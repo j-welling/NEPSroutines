@@ -29,6 +29,9 @@ desc_con <- function(dat, desc, min.val = 3, digits = 2) {
 #' @param min.val minimum number of valid values;
 #'                if negative, set to the default of 3
 #' @param digits  number of decimals for rounding percentages
+#' @param attributes ???
+#' @param absolute ???
+#' @param percentage ???
 #'
 #' @return   list with descriptives.
 #'
@@ -85,7 +88,6 @@ desc_attr <- function(dat, desc, min.val = 3) {
 #' @param desc    character. contains names of variables for descriptive analysis.
 #' @param min.val minimum number of valid values;
 #'                if negative, set to the default of 3
-#' @param digits  number of decimals for rounding
 #'
 #' @return   list with  frequency (absolute) of answers for each variable in desc.
 #'

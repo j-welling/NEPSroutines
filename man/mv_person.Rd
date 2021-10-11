@@ -67,6 +67,9 @@ if NULL, no file will be saved.}
 
 \item{color_plots}{bar color}
 
+\item{show.all_plots}{logical; only needed when groups exist, indicates whether
+plots shall also include the whole sample as a "group"}
+
 \item{lbls_plots}{lables for different types of user-defined missing values}
 
 \item{min.val}{minimum number of valid values;

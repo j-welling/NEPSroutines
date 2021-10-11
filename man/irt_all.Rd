@@ -35,24 +35,30 @@ and at least the following variables:
 \item{items}{character. contains name of variable (boolean) in vars that
 indicates which items to use for analysis.}
 
+\item{irt_type}{???}
+
 \item{Q}{matrix with one column and ncol(resp) rows. Binary items are
 scored with 1, polytomous items are scored with 0.5.
 Divergent scoring decisions can be incorporated by this matrix
 (e.g., item 7 is scored with 0.75 by assigning 0.75 to the seventh row).}
 
+\item{icc_plots}{???}
+
+\item{wright_map}{???}
+
+\item{path_plots}{???}
+
+\item{name_table}{???}
+
+\item{path_table}{???}
+
 \item{digits}{number of decimals for rounding}
 
 \item{return_results}{boolean. indicates whether to return results.}
 
-\item{irtmodel}{character. "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
-"GPCM" for GPCM analyses.}
+\item{name_data}{???}
 
-\item{path}{folder path for data}
-
-\item{filename}{string with name of file that shall be saved (including file type).}
-
-\item{verbose}{logical. If verbose == TRUE information about the estimation
-progress is printed to the console}
+\item{path_data}{???}
 }
 \description{
 Perform 1PL and 2PL analyses for binary or PCM and GPCM analyses for

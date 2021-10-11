@@ -36,6 +36,8 @@ can be NULL for Rasch model}
 
 \item{verbose}{logical; should progress be printed to console?}
 
+\item{min.val}{integer; minimal number of valid item responses}
+
 \item{...}{additional arguments to be passed to tam.mml}
 }
 \value{

@@ -18,6 +18,8 @@
 #'   can be NULL for Rasch model
 #' @param return_results  boolean. indicates whether to return results.
 #' @param verbose logical; should progress be printed to console?
+#' @param path_table ???
+#' @param print_table ???
 #' @param ... additional arguments to be passed to tam.mml
 #'
 #' @return a list of:
@@ -70,11 +72,13 @@ dif_all <- function(resp, vars, items, dif_vars, scoring = NULL,
 #' @param scoring numeric vector; scoring factor to be applied to loading matrix;
 #'   can be NULL for Rasch model
 #' @param verbose logical; should progress be printed to console?
+#' @param min.val integer; minimal number of valid item responses
 #' @param ... additional arguments to be passed to tam.mml
 #'
 #' @return a list of:
 #'   mmod: main effects model
 #'   dmod: DIF effects model
+#' @importFrom stats as.formula
 #' @export
 
 dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
@@ -260,6 +264,7 @@ summary_dif <- function(diflist, print = TRUE, save_at = NULL) {
 #'
 #' @return list of information criteria, dif estimates and main effects in
 #'   data frames for dif analysis
+#' @importFrom stats deviance
 #' @noRd
 
 difsum <- function(obj, facet, group = 1, group2 = NULL) {

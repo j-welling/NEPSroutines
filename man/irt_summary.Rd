@@ -38,6 +38,10 @@ and includes the following columns:
 
 \item{filename}{character. defines name for excel document. if NULL (default),
 the table will not be saved.}
+
+\item{digits}{integer; how many digits after rounding}
+
+\item{return_table}{logical; whether resulting table should be returned}
 }
 \value{
 a data.frame containing the item name, position, N, percentage correct,

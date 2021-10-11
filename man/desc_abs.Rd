@@ -15,8 +15,6 @@ factor (e.g. "easy" and "difficult" in the case of testlet.}
 
 \item{min.val}{minimum number of valid values;
 if negative, set to the default of 3}
-
-\item{digits}{number of decimals for rounding}
 }
 \value{
 list with  frequency (absolute) of answers for each variable in desc.

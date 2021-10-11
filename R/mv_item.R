@@ -33,6 +33,7 @@
 #' @return   list with percentages:
 #'            mvlist: percentages for each item
 #'            mvsum: summary statistics across items
+#' @importFrom stats median sd na.omit
 #' @export
 
 mvi_analysis <- function(resp, vars, items, position = NULL,
@@ -96,7 +97,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
       resp_g <- resp_c[resp[[g]], vars$items[vars[[items]] & vars[[g]]]]
 
       # Number of valid responses and position
-      if(length(position) == 1) {
+      if (length(position) == 1) {
         pos <- vars_c[[position]]
         } else {
           pos <- vars_c[[position[g]]]
@@ -130,7 +131,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
           r$items <- rownames(r)
           r <- merge(r, vars_c[, c('items', position[g])], by = "items")
           r <- dplyr::rename(r, position = as.character(position[g]))
-          r <- dplyr::select(r,-items)
+          r <- dplyr::select(r,-.data$items)
           resp_p <- dplyr::full_join(resp_p, r, by = "position")
         }
 
@@ -138,7 +139,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
 
       # Number of valid responses and position
       pos <- resp_p$position
-      resp_p <- dplyr::select(resp_p, -position) %>% t() %>% data.frame()
+      resp_p <- dplyr::select(resp_p, -.data$position) %>% t() %>% data.frame()
       mvlist$all <- data.frame(position = pos,
                                N = apply(resp_p, 2, function(x) {
                                  sum(x >= 0, na.rm = TRUE)
@@ -334,6 +335,7 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
 #' @param digits    number of decimals for rounding
 #' @param warn      boolean whether to print a warning if NAs were found in resp
 #'
+#' @importFrom rlang .data
 #' @export
 
 mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
@@ -409,7 +411,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
       ylim <- ceiling(max(y, na.rm = TRUE)/10)*10
 
       gg <- ggplot2::ggplot(data = mv_i,
-                            mapping = ggplot2::aes(x = position, y = y)
+                            mapping = ggplot2::aes(x = .data$position, y = .data$y)
       ) +
         ggplot2::labs(
           title = paste0("Missing responses by item position (", i,")"),
@@ -429,13 +431,13 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
                                               tidyselect::all_of(groups))),
                           !is.na(mv$position))
 
-      mv_wide <- tidyr::gather(mv, group, MV, tidyselect::all_of(groups))
+      mv_wide <- tidyr::gather(mv, .data$group, .data$MV, tidyselect::all_of(groups))
       ylim <- ceiling(max(mv_wide$MV, na.rm = TRUE)/10)*10
 
       # create plot
       gg <- ggplot2::ggplot(
         data = mv_wide,
-        mapping = ggplot2::aes(x = position, y = MV, fill = group)
+        mapping = ggplot2::aes(x = .data$position, y = .data$MV, fill = .data$group)
       ) +
         ggplot2::labs(
           title = paste0("Missing responses by item position (", i,")"),
@@ -454,7 +456,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
                      legend.position = c(0.01, 0.99))
 
     if (!is.null(color)) {
-      gg <- gg + ggplot2::scale_fill_manual(values = color)
+      gg <- gg + ggplot2::scale_fill_manual(values = .data[[color]])
     }
 
     # save plot

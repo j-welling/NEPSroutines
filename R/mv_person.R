@@ -28,6 +28,8 @@
 #' @param digits        number of decimals for rounding
 #' @param warn          boolean. indicates whether to print a warning if NAs were found in resp.
 #' @param verbose       print progress
+#' @param show.all_plots logical; only needed when groups exist, indicates whether
+#'                  plots shall also include the whole sample as a "group"
 #'
 #' @return   if return_table is set to TRUE, table with missing values per person and
 #' for each missing value type (in percentage)
@@ -60,7 +62,7 @@ mv_person <- function(resp, vars, items = 'final', grouping = NULL,
                   mvs = mvs, filename = name_data, path = path_data,
                   min.val = min.val, digits = digits, warn = warn)
 
-  if(plots) {
+  if (plots) {
     mvp_plots(mv_p = mv_p, vars = vars, items = items, grouping = grouping,
              mvs = mvs, lbls = lbls_plots, show.all = show.all_plots,
              filename = name_plots, path = path_plots, color = color_plots,
@@ -109,7 +111,7 @@ mvp_analysis <- function(resp, vars, items = 'final', grouping = NULL,
                     min.val = 3, digits = 2, warn = TRUE, return_results = TRUE) {
 
   # Testing prerequisites (data)
-  if(is.null(vars) | is.null(resp)) {
+  if (is.null(vars) | is.null(resp)) {
     stop("Please provide vars and resp.")
   }
 
@@ -263,6 +265,7 @@ mvp_table <- function(mv_p = NULL, grouping = NULL, resp = NULL, vars = NULL,
 #'                  one color per subgroup must be specified
 #' @param verbose   print progress
 #'
+#' @importFrom rlang .data
 #' @export
 
 mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
@@ -285,7 +288,7 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
                      color = NULL, verbose = TRUE) {
 
   # Percentage of missing values by persons
-  if (is.null(mv_p)){
+  if (is.null(mv_p)) {
     if (is.null(resp) | is.null(mvs)) {
       stop("Please provide mv_p or resp!")
     } else {
@@ -333,7 +336,7 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
   # for each missing type
   for (i in names(mv_all)) {
 
-    if(is.null(grouping)) {
+    if (is.null(grouping)) {
 
       end <- max(as.double(names(mv_p[[i]])))
       mv <- data.frame(number = seq(0, end), y = rep(0, end + 1))
@@ -341,7 +344,7 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
       ylim <- ceiling(max(mv$y, na.rm = TRUE)/10)*10
 
       gg <- ggplot2::ggplot(data = mv,
-                            mapping = ggplot2::aes(x = number, y = y)
+                            mapping = ggplot2::aes(x = .data$number, y = .data$y)
       ) +
         ggplot2::labs(
           title = paste0(filename, " (", i,")"),
@@ -367,7 +370,7 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
       # create plot
       gg <- ggplot2::ggplot(
         data = mv_wide,
-        mapping = ggplot2::aes(x = number, y = MV, fill = group)
+        mapping = ggplot2::aes(x = .data$number, y = .data$MV, fill = .data$group)
       ) +
         ggplot2::labs(
           title = paste0("Missing responses by person (", i,")"),
@@ -386,7 +389,7 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
                      legend.position = c(0.85, 0.99))
 
     if (!is.null(color)) {
-      gg <- gg + ggplot2::scale_fill_manual(values = color)
+      gg <- gg + ggplot2::scale_fill_manual(values = .data[[color]])
     }
 
     if (end > 1) {

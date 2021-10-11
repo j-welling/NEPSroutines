@@ -77,8 +77,8 @@ min_val <- function(x, vars = NULL, min.val = 3,
 
 convert_mv <- function(resp, variables = NULL, mvs = c(-97:-21)) {
 
-    if(!is.null(mvs)){
-        if(is.null(variables)) variables <- colnames(resp)
+    if (!is.null(mvs)) {
+        if (is.null(variables)) variables <- colnames(resp)
         for (i in variables) {
             resp[[i]] <- replace(resp[[i]], resp[[i]] %in% mvs, NA)
         }
@@ -102,6 +102,7 @@ convert_mv <- function(resp, variables = NULL, mvs = c(-97:-21)) {
 #' @param verbose   print results to console
 #'
 #' @return  list
+#' @importFrom stats qf pf
 #' @export
 meht <- function(stat, df1, df2, eta2 = NULL, delta = .40,
                  alpha = .05, digits = 2, verbose = TRUE) {
@@ -159,6 +160,7 @@ meht <- function(stat, df1, df2, eta2 = NULL, delta = .40,
 #'                  names represent names of groups (e.g. easy = "position_easy")
 #'
 #' @return   integer vector containing the position of the chosen items.
+#' @importFrom rlang .data
 #' @noRd
 
 pos_new <- function(vars, items = 'final', position = NULL) {
@@ -172,7 +174,7 @@ pos_new <- function(vars, items = 'final', position = NULL) {
         vars_ <- vars[vars[[items]], ]
         pos <- data.frame(items = vars_[['items']],
                           position = vars_[[position]])
-        pos <- dplyr::arrange(pos, position)
+        pos <- dplyr::arrange(pos, .data$position)
         pos[[paste0("position_", items)]] <- seq(1, nrow(pos))
         vars <- merge(vars, pos[ , c('items', paste0("position_", items))],
                       by = 'items', all = TRUE)
@@ -183,7 +185,7 @@ pos_new <- function(vars, items = 'final', position = NULL) {
             vars_ <- vars[vars[[items]] & !is.na(vars[[position[g]]]), ]
             pos <- data.frame(items = vars_[['items']],
                               position = vars_[[position[g]]])
-            pos <- dplyr::arrange(pos, position)
+            pos <- dplyr::arrange(pos, .data$position)
             pos[[paste0("position_", g, "_", items)]] <- seq(1, nrow(pos))
             vars <- merge(vars, pos[ , c('items', paste0("position_", g, "_", items))],
                           by = 'items', all = TRUE)

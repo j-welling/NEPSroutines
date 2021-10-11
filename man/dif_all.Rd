@@ -36,6 +36,10 @@ indicates which items to use for analysis.}
 \item{scoring}{numeric vector; scoring factor to be applied to loading matrix;
 can be NULL for Rasch model}
 
+\item{path_table}{???}
+
+\item{print_table}{???}
+
 \item{return_results}{boolean. indicates whether to return results.}
 
 \item{verbose}{logical; should progress be printed to console?}

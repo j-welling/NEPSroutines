@@ -25,6 +25,12 @@ factor (e.g. "easy" and "difficult" in the case of testlet.}
 if negative, set to the default of 3}
 
 \item{digits}{number of decimals for rounding percentages}
+
+\item{attributes}{???}
+
+\item{absolute}{???}
+
+\item{percentage}{???}
 }
 \value{
 list with descriptives.

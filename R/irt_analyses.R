@@ -13,17 +13,19 @@
 #'                    boolean vector; indicates which items to use for analysis.
 #' @param items     character. contains name of variable (boolean) in vars that
 #'                    indicates which items to use for analysis.
-#' @param irtmodel  character. "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
-#'                    "GPCM" for GPCM analyses.
 #' @param Q         matrix with one column and ncol(resp) rows. Binary items are
 #'                    scored with 1, polytomous items are scored with 0.5.
 #'                    Divergent scoring decisions can be incorporated by this matrix
 #'                    (e.g., item 7 is scored with 0.75 by assigning 0.75 to the seventh row).
-#' @param path      folder path for data
-#' @param filename  string with name of file that shall be saved (including file type).
-#' @param verbose   logical. If verbose == TRUE information about the estimation
-#'                    progress is printed to the console
 #' @param digits    number of decimals for rounding
+#' @param irt_type  ???
+#' @param icc_plots ???
+#' @param wright_map ???
+#' @param path_plots ???
+#' @param name_table ???
+#' @param path_table ???
+#' @param name_data ???
+#' @param path_data ???
 #' @param return_results  boolean. indicates whether to return results.
 
 irt_all <- function(resp, vars, items, irt_type, Q = NULL,
@@ -256,6 +258,8 @@ icc_plots <- function(results, name, path = here::here("Plots")) {
 #'                following "ICCs_for_" (e.g., the kind of IRT analysis: "1PL").
 #' @param path    character. contains name of path for plots.
 #'
+#' @importFrom grDevices dev.off png tiff
+#' @importFrom graphics mtext text
 #' @export
 
 wright_map <- function(results, name, path = here::here("Plots")) {
@@ -303,9 +307,12 @@ wright_map <- function(results, name, path = here::here("Plots")) {
 #' @param path     character. defines name of path for table.
 #' @param filename character. defines name for excel document. if NULL (default),
 #'                 the table will not be saved.
+#' @param digits integer; how many digits after rounding
+#' @param return_table logical; whether resulting table should be returned
 #'
 #' @return a data.frame containing the item name, position, N, percentage correct,
 #'   item difficulty, SE, WMNSQ, t, rit, item discrimination, Q3.
+#' @importFrom rlang .data
 #' @export
 
 irt_summary <- function(resp, vars, results, disc = NULL,
@@ -314,7 +321,7 @@ irt_summary <- function(resp, vars, results, disc = NULL,
 
   # prepare data
   vars_ <- dplyr::select(vars[vars$items %in% rownames(results$mod$xsi), ],
-                         item = items, position)
+                         .data$items, .data$position)
   resp_ <- resp[ , vars_$item] %>% min_val() %>% convert_mv
 
   # item parameters
@@ -346,7 +353,7 @@ irt_summary <- function(resp, vars, results, disc = NULL,
   pars$rit <- rit
 
   # 2PL discrimination
-  if (!is.null(disc)){
+  if (!is.null(disc)) {
     pars$disc <- disc$mod$item[, "B.Cat1.Dim1"]
     }
 
@@ -357,7 +364,7 @@ irt_summary <- function(resp, vars, results, disc = NULL,
   pars$num <- seq(1, nrow(pars))
 
   # reorder columns
-  if (!is.null(disc)){
+  if (!is.null(disc)) {
     pars <- pars[ , c("num", "item", "position", "N", "pc", "xsi", "se.xsi",
                      "WMNSQ", "WMNSQ_t", "rit", "disc", "Q3")]
     colnames(pars) <- c("Number", "Item", "Pos","N", "% correct",

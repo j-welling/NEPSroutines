@@ -21,14 +21,11 @@
 #' @return          list of results for each dimensional analysis
 #'
 #' @export
-#'
+#' @importFrom stats AIC BIC logLik
 
 dimension_analysis <- function(resp, vars, items, dim = NULL, min.val = 3,
                                irtmodel = "PCM2", maxiter = 10, snodes = 5,
                                verbose = FALSE) {
-
-    # Load required packages
-    load_packages(c("dplyr","haven"))
 
     # Prepare data
     resp <- min_val(resp, min.val = min.val)
@@ -90,6 +87,7 @@ dimension_analysis <- function(resp, vars, items, dim = NULL, min.val = 3,
 #'
 #' @return data.frame of summary results
 #'
+#' @importFrom stats logLik AIC BIC
 #' @export
 #'
 

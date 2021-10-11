@@ -15,6 +15,8 @@
 #' @return list of one data frame per item containing item-total correlations
 #'   for each possible response; correct response is marked with an *
 #'
+#' @importFrom stats cor
+#' @importFrom rlang .data
 #' @export
 
 distractor_analysis <- function(resp, vars, items, min.val = 3) {
@@ -23,7 +25,7 @@ distractor_analysis <- function(resp, vars, items, min.val = 3) {
     resp <- min_val(resp, min.val = min.val)
     MC <- dplyr::select(
         dplyr::filter(vars, vars$type == 'MC' & vars$raw == TRUE),
-        items, correct_response
+        .data$items, .data$correct_response
     )
     scored <- vars$items[vars[[items]]]
     var_names <- unique(c(MC$items, scored))
