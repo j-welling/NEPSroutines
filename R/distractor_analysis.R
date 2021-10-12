@@ -144,7 +144,7 @@ summary_distractor_analysis <- function(distractors, print = TRUE,
         openxlsx::write.xlsx(
             distractors,
             file = here::here(paste0(save_at, "/distractor_analysis.xlsx")),
-            showNA = FALSE
+            showNA = FALSE, overwrite = TRUE
         )
     }
 

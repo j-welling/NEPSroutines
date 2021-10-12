@@ -36,9 +36,11 @@ indicates which items to use for analysis.}
 \item{scoring}{numeric vector; scoring factor to be applied to loading matrix;
 can be NULL for Rasch model}
 
-\item{path_table}{???}
+\item{path_table}{character string; indicates the folder location where the
+summaries are stored on the hard drive. Please note that the
+path is relative to the current working path set by here::i_am()}
 
-\item{print_table}{???}
+\item{print_table}{logical indicating whether summary is printed to the console}
 
 \item{return_results}{boolean. indicates whether to return results.}
 

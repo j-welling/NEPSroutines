@@ -18,8 +18,10 @@
 #'   can be NULL for Rasch model
 #' @param return_results  boolean. indicates whether to return results.
 #' @param verbose logical; should progress be printed to console?
-#' @param path_table ???
-#' @param print_table ???
+#' @param path_table character string; indicates the folder location where the
+#'   summaries are stored on the hard drive. Please note that the
+#'   path is relative to the current working path set by here::i_am()
+#' @param print_table logical indicating whether summary is printed to the console
 #' @param ... additional arguments to be passed to tam.mml
 #'
 #' @return a list of:
@@ -42,6 +44,7 @@ dif_all <- function(resp, vars, items, dif_vars, scoring = NULL,
 
     dif_summaries[[i]] <- summary_dif(dif_models[[i]], print = FALSE)
   }
+  names(dif_summaries) <- dif_vars
 
   build_dif_tables(dif_summaries = dif_summaries, save_at = path_table)
 
@@ -413,11 +416,11 @@ build_dif_tables <- function(dif_summaries, save_at) {
   openxlsx::write.xlsx(
     gof,
     file = here::here(paste0(save_at, "/dif_all_goodness_of_fit.xlsx")),
-    showNA = FALSE
+    showNA = FALSE, overwrite = TRUE
   )
   openxlsx::write.xlsx(
     est,
     file = here::here(paste0(save_at, "/dif_all_estimates.xlsx")),
-    showNA = FALSE
+    showNA = FALSE, overwrite = TRUE
   )
 }

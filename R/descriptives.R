@@ -29,31 +29,34 @@ desc_con <- function(dat, desc, min.val = 3, digits = 2) {
 #' @param min.val minimum number of valid values;
 #'                if negative, set to the default of 3
 #' @param digits  number of decimals for rounding percentages
-#' @param attributes ???
-#' @param absolute ???
-#' @param percentage ???
+#' @param show_attributes boolean; indicates whether to show attributes.
+#' @param show_frequency_abs boolean; indicates whether to show frequency in
+#' absolute numbers.
+#' @param show_frequency_perc boolean; indicates whether to show frequency in
+#' relative numbers (percentage).
 #'
 #' @return   list with descriptives.
 #'
 #' @export
 
 desc_nom <- function(dat, desc, min.val = 3, digits = 1,
-                      attributes = TRUE, absolute = TRUE, percentage = TRUE) {
+                     show_attributes = TRUE, show_frequency_abs = TRUE,
+                     show_frequency_perc = TRUE) {
     dat <- min_val(dat, min.val = min.val)
     descriptives <- list()
 
-    if (attributes) {
+    if (show_attributes) {
         descriptives$attributes <- desc_attr(dat, desc = desc,
-                                            min.val = min.val)
+                                             min.val = min.val)
         }
-    if (absolute) {
-        descriptives$frequency_absolute <- desc_abs(dat, desc = desc,
-                                                   min.val = min.val)
+    if (show_frequency_abs) {
+        descriptives$frequency_abs <- desc_abs(dat, desc = desc,
+                                                min.val = min.val)
         }
-    if (percentage) {
-        descriptives$frequency_percentage <- desc_perc(dat, desc = desc,
-                                                      min.val = min.val,
-                                                      digits = digits)
+    if (show_frequency_perc) {
+        descriptives$frequency_perc <- desc_perc(dat, desc = desc,
+                                                 min.val = min.val,
+                                                 digits = digits)
     }
 
     return(descriptives)

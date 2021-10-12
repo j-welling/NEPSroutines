@@ -40,7 +40,7 @@ dimension_analysis <- function(resp, vars, items, dim = NULL, min.val = 3,
 
     # Create Q matrix
     Q <- matrix( 1 , nrow = ncol(resp), ncol = 1)
-    Q[sel, 1] <- 0.5    # score of 0.5 for polyomous items
+    Q[sel, 1] <- 0.5    # score of 0.5 for polytomous items
 
     # Compute dimensional model
     dimensionality$uni <- TAM::tam.mml(
@@ -59,7 +59,7 @@ dimension_analysis <- function(resp, vars, items, dim = NULL, min.val = 3,
             for (i in dimensions) {
                 Q[v == i, i] <- 1
             }
-            Q[sel,] <- Q[sel, ] * 0.5
+            Q[sel, ] <- Q[sel, ] * 0.5
 
             # Compute dimensional model
             dimensionality[[d]] <- TAM::tam.mml(
@@ -122,7 +122,7 @@ dimension_summary <- function(dimensionality, print = TRUE, save_at = NULL) {
         openxlsx::write.xlsx(
             gof,
             file = here::here(paste0(save_at, "/dimensionality_fit.xlsx")),
-            showNA = FALSE
+            showNA = FALSE, overwrite = TRUE
         )
     }
 

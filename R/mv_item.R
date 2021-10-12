@@ -411,7 +411,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
       ylim <- ceiling(max(y, na.rm = TRUE)/10)*10
 
       gg <- ggplot2::ggplot(data = mv_i,
-                            mapping = ggplot2::aes(x = .data$position, y = .data$y)
+                            mapping = ggplot2::aes(x = .data$position, y = y)
       ) +
         ggplot2::labs(
           title = paste0("Missing responses by item position (", i,")"),
@@ -431,7 +431,8 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
                                               tidyselect::all_of(groups))),
                           !is.na(mv$position))
 
-      mv_wide <- tidyr::gather(mv, .data$group, .data$MV, tidyselect::all_of(groups))
+      mv_wide <- tidyr::gather(mv, key = "group", value = "MV",
+                               tidyselect::all_of(groups))
       ylim <- ceiling(max(mv_wide$MV, na.rm = TRUE)/10)*10
 
       # create plot

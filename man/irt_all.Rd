@@ -35,30 +35,33 @@ and at least the following variables:
 \item{items}{character. contains name of variable (boolean) in vars that
 indicates which items to use for analysis.}
 
-\item{irt_type}{???}
+\item{irt_type}{character string; either "dich" for dichotomous analysis
+or "poly" for polytomous analysis.}
 
 \item{Q}{matrix with one column and ncol(resp) rows. Binary items are
 scored with 1, polytomous items are scored with 0.5.
 Divergent scoring decisions can be incorporated by this matrix
 (e.g., item 7 is scored with 0.75 by assigning 0.75 to the seventh row).}
 
-\item{icc_plots}{???}
+\item{icc_plots}{boolean; indicates whether to create and save ICC plots.}
 
-\item{wright_map}{???}
+\item{wright_map}{boolean; indicates whether to create and save Wright Map.}
 
-\item{path_plots}{???}
+\item{path_plots}{character. contains name of path for plots.}
 
-\item{name_table}{???}
+\item{name_table}{string with name of table file that shall be saved (including file type);
+if left empty, table will not be saved..}
 
-\item{path_table}{???}
+\item{path_table}{character. contains name of path for table.}
 
 \item{digits}{number of decimals for rounding}
 
 \item{return_results}{boolean. indicates whether to return results.}
 
-\item{name_data}{???}
+\item{name_data}{string with name of data file that shall be saved (including file type);
+if left empty, data will not be saved..}
 
-\item{path_data}{???}
+\item{path_data}{character. contains name of path for data.}
 }
 \description{
 Perform 1PL and 2PL analyses for binary or PCM and GPCM analyses for

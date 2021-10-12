@@ -18,15 +18,20 @@
 #'                    Divergent scoring decisions can be incorporated by this matrix
 #'                    (e.g., item 7 is scored with 0.75 by assigning 0.75 to the seventh row).
 #' @param digits    number of decimals for rounding
-#' @param irt_type  ???
-#' @param icc_plots ???
-#' @param wright_map ???
-#' @param path_plots ???
-#' @param name_table ???
-#' @param path_table ???
-#' @param name_data ???
-#' @param path_data ???
+#' @param irt_type  character string; either "dich" for dichotomous analysis
+#'   or "poly" for polytomous analysis.
+#' @param icc_plots boolean; indicates whether to create and save ICC plots.
+#' @param wright_map boolean; indicates whether to create and save Wright Map.
+#' @param path_plots character. contains name of path for plots.
+#' @param name_table string with name of table file that shall be saved (including file type);
+#'   if left empty, table will not be saved..
+#' @param path_table character. contains name of path for table.
+#' @param name_data string with name of data file that shall be saved (including file type);
+#' if left empty, data will not be saved..
+#' @param path_data character. contains name of path for data.
 #' @param return_results  boolean. indicates whether to return results.
+#'
+#' @export
 
 irt_all <- function(resp, vars, items, irt_type, Q = NULL,
                     icc_plots = TRUE, wright_map = TRUE, path_plots = here::here("Plots"),
@@ -51,7 +56,8 @@ irt_all <- function(resp, vars, items, irt_type, Q = NULL,
 
   } else {
 
-    stop("No valid irt_type provided. Possible are 'dich' and 'poly'.")
+    stop("No valid irt_type provided. Possible are 'dich' for dichotomous ",
+         "analysis or 'poly' for polytomous analysis.")
 
   }
 
@@ -330,7 +336,8 @@ irt_summary <- function(resp, vars, results, disc = NULL,
   pars <- pars[vars_$item, ]
 
   # item position
-  pars <- merge(pars, vars_[ , c("item", "position")], by = "item")
+  pars <- merge(pars, vars_[ , c("items", "position")],
+                by.x = "item", by.y = "items")
 
   # percentage correct
   pars$pc <- colMeans(resp_, na.rm = TRUE) * 100

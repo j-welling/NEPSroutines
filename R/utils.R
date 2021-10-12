@@ -10,7 +10,7 @@
 #'                or append new variable (TRUE)
 #' @param warn    print warnings
 #' @return        filtered data.frame or list of results
-#' @noRd
+#' @export
 
 min_val <- function(x, vars = NULL, min.val = 3,
                     invalid = NA, append = FALSE,
@@ -161,7 +161,7 @@ meht <- function(stat, df1, df2, eta2 = NULL, delta = .40,
 #'
 #' @return   integer vector containing the position of the chosen items.
 #' @importFrom rlang .data
-#' @noRd
+#' @export
 
 pos_new <- function(vars, items = 'final', position = NULL) {
 
