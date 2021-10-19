@@ -55,7 +55,7 @@ plots shall also include the whole sample as a "group"}
 
 \item{mvs}{named vector with definition of user-defined missing values.}
 
-\item{filename}{string with name of file that shall be saved (excluding type of file);
+\item{filename}{string with name of file that shall be saved (including type of file);
 if NULL, no file will be saved.}
 
 \item{path}{folder path for plots}

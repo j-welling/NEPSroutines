@@ -8,6 +8,7 @@ irt_summary(
   resp,
   vars,
   results,
+  position,
   disc = NULL,
   path = here::here("Tables"),
   filename = NULL,
@@ -30,6 +31,8 @@ and includes the following columns:
 
 \item{results}{list. contains results from IRT analysis with one parameter
 (e.g., Rasch analysis)}
+
+\item{position}{character string. contains name of position variable}
 
 \item{disc}{list. contains results from IRT analysis with two parameters
 (e.g., 2PL analysis), to include item discrimination}

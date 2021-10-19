@@ -56,8 +56,8 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
 
 
   # Prepare data
-  resp <- min_val(resp, min.val = min.val)
-  vars_c <- vars[vars[[items]], ]
+  resp <- min_val(resp, min.val = min.val) # siehe min_val in utils.R; ID_t in resp könnte hier die Datengrundlage verzerren!
+  vars_c <- vars[vars[[items]], ] # die Benennung ist verwirrend; vielleicht sollte man das Argument "items" in "select" oder so umbenennen?
   resp_c <- resp[ , vars_c$items]
 
   # NAs are not acknowledged in mvs-argument
@@ -224,14 +224,14 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
                       min.val = 3, digits = 2, warn = TRUE, return_table = FALSE) {
 
   # Test data
-  if (is.null(mv_i)) {
+  if (is.null(mv_i)) { # Auslagern von "Test data" für mvi_table/mvi_plots in eine eigene Funktion?
     if (!is.null(resp) & !is.null(position)) {
       mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
                       position = position, grouping = grouping,
                       show.all = show.all, min.val = min.val,
                       digits = digits, warn = warn)
     } else {
-      stop("Please provide mv_i or resp and position.")
+      stop("Please provide mv_i, or resp and position.")
     }
   } else {
     if (is.null(grouping)) {
@@ -247,7 +247,7 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
                         show.all = show.all, min.val = min.val,
                         digits = digits, warn = warn)
       } else {
-        stop("Please provide mv_i with specified missing values or resp and position.")
+        stop("Please provide mv_i with specified missing values, or resp and position.")
       }
     }
   }
@@ -355,7 +355,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
                       show.all = show.all, min.val = min.val,
                       digits = digits, warn = warn)
     } else {
-        stop("Please provide mv_i or resp and position.")
+        stop("Please provide mv_i, or resp and position.")
     }
   } else {
     if (is.null(grouping)) {
@@ -371,7 +371,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
                         show.all = show.all, min.val = min.val,
                         digits = digits, warn = warn)
       } else {
-        stop("Please provide mv_i with specified missing values or resp and position.")
+        stop("Please provide mv_i with specified missing values, or resp and position.")
       }
     }
   }
@@ -380,7 +380,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
   mv_i <- mv_i$list
 
   if (is.null(grouping)) {
-    k <- sum(vars[[items]])
+    k <- sum(vars[[items]]) # auch hier wäre es vielleicht übersichtlicher, das Argument "items" in "select" o.Ä. umzubenennen
   } else {
     k <- NA_integer_
     for (g in grouping) {

@@ -9,6 +9,7 @@ irt_all(
   vars,
   items,
   irt_type,
+  position = NULL,
   Q = NULL,
   icc_plots = TRUE,
   wright_map = TRUE,
@@ -37,6 +38,8 @@ indicates which items to use for analysis.}
 
 \item{irt_type}{character string; either "dich" for dichotomous analysis
 or "poly" for polytomous analysis.}
+
+\item{position}{character string. contains name of position variable.}
 
 \item{Q}{matrix with one column and ncol(resp) rows. Binary items are
 scored with 1, polytomous items are scored with 0.5.

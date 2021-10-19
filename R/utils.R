@@ -12,7 +12,7 @@
 #' @return        filtered data.frame or list of results
 #' @export
 
-min_val <- function(x, vars = NULL, min.val = 3,
+min_val <- function(x, vars = NULL, min.val = 3, # zu x: sollte hier auf ID_t hingewiesen/geprüft werden? Damit nicht versehentlich nur 2 valide Antworten bestehen
                     invalid = NA, append = FALSE,
                     warn = TRUE) {
 

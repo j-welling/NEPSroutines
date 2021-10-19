@@ -9,7 +9,6 @@ desc_nom(
   desc,
   min.val = 3,
   digits = 1,
-  show_attributes = TRUE,
   show_frequency_abs = TRUE,
   show_frequency_perc = TRUE
 )
@@ -26,13 +25,13 @@ if negative, set to the default of 3}
 
 \item{digits}{number of decimals for rounding percentages}
 
-\item{show_attributes}{boolean; indicates whether to show attributes.}
-
 \item{show_frequency_abs}{boolean; indicates whether to show frequency in
 absolute numbers.}
 
 \item{show_frequency_perc}{boolean; indicates whether to show frequency in
 relative numbers (percentage).}
+
+\item{show_attributes}{boolean; indicates whether to show attributes.}
 }
 \value{
 list with descriptives.
