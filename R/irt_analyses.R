@@ -13,6 +13,7 @@
 #'                    boolean vector; indicates which items to use for analysis.
 #' @param items     character. contains name of variable (boolean) in vars that
 #'                    indicates which items to use for analysis.
+#' @param position character string. contains name of position variable.
 #' @param Q         matrix with one column and ncol(resp) rows. Binary items are
 #'                    scored with 1, polytomous items are scored with 0.5.
 #'                    Divergent scoring decisions can be incorporated by this matrix
@@ -33,7 +34,7 @@
 #'
 #' @export
 
-irt_all <- function(resp, vars, items, irt_type, Q = NULL,
+irt_all <- function(resp, vars, items, irt_type, position = NULL, Q = NULL,
                     icc_plots = TRUE, wright_map = TRUE, path_plots = here::here("Plots"),
                     name_table = NULL, path_table = here::here("Tables"), digits = 2,
                     return_results = TRUE, name_data = NULL, path_data = here::here("Data")) {
@@ -308,6 +309,7 @@ wright_map <- function(results, name, path = here::here("Plots")) {
 #'                   different groups, several variables necessary.
 #' @param results  list. contains results from IRT analysis with one parameter
 #'                 (e.g., Rasch analysis)
+#' @param position character string. contains name of position variable
 #' @param disc     list. contains results from IRT analysis with two parameters
 #'                 (e.g., 2PL analysis), to include item discrimination
 #' @param path     character. defines name of path for table.
@@ -321,13 +323,13 @@ wright_map <- function(results, name, path = here::here("Plots")) {
 #' @importFrom rlang .data
 #' @export
 
-irt_summary <- function(resp, vars, results, disc = NULL,
+irt_summary <- function(resp, vars, results, position, disc = NULL,
                         path = here::here("Tables"), filename = NULL,
                         digits = 2, return_table = TRUE) {
 
   # prepare data
-  vars_ <- dplyr::select(vars[vars$items %in% rownames(results$mod$xsi), ],
-                         .data$items, .data$position)
+  vars_ <- vars[vars$items %in% rownames(results$mod$xsi), ]
+  vars_ <- dplyr::select(vars_c, item = 'items', position = position)
   resp_ <- resp[ , vars_$item] %>% min_val() %>% convert_mv
 
   # item parameters

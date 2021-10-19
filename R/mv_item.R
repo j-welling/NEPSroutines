@@ -206,7 +206,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
 #' @param show.all  boolean; only needed when groups exist, indicates whether
 #'                  plots shall also include the whole sample as a "group"
 #' @param mvs       named vector with definition of user-defined missing values.
-#' @param filename  string with name of file that shall be saved (excluding type of file);
+#' @param filename  string with name of file that shall be saved (including type of file);
 #'                  if NULL, no file will be saved.
 #' @param path      folder path for plots
 #' @param min.val   minimum number of valid values;

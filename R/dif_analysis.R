@@ -55,7 +55,6 @@ dif_all <- function(resp, vars, items, dif_vars, scoring = NULL,
 
 
 
-
 #' DIF analyses
 #'
 #' Testing for differential item functioning for binary and polytomous data.
@@ -88,24 +87,24 @@ dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
                          verbose = FALSE, min.val = 3, ...) {
 
   # prepare data
-  resp <- min_val(resp, min.val = min.val) %>% convert_mv
-  pid <- resp$ID_t
-  facets <- resp[, facets, drop = FALSE]
-  resp <- resp[, vars$items[vars[[items]]]]
+  resp_ <- min_val(resp, min.val = min.val) %>% convert_mv
+  pid <- resp_$ID_t
+  facets <- resp_[, facets, drop = FALSE]
+  resp_ <- resp_[, vars$items[vars[[items]]]]
 
-  # prepare responses
-  resp <- convert_mv(resp = resp, variables = colnames(resp))
-  resp <- min_val(x = resp)
-  is_pcm <- any(apply(resp, 2, max, na.rm = TRUE) > 1)
+  # prepare resp_onses
+  resp_ <- convert_mv(resp_ = resp_, variables = colnames(resp_))
+  resp_ <- min_val(x = resp_)
+  is_pcm <- any(apply(resp_, 2, max, na.rm = TRUE) > 1)
   dif_var <- colnames(facets)
   formula_dmod <- as.formula(paste("~ item + item *", dif_var))
   formula_mmod <- as.formula(paste("~ item +", dif_var))
   mis <- is.na(facets[[dif_var]])
   if (any(mis)) {
     facets <- facets[!mis, ]
-    resp <- resp[!mis, ]
+    resp_ <- resp_[!mis, ]
     pid <- pid[!mis]
-    warning("Missing values were found in the DIF variable. The corresponding",
+    warning("Missing values were found in the DIF variable. The corresp_onding",
             " cases have been excluded from the analysis.")
   }
 
@@ -113,28 +112,28 @@ dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
     if (is.null(scoring)) {
       stop("Scoring vector must be provided for polytomous DIF analysis.")
     }
-    if (ncol(resp) != length(scoring)) {
-      stop("Number of items in resp and scoring vector are not the same.")
+    if (ncol(resp_) != length(scoring)) {
+      stop("Number of items in resp_ and scoring vector are not the same.")
     }
     mmod <- pcm_dif(
-      resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
+      resp_ = resp_, facets = facets, formulaA = formula_mmod, pid = pid,
       scoring = scoring, ...
     )
     dmod <- pcm_dif(
-      resp = resp, facets = facets, formulaA = formula_dmod, pid = pid,
+      resp_ = resp_, facets = facets, formulaA = formula_dmod, pid = pid,
       scoring = scoring, ...
     )
   } else {
     if (is.null(scoring)) {
-      Q <- matrix(1, ncol = 1, nrow = ncol(resp))
+      Q <- matrix(1, ncol = 1, nrow = ncol(resp_))
     } else {
       Q <- as.matrix(scoring)
     }
-    dmod <- TAM::tam.mml.mfr(resp,
+    dmod <- TAM::tam.mml.mfr(resp_,
       irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
       formulaA = formula_dmod, verbose = verbose
     )
-    mmod <- TAM::tam.mml.mfr(resp,
+    mmod <- TAM::tam.mml.mfr(resp_,
       irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
       formulaA = formula_mmod, verbose = verbose
     )

@@ -456,9 +456,12 @@ mvp_perc <- function(resp, mvs, digits = 2) {
 #' @export
 
 write_results <- function(res) {
+  results <- list()
+
   for (i in names(res)) {
-    results <- data.frame(res[[i]])
-    names(results) <- c("Number of missing responses", "Percentage")
-    return(results)
+    results[[i]] <- data.frame(res[[i]])
+    names(results[[i]]) <- c("Number of missing responses", "Percentage")
   }
+
+  return(results)
 }

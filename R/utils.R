@@ -154,12 +154,12 @@ meht <- function(stat, df1, df2, eta2 = NULL, delta = .40,
 #' @param vars      data.frame with information about all items
 #' @param items     character. contains name of variable in vars (boolean) that
 #'                  indicates which variables to use.
-#' @param position  named character vector. contains name(s) of variable(s) in
+#' @param position  (named) character vector. contains name(s) of variable(s) in
 #'                  vars that indicate the position of subitems;
 #'                  if grouping, then for each group one variable name is necessary;
 #'                  names represent names of groups (e.g. easy = "position_easy")
 #'
-#' @return   integer vector containing the position of the chosen items.
+#' @return   data.frame as input, with one extra variable indicating position of chosen variables.
 #' @importFrom rlang .data
 #' @export
 
@@ -191,6 +191,6 @@ pos_new <- function(vars, items = 'final', position = NULL) {
                           by = 'items', all = TRUE)
         }
 
-        return(vars)
+        return(vars[[paste0("position_", g, "_", items)]])
     }
 }
