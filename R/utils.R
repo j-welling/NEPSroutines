@@ -4,6 +4,8 @@
 #' @param valid   character string. defines name of boolean variable in resp,
 #'                indicating (in)valid cases.
 #' @return data.frame as resp, but only with valid cases
+#'
+#' @export
 
 only_valid <- function(resp, valid = NULL) {
 
@@ -22,6 +24,7 @@ only_valid <- function(resp, valid = NULL) {
 #' @param resp    data.frame with responses
 #' @param valid   character string. defines name of boolean variable in resp,
 #'                indicating (in)valid cases.
+#' @param without_valid boolean; indicates whether not to check valid cases
 #' @param vars    data.frame. contains information about all competence items
 #'                and includes the following columns:
 #'                  items: character indicating names of items.
@@ -30,15 +33,17 @@ only_valid <- function(resp, valid = NULL) {
 #'                indicates which items to use for analysis.
 #'
 #' @return data.frame as resp, but only with valid cases
+#'
+#' @export
 
-prepare_resp <- function(resp, valid = NULL, vars = NULL, items = NULL, convert = FALSE) {
+prepare_resp <- function(resp, valid = NULL, without_valid = FALSE,
+                         vars = NULL, items = NULL, convert = FALSE) {
 
-    resp <- only_valid(resp = resp, valid = valid)
+    if (!without_valid) resp <- only_valid(resp = resp, valid = valid)
 
     if (!is.null(items)) {
         if (is.null(vars)) {
-            warning("To create dataframe with only the indicated items please also provide vars.
-                    All items are transferred to new dataframe.")
+            stop("To create dataframe (resp) with only the indicated items please also provide vars.")
         } else {
             if (items %in% colnames(vars)) {
               resp <- resp[ , vars$items[vars[[items]]]]
@@ -59,10 +64,30 @@ prepare_resp <- function(resp, valid = NULL, vars = NULL, items = NULL, convert 
 #' Check if folder exists and if not, create new one
 #'
 #' @param path    path to folder
+#'
+#' @noRd
 
 check_folder <- function(path) {
     if (!file.exists(path)) {
         dir.create(path, recursive = TRUE)
+        warning("The location ", path, " did not exist. New folder created.")
+    }
+}
+
+# if (!file.exists(save_at)) {
+#     stop("The location ", save_at, " does not exist. Please provide a ",
+#          "valid folder path to save the distractor analyses.")
+# }
+
+#' Check pid for duplicates
+#'
+#' @param pid    vector with person identifiers
+#'
+#' @noRd
+
+check_pid <- function(pid) {
+    if (length(pid) != length(unique(pid))) {
+        stop("There are duplicates in the person identifiers.")
     }
 }
 
@@ -159,6 +184,7 @@ convert_mv <- function(resp, variables = NULL, mvs = NULL) {
 #' @return  list
 #' @importFrom stats qf pf
 #' @export
+
 meht <- function(stat, df1, df2, eta2 = NULL, delta = .40,
                  alpha = .05, digits = 2, verbose = TRUE) {
 

@@ -27,15 +27,18 @@ dimension_analysis <- function(resp, vars, items, dim = NULL, valid = NULL,
                                irtmodel = "PCM2", maxiter = 10, snodes = 5,
                                verbose = FALSE) {
 
-    # prepare data
-    if (!is.null(valid)) {
-        resp_ <- resp[resp[[valid]], ]
-    } else {
-        warning("No variable with valid cases provided. All cases are used for analysis.")
-    }
+    # Select only valid cases
+    resp <- only_valid(resp, valid = valid)
+
+    # Create ID and facets variable
     pid <- resp$ID_t
-    resp <- convert_mv(resp)[ , vars$items[vars[[items]]]]
-    sel <- as.integer(apply(resp, 2, max, na.rm = TRUE) > 1) # identify polytomous items
+    check_pid(pid)
+
+    # Select only indicated items and convert mvs
+    resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE, without_valid = TRUE)
+
+    # Identify polytomous items
+    sel <- as.integer(apply(resp, 2, max, na.rm = TRUE) > 1)
 
     # Create object for results
     dimensionality <- list()
@@ -88,6 +91,7 @@ dimension_analysis <- function(resp, vars, items, dim = NULL, valid = NULL,
 #'   data.frame as Rdata; third, the information criteria are saved in an excel
 #'   file). Please note that the path is relative to the current working path
 #'   set by here::i_am(). Defaults to NULL (not stored)
+#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
 #'
 #' @return data.frame of summary results
 #'
@@ -95,7 +99,8 @@ dimension_analysis <- function(resp, vars, items, dim = NULL, valid = NULL,
 #' @export
 #'
 
-dimension_summary <- function(dimensionality, print = TRUE, save_at = NULL) {
+dimension_summary <- function(dimensionality, print = TRUE, save_at = NULL,
+                              overwrite = FALSE) {
 
     dim <- names(dimensionality)
     gof <- data.frame(Stat = c("loglik", "AIC", "BIC"))
@@ -111,13 +116,9 @@ dimension_summary <- function(dimensionality, print = TRUE, save_at = NULL) {
         print(gof)
     }
 
-
     if (!is.null(save_at)) {
 
-        if (!file.exists(save_at)) {
-            stop("The location ", save_at, " does not exist. Please provide a ",
-                 "valid folder path to save the dimensionality analyses.")
-        }
+        check_folder(save_at)
 
         save(dimensionality,
              file = here::here(paste0(save_at, "/dimensionality.Rdata")))
@@ -126,10 +127,9 @@ dimension_summary <- function(dimensionality, print = TRUE, save_at = NULL) {
         openxlsx::write.xlsx(
             gof,
             file = here::here(paste0(save_at, "/dimensionality_fit.xlsx")),
-            showNA = FALSE, overwrite = TRUE
+            showNA = FALSE, overwrite = overwrite
         )
     }
-
 
     return(gof)
 }

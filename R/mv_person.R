@@ -19,17 +19,18 @@
 #' @param return_table  boolean. indicates whether table shall be returned.
 #' @param name_table    string with name of table file that shall be saved (excluding type of file);
 #'                      if NULL, no file will be saved.
+#' @param overwrite_table boolean; indicates whether to overwrite existing file when saving table.
 #' @param path_table    folder path for file if it shall be saved
 #' @param plots         boolean. indicates whether plotsshall be created.
 #' @param name_plots    string with base of name for plot files (excluding type of file)
 #' @param path_plots    folder path for plots
-#' @param lbls_plots    lables for different types of user-defined missing values
 #' @param color_plots   bar color
+#' @param show.all_plots logical; only needed when groups exist, indicates whether
+#'                  plots shall also include the whole sample as a "group"
+#' @param lbls_plots    lables for different types of user-defined missing values
 #' @param digits        number of decimals for rounding
 #' @param warn          boolean. indicates whether to print a warning if NAs were found in resp.
 #' @param verbose       print progress
-#' @param show.all_plots logical; only needed when groups exist, indicates whether
-#'                  plots shall also include the whole sample as a "group"
 #'
 #' @return   if return_table is set to TRUE, table with missing values per person and
 #' for each missing value type (in percentage)
@@ -40,7 +41,7 @@ mv_person <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       name_data = NULL, path_data = here::here("Data"),
-                      return_table = TRUE, name_table = NULL, overwrite = FALSE,
+                      return_table = TRUE, name_table = NULL, overwrite_table = FALSE,
                       path_table = here::here("Tables"),
                       plots = FALSE, name_plots = "Missing_responses_by_person",
                       path_plots = here::here("Plots/Missing_Responses/by_person"),
@@ -72,7 +73,7 @@ mv_person <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL
   if (return_table | !is.null(name_table)) {
     mvp_table(mv_p = mv_p, grouping = grouping, mvs = mvs,
               filename = name_table, path = path_table,
-              return_table = return_table, overwrite = overwrite)
+              return_table = return_table, overwrite = overwrite_table)
   }
 }
 
@@ -179,6 +180,7 @@ mvp_analysis <- function(resp, vars, items = 'final', valid = NULL, grouping = N
 #' @param filename  string with name of file that shall be saved (excluding type of file);
 #'                  if NULL, no file will be saved.
 #' @param path      folder path for plots
+#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
 #' @param return_table  boolean. indicates whether to return table.
 
 #'
@@ -192,7 +194,7 @@ mvp_table <- function(mv_p = NULL, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       filename = NULL, path = here::here("Tables"),
-                      return_table = FALSE) {
+                      overwrite = FALSE, return_table = FALSE) {
 
   # Percentage of missing values per item
   if (is.null(mv_p)) {

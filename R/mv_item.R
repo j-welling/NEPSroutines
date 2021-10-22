@@ -163,9 +163,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
   if (!is.null(filename)) {
 
       # Create directory for data
-      if (!file.exists(path)) {
-          dir.create(path, recursive = TRUE)
-      }
+      check_folder(path)
 
       save(mv_i, file = here::here(paste0(path, "/", filename)))
   }
@@ -212,6 +210,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
 #' indicating (in)valid cases.
 #' @param digits    number of decimals for rounding
 #' @param warn      boolean whether to print a warning if NAs were found in resp
+#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
 #' @param return_table  boolean. indicates whether to return table.
 #' @export
 

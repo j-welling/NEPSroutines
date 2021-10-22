@@ -22,11 +22,7 @@
 distractor_analysis <- function(resp, vars, items, valid = NULL) {
 
     # prepare data
-    if (!is.null(valid)) {
-        resp_ <- resp[resp[[valid]], ]
-    } else {
-        warning("No variable with valid cases provided. All cases are used for analysis.")
-    }
+    resp <- only_valid(resp, valid = valid)
     MC <- dplyr::select(
         dplyr::filter(vars, vars$type == 'MC' & vars$raw == TRUE),
         .data$items, .data$correct_response
@@ -87,14 +83,16 @@ distractor_analysis <- function(resp, vars, items, valid = NULL) {
 #'   saved as an excel file with one sheet per table). Please note that the
 #'   path is relative to the current working path set by here::i_am(). Defaults
 #'   to NULL (not stored)
+#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
 #'
 #' @return list of data frames
 #'           correct : item-total correlations for correct responses
 #'           distractor : item-total correlations for distractors
 #'
 #' @export
+
 summary_distractor_analysis <- function(distractors, print = TRUE,
-                                        save_at = NULL) {
+                                        save_at = NULL, overwrite = FALSE) {
     # data.frames containing information for distractors and correct responses,
     # respectively
 
@@ -139,16 +137,13 @@ summary_distractor_analysis <- function(distractors, print = TRUE,
 
     if (!is.null(save_at)) {
 
-        if (!file.exists(save_at)) {
-            stop("The location ", save_at, " does not exist. Please provide a ",
-                 "valid folder path to save the distractor analyses.")
-        }
+        ckeck_folder(save_at)
 
         save(distractors, file = here::here(paste0(save_at, "/distractors.Rdata")))
         openxlsx::write.xlsx(
             distractors,
             file = here::here(paste0(save_at, "/distractor_analysis.xlsx")),
-            showNA = FALSE, overwrite = TRUE
+            showNA = FALSE, overwrite = overwrite
         )
     }
 

@@ -33,8 +33,9 @@
 #' @param name_data string with name of data file that shall be saved (including file type);
 #' if left empty, data will not be saved.
 #' @param path_data character. contains name of path for data.
-#' @param return_results  boolean. indicates whether to return results.
+#' @param overwrite_table boolean; indicates whether to overwrite existing file when saving table.
 #' @param digits    number of decimals for rounding
+#' @param return_results  boolean. indicates whether to return results.
 #'
 #' @export
 
@@ -42,7 +43,7 @@ irt_all <- function(resp, vars, items, position, valid = NULL, irt_type, Q = NUL
                     icc_plots = FALSE, wright_map = FALSE, path_plots = here::here("Plots"),
                     name_table = NULL, name_steps = NULL, path_tables = here::here("Tables"),
                     name_data = NULL, path_data = here::here("Data"),
-                    return_results = TRUE,  digits = 2) {
+                    overwrite_table = FALSE, digits = 2, return_results = TRUE) {
 
   results <- list()
 
@@ -90,14 +91,14 @@ irt_all <- function(resp, vars, items, position, valid = NULL, irt_type, Q = NUL
     results$summary <- irt_summary(resp = resp, vars = vars, position = position,
                                    results = results[[1]], disc = results[[2]],
                                    filename = name_table, path = path_tables,
-                                   valid = valid, digits = digits)
+                                   valid = valid, digits = digits, overwrite = overwrite_table)
   }
 
   # Steps analysis
   if (irt_type == 'poly' && (return_results | !is.null(name_steps) | !is.null(name_data))) {
     results$steps <- steps_analysis(results = results$model.pcm,
                                     filename = name_steps, path = path_tables,
-                                    digits = digits)
+                                    digits = digits, overwrite = overwrite_table)
   } else if(!is.null(name_steps)) {
     warning("No steps analysis possible for Rasch models.")
   }
@@ -164,20 +165,20 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irtmodel, Q = NULL,
          '2PL', 'PCM2', 'GPCM'.")
   }
 
-  # Prepare data
-  resp_ <- prepare_resp(resp, valid = valid, vars = vars, items = items, vonvert = TRUE)
+  # Select only valid cases
+  resp <- only_valid(resp, valid = valid)
 
   # Create ID variable
   pid <- resp$ID_t
+  check_pid(pid)
 
-  if (length(pid) != length(unique(pid))) {
-      stop("There are duplicates in the person identifiers.")
-  }
+  # Prepare data
+  prepare_resp(resp, vars = vars, items = items, convert = TRUE, without_valid = TRUE)
 
   # Create scoring matrix if not provided in function arguments
   if (irtmodel %in% c("GPCM", "PCM2") && is.null(Q)) {
-    Q <- matrix(1, ncol = 1, nrow = ncol(resp_))
-    Q[grepl("s_c", names(resp_)), ] <- 0.5
+    Q <- matrix(1, ncol = 1, nrow = ncol(resp))
+    Q[grepl("s_c", names(resp)), ] <- 0.5
     warning(
       "Scoring matrix Q was not supplied to polytomous analysis. ",
       "It is reconstructed from the item names in resp."
@@ -188,12 +189,12 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irtmodel, Q = NULL,
   # IRT model
   if (irtmodel %in% c("1PL", "PCM2")) {
     mod <- TAM::tam.mml(
-      resp = resp_, irtmodel = irtmodel, Q = Q, pid = pid,
+      resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
       verbose = verbose
     )
   } else {
     mod <- TAM::tam.mml.2pl(
-      resp = resp_, irtmodel = irtmodel, Q = Q, pid = pid,
+      resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
       verbose = verbose
     )
   }
@@ -286,9 +287,10 @@ icc_plots <- function(results, name, path = here::here("Plots")) {
 
 wright_map <- function(results, name, path = here::here("Plots")) {
 
-  if ( !file.exists(here::here(path, "/Wright_Maps"))) {
-    dir.create(here::here(path, "/Wright_Maps"), recursive = TRUE)}
+  # Create directory for plots
+  check_folder(path = here::here(path, "/Wright_Maps"))
 
+  # Create Wright Map
   png(here::here(paste0(path, "/Wright_Maps/Wright_map_for_", name, ".png")),
       width = 800, height = 1300, bg = "white",
       res = 300, pointsize = 10)
@@ -333,6 +335,7 @@ wright_map <- function(results, name, path = here::here("Plots")) {
 #' @param valid     character string. defines name of boolean variable in resp,
 #'                  indicating (in)valid cases.
 #' @param digits integer; how many digits after rounding
+#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
 #' @param return_table logical; whether resulting table should be returned
 #'
 #' @return a data.frame containing the item name, position, N, percentage correct,
@@ -342,17 +345,14 @@ wright_map <- function(results, name, path = here::here("Plots")) {
 
 irt_summary <- function(resp, vars, results, position, disc = NULL,
                         path = here::here("Tables"), filename = NULL,
-                        valid = NULL, digits = 2, return_table = TRUE) {
+                        valid = NULL, digits = 2, overwrite = FALSE,
+                        return_table = TRUE) {
 
   # prepare data
-  if (!is.null(valid)) {
-      resp <- resp[resp[[valid]], ]
-  } else {
-      warning("No variable with valid cases provided. All cases are used for analysis.")
-  }
-  vars_ <- vars[vars$items %in% rownames(results$mod$xsi), ]
-  vars_ <- dplyr::rename(vars_, item = 'items', position = position)
-  resp_ <- resp[ , vars_$item] %>% convert_mv
+  items <- vars$items %in% rownames(results$mod$xsi)
+  vars_ <- dplyr::rename(vars[items, ], item = 'items', position = position)
+  resp <- prepare_resp(resp, valid = valid, vars = vars, items = items, convert = TRUE)
+
 
   # item parameters
   pars <- results$mod$xsi[, c("xsi", "se.xsi")]
@@ -364,10 +364,10 @@ irt_summary <- function(resp, vars, results, position, disc = NULL,
                 by.x = "item", by.y = "item")
 
   # percentage correct
-  pars$pc <- ifelse(vars_$dich == 1, colMeans(resp_[, vars_$item], na.rm = TRUE) * 100, NA)
+  pars$pc <- ifelse(vars_$dich == 1, colMeans(resp[, vars_$item], na.rm = TRUE) * 100, NA)
 
   # number of valid responses
-  pars$N <- colSums(!is.na(resp_))
+  pars$N <- colSums(!is.na(resp))
 
   # items fit
   pars$WMNSQ   <- results$fit$Infit[results$fit$item %in% vars_$item]
@@ -378,8 +378,8 @@ irt_summary <- function(resp, vars, results, position, disc = NULL,
   for (i in pars$item) {
     rest <- pars$item[!(pars$item %in% i)]
     score <- NA
-    score <- rowSums(resp_[, rest], na.rm = TRUE)
-    rit <- c(rit, cor(resp_[, i], score, use = "complete.obs"))
+    score <- rowSums(resp[, rest], na.rm = TRUE)
+    rit <- c(rit, cor(resp[, i], score, use = "complete.obs"))
   }
   pars$rit <- rit
 
@@ -417,7 +417,7 @@ irt_summary <- function(resp, vars, results, position, disc = NULL,
     # Create table
     openxlsx::write.xlsx(pars,
                          file = paste0(path, "/", filename),
-                         showNA = FALSE, rowNames = FALSE, overwrite = TRUE)
+                         showNA = FALSE, rowNames = FALSE, overwrite = overwrite)
 
   }
 
@@ -435,6 +435,7 @@ irt_summary <- function(resp, vars, results, position, disc = NULL,
 #' @param filename character. defines name for excel document. if NULL (default),
 #'                 the table will not be saved.
 #' @param digits integer; how many digits after rounding
+#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
 #' @param return_table logical; whether resulting table should be returned
 #'
 #' @return a data.frame containing the step parameters and SEs for each step
@@ -442,7 +443,7 @@ irt_summary <- function(resp, vars, results, position, disc = NULL,
 #' @export
 
 steps_analysis <- function(results, path = here::here("Tables"), filename = NULL,
-                           digits = 2, return_table = TRUE) {
+                           digits = 2, overwrite = FALSE, return_table = TRUE) {
 
   # step parameters
   step <- round(results$mod$xsi[, c("xsi", "se.xsi")], digits)
@@ -482,7 +483,7 @@ steps_analysis <- function(results, path = here::here("Tables"), filename = NULL
     # Create table
     openxlsx::write.xlsx(steps,
                          file = paste0(path, "/", filename),
-                         showNA = FALSE, rowNames = TRUE, overwrite = TRUE)
+                         showNA = FALSE, rowNames = TRUE, overwrite = overwrite)
 
   }
 
