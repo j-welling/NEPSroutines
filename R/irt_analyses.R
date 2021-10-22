@@ -173,7 +173,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irtmodel, Q = NULL,
   check_pid(pid)
 
   # Prepare data
-  prepare_resp(resp, vars = vars, items = items, convert = TRUE, without_valid = TRUE)
+  resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE, without_valid = TRUE)
 
   # Create scoring matrix if not provided in function arguments
   if (irtmodel %in% c("GPCM", "PCM2") && is.null(Q)) {
@@ -349,9 +349,9 @@ irt_summary <- function(resp, vars, results, position, disc = NULL,
                         return_table = TRUE) {
 
   # prepare data
-  items <- vars$items %in% rownames(results$mod$xsi)
-  vars_ <- dplyr::rename(vars[items, ], item = 'items', position = position)
-  resp <- prepare_resp(resp, valid = valid, vars = vars, items = items, convert = TRUE)
+  vars$irt_items <- vars$items %in% rownames(results$mod$xsi)
+  vars_ <- dplyr::rename(vars[vars$irt_items, ], item = 'items', position = position)
+  resp <- prepare_resp(resp, valid = valid, vars = vars, items = 'irt_items', convert = TRUE)
 
 
   # item parameters
