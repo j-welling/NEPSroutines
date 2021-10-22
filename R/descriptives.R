@@ -1,22 +1,47 @@
+#' Number of valid cases
+#'
+#' @param dat     data.frame with item responses (user-defined missing values)
+#'                and logical grouping variables, named after the grouping
+#'                factor (e.g. "easy" and "difficult" in the case of testlet.
+#' @param valid   character string. defines name of boolean variable in dat,
+#' indicating (in)valid cases.
+#'
+#' @return   character string with answer.
+#'
+#' @export
+
+n_valid <- function(dat, valid = NULL) {
+
+    dat <- only_valid(dat, valid = valid)
+
+    paste0("There are ", nrow(dat[dat[[valid]], ]), " valid cases in the dataset.")
+}
+
+
+
 #' Descriptives of continuous variables
 #'
 #' @param dat     data.frame with item responses (user-defined missing values)
 #'                and logical grouping variables, named after the grouping
 #'                factor (e.g. "easy" and "difficult" in the case of testlet.
 #' @param desc    character. contains names of variables for descriptive analysis.
-#' @param min.val minimum number of valid values;
-#'                if negative, set to the default of 3
+#' @param valid   character string. defines name of boolean variable in dat,
+#' indicating (in)valid cases.
 #' @param digits  number of decimals for rounding
 #'
 #' @return   list with descriptives.
 #'
 #' @export
 
-desc_con <- function(dat, desc, min.val = 3, digits = 2) {
-    dat <- min_val(dat, min.val = min.val)
+desc_con <- function(dat, desc, valid = NULL, digits = 2) {
+
+    dat <- only_valid(dat, valid = valid)
+
     sapply(dat[ , desc, drop = FALSE], function(x) {
-        format(round(psych::describe(x), digits), nsmall = digits)
-        })
+            d <- round(psych::describe(x), digits)
+            d[, -c(1:2)] <- format(d[, -c(1:2)], nsmall = digits)
+            d
+            })
 }
 
 
@@ -26,8 +51,8 @@ desc_con <- function(dat, desc, min.val = 3, digits = 2) {
 #'                and logical grouping variables, named after the grouping
 #'                factor (e.g. "easy" and "difficult" in the case of testlet.
 #' @param desc    character. contains names of variables for descriptive analysis.
-#' @param min.val minimum number of valid values;
-#'                if negative, set to the default of 3
+#' @param valid   character string. defines name of boolean variable in dat,
+#' indicating (in)valid cases.
 #' @param digits  number of decimals for rounding percentages
 #' @param show_attributes boolean; indicates whether to show attributes.
 #' @param show_frequency_abs boolean; indicates whether to show frequency in
@@ -39,18 +64,20 @@ desc_con <- function(dat, desc, min.val = 3, digits = 2) {
 #'
 #' @export
 
-desc_nom <- function(dat, desc, min.val = 3, digits = 1,
+desc_nom <- function(dat, desc, valid = NULL, digits = 1,
                      show_frequency_abs = TRUE, show_frequency_perc = TRUE) {
-    dat <- min_val(dat, min.val = min.val)
+
+    dat <- only_valid(dat, valid = valid)
+
     descriptives <- list()
 
     if (show_frequency_abs) {
         descriptives$frequency_abs <- desc_abs(dat, desc = desc,
-                                                min.val = min.val)
+                                                valid = valid)
         }
     if (show_frequency_perc) {
         descriptives$frequency_perc <- desc_perc(dat, desc = desc,
-                                                 min.val = min.val,
+                                                 valid = valid,
                                                  digits = digits)
     }
 
@@ -64,15 +91,17 @@ desc_nom <- function(dat, desc, min.val = 3, digits = 1,
 #'                and logical grouping variables, named after the grouping
 #'                factor (e.g. "easy" and "difficult" in the case of testlet.
 #' @param desc    character. contains names of variables for descriptive analysis.
-#' @param min.val minimum number of valid values;
-#'                if negative, set to the default of 3
+#' @param valid   character string. defines name of boolean variable in dat,
+#' indicating (in)valid cases.
 #'
 #' @return   list with  frequency (absolute) of answers for each variable in desc.
 #'
 #' @export
 
-desc_abs <- function(dat, desc, min.val = 3) {
-    dat <- min_val(dat, min.val = min.val)
+desc_abs <- function(dat, desc, valid = NULL) {
+
+    dat <- only_valid(dat, valid = valid)
+
     sapply(dat[ , desc, drop = FALSE], function(x) {table(x, useNA = "always")})
 }
 
@@ -84,17 +113,20 @@ desc_abs <- function(dat, desc, min.val = 3) {
 #'                and logical grouping variables, named after the grouping
 #'                factor (e.g. "easy" and "difficult" in the case of testlet.
 #' @param desc    character. contains names of variables for descriptive analysis.
-#' @param min.val minimum number of valid values;
-#'                if negative, set to the default of 3
+#' @param valid   character string. defines name of boolean variable in dat,
+#' indicating (in)valid cases.
 #' @param digits  number of decimals for rounding
 #'
 #' @return   list with frequency (relative) of answers for each variable in desc.
 #'
 #' @export
 
-desc_perc <- function(dat, desc, min.val = 3, digits = 1) {
-    dat <- min_val(dat, min.val = min.val)
-    sapply(dat[ , desc, drop = FALSE], function(x) {
-        round(prop.table(table(x, useNA = "always"))*100, digits)
-        })
+desc_perc <- function(dat, desc, valid = NULL, digits = 1) {
+
+    dat <- only_valid(dat, valid = valid)
+
+    data.frame(sapply(dat[ , desc, drop = FALSE], function(x) {
+        d <- format(round(prop.table(table(x, useNA = "always"))*100, digits), nsmall = digits)
+        paste0(d, " %")
+        }))
 }

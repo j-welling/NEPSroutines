@@ -9,6 +9,7 @@ dif_all(
   vars,
   items,
   dif_vars,
+  valid = NULL,
   scoring = NULL,
   path_table = "Tables",
   print_table = FALSE,
@@ -32,6 +33,9 @@ indicates which items to use for analysis.}
 
 \item{dif_vars}{character vector. contains the variable names to be tested for DIF
 (e.g., "gender")}
+
+\item{valid}{character string. defines name of boolean variable in dat,
+indicating (in)valid cases.}
 
 \item{scoring}{numeric vector; scoring factor to be applied to loading matrix;
 can be NULL for Rasch model}

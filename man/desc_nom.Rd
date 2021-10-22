@@ -7,7 +7,7 @@
 desc_nom(
   dat,
   desc,
-  min.val = 3,
+  valid = NULL,
   digits = 1,
   show_frequency_abs = TRUE,
   show_frequency_perc = TRUE
@@ -20,8 +20,8 @@ factor (e.g. "easy" and "difficult" in the case of testlet.}
 
 \item{desc}{character. contains names of variables for descriptive analysis.}
 
-\item{min.val}{minimum number of valid values;
-if negative, set to the default of 3}
+\item{valid}{character string. defines name of boolean variable in dat,
+indicating (in)valid cases.}
 
 \item{digits}{number of decimals for rounding percentages}
 

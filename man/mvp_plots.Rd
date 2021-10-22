@@ -9,6 +9,7 @@ mvp_plots(
   resp = NULL,
   vars = NULL,
   items = "final",
+  valid = NULL,
   grouping = NULL,
   show.all = FALSE,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
@@ -36,6 +37,9 @@ with the column "items" indicating the names of teh items.}
 
 \item{items}{character. contains name of variable (boolean) in vars that
 indicates which items to items in analysis.}
+
+\item{valid}{character string. defines name of boolean variable in resp,
+indicating (in)valid cases.}
 
 \item{grouping}{character vector. contains names of groups (e.g. 'easy and 'difficult')
 as itemsd in data.frame resp.}

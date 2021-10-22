@@ -4,7 +4,7 @@
 \alias{distractor_analysis}
 \title{Distractor analysis}
 \usage{
-distractor_analysis(resp, vars, items, min.val = 3)
+distractor_analysis(resp, vars, items, valid = NULL)
 }
 \arguments{
 \item{resp}{data.frame with all respondents as rows and all variables as columns,
@@ -19,8 +19,8 @@ correct_response: integer, identifies correct response for each item}
 \item{items}{character. contains name of variable (boolean) in vars that
 indicates which items to use for analysis.}
 
-\item{min.val}{minimum number of valid values; if negative,
-set to the number of variables}
+\item{valid}{character string. defines name of boolean variable in dat,
+indicating (in)valid cases.}
 }
 \value{
 list of one data frame per item containing item-total correlations

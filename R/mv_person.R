@@ -8,6 +8,8 @@
 #'                      with the column "items" indicating the names of the items.
 #' @param items         character. contains name of variable (boolean) in vars that
 #'                      indicates which items to items in analysis.
+#' @param valid         character string. defines name of boolean variable in resp,
+#'                      indicating (in)valid cases.
 #' @param grouping      character vector. contains names of groups (e.g. 'easy and 'difficult')
 #'                      as items in data.frame resp.
 #' @param mvs           named vector with definition of user-defined missing values
@@ -23,8 +25,6 @@
 #' @param path_plots    folder path for plots
 #' @param lbls_plots    lables for different types of user-defined missing values
 #' @param color_plots   bar color
-#' @param min.val       minimum number of valid values;
-#'                      if negative, set to the default of 3
 #' @param digits        number of decimals for rounding
 #' @param warn          boolean. indicates whether to print a warning if NAs were found in resp.
 #' @param verbose       print progress
@@ -36,11 +36,11 @@
 #'
 #' @export
 
-mv_person <- function(resp, vars, items = 'final', grouping = NULL,
+mv_person <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       name_data = NULL, path_data = here::here("Data"),
-                      return_table = TRUE, name_table = NULL,
+                      return_table = TRUE, name_table = NULL, overwrite = FALSE,
                       path_table = here::here("Tables"),
                       plots = FALSE, name_plots = "Missing_responses_by_person",
                       path_plots = here::here("Plots/Missing_Responses/by_person"),
@@ -56,23 +56,23 @@ mv_person <- function(resp, vars, items = 'final', grouping = NULL,
                         NAd = "not administered",
                         AZ = "Angabe zurueckgesetzt"
                       ),
-                      min.val = 3, digits = 2, warn = TRUE, verbose = TRUE) {
+                      digits = 2, warn = TRUE, verbose = TRUE) {
 
   mv_p <- mvp_analysis(resp = resp, vars = vars, items = items, grouping = grouping,
                   mvs = mvs, filename = name_data, path = path_data,
-                  min.val = min.val, digits = digits, warn = warn)
+                  valid = valid, digits = digits, warn = warn)
 
   if (plots) {
     mvp_plots(mv_p = mv_p, vars = vars, items = items, grouping = grouping,
-             mvs = mvs, lbls = lbls_plots, show.all = show.all_plots,
-             filename = name_plots, path = path_plots, color = color_plots,
-             verbose = verbose)
+              mvs = mvs, lbls = lbls_plots, show.all = show.all_plots,
+              filename = name_plots, path = path_plots, color = color_plots,
+              verbose = verbose)
   }
 
   if (return_table | !is.null(name_table)) {
     mvp_table(mv_p = mv_p, grouping = grouping, mvs = mvs,
-             filename = name_table, path = path_table,
-             return_table = return_table)
+              filename = name_table, path = path_table,
+              return_table = return_table, overwrite = overwrite)
   }
 }
 
@@ -87,14 +87,14 @@ mv_person <- function(resp, vars, items = 'final', grouping = NULL,
 #'                  with the column "items" indicating the names of the items.
 #' @param items       character. contains name of variable (boolean) in vars that
 #'                  indicates which items to items in analysis.
+#' @param valid     character string. defines name of boolean variable in resp,
+#'                  indicating (in)valid cases.
 #' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
 #'                  as itemsd in data.frame resp.
 #' @param mvs       named vector with definition of user-defined missing values
 #' @param filename  string with name of file that shall be saved (including type of file);
 #'                  if NULL, no file will be saved.
 #' @param path      folder path for file if it shall be saved
-#' @param min.val   minimum number of valid values;
-#'                  if negative, set to the default of 3
 #' @param digits    number of decimals for rounding
 #' @param warn      boolean. indicates whether to print a warning if NAs were found in resp
 #' @param return_results    boolean. indicates whether to return results.
@@ -104,11 +104,11 @@ mv_person <- function(resp, vars, items = 'final', grouping = NULL,
 #'
 #' @export
 
-mvp_analysis <- function(resp, vars, items = 'final', grouping = NULL,
-                    mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                            UM = -90, ND = -55, NAd = -54, AZ = -21),
-                    filename = NULL, path = here::here("Data"),
-                    min.val = 3, digits = 2, warn = TRUE, return_results = TRUE) {
+mvp_analysis <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL,
+                         mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
+                                 UM = -90, ND = -55, NAd = -54, AZ = -21),
+                         filename = NULL, path = here::here("Data"),
+                         digits = 2, warn = TRUE, return_results = TRUE) {
 
   # Testing prerequisites (data)
   if (is.null(vars) | is.null(resp)) {
@@ -124,9 +124,9 @@ mvp_analysis <- function(resp, vars, items = 'final', grouping = NULL,
   mv_p <- list()
 
   # Prepare data
-  resp <- min_val(resp, min.val = min.val)
-  resp_c <- resp[ , vars$items[vars[[items]]]]
+  resp_c <- prepare_resp(resp, valid = valid, vars = vars, items = items, convert = FALSE)
 
+  # Calculate mvs per person
   if (is.null(grouping)) {
 
     mv_p <- mvp_calc(resp = resp_c, mvs = mvs, digits = digits)
@@ -151,9 +151,7 @@ mvp_analysis <- function(resp, vars, items = 'final', grouping = NULL,
   if (!is.null(filename)) {
 
     # Create directory for data
-    if (!file.exists(path)) {
-      dir.create(path, recursive = TRUE)
-    }
+    check_folder(path)
 
     save(mv_p, file = here::here(paste0(path, "/", filename)))
   }
@@ -174,19 +172,23 @@ mvp_analysis <- function(resp, vars, items = 'final', grouping = NULL,
 #' @param resp      data.frame. contains item responses (user-defined mvs)
 #' @param vars      data.frame, contains information about variables
 #'                  (for minimum columns see function "mv_person")
+#' @param valid     character string. defines name of boolean variable in resp,
+#'                  indicating (in)valid cases.
 #' @param mvs       named vector; contains definition of user-defined missing
 #'                  values that shall be analyzed in the plot
 #' @param filename  string with name of file that shall be saved (excluding type of file);
 #'                  if NULL, no file will be saved.
 #' @param path      folder path for plots
 #' @param return_table  boolean. indicates whether to return table.
+
 #'
 #' @return   if return is set to TRUE, table with missing values per person and
 #' for each missing value type (in percentage)
 #'
 #' @export
 
-mvp_table <- function(mv_p = NULL, grouping = NULL, resp = NULL, vars = NULL,
+mvp_table <- function(mv_p = NULL, grouping = NULL,
+                      resp = NULL, vars = NULL, valid = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       filename = NULL, path = here::here("Tables"),
@@ -195,7 +197,7 @@ mvp_table <- function(mv_p = NULL, grouping = NULL, resp = NULL, vars = NULL,
   # Percentage of missing values per item
   if (is.null(mv_p)) {
     if (!is.null(resp) & !is.null(vars)) {
-      mv_p <- mv_person(resp, vars = vars, mvs = mvs, grouping = grouping)
+      mv_p <- mv_analysis(resp, vars = vars, valid = valid, mvs = mvs, grouping = grouping)
     } else {
       stop("Please provide mv_p or resp and vars.")
     }
@@ -217,20 +219,18 @@ mvp_table <- function(mv_p = NULL, grouping = NULL, resp = NULL, vars = NULL,
   if (!is.null(filename)) {
 
     # Create directory for table
-    if (!file.exists(path)) {
-      dir.create(path, recursive = TRUE)
-    }
+    check_folder(path)
 
     # Write table as Excel sheet
     if (is.null(grouping)) {
       openxlsx::write.xlsx(results,
                            file = paste0(path, "/", filename, ".xlsx"),
-                           showNA = FALSE, rowNames = FALSE, overwrite = TRUE)
+                           showNA = FALSE, rowNames = FALSE, overwrite = overwrite)
     } else {
       for (g in names(mv_p)) {
         openxlsx::write.xlsx(results[[g]],
                              file = paste0(path, "/", filename, "_", g, ".xlsx"),
-                             showNA = FALSE, rowNames = FALSE, overwrite = TRUE)
+                             showNA = FALSE, rowNames = FALSE, overwrite = overwrite)
       }
     }
   }
@@ -253,6 +253,8 @@ mvp_table <- function(mv_p = NULL, grouping = NULL, resp = NULL, vars = NULL,
 #'                  with the column "items" indicating the names of teh items.
 #' @param items     character. contains name of variable (boolean) in vars that
 #'                  indicates which items to items in analysis.
+#' @param valid     character string. defines name of boolean variable in resp,
+#'                  indicating (in)valid cases.
 #' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
 #'                  as itemsd in data.frame resp.
 #' @param show.all  logical; only needed when groups exist, indicates whether
@@ -269,30 +271,30 @@ mvp_table <- function(mv_p = NULL, grouping = NULL, resp = NULL, vars = NULL,
 #' @export
 
 mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
-                     grouping = NULL, show.all = FALSE,
-                     mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                             UM = -90, ND = -55, NAd = -54, AZ = -21),
-                     path = here::here("Plots/Missing_Responses/by_person"),
-                     filename = "Missing_responses_by_person",
-                     lbls = c(
-                       ALL = "total missing",
-                       OM = "omitted",
-                       NV = "not valid",
-                       NR = "not reached",
-                       TA = "test aborted",
-                       UM = "unspecific missing",
-                       ND = "not determinable",
-                       NAd = "not administered",
-                       AZ = "Angabe zurueckgesetzt"
-                     ),
-                     color = NULL, verbose = TRUE) {
+                      valid = NULL, grouping = NULL, show.all = FALSE,
+                      mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
+                              UM = -90, ND = -55, NAd = -54, AZ = -21),
+                      path = here::here("Plots/Missing_Responses/by_person"),
+                      filename = "Missing_responses_by_person",
+                      lbls = c(
+                        ALL = "total missing",
+                        OM = "omitted",
+                        NV = "not valid",
+                        NR = "not reached",
+                        TA = "test aborted",
+                        UM = "unspecific missing",
+                        ND = "not determinable",
+                        NAd = "not administered",
+                        AZ = "Angabe zurueckgesetzt"
+                      ),
+                      color = NULL, verbose = TRUE) {
 
   # Percentage of missing values by persons
   if (is.null(mv_p)) {
     if (is.null(resp) | is.null(mvs)) {
       stop("Please provide mv_p or resp!")
     } else {
-      mv_p <- mv_person(resp, vars = vars, grouping = grouping, mvs = mvs)
+      mv_p <- mv_analysis(resp, vars = vars, valid = valid, grouping = grouping, mvs = mvs)
     }
   }
 
@@ -329,9 +331,7 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
   }
 
   # Create directory for plots
-  if (!file.exists(path)) {
-    dir.create(path, recursive = TRUE)
-  }
+  check_folder(path)
 
   # for each missing type
   for (i in names(mv_all)) {

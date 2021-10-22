@@ -4,7 +4,7 @@
 \alias{desc_perc}
 \title{Show frequency (relative) of answers of list of variables}
 \usage{
-desc_perc(dat, desc, min.val = 3, digits = 1)
+desc_perc(dat, desc, valid = NULL, digits = 1)
 }
 \arguments{
 \item{dat}{data.frame with item responses (user-defined missing values)
@@ -13,8 +13,8 @@ factor (e.g. "easy" and "difficult" in the case of testlet.}
 
 \item{desc}{character. contains names of variables for descriptive analysis.}
 
-\item{min.val}{minimum number of valid values;
-if negative, set to the default of 3}
+\item{valid}{character string. defines name of boolean variable in dat,
+indicating (in)valid cases.}
 
 \item{digits}{number of decimals for rounding}
 }

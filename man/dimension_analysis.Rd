@@ -9,7 +9,7 @@ dimension_analysis(
   vars,
   items,
   dim = NULL,
-  min.val = 3,
+  valid = NULL,
   irtmodel = "PCM2",
   maxiter = 10,
   snodes = 5,
@@ -32,8 +32,8 @@ indicates which items to use for analysis.}
 
 \item{dim}{character vector. contains names of all dimension variables that shall be analyzed}
 
-\item{min.val}{minimum number of valid values; if negative,
-set to the number of variables}
+\item{valid}{character string. defines name of boolean variable in dat,
+indicating (in)valid cases.}
 
 \item{irtmodel}{the choice of irtmodel as passed to the TAM function}
 

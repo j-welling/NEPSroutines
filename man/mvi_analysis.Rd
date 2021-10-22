@@ -15,7 +15,7 @@ mvi_analysis(
     -21),
   path = here::here("Data"),
   filename = NULL,
-  min.val = 3,
+  valid = NULL,
   digits = 2,
   warn = TRUE,
   return_results = TRUE
@@ -55,8 +55,8 @@ plots shall also include the whole sample as a "group"}
 
 \item{filename}{string with name of file that shall be saved}
 
-\item{min.val}{minimum number of valid values;
-if negative, set to the default of 3}
+\item{valid}{character string. defines name of boolean variable in resp,
+indicating (in)valid cases.}
 
 \item{digits}{number of decimals for rounding}
 

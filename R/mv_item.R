@@ -24,8 +24,8 @@
 #' @param mvs       named vector with definition of user-defined missing values.
 #' @param path      folder path for data
 #' @param filename  string with name of file that shall be saved
-#' @param min.val   minimum number of valid values;
-#'                  if negative, set to the default of 3
+#' @param valid   character string. defines name of boolean variable in resp,
+#' indicating (in)valid cases.
 #' @param digits    number of decimals for rounding
 #' @param warn      boolean whether to print a warning if NAs were found in resp
 #' @param return_results  boolean. indicates whether to return results.
@@ -41,7 +41,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
                     mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                             UM = -90, ND = -55, NAd = -54, AZ = -21),
                     path = here::here("Data"), filename = NULL,
-                    min.val = 3, digits = 2, warn = TRUE, return_results = TRUE) {
+                    valid = NULL, digits = 2, warn = TRUE, return_results = TRUE) {
 
   # Test data
   if (is.null(grouping)) {
@@ -56,9 +56,8 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
 
 
   # Prepare data
-  resp <- min_val(resp, min.val = min.val) # siehe min_val in utils.R; ID_t in resp könnte hier die Datengrundlage verzerren!
-  vars_c <- vars[vars[[items]], ] # die Benennung ist verwirrend; vielleicht sollte man das Argument "items" in "select" oder so umbenennen?
-  resp_c <- resp[ , vars_c$items]
+  vars_c <- vars[vars[[items]], ]
+  resp_c <- prepare_resp(resp, valid = valid, vars = vars, items = items, convert = FALSE)
 
   # NAs are not acknowledged in mvs-argument
   if (warn & !(NA %in% mvs) & any(resp_c %in% NA)) {
@@ -209,8 +208,8 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
 #' @param filename  string with name of file that shall be saved (including type of file);
 #'                  if NULL, no file will be saved.
 #' @param path      folder path for plots
-#' @param min.val   minimum number of valid values;
-#'                  if negative, set to the default of 3
+#' @param valid   character string. defines name of boolean variable in resp,
+#' indicating (in)valid cases.
 #' @param digits    number of decimals for rounding
 #' @param warn      boolean whether to print a warning if NAs were found in resp
 #' @param return_table  boolean. indicates whether to return table.
@@ -221,14 +220,15 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       filename = NULL, path = here::here("Tables"),
-                      min.val = 3, digits = 2, warn = TRUE, return_table = FALSE) {
+                      valid = NULL, digits = 2, warn = TRUE, overwrite = FALSE,
+                      return_table = FALSE) {
 
   # Test data
   if (is.null(mv_i)) { # Auslagern von "Test data" für mvi_table/mvi_plots in eine eigene Funktion?
     if (!is.null(resp) & !is.null(position)) {
       mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
                       position = position, grouping = grouping,
-                      show.all = show.all, min.val = min.val,
+                      show.all = show.all, valid = valid,
                       digits = digits, warn = warn)
     } else {
       stop("Please provide mv_i, or resp and position.")
@@ -244,7 +244,7 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
       if (!is.null(resp) & !is.null(position)) {
         mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
                         position = position, grouping = grouping,
-                        show.all = show.all, min.val = min.val,
+                        show.all = show.all, valid = valid,
                         digits = digits, warn = warn)
       } else {
         stop("Please provide mv_i with specified missing values, or resp and position.")
@@ -277,12 +277,13 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
 
   # Save table
   if (!is.null(filename)) {
+
     # Create directory for table
-    if (!file.exists(path)) dir.create(path, recursive = TRUE)
+    check_folder(path)
 
     openxlsx::write.xlsx(results,
                          file = paste0(path, "/", filename),
-                         showNA = FALSE, rowNames = TRUE, overwrite = TRUE)
+                         showNA = FALSE, rowNames = TRUE, overwrite = overwrite)
   } else {
     warn("No filename provided. The table will not be saved.")
   }
@@ -330,8 +331,8 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
 #' @param color     character vector. defines bar color(s); if the data contains subgroups,
 #'                  one color per subgroup must be specified
 #' @param verbose   logical; print information to console
-#' @param min.val   minimum number of valid values;
-#'                  if negative, set to the default of 3
+#' @param valid   character string. defines name of boolean variable in resp,
+#' indicating (in)valid cases.
 #' @param digits    number of decimals for rounding
 #' @param warn      boolean whether to print a warning if NAs were found in resp
 #'
@@ -345,14 +346,14 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
                      path = here::here("Plots/Missing_Responses/by_item"),
                      filename = "Missing_responses_by_item",
                      color = NULL, verbose = TRUE,
-                     min.val = 3, digits = 2, warn = TRUE) {
+                     valid = NULL, digits = 2, warn = TRUE) {
 
   # Test data
   if (is.null(mv_i)) {
     if (!is.null(resp) & !is.null(position)) {
       mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
                       position = position, grouping = grouping,
-                      show.all = show.all, min.val = min.val,
+                      show.all = show.all, valid = valid,
                       digits = digits, warn = warn)
     } else {
         stop("Please provide mv_i, or resp and position.")
@@ -368,7 +369,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
       if (!is.null(resp) & !is.null(position)) {
         mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
                         position = position, grouping = grouping,
-                        show.all = show.all, min.val = min.val,
+                        show.all = show.all, valid = valid,
                         digits = digits, warn = warn)
       } else {
         stop("Please provide mv_i with specified missing values, or resp and position.")
@@ -396,9 +397,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
   }
 
   # Create directory for plots
-  if (!file.exists(path)) {
-    dir.create(path, recursive = TRUE)
-  }
+  check_folder(path)
 
   # Create plots
 
@@ -451,7 +450,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
       ggplot2::scale_y_continuous(breaks = seq(0, ylim, 10),
                                   labels = paste0(seq(0, ylim, 10), " %"),
                                   limits = c(0, ylim)) +
-      ggplot2::scale_x_continuous(breaks = seq(1, k, floor(k/20))) +
+      ggplot2::scale_x_continuous(breaks = seq(0, k, floor(k/20))) +
       ggplot2::theme_bw() +
       ggplot2::theme(legend.justification = c(0, 1),
                      legend.position = c(0.01, 0.99))

@@ -11,8 +11,8 @@
 #' @param items     character. contains name of variable (boolean) in vars that
 #'                    indicates which items to use for analysis.
 #' @param dim       character vector. contains names of all dimension variables that shall be analyzed
-#' @param min.val   minimum number of valid values; if negative,
-#'                  set to the number of variables
+#' @param valid     character string. defines name of boolean variable in dat,
+#'                    indicating (in)valid cases.
 #' @param irtmodel  the choice of irtmodel as passed to the TAM function
 #' @param maxiter   max iterations as passed to the TAM function
 #' @param snodes    snodes as passed to the TAM function
@@ -23,12 +23,16 @@
 #' @export
 #' @importFrom stats AIC BIC logLik
 
-dimension_analysis <- function(resp, vars, items, dim = NULL, min.val = 3,
+dimension_analysis <- function(resp, vars, items, dim = NULL, valid = NULL,
                                irtmodel = "PCM2", maxiter = 10, snodes = 5,
                                verbose = FALSE) {
 
-    # Prepare data
-    resp <- min_val(resp, min.val = min.val)
+    # prepare data
+    if (!is.null(valid)) {
+        resp_ <- resp[resp[[valid]], ]
+    } else {
+        warning("No variable with valid cases provided. All cases are used for analysis.")
+    }
     pid <- resp$ID_t
     resp <- convert_mv(resp)[ , vars$items[vars[[items]]]]
     sel <- as.integer(apply(resp, 2, max, na.rm = TRUE) > 1) # identify polytomous items

@@ -14,6 +14,8 @@
 #'   indicates which items to use for analysis.
 #' @param dif_vars character vector. contains the variable names to be tested for DIF
 #'   (e.g., "gender")
+#' @param valid character string. defines name of boolean variable in dat,
+#'   indicating (in)valid cases.
 #' @param scoring numeric vector; scoring factor to be applied to loading matrix;
 #'   can be NULL for Rasch model
 #' @param return_results  boolean. indicates whether to return results.
@@ -29,7 +31,7 @@
 #'   dmod: DIF effects model
 #' @export
 
-dif_all <- function(resp, vars, items, dif_vars, scoring = NULL,
+dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = NULL,
                     path_table = "Tables", print_table = FALSE,
                     return_results = TRUE, verbose = FALSE, ...) {
 
@@ -40,7 +42,7 @@ dif_all <- function(resp, vars, items, dif_vars, scoring = NULL,
 
     dif_models[[i]] <- dif_analysis(resp = resp, vars = vars, items = items,
                              facets = dif_vars[i], scoring = scoring,
-                             verbose = verbose)
+                             valid = valid, verbose = verbose)
 
     dif_summaries[[i]] <- summary_dif(dif_models[[i]], print = FALSE)
   }
@@ -73,8 +75,9 @@ dif_all <- function(resp, vars, items, dif_vars, scoring = NULL,
 #'   (e.g., "gender")
 #' @param scoring numeric vector; scoring factor to be applied to loading matrix;
 #'   can be NULL for Rasch model
+#' @param valid character string. defines name of boolean variable in dat,
+#'   indicating (in)valid cases.
 #' @param verbose logical; should progress be printed to console?
-#' @param min.val integer; minimal number of valid item responses
 #' @param ... additional arguments to be passed to tam.mml
 #'
 #' @return a list of:
@@ -84,17 +87,17 @@ dif_all <- function(resp, vars, items, dif_vars, scoring = NULL,
 #' @export
 
 dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
-                         verbose = FALSE, min.val = 3, ...) {
+                         valid = NULL, verbose = FALSE, ...) {
 
   # prepare data
-  resp_ <- min_val(resp, min.val = min.val) %>% convert_mv
+  if (!is.null(valid)) {
+      resp_ <- resp[resp[[valid]], ]
+  } else {
+      warning("No variable with valid cases provided. All cases are used for analysis.")
+  }
   pid <- resp_$ID_t
   facets <- resp_[, facets, drop = FALSE]
-  resp_ <- resp_[, vars$items[vars[[items]]]]
-
-  # prepare resp_onses
-  resp_ <- convert_mv(resp_ = resp_, variables = colnames(resp_))
-  resp_ <- min_val(x = resp_)
+  resp_ <- resp_[, vars$items[vars[[items]]]] %>% convert_mv()
   is_pcm <- any(apply(resp_, 2, max, na.rm = TRUE) > 1)
   dif_var <- colnames(facets)
   formula_dmod <- as.formula(paste("~ item + item *", dif_var))
@@ -153,17 +156,25 @@ dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
 #'   column is named after DIF variable (e.g., "gender"); must contain the same
 #'   persons in the same order as resp
 #' @param formulaA an R formula for the DIF analysis
-#' @param pid person identifiers for resp
 #' @param scoring numeric vector; scoring factor to be applied to loading matrix
 #' @param verbose logical; should progress be printed to console?
+#' @param valid character string. defines name of boolean variable in dat,
+#'   indicating (in)valid cases.
 #' @param ... additional arguments to be passed to tam.mml
 #'
 #' @return a tam.mml model
 #' @noRd
-pcm_dif <- function(resp, facets, formulaA, pid, scoring, min.val = 3, ...) {
+
+pcm_dif <- function(resp, facets, formulaA, scoring, valid = NULL, ...) {
 
   # prepare data
-  resp <- min_val(resp, min.val = min.val) %>% convert_mv
+    if (!is.null(valid)) {
+        resp_ <- resp[resp[[valid]], ]
+    } else {
+        warning("No variable with valid cases provided. All cases are used for analysis.")
+    }
+    resp <- convert_mv(resp)
+    pid <- resp$ID_t
 
   # design matrix for model
   des <- TAM::designMatrices.mfr2(
@@ -197,6 +208,7 @@ pcm_dif <- function(resp, facets, formulaA, pid, scoring, min.val = 3, ...) {
 #' @return list of information criteria, dif estimates and main effects in
 #'   data frames for dif analysis
 #' @export
+
 summary_dif <- function(diflist, print = TRUE, save_at = NULL) {
   # information criteria for DIF and main model
   # main effects of main and DIF model + standardized

@@ -4,7 +4,7 @@
 \alias{convert_mv}
 \title{Convert user-defined missing values to NAs}
 \usage{
-convert_mv(resp, variables = NULL, mvs = c(-97:-21))
+convert_mv(resp, variables = NULL, mvs = NULL)
 }
 \arguments{
 \item{resp}{data.frame containing the responses, scored items,

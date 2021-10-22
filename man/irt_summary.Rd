@@ -12,6 +12,7 @@ irt_summary(
   disc = NULL,
   path = here::here("Tables"),
   filename = NULL,
+  valid = NULL,
   digits = 2,
   return_table = TRUE
 )
@@ -41,6 +42,9 @@ and includes the following columns:
 
 \item{filename}{character. defines name for excel document. if NULL (default),
 the table will not be saved.}
+
+\item{valid}{character string. defines name of boolean variable in resp,
+indicating (in)valid cases.}
 
 \item{digits}{integer; how many digits after rounding}
 

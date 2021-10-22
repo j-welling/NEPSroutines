@@ -8,12 +8,12 @@ mvp_analysis(
   resp,
   vars,
   items = "final",
+  valid = NULL,
   grouping = NULL,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
     -21),
   filename = NULL,
   path = here::here("Data"),
-  min.val = 3,
   digits = 2,
   warn = TRUE,
   return_results = TRUE
@@ -31,6 +31,9 @@ with the column "items" indicating the names of the items.}
 \item{items}{character. contains name of variable (boolean) in vars that
 indicates which items to items in analysis.}
 
+\item{valid}{character string. defines name of boolean variable in resp,
+indicating (in)valid cases.}
+
 \item{grouping}{character vector. contains names of groups (e.g. 'easy and 'difficult')
 as itemsd in data.frame resp.}
 
@@ -40,9 +43,6 @@ as itemsd in data.frame resp.}
 if NULL, no file will be saved.}
 
 \item{path}{folder path for file if it shall be saved}
-
-\item{min.val}{minimum number of valid values;
-if negative, set to the default of 3}
 
 \item{digits}{number of decimals for rounding}
 

@@ -4,7 +4,7 @@
 \alias{desc_abs}
 \title{Show frequency (absolute) of answers of list of variables}
 \usage{
-desc_abs(dat, desc, min.val = 3)
+desc_abs(dat, desc, valid = NULL)
 }
 \arguments{
 \item{dat}{data.frame with item responses (user-defined missing values)
@@ -13,8 +13,8 @@ factor (e.g. "easy" and "difficult" in the case of testlet.}
 
 \item{desc}{character. contains names of variables for descriptive analysis.}
 
-\item{min.val}{minimum number of valid values;
-if negative, set to the default of 3}
+\item{valid}{character string. defines name of boolean variable in dat,
+indicating (in)valid cases.}
 }
 \value{
 list with  frequency (absolute) of answers for each variable in desc.

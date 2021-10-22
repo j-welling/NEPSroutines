@@ -9,8 +9,8 @@
 #'                  correct_response: integer, identifies correct response for each item
 #' @param items     character. contains name of variable (boolean) in vars that
 #'                    indicates which items to use for analysis.
-#' @param min.val   minimum number of valid values; if negative,
-#'                  set to the number of variables
+#' @param valid     character string. defines name of boolean variable in dat,
+#'                    indicating (in)valid cases.
 #'
 #' @return list of one data frame per item containing item-total correlations
 #'   for each possible response; correct response is marked with an *
@@ -19,10 +19,14 @@
 #' @importFrom rlang .data
 #' @export
 
-distractor_analysis <- function(resp, vars, items, min.val = 3) {
+distractor_analysis <- function(resp, vars, items, valid = NULL) {
 
-    # Prepare data
-    resp <- min_val(resp, min.val = min.val)
+    # prepare data
+    if (!is.null(valid)) {
+        resp_ <- resp[resp[[valid]], ]
+    } else {
+        warning("No variable with valid cases provided. All cases are used for analysis.")
+    }
     MC <- dplyr::select(
         dplyr::filter(vars, vars$type == 'MC' & vars$raw == TRUE),
         .data$items, .data$correct_response

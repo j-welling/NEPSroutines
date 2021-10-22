@@ -9,6 +9,7 @@ mvp_table(
   grouping = NULL,
   resp = NULL,
   vars = NULL,
+  valid = NULL,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
     -21),
   filename = NULL,
@@ -25,6 +26,9 @@ mvp_table(
 
 \item{vars}{data.frame, contains information about variables
 (for minimum columns see function "mv_person")}
+
+\item{valid}{character string. defines name of boolean variable in resp,
+indicating (in)valid cases.}
 
 \item{mvs}{named vector; contains definition of user-defined missing
 values that shall be analyzed in the plot}
