@@ -46,13 +46,15 @@ dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = NULL,
                              facets = dif_vars[i], scoring = scoring,
                              valid = valid, verbose = verbose)
 
-    dif_summaries[[i]] <- summary_dif(dif_models[[i]], print = FALSE, overwrite = overwrite_table)
+    dif_summaries[[i]] <- summary_dif(dif_models[[i]], print = print_table,
+                                      overwrite = overwrite_table)
   }
-  names(dif_summaries) <- dif_vars
+  names(dif_summaries) <- names(dif_models) <- dif_vars
 
-  build_dif_tables(dif_summaries = dif_summaries, save_at = path_table, overwrite = overwrite_table)
+  build_dif_tables(dif_summaries = dif_summaries, save_at = path_table,
+                   overwrite = overwrite_table)
 
-  results <- list(dif_models, dif_summaries)
+  results <- list(dif_mdels = dif_models, dif_summaries = dif_summaries)
 
   if (return_results) return(results)
 }
@@ -77,7 +79,7 @@ dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = NULL,
 #'   (e.g., "gender")
 #' @param scoring numeric vector; scoring factor to be applied to loading matrix;
 #'   can be NULL for Rasch model
-#' @param valid character string. defines name of boolean variable in dat,
+#' @param valid character string. defines name of boolean variable in data,
 #'   indicating (in)valid cases.
 #' @param verbose logical; should progress be printed to console?
 #' @param ... additional arguments to be passed to tam.mml
@@ -100,29 +102,34 @@ dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
   facets <- resp[, facets, drop = FALSE]
 
   # Select only indicated items and convert mvs
-  resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE, without_valid = TRUE)
+  resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE,
+                       without_valid = TRUE)
 
   # Prepare DIF analysis
   is_pcm <- any(apply(resp, 2, max, na.rm = TRUE) > 1)
   dif_var <- colnames(facets)
-  formula_dmod <- as.formula(paste("~ item + item *", dif_var))
-  formula_mmod <- as.formula(paste("~ item +", dif_var))
+  tmp_formula <- paste("~ item +", ifelse(is_pcm, "item * step +", ""))
+  formula_dmod <- as.formula(paste(tmp_formula, "item *", dif_var))
+  formula_mmod <- as.formula(paste(tmp_formula, dif_var))
+  rm(tmp_formula)
   mis <- is.na(facets[[dif_var]])
 
   if (any(mis)) {
     facets <- facets[!mis, ]
     resp <- resp[!mis, ]
     pid <- pid[!mis]
-    warning("Missing values were found in the DIF variable. The corresp_onding",
+    warning("Missing values were found in the DIF variable. The corresponding",
             " cases have been excluded from the analysis.")
   }
 
   # DIF analysis
   if (is_pcm) {
     if (is.null(scoring)) {
-      stop("Scoring vector must be provided for polytomous DIF analysis.")
+      scoring <- 0.5
+      warning("Scoring vector was not provided. Scoring for all polytomous ",
+              "items was set to 0.5")
     }
-    if (ncol(resp) != length(scoring)) {
+    if (length(scoring) > 1 & ncol(resp) != length(scoring)) {
       stop("Number of items in resp and scoring vector are not the same.")
     }
     mmod <- pcm_dif(
@@ -167,18 +174,24 @@ dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
 #' @param verbose logical; should progress be printed to console?
 #' @param valid character string. defines name of boolean variable in dat,
 #'   indicating (in)valid cases.
+#' @param pid vector with person identifiers
 #' @param ... additional arguments to be passed to tam.mml
 #'
 #' @return a tam.mml model
 #' @noRd
 
-pcm_dif <- function(resp, facets, formulaA, scoring, valid = NULL, ...) {
+pcm_dif <- function(resp, facets, formulaA, scoring, valid = NULL, pid, ...) {
 
   # Select only valid cases and convert mvs
-  resp <- only_valid(resp, valid = valid) %>% convert_mv()
+  if (!is.null(valid) && valid %in% names(resp)) {
+    resp <- only_valid(resp, valid = valid) %>% convert_mv()
+  } else {
+    message("The response matrix is used as is. Please check yourself whether ",
+            "all cases are valid or provide a variable within the response ",
+            "matrix for pcm_dif() to check.")
+  }
 
   # Create ID and facets variable
-  pid <- resp$ID_t
   check_pid(pid)
 
   # design matrix for model

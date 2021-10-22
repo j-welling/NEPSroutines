@@ -112,12 +112,10 @@ min_val <- function(resp, vars, items, min.val = NULL,
     resp_ <- resp[ , vrs]
 
     # Set minimum number of valid values
-    if (is.null(min.val)) {
+    if (is.null(min.val) || min.val < 0) {
         min.val <- 3
-        warning("No valid (=> 0) number of minimum valid responses per person (min.val) provided. Default of 3 valid responses applies.")
-    } else if (min.val < 0) {
-        min.val <- 3
-        warning("No valid (=> 0) number of minimum valid responses per person (min.val) provided. Default of 3 valid responses applies.")
+        warning("No valid (=> 0) number of minimum valid responses per person ",
+                "(min.val) provided. Default of 3 valid responses applies.")
     }
 
     # Number of valid values by respondent
@@ -141,8 +139,8 @@ min_val <- function(resp, vars, items, min.val = NULL,
 
 #' Convert user-defined missing values to NAs
 #'
-#' Testing for differential item functioning for binary and polytomous data.
-#' Main effects and DIF effects models are estimated.
+#' User defined missing values (usually coded as negative numbers) must be
+#' converted to NAs so that they do not break the IRT analysis
 #'
 #' @param resp          data.frame containing the responses, scored items,
 #'                      sociodemographic and design variables
@@ -156,7 +154,8 @@ convert_mv <- function(resp, variables = NULL, mvs = NULL) {
 
     if (is.null(mvs)) {
         mvs <- -999:-1
-        warning("No user defined missing values provided. Default of '-999 to -1' is used.")
+        warning("No user defined missing values provided. Default of ",
+                "'-999 to -1' is used.")
     }
 
     if (is.null(variables)) variables <- colnames(resp)
