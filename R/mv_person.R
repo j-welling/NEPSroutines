@@ -125,27 +125,27 @@ mvp_analysis <- function(resp, vars, items = 'final', valid = NULL, grouping = N
   mv_p <- list()
 
   # Prepare data
-  resp_c <- prepare_resp(resp, valid = valid, vars = vars, items = items, convert = FALSE)
+  resp <- only_valid(resp, valid = valid)
+  resp_c <- prepare_resp(resp, vars = vars, items = items, without_valid = TRUE, convert = FALSE)
 
   # Calculate mvs per person
   if (is.null(grouping)) {
 
+    # Determine percentage of missing values for each missing type
     mv_p <- mvp_calc(resp = resp_c, mvs = mvs, digits = digits)
 
   } else {
 
-    resp_all <- data.frame(NA)
-
     for (g in grouping) {
 
       resp_g <- resp_c[resp[[g]], vars$items[vars[[items]] & vars[[g]]]]
-      resp_all <- merge(resp_all, resp_g, all = TRUE)
 
       # Determine percentage of missing values for each missing type
       mv_p[[g]] <- mvp_calc(resp = resp_g, mvs = mvs, digits = digits)
     }
 
-    mv_p$all <- mvp_calc(resp = resp_all, mvs = mvs, digits = digits)
+    # Determine percentage of missing values for each missing type
+    mv_p$all <- mvp_calc(resp = resp_c, mvs = mvs, digits = digits)
   }
 
   # Save results

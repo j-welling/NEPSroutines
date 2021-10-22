@@ -57,7 +57,8 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
 
   # Prepare data
   vars_c <- vars[vars[[items]], ]
-  resp_c <- prepare_resp(resp, valid = valid, vars = vars, items = items, convert = FALSE)
+  resp <- only_valid(resp, valid = valid)
+  resp_c <- prepare_resp(resp, vars = vars, items = items, without_valid = TRUE, convert = FALSE)
 
   # NAs are not acknowledged in mvs-argument
   if (warn & !(NA %in% mvs) & any(resp_c %in% NA)) {
@@ -104,16 +105,16 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
 
       mvlist[[g]] <- data.frame(items = vars_c$items[!is.na(pos)],
                                 position = na.omit(pos),
-                                N = colSums(apply(resp_c[ , !is.na(pos)], 2,
+                                N = colSums(apply(resp_g, 2,
                                 function(x) !(x %in% mvs))))
 
       # Determine percentage of missing values for each missing type
-      results <- data.frame(mvi_calc(resp = resp_c, mvs = mvs, digits = digits))
+      results <- data.frame(mvi_calc(resp = resp_g, mvs = mvs, digits = digits))
       results$items <- row.names(results)
       mvlist[[g]] <- merge(mvlist[[g]], results, by = 'items')
 
       # Summary across items
-      mvsum[[g]] <- t(apply(mvlist[[g]][ , -1], 2, function(x) {
+      mvsum[[g]] <- t(apply(mvlist[[g]][ , -c(1:2)], 2, function(x) {
         round(c(mean(x), sd(x), median(x), range(x)[1], range(x)[2]), digits)
       }))
       colnames(mvsum[[g]]) <- c("Mean", "Median", "SD", "Min", "Max")
@@ -260,16 +261,15 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
     } else {
 
     results <- list()
-    results$list <- data.frame(item = vars$item[vars[[items]]])
+    results$list <- data.frame(items = vars$item[vars[[items]]])
     results$summary_all <- mv_i$summary$all
 
     for (g in grouping) {
       mv <- mv_i$list[[g]]
-      names(mv) <- apply(data.frame(names(mv)), 2, function(x) {
-        return(paste0(x, "_", g))
+      names(mv)[-1] <- apply(data.frame(names(mv)[-1]), 2, function(x) {
+        paste0(x, "_", g)
       })
-      mv$item <- rownames(mv)
-      results$list <- dplyr::full_join(results$list, mv, by = "item")
+      results$list <- dplyr::full_join(results$list, mv, by = "items")
       results[[paste0("summary_", g)]] <- mv_i$summary[[g]]
     }
   }
