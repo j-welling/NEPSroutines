@@ -8,6 +8,7 @@ mv_person(
   resp,
   vars,
   items = "final",
+  valid = NULL,
   grouping = NULL,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
     -21),
@@ -15,6 +16,7 @@ mv_person(
   path_data = here::here("Data"),
   return_table = TRUE,
   name_table = NULL,
+  overwrite = FALSE,
   path_table = here::here("Tables"),
   plots = FALSE,
   name_plots = "Missing_responses_by_person",
@@ -24,7 +26,6 @@ mv_person(
   lbls_plots = c(ALL = "total missing", OM = "omitted", NV = "not valid", NR =
     "not reached", TA = "test aborted", UM = "unspecific missing", ND =
     "not determinable", NAd = "not administered", AZ = "Angabe zurueckgesetzt"),
-  min.val = 3,
   digits = 2,
   warn = TRUE,
   verbose = TRUE
@@ -41,6 +42,9 @@ with the column "items" indicating the names of the items.}
 
 \item{items}{character. contains name of variable (boolean) in vars that
 indicates which items to items in analysis.}
+
+\item{valid}{character string. defines name of boolean variable in resp,
+indicating (in)valid cases.}
 
 \item{grouping}{character vector. contains names of groups (e.g. 'easy and 'difficult')
 as items in data.frame resp.}
@@ -71,9 +75,6 @@ if NULL, no file will be saved.}
 plots shall also include the whole sample as a "group"}
 
 \item{lbls_plots}{lables for different types of user-defined missing values}
-
-\item{min.val}{minimum number of valid values;
-if negative, set to the default of 3}
 
 \item{digits}{number of decimals for rounding}
 

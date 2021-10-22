@@ -18,7 +18,7 @@ mvi_plots(
   filename = "Missing_responses_by_item",
   color = NULL,
   verbose = TRUE,
-  min.val = 3,
+  valid = NULL,
   digits = 2,
   warn = TRUE
 )
@@ -61,8 +61,8 @@ one color per subgroup must be specified}
 
 \item{verbose}{logical; print information to console}
 
-\item{min.val}{minimum number of valid values;
-if negative, set to the default of 3}
+\item{valid}{character string. defines name of boolean variable in resp,
+indicating (in)valid cases.}
 
 \item{digits}{number of decimals for rounding}
 

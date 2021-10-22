@@ -12,13 +12,13 @@ pos_new(vars, items = "final", position = NULL)
 \item{items}{character. contains name of variable in vars (boolean) that
 indicates which variables to use.}
 
-\item{position}{named character vector. contains name(s) of variable(s) in
+\item{position}{(named) character vector. contains name(s) of variable(s) in
 vars that indicate the position of subitems;
 if grouping, then for each group one variable name is necessary;
 names represent names of groups (e.g. easy = "position_easy")}
 }
 \value{
-integer vector containing the position of the chosen items.
+data.frame as input, with one extra variable indicating position of chosen variables.
 }
 \description{
 Calculate new position variable with only a set of variables

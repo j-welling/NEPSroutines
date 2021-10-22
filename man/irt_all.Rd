@@ -8,17 +8,20 @@ irt_all(
   resp,
   vars,
   items,
+  position,
+  valid = NULL,
   irt_type,
   Q = NULL,
-  icc_plots = TRUE,
-  wright_map = TRUE,
+  icc_plots = FALSE,
+  wright_map = FALSE,
   path_plots = here::here("Plots"),
   name_table = NULL,
-  path_table = here::here("Tables"),
-  digits = 2,
-  return_results = TRUE,
+  name_steps = NULL,
+  path_tables = here::here("Tables"),
   name_data = NULL,
-  path_data = here::here("Data")
+  path_data = here::here("Data"),
+  return_results = TRUE,
+  digits = 2
 )
 }
 \arguments{
@@ -35,6 +38,11 @@ and at least the following variables:
 \item{items}{character. contains name of variable (boolean) in vars that
 indicates which items to use for analysis.}
 
+\item{position}{character string. contains name of position variable.}
+
+\item{valid}{character string. defines name of boolean variable in resp,
+indicating (in)valid cases.}
+
 \item{irt_type}{character string; either "dich" for dichotomous analysis
 or "poly" for polytomous analysis.}
 
@@ -49,19 +57,22 @@ Divergent scoring decisions can be incorporated by this matrix
 
 \item{path_plots}{character. contains name of path for plots.}
 
-\item{name_table}{string with name of table file that shall be saved (including file type);
-if left empty, table will not be saved..}
+\item{name_table}{string with name of summary table file that shall be saved (including file type);
+if left empty, table will not be saved.}
 
-\item{path_table}{character. contains name of path for table.}
+\item{name_steps}{string with name of steps table file that shall be saved (including file type);
+if left empty, table will not be saved; only available for partial credit models.}
 
-\item{digits}{number of decimals for rounding}
+\item{path_tables}{character. contains name of path for tables.}
+
+\item{name_data}{string with name of data file that shall be saved (including file type);
+if left empty, data will not be saved.}
+
+\item{path_data}{character. contains name of path for data.}
 
 \item{return_results}{boolean. indicates whether to return results.}
 
-\item{name_data}{string with name of data file that shall be saved (including file type);
-if left empty, data will not be saved..}
-
-\item{path_data}{character. contains name of path for data.}
+\item{digits}{number of decimals for rounding}
 }
 \description{
 Perform 1PL and 2PL analyses for binary or PCM and GPCM analyses for

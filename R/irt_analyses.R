@@ -13,45 +13,54 @@
 #'                    boolean vector; indicates which items to use for analysis.
 #' @param items     character. contains name of variable (boolean) in vars that
 #'                    indicates which items to use for analysis.
-#' @param position character string. contains name of position variable.
+#' @param position  character string. contains name of position variable.
+#' @param valid     character string. defines name of boolean variable in resp,
+#'                  indicating (in)valid cases.
+#' @param irt_type  character string; either "dich" for dichotomous analysis
+#'   or "poly" for polytomous analysis.
 #' @param Q         matrix with one column and ncol(resp) rows. Binary items are
 #'                    scored with 1, polytomous items are scored with 0.5.
 #'                    Divergent scoring decisions can be incorporated by this matrix
 #'                    (e.g., item 7 is scored with 0.75 by assigning 0.75 to the seventh row).
-#' @param digits    number of decimals for rounding
-#' @param irt_type  character string; either "dich" for dichotomous analysis
-#'   or "poly" for polytomous analysis.
 #' @param icc_plots boolean; indicates whether to create and save ICC plots.
 #' @param wright_map boolean; indicates whether to create and save Wright Map.
 #' @param path_plots character. contains name of path for plots.
-#' @param name_table string with name of table file that shall be saved (including file type);
-#'   if left empty, table will not be saved..
-#' @param path_table character. contains name of path for table.
+#' @param name_table string with name of summary table file that shall be saved (including file type);
+#'   if left empty, table will not be saved.
+#' @param name_steps string with name of steps table file that shall be saved (including file type);
+#'   if left empty, table will not be saved; only available for partial credit models.
+#' @param path_tables character. contains name of path for tables.
 #' @param name_data string with name of data file that shall be saved (including file type);
-#' if left empty, data will not be saved..
+#' if left empty, data will not be saved.
 #' @param path_data character. contains name of path for data.
 #' @param return_results  boolean. indicates whether to return results.
+#' @param digits    number of decimals for rounding
 #'
 #' @export
 
-irt_all <- function(resp, vars, items, irt_type, position = NULL, Q = NULL,
-                    icc_plots = TRUE, wright_map = TRUE, path_plots = here::here("Plots"),
-                    name_table = NULL, path_table = here::here("Tables"), digits = 2,
-                    return_results = TRUE, name_data = NULL, path_data = here::here("Data")) {
+irt_all <- function(resp, vars, items, position, valid = NULL, irt_type, Q = NULL,
+                    icc_plots = FALSE, wright_map = FALSE, path_plots = here::here("Plots"),
+                    name_table = NULL, name_steps = NULL, path_tables = here::here("Tables"),
+                    name_data = NULL, path_data = here::here("Data"),
+                    return_results = TRUE,  digits = 2) {
 
   results <- list()
 
   if (irt_type == 'dich') {
 
-    results$model.1pl <- irt_analysis(resp = resp, vars = vars, items = items, irtmodel = '1PL')
-    results$model.2pl <- irt_analysis(resp = resp, vars = vars, items = items, irtmodel = '2PL')
+    results$model.1pl <- irt_analysis(resp = resp, vars = vars, items = items,
+                                      valid = valid, irtmodel = '1PL')
+    results$model.2pl <- irt_analysis(resp = resp, vars = vars, items = items,
+                                      valid = valid, irtmodel = '2PL')
 
     irtmodel = c("1PL", "2PL")
 
   } else if (irt_type == 'poly') {
 
-    results$model.pcm <- irt_analysis(resp = resp, vars = vars, items = items, irtmodel = 'PCM2')
-    results$model.gpcm <- irt_analysis(resp = resp, vars = vars, items = items, irtmodel = 'GPCM')
+    results$model.pcm <- irt_analysis(resp = resp, vars = vars, items = items,
+                                      valid = valid, irtmodel = 'PCM2')
+    results$model.gpcm <- irt_analysis(resp = resp, vars = vars, items = items,
+                                       valid = valid, irtmodel = 'GPCM')
 
     irtmodel = c("PCM2", "GPCM")
 
@@ -78,19 +87,26 @@ irt_all <- function(resp, vars, items, irt_type, position = NULL, Q = NULL,
 
   # IRT summary
   if (return_results | !is.null(name_table) | !is.null(name_data)) {
-    results$summary <- irt_summary(resp = resp, vars = vars,
+    results$summary <- irt_summary(resp = resp, vars = vars, position = position,
                                    results = results[[1]], disc = results[[2]],
-                                   filename = name_table, path = path_table,
-                                   return_table = FALSE)
+                                   filename = name_table, path = path_tables,
+                                   valid = valid, digits = digits)
+  }
+
+  # Steps analysis
+  if (irt_type == 'poly' && (return_results | !is.null(name_steps) | !is.null(name_data))) {
+    results$steps <- steps_analysis(results = results$model.pcm,
+                                    filename = name_steps, path = path_tables,
+                                    digits = digits)
+  } else if(!is.null(name_steps)) {
+    warning("No steps analysis possible for Rasch models.")
   }
 
   # Save results
   if (!is.null(name_data)) {
 
     # Create directory for data
-    if (!file.exists(path_data)) {
-      dir.create(path_data, recursive = TRUE)
-    }
+    check_folder(path_data)
 
     save(results, file = here::here(paste0(path_data, "/", name_data)))
   }
@@ -114,6 +130,8 @@ irt_all <- function(resp, vars, items, irt_type, position = NULL, Q = NULL,
 #'                    boolean vector; indicates which items to use for analysis.
 #' @param items     character. contains name of variable (boolean) in vars that
 #'                    indicates which items to use for analysis.
+#' @param valid     character string. defines name of boolean variable in resp,
+#'                  indicating (in)valid cases.
 #' @param irtmodel  character. "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
 #'                    "GPCM" for GPCM analyses.
 #' @param Q         matrix with one column and ncol(resp) rows. Binary items are
@@ -136,7 +154,7 @@ irt_all <- function(resp, vars, items, irt_type, position = NULL, Q = NULL,
 #'   info_crit: data.frame with information criteria of the model
 #' @export
 
-irt_analysis <- function(resp, vars, items, irtmodel, Q = NULL,
+irt_analysis <- function(resp, vars, items, valid = NULL, irtmodel, Q = NULL,
                          path = here::here("Data"), filename = NULL,
                          verbose = FALSE, return_results = TRUE) {
 
@@ -147,20 +165,27 @@ irt_analysis <- function(resp, vars, items, irtmodel, Q = NULL,
   }
 
   # Prepare data
+  if (!is.null(valid)) {
+      resp <- resp[resp[[valid]], ]
+  } else {
+      warning("No variable with valid cases provided. All cases are used for analysis.")
+  }
+  resp_ <- resp[ , vars$items[vars[[items]]]] %>% convert_mv
+
+  # Create ID variable
   pid <- resp$ID_t
 
   if (length(pid) != length(unique(pid))) {
-    stop("There are duplicates in the person identifiers.")
+      stop("There are duplicates in the person identifiers.")
   }
 
-  resp_ <- resp[ , vars$items[vars[[items]]]] %>% min_val() %>% convert_mv
-
+  # Create scoring matrix if not provided in function arguments
   if (irtmodel %in% c("GPCM", "PCM2") && is.null(Q)) {
     Q <- matrix(1, ncol = 1, nrow = ncol(resp_))
     Q[grepl("s_c", names(resp_)), ] <- 0.5
     warning(
       "Scoring matrix Q was not supplied to polytomous analysis. ",
-      "It is reconstructed from the item names in resp_."
+      "It is reconstructed from the item names in resp."
     )
   }
 
@@ -179,10 +204,8 @@ irt_analysis <- function(resp, vars, items, irtmodel, Q = NULL,
   }
 
   # WMNSQ
-  fit <- TAM::tam.fit(mod)$itemfit[, c(
-    "parameter", "Infit", "Infit_t",
-    "Infit_p", "Infit_pholm"
-  )]
+  fit <- TAM::msq.itemfit(mod)$itemfit[, c("item", "Infit",
+                                           "Infit_t", "Infit_p")]
 
   # Item parameters and standard errors
   pars <- TAM::tam.se(mod)
@@ -210,9 +233,7 @@ irt_analysis <- function(resp, vars, items, irtmodel, Q = NULL,
   if (!is.null(filename)) {
 
     # Create directory for data
-    if (!file.exists(path)) {
-      dir.create(path, recursive = TRUE)
-    }
+    check_folder(path)
 
     save(results, file = here::here(paste0(path, "/", filename)))
   }
@@ -237,8 +258,7 @@ irt_analysis <- function(resp, vars, items, irtmodel, Q = NULL,
 icc_plots <- function(results, name, path = here::here("Plots")) {
 
   # create directory for plots
-  if ( !file.exists(here::here(paste0(path, "/ICCs_for_", name)))) {
-    dir.create(here::here(paste0(path, "/ICCs_for_", name)), recursive = TRUE)}
+  check_folder(path = here::here(paste0(path, "/ICCs_for_", name)))
 
   # ICC plots
   for (i in 1:results$mod$nitems) {
@@ -315,6 +335,8 @@ wright_map <- function(results, name, path = here::here("Plots")) {
 #' @param path     character. defines name of path for table.
 #' @param filename character. defines name for excel document. if NULL (default),
 #'                 the table will not be saved.
+#' @param valid     character string. defines name of boolean variable in resp,
+#'                  indicating (in)valid cases.
 #' @param digits integer; how many digits after rounding
 #' @param return_table logical; whether resulting table should be returned
 #'
@@ -325,12 +347,17 @@ wright_map <- function(results, name, path = here::here("Plots")) {
 
 irt_summary <- function(resp, vars, results, position, disc = NULL,
                         path = here::here("Tables"), filename = NULL,
-                        digits = 2, return_table = TRUE) {
+                        valid = NULL, digits = 2, return_table = TRUE) {
 
   # prepare data
+  if (!is.null(valid)) {
+      resp <- resp[resp[[valid]], ]
+  } else {
+      warning("No variable with valid cases provided. All cases are used for analysis.")
+  }
   vars_ <- vars[vars$items %in% rownames(results$mod$xsi), ]
-  vars_ <- dplyr::select(vars_c, item = 'items', position = position)
-  resp_ <- resp[ , vars_$item] %>% min_val() %>% convert_mv
+  vars_ <- dplyr::rename(vars_, item = 'items', position = position)
+  resp_ <- resp[ , vars_$item] %>% convert_mv
 
   # item parameters
   pars <- results$mod$xsi[, c("xsi", "se.xsi")]
@@ -338,26 +365,26 @@ irt_summary <- function(resp, vars, results, position, disc = NULL,
   pars <- pars[vars_$item, ]
 
   # item position
-  pars <- merge(pars, vars_[ , c("items", "position")],
-                by.x = "item", by.y = "items")
+  pars <- merge(pars, vars_[ , c("item", "position")],
+                by.x = "item", by.y = "item")
 
   # percentage correct
-  pars$pc <- colMeans(resp_, na.rm = TRUE) * 100
+  pars$pc <- ifelse(vars_$dich == 1, colMeans(resp_[, vars_$item], na.rm = TRUE) * 100, NA)
 
   # number of valid responses
   pars$N <- colSums(!is.na(resp_))
 
   # items fit
-  pars$WMNSQ   <- results$fit$Infit[results$fit$parameter %in% vars_$item]
-  pars$WMNSQ_t <- results$fit$Infit_t[results$fit$parameter %in% vars_$item]
+  pars$WMNSQ   <- results$fit$Infit[results$fit$item %in% vars_$item]
+  pars$WMNSQ_t <- results$fit$Infit_t[results$fit$item %in% vars_$item]
 
   # corrected item-total discrimination
   rit <- c()
   for (i in pars$item) {
     rest <- pars$item[!(pars$item %in% i)]
     score <- NA
-    score <- rowSums(resp[, rest], na.rm = TRUE)
-    rit <- c(rit, cor(resp[, i], score, use = "complete.obs"))
+    score <- rowSums(resp_[, rest], na.rm = TRUE)
+    rit <- c(rit, cor(resp_[, i], score, use = "complete.obs"))
   }
   pars$rit <- rit
 
@@ -390,9 +417,7 @@ irt_summary <- function(resp, vars, results, position, disc = NULL,
   if (!is.null(filename)) {
 
     # Create directory for table
-    if (!file.exists(path)) {
-      dir.create(path, recursive = TRUE)
-    }
+    check_folder(path)
 
     # Create table
     openxlsx::write.xlsx(pars,
@@ -402,4 +427,69 @@ irt_summary <- function(resp, vars, results, position, disc = NULL,
   }
 
   if (return_table)  return(pars)
+}
+
+
+#' Step analysis
+#'
+#' Create table with results of step analysis.
+#'
+#' @param results  list. contains results from IRT analysis with one parameter
+#'                 (PCM analysis).
+#' @param path     character. defines name of path for table.
+#' @param filename character. defines name for excel document. if NULL (default),
+#'                 the table will not be saved.
+#' @param digits integer; how many digits after rounding
+#' @param return_table logical; whether resulting table should be returned
+#'
+#' @return a data.frame containing the step parameters and SEs for each step
+#'
+#' @export
+
+steps_analysis <- function(results, path = here::here("Tables"), filename = NULL,
+                           digits = 2, return_table = TRUE) {
+
+  # step parameters
+  step <- round(results$mod$xsi[, c("xsi", "se.xsi")], digits)
+  step$item <- sub("_step[0-9]$", "", rownames(results$mod$xsi))
+  step$step <- as.numeric(gsub(".+_c_step", "", rownames(results$mod$xsi)))
+  step <- step[!is.na(step$step), ]
+
+  # create matrix for results
+  steps <- matrix(NA, ncol = max(step$step) + 1, nrow = length(unique(step$item)))
+  rownames(steps) <- unique(step$item)
+  colnames(steps) <- paste0("step", seq_len(ncol(steps)))
+  pars <- steps
+
+  # include step parameters and SEs
+  for (i in seq_len(nrow(step))) {
+    steps[step$item[i], step$step[i]] <- paste0(format(step$xsi[i], nsmall = digits), " (",
+                                                format(step$se.xsi[i]), nsmall = digits, ")")
+     pars[step$item[i], step$step[i]] <- step$xsi[i]
+  }
+
+  # sum 0 constraint for last step
+  for (i in seq_len(nrow(steps))) {
+    steps[i, seq_len(ncol(steps))[is.na(pars[i, ])][1]] <- format(1 * sum(pars[i, ],
+                                                                          na.rm = TRUE),
+                                                                  nsmall = digits)
+  }
+
+  # convert to data.frame
+  steps <- data.frame(steps)
+
+  # Save table as Excel sheet
+  if (!is.null(filename)) {
+
+    # Create directory for table
+    check_folder(path)
+
+    # Create table
+    openxlsx::write.xlsx(steps,
+                         file = paste0(path, "/", filename),
+                         showNA = FALSE, rowNames = TRUE, overwrite = TRUE)
+
+  }
+
+  if (return_table)  return(steps)
 }

@@ -1,64 +1,116 @@
+#' Select only valid cases
+#'
+#' @param resp    data.frame with responses
+#' @param valid   character string. defines name of boolean variable in resp,
+#'                indicating (in)valid cases.
+#' @return data.frame as resp, but only with valid cases
+
+only_valid <- function(resp, valid = NULL) {
+
+    if (!is.null(valid)) {
+        resp <- resp[resp[[valid]], ]
+    } else {
+        warning("No variable with valid cases provided. All cases are used for analysis.")
+    }
+
+    return(resp)
+}
+
+
+#' Prepare resp for analysis
+#'
+#' @param resp    data.frame with responses
+#' @param valid   character string. defines name of boolean variable in resp,
+#'                indicating (in)valid cases.
+#' @param vars    data.frame. contains information about all competence items
+#'                and includes the following columns:
+#'                  items: character indicating names of items.
+#'                  variable indicated by argument 'items'
+#' @param items   character. contains name of variable (boolean) in vars that
+#'                indicates which items to use for analysis.
+#'
+#' @return data.frame as resp, but only with valid cases
+
+prepare_resp <- function(resp, valid = NULL, vars = NULL, items = NULL, convert = FALSE) {
+
+    resp <- only_valid(resp = resp, valid = valid)
+
+    if (!is.null(items)) {
+        if (is.null(vars)) {
+            warning("To create dataframe with only the indicated items please also provide vars.
+                    All items are transferred to new dataframe.")
+        } else {
+            if (items %in% colnames(vars)) {
+              resp <- resp[ , vars$items[vars[[items]]]]
+            } else {
+              stop(paste0("No variable with name '", items, "' exists in vars."))
+            }
+        }
+    } else {
+        warning("No variable provided indicating the items to keep. All items are kept.")
+    }
+
+    if (convert) resp <- convert_mv(resp)
+
+    return(resp)
+}
+
+
+#' Check if folder exists and if not, create new one
+#'
+#' @param path    path to folder
+
+check_folder <- function(path) {
+    if (!file.exists(path)) {
+        dir.create(path, recursive = TRUE)
+    }
+}
+
+
 #' Select sample with a minimum number of valid values
 #'
-#' @param x       data.frame with responses
+#' @param resp    data.frame with responses
 #' @param vars    variables to check for valid values;
 #                 if NULL, all variables will be selected
 #' @param min.val minimum number of valid values;
 #'                if negative, set to the default of 3
 #' @param invalid vector of invalid values
-#' @param append  boolean indicating whether to filter data.frame (FALSE)
-#'                or append new variable (TRUE)
 #' @param warn    print warnings
-#' @return        filtered data.frame or list of results
+#' @return        boolean vector with length = nrow(resp),
+#' indicating whether case is valid.
 #' @export
 
-min_val <- function(x, vars = NULL, min.val = 3,
-                    invalid = NA, append = FALSE,
-                    warn = TRUE) {
+min_val <- function(resp, vars, items, min.val = NULL,
+                    invalid = NA, warn = TRUE) {
 
-    # Set variables to check
-    if (is.null(vars)) {
-        vars <- colnames(x)
-    }
-
-    # Remove missing variables
-    if (!all(vars %in% colnames(x))) {
-        if (warn) {
-            warning("Some variables in vars are not included in x and, thus, are ignored!")
-        }
-        vars <- subset(vars, vars %in% colnames(x))
-    }
+    vrs <- vars$items[vars[[items]]]
+    resp_ <- resp[ , vrs]
 
     # Set minimum number of valid values
-    if (min.val < 0) {
+    if (is.null(min.val)) {
         min.val <- 3
+        warning("No valid (=> 0) number of minimum valid responses per person (min.val) provided. Default of 3 valid responses applies.")
+    } else if (min.val < 0) {
+        min.val <- 3
+        warning("No valid (=> 0) number of minimum valid responses per person (min.val) provided. Default of 3 valid responses applies.")
     }
 
     # Number of valid values by respondent
     nval <- rowSums(apply(
-        subset(x, select = vars), 2,
+        subset(resp_, select = vrs), 2,
         function(x) {
             !(x %in% invalid)
         }
     ))
 
     # Create indicator
-    if (append) {
-        x$valid <- as.numeric(nval >= min.val)
-        attr(x$valid, "label") <- paste0(
-            "Case with at least ",
-            min.val,
-            " valid responses"
-        )
-        attr(x$valid, "labels") <- c("valid" = 1, "not valid" = 0)
-
-        # Filter cases
-    } else {
-        x <- subset(x, nval >= min.val)
-    }
+    valid <- (nval >= min.val)
+    attr(valid, "label") <- paste0("Case with at least ",
+                                   min.val,
+                                   " valid responses")
 
     # Return results
-    return(x)
+    return(valid)
 }
 
 
@@ -75,17 +127,20 @@ min_val <- function(x, vars = NULL, min.val = 3,
 #' @return              data.frame like resp, but without user-defined mvs
 #' @export
 
-convert_mv <- function(resp, variables = NULL, mvs = c(-97:-21)) {
+convert_mv <- function(resp, variables = NULL, mvs = NULL) {
 
-    if (!is.null(mvs)) {
-        if (is.null(variables)) variables <- colnames(resp)
-        for (i in variables) {
-            resp[[i]] <- replace(resp[[i]], resp[[i]] %in% mvs, NA)
-        }
-        return(resp)
-    } else {
-        stop("No user defined missing values provided.")
+    if (is.null(mvs)) {
+        mvs <- -999:-1
+        warning("No user defined missing values provided. Default of '-999 to -1' is used.")
     }
+
+    if (is.null(variables)) variables <- colnames(resp)
+
+    for (i in variables) {
+      resp[[i]] <- replace(resp[[i]], resp[[i]] %in% mvs, NA)
+    }
+
+    return(resp)
 }
 
 
@@ -191,6 +246,6 @@ pos_new <- function(vars, items = 'final', position = NULL) {
                           by = 'items', all = TRUE)
         }
 
-        return(vars[[paste0("position_", g, "_", items)]])
+        return(vars)
     }
 }

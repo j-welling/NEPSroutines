@@ -4,10 +4,10 @@
 \alias{min_val}
 \title{Select sample with a minimum number of valid values}
 \usage{
-min_val(x, vars = NULL, min.val = 3, invalid = NA, append = FALSE, warn = TRUE)
+min_val(resp, vars, items, min.val = NULL, invalid = NA, warn = TRUE)
 }
 \arguments{
-\item{x}{data.frame with responses}
+\item{resp}{data.frame with responses}
 
 \item{vars}{variables to check for valid values;}
 
@@ -16,13 +16,11 @@ if negative, set to the default of 3}
 
 \item{invalid}{vector of invalid values}
 
-\item{append}{boolean indicating whether to filter data.frame (FALSE)
-or append new variable (TRUE)}
-
 \item{warn}{print warnings}
 }
 \value{
-filtered data.frame or list of results
+boolean vector with length = nrow(resp),
+indicating whether case is valid.
 }
 \description{
 Select sample with a minimum number of valid values

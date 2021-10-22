@@ -8,9 +8,11 @@ irt_summary(
   resp,
   vars,
   results,
+  position,
   disc = NULL,
   path = here::here("Tables"),
   filename = NULL,
+  valid = NULL,
   digits = 2,
   return_table = TRUE
 )
@@ -31,6 +33,8 @@ and includes the following columns:
 \item{results}{list. contains results from IRT analysis with one parameter
 (e.g., Rasch analysis)}
 
+\item{position}{character string. contains name of position variable}
+
 \item{disc}{list. contains results from IRT analysis with two parameters
 (e.g., 2PL analysis), to include item discrimination}
 
@@ -38,6 +42,9 @@ and includes the following columns:
 
 \item{filename}{character. defines name for excel document. if NULL (default),
 the table will not be saved.}
+
+\item{valid}{character string. defines name of boolean variable in resp,
+indicating (in)valid cases.}
 
 \item{digits}{integer; how many digits after rounding}
 

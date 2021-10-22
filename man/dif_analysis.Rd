@@ -10,8 +10,8 @@ dif_analysis(
   items,
   facets,
   scoring = NULL,
+  valid = NULL,
   verbose = FALSE,
-  min.val = 3,
   ...
 )
 }
@@ -34,9 +34,10 @@ indicates which items to use for analysis.}
 \item{scoring}{numeric vector; scoring factor to be applied to loading matrix;
 can be NULL for Rasch model}
 
-\item{verbose}{logical; should progress be printed to console?}
+\item{valid}{character string. defines name of boolean variable in dat,
+indicating (in)valid cases.}
 
-\item{min.val}{integer; minimal number of valid item responses}
+\item{verbose}{logical; should progress be printed to console?}
 
 \item{...}{additional arguments to be passed to tam.mml}
 }

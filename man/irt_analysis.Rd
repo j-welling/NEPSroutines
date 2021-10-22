@@ -8,6 +8,7 @@ irt_analysis(
   resp,
   vars,
   items,
+  valid = NULL,
   irtmodel,
   Q = NULL,
   path = here::here("Data"),
@@ -29,6 +30,9 @@ and at least the following variables:
 
 \item{items}{character. contains name of variable (boolean) in vars that
 indicates which items to use for analysis.}
+
+\item{valid}{character string. defines name of boolean variable in resp,
+indicating (in)valid cases.}
 
 \item{irtmodel}{character. "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
 "GPCM" for GPCM analyses.}

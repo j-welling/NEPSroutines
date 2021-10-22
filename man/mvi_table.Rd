@@ -16,9 +16,10 @@ mvi_table(
     -21),
   filename = NULL,
   path = here::here("Tables"),
-  min.val = 3,
+  valid = NULL,
   digits = 2,
   warn = TRUE,
+  overwrite = FALSE,
   return_table = FALSE
 )
 }
@@ -55,13 +56,13 @@ plots shall also include the whole sample as a "group"}
 
 \item{mvs}{named vector with definition of user-defined missing values.}
 
-\item{filename}{string with name of file that shall be saved (excluding type of file);
+\item{filename}{string with name of file that shall be saved (including type of file);
 if NULL, no file will be saved.}
 
 \item{path}{folder path for plots}
 
-\item{min.val}{minimum number of valid values;
-if negative, set to the default of 3}
+\item{valid}{character string. defines name of boolean variable in resp,
+indicating (in)valid cases.}
 
 \item{digits}{number of decimals for rounding}
 
