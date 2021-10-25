@@ -20,7 +20,7 @@
 #'   (e.g., "gender")
 #' @param valid character string. defines name of boolean variable in dat,
 #'   indicating (in)valid cases.
-#' @param scoring character string; refers to the scoring variable in vars. 
+#' @param scoring character string; refers to the scoring variable in vars.
 #'   Defaults to "scoring".
 #' @param path_table character string; indicates the folder location where the
 #'   summaries are stored on the hard drive. Please note that the
@@ -36,10 +36,10 @@
 #'   dmod: DIF effects model
 #' @export
 
-dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = "scoring",
-                    path_table = "Tables", overwrite_table = FALSE,
-                    print_table = FALSE, verbose = FALSE,
-                    return_results = TRUE, ...) {
+dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, scoring = "scoring",
+                         path_table = "Tables", overwrite_table = FALSE,
+                         print_table = FALSE, verbose = FALSE,
+                         return_results = TRUE, ...) {
 
   dif_models <- list()
   dif_summaries <- list()
@@ -54,7 +54,7 @@ dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = "scorin
 
   for (i in seq_along(dif_vars)) {
 
-    dif_models[[i]] <- dif_analysis(resp = resp, vars = vars, items = items[i],
+    dif_models[[i]] <- dif_model(resp = resp, vars = vars, items = items[i],
                              facets = dif_vars[i], scoring = scoring,
                              valid = valid, verbose = verbose)
 
@@ -88,7 +88,7 @@ dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = "scorin
 #'   scoring via logicals
 #' @param items character. contains name of variable (boolean) in vars that
 #'   indicates which items to use for analysis.
-#' @param scoring character string; refers to the scoring variable in vars. 
+#' @param scoring character string; refers to the scoring variable in vars.
 #'   Defaults to "scoring".
 #' @param facets character string signifying the variable to be tested for DIF
 #'   (e.g., "gender")
@@ -104,7 +104,7 @@ dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = "scorin
 #' @importFrom stats as.formula
 #' @export
 
-dif_analysis <- function(resp, vars, items, facets, scoring = "scoring",
+dif_model <- function(resp, vars, items, facets, scoring = "scoring",
                          valid = NULL, verbose = FALSE) {
 
   # Select only valid cases
@@ -183,7 +183,7 @@ dif_analysis <- function(resp, vars, items, facets, scoring = "scoring",
 #'   names for the current estimation
 #' @param select character. contains name of variable (boolean) in vars that
 #'   indicates which items to use for analysis.
-#' @param scoring character string; refers to the scoring variable in vars. 
+#' @param scoring character string; refers to the scoring variable in vars.
 #'   Defaults to "scoring".
 #' @param verbose logical; should progress be printed to console?
 #' @param valid character string. defines name of boolean variable in dat,
@@ -223,7 +223,7 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring", v
 
 #' Summary for DIF analysis
 #'
-#' @param diflist list with main and dif model as returned by dif_analysis()
+#' @param diflist list with main and dif model as returned by dif_model()
 #' @param print logical indicating whether summary is printed to the console
 #' @param save_at character string; indicates the folder location where the
 #'   summaries are stored on the hard drive. Please note that the
@@ -297,7 +297,7 @@ summary_dif <- function(diflist, print = TRUE, save_at = NULL,
 
 #' Summarizes DIF effects
 #'
-#' @param obj results from DIF analyses for criterion as returned by dif_analysis
+#' @param obj results from DIF analyses for criterion as returned by dif_model
 #' @param facet character string; dif variable
 #' @param group integer; group to compare against
 #' @param group2 integer; in case of more than two groups

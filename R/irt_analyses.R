@@ -18,10 +18,9 @@
 #'                  indicating (in)valid cases.
 #' @param irt_type  character string; either "dich" for dichotomous analysis
 #'   or "poly" for polytomous analysis.
-#' @param Q         matrix with one column and ncol(resp) rows. Binary items are
-#'                    scored with 1, polytomous items are scored with 0.5.
-#'                    Divergent scoring decisions can be incorporated by this matrix
-#'                    (e.g., item 7 is scored with 0.75 by assigning 0.75 to the seventh row).
+#' @param scoring   numeric vector; scoring factor to be applied to loading matrix;
+#'                    can be NULL for Rasch model; if NULL for PCM model,
+#'                    scoring matrix is reconstructed from item names.
 #' @param icc_plots boolean; indicates whether to create and save ICC plots.
 #' @param wright_map boolean; indicates whether to create and save Wright Map.
 #' @param path_plots character. contains name of path for plots.
@@ -39,29 +38,29 @@
 #'
 #' @export
 
-irt_all <- function(resp, vars, items, position, valid = NULL, irt_type, Q = NULL,
-                    icc_plots = FALSE, wright_map = FALSE, path_plots = here::here("Plots"),
-                    name_table = NULL, name_steps = NULL, path_tables = here::here("Tables"),
-                    name_data = NULL, path_data = here::here("Data"),
-                    overwrite_table = FALSE, digits = 2, return_results = TRUE) {
+irt_analysis <- function(resp, vars, items, position, valid = NULL, irt_type, scoring = NULL,
+                         icc_plots = FALSE, wright_map = FALSE, path_plots = here::here("Plots"),
+                         name_table = NULL, name_steps = NULL, path_tables = here::here("Tables"),
+                         name_data = NULL, path_data = here::here("Data"),
+                         overwrite_table = FALSE, digits = 2, return_results = TRUE) {
 
   results <- list()
 
   if (irt_type == 'dich') {
 
-    results$model.1pl <- irt_analysis(resp = resp, vars = vars, items = items,
+    results$model.1pl <- irt_model(resp = resp, vars = vars, items = items,
                                       valid = valid, irtmodel = '1PL')
-    results$model.2pl <- irt_analysis(resp = resp, vars = vars, items = items,
+    results$model.2pl <- irt_model(resp = resp, vars = vars, items = items,
                                       valid = valid, irtmodel = '2PL')
 
     irtmodel = c("1PL", "2PL")
 
   } else if (irt_type == 'poly') {
 
-    results$model.pcm <- irt_analysis(resp = resp, vars = vars, items = items,
-                                      valid = valid, irtmodel = 'PCM2')
-    results$model.gpcm <- irt_analysis(resp = resp, vars = vars, items = items,
-                                       valid = valid, irtmodel = 'GPCM')
+    results$model.pcm <- irt_model(resp = resp, vars = vars, items = items,
+                                      valid = valid, irtmodel = 'PCM2', scoring = scoring)
+    results$model.gpcm <- irt_model(resp = resp, vars = vars, items = items,
+                                       valid = valid, irtmodel = 'GPCM', scoring = scoring)
 
     irtmodel = c("PCM2", "GPCM")
 
@@ -135,10 +134,9 @@ irt_all <- function(resp, vars, items, position, valid = NULL, irt_type, Q = NUL
 #'                  indicating (in)valid cases.
 #' @param irtmodel  character. "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
 #'                    "GPCM" for GPCM analyses.
-#' @param Q         matrix with one column and ncol(resp) rows. Binary items are
-#'                    scored with 1, polytomous items are scored with 0.5.
-#'                    Divergent scoring decisions can be incorporated by this matrix
-#'                    (e.g., item 7 is scored with 0.75 by assigning 0.75 to the seventh row).
+#' @param scoring   numeric vector; scoring factor to be applied to loading matrix;
+#'                    can be NULL for Rasch model; if NULL for PCM model,
+#'                    scoring matrix is reconstructed from item names.
 #' @param path      folder path for data
 #' @param filename  string with name of file that shall be saved (including file type).
 #' @param verbose   logical. If verbose == TRUE information about the estimation
@@ -155,7 +153,7 @@ irt_all <- function(resp, vars, items, position, valid = NULL, irt_type, Q = NUL
 #'   info_crit: data.frame with information criteria of the model
 #' @export
 
-irt_analysis <- function(resp, vars, items, valid = NULL, irtmodel, Q = NULL,
+irt_model <- function(resp, vars, items, valid = NULL, irtmodel, scoring = NULL,
                          path = here::here("Data"), filename = NULL,
                          verbose = FALSE, return_results = TRUE) {
 
@@ -176,15 +174,18 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irtmodel, Q = NULL,
   resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE, without_valid = TRUE)
 
   # Create scoring matrix if not provided in function arguments
-  if (irtmodel %in% c("GPCM", "PCM2") && is.null(Q)) {
-    Q <- matrix(1, ncol = 1, nrow = ncol(resp))
-    Q[grepl("s_c", names(resp)), ] <- 0.5
-    warning(
-      "Scoring matrix Q was not supplied to polytomous analysis. ",
+  if (!is.null(scoring)) {
+      Q = as.matrix(vars[[scoring]][vars[[items]]])
+  } else if (irtmodel %in% c("GPCM", "PCM2")) {
+      Q <- matrix(1, ncol = 1, nrow = ncol(resp))
+      Q[grepl("s_c", names(resp)), ] <- 0.5
+      warning(
+      "No variable name for scoring factor was provided to polytomous analysis. ",
       "It is reconstructed from the item names in resp."
-    )
+      )
+  } else {
+      Q <- NULL
   }
-
 
   # IRT model
   if (irtmodel %in% c("1PL", "PCM2")) {
@@ -244,7 +245,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irtmodel, Q = NULL,
 #' Create ICC plots for IRT models.
 #'
 #' @param results list. Contains results from IRT analysis as returned by function
-#'                'irt_analysis'.
+#'                'irt_model'.
 #' @param name    character. Part of the filename for the directory of the plots,
 #'                following "ICCs_for_" (e.g., the kind of IRT analysis: "1PL").
 #' @param path    character. contains name of path for plots.
@@ -276,7 +277,7 @@ icc_plots <- function(results, name, path = here::here("Plots")) {
 #' Create Wright maps for IRT models.
 #'
 #' @param results list. Contains results from IRT analysis as returned by function
-#'                'irt_analysis'.
+#'                'irt_model'.
 #' @param name    character. Part of the filename for the directory of the plots,
 #'                following "ICCs_for_" (e.g., the kind of IRT analysis: "1PL").
 #' @param path    character. contains name of path for plots.
@@ -364,7 +365,7 @@ irt_summary <- function(resp, vars, results, position, disc = NULL,
                 by.x = "item", by.y = "item")
 
   # percentage correct
-  pars$pc <- ifelse(vars_$dich == 1, colMeans(resp[, vars_$item], na.rm = TRUE) * 100, NA)
+  pars$pc <- round(ifelse(vars_$dich, colMeans(resp[, vars_$item], na.rm = TRUE) * 100, NA), 0)
 
   # number of valid responses
   pars$N <- colSums(!is.na(resp))
@@ -406,7 +407,7 @@ irt_summary <- function(resp, vars, results, position, disc = NULL,
     colnames(pars) <- c("Number", "Item", "Pos","N", "% correct",
                         "xsi", "SE", "WMNSQ", "t", "rit", "aQ3")
   }
-  pars[, -c(1:4)] <- format(round(pars[, -c(1:4)], digits), nsmall = digits)
+  pars[, -c(1:5)] <- format(round(pars[, -c(1:5)], digits), nsmall = digits)
 
   # Save table as Excel sheet
   if (!is.null(filename)) {
@@ -461,7 +462,7 @@ steps_analysis <- function(results, path = here::here("Tables"), filename = NULL
   for (i in seq_len(nrow(step))) {
     steps[step$item[i], step$step[i]] <- paste0(format(step$xsi[i], nsmall = digits), " (",
                                                 format(step$se.xsi[i]), nsmall = digits, ")")
-     pars[step$item[i], step$step[i]] <- step$xsi[i]
+    pars[step$item[i], step$step[i]] <- step$xsi[i]
   }
 
   # sum 0 constraint for last step

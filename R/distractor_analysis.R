@@ -91,7 +91,7 @@ distractor_analysis <- function(resp, vars, items, valid = NULL) {
 #'
 #' @export
 
-summary_distractor_analysis <- function(distractors, print = TRUE,
+distractor_summary <- function(distractors, print = TRUE,
                                         save_at = NULL, overwrite = FALSE) {
     # data.frames containing information for distractors and correct responses,
     # respectively
