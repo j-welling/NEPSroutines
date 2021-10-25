@@ -68,6 +68,8 @@ indicating (in)valid cases.}
 
 \item{warn}{boolean whether to print a warning if NAs were found in resp}
 
+\item{overwrite}{boolean; indicates whether to overwrite existing file when saving table.}
+
 \item{return_table}{boolean. indicates whether to return table.}
 }
 \description{

@@ -12,9 +12,10 @@ dif_all(
   valid = NULL,
   scoring = NULL,
   path_table = "Tables",
+  overwrite_table = FALSE,
   print_table = FALSE,
-  return_results = TRUE,
   verbose = FALSE,
+  return_results = TRUE,
   ...
 )
 }
@@ -44,11 +45,13 @@ can be NULL for Rasch model}
 summaries are stored on the hard drive. Please note that the
 path is relative to the current working path set by here::i_am()}
 
+\item{overwrite_table}{boolean; indicates whether to overwrite existing file when saving table.}
+
 \item{print_table}{logical indicating whether summary is printed to the console}
 
-\item{return_results}{boolean. indicates whether to return results.}
-
 \item{verbose}{logical; should progress be printed to console?}
+
+\item{return_results}{boolean. indicates whether to return results.}
 
 \item{...}{additional arguments to be passed to tam.mml}
 }

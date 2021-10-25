@@ -9,6 +9,7 @@ steps_analysis(
   path = here::here("Tables"),
   filename = NULL,
   digits = 2,
+  overwrite = FALSE,
   return_table = TRUE
 )
 }
@@ -22,6 +23,8 @@ steps_analysis(
 the table will not be saved.}
 
 \item{digits}{integer; how many digits after rounding}
+
+\item{overwrite}{boolean; indicates whether to overwrite existing file when saving table.}
 
 \item{return_table}{logical; whether resulting table should be returned}
 }

@@ -4,7 +4,7 @@
 \alias{summary_dif}
 \title{Summary for DIF analysis}
 \usage{
-summary_dif(diflist, print = TRUE, save_at = NULL)
+summary_dif(diflist, print = TRUE, save_at = NULL, overwrite = FALSE)
 }
 \arguments{
 \item{diflist}{list with main and dif model as returned by dif_analysis()}
@@ -15,6 +15,8 @@ summary_dif(diflist, print = TRUE, save_at = NULL)
 summaries are stored on the hard drive. Please note that the
 path is relative to the current working path set by here::i_am(). Defaults
 to NULL (not stored)}
+
+\item{overwrite}{boolean; indicates whether to overwrite existing file when saving table.}
 }
 \value{
 list of information criteria, dif estimates and main effects in

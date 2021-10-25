@@ -11,7 +11,6 @@ irt_all(
   position,
   valid = NULL,
   irt_type,
-  position = NULL,
   Q = NULL,
   icc_plots = FALSE,
   wright_map = FALSE,
@@ -21,8 +20,9 @@ irt_all(
   path_tables = here::here("Tables"),
   name_data = NULL,
   path_data = here::here("Data"),
-  return_results = TRUE,
-  digits = 2
+  overwrite_table = FALSE,
+  digits = 2,
+  return_results = TRUE
 )
 }
 \arguments{
@@ -46,8 +46,6 @@ indicating (in)valid cases.}
 
 \item{irt_type}{character string; either "dich" for dichotomous analysis
 or "poly" for polytomous analysis.}
-
-\item{position}{character string. contains name of position variable.}
 
 \item{Q}{matrix with one column and ncol(resp) rows. Binary items are
 scored with 1, polytomous items are scored with 0.5.
@@ -73,9 +71,11 @@ if left empty, data will not be saved.}
 
 \item{path_data}{character. contains name of path for data.}
 
-\item{return_results}{boolean. indicates whether to return results.}
+\item{overwrite_table}{boolean; indicates whether to overwrite existing file when saving table.}
 
 \item{digits}{number of decimals for rounding}
+
+\item{return_results}{boolean. indicates whether to return results.}
 }
 \description{
 Perform 1PL and 2PL analyses for binary or PCM and GPCM analyses for

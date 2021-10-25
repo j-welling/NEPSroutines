@@ -4,7 +4,7 @@
 \alias{build_dif_tables}
 \title{Combine individual DIF results}
 \usage{
-build_dif_tables(dif_summaries, save_at)
+build_dif_tables(dif_summaries, save_at, overwrite = FALSE)
 }
 \arguments{
 \item{dif_summaries}{named list of summary_dif() return objects; the list
@@ -13,6 +13,8 @@ elements must be named after their DIF variable}
 \item{save_at}{character string; indicates the folder location where the
 summaries are stored on the hard drive. Please note that the
 path is relative to the current working path set by here::i_am()}
+
+\item{overwrite}{boolean; indicates whether to overwrite existing file when saving table.}
 }
 \description{
 Combine the individual DIF analysis results to excel tables that can be

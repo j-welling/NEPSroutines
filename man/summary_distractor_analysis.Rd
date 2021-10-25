@@ -4,7 +4,12 @@
 \alias{summary_distractor_analysis}
 \title{Summary of distractor analysis}
 \usage{
-summary_distractor_analysis(distractors, print = TRUE, save_at = NULL)
+summary_distractor_analysis(
+  distractors,
+  print = TRUE,
+  save_at = NULL,
+  overwrite = FALSE
+)
 }
 \arguments{
 \item{distractors}{return object of distractor_analysis() function (list of
@@ -22,6 +27,8 @@ table for the distractors and one table for the correct responses is
 saved as an excel file with one sheet per table). Please note that the
 path is relative to the current working path set by here::i_am(). Defaults
 to NULL (not stored)}
+
+\item{overwrite}{boolean; indicates whether to overwrite existing file when saving table.}
 }
 \value{
 list of data frames

@@ -18,6 +18,6 @@ sociodemographic and design variables}
 data.frame like resp, but without user-defined mvs
 }
 \description{
-Testing for differential item functioning for binary and polytomous data.
-Main effects and DIF effects models are estimated.
+User defined missing values (usually coded as negative numbers) must be
+converted to NAs so that they do not break the IRT analysis
 }

@@ -11,8 +11,7 @@ dif_analysis(
   facets,
   scoring = NULL,
   valid = NULL,
-  verbose = FALSE,
-  ...
+  verbose = FALSE
 )
 }
 \arguments{
@@ -34,12 +33,10 @@ indicates which items to use for analysis.}
 \item{scoring}{numeric vector; scoring factor to be applied to loading matrix;
 can be NULL for Rasch model}
 
-\item{valid}{character string. defines name of boolean variable in dat,
+\item{valid}{character string. defines name of boolean variable in data,
 indicating (in)valid cases.}
 
 \item{verbose}{logical; should progress be printed to console?}
-
-\item{...}{additional arguments to be passed to tam.mml}
 }
 \value{
 a list of:

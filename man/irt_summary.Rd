@@ -14,6 +14,7 @@ irt_summary(
   filename = NULL,
   valid = NULL,
   digits = 2,
+  overwrite = FALSE,
   return_table = TRUE
 )
 }
@@ -47,6 +48,8 @@ the table will not be saved.}
 indicating (in)valid cases.}
 
 \item{digits}{integer; how many digits after rounding}
+
+\item{overwrite}{boolean; indicates whether to overwrite existing file when saving table.}
 
 \item{return_table}{logical; whether resulting table should be returned}
 }

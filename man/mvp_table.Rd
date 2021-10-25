@@ -14,6 +14,7 @@ mvp_table(
     -21),
   filename = NULL,
   path = here::here("Tables"),
+  overwrite = FALSE,
   return_table = FALSE
 )
 }
@@ -37,6 +38,8 @@ values that shall be analyzed in the plot}
 if NULL, no file will be saved.}
 
 \item{path}{folder path for plots}
+
+\item{overwrite}{boolean; indicates whether to overwrite existing file when saving table.}
 
 \item{return_table}{boolean. indicates whether to return table.}
 }

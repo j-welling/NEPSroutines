@@ -16,7 +16,7 @@ mv_person(
   path_data = here::here("Data"),
   return_table = TRUE,
   name_table = NULL,
-  overwrite = FALSE,
+  overwrite_table = FALSE,
   path_table = here::here("Tables"),
   plots = FALSE,
   name_plots = "Missing_responses_by_person",
@@ -60,6 +60,8 @@ if NULL, no file will be saved.}
 
 \item{name_table}{string with name of table file that shall be saved (excluding type of file);
 if NULL, no file will be saved.}
+
+\item{overwrite_table}{boolean; indicates whether to overwrite existing file when saving table.}
 
 \item{path_table}{folder path for file if it shall be saved}
 

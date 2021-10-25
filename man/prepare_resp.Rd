@@ -4,13 +4,22 @@
 \alias{prepare_resp}
 \title{Prepare resp for analysis}
 \usage{
-prepare_resp(resp, valid = NULL, vars = NULL, items = NULL, convert = FALSE)
+prepare_resp(
+  resp,
+  valid = NULL,
+  without_valid = FALSE,
+  vars = NULL,
+  items = NULL,
+  convert = FALSE
+)
 }
 \arguments{
 \item{resp}{data.frame with responses}
 
 \item{valid}{character string. defines name of boolean variable in resp,
 indicating (in)valid cases.}
+
+\item{without_valid}{boolean; indicates whether not to check valid cases}
 
 \item{vars}{data.frame. contains information about all competence items
 and includes the following columns:
