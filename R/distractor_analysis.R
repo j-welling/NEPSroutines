@@ -137,7 +137,7 @@ summary_distractor_analysis <- function(distractors, print = TRUE,
 
     if (!is.null(save_at)) {
 
-        ckeck_folder(save_at)
+        check_folder(save_at)
 
         save(distractors, file = here::here(paste0(save_at, "/distractors.Rdata")))
         openxlsx::write.xlsx(
