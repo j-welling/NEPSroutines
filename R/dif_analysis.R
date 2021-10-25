@@ -102,8 +102,12 @@ dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
   facets <- resp[, facets, drop = FALSE]
 
   # Select only indicated items and convert mvs
+  # add default MVs message here once instead of every time, convert_mv is
+  # called
   resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE,
                        without_valid = TRUE)
+  message(names(facets),
+          ": User-defined missing values (-999 to -20) converted to NA.")
 
   # Prepare DIF analysis
   is_pcm <- any(apply(resp, 2, max, na.rm = TRUE) > 1)
@@ -119,7 +123,7 @@ dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
     resp <- resp[!mis, ]
     pid <- pid[!mis]
     warning("Missing values were found in the DIF variable. The corresponding",
-            " cases have been excluded from the analysis.")
+            " cases have been excluded from the analysis.\n")
   }
 
   # DIF analysis
@@ -127,7 +131,7 @@ dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
     if (is.null(scoring)) {
       scoring <- 0.5
       warning("Scoring vector was not provided. Scoring for all polytomous ",
-              "items was set to 0.5")
+              "items was set to 0.5.\n")
     }
     if (length(scoring) > 1 & ncol(resp) != length(scoring)) {
       stop("Number of items in resp and scoring vector are not the same.")
@@ -184,7 +188,7 @@ pcm_dif <- function(resp, facets, formulaA, scoring, valid = NULL, pid, ...) {
 
   # Select only valid cases and convert mvs
   if (!is.null(valid) && valid %in% names(resp)) {
-    resp <- only_valid(resp, valid = valid) %>% convert_mv()
+    resp <- convert_mv(resp = only_valid(resp, valid = valid), mvs = -999:-20)
   } else {
     message("The response matrix is used as is. Please check yourself whether ",
             "all cases are valid or provide a variable within the response ",
@@ -242,10 +246,12 @@ summary_dif <- function(diflist, print = TRUE, save_at = NULL,
 
   if (print) {
     # information criteria table
-    message("Information criteria regarding the ", diflist$dif_var, " DIF analysis:")
+    message("Information criteria regarding the ", diflist$dif_var,
+            " DIF analysis:")
     print(res$gof)
     # main effects table
-    message("\nMain effects of DIF and main effects model for ", diflist$dif_var, ":")
+    message("\nMain effects of DIF and main effects model for ",
+            diflist$dif_var, ":")
     print(res$mne)
     # problematic dif values (significant p-value, larger than 0.5 logits)
     message("\nItems exhibiting problematic DIF for ", diflist$dif_var,

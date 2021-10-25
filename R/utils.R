@@ -58,7 +58,7 @@ prepare_resp <- function(resp, valid = NULL, without_valid = FALSE,
                 "are kept.")
     }
 
-    if (convert) resp <- convert_mv(resp)
+    if (convert) resp <- convert_mv(resp = resp, mvs = -999:-20)
 
     return(resp)
 }
