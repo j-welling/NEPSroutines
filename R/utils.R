@@ -12,7 +12,8 @@ only_valid <- function(resp, valid = NULL) {
     if (!is.null(valid)) {
         resp <- resp[resp[[valid]], ]
     } else {
-        warning("No variable with valid cases provided. All cases are used for analysis.")
+        warning("No variable with valid cases provided. All cases are used ",
+                "for analysis.")
     }
 
     return(resp)
@@ -43,7 +44,8 @@ prepare_resp <- function(resp, valid = NULL, without_valid = FALSE,
 
     if (!is.null(items)) {
         if (is.null(vars)) {
-            stop("To create dataframe (resp) with only the indicated items please also provide vars.")
+            stop("To create dataframe (resp) with only the indicated items ",
+                 "please also provide vars.")
         } else {
             if (items %in% colnames(vars)) {
               resp <- resp[ , vars$items[vars[[items]]]]
@@ -52,7 +54,8 @@ prepare_resp <- function(resp, valid = NULL, without_valid = FALSE,
             }
         }
     } else {
-        warning("No variable provided indicating the items to keep. All items are kept.")
+        warning("No variable provided indicating the items to keep. All items ",
+                "are kept.")
     }
 
     if (convert) resp <- convert_mv(resp)
@@ -155,7 +158,7 @@ convert_mv <- function(resp, variables = NULL, mvs = NULL) {
     if (is.null(mvs)) {
         mvs <- -999:-1
         warning("No user defined missing values provided. Default of ",
-                "'-999 to -1' is used.")
+                "'-999 to -1' is used.\n")
     }
 
     if (is.null(variables)) variables <- colnames(resp)
