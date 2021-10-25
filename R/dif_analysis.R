@@ -9,7 +9,8 @@
 #'   column with the DIF variable.
 #' @param vars data.frame with all variables as rows with at least following columns:
 #'   items: contains all item names (both scored and unscored)
-#'   scored: logical or binary integer, identifies all scored items
+#'   further custom-named columns indicating the items to select and the item
+#'   scoring via logicals
 #' @param items character. contains name of variable (boolean) in vars that
 #'   indicates which items to use for analysis. If some of the \code{dif_vars}
 #'   come with a different set of analysis items, this argument becomes a
@@ -19,8 +20,8 @@
 #'   (e.g., "gender")
 #' @param valid character string. defines name of boolean variable in dat,
 #'   indicating (in)valid cases.
-#' @param scoring numeric vector; scoring factor to be applied to loading matrix;
-#'   can be NULL for Rasch model
+#' @param scoring character string; refers to the scoring variable in vars. 
+#'   Defaults to "scoring".
 #' @param path_table character string; indicates the folder location where the
 #'   summaries are stored on the hard drive. Please note that the
 #'   path is relative to the current working path set by here::i_am()
@@ -35,7 +36,7 @@
 #'   dmod: DIF effects model
 #' @export
 
-dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = NULL,
+dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = "scoring",
                     path_table = "Tables", overwrite_table = FALSE,
                     print_table = FALSE, verbose = FALSE,
                     return_results = TRUE, ...) {
@@ -83,9 +84,12 @@ dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = NULL,
 #'   column with the DIF variable.
 #' @param vars data.frame with all variables as rows with at least following columns:
 #'   items: contains all item names (both scored and unscored)
-#'   scored: logical or binary integer, identifies all scored items
+#'   further custom-named columns indicating the items to select and the item
+#'   scoring via logicals
 #' @param items character. contains name of variable (boolean) in vars that
 #'   indicates which items to use for analysis.
+#' @param scoring character string; refers to the scoring variable in vars. 
+#'   Defaults to "scoring".
 #' @param facets character string signifying the variable to be tested for DIF
 #'   (e.g., "gender")
 #' @param scoring numeric vector; scoring factor to be applied to loading matrix;
@@ -100,7 +104,7 @@ dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = NULL,
 #' @importFrom stats as.formula
 #' @export
 
-dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
+dif_analysis <- function(resp, vars, items, facets, scoring = "scoring",
                          valid = NULL, verbose = FALSE) {
 
   # Select only valid cases
@@ -138,21 +142,13 @@ dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
 
   # DIF analysis
   if (is_pcm) {
-    # if (is.null(scoring)) {
-    #   scoring <- 0.5
-    #   warning("Scoring vector was not provided. Scoring for all polytomous ",
-    #           "items was set to 0.5.\n")
-    # }
-    # if (length(scoring) > 1 & ncol(resp) != length(scoring)) {
-    #   stop("Number of items in resp and scoring vector are not the same.")
-    # }
     mmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
-      vars = vars, select = items, verbose = verbose
+      vars = vars, select = items, scoring = scoring, verbose = verbose
     )
     dmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_dmod, pid = pid,
-      vars = vars, select = items, verbose = verbose
+      vars = vars, select = items, scoring = scoring, verbose = verbose
     )
   } else {
     Q <- as.matrix(vars$scoring[vars[[items]]])
@@ -187,6 +183,8 @@ dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
 #'   names for the current estimation
 #' @param select character. contains name of variable (boolean) in vars that
 #'   indicates which items to use for analysis.
+#' @param scoring character string; refers to the scoring variable in vars. 
+#'   Defaults to "scoring".
 #' @param verbose logical; should progress be printed to console?
 #' @param valid character string. defines name of boolean variable in dat,
 #'   indicating (in)valid cases.
@@ -195,7 +193,7 @@ dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
 #' @return a tam.mml model
 #' @noRd
 
-pcm_dif <- function(resp, facets, formulaA, vars, select, valid = NULL, pid,
+pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring", valid = NULL, pid,
                     verbose) {
 
   # Select only valid cases and convert mvs
@@ -215,7 +213,7 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, valid = NULL, pid,
 
   # 0.5 scoring for PCM
   B[vars$items[vars[[select]]], , 1] <-
-    B[vars$items[vars[[select]]], , 1] * vars$scoring[vars[[select]]]
+    B[vars$items[vars[[select]]], , 1] * vars[[scoring]][vars[[select]]]
 
   TAM::tam.mml.mfr(formulaA = formulaA, facets = facets, B = B, pid = pid,
                    irtmodel = "PCM2", resp = resp, verbose = verbose)
