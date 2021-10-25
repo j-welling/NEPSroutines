@@ -11,7 +11,10 @@
 #'   items: contains all item names (both scored and unscored)
 #'   scored: logical or binary integer, identifies all scored items
 #' @param items character. contains name of variable (boolean) in vars that
-#'   indicates which items to use for analysis.
+#'   indicates which items to use for analysis. If some of the \code{dif_vars}
+#'   come with a different set of analysis items, this argument becomes a
+#'   vector of \code{length(dif_vars)} containing the respective selection
+#'   variables in vars
 #' @param dif_vars character vector. contains the variable names to be tested for DIF
 #'   (e.g., "gender")
 #' @param valid character string. defines name of boolean variable in dat,
@@ -40,9 +43,17 @@ dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = NULL,
   dif_models <- list()
   dif_summaries <- list()
 
+  if (length(items) > 1 & length(items) != length(dif_vars)) {
+    stop("Please check 'items' and 'dif_vars'. At least one of them does ",
+	     "not match the intended analysis.")
+  }
+  if (length(items) == 1) {
+    items <- rep(items, length(dif_vars))
+  }
+
   for (i in seq_along(dif_vars)) {
 
-    dif_models[[i]] <- dif_analysis(resp = resp, vars = vars, items = items,
+    dif_models[[i]] <- dif_analysis(resp = resp, vars = vars, items = items[i],
                              facets = dif_vars[i], scoring = scoring,
                              valid = valid, verbose = verbose)
 
