@@ -54,7 +54,7 @@ dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = NULL,
   build_dif_tables(dif_summaries = dif_summaries, save_at = path_table,
                    overwrite = overwrite_table)
 
-  results <- list(dif_mdels = dif_models, dif_summaries = dif_summaries)
+  results <- list(dif_models = dif_models, dif_summaries = dif_summaries)
 
   if (return_results) return(results)
 }
@@ -82,7 +82,6 @@ dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = NULL,
 #' @param valid character string. defines name of boolean variable in data,
 #'   indicating (in)valid cases.
 #' @param verbose logical; should progress be printed to console?
-#' @param ... additional arguments to be passed to tam.mml
 #'
 #' @return a list of:
 #'   mmod: main effects model
@@ -91,7 +90,7 @@ dif_all <- function(resp, vars, items, dif_vars, valid = NULL, scoring = NULL,
 #' @export
 
 dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
-                         valid = NULL, verbose = FALSE, ...) {
+                         valid = NULL, verbose = FALSE) {
 
   # Select only valid cases
   resp <- only_valid(resp, valid = valid)
@@ -128,28 +127,24 @@ dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
 
   # DIF analysis
   if (is_pcm) {
-    if (is.null(scoring)) {
-      scoring <- 0.5
-      warning("Scoring vector was not provided. Scoring for all polytomous ",
-              "items was set to 0.5.\n")
-    }
-    if (length(scoring) > 1 & ncol(resp) != length(scoring)) {
-      stop("Number of items in resp and scoring vector are not the same.")
-    }
+    # if (is.null(scoring)) {
+    #   scoring <- 0.5
+    #   warning("Scoring vector was not provided. Scoring for all polytomous ",
+    #           "items was set to 0.5.\n")
+    # }
+    # if (length(scoring) > 1 & ncol(resp) != length(scoring)) {
+    #   stop("Number of items in resp and scoring vector are not the same.")
+    # }
     mmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
-      scoring = scoring, ...
+      vars = vars, select = items, verbose = verbose
     )
     dmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_dmod, pid = pid,
-      scoring = scoring, ...
+      vars = vars, select = items, verbose = verbose
     )
   } else {
-    if (is.null(scoring)) {
-      Q <- matrix(1, ncol = 1, nrow = ncol(resp))
-    } else {
-      Q <- as.matrix(scoring)
-    }
+    Q <- as.matrix(vars$scoring[vars[[items]]])
     dmod <- TAM::tam.mml.mfr(resp,
       irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
       formulaA = formula_dmod, verbose = verbose
@@ -174,17 +169,23 @@ dif_analysis <- function(resp, vars, items, facets, scoring = NULL,
 #'   column is named after DIF variable (e.g., "gender"); must contain the same
 #'   persons in the same order as resp
 #' @param formulaA an R formula for the DIF analysis
-#' @param scoring numeric vector; scoring factor to be applied to loading matrix
+#' @param vars data.frame with all variables as rows with at least following columns:
+#'   items: contains all item names (both scored and unscored)
+#'   scoring: numeric; scoring of IRT items;
+#'   ???: logical, can be named arbitrarily and needs to contain the variable
+#'   names for the current estimation
+#' @param select character. contains name of variable (boolean) in vars that
+#'   indicates which items to use for analysis.
 #' @param verbose logical; should progress be printed to console?
 #' @param valid character string. defines name of boolean variable in dat,
 #'   indicating (in)valid cases.
 #' @param pid vector with person identifiers
-#' @param ... additional arguments to be passed to tam.mml
 #'
 #' @return a tam.mml model
 #' @noRd
 
-pcm_dif <- function(resp, facets, formulaA, scoring, valid = NULL, pid, ...) {
+pcm_dif <- function(resp, facets, formulaA, vars, select, valid = NULL, pid,
+                    verbose) {
 
   # Select only valid cases and convert mvs
   if (!is.null(valid) && valid %in% names(resp)) {
@@ -198,23 +199,16 @@ pcm_dif <- function(resp, facets, formulaA, scoring, valid = NULL, pid, ...) {
   # Create ID and facets variable
   check_pid(pid)
 
-  # design matrix for model
-  des <- TAM::designMatrices.mfr2(
-    resp = resp, facets = facets,
-    formulaA = formulaA
-  )
-  resp2 <- des$gresp$gresp.noStep
-  A <- des$A$A.3d[, , -des$xsi.elim[, 2]]
+  # get design matrix for model
+  B <- TAM::designMatrices(modeltype = "PCM", resp = resp)$B
 
   # 0.5 scoring for PCM
-  B <- des$B$B.3d
-  # identify polytomous items
-  v <- sub(paste0("-", names(facets)[1], ".+$"), "", rownames(B))
-  s <- v %in% names(resp)
-  B[s, , 1] <- B[s, , 1] * scoring
+  B[vars$items[vars[[select]]], , 1] <-
+    B[vars$items[vars[[select]]], , 1] * vars$scoring[vars[[select]]]
 
-  # fit model
-  TAM::tam.mml(resp = resp2, A = A, B = B, pid = pid, ...)
+  TAM::tam.mml.mfr(formulaA = formulaA, facets = facets, B = B, pid = pid,
+                   irtmodel = "PCM2", resp = resp, verbose = verbose)
+
 }
 
 
