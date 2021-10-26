@@ -58,7 +58,7 @@ dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, scoring = "s
                              facets = dif_vars[i], scoring = scoring,
                              valid = valid, verbose = verbose)
 
-    dif_summaries[[i]] <- summary_dif(dif_models[[i]], print = print_table,
+    dif_summaries[[i]] <- dif_summary(dif_models[[i]], print = print_table,
                                       overwrite = overwrite_table)
   }
   names(dif_summaries) <- names(dif_models) <- dif_vars
@@ -235,7 +235,7 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring", v
 #'   data frames for dif analysis
 #' @export
 
-summary_dif <- function(diflist, print = TRUE, save_at = NULL,
+dif_summary <- function(diflist, print = TRUE, save_at = NULL,
                         overwrite = FALSE) {
   # information criteria for DIF and main model
   # main effects of main and DIF model + standardized
@@ -410,7 +410,7 @@ difsum <- function(obj, facet, group = 1, group2 = NULL) {
 #' Combine the individual DIF analysis results to excel tables that can be
 #' used for the technical reports
 #'
-#' @param dif_summaries named list of summary_dif() return objects; the list
+#' @param dif_summaries named list of dif_summary() return objects; the list
 #' elements must be named after their DIF variable
 #' @param save_at character string; indicates the folder location where the
 #'   summaries are stored on the hard drive. Please note that the
