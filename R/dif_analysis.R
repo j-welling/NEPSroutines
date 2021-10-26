@@ -246,48 +246,14 @@ dif_summary <- function(diflist, print = TRUE, save_at = NULL,
   group <- as.integer(group)
   res <- difsum(obj = diflist, facet = diflist$dif_var, group = group,
                 group2 = NULL)
+  res$compared_against <- group
 
   if (print) {
-    # information criteria table
-    message("Information criteria regarding the ", diflist$dif_var,
-            " DIF analysis:")
-    print(res$gof)
-    # main effects table
-    message("\nMain effects of DIF and main effects model for ",
-            diflist$dif_var, ":")
-    print(res$mne)
-    # problematic dif values (significant p-value, larger than 0.5 logits)
-    message("\nItems exhibiting problematic DIF for ", diflist$dif_var,
-            " (|xsi| >= 0.5 and p < 0.05):")
-    print(res$est[abs(res$est$xsi) >= 0.5 & res$est$p < 0.05, ])
+    print_dif_summary(diflist, res)
   }
 
   if (!is.null(save_at)) {
-
-    ckeck_folder(save_at)
-
-    save(diflist, file = here::here(paste0(save_at, "/dif_",
-                                           diflist$dif_var, ".Rdata")))
-    save(res, file = here::here(paste0(save_at, "/dif_",
-                                           diflist$dif_var, "_summary.Rdata")))
-    openxlsx::write.xlsx(
-      res$gof,
-      file = here::here(paste0(save_at, "/dif_",
-                               diflist$dif_var, "_goodness_of_fit.xlsx")),
-      showNA = FALSE, overwrite = overwrite
-    )
-    openxlsx::write.xlsx(
-      res$est,
-      file = here::here(paste0(save_at, "/dif_",
-                               diflist$dif_var, "_dif_estimates.xlsx")),
-      showNA = FALSE, overwrite = overwrite
-    )
-    openxlsx::write.xlsx(
-      res$mne,
-      file = here::here(paste0(save_at, "/dif_",
-                               diflist$dif_var, "_main_effects.xlsx")),
-      showNA = FALSE, overwrite = overwrite
-    )
+    save_dif_summary(save_at, diflist, res, overwrite)
   }
 
   return(res)
@@ -347,7 +313,7 @@ difsum <- function(obj, facet, group = 1, group2 = NULL) {
     rownames(est2) <- NULL
   }
 
-  # difference in item paramters
+  # difference in item parameters
   if (is.null(group2)) {
     est$xsi <- 2 * est$xsi
     est$se.xsi2 <- est$se.xsi
@@ -463,6 +429,48 @@ build_dif_tables <- function(dif_summaries, save_at, overwrite = FALSE) {
   openxlsx::write.xlsx(
     est,
     file = here::here(paste0(save_at, "/dif_all_estimates.xlsx")),
+    showNA = FALSE, overwrite = overwrite
+  )
+}
+
+print_dif_summary <- function(diflist, res) {
+  # information criteria table
+  message("Information criteria regarding the ", diflist$dif_var,
+          " DIF analysis:")
+  print(res$gof)
+  # main effects table
+  message("\nMain effects of DIF and main effects model for ",
+          diflist$dif_var, ":")
+  print(res$mne)
+  # problematic dif values (significant p-value, larger than 0.5 logits)
+  message("\nItems exhibiting problematic DIF for ", diflist$dif_var,
+          " (|xsi| >= 0.5 and p < 0.05):")
+  print(res$est[abs(res$est$xsi) >= 0.5 & res$est$p < 0.05, ])
+}
+
+save_dif_summary <- function(save_at, diflist, res, overwrite) {
+  ckeck_folder(save_at)
+
+  save(diflist, file = here::here(paste0(save_at, "/dif_",
+                                         diflist$dif_var, ".Rdata")))
+  save(res, file = here::here(paste0(save_at, "/dif_",
+                                     diflist$dif_var, "_summary.Rdata")))
+  openxlsx::write.xlsx(
+    res$gof,
+    file = here::here(paste0(save_at, "/dif_",
+                             diflist$dif_var, "_goodness_of_fit.xlsx")),
+    showNA = FALSE, overwrite = overwrite
+  )
+  openxlsx::write.xlsx(
+    res$est,
+    file = here::here(paste0(save_at, "/dif_",
+                             diflist$dif_var, "_dif_estimates.xlsx")),
+    showNA = FALSE, overwrite = overwrite
+  )
+  openxlsx::write.xlsx(
+    res$mne,
+    file = here::here(paste0(save_at, "/dif_",
+                             diflist$dif_var, "_main_effects.xlsx")),
     showNA = FALSE, overwrite = overwrite
   )
 }
