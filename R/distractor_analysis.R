@@ -1,12 +1,17 @@
 #' Distractor analysis
 #'
-#' @param resp      data.frame with all respondents as rows and all variables as columns,
-#'                  needs to contain at least all competence variables
-#' @param vars      data.frame with all variables as rows with at least following columns:
+#' Checks how the distractors in multiple choice items functioned.
+#'
+#' @param resp      data.frame with all respondents as rows and all variables as
+#'                  columns, needs to contain at least all competence variables
+#' @param vars      data.frame with all variables as rows with at least
+#'                  following columns:
 #'                  items: contains all item names (both scored and unscored)
-#'                  scored: logical or binary integer, identifies all scored items
-#'                  type: characer vector, identifies type of each item (e.g. "MC")
-#'                  correct_response: integer, identifies correct response for each item
+#'                  raw: unscored items (before binary and pc scoring)
+#'                  type: characer vector, identifies type of each item (e.g.
+#'                  "MC")
+#'                  correct_response: integer, identifies correct response for
+#'                  each item
 #' @param items     character. contains name of variable (boolean) in vars that
 #'                    indicates which items to use for analysis.
 #' @param valid     character string. defines name of boolean variable in dat,
@@ -46,7 +51,7 @@ distractor_analysis <- function(resp, vars, items, valid = NULL) {
         names(dis[[item]])[1] <- item
         dis[[item]]$rit <- NA
 
-        cscore <- resp$score - resp[, paste0(item, "_c")] / length(scored) # corrected total score
+        cscore <- resp$score - resp[, paste0(item, "_c")] / sum(vars$raw)#length(scored) # corrected total score
 
         # Correlation between each response option and corrected total score
         for (s in seq_len(nrow(dis[[item]]))) {
