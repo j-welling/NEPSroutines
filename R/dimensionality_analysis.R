@@ -123,19 +123,23 @@ dimension_summary <- function(dimensionality, save_at = NULL,
     dimsum[["Goodness Of fit"]] <- gof
 
     if (!is.null(save_at)) {
-
-        check_folder(save_at)
-
-        save(dimensionality,
-             file = here::here(paste0(save_at, "/dimensionality.Rdata")))
-        save(gof,
-             file = here::here(paste0(save_at, "/dimensionality_fit.Rdata")))
-        openxlsx::write.xlsx(
-            dimsum,
-            file = here::here(paste0(save_at, "/dimensionality_summary.xlsx")),
-            showNA = FALSE, overwrite = overwrite
-        )
+        save_dim_summary(save_at, dimensionality, gof, dimsum, overwrite)
     }
 
     return(dimsum)
+}
+
+
+save_dim_summary <- function(save_at, dimensionality, gof, dimsum, overwrite) {
+    check_folder(save_at)
+
+    save(dimensionality,
+         file = here::here(paste0(save_at, "/dimensionality.Rdata")))
+    save(gof,
+         file = here::here(paste0(save_at, "/dimensionality_fit.Rdata")))
+    openxlsx::write.xlsx(
+        dimsum,
+        file = here::here(paste0(save_at, "/dimensionality_summary.xlsx")),
+        showNA = FALSE, overwrite = overwrite
+    )
 }
