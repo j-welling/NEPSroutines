@@ -88,8 +88,6 @@ dimension_analysis <- function(resp, vars, items, scoring = "scoring",
 #' Summary of dimensionality analysis (saves summary in excel sheet)
 #'
 #' @param dimensionality list with results of the dimension_analysis function
-#' @param print logical indicating whether summary is printed to the console;
-#'   prints the information criteria for all multidimensional models
 #' @param save_at character string; indicates the folder location where the
 #'   summaries are stored on the hard drive (first, the dimensionality object is
 #'   saved unchanged as Rdata; second, the information criteria are saved as a
