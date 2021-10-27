@@ -15,7 +15,8 @@
 #'                    indicates the variable used for scoring. Defaults to
 #'                    "scoring"
 #' @param dim       character vector. contains names of all dimension variables
-#'                    that shall be analyzed
+#'                    that shall be analyzed (NOTE: the dimensions must be
+#'                    coded as integers from 1 to the number of dimensions!)
 #' @param valid     character string. defines name of boolean variable in dat,
 #'                    indicating (in)valid cases.
 #' @param irtmodel  the choice of irtmodel as passed to the TAM function
@@ -51,7 +52,7 @@ dimension_analysis <- function(resp, vars, items, scoring = "scoring",
     # Create Q matrix
     Q <- as.matrix(vars[[scoring]][vars[[items]]])
 
-    # Compute dimensional model
+    # Compute reference model
     dimensionality$uni <- TAM::tam.mml(
         resp = resp, pid = pid, Q = Q, irtmodel = irtmodel, verbose = verbose,
         control = list(maxiter = maxiter, snodes = snodes)
