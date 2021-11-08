@@ -54,7 +54,6 @@ desc_con <- function(dat, desc, valid = NULL, digits = 2) {
 #' @param valid   character string. defines name of boolean variable in dat,
 #' indicating (in)valid cases.
 #' @param digits  number of decimals for rounding percentages
-#' @param show_attributes boolean; indicates whether to show attributes.
 #' @param show_frequency_abs boolean; indicates whether to show frequency in
 #' absolute numbers.
 #' @param show_frequency_perc boolean; indicates whether to show frequency in

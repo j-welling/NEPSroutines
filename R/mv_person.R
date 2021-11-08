@@ -126,7 +126,8 @@ mvp_analysis <- function(resp, vars, items = 'final', valid = NULL, grouping = N
 
   # Prepare data
   resp <- only_valid(resp, valid = valid)
-  resp_c <- prepare_resp(resp, vars = vars, items = items, without_valid = TRUE, convert = FALSE)
+  resp_c <- prepare_resp(resp, vars = vars, items = items, without_valid = TRUE,
+                         convert = FALSE)
 
   # Calculate mvs per person
   if (is.null(grouping)) {
@@ -199,7 +200,8 @@ mvp_table <- function(mv_p = NULL, grouping = NULL,
   # Percentage of missing values per item
   if (is.null(mv_p)) {
     if (!is.null(resp) & !is.null(vars)) {
-      mv_p <- mv_analysis(resp, vars = vars, valid = valid, mvs = mvs, grouping = grouping)
+      mv_p <- mvp_analysis(resp, vars = vars, valid = valid, mvs = mvs,
+                           grouping = grouping)
     } else {
       stop("Please provide mv_p or resp and vars.")
     }
@@ -296,7 +298,8 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
     if (is.null(resp) | is.null(mvs)) {
       stop("Please provide mv_p or resp!")
     } else {
-      mv_p <- mv_analysis(resp, vars = vars, valid = valid, grouping = grouping, mvs = mvs)
+      mv_p <- mvp_analysis(resp, vars = vars, valid = valid, grouping = grouping,
+                           mvs = mvs)
     }
   }
 

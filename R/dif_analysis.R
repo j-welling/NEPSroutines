@@ -449,7 +449,7 @@ print_dif_summary <- function(diflist, res) {
 }
 
 save_dif_summary <- function(save_at, diflist, res, overwrite) {
-  ckeck_folder(save_at)
+  check_folder(save_at)
 
   save(diflist, file = here::here(paste0(save_at, "/dif_",
                                          diflist$dif_var, ".Rdata")))

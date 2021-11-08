@@ -4,18 +4,10 @@
 \alias{dimension_summary}
 \title{Summary of dimensionality analysis (saves summary in excel sheet)}
 \usage{
-dimension_summary(
-  dimensionality,
-  print = TRUE,
-  save_at = NULL,
-  overwrite = FALSE
-)
+dimension_summary(dimensionality, save_at = NULL, overwrite = FALSE)
 }
 \arguments{
 \item{dimensionality}{list with results of the dimension_analysis function}
-
-\item{print}{logical indicating whether summary is printed to the console;
-prints the information criteria for all multidimensional models}
 
 \item{save_at}{character string; indicates the folder location where the
 summaries are stored on the hard drive (first, the dimensionality object is
@@ -24,7 +16,8 @@ data.frame as Rdata; third, the information criteria are saved in an excel
 file). Please note that the path is relative to the current working path
 set by here::i_am(). Defaults to NULL (not stored)}
 
-\item{overwrite}{boolean; indicates whether to overwrite existing file when saving table.}
+\item{overwrite}{boolean; indicates whether to overwrite existing file when
+saving table.}
 }
 \value{
 data.frame of summary results

@@ -100,7 +100,7 @@ dimension_analysis <- function(resp, vars, items, scoring = "scoring",
 #'
 #' @return data.frame of summary results
 #'
-#' @importFrom stats logLik AIC BIC
+#' @importFrom stats logLik AIC BIC cov2cor
 #' @export
 #'
 

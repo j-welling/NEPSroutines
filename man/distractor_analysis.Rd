@@ -7,14 +7,17 @@
 distractor_analysis(resp, vars, items, valid = NULL)
 }
 \arguments{
-\item{resp}{data.frame with all respondents as rows and all variables as columns,
-needs to contain at least all competence variables}
+\item{resp}{data.frame with all respondents as rows and all variables as
+columns, needs to contain at least all competence variables}
 
-\item{vars}{data.frame with all variables as rows with at least following columns:
+\item{vars}{data.frame with all variables as rows with at least
+following columns:
 items: contains all item names (both scored and unscored)
-scored: logical or binary integer, identifies all scored items
-type: characer vector, identifies type of each item (e.g. "MC")
-correct_response: integer, identifies correct response for each item}
+raw: unscored items (before binary and pc scoring)
+type: characer vector, identifies type of each item (e.g.
+"MC")
+correct_response: integer, identifies correct response for
+each item}
 
 \item{items}{character. contains name of variable (boolean) in vars that
 indicates which items to use for analysis.}
@@ -27,5 +30,5 @@ list of one data frame per item containing item-total correlations
   for each possible response; correct response is marked with an *
 }
 \description{
-Distractor analysis
+Checks how the distractors in multiple choice items functioned.
 }

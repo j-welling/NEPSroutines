@@ -8,7 +8,7 @@ icc_plots(results, name, path = here::here("Plots"))
 }
 \arguments{
 \item{results}{list. Contains results from IRT analysis as returned by function
-'irt_analysis'.}
+'irt_model'.}
 
 \item{name}{character. Part of the filename for the directory of the plots,
 following "ICCs_for_" (e.g., the kind of IRT analysis: "1PL").}

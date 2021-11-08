@@ -2,18 +2,26 @@
 % Please edit documentation in R/irt_analyses.R
 \name{irt_analysis}
 \alias{irt_analysis}
-\title{IRT analyses}
+\title{IRT analyses - all in one function}
 \usage{
 irt_analysis(
   resp,
   vars,
   items,
+  position,
   valid = NULL,
-  irtmodel,
-  Q = NULL,
-  path = here::here("Data"),
-  filename = NULL,
-  verbose = FALSE,
+  irt_type,
+  scoring = NULL,
+  icc_plots = FALSE,
+  wright_map = FALSE,
+  path_plots = here::here("Plots"),
+  name_table = NULL,
+  name_steps = NULL,
+  path_tables = here::here("Tables"),
+  name_data = NULL,
+  path_data = here::here("Data"),
+  overwrite_table = FALSE,
+  digits = 2,
   return_results = TRUE
 )
 }
@@ -31,37 +39,44 @@ and at least the following variables:
 \item{items}{character. contains name of variable (boolean) in vars that
 indicates which items to use for analysis.}
 
+\item{position}{character string. contains name of position variable.}
+
 \item{valid}{character string. defines name of boolean variable in resp,
 indicating (in)valid cases.}
 
-\item{irtmodel}{character. "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
-"GPCM" for GPCM analyses.}
+\item{irt_type}{character string; either "dich" for dichotomous analysis
+or "poly" for polytomous analysis.}
 
-\item{Q}{matrix with one column and ncol(resp) rows. Binary items are
-scored with 1, polytomous items are scored with 0.5.
-Divergent scoring decisions can be incorporated by this matrix
-(e.g., item 7 is scored with 0.75 by assigning 0.75 to the seventh row).}
+\item{scoring}{numeric vector; scoring factor to be applied to loading matrix;
+can be NULL for Rasch model; if NULL for PCM model,
+scoring matrix is reconstructed from item names.}
 
-\item{path}{folder path for data}
+\item{icc_plots}{boolean; indicates whether to create and save ICC plots.}
 
-\item{filename}{string with name of file that shall be saved (including file type).}
+\item{wright_map}{boolean; indicates whether to create and save Wright Map.}
 
-\item{verbose}{logical. If verbose == TRUE information about the estimation
-progress is printed to the console}
+\item{path_plots}{character. contains name of path for plots.}
+
+\item{name_table}{string with name of summary table file that shall be saved (including file type);
+if left empty, table will not be saved.}
+
+\item{name_steps}{string with name of steps table file that shall be saved (including file type);
+if left empty, table will not be saved; only available for partial credit models.}
+
+\item{path_tables}{character. contains name of path for tables.}
+
+\item{name_data}{string with name of data file that shall be saved (including file type);
+if left empty, data will not be saved.}
+
+\item{path_data}{character. contains name of path for data.}
+
+\item{overwrite_table}{boolean; indicates whether to overwrite existing file when saving table.}
+
+\item{digits}{number of decimals for rounding}
 
 \item{return_results}{boolean. indicates whether to return results.}
 }
-\value{
-(if return_results = TRUE) a list of:
-  mod: tam.mml; estimated item response model
-  fit: data.frame; item fit (WMNSQ) of the model
-  pars: data.frame; item difficulties and scoring parameters with respective standard errors
-  mfit: data.frame; (adjusted) Yen's Q3 statistics of the model
-  wle: data.frame; WLEs for the model
-  wle_rel: numeric; WLE reliability of the model
-  info_crit: data.frame with information criteria of the model
-}
 \description{
-Perform Rasch or 2PL analyses for binary or PCM or GPCM analyses for
-polytomous data.
+Perform 1PL and 2PL analyses for binary or PCM and GPCM analyses for
+polytomous data, generate summary and plots.
 }

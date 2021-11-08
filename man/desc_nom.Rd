@@ -30,8 +30,6 @@ absolute numbers.}
 
 \item{show_frequency_perc}{boolean; indicates whether to show frequency in
 relative numbers (percentage).}
-
-\item{show_attributes}{boolean; indicates whether to show attributes.}
 }
 \value{
 list with descriptives.

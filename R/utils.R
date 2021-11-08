@@ -32,6 +32,7 @@ only_valid <- function(resp, valid = NULL) {
 #'                  variable indicated by argument 'items'
 #' @param items   character. contains name of variable (boolean) in vars that
 #'                indicates which items to use for analysis.
+#' @param convert logical; convert custom missing values to NA
 #'
 #' @return data.frame as resp, but only with valid cases
 #'
@@ -100,6 +101,8 @@ check_pid <- function(pid) {
 #' @param resp    data.frame with responses
 #' @param vars    variables to check for valid values;
 #                 if NULL, all variables will be selected
+#' @param items   character. contains name of variable (boolean) in vars that
+#'                indicates which items to use for analysis.
 #' @param min.val minimum number of valid values;
 #'                if negative, set to the default of 3
 #' @param invalid vector of invalid values

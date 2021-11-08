@@ -2,16 +2,21 @@
 % Please edit documentation in R/dif_analysis.R
 \name{dif_analysis}
 \alias{dif_analysis}
-\title{DIF analyses}
+\title{DIF analyses - all in one function}
 \usage{
 dif_analysis(
   resp,
   vars,
   items,
-  facets,
-  scoring = NULL,
+  dif_vars,
   valid = NULL,
-  verbose = FALSE
+  scoring = "scoring",
+  path_table = "Tables",
+  overwrite_table = FALSE,
+  print_table = FALSE,
+  verbose = FALSE,
+  return_results = TRUE,
+  ...
 )
 }
 \arguments{
@@ -22,21 +27,37 @@ column with the DIF variable.}
 
 \item{vars}{data.frame with all variables as rows with at least following columns:
 items: contains all item names (both scored and unscored)
-scored: logical or binary integer, identifies all scored items}
+further custom-named columns indicating the items to select and the item
+scoring via logicals}
 
 \item{items}{character. contains name of variable (boolean) in vars that
-indicates which items to use for analysis.}
+indicates which items to use for analysis. If some of the \code{dif_vars}
+come with a different set of analysis items, this argument becomes a
+vector of \code{length(dif_vars)} containing the respective selection
+variables in vars}
 
-\item{facets}{character string signifying the variable to be tested for DIF
+\item{dif_vars}{character vector. contains the variable names to be tested for DIF
 (e.g., "gender")}
 
-\item{scoring}{numeric vector; scoring factor to be applied to loading matrix;
-can be NULL for Rasch model}
-
-\item{valid}{character string. defines name of boolean variable in data,
+\item{valid}{character string. defines name of boolean variable in dat,
 indicating (in)valid cases.}
 
+\item{scoring}{character string; refers to the scoring variable in vars.
+Defaults to "scoring".}
+
+\item{path_table}{character string; indicates the folder location where the
+summaries are stored on the hard drive. Please note that the
+path is relative to the current working path set by here::i_am()}
+
+\item{overwrite_table}{boolean; indicates whether to overwrite existing file when saving table.}
+
+\item{print_table}{logical indicating whether summary is printed to the console}
+
 \item{verbose}{logical; should progress be printed to console?}
+
+\item{return_results}{boolean. indicates whether to return results.}
+
+\item{...}{additional arguments to be passed to tam.mml}
 }
 \value{
 a list of:

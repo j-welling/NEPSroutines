@@ -11,6 +11,9 @@ min_val(resp, vars, items, min.val = NULL, invalid = NA, warn = TRUE)
 
 \item{vars}{variables to check for valid values;}
 
+\item{items}{character. contains name of variable (boolean) in vars that
+indicates which items to use for analysis.}
+
 \item{min.val}{minimum number of valid values;
 if negative, set to the default of 3}
 

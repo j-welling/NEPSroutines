@@ -8,6 +8,7 @@ dimension_analysis(
   resp,
   vars,
   items,
+  scoring = "scoring",
   dim = NULL,
   valid = NULL,
   irtmodel = "PCM2",
@@ -22,15 +23,22 @@ dimension_analysis(
   {0, 1, ... k-1} for polytomous responses with k categories
 (2) ID_t: column indicating ID of participants}
 
-\item{vars}{data.frame with all variables as rows with at least the following columns:
+\item{vars}{data.frame with all variables as rows with at least the
+following columns:
 items: contains name for each item (scored and unscored)
-poly: identifies all polytomous (?) items (logical)
-scored: identifies all scored items (logical)}
+and a column identifying item subsets for the analyses and
+one for the item scoring}
 
 \item{items}{character. contains name of variable (boolean) in vars that
 indicates which items to use for analysis.}
 
-\item{dim}{character vector. contains names of all dimension variables that shall be analyzed}
+\item{scoring}{character. Contains the name of the variable in vars that
+indicates the variable used for scoring. Defaults to
+"scoring"}
+
+\item{dim}{character vector. contains names of all dimension variables
+that shall be analyzed (NOTE: the dimensions must be
+coded as integers from 1 to the number of dimensions!)}
 
 \item{valid}{character string. defines name of boolean variable in dat,
 indicating (in)valid cases.}

@@ -28,6 +28,8 @@ and includes the following columns:
 
 \item{items}{character. contains name of variable (boolean) in vars that
 indicates which items to use for analysis.}
+
+\item{convert}{logical; convert custom missing values to NA}
 }
 \value{
 data.frame as resp, but only with valid cases

@@ -7,7 +7,7 @@
 build_dif_tables(dif_summaries, save_at, overwrite = FALSE)
 }
 \arguments{
-\item{dif_summaries}{named list of summary_dif() return objects; the list
+\item{dif_summaries}{named list of dif_summary() return objects; the list
 elements must be named after their DIF variable}
 
 \item{save_at}{character string; indicates the folder location where the
