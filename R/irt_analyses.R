@@ -177,11 +177,8 @@ irt_model <- function(resp, vars, items, valid = NULL, irtmodel, scoring = NULL,
   if (!is.null(scoring)) {
       Q = as.matrix(vars[[scoring]][vars[[items]]])
   } else if (irtmodel %in% c("GPCM", "PCM2")) {
-      Q <- matrix(1, ncol = 1, nrow = ncol(resp))
-      Q[grepl("s_c", names(resp)), ] <- 0.5
-      warning(
-      "No variable name for scoring factor was provided to polytomous analysis. ",
-      "It is reconstructed from the item names in resp."
+      stop(
+      "Please provide variable name for scoring factor for polytomous analysis.",
       )
   } else {
       Q <- NULL
