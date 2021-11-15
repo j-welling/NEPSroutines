@@ -33,6 +33,10 @@
 #' @param path_data character. contains name of path for data.
 #' @param overwrite_table boolean; indicates whether to overwrite existing file when saving table.
 #' @param digits    number of decimals for rounding
+#' @param print_results  boolean; indicates whether to print results  to console or html.
+# #' @param highlight  boolean; indicates whether to highlight problematic items
+# #' @param moderate_thresh  named double vector; contains thresholds for moderate misfit
+# #' @param severe_thresh  named double vector; contains thresholds for severe misfit
 #' @param return_results  boolean. indicates whether to return results.
 #'
 #' @export
@@ -42,7 +46,20 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
                          name_table = NULL, name_steps = NULL, path_tables = here::here("Tables"),
                          name_data = NULL, path_data = here::here("Data"),
                          overwrite_table = FALSE, digits = 2,
-                         print_results = TRUE, return_results = FALSE) {
+                         print_results = TRUE, # highlight = TRUE,
+                         # moderate_thresh = c(WMNSQ = 1.15,
+                         #                     t = 6,
+                         #                     rit = 0.3,
+                         #                     disc_low = 0.6,
+                         #                     disc_high = 2,
+                         #                     aQ3 = 0.04),
+                         # high_thresh = c(WMNSQ = 1.2,
+                         #                 t = 8,
+                         #                 rit = 0.2,
+                         #                 disc_low = 0.4,
+                         #                 disc_high = 3,
+                         #                 aQ3 = 0.06)
+                         return_results = FALSE) {
 
   results <- list()
 
@@ -112,9 +129,9 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
   }
 
   # Print results
-  if (print_results)  print_irt_results(irt_sum = results$summary,
-                                        steps_sum = results$steps,
-                                        highlight = highlight)
+  if (print_results)  {print_irt_results(irt_sum = results$summary,
+                                         steps_sum = results$steps,
+                                         highlight = highlight)}
 
   # Return results
   if (return_results)  return(results)
@@ -495,49 +512,48 @@ steps_analysis <- function(results, path = here::here("Tables"), filename = NULL
 #'
 #' Print and highlight IRT (and steps) analysis results.
 #'
+#' @param model      list; results of irt analysis, as returned by function irt_model()
 #' @param irt_sum    data.frame; results of irt analysis, as returned by function irt_summary()
 #' @param steps_sum  data.frame; results of steps analysis, as returned by function steps_analysis()
-#' @param highlight  boolean; indicates whether to highlight problematic items
+# #' @param highlight  boolean; indicates whether to highlight problematic items
+# #' @param moderate_thresh  named double vector; contains thresholds for moderate misfit
+# #' @param severe_thresh  named double vector; contains thresholds for severe misfit
 #'
 #' @export
-print_irt_results <- function(irt_sum, steps_sum = NULL, highlight = TRUE,
-                              moderate_misfit = c(WMNSQ = 1.15,
-                                                  t = 6,
-                                                  rit = 0.3,
-                                                  disc_low = 0.6,
-                                                  disc_high = 2,
-                                                  aQ3 = 0.04),
-                              high_misfit = c(WMNSQ = 1.2,
-                                              t = 8,
-                                              rit = 0.2,
-                                              disc_low = 0.4,
-                                              disc_high = 3,
-                                              aQ3 = 0.06)) {
 
+print_irt_results <- function(model, irt_sum, steps_sum = NULL) { #, highlight = TRUE,
+                              # moderate_thresh = c(WMNSQ = 1.15,
+                              #                     t = 6,
+                              #                     rit = 0.3,
+                              #                     disc_low = 0.6,
+                              #                     disc_high = 2,
+                              #                     aQ3 = 0.04),
+                              # severe_thresh = c(WMNSQ = 1.2,
+                              #                   t = 8,
+                              #                   rit = 0.2,
+                              #                   disc_low = 0.4,
+                              #                   disc_high = 3,
+                              #                   aQ3 = 0.06)) {
+  # IRT summary table
   print("Summary table of IRT analysis", quote = FALSE)
-  if (highlight) {
-      moderate <- unique(which(
-          irt_sum$WMNSQ  > moderate_misfit['WMSNQ'] |
-          abs(irt_sum$t) > moderate_misfit['t'] |
-          irt_sum$rit    < moderate_misfit['rit'] |
-          irt_sum$Discr. < moderate_misfit['disc_low'] |
-          irt_sum$Discr. > moderate_misfit['disc_high'] |
-          irt_sum$aQ3    > moderate_misfit['aQ3']))
-      high <- unique(which(
-          irt_sum$WMNSQ  > high_misfit['WMSNQ'] |
-          abs(irt_sum$t) > high_misfit['t'] |
-          irt_sum$rit    < high_misfit['rit'] |
-          irt_sum$Discr. < high_misfit['disc_low'] |
-          irt_sum$Discr. > high_misfit['disc_high'] |
-          irt_sum$aQ3    > high_misfit['aQ3']))
-      print(kable(irt_sum, caption = "IRT analysis") %>%
-                kable_styling(bootstrap_options = "striped", full_width = F) %>%
-                row_spec(moderate, bold = T, color = "white", background = "orange") %>%
-                row_spec(high, bold = T, color = "white", background = "red"))
-  } else {
+  # if (highlight) {
+    # if (any(!names(moderate_misfit) %in% c('WNSQ', 't', 'rit', 'disc_low', 'disc_high', 'aQ3')) ||
+    #     any(!names(severe_misfit) %in% c('WNSQ', 't', 'rit', 'disc_low', 'disc_high', 'aQ3')))
+    # {
+    #     error("Please provide vector with thresholds for WMSQ, t, rit, disc_low, disc_high AND aQ3 or use the function default.")
+    # } else {
+      #     moderate_misfit <- find_rows_with_misfit(irt_sum, thresholds = moderate_thresh)
+      #     severe_misfit <- find_rows_with_misfit(irt_sum, thresholds = severe_thresh)
+      #     print(kable(irt_sum, caption = "IRT analysis") %>%
+      #               kable_styling(bootstrap_options = "striped", full_width = F) %>%
+      #               kableExtra::row_spec(moderate, bold = T, color = "white", background = "orange") %>%
+      #               kableExtra::row_spec(severe, bold = T, color = "white", background = "red"))
+    #  }
+  # } else {
     print(irt_sum, row.names = FALSE)
-  }
+  # }
 
+  # Percentage correct
   print("Percentage correct", quote = FALSE)
   pc_min <- min(irt_sum[['% correct']], na.rm = TRUE)
   pc_max <- max(irt_sum[['% correct']], na.rm = TRUE)
@@ -547,6 +563,7 @@ print_irt_results <- function(irt_sum, steps_sum = NULL, highlight = TRUE,
           pc_max, " % (item ", irt_sum$Item[irt_sum[['% correct']] %in% pc_max], ") with an average of ",
           round(mean(irt_sum[['% correct']], na.rm = TRUE)), " % correct responses.")
 
+  # Item difficulties
   print("Item difficulties", quote = FALSE)
   xsi_min <- min(irt_sum$xsi, na.rm = TRUE)
   xsi_max <- max(irt_sum$xsi, na.rm = TRUE)
@@ -556,11 +573,45 @@ print_irt_results <- function(irt_sum, steps_sum = NULL, highlight = TRUE,
           xsi_max, " (item ", irt_sum$Item[irt_sum$xsi %in% xsi_max], ") with an average of ",
           round(mean(irt_sum$xsi, na.rm = TRUE), 2), ".")
 
+  # SE
   print("SE", quote = FALSE)
   message("The maximum of SEs is ", max(irt_sum$SE, na.rm = TRUE),".")
 
+  # Model variance
+  print("Model variance", quote = FALSE)
+  message("The variance of the model was estimated to be ", round(model$mod$variance[1], 3),".")
+
+  # Test reliability
+  print("Test reliability", quote = FALSE)
+  eap_rel <- round(model$mod$EAP.rel[1], 3)
+  wle_rel <- round(model$wle_rel[1], 3)
+  message("The reliabilities of the test (EAP/PV reliability = ", eap_rel,
+          ", WLE reliability = ", wle_rel, ") were ... .")
+
+  # Steps analysis
   if(!is.null(steps_sum)) {
     print("Summary of steps analysis", quote = FALSE)
     print(steps_sum)
   }
 }
+
+
+# #' Find rows with misfit
+# #'
+# #' Indicate rows that contain items with some misfit.
+# #'
+# #' @param irt_sum    data.frame; results of irt analysis, as returned by function irt_summary()
+# #' @param thresholds  named double vector; contains thresholds for misfit
+# #'
+# #' @return integer vector; contains row numbers of malfunctioning items
+
+# find_rows_with_misfit <- function(irt_sum, thresholds) {
+#     unique(which(
+#         irt_sum$WMNSQ  > thresholds['WMSNQ'] |
+#         abs(irt_sum$t) > thresholds['t'] |
+#         irt_sum$rit    < thresholds['rit'] |
+#         irt_sum$Discr. < thresholds['disc_low'] |
+#         irt_sum$Discr. > thresholds['disc_high'] |
+#         irt_sum$aQ3    > thresholds['aQ3']
+#         ))
+# }
