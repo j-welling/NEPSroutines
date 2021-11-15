@@ -129,3 +129,13 @@ desc_perc <- function(dat, desc, valid = NULL, digits = 1) {
         paste0(d, " %")
         }))
 }
+
+#' Show attributes of selected variables
+#'
+#' @param dat data.frame containing variables
+#' @param show character vectors containing variables to be shown
+show_attributes <- function(dat, show) {
+    for (var in show) {
+        print(attributes(dat[[var]])$labels)
+    }
+}
