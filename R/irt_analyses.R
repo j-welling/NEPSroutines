@@ -41,7 +41,8 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
                          icc_plots = FALSE, wright_map = FALSE, path_plots = here::here("Plots"),
                          name_table = NULL, name_steps = NULL, path_tables = here::here("Tables"),
                          name_data = NULL, path_data = here::here("Data"),
-                         overwrite_table = FALSE, digits = 2, return_results = TRUE) {
+                         overwrite_table = FALSE, digits = 2,
+                         print_results = TRUE, return_results = FALSE) {
 
   results <- list()
 
@@ -85,7 +86,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
   }
 
   # IRT summary
-  if (return_results | !is.null(name_table) | !is.null(name_data)) {
+  if (return_results | print_results | !is.null(name_table) | !is.null(name_data)) {
     results$summary <- irt_summary(resp = resp, vars = vars,
                                    results = results[[1]], disc = results[[2]],
                                    filename = name_table, path = path_tables,
@@ -93,7 +94,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
   }
 
   # Steps analysis
-  if (irt_type == 'poly' && (return_results | !is.null(name_steps) | !is.null(name_data))) {
+  if (irt_type == 'poly' && (return_results | print_results | !is.null(name_steps) | !is.null(name_data))) {
     results$steps <- steps_analysis(results = results$model.pcm,
                                     filename = name_steps, path = path_tables,
                                     digits = digits, overwrite = overwrite_table)
@@ -109,6 +110,11 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
 
     save(results, file = here::here(paste0(path_data, "/", name_data)))
   }
+
+  # Print results
+  if (print_results)  print_irt_results(irt_sum = results$summary,
+                                        steps_sum = results$steps,
+                                        highlight = highlight)
 
   # Return results
   if (return_results)  return(results)
@@ -396,7 +402,7 @@ irt_summary <- function(resp, vars, results, disc = NULL,
     colnames(pars) <- c("Number", "Item", "N", "% correct",
                         "xsi", "SE", "WMNSQ", "t", "rit", "aQ3")
   }
-  pars[, -c(1:4)] <- format(round(pars[, -c(1:4)], digits), nsmall = digits)
+  pars[, -c(1:4)] <- round(pars[, -c(1:4)], digits)
 
   # Save table as Excel sheet
   if (!is.null(filename)) {
@@ -404,8 +410,12 @@ irt_summary <- function(resp, vars, results, disc = NULL,
     # Create directory for table
     check_folder(path)
 
+    # Format table
+    pars_formatted <- pars
+    pars_formatted[, -c(1:4)] <- format(pars_formatted[, -c(1:4)], nsmall = digits)
+
     # Create table
-    openxlsx::write.xlsx(pars,
+    openxlsx::write.xlsx(pars_formatted,
                          file = paste0(path, "/", filename),
                          showNA = FALSE, rowNames = FALSE, overwrite = overwrite)
 
@@ -478,4 +488,79 @@ steps_analysis <- function(results, path = here::here("Tables"), filename = NULL
   }
 
   if (return_table)  return(steps)
+}
+
+
+#' Print IRT results
+#'
+#' Print and highlight IRT (and steps) analysis results.
+#'
+#' @param irt_sum    data.frame; results of irt analysis, as returned by function irt_summary()
+#' @param steps_sum  data.frame; results of steps analysis, as returned by function steps_analysis()
+#' @param highlight  boolean; indicates whether to highlight problematic items
+#'
+#' @export
+print_irt_results <- function(irt_sum, steps_sum = NULL, highlight = TRUE,
+                              moderate_misfit = c(WMNSQ = 1.15,
+                                                  t = 6,
+                                                  rit = 0.3,
+                                                  disc_low = 0.6,
+                                                  disc_high = 2,
+                                                  aQ3 = 0.04),
+                              high_misfit = c(WMNSQ = 1.2,
+                                              t = 8,
+                                              rit = 0.2,
+                                              disc_low = 0.4,
+                                              disc_high = 3,
+                                              aQ3 = 0.06)) {
+
+  print("Summary table of IRT analysis", quote = FALSE)
+  if (highlight) {
+      moderate <- unique(which(
+          irt_sum$WMNSQ  > moderate_misfit['WMSNQ'] |
+          abs(irt_sum$t) > moderate_misfit['t'] |
+          irt_sum$rit    < moderate_misfit['rit'] |
+          irt_sum$Discr. < moderate_misfit['disc_low'] |
+          irt_sum$Discr. > moderate_misfit['disc_high'] |
+          irt_sum$aQ3    > moderate_misfit['aQ3']))
+      high <- unique(which(
+          irt_sum$WMNSQ  > high_misfit['WMSNQ'] |
+          abs(irt_sum$t) > high_misfit['t'] |
+          irt_sum$rit    < high_misfit['rit'] |
+          irt_sum$Discr. < high_misfit['disc_low'] |
+          irt_sum$Discr. > high_misfit['disc_high'] |
+          irt_sum$aQ3    > high_misfit['aQ3']))
+      print(kable(irt_sum, caption = "IRT analysis") %>%
+                kable_styling(bootstrap_options = "striped", full_width = F) %>%
+                row_spec(moderate, bold = T, color = "white", background = "orange") %>%
+                row_spec(high, bold = T, color = "white", background = "red"))
+  } else {
+    print(irt_sum, row.names = FALSE)
+  }
+
+  print("Percentage correct", quote = FALSE)
+  pc_min <- min(irt_sum[['% correct']], na.rm = TRUE)
+  pc_max <- max(irt_sum[['% correct']], na.rm = TRUE)
+  pc_mean <- mean(irt_sum[['% correct']], na.rm = TRUE)
+  message("The percentage of correct responses within dichotomous items varied between ",
+          pc_min, " % (item ", irt_sum$Item[irt_sum[['% correct']] %in% pc_min], ") and ",
+          pc_max, " % (item ", irt_sum$Item[irt_sum[['% correct']] %in% pc_max], ") with an average of ",
+          round(mean(irt_sum[['% correct']], na.rm = TRUE)), " % correct responses.")
+
+  print("Item difficulties", quote = FALSE)
+  xsi_min <- min(irt_sum$xsi, na.rm = TRUE)
+  xsi_max <- max(irt_sum$xsi, na.rm = TRUE)
+  xsi_mean <- mean(irt_sum$xsi, na.rm = TRUE)
+  message("The estimated item difficulties (or location parameters for polytomous variables) varied between ",
+          xsi_min, " (item ", irt_sum$Item[irt_sum$xsi %in% xsi_min], ") and ",
+          xsi_max, " (item ", irt_sum$Item[irt_sum$xsi %in% xsi_max], ") with an average of ",
+          round(mean(irt_sum$xsi, na.rm = TRUE), 2), ".")
+
+  print("SE", quote = FALSE)
+  message("The maximum of SEs is ", max(irt_sum$SE, na.rm = TRUE),".")
+
+  if(!is.null(steps_sum)) {
+    print("Summary of steps analysis", quote = FALSE)
+    print(steps_sum)
+  }
 }

@@ -1,0 +1,1 @@
+print_irt_results(irt_sum)
