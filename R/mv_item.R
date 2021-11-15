@@ -196,6 +196,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
 #' @param digits    number of decimals for rounding
 #' @param warn      boolean whether to print a warning if NAs were found in resp
 #' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
+#' @param print_table  boolean; indicates whether to print ta
 #' @param return_table  boolean. indicates whether to return table.
 #' @export
 
@@ -205,7 +206,7 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       filename = NULL, path = here::here("Tables"),
                       valid = NULL, digits = 2, warn = TRUE, overwrite = FALSE,
-                      return_table = FALSE) {
+                      print_table = TRUE, return_table = FALSE) {
 
   # Test data
   if (is.null(mv_i)) { # Auslagern von "Test data" für mvi_table/mvi_plots in eine eigene Funktion?
@@ -270,6 +271,9 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
   } else {
     warn("No filename provided. The table will not be saved.")
   }
+
+  # Print table
+  if (print_table) print(results)
 
   # Return table
   if (return_table) return(results)
@@ -563,25 +567,26 @@ mvi_summary <- function(mvlist) {
 
 print_mvi_results <- function(mv_i, labels, grouping = NULL) {
   if (is.null(grouping)) {
-    for (lbl in labels) {
-      mv_min <- min(mv_i$list[[names(lbl)]], na.rm = TRUE)
-      mv_max <- max(mv_i$list[[names(lbl)]], na.rm = TRUE)
-      item_min <- mv_i$list$items[mv_i$list[[names(lbl)]] == mv_min]
-      item_max <- mv_i$list$items[mv_i$list[[names(lbl)]] == mv_max]
-      message("The number of ", lbl, " items varied between ",
-              mv_min, " % (item ", if(length(item_min) == 1) {print(item_min)}, ") and ",
-              mv_max, " % (item ", item_max, ").")
+    for (lbl in names(labels)) {
+      mv_min <- min(mv_i$list[[lbl]], na.rm = TRUE)
+      mv_max <- max(mv_i$list[[lbl]], na.rm = TRUE)
+      item_min <- mv_i$list$items[mv_i$list[[lbl]] == mv_min]
+      item_max <- mv_i$list$items[mv_i$list[[lbl]] == mv_max]
+      message("The number of ", labels[lbl], " items varied between ",
+              mv_min, " %", if(length(item_min) == 1) {paste0(" (item ", item_min, ")")}, " and ",
+              mv_max, " %", if(length(item_max) == 1) {paste0(" (item ", item_max, ")")}, ".")
     }
   } else {
     for (g in grouping) {
-      for (lbl in labels) {
-        mv_min <- min(mv_i$list[[g]][[names(lbl)]], na.rm = TRUE)
-        mv_max <- max(mv_i$list[[g]][[names(lbl)]], na.rm = TRUE)
-        item_min <- mv_i$list[[g]]$items[mv_i$list[[g]][[names(lbl)]] == mv_min]
-        item_max <- mv_i$list[[g]]$items[mv_i$list[[g]][[names(lbl)]] == mv_max]
-        message("The number of ", lbl, " items in the ", g, "test version varied between ",
-                mv_min, " % (item ", if(length(item_min) == 1) {print(item_min)}, ") and ",
-                mv_max, " % (item ", item_max, ").")
+      print(g)
+      for (lbl in names(labels)) {
+        mv_min <- min(mv_i$list[[g]][[lbl]], na.rm = TRUE)
+        mv_max <- max(mv_i$list[[g]][[lbl]], na.rm = TRUE)
+        item_min <- mv_i$list[[g]]$items[mv_i$list[[g]][[lbl]] == mv_min]
+        item_max <- mv_i$list[[g]]$items[mv_i$list[[g]][[lbl]] == mv_max]
+        message("The number of ", labels[lbl], " items in the ", g, " test version varied between ",
+                mv_min, " %", if(length(item_min) == 1) {paste0(" (item ", item_min, ")")}, " and ",
+                mv_max, " %", if(length(item_max) == 1) {paste0(" (item ", item_max, ")")}, ".")
       }
     }
   }
