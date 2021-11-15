@@ -22,13 +22,15 @@
 #'   indicating (in)valid cases.
 #' @param scoring character string; refers to the scoring variable in vars.
 #'   Defaults to "scoring".
-#' @param path_table character string; indicates the folder location where the
-#'   summaries are stored on the hard drive. Please note that the
-#'   path is relative to the current working path set by here::i_am()
 #' @param overwrite_table boolean; indicates whether to overwrite existing file when saving table.
-#' @param print_table logical indicating whether summary is printed to the console
+#' @param print logical indicating whether summary is printed to the console
+#' @param save logical indicating whether summary / data is stored on hard disk
 #' @param verbose logical; should progress be printed to console?
 #' @param return_results  boolean. indicates whether to return results.
+#' @param path character vector; indicates the folder locations where the
+#'   resulting summaries (first element of vector) and data (second element of
+#'   vector) is stored on the hard drive. Please note that the
+#'   path is relative to the current working path set by here::i_am()
 #' @param ... additional arguments to be passed to tam.mml
 #'
 #' @return a list of:
@@ -36,17 +38,41 @@
 #'   dmod: DIF effects model
 #' @export
 
-dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, scoring = "scoring",
-                         path_table = "Tables", overwrite_table = FALSE,
-                         print_table = FALSE, verbose = FALSE,
-                         return_results = TRUE, ...) {
+dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL,
+                         scoring = "scoring", overwrite_table = FALSE,
+                         print = TRUE, verbose = FALSE, save = TRUE,
+                         return_results = FALSE,
+                         save = TRUE, path = c("Tables", "Results"),
+                         ...) {
+
+  path_table <- path[1]
+  path_results <- path[2]
+
+  res <- conduct_dif_analysis_summary(
+    items, dif_vars, resp, vars, scoring, valid, verbose, path_table,
+    path_results, print, save, overwrite_table
+  )
+
+  build_dif_tables(dif_summaries = res$dif_summaries, save = save,
+                   path_table = path_table, overwrite = overwrite_table)
+
+  if (return_results) {
+    return(res)
+  }
+}
+
+
+conduct_dif_analysis_summary <- function(items, dif_vars, resp, vars, scoring,
+                                         valid, verbose, path_table,
+                                         path_results, print, save,
+                                         overwrite_table) {
 
   dif_models <- list()
   dif_summaries <- list()
 
   if (length(items) > 1 & length(items) != length(dif_vars)) {
     stop("Please check 'items' and 'dif_vars'. At least one of them does ",
-	     "not match the intended analysis.")
+         "not match the intended analysis.")
   }
   if (length(items) == 1) {
     items <- rep(items, length(dif_vars))
@@ -55,20 +81,17 @@ dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, scoring = "s
   for (i in seq_along(dif_vars)) {
 
     dif_models[[i]] <- dif_model(resp = resp, vars = vars, items = items[i],
-                             facets = dif_vars[i], scoring = scoring,
-                             valid = valid, verbose = verbose)
+                                 facets = dif_vars[i], scoring = scoring,
+                                 valid = valid, verbose = verbose)
 
-    dif_summaries[[i]] <- dif_summary(dif_models[[i]], print = print_table,
+    dif_summaries[[i]] <- dif_summary(dif_models[[i]], print = print,
+                                      save = save, path_table = path_table,
+                                      path_results = path_results,
                                       overwrite = overwrite_table)
   }
   names(dif_summaries) <- names(dif_models) <- dif_vars
 
-  build_dif_tables(dif_summaries = dif_summaries, save_at = path_table,
-                   overwrite = overwrite_table)
-
-  results <- list(dif_models = dif_models, dif_summaries = dif_summaries)
-
-  if (return_results) return(results)
+  return(list(dif_summaries = dif_summaries, dif_models = dif_models))
 }
 
 
@@ -105,7 +128,7 @@ dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, scoring = "s
 #' @export
 
 dif_model <- function(resp, vars, items, facets, scoring = "scoring",
-                         valid = NULL, verbose = FALSE) {
+                      valid = NULL, verbose = FALSE) {
 
   # Select only valid cases
   resp <- only_valid(resp, valid = valid)
@@ -153,12 +176,12 @@ dif_model <- function(resp, vars, items, facets, scoring = "scoring",
   } else {
     Q <- as.matrix(vars$scoring[vars[[items]]])
     dmod <- TAM::tam.mml.mfr(resp,
-      irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
-      formulaA = formula_dmod, verbose = verbose
+                             irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
+                             formulaA = formula_dmod, verbose = verbose
     )
     mmod <- TAM::tam.mml.mfr(resp,
-      irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
-      formulaA = formula_mmod, verbose = verbose
+                             irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
+                             formulaA = formula_mmod, verbose = verbose
     )
   }
 
@@ -235,7 +258,8 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring", v
 #'   data frames for dif analysis
 #' @export
 
-dif_summary <- function(diflist, print = TRUE, save_at = NULL,
+dif_summary <- function(diflist, print = TRUE, save = TRUE,
+                        path_table = "Tables", path_results = "Results",
                         overwrite = FALSE) {
   # information criteria for DIF and main model
   # main effects of main and DIF model + standardized
@@ -252,8 +276,8 @@ dif_summary <- function(diflist, print = TRUE, save_at = NULL,
     print_dif_summary(diflist, res)
   }
 
-  if (!is.null(save_at)) {
-    save_dif_summary(save_at, diflist, res, overwrite)
+  if (save) {
+    save_dif_summary(path_table, path_results, diflist, res, overwrite)
   }
 
   return(res)
@@ -378,13 +402,16 @@ difsum <- function(obj, facet, group = 1, group2 = NULL) {
 #'
 #' @param dif_summaries named list of dif_summary() return objects; the list
 #' elements must be named after their DIF variable
-#' @param save_at character string; indicates the folder location where the
+#' @param save logical indicator whether the results are to be written to the
+#'   hard disk
+#' @param path_table character string; indicates the folder location where the
 #'   summaries are stored on the hard drive. Please note that the
 #'   path is relative to the current working path set by here::i_am()
 #' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
 #'
 #' @export
-build_dif_tables <- function(dif_summaries, save_at, overwrite = FALSE) {
+build_dif_tables <- function(dif_summaries, save = TRUE, path_table, #path_results,
+                             overwrite = FALSE) {
 
   dif_vars <- names(dif_summaries)
 
@@ -414,24 +441,29 @@ build_dif_tables <- function(dif_summaries, save_at, overwrite = FALSE) {
 
   est <- rbind(est, mne)
 
-  # save to hard drive
-  check_folder(save_at)
+  if (save) {
+    # save to hard drive
+    check_folder(path_table)
+    # check_folder(path_results)
 
-  save(gof, est,
-       file = here::here(paste0(save_at, "/dif_all_summary.Rdata")))
+    # save(gof, est,
+    #      file = here::here(paste0(path_results, "/dif_all_summary.Rdata")))
 
-  openxlsx::write.xlsx(
-    gof,
-    file = here::here(paste0(save_at, "/dif_all_goodness_of_fit.xlsx")),
-    showNA = FALSE, overwrite = overwrite
-  )
+    openxlsx::write.xlsx(
+      gof,
+      file = here::here(paste0(path_table, "/dif_all_goodness_of_fit.xlsx")),
+      showNA = FALSE, overwrite = overwrite
+    )
 
-  openxlsx::write.xlsx(
-    est,
-    file = here::here(paste0(save_at, "/dif_all_estimates.xlsx")),
-    showNA = FALSE, overwrite = overwrite
-  )
+    openxlsx::write.xlsx(
+      est,
+      file = here::here(paste0(path_table, "/dif_all_estimates.xlsx")),
+      showNA = FALSE, overwrite = overwrite
+    )
+  }
 }
+
+
 
 print_dif_summary <- function(diflist, res) {
   # information criteria table
@@ -448,28 +480,32 @@ print_dif_summary <- function(diflist, res) {
   print(res$est[abs(res$est$xsi) >= 0.5 & res$est$p < 0.05, ])
 }
 
-save_dif_summary <- function(save_at, diflist, res, overwrite) {
-  check_folder(save_at)
 
-  save(diflist, file = here::here(paste0(save_at, "/dif_",
+
+save_dif_summary <- function(path_table, path_results, diflist, res,
+                             overwrite) {
+  check_folder(path_table)
+  check_folder(path_results)
+
+  save(diflist, file = here::here(paste0(path_results, "/dif_",
                                          diflist$dif_var, ".Rdata")))
-  save(res, file = here::here(paste0(save_at, "/dif_",
+  save(res, file = here::here(paste0(path_table, "/dif_",
                                      diflist$dif_var, "_summary.Rdata")))
   openxlsx::write.xlsx(
     res$gof,
-    file = here::here(paste0(save_at, "/dif_",
+    file = here::here(paste0(path_table, "/dif_",
                              diflist$dif_var, "_goodness_of_fit.xlsx")),
     showNA = FALSE, overwrite = overwrite
   )
   openxlsx::write.xlsx(
     res$est,
-    file = here::here(paste0(save_at, "/dif_",
+    file = here::here(paste0(path_table, "/dif_",
                              diflist$dif_var, "_dif_estimates.xlsx")),
     showNA = FALSE, overwrite = overwrite
   )
   openxlsx::write.xlsx(
     res$mne,
-    file = here::here(paste0(save_at, "/dif_",
+    file = here::here(paste0(path_table, "/dif_",
                              diflist$dif_var, "_main_effects.xlsx")),
     showNA = FALSE, overwrite = overwrite
   )

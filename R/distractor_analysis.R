@@ -16,6 +16,19 @@
 #'                    indicates which items to use for analysis.
 #' @param valid     character string. defines name of boolean variable in dat,
 #'                    indicating (in)valid cases.
+#' @param print logical indicating whether summary is printed to the console;
+#'   prints minimum and maximum for distractors and correct responses as well as
+#'   the respective item names
+#' @param save logical indicating whether summary is saved to the hard disk
+#' @param path_results character string; indicates the folder location where the
+#'   summaries are stored on the hard drive (first, the distractor object is
+#'   saved unchanged as Rdata; second, the distractor object is saved unchanged
+#'   as an excel file with one sheet per item distractor analysis; third, one
+#'   table for the distractors and one table for the correct responses is
+#'   saved as an excel file with one sheet per table). Please note that the
+#'   path is relative to the current working path set by here::i_am(). Defaults
+#'   to NULL (not stored)
+#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
 #'
 #' @return list of one data frame per item containing item-total correlations
 #'   for each possible response; correct response is marked with an *
@@ -24,8 +37,19 @@
 #' @importFrom rlang .data
 #' @export
 
-distractor_analysis <- function(resp, vars, items, valid = NULL) {
+distractor_analysis <- function(resp, vars, items, valid = NULL, print = TRUE,
+                                save = TRUE, path_results = "Results", 
+                                overwrite = TRUE) {
 
+    distractors <- conduct_distractor_analysis(resp, vars, items, valid)
+    dist_sum <- distractor_summary(distractors)
+    print_distractor_summary(print, dist_sum)
+    save_distractor_analysis(save, distractors, path_results, overwrite)
+
+}
+
+
+conduct_distractor_analysis <- function(resp, vars, items, valid = NULL) {
     # prepare data
     resp <- only_valid(resp, valid = valid)
     MC <- dplyr::select(
@@ -70,34 +94,19 @@ distractor_analysis <- function(resp, vars, items, valid = NULL) {
     }
 
     return(dis)
-
 }
 
 #' Summary of distractor analysis
 #'
 #' @param distractors return object of distractor_analysis() function (list of
 #'   data frames containing item-total correlations for each item)
-#' @param print logical indicating whether summary is printed to the console;
-#'   prints minimum and maximum for distractors and correct responses as well as
-#'   the respective item names
-#' @param save_at character string; indicates the folder location where the
-#'   summaries are stored on the hard drive (first, the distractor object is
-#'   saved unchanged as Rdata; second, the distractor object is saved unchanged
-#'   as an excel file with one sheet per item distractor analysis; third, one
-#'   table for the distractors and one table for the correct responses is
-#'   saved as an excel file with one sheet per table). Please note that the
-#'   path is relative to the current working path set by here::i_am(). Defaults
-#'   to NULL (not stored)
-#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
 #'
 #' @return list of data frames
 #'           correct : item-total correlations for correct responses
 #'           distractor : item-total correlations for distractors
 #'
 #' @export
-
-distractor_summary <- function(distractors, print = TRUE,
-                                        save_at = NULL, overwrite = FALSE) {
+distractor_summary <- function(distractors) {
     # data.frames containing information for distractors and correct responses,
     # respectively
 
@@ -113,8 +122,14 @@ distractor_summary <- function(distractors, print = TRUE,
     rc <- res[sel,]
     rd <- res[!sel,]
 
+    # Return list with results
+    return(list(correct = rc, distractor = rd))
+}
 
+print_distractor_summary <- function(print, dist_sum) {
     if (print) {
+        rc <- dist_sum$correct
+        rd <- dist_sum$distractor
         # short summary containing minimum and maximum for distractors and
         # correct responses as well as respective item names [print to console!]
         message("Item-total correlation for correct response: \nMin. = ",
@@ -139,19 +154,21 @@ distractor_summary <- function(distractors, print = TRUE,
                 paste(rownames(rd[which(rd$corr > 0.05),]), collapse = ", "),
                 "\n")
     }
+}
 
-    if (!is.null(save_at)) {
+save_distractor_analysis <- function(save, distractors, path_results,
+                                    overwrite) {
+    if (save) {
 
-        check_folder(save_at)
+        check_folder(path_results)
 
-        save(distractors, file = here::here(paste0(save_at, "/distractors.Rdata")))
+        save(distractors,
+             file = here::here(paste0(path_results, "/distractors.Rdata")))
         openxlsx::write.xlsx(
             distractors,
-            file = here::here(paste0(save_at, "/distractor_analysis.xlsx")),
+            file = here::here(paste0(path_results, "/distractor_analysis.xlsx")),
             showNA = FALSE, overwrite = overwrite
         )
     }
-
-    # Return list with results
-    return(list(correct = rc, distractor = rd))
 }
+

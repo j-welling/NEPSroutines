@@ -23,6 +23,15 @@
 #' @param maxiter   max iterations as passed to the TAM function
 #' @param snodes    snodes as passed to the TAM function
 #' @param verbose   verbose as passed to the TAM function
+#' @param return_results  boolean. indicates whether to return results.
+#' @param save logical indicating whether summary / data is stored on hard disk
+#' @param path character vector; indicates the folder locations where the
+#'   resulting summaries (first element of vector) and data (second element of
+#'   vector) is stored on the hard drive. Please note that the
+#'   path is relative to the current working path set by here::i_am()
+#' @param overwrite boolean; indicates whether to overwrite existing file when
+#'   saving table.
+#' @param print locigal indicating whether the summary is printed to console
 #'
 #' @return          list of results for each dimensional analysis
 #'
@@ -31,8 +40,32 @@
 
 dimension_analysis <- function(resp, vars, items, scoring = "scoring",
                                dim = NULL, valid = NULL, irtmodel = "PCM2",
-                               maxiter = 10, snodes = 5, verbose = FALSE) {
+                               maxiter = 10, snodes = 5, verbose = FALSE,
+                               return_results = FALSE, save = TRUE,
+                               path = c("Tables", "Results"),
+                               overwrite = TRUE, print = TRUE) {
 
+    path_table <- path[1]
+    path_results <- path[2]
+
+    dimensionality <- conduct_dimensionality_analysis(
+        resp, vars, items, scoring, dim, valid, irtmodel, maxiter, snodes,
+        verbose
+    )
+    save_dimensionality(save, path_results, dimensionality)
+
+    dimsum <- dimension_summary(dimensionality)
+    save_dim_summary(save, path_table, path_results, dimsum, overwrite)
+    print_dim_summary(print, dimsum)
+
+    if (return_results) {
+        return(dimensionality)
+    }
+}
+
+conduct_dimensionality_analysis <- function(resp, vars, items, scoring, dim,
+                                            valid, irtmodel, maxiter, snodes,
+                                            verbose) {
     # Select only valid cases
     resp <- only_valid(resp, valid = valid)
 
@@ -89,14 +122,6 @@ dimension_analysis <- function(resp, vars, items, scoring = "scoring",
 #' Summary of dimensionality analysis (saves summary in excel sheet)
 #'
 #' @param dimensionality list with results of the dimension_analysis function
-#' @param save_at character string; indicates the folder location where the
-#'   summaries are stored on the hard drive (first, the dimensionality object is
-#'   saved unchanged as Rdata; second, the information criteria are saved as a
-#'   data.frame as Rdata; third, the information criteria are saved in an excel
-#'   file). Please note that the path is relative to the current working path
-#'   set by here::i_am(). Defaults to NULL (not stored)
-#' @param overwrite boolean; indicates whether to overwrite existing file when
-#'   saving table.
 #'
 #' @return data.frame of summary results
 #'
@@ -104,8 +129,7 @@ dimension_analysis <- function(resp, vars, items, scoring = "scoring",
 #' @export
 #'
 
-dimension_summary <- function(dimensionality, save_at = NULL,
-                              overwrite = FALSE) {
+dimension_summary <- function(dimensionality) {
 
     dim <- names(dimensionality)
     dimsum <- list()
@@ -121,24 +145,41 @@ dimension_summary <- function(dimensionality, save_at = NULL,
     }
     dimsum[["Goodness Of fit"]] <- gof
 
-    if (!is.null(save_at)) {
-        save_dim_summary(save_at, dimensionality, gof, dimsum, overwrite)
-    }
-
     return(dimsum)
 }
 
+print_dim_summary <- function(print, dimsum) {
+  if (print) {
+    for (nms in names(dimsum)) {
+      print(nms)
+      print(dimsum[[nms]])
+    }
+  }
+}
 
-save_dim_summary <- function(save_at, dimensionality, gof, dimsum, overwrite) {
-    check_folder(save_at)
 
-    save(dimensionality,
-         file = here::here(paste0(save_at, "/dimensionality.Rdata")))
-    save(gof,
-         file = here::here(paste0(save_at, "/dimensionality_fit.Rdata")))
-    openxlsx::write.xlsx(
-        dimsum,
-        file = here::here(paste0(save_at, "/dimensionality_summary.xlsx")),
-        showNA = FALSE, overwrite = overwrite
-    )
+save_dimensionality <- function(save, path_results, dimensionality) {
+    if (save) {
+        check_folder(path_results)
+
+        save(dimensionality,
+             file = here::here(paste0(path_results, "/dimensionality.Rdata")))
+    }
+}
+
+
+save_dim_summary <- function(save, path_table, path_results, dimsum, overwrite) {
+    if (save) {
+        check_folder(path_table)
+        check_folder(path_results)
+
+        save(dimsum,
+             file = here::here(paste0(path_results,
+                                      "/dimensionality_summary_fit.Rdata")))
+        openxlsx::write.xlsx(
+            dimsum,
+            file = here::here(paste0(path_table, "/dimensionality_summary.xlsx")),
+            showNA = FALSE, overwrite = overwrite
+        )
+    }
 }
