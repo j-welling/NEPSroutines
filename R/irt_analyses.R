@@ -13,7 +13,6 @@
 #'                    boolean vector; indicates which items to use for analysis.
 #' @param items     character. contains name of variable (boolean) in vars that
 #'                    indicates which items to use for analysis.
-#' @param position  character string. contains name of position variable.
 #' @param valid     character string. defines name of boolean variable in resp,
 #'                  indicating (in)valid cases.
 #' @param irt_type  character string; either "dich" for dichotomous analysis
@@ -38,7 +37,7 @@
 #'
 #' @export
 
-irt_analysis <- function(resp, vars, items, position, valid = NULL, irt_type, scoring = NULL,
+irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NULL,
                          icc_plots = FALSE, wright_map = FALSE, path_plots = here::here("Plots"),
                          name_table = NULL, name_steps = NULL, path_tables = here::here("Tables"),
                          name_data = NULL, path_data = here::here("Data"),
@@ -87,7 +86,7 @@ irt_analysis <- function(resp, vars, items, position, valid = NULL, irt_type, sc
 
   # IRT summary
   if (return_results | !is.null(name_table) | !is.null(name_data)) {
-    results$summary <- irt_summary(resp = resp, vars = vars, position = position,
+    results$summary <- irt_summary(resp = resp, vars = vars,
                                    results = results[[1]], disc = results[[2]],
                                    filename = name_table, path = path_tables,
                                    valid = valid, digits = digits, overwrite = overwrite_table)
@@ -320,11 +319,8 @@ wright_map <- function(results, name, path = here::here("Plots")) {
 #'                 and includes the following columns:
 #'                   items: character indicating names of items.
 #'                   final: logical indicating whether item is a final item
-#'                   position: contains position per item. if different for
-#'                   different groups, several variables necessary.
 #' @param results  list. contains results from IRT analysis with one parameter
 #'                 (e.g., Rasch analysis)
-#' @param position character string. contains name of position variable
 #' @param disc     list. contains results from IRT analysis with two parameters
 #'                 (e.g., 2PL analysis), to include item discrimination
 #' @param path     character. defines name of path for table.
@@ -336,19 +332,19 @@ wright_map <- function(results, name, path = here::here("Plots")) {
 #' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
 #' @param return_table logical; whether resulting table should be returned
 #'
-#' @return a data.frame containing the item name, position, N, percentage correct,
+#' @return a data.frame containing the item name, N, percentage correct,
 #'   item difficulty, SE, WMNSQ, t, rit, item discrimination, Q3.
 #' @importFrom rlang .data
 #' @export
 
-irt_summary <- function(resp, vars, results, position, disc = NULL,
+irt_summary <- function(resp, vars, results, disc = NULL,
                         path = here::here("Tables"), filename = NULL,
                         valid = NULL, digits = 2, overwrite = FALSE,
                         return_table = TRUE) {
 
   # prepare data
   vars$irt_items <- vars$items %in% rownames(results$mod$xsi)
-  vars_ <- dplyr::rename(vars[vars$irt_items, ], item = 'items', position = position)
+  vars_ <- dplyr::rename(vars[vars$irt_items, ], item = 'items')
   resp <- prepare_resp(resp, valid = valid, vars = vars, items = 'irt_items', convert = TRUE)
 
 
@@ -356,10 +352,6 @@ irt_summary <- function(resp, vars, results, position, disc = NULL,
   pars <- results$mod$xsi[, c("xsi", "se.xsi")]
   pars$item <- rownames(results$mod$xsi)
   pars <- pars[vars_$item, ]
-
-  # item position
-  pars <- merge(pars, vars_[ , c("item", "position")],
-                by.x = "item", by.y = "item")
 
   # percentage correct
   pars$pc <- round(ifelse(vars_$dich, colMeans(resp[, vars_$item], na.rm = TRUE) * 100, NA), 0)
@@ -394,17 +386,17 @@ irt_summary <- function(resp, vars, results, position, disc = NULL,
 
   # reorder columns
   if (!is.null(disc)) {
-    pars <- pars[ , c("num", "item", "position", "N", "pc", "xsi", "se.xsi",
+    pars <- pars[ , c("num", "item", "N", "pc", "xsi", "se.xsi",
                      "WMNSQ", "WMNSQ_t", "rit", "disc", "Q3")]
-    colnames(pars) <- c("Number", "Item", "Pos","N", "% correct",
+    colnames(pars) <- c("Number", "Item", "N", "% correct",
                         "xsi", "SE", "WMNSQ", "t", "rit", "Discr.", "aQ3")
   } else {
-    pars <- pars[ , c("num", "item", "position", "N", "pc", "xsi", "se.xsi",
+    pars <- pars[ , c("num", "item", "N", "pc", "xsi", "se.xsi",
                      "WMNSQ", "WMNSQ_t", "rit", "Q3")]
-    colnames(pars) <- c("Number", "Item", "Pos","N", "% correct",
+    colnames(pars) <- c("Number", "Item", "N", "% correct",
                         "xsi", "SE", "WMNSQ", "t", "rit", "aQ3")
   }
-  pars[, -c(1:5)] <- format(round(pars[, -c(1:5)], digits), nsmall = digits)
+  pars[, -c(1:4)] <- format(round(pars[, -c(1:4)], digits), nsmall = digits)
 
   # Save table as Excel sheet
   if (!is.null(filename)) {
