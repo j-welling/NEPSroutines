@@ -100,8 +100,8 @@ mv_person <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL
 #' @param warn      boolean. indicates whether to print a warning if NAs were found in resp
 #' @param return_results    boolean. indicates whether to return results.
 #'
-#' @return   if return is set to TRUE, list with missing values per person and
-#' for each missing value type (in percentage)
+#' @return   if return_results, list with missing values per person and
+#' for each missing value type (in percentage) is returned
 #'
 #' @export
 
@@ -237,6 +237,8 @@ mvp_table <- function(mv_p = NULL, grouping = NULL,
                              showNA = FALSE, rowNames = FALSE, overwrite = overwrite)
       }
     }
+  } else {
+      warn("No filename provided. The table will not be saved.")
   }
 
   # Return table
