@@ -105,9 +105,18 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
   # IRT summary
   if (return_results | print_results | !is.null(name_table) | !is.null(name_data)) {
     results$summary <- irt_summary(resp = resp, vars = vars,
-                                   results = results[[1]], disc = results[[2]],
-                                   filename = name_table, path = path_tables,
-                                   valid = valid, digits = digits, overwrite = overwrite_table)
+                                   results = results[[1]],
+                                   disc = results[[2]],
+                                   filename = name_table,
+                                   path = path_tables,
+                                   valid = valid, digits = digits,
+                                   overwrite = overwrite_table)
+
+    results$model_fit <- irt_model_fit(model_dich = results[[1]],
+                                       model_poly = results[[2]],
+                                       irt_type = irt_type,
+                                       print_results = print_results,
+                                       return_results = TRUE)
   }
 
   # Steps analysis
@@ -129,9 +138,14 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
   }
 
   # Print results
-  if (print_results)  {print_irt_results(irt_sum = results$summary,
-                                         steps_sum = results$steps,
-                                         highlight = highlight)}
+  if (print_results)  {
+    print_irt_results(model = results[[1]],
+                      irt_sum = results$summary,
+                      steps_sum = results$steps) #,
+                      #highlight = highlight,
+                      #moderate_thresh = moderate_thresh,
+                      #severe_thresh = severe_thresh)
+}
 
   # Return results
   if (return_results)  return(results)
@@ -360,7 +374,7 @@ wright_map <- function(results, name, path = here::here("Plots")) {
 #' @importFrom rlang .data
 #' @export
 
-irt_summary <- function(resp, vars, results, disc = NULL,
+irt_summary <- function(resp, vars, results, disc,
                         path = here::here("Tables"), filename = NULL,
                         valid = NULL, digits = 2, overwrite = FALSE,
                         return_table = TRUE) {
@@ -408,17 +422,10 @@ irt_summary <- function(resp, vars, results, disc = NULL,
   pars$num <- seq(1, nrow(pars))
 
   # reorder columns
-  if (!is.null(disc)) {
-    pars <- pars[ , c("num", "item", "N", "pc", "xsi", "se.xsi",
-                     "WMNSQ", "WMNSQ_t", "rit", "disc", "Q3")]
-    colnames(pars) <- c("Number", "Item", "N", "% correct",
-                        "xsi", "SE", "WMNSQ", "t", "rit", "Discr.", "aQ3")
-  } else {
-    pars <- pars[ , c("num", "item", "N", "pc", "xsi", "se.xsi",
-                     "WMNSQ", "WMNSQ_t", "rit", "Q3")]
-    colnames(pars) <- c("Number", "Item", "N", "% correct",
-                        "xsi", "SE", "WMNSQ", "t", "rit", "aQ3")
-  }
+  pars <- pars[ , c("num", "item", "N", "pc", "xsi", "se.xsi",
+                    "WMNSQ", "WMNSQ_t", "rit", "disc", "Q3")]
+  colnames(pars) <- c("Number", "Item", "N", "% correct",
+                      "xsi", "SE", "WMNSQ", "t", "rit", "Discr.", "aQ3")
   pars[, -c(1:4)] <- round(pars[, -c(1:4)], digits)
 
   # Save table as Excel sheet
@@ -540,7 +547,7 @@ print_irt_results <- function(model, irt_sum, steps_sum = NULL) { #, highlight =
     # if (any(!names(moderate_misfit) %in% c('WNSQ', 't', 'rit', 'disc_low', 'disc_high', 'aQ3')) ||
     #     any(!names(severe_misfit) %in% c('WNSQ', 't', 'rit', 'disc_low', 'disc_high', 'aQ3')))
     # {
-    #     error("Please provide vector with thresholds for WMSQ, t, rit, disc_low, disc_high AND aQ3 or use the function default.")
+    #     stop("Please provide vector with thresholds for WMSQ, t, rit, disc_low, disc_high AND aQ3 or use the function default.")
     # } else {
       #     moderate_misfit <- find_rows_with_misfit(irt_sum, thresholds = moderate_thresh)
       #     severe_misfit <- find_rows_with_misfit(irt_sum, thresholds = severe_thresh)
@@ -557,25 +564,61 @@ print_irt_results <- function(model, irt_sum, steps_sum = NULL) { #, highlight =
   print("Percentage correct", quote = FALSE)
   pc_min <- min(irt_sum[['% correct']], na.rm = TRUE)
   pc_max <- max(irt_sum[['% correct']], na.rm = TRUE)
-  pc_mean <- mean(irt_sum[['% correct']], na.rm = TRUE)
+  pc_mean <- round(mean(irt_sum[['% correct']], na.rm = TRUE), 2)
   message("The percentage of correct responses within dichotomous items varied between ",
           pc_min, " % (item ", irt_sum$Item[irt_sum[['% correct']] %in% pc_min], ") and ",
           pc_max, " % (item ", irt_sum$Item[irt_sum[['% correct']] %in% pc_max], ") with an average of ",
-          round(mean(irt_sum[['% correct']], na.rm = TRUE)), " % correct responses.")
+          pc_mean, " % correct responses.")
 
   # Item difficulties
   print("Item difficulties", quote = FALSE)
   xsi_min <- min(irt_sum$xsi, na.rm = TRUE)
   xsi_max <- max(irt_sum$xsi, na.rm = TRUE)
-  xsi_mean <- mean(irt_sum$xsi, na.rm = TRUE)
+  xsi_mean <- round(mean(irt_sum$xsi, na.rm = TRUE), 2)
   message("The estimated item difficulties (or location parameters for polytomous variables) varied between ",
           xsi_min, " (item ", irt_sum$Item[irt_sum$xsi %in% xsi_min], ") and ",
           xsi_max, " (item ", irt_sum$Item[irt_sum$xsi %in% xsi_max], ") with an average of ",
-          round(mean(irt_sum$xsi, na.rm = TRUE), 2), ".")
+          xsi_mean, ".")
 
-  # SE
-  print("SE", quote = FALSE)
+  # SE of item difficulties
+  print("SE of item difficulties", quote = FALSE)
   message("The maximum of SEs is ", max(irt_sum$SE, na.rm = TRUE),".")
+
+  # WMNSQ
+  print("WMNSQ", quote = FALSE)
+  wmnsq_min <- min(irt_sum$WMNSQ, na.rm = TRUE)
+  wmnsq_max <- max(irt_sum$WMNSQ, na.rm = TRUE)
+  wmnsq_misfit <- irt_sum$Item[irt_sum$WMNSQ > 1.15]
+  message("The values of the WMNSQ were ... close to 1 with the lowest value being ",
+          wmnsq_min, " (item ", irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_min], ") and the highest being ",
+          wmnsq_max, " (item ", irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_max], ").")
+  if (length(wmnsq_misfit == 1)) {
+    message("Item ", wmnsq_misfit, " exhibited a WMNSQ of at least 1.15.")
+  } else if (length(wmnsq_misfit > 1)) {
+    message("Items ", wmnsq_misfit, " exhibited a WMNSQ of at least 1.15.")
+  }
+
+  # WMNSQ t-value
+  print("WMNSQ t-value", quote = FALSE)
+  t_min <- min(irt_sum$t, na.rm = TRUE)
+  t_max <- max(irt_sum$t, na.rm = TRUE)
+  t_misfit <- irt_sum$Item[abs(irt_sum$t) > 8]
+  message("The WMNSQ t-values varied between ",
+          t_min, " (item ", irt_sum$Item[irt_sum$t %in% t_min], ") and ",
+          t_max, " (item ", irt_sum$Item[irt_sum$t %in% t_max], ").")
+  if (length(t_misfit > 0)) {
+    message("Items ", t_misfit, " exhibited a WMNSQ t-value of at least 8.")
+  }
+
+  # Correlation of item scores with total correct score
+  print("Correlation of item scores with total correct score", quote = FALSE)
+  rit_min <- min(irt_sum$rit, na.rm = TRUE)
+  rit_max <- max(irt_sum$rit, na.rm = TRUE)
+  rit_mean <- round(mean(irt_sum$rit, na.rm = TRUE), 2)
+  message("The correlations between the item scores and the total correct scores varied between ",
+          rit_min, " (item ", irt_sum$Item[irt_sum$rit %in% rit_min], ") and ",
+          rit_max, " (item ", irt_sum$Item[irt_sum$rit %in% rit_max], ") with an average correlation of ",
+          rit_mean, ".")
 
   # Model variance
   print("Model variance", quote = FALSE)
@@ -593,6 +636,16 @@ print_irt_results <- function(model, irt_sum, steps_sum = NULL) { #, highlight =
     print("Summary of steps analysis", quote = FALSE)
     print(steps_sum)
   }
+
+  # Item discrimination
+  print("Item discrimination", quote = FALSE)
+  disc_min <- min(irt_sum$Discr., na.rm = TRUE)
+  disc_max <- max(irt_sum$Discr., na.rm = TRUE)
+  disc_mean <- round(mean(irt_sum$Discr., na.rm = TRUE), 2)
+  message("The estimated discrimination parameters varied between ",
+          disc_min, " (item ", irt_sum$Item[irt_sum$Discr. %in% disc_min], ") and ",
+          disc_max, " (item ", irt_sum$Item[irt_sum$Discr. %in% disc_max], ") with an average discrimination of ",
+          disc_mean, ".")
 }
 
 
@@ -615,3 +668,48 @@ print_irt_results <- function(model, irt_sum, steps_sum = NULL) { #, highlight =
 #         irt_sum$aQ3    > thresholds['aQ3']
 #         ))
 # }
+
+#' Print IRT results
+#'
+#' Print and highlight IRT (and steps) analysis results.
+#'
+#' @param model_dich  list; results of dichotomous irt analysis, as returned by function irt_model()
+#' @param model_poly  list; results of polytomous irt analysis, as returned by function irt_model()
+#' @param irt_type  character string; either "dich" for dichotomous analysis or "poly" for polytomous analysis.
+#' @param print_results  boolean; indicates whether to print results  to console or html.
+#' @param return_results  boolean; indicates whether to return results.
+#'
+#' @return if return_results, data.frame with AIC, BIC and number of parameters for both models will be returned.
+#' @export
+
+irt_model_fit <- function(model_dich, model_poly, irt_type,
+                          print_results = TRUE, return_results = FALSE) {
+
+  mfit <- data.frame(AIC = rep(NA_integer_, 2),
+                     BIC = rep(NA_integer_, 2),
+                     Npars = rep(NA_integer_, 2))
+
+  if(irt_type == 'dich') {
+    row.names(mfit) <- c("1PL model", "2PL model")
+  } else if (irt_type == 'poly') {
+    row.names(mfit) <- c("PCM model", "GPCM model")
+  } else {
+    stop("No valid irt_type provided. Possible are 'dich' for dichotomous ",
+         "analysis or 'poly' for polytomous analysis.")
+  }
+
+  mfit$AIC[1] <- model_dich$info_crit$AIC
+  mfit$BIC[1] <- model_dich$info_crit$BIC
+  mfit$Npars[1] <- model_dich$info_crit$Npars
+
+  mfit$AIC[2] <- model_poly$info_crit$AIC
+  mfit$BIC[2] <- model_poly$info_crit$BIC
+  mfit$Npars[2] <- model_poly$info_crit$Npars
+
+  if (print_results) {
+    print("Model fit of IRT models", quote = FALSE)
+    print(mfit)
+  }
+
+  if (return_results) return(mfit)
+}

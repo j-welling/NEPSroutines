@@ -1,1 +1,3 @@
-print_irt_results(irt_sum)
+print_irt_results(model = results$model.1pl,
+                  irt_sum = results$summary,
+                  steps_sum = results$steps)
