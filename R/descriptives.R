@@ -14,7 +14,7 @@ n_valid <- function(dat, valid = NULL) {
 
     dat <- only_valid(dat, valid = valid)
 
-    paste0("There are ", nrow(dat[dat[[valid]], ]), " valid cases in the dataset.")
+    message("There are ", nrow(dat[dat[[valid]], ]), " valid cases in the dataset.")
 }
 
 
