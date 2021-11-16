@@ -43,30 +43,29 @@
 dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL,
                          scoring = "scoring", overwrite_table = FALSE,
                          print = TRUE, verbose = FALSE, save = TRUE,
-                         return_results = FALSE,
+                         return = FALSE,
                          path_results = 'Results', path_table = 'Tables',
                          ...) {
 
   check_items(items, dif_vars)
 
-  dif_models <- conduct_dif_analysis(
+  dif <- list()
+
+  dif$models <- conduct_dif_analysis(
     items = items, dif_vars = dif_vars, resp = resp, vars = vars,
     scoring = scoring, valid = valid, verbose = verbose
   )
 
-  dif_summaries <- summarize_dif_analysis(
-    dif_models = dif_models, dif_vars = dif_vars,
+  dif$summaries <- summarize_dif_analysis(
+    dif_models = dif$models, dif_vars = dif_vars,
     path_table = path_table, path_results = path_results,
     print = print, save = save, overwrite_table = overwrite_table
   )
 
-  build_dif_tr_tables(dif_summaries = dif_summaries, save = save,
+  build_dif_tr_tables(dif_summaries = dif$summaries, save = save,
                       path_table = path_table, overwrite = overwrite_table)
 
-  if (return_results) {
-    res <- list(dif_models = dif_models, dif_summaries = dif_summaries)
-    return(res)
-  }
+  if (return) return (dif)
 }
 
 check_items <- function(items, dif_vars) {

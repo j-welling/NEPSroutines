@@ -38,12 +38,15 @@
 #' @export
 
 distractor_analysis <- function(resp, vars, items, valid = NULL, print = TRUE,
-                                save = TRUE, path_results = "Results",
-                                overwrite = FALSE) {
+                                save = TRUE, overwrite = FALSE, return = FALSE,
+                                path_results = "Results", path_table) {
 
     distratcors <- list()
-    distractors$analysis <- conduct_distractor_analysis(resp, vars, items, valid)
-    distractors$summary <- distractor_summary(distractors)
+    distractors$analysis <- conduct_distractor_analysis(resp = resp,
+                                                        vars = vars,
+                                                        items = items,
+                                                        valid = valid)
+    distractors$summary <- distractor_summary(distractors$analysis)
 
     if (print) print_distractor_summary(distractors$summary)
     if (save) {
@@ -52,6 +55,8 @@ distractor_analysis <- function(resp, vars, items, valid = NULL, print = TRUE,
         save_table(distractors$analysis, overwrite = overwrite,
                    filename = "distractors.xlsx", path = path_table)
     }
+
+    if (return) return(distractors)
 }
 
 

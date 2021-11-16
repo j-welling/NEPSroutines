@@ -41,7 +41,7 @@
 dimension_analysis <- function(resp, vars, items, scoring = "scoring",
                                dim = NULL, valid = NULL, irtmodel = "PCM2",
                                maxiter = 10, snodes = 5, verbose = FALSE,
-                               return_results = FALSE, save = TRUE,
+                               return = FALSE, save = TRUE,
                                path_table = "Tables", path_results = "Results",
                                overwrite = TRUE, print = TRUE) {
 
@@ -52,7 +52,7 @@ dimension_analysis <- function(resp, vars, items, scoring = "scoring",
         valid = valid, irtmodel = irtmodel, maxiter = maxiter, snodes = snodes,
         verbose = verbose
     )
-    dimensionality$summary <- dimension_summary(dimensionality)
+    dimensionality$summary <- dimension_summary(dimensionality$analysis)
 
     if (save) {
       save_results(dimensionality,
@@ -61,9 +61,9 @@ dimension_analysis <- function(resp, vars, items, scoring = "scoring",
                  filename = "dimensionality.xlsx", path = path_table)
     }
 
-    if (print) print_dim_summary(dimsum)
+    if (print) print_dim_summary(dimensionality$summary)
 
-    if (return_results) return(dimensionality)
+    if (return) return(dimensionality)
 }
 
 conduct_dimensionality_analysis <- function(resp, vars, items, scoring, dim,
