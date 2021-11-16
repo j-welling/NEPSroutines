@@ -129,13 +129,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
   }
 
   # Save results
-  if (!is.null(name_data)) {
-
-    # Create directory for data
-    check_folder(path_data)
-
-    save(results, file = here::here(paste0(path_data, "/", name_data)))
-  }
+  save_results(results, filename = name_data, path = path_data)
 
   # Print results
   if (print_results)  {
@@ -145,7 +139,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
                       #highlight = highlight,
                       #moderate_thresh = moderate_thresh,
                       #severe_thresh = severe_thresh)
-}
+  }
 
   # Return results
   if (return_results)  return(results)
@@ -213,9 +207,7 @@ irt_model <- function(resp, vars, items, valid = NULL, irtmodel, scoring = NULL,
   if (!is.null(scoring)) {
       Q = as.matrix(vars[[scoring]][vars[[items]]])
   } else if (irtmodel %in% c("GPCM", "PCM2")) {
-      stop(
-      "Please provide variable name for scoring factor for polytomous analysis.",
-      )
+      stop("Please provide variable name for scoring factor for polytomous analysis.")
   } else {
       Q <- NULL
   }
@@ -260,13 +252,7 @@ irt_model <- function(resp, vars, items, valid = NULL, irtmodel, scoring = NULL,
   )
 
   # Save results
-  if (!is.null(filename)) {
-
-    # Create directory for data
-    check_folder(path)
-
-    save(results, file = here::here(paste0(path, "/", filename)))
-  }
+  save_results(results, filename = filename, path = path)
 
   # Return results
   if (return_results)  return(results)
@@ -428,24 +414,63 @@ irt_summary <- function(resp, vars, results, disc,
                       "xsi", "SE", "WMNSQ", "t", "rit", "Discr.", "aQ3")
   pars[, -c(1:4)] <- round(pars[, -c(1:4)], digits)
 
-  # Save table as Excel sheet
-  if (!is.null(filename)) {
+  # Format table
+  pars_formatted <- pars
+  pars_formatted[, -c(1:4)] <- format(pars_formatted[, -c(1:4)], nsmall = digits)
 
-    # Create directory for table
-    check_folder(path)
+  # Save table
+  save_table(pars_formatted, filename = filename, path = path,
+             overwrite = overwrite, show_rownames = FALSE)
 
-    # Format table
-    pars_formatted <- pars
-    pars_formatted[, -c(1:4)] <- format(pars_formatted[, -c(1:4)], nsmall = digits)
+  # Return table
+  if (return_table)  return(pars)
+}
 
-    # Create table
-    openxlsx::write.xlsx(pars_formatted,
-                         file = paste0(path, "/", filename),
-                         showNA = FALSE, rowNames = FALSE, overwrite = overwrite)
 
+
+#' IRT model fit
+#'
+#' Create table with model fit for 1 parameter and 2 parameter IRT model.
+#'
+#' @param model_dich  list; results of dichotomous irt analysis, as returned by function irt_model()
+#' @param model_poly  list; results of polytomous irt analysis, as returned by function irt_model()
+#' @param irt_type  character string; either "dich" for dichotomous analysis or "poly" for polytomous analysis.
+#' @param print_results  boolean; indicates whether to print results  to console or html.
+#' @param return_results  boolean; indicates whether to return results.
+#'
+#' @return if return_results, data.frame with AIC, BIC and number of parameters for both models will be returned.
+#' @export
+
+irt_model_fit <- function(model_dich, model_poly, irt_type,
+                          print_results = TRUE, return_results = FALSE) {
+
+  mfit <- data.frame(AIC = rep(NA_integer_, 2),
+                     BIC = rep(NA_integer_, 2),
+                     Npars = rep(NA_integer_, 2))
+
+  if(irt_type == 'dich') {
+    row.names(mfit) <- c("1PL model", "2PL model")
+  } else if (irt_type == 'poly') {
+    row.names(mfit) <- c("PCM model", "GPCM model")
+  } else {
+    stop("No valid irt_type provided. Possible are 'dich' for dichotomous ",
+         "analysis or 'poly' for polytomous analysis.")
   }
 
-  if (return_table)  return(pars)
+  mfit$AIC[1] <- model_dich$info_crit$AIC
+  mfit$BIC[1] <- model_dich$info_crit$BIC
+  mfit$Npars[1] <- model_dich$info_crit$Npars
+
+  mfit$AIC[2] <- model_poly$info_crit$AIC
+  mfit$BIC[2] <- model_poly$info_crit$BIC
+  mfit$Npars[2] <- model_poly$info_crit$Npars
+
+  if (print_results) {
+    print("Model fit of IRT models", quote = FALSE)
+    print(mfit)
+  }
+
+  if (return_results) return(mfit)
 }
 
 
@@ -499,18 +524,10 @@ steps_analysis <- function(results, path = here::here("Tables"), filename = NULL
   steps <- data.frame(steps)
 
   # Save table as Excel sheet
-  if (!is.null(filename)) {
+  save_table(steps, filename = filename, path = path, overwrite = overwrite,
+             show_rownames = TRUE)
 
-    # Create directory for table
-    check_folder(path)
-
-    # Create table
-    openxlsx::write.xlsx(steps,
-                         file = paste0(path, "/", filename),
-                         showNA = FALSE, rowNames = TRUE, overwrite = overwrite)
-
-  }
-
+  # return table
   if (return_table)  return(steps)
 }
 
@@ -541,6 +558,7 @@ print_irt_results <- function(model, irt_sum, steps_sum = NULL) { #, highlight =
                               #                   disc_low = 0.4,
                               #                   disc_high = 3,
                               #                   aQ3 = 0.06)) {
+
   # IRT summary table
   print("Summary table of IRT analysis", quote = FALSE)
   # if (highlight) {
@@ -588,10 +606,13 @@ print_irt_results <- function(model, irt_sum, steps_sum = NULL) { #, highlight =
   print("WMNSQ", quote = FALSE)
   wmnsq_min <- min(irt_sum$WMNSQ, na.rm = TRUE)
   wmnsq_max <- max(irt_sum$WMNSQ, na.rm = TRUE)
-  wmnsq_misfit <- irt_sum$Item[irt_sum$WMNSQ > 1.15]
+  wmnsq_mean <- round(mean(irt_sum$wmnsq, na.rm = TRUE), 2)
   message("The values of the WMNSQ were ... close to 1 with the lowest value being ",
           wmnsq_min, " (item ", irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_min], ") and the highest being ",
-          wmnsq_max, " (item ", irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_max], ").")
+          wmnsq_max, " (item ", irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_max], ") with an average of ",
+          wmnsq_mean, ".")
+
+  wmnsq_misfit <- irt_sum$Item[irt_sum$WMNSQ > 1.15]
   if (length(wmnsq_misfit == 1)) {
     message("Item ", wmnsq_misfit, " exhibited a WMNSQ of at least 1.15.")
   } else if (length(wmnsq_misfit > 1)) {
@@ -602,12 +623,17 @@ print_irt_results <- function(model, irt_sum, steps_sum = NULL) { #, highlight =
   print("WMNSQ t-value", quote = FALSE)
   t_min <- min(irt_sum$t, na.rm = TRUE)
   t_max <- max(irt_sum$t, na.rm = TRUE)
-  t_misfit <- irt_sum$Item[abs(irt_sum$t) > 8]
+  t_mean <- round(mean(irt_sum$t, na.rm = TRUE), 2)
   message("The WMNSQ t-values varied between ",
           t_min, " (item ", irt_sum$Item[irt_sum$t %in% t_min], ") and ",
-          t_max, " (item ", irt_sum$Item[irt_sum$t %in% t_max], ").")
-  if (length(t_misfit > 0)) {
-    message("Items ", t_misfit, " exhibited a WMNSQ t-value of at least 8.")
+          t_max, " (item ", irt_sum$Item[irt_sum$t %in% t_max], ") with an average of ",
+          t_mean, ".")
+
+  t_misfit <- irt_sum$Item[abs(irt_sum$t) > 8]
+  if (length(t_misfit == 1)) {
+    message("Item ", t_misfit, " exhibited an absolute t-value of at least 8.")
+  } else if (length(t_misfit > 1)) {
+    message("Items ", t_misfit, " exhibited an absolute t-value of at least 8.")
   }
 
   # Correlation of item scores with total correct score
@@ -668,48 +694,3 @@ print_irt_results <- function(model, irt_sum, steps_sum = NULL) { #, highlight =
 #         irt_sum$aQ3    > thresholds['aQ3']
 #         ))
 # }
-
-#' Print IRT results
-#'
-#' Print and highlight IRT (and steps) analysis results.
-#'
-#' @param model_dich  list; results of dichotomous irt analysis, as returned by function irt_model()
-#' @param model_poly  list; results of polytomous irt analysis, as returned by function irt_model()
-#' @param irt_type  character string; either "dich" for dichotomous analysis or "poly" for polytomous analysis.
-#' @param print_results  boolean; indicates whether to print results  to console or html.
-#' @param return_results  boolean; indicates whether to return results.
-#'
-#' @return if return_results, data.frame with AIC, BIC and number of parameters for both models will be returned.
-#' @export
-
-irt_model_fit <- function(model_dich, model_poly, irt_type,
-                          print_results = TRUE, return_results = FALSE) {
-
-  mfit <- data.frame(AIC = rep(NA_integer_, 2),
-                     BIC = rep(NA_integer_, 2),
-                     Npars = rep(NA_integer_, 2))
-
-  if(irt_type == 'dich') {
-    row.names(mfit) <- c("1PL model", "2PL model")
-  } else if (irt_type == 'poly') {
-    row.names(mfit) <- c("PCM model", "GPCM model")
-  } else {
-    stop("No valid irt_type provided. Possible are 'dich' for dichotomous ",
-         "analysis or 'poly' for polytomous analysis.")
-  }
-
-  mfit$AIC[1] <- model_dich$info_crit$AIC
-  mfit$BIC[1] <- model_dich$info_crit$BIC
-  mfit$Npars[1] <- model_dich$info_crit$Npars
-
-  mfit$AIC[2] <- model_poly$info_crit$AIC
-  mfit$BIC[2] <- model_poly$info_crit$BIC
-  mfit$Npars[2] <- model_poly$info_crit$Npars
-
-  if (print_results) {
-    print("Model fit of IRT models", quote = FALSE)
-    print(mfit)
-  }
-
-  if (return_results) return(mfit)
-}
