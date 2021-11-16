@@ -13,16 +13,10 @@
 #' @param grouping      character vector. contains names of groups (e.g. 'easy and 'difficult')
 #'                      as items in data.frame resp.
 #' @param mvs           named vector with definition of user-defined missing values
-#' @param name_data     string with name of data file that shall be saved (including type of file);
-#'                      if NULL, no file will be saved.
-#' @param path_data     folder path for file if it shall be saved
-#' @param return_table  boolean. indicates whether table shall be returned.
-#' @param name_table    string with name of table file that shall be saved (excluding type of file);
-#'                      if NULL, no file will be saved.
+#' @param path_results     folder path for file if it shall be saved
 #' @param overwrite_table boolean; indicates whether to overwrite existing file when saving table.
 #' @param path_table    folder path for file if it shall be saved
-#' @param plots         boolean. indicates whether plotsshall be created.
-#' @param name_plots    string with base of name for plot files (excluding type of file)
+#' @param plots         boolean. indicates whether plots shall be created.
 #' @param path_plots    folder path for plots
 #' @param color_plots   bar color
 #' @param show.all_plots logical; only needed when groups exist, indicates whether
@@ -40,10 +34,9 @@
 mv_person <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
-                      name_data = NULL, path_data = here::here("Data"),
-                      return_table = TRUE, name_table = NULL, overwrite_table = FALSE,
-                      path_table = here::here("Tables"),
-                      plots = FALSE, name_plots = "Missing_responses_by_person",
+                      plots = FALSE, save = TRUE, return = FALSE,
+                      path_results = here::here("Results"),
+                      path_table = here::here("Tables"), overwrite_table = FALSE,
                       path_plots = here::here("Plots/Missing_Responses/by_person"),
                       color_plots = NULL, show.all_plots = FALSE,
                       lbls_plots = c(
@@ -60,8 +53,8 @@ mv_person <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL
                       digits = 2, warn = TRUE, verbose = TRUE) {
 
   mv_p <- mvp_analysis(resp = resp, vars = vars, items = items, grouping = grouping,
-                  mvs = mvs, filename = name_data, path = path_data,
-                  valid = valid, digits = digits, warn = warn)
+                       mvs = mvs, filename = name_data, path = path_results,
+                       valid = valid, digits = digits, warn = warn)
 
   if (plots) {
     mvp_plots(mv_p = mv_p, vars = vars, items = items, grouping = grouping,
@@ -70,10 +63,11 @@ mv_person <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL
               verbose = verbose)
   }
 
-  if (return_table | !is.null(name_table)) {
+  if (save) {
+    save_results(mv_p, filename = "mv_person.Rdata", path = path_results)
     mvp_table(mv_p = mv_p, grouping = grouping, mvs = mvs,
-              filename = name_table, path = path_table,
-              return_table = return_table, overwrite = overwrite_table)
+              filename = "mv_person.xlsx", path = path_table,
+              overwrite = overwrite_table)
   }
 }
 
@@ -100,7 +94,7 @@ mv_person <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL
 #' @param warn      boolean. indicates whether to print a warning if NAs were found in resp
 #' @param return_results    boolean. indicates whether to return results.
 #'
-#' @return   if return_results, list with missing values per person and
+#' @return   list with missing values per person and
 #' for each missing value type (in percentage) is returned
 #'
 #' @export
@@ -108,8 +102,8 @@ mv_person <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL
 mvp_analysis <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, NAd = -54, AZ = -21),
-                         filename = NULL, path = here::here("Data"),
-                         digits = 2, warn = TRUE, return_results = TRUE) {
+                         filename = NULL, path = here::here("Results"),
+                         digits = 2, warn = TRUE) {
 
   # NAs are not acknowledged in mvs-argument
   if (warn & !(NA %in% mvs) & any(resp %in% NA)) {
@@ -148,7 +142,7 @@ mvp_analysis <- function(resp, vars, items = 'final', valid = NULL, grouping = N
   save_results(mv_p, filename = filename, path = path)
 
   # Return results
-  if (return_results) return(mv_p)
+  return(mv_p)
 }
 
 
@@ -174,7 +168,7 @@ mvp_analysis <- function(resp, vars, items = 'final', valid = NULL, grouping = N
 #' @param return_table  boolean. indicates whether to return table.
 
 #'
-#' @return   if return is set to TRUE, table with missing values per person and
+#' @return   table with missing values per person and
 #' for each missing value type (in percentage)
 #'
 #' @export
@@ -184,7 +178,7 @@ mvp_table <- function(mv_p = NULL, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       filename = NULL, path = here::here("Tables"),
-                      overwrite = FALSE, return_table = FALSE) {
+                      overwrite = FALSE) {
 
   # Test data
   test_mvp_data(mv_p, resp = resp, vars = vars, valid = valid, mvs = mvs,
@@ -192,16 +186,15 @@ mvp_table <- function(mv_p = NULL, grouping = NULL,
 
   # Create table
   if (is.null(grouping)) {
-    results <- write_results(mv_p)
+    results <- write_mvp_table(mv_p)
   } else {
     results <- list()
     for (g in names(mv_p)) {
-      results[[g]] <- write_results(mv_p[[g]])
+      results[[g]] <- write_mvp_table(mv_p[[g]])
     }
   }
 
   # Save table
-
   if (!is.null(filename)) {
 
     # Create directory for table
@@ -222,7 +215,7 @@ mvp_table <- function(mv_p = NULL, grouping = NULL,
   }
 
   # Return table
-  if (return_table) return(results)
+  return(results)
 }
 
 
@@ -261,7 +254,6 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       path = here::here("Plots/Missing_Responses/by_person"),
-                      filename = "Missing_responses_by_person",
                       lbls = c(
                         ALL = "total missing",
                         OM = "omitted",
@@ -379,7 +371,7 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
 
     # save plot
     ggplot2::ggsave(
-      filename = paste0(filename, " (", i,").png"),
+      filename = paste0("Missing_responses_by_person (", i,").png"),
       plot = gg, path = path, width = 2000, height = 1200, units = "px",
       dpi = 300
     )
@@ -436,7 +428,7 @@ mvp_perc <- function(resp, mvs, digits = 2) {
 #' @return   table with frequency of missing values for one missing value type
 #' @export
 
-write_results <- function(res) {
+write_mvp_table <- function(res) {
   results <- list()
 
   for (i in names(res)) {
@@ -447,7 +439,7 @@ write_results <- function(res) {
   return(results)
 }
 
-#' Missing values by person analysis
+#' Test mv_p and if incomplete, create new mv_p
 #'
 #' @param mv_p      percentage of missing responses by person as
 #'                  returned by mv_person()

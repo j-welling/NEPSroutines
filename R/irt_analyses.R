@@ -20,64 +20,43 @@
 #' @param scoring   numeric vector; scoring factor to be applied to loading matrix;
 #'                    can be NULL for Rasch model; if NULL for PCM model,
 #'                    scoring matrix is reconstructed from item names.
-#' @param icc_plots boolean; indicates whether to create and save ICC plots.
-#' @param wright_map boolean; indicates whether to create and save Wright Map.
+#' @param plots  boolean; indicates whether to create plots.
 #' @param path_plots character. contains name of path for plots.
-#' @param name_table string with name of summary table file that shall be saved (including file type);
-#'   if left empty, table will not be saved.
-#' @param name_steps string with name of steps table file that shall be saved (including file type);
-#'   if left empty, table will not be saved; only available for partial credit models.
 #' @param path_tables character. contains name of path for tables.
-#' @param name_data string with name of data file that shall be saved (including file type);
-#' if left empty, data will not be saved.
-#' @param path_data character. contains name of path for data.
+#' @param path_results character. contains name of path for data.
 #' @param overwrite_table boolean; indicates whether to overwrite existing file when saving table.
 #' @param digits    number of decimals for rounding
-#' @param print_results  boolean; indicates whether to print results  to console or html.
-# #' @param highlight  boolean; indicates whether to highlight problematic items
-# #' @param moderate_thresh  named double vector; contains thresholds for moderate misfit
-# #' @param severe_thresh  named double vector; contains thresholds for severe misfit
-#' @param return_results  boolean. indicates whether to return results.
+#' @param print  boolean; indicates whether to print results  to console or html.
+#' @param return  boolean. indicates whether to return results.
+#' @param name_group
 #'
+#' @return
 #' @export
 
 irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NULL,
-                         icc_plots = FALSE, wright_map = FALSE, path_plots = here::here("Plots"),
-                         name_table = NULL, name_steps = NULL, path_tables = here::here("Tables"),
-                         name_data = NULL, path_data = here::here("Data"),
-                         overwrite_table = FALSE, digits = 2,
-                         print_results = TRUE, # highlight = TRUE,
-                         # moderate_thresh = c(WMNSQ = 1.15,
-                         #                     t = 6,
-                         #                     rit = 0.3,
-                         #                     disc_low = 0.6,
-                         #                     disc_high = 2,
-                         #                     aQ3 = 0.04),
-                         # high_thresh = c(WMNSQ = 1.2,
-                         #                 t = 8,
-                         #                 rit = 0.2,
-                         #                 disc_low = 0.4,
-                         #                 disc_high = 3,
-                         #                 aQ3 = 0.06)
-                         return_results = FALSE) {
+                         plots = FALSE, save = TRUE, print = TRUE, return = FALSE,
+                         path_plots = here::here("Plots"),
+                         path_tables = here::here("Tables"),
+                         path_results = here::here("Results"),
+                         overwrite_table = FALSE, digits = 2, name_group = NULL) {
 
-  results <- list()
+  irt <- list()
 
   if (irt_type == 'dich') {
 
-    results$model.1pl <- irt_model(resp = resp, vars = vars, items = items,
-                                      valid = valid, irtmodel = '1PL')
-    results$model.2pl <- irt_model(resp = resp, vars = vars, items = items,
-                                      valid = valid, irtmodel = '2PL')
+    irt$model.1pl <- irt_model(resp = resp, vars = vars, items = items,
+                               valid = valid, irtmodel = '1PL')
+    irt$model.2pl <- irt_model(resp = resp, vars = vars, items = items,
+                               valid = valid, irtmodel = '2PL')
 
     irtmodel = c("1PL", "2PL")
 
   } else if (irt_type == 'poly') {
 
-    results$model.pcm <- irt_model(resp = resp, vars = vars, items = items,
-                                      valid = valid, irtmodel = 'PCM2', scoring = scoring)
-    results$model.gpcm <- irt_model(resp = resp, vars = vars, items = items,
-                                       valid = valid, irtmodel = 'GPCM', scoring = scoring)
+    irt$model.pcm <- irt_model(resp = resp, vars = vars, items = items,
+                               valid = valid, irtmodel = 'PCM2', scoring = scoring)
+    irt$model.gpcm <- irt_model(resp = resp, vars = vars, items = items,
+                                valid = valid, irtmodel = 'GPCM', scoring = scoring)
 
     irtmodel = c("PCM2", "GPCM")
 
@@ -88,61 +67,60 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
 
   }
 
-  for (i in seq_along(irtmodel)) {
+  if (plots) {
 
-    # ICC plots
-    if (icc_plots) {
-      icc_plots(results = results[[i]], name = irtmodel[i], path = path_plots)
+    for (i in seq_along(irtmodel)) {
+
+      # ICC plots
+      icc_plots(results = irt[[i]], name = irtmodel[i], path = path_plots)
+
+      # Wright map
+      wright_map(results = irt[[i]], name = irtmodel[i], path = path_plots)
+
     }
+  }
 
-    # Wright map
-    if (wright_map) {
-      wright_map(results = results[[i]], name = irtmodel[i], path = path_plots)
+
+  if (return | print | save) {
+    # IRT summary
+    irt$summary <- irt_summary(resp = resp, vars = vars,
+                               results = irt[[1]], disc = irt[[2]],
+                               valid = valid, digits = digits)
+
+    # Model fit
+    irt$model_fit <- irt_model_fit(model_dich = irt[[1]],
+                                   model_poly = irt[[2]],
+                                   irt_type = irt_type)
+
+    # Steps analysis
+    if (irt_type = 'poly') {
+      irt$steps <- steps_analysis(results = irt$model.pcm, digits = digits)
     }
-
   }
 
-  # IRT summary
-  if (return_results | print_results | !is.null(name_table) | !is.null(name_data)) {
-    results$summary <- irt_summary(resp = resp, vars = vars,
-                                   results = results[[1]],
-                                   disc = results[[2]],
-                                   filename = name_table,
-                                   path = path_tables,
-                                   valid = valid, digits = digits,
-                                   overwrite = overwrite_table)
-
-    results$model_fit <- irt_model_fit(model_dich = results[[1]],
-                                       model_poly = results[[2]],
-                                       irt_type = irt_type,
-                                       print_results = print_results,
-                                       return_results = TRUE)
-  }
-
-  # Steps analysis
-  if (irt_type == 'poly' && (return_results | print_results | !is.null(name_steps) | !is.null(name_data))) {
-    results$steps <- steps_analysis(results = results$model.pcm,
-                                    filename = name_steps, path = path_tables,
-                                    digits = digits, overwrite = overwrite_table)
-  } else if(!is.null(name_steps)) {
-    warning("No steps analysis possible for Rasch models.")
-  }
-
-  # Save results
-  save_results(results, filename = name_data, path = path_data)
-
-  # Print results
+  # Print irt
   if (print_results)  {
-    print_irt_results(model = results[[1]],
-                      irt_sum = results$summary,
-                      steps_sum = results$steps) #,
-                      #highlight = highlight,
-                      #moderate_thresh = moderate_thresh,
-                      #severe_thresh = severe_thresh)
+    print(irt$summary)
+    print(irt$model_fit)
+    if (irt_type == 'poly') print(irt$steps)
+    print_irt_results(model = irt[[1]],
+                      irt_sum = irt$summary,
+                      steps_sum = irt$steps)
   }
 
-  # Return results
-  if (return_results)  return(results)
+  # Save irt
+  if (is.null(name_group)) {
+    name <- paste0("irt_", irt_type)
+  } else {
+    name <- paste0("irt_", irt_type, "_", name_group)
+  }
+  irt_summary <- irt[-c(1:2)]
+
+  save_results(irt, filename = paste0(name, ".Rdata"), path = path_results)
+  save_table(irt_summary, filename = paste0(name, ".xlsx"), path = path_table)
+
+  # Return irt
+  if (return)  return(irt)
 }
 
 #' IRT analyses
@@ -170,8 +148,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
 #' @param path      folder path for data
 #' @param filename  string with name of file that shall be saved (including file type).
 #' @param verbose   logical. If verbose == TRUE information about the estimation
-#'                    progress is printed to the console
-#' @param return_results  boolean. indicates whether to return results.
+#'                    progress is printed to the console.
 #'
 #' @return (if return_results = TRUE) a list of:
 #'   mod: tam.mml; estimated item response model
@@ -184,7 +161,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
 #' @export
 
 irt_model <- function(resp, vars, items, valid = NULL, irtmodel, scoring = NULL,
-                         path = here::here("Data"), filename = NULL,
+                         path = here::here("Results"), filename = NULL,
                          verbose = FALSE, return_results = TRUE) {
 
   # Check if input is correct
@@ -255,7 +232,7 @@ irt_model <- function(resp, vars, items, valid = NULL, irtmodel, scoring = NULL,
   save_results(results, filename = filename, path = path)
 
   # Return results
-  if (return_results)  return(results)
+  return(results)
 }
 
 
@@ -353,7 +330,6 @@ wright_map <- function(results, name, path = here::here("Plots")) {
 #'                  indicating (in)valid cases.
 #' @param digits integer; how many digits after rounding
 #' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
-#' @param return_table logical; whether resulting table should be returned
 #'
 #' @return a data.frame containing the item name, N, percentage correct,
 #'   item difficulty, SE, WMNSQ, t, rit, item discrimination, Q3.
@@ -362,8 +338,7 @@ wright_map <- function(results, name, path = here::here("Plots")) {
 
 irt_summary <- function(resp, vars, results, disc,
                         path = here::here("Tables"), filename = NULL,
-                        valid = NULL, digits = 2, overwrite = FALSE,
-                        return_table = TRUE) {
+                        valid = NULL, digits = 2, overwrite = FALSE) {
 
   # prepare data
   vars$irt_items <- vars$items %in% rownames(results$mod$xsi)
@@ -423,7 +398,7 @@ irt_summary <- function(resp, vars, results, disc,
              overwrite = overwrite, show_rownames = FALSE)
 
   # Return table
-  if (return_table)  return(pars)
+  return(pars)
 }
 
 
@@ -435,14 +410,12 @@ irt_summary <- function(resp, vars, results, disc,
 #' @param model_dich  list; results of dichotomous irt analysis, as returned by function irt_model()
 #' @param model_poly  list; results of polytomous irt analysis, as returned by function irt_model()
 #' @param irt_type  character string; either "dich" for dichotomous analysis or "poly" for polytomous analysis.
-#' @param print_results  boolean; indicates whether to print results  to console or html.
-#' @param return_results  boolean; indicates whether to return results.
 #'
-#' @return if return_results, data.frame with AIC, BIC and number of parameters for both models will be returned.
+#' @return data.frame with AIC, BIC and number of parameters for both models will be returned.
 #' @export
 
-irt_model_fit <- function(model_dich, model_poly, irt_type,
-                          print_results = TRUE, return_results = FALSE) {
+irt_model_fit <- function(model_dich, model_poly, irt_type, overwrite = FALSE,
+                          path = here::here("Tables"), filename = NULL) {
 
   mfit <- data.frame(AIC = rep(NA_integer_, 2),
                      BIC = rep(NA_integer_, 2),
@@ -465,12 +438,11 @@ irt_model_fit <- function(model_dich, model_poly, irt_type,
   mfit$BIC[2] <- model_poly$info_crit$BIC
   mfit$Npars[2] <- model_poly$info_crit$Npars
 
-  if (print_results) {
-    print("Model fit of IRT models", quote = FALSE)
-    print(mfit)
-  }
+  # Save table
+  save_table(mfit, filename = filename, path = path, overwrite = overwrite)
 
-  if (return_results) return(mfit)
+  # Return table
+  return(mfit)
 }
 
 
@@ -485,14 +457,13 @@ irt_model_fit <- function(model_dich, model_poly, irt_type,
 #'                 the table will not be saved.
 #' @param digits integer; how many digits after rounding
 #' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
-#' @param return_table logical; whether resulting table should be returned
 #'
 #' @return a data.frame containing the step parameters and SEs for each step
 #'
 #' @export
 
 steps_analysis <- function(results, path = here::here("Tables"), filename = NULL,
-                           digits = 2, overwrite = FALSE, return_table = TRUE) {
+                           digits = 2, overwrite = FALSE) {
 
   # step parameters
   step <- round(results$mod$xsi[, c("xsi", "se.xsi")], digits)
@@ -527,8 +498,8 @@ steps_analysis <- function(results, path = here::here("Tables"), filename = NULL
   save_table(steps, filename = filename, path = path, overwrite = overwrite,
              show_rownames = TRUE)
 
-  # return table
-  if (return_table)  return(steps)
+  # Return table
+  return(steps)
 }
 
 
@@ -539,44 +510,10 @@ steps_analysis <- function(results, path = here::here("Tables"), filename = NULL
 #' @param model      list; results of irt analysis, as returned by function irt_model()
 #' @param irt_sum    data.frame; results of irt analysis, as returned by function irt_summary()
 #' @param steps_sum  data.frame; results of steps analysis, as returned by function steps_analysis()
-# #' @param highlight  boolean; indicates whether to highlight problematic items
-# #' @param moderate_thresh  named double vector; contains thresholds for moderate misfit
-# #' @param severe_thresh  named double vector; contains thresholds for severe misfit
 #'
 #' @export
 
-print_irt_results <- function(model, irt_sum, steps_sum = NULL) { #, highlight = TRUE,
-                              # moderate_thresh = c(WMNSQ = 1.15,
-                              #                     t = 6,
-                              #                     rit = 0.3,
-                              #                     disc_low = 0.6,
-                              #                     disc_high = 2,
-                              #                     aQ3 = 0.04),
-                              # severe_thresh = c(WMNSQ = 1.2,
-                              #                   t = 8,
-                              #                   rit = 0.2,
-                              #                   disc_low = 0.4,
-                              #                   disc_high = 3,
-                              #                   aQ3 = 0.06)) {
-
-  # IRT summary table
-  print("Summary table of IRT analysis", quote = FALSE)
-  # if (highlight) {
-    # if (any(!names(moderate_misfit) %in% c('WNSQ', 't', 'rit', 'disc_low', 'disc_high', 'aQ3')) ||
-    #     any(!names(severe_misfit) %in% c('WNSQ', 't', 'rit', 'disc_low', 'disc_high', 'aQ3')))
-    # {
-    #     stop("Please provide vector with thresholds for WMSQ, t, rit, disc_low, disc_high AND aQ3 or use the function default.")
-    # } else {
-      #     moderate_misfit <- find_rows_with_misfit(irt_sum, thresholds = moderate_thresh)
-      #     severe_misfit <- find_rows_with_misfit(irt_sum, thresholds = severe_thresh)
-      #     print(kable(irt_sum, caption = "IRT analysis") %>%
-      #               kable_styling(bootstrap_options = "striped", full_width = F) %>%
-      #               kableExtra::row_spec(moderate, bold = T, color = "white", background = "orange") %>%
-      #               kableExtra::row_spec(severe, bold = T, color = "white", background = "red"))
-    #  }
-  # } else {
-    print(irt_sum, row.names = FALSE)
-  # }
+print_irt_results <- function(model, irt_sum, steps_sum = NULL) {
 
   # Percentage correct
   print("Percentage correct", quote = FALSE)
@@ -657,12 +594,6 @@ print_irt_results <- function(model, irt_sum, steps_sum = NULL) { #, highlight =
   message("The reliabilities of the test (EAP/PV reliability = ", eap_rel,
           ", WLE reliability = ", wle_rel, ") were ... .")
 
-  # Steps analysis
-  if(!is.null(steps_sum)) {
-    print("Summary of steps analysis", quote = FALSE)
-    print(steps_sum)
-  }
-
   # Item discrimination
   print("Item discrimination", quote = FALSE)
   disc_min <- min(irt_sum$Discr., na.rm = TRUE)
@@ -673,24 +604,3 @@ print_irt_results <- function(model, irt_sum, steps_sum = NULL) { #, highlight =
           disc_max, " (item ", irt_sum$Item[irt_sum$Discr. %in% disc_max], ") with an average discrimination of ",
           disc_mean, ".")
 }
-
-
-# #' Find rows with misfit
-# #'
-# #' Indicate rows that contain items with some misfit.
-# #'
-# #' @param irt_sum    data.frame; results of irt analysis, as returned by function irt_summary()
-# #' @param thresholds  named double vector; contains thresholds for misfit
-# #'
-# #' @return integer vector; contains row numbers of malfunctioning items
-
-# find_rows_with_misfit <- function(irt_sum, thresholds) {
-#     unique(which(
-#         irt_sum$WMNSQ  > thresholds['WMSNQ'] |
-#         abs(irt_sum$t) > thresholds['t'] |
-#         irt_sum$rit    < thresholds['rit'] |
-#         irt_sum$Discr. < thresholds['disc_low'] |
-#         irt_sum$Discr. > thresholds['disc_high'] |
-#         irt_sum$aQ3    > thresholds['aQ3']
-#         ))
-# }
