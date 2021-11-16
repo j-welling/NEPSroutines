@@ -7,7 +7,8 @@
 #'   and y in {0, 1, ... k-1} for polytomous responses with k categories.
 #'   Missing values (-97 to -21) are coded as NA internally. Also contains a
 #'   column with the DIF variable.
-#' @param vars data.frame with all variables as rows with at least following columns:
+#' @param vars data.frame with all variables as rows with at least following
+#'   columns:
 #'   items: contains all item names (both scored and unscored)
 #'   further custom-named columns indicating the items to select and the item
 #'   scoring via logicals
@@ -16,13 +17,14 @@
 #'   come with a different set of analysis items, this argument becomes a
 #'   vector of \code{length(dif_vars)} containing the respective selection
 #'   variables in vars
-#' @param dif_vars character vector. contains the variable names to be tested for DIF
-#'   (e.g., "gender")
+#' @param dif_vars character vector. contains the variable names to be tested
+#'   for DIF (e.g., "gender")
 #' @param valid character string. defines name of boolean variable in dat,
 #'   indicating (in)valid cases.
 #' @param scoring character string; refers to the scoring variable in vars.
 #'   Defaults to "scoring".
-#' @param overwrite_table boolean; indicates whether to overwrite existing file when saving table.
+#' @param overwrite_table boolean; indicates whether to overwrite existing file
+#'   when saving table.
 #' @param print logical indicating whether summary is printed to the console
 #' @param save logical indicating whether summary / data is stored on hard disk
 #' @param verbose logical; should progress be printed to console?
@@ -42,56 +44,74 @@ dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL,
                          scoring = "scoring", overwrite_table = FALSE,
                          print = TRUE, verbose = FALSE, save = TRUE,
                          return_results = FALSE,
-                         save = TRUE, path = c("Tables", "Results"),
+                         path_results = 'Results', path_table = 'Tables',
                          ...) {
 
-  path_table <- path[1]
-  path_results <- path[2]
+  check_items(items, dif_vars)
 
-  res <- conduct_dif_analysis_summary(
-    items, dif_vars, resp, vars, scoring, valid, verbose, path_table,
-    path_results, print, save, overwrite_table
+  dif_models <- conduct_dif_analysis(
+    items = items, dif_vars = dif_vars, resp = resp, vars = vars,
+    scoring = scoring, valid = valid, verbose = verbose
   )
 
-  build_dif_tables(dif_summaries = res$dif_summaries, save = save,
-                   path_table = path_table, overwrite = overwrite_table)
+  dif_summaries <- summarize_dif_analysis(
+    dif_models = dif_models, dif_vars = dif_vars,
+    path_table = path_table, path_results = path_results,
+    print = print, save = save, overwrite_table = overwrite_table
+  )
+
+  build_dif_tr_tables(dif_summaries = dif_summaries, save = save,
+                      path_table = path_table, overwrite = overwrite_table)
 
   if (return_results) {
+    res <- list(dif_models = dif_models, dif_summaries = dif_summaries)
     return(res)
   }
 }
 
-
-conduct_dif_analysis_summary <- function(items, dif_vars, resp, vars, scoring,
-                                         valid, verbose, path_table,
-                                         path_results, print, save,
-                                         overwrite_table) {
-
-  dif_models <- list()
-  dif_summaries <- list()
-
+check_items <- function(items, dif_vars) {
   if (length(items) > 1 & length(items) != length(dif_vars)) {
     stop("Please check 'items' and 'dif_vars'. At least one of them does ",
          "not match the intended analysis.")
   }
+}
+
+
+conduct_dif_analysis <- function(items, dif_vars, resp, vars, scoring,
+                                 valid, verbose) {
+
+  dif_models <- list()
+
   if (length(items) == 1) {
     items <- rep(items, length(dif_vars))
   }
 
   for (i in seq_along(dif_vars)) {
-
     dif_models[[i]] <- dif_model(resp = resp, vars = vars, items = items[i],
                                  facets = dif_vars[i], scoring = scoring,
                                  valid = valid, verbose = verbose)
+  }
+  names(dif_models) <- dif_vars
+
+  return(dif_models)
+}
+
+
+summarize_dif_analysis <- function(dif_models, dif_vars, path_table,
+                                   path_results, print, save, overwrite_table) {
+
+  dif_summaries <- list()
+
+  for (i in seq_along(dif_vars)) {
 
     dif_summaries[[i]] <- dif_summary(dif_models[[i]], print = print,
                                       save = save, path_table = path_table,
                                       path_results = path_results,
                                       overwrite = overwrite_table)
   }
-  names(dif_summaries) <- names(dif_models) <- dif_vars
+  names(dif_summaries) <- dif_vars
 
-  return(list(dif_summaries = dif_summaries, dif_models = dif_models))
+  return(dif_summaries)
 }
 
 
@@ -105,7 +125,8 @@ conduct_dif_analysis_summary <- function(items, dif_vars, resp, vars, scoring,
 #'   and y in {0, 1, ... k-1} for polytomous responses with k categories.
 #'   Missing values (-97 to -21) are coded as NA internally. Also contains a
 #'   column with the DIF variable.
-#' @param vars data.frame with all variables as rows with at least following columns:
+#' @param vars data.frame with all variables as rows with at least following
+#'   columns:
 #'   items: contains all item names (both scored and unscored)
 #'   further custom-named columns indicating the items to select and the item
 #'   scoring via logicals
@@ -199,7 +220,8 @@ dif_model <- function(resp, vars, items, facets, scoring = "scoring",
 #'   column is named after DIF variable (e.g., "gender"); must contain the same
 #'   persons in the same order as resp
 #' @param formulaA an R formula for the DIF analysis
-#' @param vars data.frame with all variables as rows with at least following columns:
+#' @param vars data.frame with all variables as rows with at least following
+#'   columns:
 #'   items: contains all item names (both scored and unscored)
 #'   scoring: numeric; scoring of IRT items;
 #'   ???: logical, can be named arbitrarily and needs to contain the variable
@@ -216,8 +238,8 @@ dif_model <- function(resp, vars, items, facets, scoring = "scoring",
 #' @return a tam.mml model
 #' @noRd
 
-pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring", valid = NULL, pid,
-                    verbose) {
+pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring",
+                    valid = NULL, pid, verbose) {
 
   # Select only valid cases and convert mvs
   if (!is.null(valid) && valid %in% names(resp)) {
@@ -252,7 +274,8 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring", v
 #'   summaries are stored on the hard drive. Please note that the
 #'   path is relative to the current working path set by here::i_am(). Defaults
 #'   to NULL (not stored)
-#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
+#' @param overwrite boolean; indicates whether to overwrite existing file when
+#'   saving table.
 #'
 #' @return list of information criteria, dif estimates and main effects in
 #'   data frames for dif analysis
@@ -273,11 +296,12 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
   res$compared_against <- group
 
   if (print) {
-    print_dif_summary(diflist, res)
+    print_dif_summary(diflist = diflist, res = res)
   }
 
   if (save) {
-    save_dif_summary(path_table, path_results, diflist, res, overwrite)
+    save_dif_summary(diflist = diflist, res = res, overwrite = overwrite,
+                     path_results = path_results, path_table = path_table)
   }
 
   return(res)
@@ -401,17 +425,18 @@ difsum <- function(obj, facet, group = 1, group2 = NULL) {
 #' used for the technical reports
 #'
 #' @param dif_summaries named list of dif_summary() return objects; the list
-#' elements must be named after their DIF variable
+#'   elements must be named after their DIF variable
 #' @param save logical indicator whether the results are to be written to the
 #'   hard disk
 #' @param path_table character string; indicates the folder location where the
 #'   summaries are stored on the hard drive. Please note that the
 #'   path is relative to the current working path set by here::i_am()
-#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
+#' @param overwrite boolean; indicates whether to overwrite existing file when
+#'   saving table.
 #'
 #' @export
-build_dif_tables <- function(dif_summaries, save = TRUE, path_table, #path_results,
-                             overwrite = FALSE) {
+build_dif_tr_tables <- function(dif_summaries, save = TRUE,
+                                path_results, path_table, overwrite = FALSE) {
 
   dif_vars <- names(dif_summaries)
 
@@ -442,25 +467,18 @@ build_dif_tables <- function(dif_summaries, save = TRUE, path_table, #path_resul
   est <- rbind(est, mne)
 
   if (save) {
-    # save to hard drive
-    check_folder(path_table)
-    # check_folder(path_results)
-
-    # save(gof, est,
-    #      file = here::here(paste0(path_results, "/dif_all_summary.Rdata")))
-
-    openxlsx::write.xlsx(
-      gof,
-      file = here::here(paste0(path_table, "/dif_all_goodness_of_fit.xlsx")),
-      showNA = FALSE, overwrite = overwrite
-    )
-
-    openxlsx::write.xlsx(
-      est,
-      file = here::here(paste0(path_table, "/dif_all_estimates.xlsx")),
-      showNA = FALSE, overwrite = overwrite
-    )
+    save_dif_tr_tables(gof = gof, est = est, overwrite = overwrite,
+                       path_results = path_results, path_table = path_table)
   }
+}
+
+
+save_dif_tr_tables <- function(gof, est, path_results, path_table, overwrite) {
+
+  dif_tr_tables <- list(gof = gof, estimates = est)
+  save_results(dif_tr_tables, filename = "dif_tr_tables.Rdata", path = path_results)
+  save_table(dif_tr_tables, filename = "dif_tr_tables.xlsx", path = path_table,
+             overwrite = overwrite)
 }
 
 
@@ -472,7 +490,7 @@ print_dif_summary <- function(diflist, res) {
   print(res$gof)
   # main effects table
   message("\nMain effects of DIF and main effects model for ",
-          diflist$dif_var, ":")
+          diflist$dif_var, " (compared against: ", res$compared_against, "):")
   print(res$mne)
   # problematic dif values (significant p-value, larger than 0.5 logits)
   message("\nItems exhibiting problematic DIF for ", diflist$dif_var,
@@ -482,31 +500,15 @@ print_dif_summary <- function(diflist, res) {
 
 
 
-save_dif_summary <- function(path_table, path_results, diflist, res,
+save_dif_summary <- function(diflist, res, path_results, path_table,
                              overwrite) {
-  check_folder(path_table)
-  check_folder(path_results)
 
-  save(diflist, file = here::here(paste0(path_results, "/dif_",
-                                         diflist$dif_var, ".Rdata")))
-  save(res, file = here::here(paste0(path_table, "/dif_",
-                                     diflist$dif_var, "_summary.Rdata")))
-  openxlsx::write.xlsx(
-    res$gof,
-    file = here::here(paste0(path_table, "/dif_",
-                             diflist$dif_var, "_goodness_of_fit.xlsx")),
-    showNA = FALSE, overwrite = overwrite
-  )
-  openxlsx::write.xlsx(
-    res$est,
-    file = here::here(paste0(path_table, "/dif_",
-                             diflist$dif_var, "_dif_estimates.xlsx")),
-    showNA = FALSE, overwrite = overwrite
-  )
-  openxlsx::write.xlsx(
-    res$mne,
-    file = here::here(paste0(path_table, "/dif_",
-                             diflist$dif_var, "_main_effects.xlsx")),
-    showNA = FALSE, overwrite = overwrite
-  )
+  # Save results
+  dif_results <- list(diflist = diflist, summary = res)
+  save_results(dif, filename = "dif_results.Rdata", path = path_results)
+
+  # Save table
+  results <- list(gof = res$gof, estimates = res$est, main_effects = res$mne)
+  save_table(results, filename = "dif_results.xlsx", path = path_table,
+             overwrite = overwrite)
 }
