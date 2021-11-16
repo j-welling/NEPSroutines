@@ -111,11 +111,6 @@ mvp_analysis <- function(resp, vars, items = 'final', valid = NULL, grouping = N
                          filename = NULL, path = here::here("Data"),
                          digits = 2, warn = TRUE, return_results = TRUE) {
 
-  # Testing prerequisites (data)
-  if (is.null(vars) | is.null(resp)) {
-    stop("Please provide vars and resp.")
-  }
-
   # NAs are not acknowledged in mvs-argument
   if (warn & !(NA %in% mvs) & any(resp %in% NA)) {
     warning("NAs found in resp! These values are ignored.")
@@ -150,13 +145,7 @@ mvp_analysis <- function(resp, vars, items = 'final', valid = NULL, grouping = N
   }
 
   # Save results
-  if (!is.null(filename)) {
-
-    # Create directory for data
-    check_folder(path)
-
-    save(mv_p, file = here::here(paste0(path, "/", filename)))
-  }
+  save_results(mv_p, filename = filename, path = path)
 
   # Return results
   if (return_results) return(mv_p)
@@ -197,18 +186,11 @@ mvp_table <- function(mv_p = NULL, grouping = NULL,
                       filename = NULL, path = here::here("Tables"),
                       overwrite = FALSE, return_table = FALSE) {
 
-  # Percentage of missing values per item
-  if (is.null(mv_p)) {
-    if (!is.null(resp) & !is.null(vars)) {
-      mv_p <- mvp_analysis(resp, vars = vars, valid = valid, mvs = mvs,
-                           grouping = grouping)
-    } else {
-      stop("Please provide mv_p or resp and vars.")
-    }
-  }
+  # Test data
+  test_mvp_data(mv_p, resp = resp, vars = vars, valid = valid, mvs = mvs,
+                grouping = grouping)
 
   # Create table
-
   if (is.null(grouping)) {
     results <- write_results(mv_p)
   } else {
@@ -237,8 +219,6 @@ mvp_table <- function(mv_p = NULL, grouping = NULL,
                              showNA = FALSE, rowNames = FALSE, overwrite = overwrite)
       }
     }
-  } else {
-      warn("No filename provided. The table will not be saved.")
   }
 
   # Return table
@@ -295,15 +275,9 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
                       ),
                       color = NULL, verbose = TRUE) {
 
-  # Percentage of missing values by persons
-  if (is.null(mv_p)) {
-    if (is.null(resp) | is.null(mvs)) {
-      stop("Please provide mv_p or resp!")
-    } else {
-      mv_p <- mvp_analysis(resp, vars = vars, valid = valid, grouping = grouping,
-                           mvs = mvs)
-    }
-  }
+  # Test data
+  test_mvp_data(mv_p, resp = resp, vars = vars, valid = valid, mvs = mvs,
+                grouping = grouping)
 
   # Prepare data
   if (is.null(grouping)) {
@@ -471,4 +445,35 @@ write_results <- function(res) {
   }
 
   return(results)
+}
+
+#' Missing values by person analysis
+#'
+#' @param mv_p      percentage of missing responses by person as
+#'                  returned by mv_person()
+#' @param resp          data.frame with item responses (user-defined missing values)
+#'                      and logical grouping variables, named after the grouping
+#'                      factor (e.g. "easy" and "difficult" in the case of testlet
+#'                      difficulties) --> must be in separate columns!
+#' @param vars          data.frame. contains all competence items as rows,
+#'                      with the column "items" indicating the names of the items.
+#' @param items         character. contains name of variable (boolean) in vars that
+#'                      indicates which items to items in analysis.
+#' @param valid         character string. defines name of boolean variable in resp,
+#'                      indicating (in)valid cases.
+#' @param grouping      character vector. contains names of groups (e.g. 'easy and 'difficult')
+#'                      as items in data.frame resp.
+#' @param mvs           named vector with definition of user-defined missing values
+#'
+#' @noRd
+
+test_mvp_data <- function(mv_p, resp, vars, grouping, mvs, valid) {
+  if (is.null(mv_p)) {
+    if (!is.null(resp) & !is.null(vars)) {
+      mv_p <- mvp_analysis(resp, vars = vars, valid = valid, mvs = mvs,
+                           grouping = grouping)
+    } else {
+      stop("Please provide mv_p or resp and vars.")
+    }
+  }
 }
