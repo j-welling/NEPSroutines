@@ -1,3 +1,72 @@
+#' Missing values analysis by item - all in one function
+#'
+#' @param resp      data.frame. contains item responses (integer with user-defined missing values)
+#'                  and grouping variables (boolean).
+#' @param vars      data.frame. contains all competence items as rows,
+#'                  and at least the following variables:
+#'                    character vector named "items"; contains the names of the items.
+#'                    boolean vector; indicates which items to use for analysis.
+#'                    integer vector; contains position for each item; if grouping
+#'                      exists and positions differ between groups, several variables necessary.
+#' @param items     character. contains name of variable (boolean) in vars that
+#'                  indicates which items to use for analysis.
+#' @param position  (named) character vector. contains name(s) of variable(s) in
+#'                  vars that indicate the position of subitems;
+#'                  if grouping with differing positions in testlets,
+#'                  then for each group one variable name is necessary,
+#'                  as well as names for the vector that represent names of groups
+#'                  and must be identical with items in variable "grouping"
+#'                  (e.g. position = c(easy = "position_easy", diff = "position_diff"))
+#' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
+#'                  as used in resp.
+#' @param show.all  boolean; only needed when groups exist, indicates whether
+#'                  plots shall also include the whole sample as a "group"
+#' @param mvs       named vector with definition of user-defined missing values.
+#' @param path_results     folder path for file if it shall be saved
+#' @param overwrite_table boolean; indicates whether to overwrite existing file when saving table.
+#' @param path_table    folder path for file if it shall be saved
+#' @param plots         boolean. indicates whether plots shall be created.
+#' @param path_plots    folder path for plots
+#' @param color_plots   bar color
+#' @param valid   character string. defines name of boolean variable in resp,
+#' indicating (in)valid cases.
+#' @param digits    number of decimals for rounding
+#' @param warn      boolean whether to print a warning if NAs were found in resp
+#' @param return  boolean. indicates whether to return results.
+#'
+#' @return
+#'
+#' @export
+
+mv_item <- function() {
+
+  # Conduct analysis
+  mv_item <- mvi_analysis()
+
+  # Write grouped table
+  mv_item$summary_table <- mvi_table()
+
+  # Write plots
+  if (plots) mvi_plots()
+
+  # Save results
+  if (save) {
+    save_results(mv_item, filename = "mv_item.Rdata", path = path_results)
+    save_table(mv_item$summary_table,
+               filename = "mv_item.xlsx", path = path_table)
+  }
+
+  # Print results
+  if (print) {
+    print(mv_item$summary_table)
+    print_mvi_results()
+  }
+
+  # Return results
+  if (return) return(mv_item)
+
+}
+
 #' Percentage of missing responses by item
 #'
 #' @param resp      data.frame. contains item responses (integer with user-defined missing values)
@@ -41,7 +110,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
                     mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                             UM = -90, ND = -55, NAd = -54, AZ = -21),
                     path = here::here("Data"), filename = NULL,
-                    valid = NULL, digits = 2, warn = TRUE, return_results = TRUE) {
+                    valid = NULL, digits = 2, warn = TRUE) {
 
   # Test data
   if (is.null(grouping)) {
@@ -49,9 +118,12 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
       stop("No grouping. Please provide only one position variable.")
     }
   } else if (length(position) == 1) {
-        warn("Only one position variable provided. The items of each group are therefore set to the same positions.")
+        warn("Only one position variable provided. ",
+        "The items of each group are therefore set to the same positions.")
     } else if (length(position) != length(grouping)) {
-          stop("Position and grouping variables do not match. Please provide either only one position variable (if positions of items do not differ between groups) or matching position and grouping variables (if positions of items do differ between groups).")
+          stop("Position and grouping variables do not match. ",
+          "Please provide either only one position variable (if positions of items do not differ between groups) ",
+          "or matching position and grouping variables (if positions of items do differ between groups).")
   }
 
 
@@ -148,7 +220,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
   save_results(mv_i, filename = filename, path = path)
 
   # Return results
-  if (return_results)  return(mv_i)
+  return(mv_i)
 }
 
 
@@ -190,8 +262,9 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
 #' @param digits    number of decimals for rounding
 #' @param warn      boolean whether to print a warning if NAs were found in resp
 #' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
-#' @param print_table  boolean; indicates whether to print ta
 #' @param return_table  boolean. indicates whether to return table.
+#'
+#' @return table with results
 #' @export
 
 mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
@@ -199,8 +272,7 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       filename = NULL, path = here::here("Tables"),
-                      valid = NULL, digits = 2, warn = TRUE, overwrite = FALSE,
-                      print_table = TRUE, return_table = FALSE) {
+                      valid = NULL, digits = 2, warn = TRUE, overwrite = FALSE) {
 
   # Test data
   test_mvi_data(mv_i, resp = resp, vars = vars, mvs = mvs, items = items,
@@ -233,11 +305,8 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
   save_table(results, filename = filename, path = path,
              overwrite = overwrite, show_rownames = TRUE)
 
-  # Print table
-  if (print_table) print(results)
-
   # Return table
-  if (return_table) return(results)
+  return(results)
 }
 
 
@@ -528,7 +597,7 @@ mvi_summary <- function(mvlist, digits = 2) {
   return(mvsum)
 }
 
-#' Test mvi data and if not sufficent, create new mv_i
+#' Test mvi data and if not incomplete, create new mv_i
 #'
 #' @param resp      data.frame. contains item responses (integer with user-defined missing values)
 #'                  and grouping variables (boolean).
