@@ -76,7 +76,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
                             digits = digits)
 
     # Summary across items
-    mvsum <- mv_summary(mvlist[ , -c(1:2)])
+    mvsum <- mvi_summary(mvlist[ , -c(1:2)], digits = digits)
 
   } else {
 
@@ -104,7 +104,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
                                    digits = digits)
 
       # Summary across items
-      mvsum[[g]] <- mv_summary(mvlist[[g]][ , -c(1:2)])
+      mvsum[[g]] <- mvi_summary(mvlist[[g]][ , -c(1:2)], digits = digits)
     }
 
     if (length(position) > 1) {
@@ -137,7 +137,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
       mvlist$all <- cbind(mvlist$all, results)
 
       # Summary across items
-      mvsum$all <- mv_summary(mvlist$all[ , -1])
+      mvsum$all <- mvi_summary(mvlist$all[ , -1], digits = digits)
     }
   }
 
@@ -145,13 +145,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
   mv_i <- list(list = mvlist, summary = mvsum)
 
   # Save results
-  if (!is.null(filename)) {
-
-      # Create directory for data
-      check_folder(path)
-
-      save(mv_i, file = here::here(paste0(path, "/", filename)))
-  }
+  save_results(mv_i, filename = filename, path = path)
 
   # Return results
   if (return_results)  return(mv_i)
@@ -209,33 +203,9 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
                       print_table = TRUE, return_table = FALSE) {
 
   # Test data
-  if (is.null(mv_i)) { # Auslagern von "Test data" für mvi_table/mvi_plots in eine eigene Funktion?
-    if (!is.null(resp) & !is.null(position)) {
-      mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
-                      position = position, grouping = grouping,
-                      show.all = show.all, valid = valid,
-                      digits = digits, warn = warn)
-    } else {
-      stop("Please provide mv_i, or resp and position.")
-    }
-  } else {
-    if (is.null(grouping)) {
-      nms <- names(mv_i$list)
-    } else {
-      nms <- names(mv_i$list$all)
-    }
-
-    if (any(!(names(mvs) %in% nms))) {
-      if (!is.null(resp) & !is.null(position)) {
-        mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
-                        position = position, grouping = grouping,
-                        show.all = show.all, valid = valid,
-                        digits = digits, warn = warn)
-      } else {
-        stop("Please provide mv_i with specified missing values, or resp and position.")
-      }
-    }
-  }
+  test_mvi_data(mv_i, resp = resp, vars = vars, mvs = mvs, items = items,
+                position = position, grouping = grouping, show.all = show.all,
+                valid = valid, digits = digits, warn = warn)
 
   # Create table
 
@@ -260,17 +230,8 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
   }
 
   # Save table
-  if (!is.null(filename)) {
-
-    # Create directory for table
-    check_folder(path)
-
-    openxlsx::write.xlsx(results,
-                         file = paste0(path, "/", filename),
-                         showNA = FALSE, rowNames = TRUE, overwrite = overwrite)
-  } else {
-    warn("No filename provided. The table will not be saved.")
-  }
+  save_table(results, filename = filename, path = path,
+             overwrite = overwrite, show_rownames = TRUE)
 
   # Print table
   if (print_table) print(results)
@@ -336,33 +297,9 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
                      valid = NULL, digits = 2, warn = TRUE) {
 
   # Test data
-  if (is.null(mv_i)) {
-    if (!is.null(resp) & !is.null(position)) {
-      mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
-                      position = position, grouping = grouping,
-                      show.all = show.all, valid = valid,
-                      digits = digits, warn = warn)
-    } else {
-        stop("Please provide mv_i, or resp and position.")
-    }
-  } else {
-    if (is.null(grouping)) {
-      nms <- names(mv_i$list)
-    } else {
-      nms <- names(mv_i$list$all)
-    }
-
-    if (any(!(names(mvs) %in% nms))) {
-      if (!is.null(resp) & !is.null(position)) {
-        mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
-                        position = position, grouping = grouping,
-                        show.all = show.all, valid = valid,
-                        digits = digits, warn = warn)
-      } else {
-        stop("Please provide mv_i with specified missing values, or resp and position.")
-      }
-    }
-  }
+  test_mvi_data(mv_i, resp = resp, vars = vars, mvs = mvs, items = items,
+                position = position, grouping = grouping, show.all = show.all,
+                valid = valid, digits = digits, warn = warn)
 
   # Pepare data
   mv_i <- mv_i$list
@@ -459,6 +396,45 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
 }
 
 
+#' Print MVI results
+#'
+#' @param mv_i      list; return object of mvi_analysis(). mvi_analysis$list must contain
+#'                  for each group and all groups together the name of the
+#'                  user-defined missing values that are to be
+#'                  analyzed and the names of the items as its row names.
+#' @param labels    lables for different types of user-defined missing values
+#' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
+#'                  as used in resp.
+#'
+#' @export
+
+print_mvi_results <- function(mv_i, labels, grouping = NULL) {
+  if (is.null(grouping)) {
+    for (lbl in names(labels)) {
+      mv_min <- min(mv_i$list[[lbl]], na.rm = TRUE)
+      mv_max <- max(mv_i$list[[lbl]], na.rm = TRUE)
+      item_min <- mv_i$list$items[mv_i$list[[lbl]] == mv_min]
+      item_max <- mv_i$list$items[mv_i$list[[lbl]] == mv_max]
+      message("The number of ", labels[lbl], " items varied between ",
+              mv_min, " %", if(length(item_min) == 1) {paste0(" (item ", item_min, ")")}, " and ",
+              mv_max, " %", if(length(item_max) == 1) {paste0(" (item ", item_max, ")")}, ".")
+    }
+  } else {
+    for (g in grouping) {
+      print(g)
+      for (lbl in names(labels)) {
+        mv_min <- min(mv_i$list[[g]][[lbl]], na.rm = TRUE)
+        mv_max <- max(mv_i$list[[g]][[lbl]], na.rm = TRUE)
+        item_min <- mv_i$list[[g]]$items[mv_i$list[[g]][[lbl]] == mv_min]
+        item_max <- mv_i$list[[g]]$items[mv_i$list[[g]][[lbl]] == mv_max]
+        message("The number of ", labels[lbl], " items in the ", g, " test version varied between ",
+                mv_min, " %", if(length(item_min) == 1) {paste0(" (item ", item_min, ")")}, " and ",
+                mv_max, " %", if(length(item_max) == 1) {paste0(" (item ", item_max, ")")}, ".")
+      }
+    }
+  }
+}
+
 
 #' Calculate and round frequency (in percentage) of one missing value type (by item)
 #'
@@ -475,7 +451,6 @@ mvi_perc <- function(resp, mvs, digits = 2) {
   }))
   round(apply(perc, 2, mean, na.rm = TRUE) * 100, digits)
 }
-
 
 
 #' Create list with frequency of missing responses by item for each missing value type
@@ -526,10 +501,10 @@ create_mvlist <- function(items, position, responses, mvs, digits = 2) {
   # Create list
   mvlist <- data.frame(items = items,
                        position = position,
-                       N = colSums(apply(resp, 2, function(x) !(x %in% mvs))))
+                       N = colSums(apply(responses, 2, function(x) !(x %in% mvs))))
 
   # Merge with percentage of missing values for each missing type
-  results <- data.frame(mvi_calc(resp = resp, mvs = mvs, digits = digits))
+  results <- data.frame(mvi_calc(resp = responses, mvs = mvs, digits = digits))
   results$items <- row.names(results)
   mvlist <- merge(mvlist, results, by = 'items')
 
@@ -545,7 +520,7 @@ create_mvlist <- function(items, position, responses, mvs, digits = 2) {
 #' @return  data.frame with mean, median, SD, min and max of missing values
 #' @noRd
 
-mvi_summary <- function(mvlist) {
+mvi_summary <- function(mvlist, digits = 2) {
   mvsum <- data.frame(t(apply(mvlist, 2, function(x) {
     round(c(mean(x), sd(x), median(x), range(x)[1], range(x)[2]), digits)
   })))
@@ -553,40 +528,65 @@ mvi_summary <- function(mvlist) {
   return(mvsum)
 }
 
-#' Print MVI results
+#' Test mvi data and if not sufficent, create new mv_i
 #'
-#' @param mv_i      list; return object of mvi_analysis(). mvi_analysis$list must contain
-#'                  for each group and all groups together the name of the
-#'                  user-defined missing values that are to be
-#'                  analyzed and the names of the items as its row names.
-#' @param labels    lables for different types of user-defined missing values
+#' @param resp      data.frame. contains item responses (integer with user-defined missing values)
+#'                  and grouping variables (boolean).
+#' @param vars      data.frame. contains all competence items as rows,
+#'                  and at least the following variables:
+#'                    character vector named "items"; contains the names of the items.
+#'                    boolean vector; indicates which items to use for analysis.
+#'                    integer vector; contains position for each item; if grouping
+#'                      exists and positions differ between groups, several variables necessary.
+#' @param items     character. contains name of variable (boolean) in vars that
+#'                  indicates which items to use for analysis.
+#' @param position  (named) character vector. contains name(s) of variable(s) in
+#'                  vars that indicate the position of subitems;
+#'                  if grouping with differing positions in testlets,
+#'                  then for each group one variable name is necessary,
+#'                  as well as names for the vector that represent names of groups
+#'                  and must be identical with items in variable "grouping"
+#'                  (e.g. position = c(easy = "position_easy", diff = "position_diff"))
 #' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
 #'                  as used in resp.
+#' @param show.all  boolean; only needed when groups exist, indicates whether
+#'                  plots shall also include the whole sample as a "group"
+#' @param mvs       named vector with definition of user-defined missing values.
+#' @param valid   character string. defines name of boolean variable in resp,
+#' indicating (in)valid cases.
+#' @param digits    number of decimals for rounding
+#' @param warn      boolean whether to print a warning if NAs were found in resp
 #'
-#' @export
+#' @noRd
 
-print_mvi_results <- function(mv_i, labels, grouping = NULL) {
-  if (is.null(grouping)) {
-    for (lbl in names(labels)) {
-      mv_min <- min(mv_i$list[[lbl]], na.rm = TRUE)
-      mv_max <- max(mv_i$list[[lbl]], na.rm = TRUE)
-      item_min <- mv_i$list$items[mv_i$list[[lbl]] == mv_min]
-      item_max <- mv_i$list$items[mv_i$list[[lbl]] == mv_max]
-      message("The number of ", labels[lbl], " items varied between ",
-              mv_min, " %", if(length(item_min) == 1) {paste0(" (item ", item_min, ")")}, " and ",
-              mv_max, " %", if(length(item_max) == 1) {paste0(" (item ", item_max, ")")}, ".")
+
+test_mvi_data <- function(mv_i, resp, vars, mvs, items, position, grouping,
+                          show.all, valid, digits, warn) {
+
+  if (is.null(mv_i)) {
+    if (!is.null(resp) & !is.null(position)) {
+      mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
+                           position = position, grouping = grouping,
+                           show.all = show.all, valid = valid,
+                           digits = digits, warn = warn)
+    } else {
+      stop("Please provide mv_i, or resp and position.")
     }
   } else {
-    for (g in grouping) {
-      print(g)
-      for (lbl in names(labels)) {
-        mv_min <- min(mv_i$list[[g]][[lbl]], na.rm = TRUE)
-        mv_max <- max(mv_i$list[[g]][[lbl]], na.rm = TRUE)
-        item_min <- mv_i$list[[g]]$items[mv_i$list[[g]][[lbl]] == mv_min]
-        item_max <- mv_i$list[[g]]$items[mv_i$list[[g]][[lbl]] == mv_max]
-        message("The number of ", labels[lbl], " items in the ", g, " test version varied between ",
-                mv_min, " %", if(length(item_min) == 1) {paste0(" (item ", item_min, ")")}, " and ",
-                mv_max, " %", if(length(item_max) == 1) {paste0(" (item ", item_max, ")")}, ".")
+    if (is.null(grouping)) {
+      nms <- names(mv_i$list)
+    } else {
+      nms <- names(mv_i$list$all)
+    }
+
+    if (any(!(names(mvs) %in% nms))) {
+      if (!is.null(resp) & !is.null(position)) {
+        mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
+                             position = position, grouping = grouping,
+                             show.all = show.all, valid = valid,
+                             digits = digits, warn = warn)
+      } else {
+        stop("Please provide mv_i with specified missing values, or resp and position.")
       }
     }
   }

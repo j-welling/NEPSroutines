@@ -64,6 +64,50 @@ prepare_resp <- function(resp, valid = NULL, without_valid = FALSE,
     return(resp)
 }
 
+#' Check if folder exists and if not, create new one
+#'
+#' @param results table to be saved
+#' @param filename string with name of table file that shall be saved
+#' @param path folder path for table
+#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
+#' @param show_rownames boolean; indicates whether to show rownames
+#'
+#' @noRd
+
+save_table <- function(results, filename, path,
+                       overwrite = FALSE,
+                       show_rownames = TRUE) {
+
+  if (!is.null(filename)) {
+
+    # Check and create directory for table
+    check_folder(path)
+
+    openxlsx::write.xlsx(results,
+                         file = paste0(path, "/", filename),
+                         showNA = FALSE, rowNames = show_rownames, overwrite = overwrite)
+  }
+}
+
+#' Check if folder exists and if not, create new one
+#'
+#' @param results results to be saved
+#' @param filename string with name of results file that shall be saved
+#' @param path folder path for results
+#'
+#' @noRd
+
+save_results <- function(results, filename, path) {
+
+  if (!is.null(filename)) {
+
+    # Check and create directory for data
+    check_folder(path)
+
+    save(results, file = here::here(paste0(path, "/", filename)))
+  }
+}
+
 
 #' Check if folder exists and if not, create new one
 #'
