@@ -64,7 +64,7 @@ prepare_resp <- function(resp, valid = NULL, without_valid = FALSE,
     return(resp)
 }
 
-#' Check if folder exists and if not, create new one
+#' Save table
 #'
 #' @param results table to be saved
 #' @param filename string with name of table file that shall be saved
@@ -89,7 +89,7 @@ save_table <- function(results, filename, path,
   }
 }
 
-#' Check if folder exists and if not, create new one
+#' Save Rdata results
 #'
 #' @param results results to be saved
 #' @param filename string with name of results file that shall be saved
