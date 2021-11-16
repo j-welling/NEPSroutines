@@ -42,25 +42,28 @@ dimension_analysis <- function(resp, vars, items, scoring = "scoring",
                                dim = NULL, valid = NULL, irtmodel = "PCM2",
                                maxiter = 10, snodes = 5, verbose = FALSE,
                                return_results = FALSE, save = TRUE,
-                               path = c("Tables", "Results"),
+                               path_table = "Tables", path_results = "Results",
                                overwrite = TRUE, print = TRUE) {
 
-    path_table <- path[1]
-    path_results <- path[2]
+    dimensionality <- list()
 
-    dimensionality <- conduct_dimensionality_analysis(
-        resp, vars, items, scoring, dim, valid, irtmodel, maxiter, snodes,
-        verbose
+    dimensionality$analysis <- conduct_dimensionality_analysis(
+        resp = resp, vars = vars, items = items, scoring = scoring, dim = dim,
+        valid = valid, irtmodel = irtmodel, maxiter = maxiter, snodes = snodes,
+        verbose = verbose
     )
-    save_dimensionality(save, path_results, dimensionality)
+    dimensionality$summary <- dimension_summary(dimensionality)
 
-    dimsum <- dimension_summary(dimensionality)
-    save_dim_summary(save, path_table, path_results, dimsum, overwrite)
-    print_dim_summary(print, dimsum)
-
-    if (return_results) {
-        return(dimensionality)
+    if (save) {
+      save_results(dimensionality,
+                   filename = "dimensionality.Rdata", path = path_results)
+      save_table(dimensionality$summary, overwrite = overwrite,
+                 filename = "dimensionality.xlsx", path = path_table)
     }
+
+    if (print) print_dim_summary(dimsum)
+
+    if (return_results) return(dimensionality)
 }
 
 conduct_dimensionality_analysis <- function(resp, vars, items, scoring, dim,
@@ -148,38 +151,9 @@ dimension_summary <- function(dimensionality) {
     return(dimsum)
 }
 
-print_dim_summary <- function(print, dimsum) {
-  if (print) {
+print_dim_summary <- function(dimsum) {
     for (nms in names(dimsum)) {
       print(nms)
       print(dimsum[[nms]])
-    }
-  }
-}
-
-
-save_dimensionality <- function(save, path_results, dimensionality) {
-    if (save) {
-        check_folder(path_results)
-
-        save(dimensionality,
-             file = here::here(paste0(path_results, "/dimensionality.Rdata")))
-    }
-}
-
-
-save_dim_summary <- function(save, path_table, path_results, dimsum, overwrite) {
-    if (save) {
-        check_folder(path_table)
-        check_folder(path_results)
-
-        save(dimsum,
-             file = here::here(paste0(path_results,
-                                      "/dimensionality_summary_fit.Rdata")))
-        openxlsx::write.xlsx(
-            dimsum,
-            file = here::here(paste0(path_table, "/dimensionality_summary.xlsx")),
-            showNA = FALSE, overwrite = overwrite
-        )
     }
 }

@@ -38,14 +38,20 @@
 #' @export
 
 distractor_analysis <- function(resp, vars, items, valid = NULL, print = TRUE,
-                                save = TRUE, path_results = "Results", 
-                                overwrite = TRUE) {
+                                save = TRUE, path_results = "Results",
+                                overwrite = FALSE) {
 
-    distractors <- conduct_distractor_analysis(resp, vars, items, valid)
-    dist_sum <- distractor_summary(distractors)
-    print_distractor_summary(print, dist_sum)
-    save_distractor_analysis(save, distractors, path_results, overwrite)
+    distratcors <- list()
+    distractors$analysis <- conduct_distractor_analysis(resp, vars, items, valid)
+    distractors$summary <- distractor_summary(distractors)
 
+    if (print) print_distractor_summary(distractors$summary)
+    if (save) {
+        save_results(distractors,
+                     filename = "distractors.Rdata", path = path_results)
+        save_table(distractors$analysis, overwrite = overwrite,
+                   filename = "distractors.xlsx", path = path_table)
+    }
 }
 
 
@@ -127,7 +133,6 @@ distractor_summary <- function(distractors) {
 }
 
 print_distractor_summary <- function(print, dist_sum) {
-    if (print) {
         rc <- dist_sum$correct
         rd <- dist_sum$distractor
         # short summary containing minimum and maximum for distractors and
@@ -153,22 +158,4 @@ print_distractor_summary <- function(print, dist_sum) {
                 "distractors (r > 0.05): \n",
                 paste(rownames(rd[which(rd$corr > 0.05),]), collapse = ", "),
                 "\n")
-    }
 }
-
-save_distractor_analysis <- function(save, distractors, path_results,
-                                    overwrite) {
-    if (save) {
-
-        check_folder(path_results)
-
-        save(distractors,
-             file = here::here(paste0(path_results, "/distractors.Rdata")))
-        openxlsx::write.xlsx(
-            distractors,
-            file = here::here(paste0(path_results, "/distractor_analysis.xlsx")),
-            showNA = FALSE, overwrite = overwrite
-        )
-    }
-}
-
