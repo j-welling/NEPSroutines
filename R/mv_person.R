@@ -73,7 +73,8 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
 
   if (save) {
     save_results(mv_person, filename = "mv_person.Rdata", path = path_results)
-    save_table(mv_person$summary, filename = "mv_person.xlsx", path = path_table)
+    save_table(mv_person$summary, overwrite = overwrite, show_rownames = FALSE,
+               filename = "mv_person.xlsx", path = path_table)
 
   }
 

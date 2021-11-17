@@ -24,7 +24,7 @@
 #' contains the scoring factor to be applied to loading matrix; defaults to
 #' "scoring"
 #' @param print  logical; whether results shall be printed to console
-#' @param save  logical; whether results shall be saved to hard disc
+#' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
@@ -254,7 +254,7 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring",
 #'
 #' @param diflist list; return object of dif_model(); with main and dif model
 #' @param print logical; whether results shall be printed to console
-#' @param save  logical; whether results shall be saved to hard disc
+#' @param save  logical; whether results shall be saved to hard drive
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param overwrite logical; whether to overwrite existing file when saving table
@@ -409,7 +409,7 @@ difsum <- function(obj, facet, group = 1, group2 = NULL) {
 #'
 #' @param dif_summaries named list of dif_summary() return objects; the list
 #'   elements must be named after their DIF variable
-#' @param save logical; whether results shall be saved to hard disc
+#' @param save logical; whether results shall be saved to hard drive
 #' @param path_table string; indicates the folder location where the summaries
 #' are stored on the hard drive; please note that the path is relative to the
 #' current working path set by here::i_am()

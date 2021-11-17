@@ -24,7 +24,7 @@
 #' @param snodes  snodes as passed to the TAM function
 #' @param verbose   verbose as passed to the TAM function
 #' @param print  logical; whether results shall be printed to console
-#' @param save  logical; whether results shall be saved to hard disc
+#' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved

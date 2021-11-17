@@ -19,7 +19,7 @@
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param print  logical; whether results shall be printed to console
-#' @param save  logical; whether results shall be saved to hard disc
+#' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
 #' @param path_results string; indicates the folder location where the summaries
 #' are stored on the hard drive; please note that the path is relative to the

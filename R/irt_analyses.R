@@ -191,7 +191,8 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
     irt_summary <- irt[-c(1:2)]
 
     save_results(irt, filename = paste0(name, ".Rdata"), path = path_results)
-    save_table(irt_summary, filename = paste0(name, ".xlsx"), path = path_table)
+    save_table(irt_summary, filename = paste0(name, ".xlsx"), path = path_table,
+               overwrite = overwrite)
   }
 
   # Return irt
@@ -569,8 +570,7 @@ steps_analysis <- function(pcm_model, digits = 2, overwrite = FALSE,
   steps <- data.frame(steps)
 
   # Save table as Excel sheet
-  save_table(steps, filename = filename, path = path, overwrite = overwrite,
-             show_rownames = TRUE)
+  save_table(steps, filename = filename, path = path, overwrite = overwrite)
 
   # Return table
   return(steps)
