@@ -60,7 +60,7 @@ prepare_resp <- function(resp, vars = NULL, items = NULL,
                 "are kept.")
     }
 
-    if (convert) resp <- convert_mv(resp = resp, mvs = mvs)
+    if (convert) resp <- convert_mv(resp = resp, items = items, mvs = mvs)
 
     return(resp)
 }
@@ -84,9 +84,9 @@ save_table <- function(results, filename, path,
     # Check and create directory for table
     check_folder(path)
 
-    openxlsx::write.xlsx(results,
-                         file = paste0(path, "/", filename),
-                         showNA = FALSE, rowNames = show_rownames, overwrite = overwrite)
+    openxlsx::write.xlsx(results, file = paste0(path, "/", filename),
+                         showNA = FALSE, rowNames = show_rownames,
+                         overwrite = overwrite)
   }
 }
 
@@ -151,13 +151,11 @@ check_pid <- function(pid) {
 #' @param min.val minimum number of valid values;
 #'                if negative, set to the default of 3
 #' @param invalid vector of invalid values
-#' @param warn    print warnings
 #' @return        boolean vector with length = nrow(resp),
 #' indicating whether case is valid.
 #' @export
 
-min_val <- function(resp, vars, items, min.val = NULL,
-                    invalid = NA, warn = TRUE) {
+min_val <- function(resp, vars, items, min.val = NULL, invalid = NA) {
 
     vrs <- vars$items[vars[[items]]]
     resp_ <- resp[ , vrs]
@@ -194,14 +192,14 @@ min_val <- function(resp, vars, items, min.val = NULL,
 #' converted to NAs so that they do not break the IRT analysis
 #'
 #' @param resp          data.frame containing the responses, scored items,
-#'                      sociodemographic and design variables
-#' @param variables     character vector with names of all competence variables
+#'                      sociodemographic and design items
+#' @param items     character vector with names of all competence items
 #' @param mvs           numeric vector including all user-defined missing values
 #'
 #' @return              data.frame like resp, but without user-defined mvs
 #' @export
 
-convert_mv <- function(resp, variables = NULL, mvs = NULL) {
+convert_mv <- function(resp, items = NULL, mvs = NULL) {
 
     if (is.null(mvs)) {
         mvs <- -999:-1
@@ -209,9 +207,9 @@ convert_mv <- function(resp, variables = NULL, mvs = NULL) {
                 "'-999 to -1' is used.\n")
     }
 
-    if (is.null(variables)) variables <- colnames(resp)
+    if (is.null(items)) items <- colnames(resp)
 
-    for (i in variables) {
+    for (i in items) {
       resp[[i]] <- replace(resp[[i]], resp[[i]] %in% mvs, NA)
     }
 
@@ -294,13 +292,9 @@ meht <- function(stat, df1, df2, eta2 = NULL, delta = .40,
 #' @importFrom rlang .data
 #' @export
 
-pos_new <- function(vars, items = 'final', position = NULL) {
+pos_new <- function(vars, items, position) {
 
-    if (is.null(position)) {
-
-        stop("No position variable(s) provided.")
-
-    } else if (length(position) == 1) {
+    if (length(position) == 1) {
 
         vars_ <- vars[vars[[items]], ]
         pos <- data.frame(items = vars_[['items']],

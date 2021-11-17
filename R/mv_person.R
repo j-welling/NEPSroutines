@@ -14,14 +14,14 @@
 #'                      as items in data.frame resp.
 #' @param mvs           named vector with definition of user-defined missing values
 #' @param path_results     folder path for file if it shall be saved
-#' @param overwrite_table boolean; indicates whether to overwrite existing file when saving table.
+#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
 #' @param path_table    folder path for file if it shall be saved
 #' @param plots         boolean. indicates whether plots shall be created.
 #' @param path_plots    folder path for plots
-#' @param color_plots   bar color
-#' @param show.all_plots logical; only needed when groups exist, indicates whether
+#' @param color   bar color
+#' @param show_all logical; only needed when groups exist, indicates whether
 #'                  plots shall also include the whole sample as a "group"
-#' @param lbls_plots    lables for different types of user-defined missing values
+#' @param labels_mvs    lables for different types of user-defined missing values
 #' @param digits        number of decimals for rounding
 #' @param warn          boolean. indicates whether to print a warning if NAs were found in resp.
 #' @param verbose       print progress
@@ -36,10 +36,10 @@ mv_person <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       plots = FALSE, save = TRUE, return = FALSE,
                       path_results = here::here("Results"),
-                      path_table = here::here("Tables"), overwrite_table = FALSE,
+                      path_table = here::here("Tables"), overwrite = FALSE,
                       path_plots = here::here("Plots/Missing_Responses/by_person"),
-                      color_plots = NULL, show.all_plots = FALSE,
-                      lbls_plots = c(
+                      color = NULL, show_all = FALSE,
+                      labels_mvs = c(
                         ALL = "total missing",
                         OM = "omitted",
                         NV = "not valid",
@@ -58,8 +58,8 @@ mv_person <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL
 
   if (plots) {
     mvp_plots(mv_p = mv_p, vars = vars, items = items, grouping = grouping,
-              mvs = mvs, lbls = lbls_plots, show.all = show.all_plots,
-              filename = name_plots, path = path_plots, color = color_plots,
+              mvs = mvs, labels_mvs = labels_mvs, show_all = show_all,
+              filename = name_plots, path = path_plots, color = color,
               verbose = verbose)
   }
 
@@ -67,7 +67,7 @@ mv_person <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL
     save_results(mv_p, filename = "mv_person.Rdata", path = path_results)
     mvp_table(mv_p = mv_p, grouping = grouping, mvs = mvs,
               filename = "mv_person.xlsx", path = path_table,
-              overwrite = overwrite_table)
+              overwrite = overwrite)
   }
 }
 
@@ -233,12 +233,12 @@ mvp_table <- function(mv_p = NULL, grouping = NULL,
 #'                  indicating (in)valid cases.
 #' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
 #'                  as itemsd in data.frame resp.
-#' @param show.all  logical; only needed when groups exist, indicates whether
+#' @param show_all  logical; only needed when groups exist, indicates whether
 #'                  plots shall also include the whole sample as a "group"
 #' @param mvs       named vector with definition of user-defined missing values
 #' @param path      folder path for plots
 #' @param filename  string with name of file that shall be saved (excluding type of file)
-#' @param lbls      lables for different types of user-defined missing values
+#' @param labels_mvs lables for different types of user-defined missing values
 #' @param color     character vector. defines bar color(s); if the data contains subgroups,
 #'                  one color per subgroup must be specified
 #' @param verbose   print progress
@@ -247,11 +247,11 @@ mvp_table <- function(mv_p = NULL, grouping = NULL,
 #' @export
 
 mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
-                      valid = NULL, grouping = NULL, show.all = FALSE,
+                      valid = NULL, grouping = NULL, show_all = FALSE,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       path = here::here("Plots/Missing_Responses/by_person"),
-                      lbls = c(
+                      labels_mvs = c(
                         ALL = "total missing",
                         OM = "omitted",
                         NV = "not valid",
@@ -273,7 +273,7 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
     mv_all <- mv_p
   } else {
     mv_all <- mv_p$all
-    if (show.all) {
+    if (show_all) {
       groups <- c(grouping, "all")
     } else {
       groups <- grouping
@@ -282,7 +282,7 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
 
   # Labels
   for (i in names(mv_all)) {
-    if (!(i %in% names(lbls))) lbls[i] <- "missing"
+    if (!(i %in% names(labels_mvs))) labels_mvs[i] <- "missing"
   }
 
   # Approx. number of items
@@ -318,7 +318,7 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
       ) +
         ggplot2::labs(
           title = paste0(filename, " (", i,")"),
-          x = paste0("Number of ", lbls[i], " items"),
+          x = paste0("Number of ", labels_mvs[i], " items"),
           y = "Percentage"
         )
 
@@ -344,7 +344,7 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
       ) +
         ggplot2::labs(
           title = paste0("Missing responses by person (", i,")"),
-          x = paste0("Number of ", lbls[i], " items"),
+          x = paste0("Number of ", labels_mvs[i], " items"),
           y = "Percentage", fill = "Group"
         )
     }

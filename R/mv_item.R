@@ -19,15 +19,15 @@
 #'                  (e.g. position = c(easy = "position_easy", diff = "position_diff"))
 #' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
 #'                  as used in resp.
-#' @param show.all  boolean; only needed when groups exist, indicates whether
+#' @param show_all  boolean; only needed when groups exist, indicates whether
 #'                  plots shall also include the whole sample as a "group"
 #' @param mvs       named vector with definition of user-defined missing values.
 #' @param path_results     folder path for file if it shall be saved
-#' @param overwrite_table boolean; indicates whether to overwrite existing file when saving table.
+#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
 #' @param path_table    folder path for file if it shall be saved
 #' @param plots         boolean. indicates whether plots shall be created.
 #' @param path_plots    folder path for plots
-#' @param color_plots   bar color
+#' @param color   bar color
 #' @param valid   character string. defines name of boolean variable in resp,
 #' indicating (in)valid cases.
 #' @param digits    number of decimals for rounding
@@ -88,7 +88,7 @@ mv_item <- function() {
 #'                  (e.g. position = c(easy = "position_easy", diff = "position_diff"))
 #' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
 #'                  as used in resp.
-#' @param show.all  boolean; only needed when groups exist, indicates whether
+#' @param show_all  boolean; only needed when groups exist, indicates whether
 #'                  plots shall also include the whole sample as a "group"
 #' @param mvs       named vector with definition of user-defined missing values.
 #' @param path      folder path for data
@@ -105,7 +105,7 @@ mv_item <- function() {
 #' @export
 
 mvi_analysis <- function(resp, vars, items, position = NULL,
-                    grouping = NULL, show.all = FALSE,
+                    grouping = NULL, show_all = FALSE,
                     mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                             UM = -90, ND = -55, NAd = -54, AZ = -21),
                     path = here::here("Data"), filename = NULL,
@@ -250,7 +250,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
 #'                  (e.g. position = c(easy = "position_easy", diff = "position_diff"))
 #' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
 #'                  as used in resp.
-#' @param show.all  boolean; only needed when groups exist, indicates whether
+#' @param show_all  boolean; only needed when groups exist, indicates whether
 #'                  plots shall also include the whole sample as a "group"
 #' @param mvs       named vector with definition of user-defined missing values.
 #' @param filename  string with name of file that shall be saved (including type of file);
@@ -266,7 +266,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
 #' @export
 
 mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
-                      position = NULL, grouping = NULL, show.all = FALSE,
+                      position = NULL, grouping = NULL, show_all = FALSE,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       filename = NULL, path = here::here("Tables"),
@@ -274,7 +274,7 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
 
   # Test data
   test_mvi_data(mv_i, resp = resp, vars = vars, mvs = mvs, items = items,
-                position = position, grouping = grouping, show.all = show.all,
+                position = position, grouping = grouping, show_all = show_all,
                 valid = valid, digits = digits, warn = warn)
 
   # Create table
@@ -335,7 +335,7 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
 #'                  (e.g. position = c(easy = "position_easy", diff = "position_diff"))
 #' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
 #'                  as used in resp.
-#' @param show.all  boolean; only needed when groups exist, indicates whether
+#' @param show_all  boolean; only needed when groups exist, indicates whether
 #'                  plots shall also include the whole sample as a "group"
 #' @param mvs       named vector; contains definition of user-defined missing
 #'                  values that shall be analyzed in the plot
@@ -355,7 +355,7 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
 #' @export
 
 mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
-                     position = NULL, grouping = NULL, show.all = FALSE,
+                     position = NULL, grouping = NULL, show_all = FALSE,
                      mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                              UM = -90, ND = -55, NAd = -54, AZ = -21),
                      path = here::here("Plots/Missing_Responses/by_item"),
@@ -365,7 +365,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
 
   # Test data
   test_mvi_data(mv_i, resp = resp, vars = vars, mvs = mvs, items = items,
-                position = position, grouping = grouping, show.all = show.all,
+                position = position, grouping = grouping, show_all = show_all,
                 valid = valid, digits = digits, warn = warn)
 
   # Pepare data
@@ -380,7 +380,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
     }
     k <- max(k, na.rm = TRUE)
 
-    if (show.all) {
+    if (show_all) {
       groups <- c(grouping, "all")
     } else {
       groups <- grouping
@@ -469,32 +469,32 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
 #'                  for each group and all groups together the name of the
 #'                  user-defined missing values that are to be
 #'                  analyzed and the names of the items as its row names.
-#' @param labels    lables for different types of user-defined missing values
+#' @param labels_mvs    lables for different types of user-defined missing values
 #' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
 #'                  as used in resp.
 #'
 #' @export
 
-print_mvi_results <- function(mv_i, labels, grouping = NULL) {
+print_mvi_results <- function(mv_i, labels_mvs, grouping = NULL) {
   if (is.null(grouping)) {
-    for (lbl in names(labels)) {
+    for (lbl in names(labels_mvs)) {
       mv_min <- min(mv_i$list[[lbl]], na.rm = TRUE)
       mv_max <- max(mv_i$list[[lbl]], na.rm = TRUE)
       item_min <- mv_i$list$items[mv_i$list[[lbl]] == mv_min]
       item_max <- mv_i$list$items[mv_i$list[[lbl]] == mv_max]
-      message("The number of ", labels[lbl], " items varied between ",
+      message("The number of ", labels_mvs[lbl], " items varied between ",
               mv_min, " %", if(length(item_min) == 1) {paste0(" (item ", item_min, ")")}, " and ",
               mv_max, " %", if(length(item_max) == 1) {paste0(" (item ", item_max, ")")}, ".")
     }
   } else {
     for (g in grouping) {
       print(g)
-      for (lbl in names(labels)) {
+      for (lbl in names(labels_mvs)) {
         mv_min <- min(mv_i$list[[g]][[lbl]], na.rm = TRUE)
         mv_max <- max(mv_i$list[[g]][[lbl]], na.rm = TRUE)
         item_min <- mv_i$list[[g]]$items[mv_i$list[[g]][[lbl]] == mv_min]
         item_max <- mv_i$list[[g]]$items[mv_i$list[[g]][[lbl]] == mv_max]
-        message("The number of ", labels[lbl], " items in the ", g, " test version varied between ",
+        message("The number of ", labels_mvs[lbl], " items in the ", g, " test version varied between ",
                 mv_min, " %", if(length(item_min) == 1) {paste0(" (item ", item_min, ")")}, " and ",
                 mv_max, " %", if(length(item_max) == 1) {paste0(" (item ", item_max, ")")}, ".")
       }
@@ -616,7 +616,7 @@ mvi_summary <- function(mvlist, digits = 2) {
 #'                  (e.g. position = c(easy = "position_easy", diff = "position_diff"))
 #' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
 #'                  as used in resp.
-#' @param show.all  boolean; only needed when groups exist, indicates whether
+#' @param show_all  boolean; only needed when groups exist, indicates whether
 #'                  plots shall also include the whole sample as a "group"
 #' @param mvs       named vector with definition of user-defined missing values.
 #' @param valid   character string. defines name of boolean variable in resp,
@@ -628,13 +628,13 @@ mvi_summary <- function(mvlist, digits = 2) {
 
 
 test_mvi_data <- function(mv_i, resp, vars, mvs, items, position, grouping,
-                          show.all, valid, digits, warn) {
+                          show_all, valid, digits, warn) {
 
   if (is.null(mv_i)) {
     if (!is.null(resp) & !is.null(position)) {
       mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
                            position = position, grouping = grouping,
-                           show.all = show.all, valid = valid,
+                           show_all = show_all, valid = valid,
                            digits = digits, warn = warn)
     } else {
       stop("Please provide mv_i, or resp and position.")
@@ -650,7 +650,7 @@ test_mvi_data <- function(mv_i, resp, vars, mvs, items, position, grouping,
       if (!is.null(resp) & !is.null(position)) {
         mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
                              position = position, grouping = grouping,
-                             show.all = show.all, valid = valid,
+                             show_all = show_all, valid = valid,
                              digits = digits, warn = warn)
       } else {
         stop("Please provide mv_i with specified missing values, or resp and position.")

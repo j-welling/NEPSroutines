@@ -38,7 +38,7 @@
 #' @export
 #' @importFrom stats AIC BIC logLik
 
-dimension_analysis <- function(resp, vars, items, scoring = "scoring",
+dim_analysis <- function(resp, vars, items, scoring = "scoring",
                                dim = NULL, valid = NULL, mvs = NULL,
                                irtmodel = "PCM2", maxiter = 10, snodes = 5,
                                return = FALSE, save = TRUE, print = TRUE,
@@ -48,12 +48,12 @@ dimension_analysis <- function(resp, vars, items, scoring = "scoring",
 
     dimensionality <- list()
 
-    dimensionality$analysis <- conduct_dimensionality_analysis(
+    dimensionality$analysis <- conduct_dim_analysis(
         resp = resp, vars = vars, items = items, scoring = scoring, dim = dim,
         valid = valid, irtmodel = irtmodel, maxiter = maxiter, snodes = snodes,
         mvs = mvs, verbose = verbose
     )
-    dimensionality$summary <- dimension_summary(dimensionality$analysis)
+    dimensionality$summary <- dim_summary(dimensionality$analysis)
 
     if (save) {
       save_results(dimensionality,
@@ -67,7 +67,7 @@ dimension_analysis <- function(resp, vars, items, scoring = "scoring",
     if (return) return(dimensionality)
 }
 
-conduct_dimensionality_analysis <- function(resp, vars, items, scoring, dim,
+conduct_dim_analysis <- function(resp, vars, items, scoring, dim,
                                             valid, irtmodel, maxiter, snodes,
                                             verbose, mvs) {
     # Select only valid cases
@@ -125,7 +125,7 @@ conduct_dimensionality_analysis <- function(resp, vars, items, scoring, dim,
 
 #' Summary of dimensionality analysis (saves summary in excel sheet)
 #'
-#' @param dimensionality list with results of the dimension_analysis function
+#' @param dimensionality list with results of the dim_analysis function
 #'
 #' @return data.frame of summary results
 #'
@@ -133,7 +133,7 @@ conduct_dimensionality_analysis <- function(resp, vars, items, scoring, dim,
 #' @export
 #'
 
-dimension_summary <- function(dimensionality) {
+dim_summary <- function(dimensionality) {
 
     dim <- names(dimensionality)
     dimsum <- list()

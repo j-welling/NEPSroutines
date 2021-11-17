@@ -23,7 +23,7 @@
 #'   indicating (in)valid cases.
 #' @param scoring character string; refers to the scoring variable in vars.
 #'   Defaults to "scoring".
-#' @param overwrite_table boolean; indicates whether to overwrite existing file
+#' @param overwrite boolean; indicates whether to overwrite existing file
 #'   when saving table.
 #' @param print logical indicating whether summary is printed to the console
 #' @param save logical indicating whether summary / data is stored on hard disk
@@ -41,7 +41,7 @@
 #' @export
 
 dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, mvs = NULL,
-                         scoring = "scoring", overwrite_table = FALSE,
+                         scoring = "scoring", overwrite = FALSE,
                          print = TRUE, verbose = FALSE, save = TRUE,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
@@ -60,11 +60,11 @@ dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, mvs = NULL,
   dif$summaries <- summarize_dif_analysis(
     dif_models = dif$models, dif_vars = dif_vars,
     path_table = path_table, path_results = path_results,
-    print = print, save = save, overwrite_table = overwrite_table
+    print = print, save = save, overwrite = overwrite
   )
 
   build_dif_tr_tables(dif_summaries = dif$summaries, save = save,
-                      path_table = path_table, overwrite = overwrite_table)
+                      path_table = path_table, overwrite = overwrite)
 
   if (return) return (dif)
 }
@@ -98,7 +98,7 @@ conduct_dif_analysis <- function(items, dif_vars, resp, vars, scoring,
 
 
 summarize_dif_analysis <- function(dif_models, dif_vars, path_table,
-                                   path_results, print, save, overwrite_table) {
+                                   path_results, print, save, overwrite) {
 
   dif_summaries <- list()
 
@@ -107,7 +107,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, path_table,
     dif_summaries[[i]] <- dif_summary(dif_models[[i]], print = print,
                                       save = save, path_table = path_table,
                                       path_results = path_results,
-                                      overwrite = overwrite_table)
+                                      overwrite = overwrite)
   }
   names(dif_summaries) <- dif_vars
 

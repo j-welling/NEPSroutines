@@ -2,7 +2,7 @@
 #'
 #' @param dat     data.frame with item responses (user-defined missing values)
 #'                and logical grouping variables, named after the grouping
-#'                factor (e.g. "easy" and "difficult" in the case of testlet.
+#'                factor (e.g. "easy" and "difficult" in the case of testlet).
 #' @param valid   character string. defines name of boolean variable in dat,
 #' indicating (in)valid cases.
 #'
@@ -54,9 +54,9 @@ desc_con <- function(dat, desc, valid = NULL, digits = 2) {
 #' @param valid   character string. defines name of boolean variable in dat,
 #' indicating (in)valid cases.
 #' @param digits  number of decimals for rounding percentages
-#' @param show_frequency_abs boolean; indicates whether to show frequency in
+#' @param show_absolute boolean; indicates whether to show frequency in
 #' absolute numbers.
-#' @param show_frequency_perc boolean; indicates whether to show frequency in
+#' @param show_percentage boolean; indicates whether to show frequency in
 #' relative numbers (percentage).
 #'
 #' @return   list with descriptives.
@@ -64,17 +64,17 @@ desc_con <- function(dat, desc, valid = NULL, digits = 2) {
 #' @export
 
 desc_nom <- function(dat, desc, valid = NULL, digits = 1,
-                     show_frequency_abs = TRUE, show_frequency_perc = TRUE) {
+                     show_absolute = TRUE, show_percentage = TRUE) {
 
     dat <- only_valid(dat, valid = valid)
 
     descriptives <- list()
 
-    if (show_frequency_abs) {
+    if (show_absolute) {
         descriptives$frequency_abs <- desc_abs(dat, desc = desc,
                                                 valid = valid)
         }
-    if (show_frequency_perc) {
+    if (show_percentage) {
         descriptives$frequency_perc <- desc_perc(dat, desc = desc,
                                                  valid = valid,
                                                  digits = digits)
@@ -133,9 +133,10 @@ desc_perc <- function(dat, desc, valid = NULL, digits = 1) {
 #' Show attributes of selected variables
 #'
 #' @param dat data.frame containing variables
-#' @param show character vectors containing variables to be shown
-show_attributes <- function(dat, show) {
-    for (var in show) {
+#' @param desc character vectors containing variables to be shown
+
+show_attributes <- function(dat, desc) {
+    for (var in desc) {
         print(attributes(dat[[var]])$labels)
     }
 }

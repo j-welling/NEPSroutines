@@ -24,7 +24,7 @@
 #' @param path_plots character. contains name of path for plots.
 #' @param path_tables character. contains name of path for tables.
 #' @param path_results character. contains name of path for data.
-#' @param overwrite_table boolean; indicates whether to overwrite existing file when saving table.
+#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
 #' @param digits    number of decimals for rounding
 #' @param print  boolean; indicates whether to print results  to console or html.
 #' @param return  boolean. indicates whether to return results.
@@ -38,7 +38,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
                          path_plots = here::here("Plots"),
                          path_tables = here::here("Tables"),
                          path_results = here::here("Results"),
-                         overwrite_table = FALSE, digits = 2, name_group = NULL) {
+                         overwrite = FALSE, digits = 2, name_group = NULL) {
 
   irt <- list()
 

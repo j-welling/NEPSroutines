@@ -37,19 +37,20 @@
 #' @importFrom rlang .data
 #' @export
 
-distractor_analysis <- function(resp, vars, items, valid = NULL, print = TRUE,
-                                save = TRUE, overwrite = FALSE, return = FALSE,
+dis_analysis <- function(resp, vars, items, valid = NULL,
+                                save = TRUE, print = TRUE, return = FALSE,
                                 path_results = here::here('Results'),
-                                path_table = here::here('Tables')) {
+                                path_table = here::here('Tables'),
+                                overwrite = FALSE) {
 
     distratcors <- list()
-    distractors$analysis <- conduct_distractor_analysis(resp = resp,
+    distractors$analysis <- conduct_dis_analysis(resp = resp,
                                                         vars = vars,
                                                         items = items,
                                                         valid = valid)
-    distractors$summary <- distractor_summary(distractors$analysis)
+    distractors$summary <- dis_summary(distractors$analysis)
 
-    if (print) print_distractor_summary(distractors$summary)
+    if (print) print_dis_summary(distractors$summary)
     if (save) {
         save_results(distractors,
                      filename = "distractors.Rdata", path = path_results)
@@ -61,7 +62,7 @@ distractor_analysis <- function(resp, vars, items, valid = NULL, print = TRUE,
 }
 
 
-conduct_distractor_analysis <- function(resp, vars, items, valid = NULL) {
+conduct_dis_analysis <- function(resp, vars, items, valid = NULL) {
     # prepare data
     resp <- only_valid(resp, valid = valid)
     MC <- dplyr::select(
@@ -70,7 +71,7 @@ conduct_distractor_analysis <- function(resp, vars, items, valid = NULL) {
     )
     scored <- vars$items[vars[[items]]]
     var_names <- unique(c(MC$items, scored))
-    resp <- convert_mv(resp = resp, variables = var_names)
+    resp <- convert_mv(resp = resp, items = var_names)
 
     # Sum score across all items
     resp$score <- rowMeans(resp[, scored], na.rm = TRUE)
@@ -110,7 +111,7 @@ conduct_distractor_analysis <- function(resp, vars, items, valid = NULL) {
 
 #' Summary of distractor analysis
 #'
-#' @param distractors return object of distractor_analysis() function (list of
+#' @param distractors return object of dis_analysis() function (list of
 #'   data frames containing item-total correlations for each item)
 #'
 #' @return list of data frames
@@ -118,7 +119,7 @@ conduct_distractor_analysis <- function(resp, vars, items, valid = NULL) {
 #'           distractor : item-total correlations for distractors
 #'
 #' @export
-distractor_summary <- function(distractors) {
+dis_summary <- function(distractors) {
     # data.frames containing information for distractors and correct responses,
     # respectively
 
@@ -138,7 +139,7 @@ distractor_summary <- function(distractors) {
     return(list(correct = rc, distractor = rd))
 }
 
-print_distractor_summary <- function(print, dist_sum) {
+print_dis_summary <- function(print, dist_sum) {
         rc <- dist_sum$correct
         rd <- dist_sum$distractor
         # short summary containing minimum and maximum for distractors and
