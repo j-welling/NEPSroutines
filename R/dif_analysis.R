@@ -231,27 +231,13 @@ dif_model <- function(resp, vars, items, facets, scoring = "scoring",
 #' @param scoring character string; refers to the scoring variable in vars.
 #'   Defaults to "scoring".
 #' @param verbose logical; should progress be printed to console?
-#' @param valid character string. defines name of boolean variable in dat,
-#'   indicating (in)valid cases.
 #' @param pid vector with person identifiers
 #'
 #' @return a tam.mml model
 #' @noRd
 
 pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring",
-                    valid = NULL, pid, verbose) {
-
-  # Select only valid cases and convert mvs
-  if (!is.null(valid) && valid %in% names(resp)) {
-    resp <- convert_mv(resp = only_valid(resp, valid = valid), mvs = -999:-20)
-  } else {
-    message("The response matrix is used as is. Please check yourself whether ",
-            "all cases are valid or provide a variable within the response ",
-            "matrix for pcm_dif() to check.")
-  }
-
-  # Create ID and facets variable
-  check_pid(pid)
+                    pid, verbose) {
 
   # get design matrix for model
   B <- TAM::designMatrices(modeltype = "PCM", resp = resp)$B
