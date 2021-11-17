@@ -1,37 +1,34 @@
 #' Dimensionality analysis
 #'
-#' @param resp      data.frame. contains:
-#'                    (1) the responses. y in {0, 1} for binary data and y in
-#'                      {0, 1, ... k-1} for polytomous responses with k categories
-#'                    (2) ID_t: column indicating ID of participants
-#' @param vars      data.frame with all variables as rows with at least the
-#'                  following columns:
-#'                  items: contains name for each item (scored and unscored)
-#'                  and a column identifying item subsets for the analyses and
-#'                  one for the item scoring
-#' @param items     character. contains name of variable (boolean) in vars that
-#'                    indicates which items to use for analysis.
-#' @param scoring   character. Contains the name of the variable in vars that
-#'                    indicates the variable used for scoring. Defaults to
-#'                    "scoring"
-#' @param dim       character vector. contains names of all dimension variables
-#'                    that shall be analyzed (NOTE: the dimensions must be
-#'                    coded as integers from 1 to the number of dimensions!)
-#' @param valid     character string. defines name of boolean variable in dat,
-#'                    indicating (in)valid cases.
-#' @param irtmodel  the choice of irtmodel as passed to the TAM function
-#' @param maxiter   max iterations as passed to the TAM function
-#' @param snodes    snodes as passed to the TAM function
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' polytomous responses with k categories; missing values (default -999 to -1)
+#' are coded as NA internally; additionally includes ID_t as a person identifier
+#' and all variables that are further defined in the function arguments
+#' @param vars data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param scoring  string; defines name of numerical variable in vars that
+#' contains the scoring factor to be applied to loading matrix; defaults to
+#' "scoring"
+#' @param dim  character vector. contains names of all dimension variables
+#' that shall be analyzed (NOTE: the dimensions must be coded as integers from 1
+#' to the number of dimensions!)
+#' @param irtmodel  string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
+#' "GPCM" for GPCM analysis
+#' @param maxiter  max iterations as passed to the TAM function
+#' @param snodes  snodes as passed to the TAM function
 #' @param verbose   verbose as passed to the TAM function
-#' @param return_results  boolean. indicates whether to return results.
-#' @param save logical indicating whether summary / data is stored on hard disk
-#' @param path character vector; indicates the folder locations where the
-#'   resulting summaries (first element of vector) and data (second element of
-#'   vector) is stored on the hard drive. Please note that the
-#'   path is relative to the current working path set by here::i_am()
-#' @param overwrite boolean; indicates whether to overwrite existing file when
-#'   saving table.
-#' @param print locigal indicating whether the summary is printed to console
+#' @param print  logical; whether results shall be printed to console
+#' @param save  logical; whether results shall be saved to hard disc
+#' @param return  logical; whether results shall be returned
+#' @param path_results  string; defines path to folder where results shall be saved
+#' @param path_table  string; defines path to folder where tables shall be saved
+#' @param overwrite logical; whether to overwrite existing file when saving table
 #'
 #' @return          list of results for each dimensional analysis
 #'

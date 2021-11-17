@@ -1,10 +1,10 @@
 #' Select only valid cases
 #'
-#' @param resp    data.frame with responses
-#' @param valid   character string. defines name of boolean variable in resp,
-#'                indicating (in)valid cases.
-#' @return data.frame as resp, but only with valid cases
+#' @param resp  data.frame with item responses
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
 #'
+#' @return data.frame as resp, but only with valid cases
 #' @export
 
 only_valid <- function(resp, valid = NULL) {
@@ -22,17 +22,16 @@ only_valid <- function(resp, valid = NULL) {
 
 #' Prepare resp for analysis
 #'
-#' @param resp    data.frame with responses
-#' @param valid   character string. defines name of boolean variable in resp,
-#'                indicating (in)valid cases.
-#' @param without_valid boolean; indicates whether not to check valid cases
-#' @param vars    data.frame. contains information about all competence items
-#'                and includes the following columns:
-#'                  items: character indicating names of items.
-#'                  variable indicated by argument 'items'
-#' @param items   character. contains name of variable (boolean) in vars that
-#'                indicates which items to use for analysis.
-#' @param convert logical; convert custom missing values to NA
+#' @param resp  data.frame with item responses
+#' @param use_only_valid logical; whether to check valid cases
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param convert  logical; whether to convert custom missing values to NA
 #'
 #' @return data.frame as resp, but only with valid cases
 #'
@@ -68,10 +67,12 @@ prepare_resp <- function(resp, vars = NULL, items = NULL,
 #' Save table
 #'
 #' @param results table to be saved
-#' @param filename string with name of table file that shall be saved
-#' @param path folder path for table
-#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
-#' @param show_rownames boolean; indicates whether to show rownames
+#' @param filename string; defines name of table file
+#' @param path string; indicates the folder location where the tables
+#' are stored on the hard drive; please note that the path is relative to the
+#' current working path set by here::i_am()
+#' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param show_rownames logical; whether to show rownames
 #'
 #' @noRd
 
@@ -93,8 +94,10 @@ save_table <- function(results, filename, path,
 #' Save Rdata results
 #'
 #' @param results results to be saved
-#' @param filename string with name of results file that shall be saved
-#' @param path folder path for results
+#' @param filename string with name of results file
+#' @param path string; indicates the folder location where the tables
+#' are stored on the hard drive; please note that the path is relative to the
+#' current working path set by here::i_am()
 #'
 #' @noRd
 
@@ -112,7 +115,9 @@ save_results <- function(results, filename, path) {
 
 #' Check if folder exists and if not, create new one
 #'
-#' @param path    path to folder
+#' @param path    string; indicates the folder location that shall be checked;
+#' please note that the path is relative to the current working path set by
+#' here::i_am()
 #'
 #' @noRd
 
@@ -123,14 +128,10 @@ check_folder <- function(path) {
     }
 }
 
-# if (!file.exists(save_at)) {
-#     stop("The location ", save_at, " does not exist. Please provide a ",
-#          "valid folder path to save the distractor analyses.")
-# }
 
 #' Check pid for duplicates
 #'
-#' @param pid    vector with person identifiers
+#' @param pid  character vector with person identifiers
 #'
 #' @noRd
 
@@ -143,16 +144,16 @@ check_pid <- function(pid) {
 
 #' Select sample with a minimum number of valid values
 #'
-#' @param resp    data.frame with responses
-#' @param vars    variables to check for valid values;
-#                 if NULL, all variables will be selected
-#' @param items   character. contains name of variable (boolean) in vars that
-#'                indicates which items to use for analysis.
-#' @param min.val minimum number of valid values;
-#'                if negative, set to the default of 3
-#' @param invalid vector of invalid values
-#' @return        boolean vector with length = nrow(resp),
-#' indicating whether case is valid.
+#' @param resp  data.frame with item responses
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param min.val minimum number of valid values; if negative, set to the default of 3
+#' @param invalid vector of invalid values (?)
+#'
+#' @return   logical vector with length = nrow(resp), indicating whether case is valid
 #' @export
 
 min_val <- function(resp, vars, items, min.val = NULL, invalid = NA) {
@@ -191,10 +192,10 @@ min_val <- function(resp, vars, items, min.val = NULL, invalid = NA) {
 #' User defined missing values (usually coded as negative numbers) must be
 #' converted to NAs so that they do not break the IRT analysis
 #'
-#' @param resp          data.frame containing the responses, scored items,
-#'                      sociodemographic and design items
-#' @param items     character vector with names of all competence items
-#' @param mvs           numeric vector including all user-defined missing values
+#' @param resp  data.frame containing the item responses
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param mvs  named integer vector; contains user-defined missing values
 #'
 #' @return              data.frame like resp, but without user-defined mvs
 #' @export
@@ -280,15 +281,18 @@ meht <- function(stat, df1, df2, eta2 = NULL, delta = .40,
 
 #' Calculate new position variable with only a set of variables
 #'
-#' @param vars      data.frame with information about all items
-#' @param items     character. contains name of variable in vars (boolean) that
-#'                  indicates which variables to use.
-#' @param position  (named) character vector. contains name(s) of variable(s) in
-#'                  vars that indicate the position of subitems;
-#'                  if grouping, then for each group one variable name is necessary;
-#'                  names represent names of groups (e.g. easy = "position_easy")
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param position  (named) character vector; defines name(s) of integer
+#' variable(s) in vars that indicate position of items; if groups with differing
+#' item positions in testlets exist, then vector must be named with names of
+#' groups (as in "grouping") as names of elements and names of variables as elements
 #'
-#' @return   data.frame as input, with one extra variable indicating position of chosen variables.
+#' @return   data.frame as input, with one or more extra variable(s) containing
+#' the (relative) position of chosen items.
 #' @importFrom rlang .data
 #' @export
 

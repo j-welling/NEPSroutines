@@ -1,62 +1,96 @@
+#' IRT analyses for several groups
+#'
+#' @param groups named character vector; contains name of item selection variable of each group (e.g. easy = 'easy_final')
+
+grouped_irt_analysis <- function(groups) {
+
+  for (g in names(groups)) {
+
+    name_group <- g
+    items <- groups['g']
+    irt_groups <- list()
+
+    irt[[g]] <-irt_analysis(resp = resp, vars = vars, items = items,
+                            valid = valid, irt_type = irt_type, print = print,
+                            scoring = scoring, plots = plots, save = save,
+                            return = TRUE, path_results = path_results,
+                            path_tables = path_tables, path_plots = path_plots,
+                            overwrite = overwrite, digits = digits,
+                            name_group = name_group)
+  }
+
+  if (return) return(irt_groups)
+}
+
+
 #' IRT analyses - all in one function
 #'
 #' Perform 1PL and 2PL analyses for binary or PCM and GPCM analyses for
 #' polytomous data, generate summary and plots.
 #'
-#' @param resp      data.frame. contains:
-#'                    (1) the responses. y in {0, 1} for binary data and y in
-#'                      {0, 1, ... k-1} for polytomous responses with k categories
-#'                    (2) ID_t: column indicating ID of participants
-#' @param vars      data.frame. contains all competence items as rows,
-#'                  and at least the following variables:
-#'                    character vector named "items"; contains the names of the items.
-#'                    boolean vector; indicates which items to use for analysis.
-#' @param items     character. contains name of variable (boolean) in vars that
-#'                    indicates which items to use for analysis.
-#' @param valid     character string. defines name of boolean variable in resp,
-#'                  indicating (in)valid cases.
-#' @param irt_type  character string; either "dich" for dichotomous analysis
-#'   or "poly" for polytomous analysis.
-#' @param scoring   numeric vector; scoring factor to be applied to loading matrix;
-#'                    can be NULL for Rasch model; if NULL for PCM model,
-#'                    scoring matrix is reconstructed from item names.
-#' @param plots  boolean; indicates whether to create plots.
-#' @param path_plots character. contains name of path for plots.
-#' @param path_tables character. contains name of path for tables.
-#' @param path_results character. contains name of path for data.
-#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
-#' @param digits    number of decimals for rounding
-#' @param print  boolean; indicates whether to print results  to console or html.
-#' @param return  boolean. indicates whether to return results.
-#' @param name_group
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' polytomous responses with k categories; missing values (default -999 to -1)
+#' are coded as NA internally; additionally includes ID_t as a person identifier
+#' and all variables that are further defined in the function arguments
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param irt_type  string; either "dich" (dichotomous analysis) or "poly"
+#' (polytomous analysis)
+#' @param scoring  string; defines name of numerical variable in vars that
+#' contains the scoring factor to be applied to loading matrix; can be NULL for
+#' Rasch model
+#' @param plots  logical; whether plots shall be created and saved to hard disc
+#' @param print  logical; whether results shall be printed to console
+#' @param save  logical; whether results shall be saved to hard disc
+#' @param return  logical; whether results shall be returned
+#' @param path_results  string; defines path to folder where results shall be saved
+#' @param path_table  string; defines path to folder where tables shall be saved
+#' @param path_plots  string; defines path to folder where plots shall be saved
+#' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param digits  integer; number of decimals for rounding
+#' @param name_group  string; defines name of group used in analysis
+#' @param verbose  logical; whether to print processing information to console
 #'
 #' @return
 #' @export
 
-irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NULL,
-                         plots = FALSE, save = TRUE, print = TRUE, return = FALSE,
+irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
+                         irt_type, scoring = NULL, plots = FALSE,
+                         save = TRUE, print = TRUE, return = FALSE,
                          path_plots = here::here("Plots"),
                          path_tables = here::here("Tables"),
                          path_results = here::here("Results"),
-                         overwrite = FALSE, digits = 2, name_group = NULL) {
+                         overwrite = FALSE, digits = 2, verbose = FALSE,
+                         name_group = NULL) {
 
   irt <- list()
 
   if (irt_type == 'dich') {
 
     irt$model.1pl <- irt_model(resp = resp, vars = vars, items = items,
-                               valid = valid, mvs = mvs, irtmodel = '1PL')
+                               valid = valid, mvs = mvs, irtmodel = '1PL',
+                               verbose = verbose)
     irt$model.2pl <- irt_model(resp = resp, vars = vars, items = items,
-                               valid = valid, mvs = mvs, irtmodel = '2PL')
+                               valid = valid, mvs = mvs, irtmodel = '2PL',
+                               verbose = verbose)
 
     irtmodel = c("1PL", "2PL")
 
   } else if (irt_type == 'poly') {
 
     irt$model.pcm <- irt_model(resp = resp, vars = vars, items = items, mvs = mvs,
-                               valid = valid, irtmodel = 'PCM2', scoring = scoring)
+                               valid = valid, irtmodel = 'PCM2', scoring = scoring,
+                               verbose = verbose)
     irt$model.gpcm <- irt_model(resp = resp, vars = vars, items = items, mvs = mvs,
-                                valid = valid, irtmodel = 'GPCM', scoring = scoring)
+                                valid = valid, irtmodel = 'GPCM', scoring = scoring,
+                                verbose = verbose)
 
     irtmodel = c("PCM2", "GPCM")
 
@@ -71,11 +105,13 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
 
     for (i in seq_along(irtmodel)) {
 
+      if (!is.null(name_groups)) path_plots <- paste0(path_plots, "/", name_group)
+
       # ICC plots
-      icc_plots(results = irt[[i]], name = irtmodel[i], path = path_plots)
+      icc_plots(model = irt[[i]], irtmodel = irtmodel[i], path = path_plots)
 
       # Wright map
-      wright_map(results = irt[[i]], name = irtmodel[i], path = path_plots)
+      wright_map(model = irt[[i]], irtmodel = irtmodel[i], path = path_plots)
 
     }
   }
@@ -84,7 +120,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
   if (return | print | save) {
     # IRT summary
     irt$summary <- irt_summary(resp = resp, vars = vars,
-                               results = irt[[1]], disc = irt[[2]],
+                               model_1par = irt[[1]], model_2par = irt[[2]],
                                valid = valid, mvs = mvs, digits = digits)
 
     # Model fit
@@ -94,7 +130,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
 
     # Steps analysis
     if (irt_type = 'poly') {
-      irt$steps <- steps_analysis(results = irt$model.pcm, digits = digits)
+      irt$steps <- steps_analysis(pcm_model = irt$model.pcm, digits = digits)
     }
   }
 
@@ -130,27 +166,27 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
 #' Perform Rasch or 2PL analyses for binary or PCM or GPCM analyses for
 #' polytomous data.
 #'
-#' @param resp      data.frame. contains:
-#'                    (1) the responses. y in {0, 1} for binary data and y in
-#'                      {0, 1, ... k-1} for polytomous responses with k categories
-#'                    (2) ID_t: column indicating ID of participants
-#' @param vars      data.frame. contains all competence items as rows,
-#'                  and at least the following variables:
-#'                    character vector named "items"; contains the names of the items.
-#'                    boolean vector; indicates which items to use for analysis.
-#' @param items     character. contains name of variable (boolean) in vars that
-#'                    indicates which items to use for analysis.
-#' @param valid     character string. defines name of boolean variable in resp,
-#'                  indicating (in)valid cases.
-#' @param irtmodel  character. "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
-#'                    "GPCM" for GPCM analyses.
-#' @param scoring   numeric vector; scoring factor to be applied to loading matrix;
-#'                    can be NULL for Rasch model; if NULL for PCM model,
-#'                    scoring matrix is reconstructed from item names.
-#' @param path      folder path for data
-#' @param filename  string with name of file that shall be saved (including file type).
-#' @param verbose   logical. If verbose == TRUE information about the estimation
-#'                    progress is printed to the console.
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' polytomous responses with k categories; missing values (default -999 to -1)
+#' are coded as NA internally; additionally includes ID_t as a person identifier
+#' and all variables that are further defined in the function arguments
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param irtmodel  string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
+#' "GPCM" for GPCM analysis
+#' @param scoring  string; defines name of numerical variable in vars that
+#' contains the scoring factor to be applied to loading matrix; can be NULL for
+#' Rasch model
+#' @param path  string; defines path to folder where results shall be saved
+#' @param filename  string; defines name of file that shall be saved
+#' @param verbose  logical; whether to print processing information to console
 #'
 #' @return (if return_results = TRUE) a list of:
 #'   mod: tam.mml; estimated item response model
@@ -162,9 +198,9 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
 #'   info_crit: data.frame with information criteria of the model
 #' @export
 
-irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel, scoring = NULL,
-                         path = here::here("Results"), filename = NULL,
-                         verbose = FALSE) {
+irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel,
+                      scoring = NULL, verbose = FALSE,
+                      path = here::here("Results"), filename = NULL) {
 
   # Check if input is correct
   if (!irtmodel %in% c("1PL", "2PL", "GPCM", "PCM2")) {
@@ -242,28 +278,28 @@ irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel, sco
 #'
 #' Create ICC plots for IRT models.
 #'
-#' @param results list. Contains results from IRT analysis as returned by function
-#'                'irt_model'.
-#' @param name    character. Part of the filename for the directory of the plots,
-#'                following "ICCs_for_" (e.g., the kind of IRT analysis: "1PL").
-#' @param path    character. contains name of path for plots.
+#' @param results  list; return object of irt_model()
+#' @param irtmodel  string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
+#' "GPCM" for GPCM analysis
+#' @param path  string; defines path to folder where plots shall be saved
 #'
 #' @export
 
-icc_plots <- function(results, name, path = here::here("Plots")) {
+icc_plots <- function(model, irtmodel, path = here::here("Plots")) {
 
   # create directory for plots
-  check_folder(path = here::here(paste0(path, "/ICCs_for_", name)))
+  check_folder(path = here::here(paste0(path, "ICCs/ICCs_for_", irtmodel)))
 
   # ICC plots
-  for (i in 1:results$mod$nitems) {
-    tiff(paste0(here::here(paste0(path, "/ICCs_for_", name, "/plots")),
-                results$mod$item[i, 1],
+  for (i in 1:model$mod$nitems) {
+    #tiff(paste0(here::here(paste0(path, "ICCs/ICCs_for_", irtmodel, "/plots")),
+    tiff(paste0(here::here(paste0(path, "ICCs/ICCs_for_", irtmodel)),
+                model$mod$item[i, 1],
                 ".tiff"),
         width = 800, height = 800, bg = "white",
         res = 300, compression = "lzw", pointsize = 6)
-    plot(results$mod, export = FALSE, type = "expected", items = i,
-         wle = results$wle$theta)
+    plot(model$mod, export = FALSE, type = "expected", items = i,
+         wle = model$wle$theta)
     dev.off()
   }
 }
@@ -274,33 +310,32 @@ icc_plots <- function(results, name, path = here::here("Plots")) {
 #'
 #' Create Wright maps for IRT models.
 #'
-#' @param results list. Contains results from IRT analysis as returned by function
-#'                'irt_model'.
-#' @param name    character. Part of the filename for the directory of the plots,
-#'                following "ICCs_for_" (e.g., the kind of IRT analysis: "1PL").
-#' @param path    character. contains name of path for plots.
+#' @param model  list; return object of irt_model()
+#' @param irtmodel  string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
+#' "GPCM" for GPCM analysis
+#' @param path  string; defines path to folder where plots shall be saved
 #'
 #' @importFrom grDevices dev.off png tiff
 #' @importFrom graphics mtext text
 #' @export
 
-wright_map <- function(results, name, path = here::here("Plots")) {
+wright_map <- function(model, irtmodel, path = here::here("Plots")) {
 
   # Create directory for plots
   check_folder(path = here::here(path, "/Wright_Maps"))
 
   # Create Wright Map
-  png(here::here(paste0(path, "/Wright_Maps/Wright_map_for_", name, ".png")),
+  png(here::here(paste0(path, "/Wright_Maps/Wright_map_for_", irtmodel, ".png")),
       width = 800, height = 1300, bg = "white",
       res = 300, pointsize = 10)
-  TAM::IRT.WrightMap(TAM::IRT.threshold(results$mod),
-                main.title = "Wright map with all items",
-                label.items =  paste0("I",c(1:length(results$mod$xsi))),
-                item.side = "itemClassic",
-                return.thresholds = FALSE, dim.names = "",
-                show.axis.logits = "R",
-                axis.items = "",
-                axis.persons = "")
+  TAM::IRT.WrightMap(TAM::IRT.threshold(model$mod),
+                     main.title = "Wright map with all items",
+                     label.items =  paste0("I",c(1:length(model$mod$xsi))),
+                     item.side = "itemClassic",
+                     return.thresholds = FALSE, dim.names = "",
+                     show.axis.logits = "R",
+                     axis.items = "",
+                     axis.persons = "")
   text(0, 0, "")
   mtext("Item difficulties", 3, line = 0.5, cex = .65)
   mtext("Respondents", 3, line = 0.5, cex = .65, at = 0.04)
@@ -313,45 +348,45 @@ wright_map <- function(results, name, path = here::here("Plots")) {
 #'
 #' Create table with results of IRT analysis.
 #'
-#' @param resp     data.frame. contains:
-#'                   (1) the responses. y in {0, 1} for binary data and y in
-#'                   {0, 1, ... k-1} for polytomous responses with k categories
-#'                   (2) ID_t: column indicating ID of participants
-#' @param vars     data.frame. contains information about all competence items
-#'                 and includes the following columns:
-#'                   items: character indicating names of items.
-#'                   final: logical indicating whether item is a final item
-#' @param results  list. contains results from IRT analysis with one parameter
-#'                 (e.g., Rasch analysis)
-#' @param disc     list. contains results from IRT analysis with two parameters
-#'                 (e.g., 2PL analysis), to include item discrimination
-#' @param path     character. defines name of path for table.
-#' @param filename character. defines name for excel document. if NULL (default),
-#'                 the table will not be saved.
-#' @param valid     character string. defines name of boolean variable in resp,
-#'                  indicating (in)valid cases.
-#' @param digits integer; how many digits after rounding
-#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' polytomous responses with k categories; missing values (default -999 to -1)
+#' are coded as NA internally; additionally includes ID_t as a person identifier
+#' and all variables that are further defined in the function arguments
+#' includes all variables that are further defined in the function arguments
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param model_1par  list; return object of irt_model(); one parameter model
+#' @param model_2par  list; return object of irt_model(); two parameter model
+#' @param path  string; defines path to folder where table shall be saved
+#' @param filename  string; defines name of table that shall be saved
+#' @param digits  integer; number of decimals for rounding
+#' @param overwrite  logical; whether to overwrite existing file when saving table
 #'
 #' @return a data.frame containing the item name, N, percentage correct,
 #'   item difficulty, SE, WMNSQ, t, rit, item discrimination, Q3.
 #' @importFrom rlang .data
 #' @export
 
-irt_summary <- function(resp, vars, results, disc, mvs = NULL, valid = NULL,
+irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
+                        model_1par, model_2par,
                         path = here::here("Tables"), filename = NULL,
                         digits = 2, overwrite = FALSE) {
 
   # prepare data
-  vars$irt_items <- vars$items %in% rownames(results$mod$xsi)
+  vars$irt_items <- vars$items %in% rownames(model_1par$mod$xsi)
   vars_ <- dplyr::rename(vars[vars$irt_items, ], item = 'items')
   resp <- prepare_resp(resp, vars = vars, items = 'irt_items', valid = valid,
                        use_only_valid = TRUE, convert = TRUE, mvs = mvs)
 
 
   # item parameters
-  pars <- results$mod$xsi[, c("xsi", "se.xsi")]
-  pars$item <- rownames(results$mod$xsi)
+  pars <- model_1par$mod$xsi[, c("xsi", "se.xsi")]
+  pars$item <- rownames(model_1par$mod$xsi)
   pars <- pars[vars_$item, ]
 
   # percentage correct
@@ -361,8 +396,8 @@ irt_summary <- function(resp, vars, results, disc, mvs = NULL, valid = NULL,
   pars$N <- colSums(!is.na(resp))
 
   # items fit
-  pars$WMNSQ   <- results$fit$Infit[results$fit$item %in% vars_$item]
-  pars$WMNSQ_t <- results$fit$Infit_t[results$fit$item %in% vars_$item]
+  pars$WMNSQ   <- model_1par$fit$Infit[model_1par$fit$item %in% vars_$item]
+  pars$WMNSQ_t <- model_1par$fit$Infit_t[model_1par$fit$item %in% vars_$item]
 
   # corrected item-total discrimination
   rit <- c()
@@ -375,19 +410,19 @@ irt_summary <- function(resp, vars, results, disc, mvs = NULL, valid = NULL,
   pars$rit <- rit
 
   # 2PL discrimination
-  if (!is.null(disc)) {
-    pars$disc <- disc$mod$item[, "B.Cat1.Dim1"]
+  if (!is.null(model_2par)) {
+    pars$model_2par <- model_2par$mod$item[, "B.Cat1.Dim1"]
     }
 
   # Yen Q3: average absolute residual correlation for items (adjusted)
-  pars$Q3 <- colMeans(abs(results$mfit$aQ3.matr), na.rm = TRUE)
+  pars$Q3 <- colMeans(abs(model_1par$mfit$aQ3.matr), na.rm = TRUE)
 
   # numbering
   pars$num <- seq(1, nrow(pars))
 
   # reorder columns
   pars <- pars[ , c("num", "item", "N", "pc", "xsi", "se.xsi",
-                    "WMNSQ", "WMNSQ_t", "rit", "disc", "Q3")]
+                    "WMNSQ", "WMNSQ_t", "rit", "model_2par", "Q3")]
   colnames(pars) <- c("Number", "Item", "N", "% correct",
                       "xsi", "SE", "WMNSQ", "t", "rit", "Discr.", "aQ3")
   pars[, -c(1:4)] <- round(pars[, -c(1:4)], digits)
@@ -410,11 +445,12 @@ irt_summary <- function(resp, vars, results, disc, mvs = NULL, valid = NULL,
 #'
 #' Create table with model fit for 1 parameter and 2 parameter IRT model.
 #'
-#' @param model_dich  list; results of dichotomous irt analysis, as returned by function irt_model()
-#' @param model_poly  list; results of polytomous irt analysis, as returned by function irt_model()
-#' @param irt_type  character string; either "dich" for dichotomous analysis or "poly" for polytomous analysis.
+#' @param model_dich  list; return object of irt_model(); dichotomous analysis
+#' @param model_poly  list; return object of irt_model(); polytomous analysis
+#' @param irt_type  string; either "dich" (dichotomous analysis) or "poly"
+#' (polytomous analysis)
 #'
-#' @return data.frame with AIC, BIC and number of parameters for both models will be returned.
+#' @return data.frame with AIC, BIC and number of parameters for both models
 #' @export
 
 irt_model_fit <- function(model_dich, model_poly, irt_type, overwrite = FALSE,
@@ -451,30 +487,28 @@ irt_model_fit <- function(model_dich, model_poly, irt_type, overwrite = FALSE,
 
 #' Step analysis
 #'
-#' Create table with results of step analysis.
+#' Create table with pcm_model of step analysis.
 #'
-#' @param results  list. contains results from IRT analysis with one parameter
-#'                 (PCM analysis).
-#' @param path     character. defines name of path for table.
-#' @param filename character. defines name for excel document. if NULL (default),
-#'                 the table will not be saved.
-#' @param digits integer; how many digits after rounding
-#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
+#' @param pcm_model  list; return object of irt_model(); PCM analysis
+#' @param path  string; defines path to folder where table shall be saved
+#' @param filename  string; defines name of table that shall be saved
+#' @param digits  integer; number of decimals for rounding
+#' @param overwrite  logical; whether to overwrite existing file when saving table
 #'
 #' @return a data.frame containing the step parameters and SEs for each step
 #'
 #' @export
 
-steps_analysis <- function(results, path = here::here("Tables"), filename = NULL,
-                           digits = 2, overwrite = FALSE) {
+steps_analysis <- function(pcm_model, digits = 2, overwrite = FALSE,
+                           path = here::here("Tables"), filename = NULL) {
 
   # step parameters
-  step <- round(results$mod$xsi[, c("xsi", "se.xsi")], digits)
-  step$item <- sub("_step[0-9]$", "", rownames(results$mod$xsi))
-  step$step <- as.numeric(gsub(".+_c_step", "", rownames(results$mod$xsi)))
+  step <- round(pcm_model$mod$xsi[, c("xsi", "se.xsi")], digits)
+  step$item <- sub("_step[0-9]$", "", rownames(pcm_model$mod$xsi))
+  step$step <- as.numeric(gsub(".+_c_step", "", rownames(pcm_model$mod$xsi)))
   step <- step[!is.na(step$step), ]
 
-  # create matrix for results
+  # create matrix for pcm_model
   steps <- matrix(NA, ncol = max(step$step) + 1, nrow = length(unique(step$item)))
   rownames(steps) <- unique(step$item)
   colnames(steps) <- paste0("step", seq_len(ncol(steps)))
@@ -510,9 +544,9 @@ steps_analysis <- function(results, path = here::here("Tables"), filename = NULL
 #'
 #' Print and highlight IRT (and steps) analysis results.
 #'
-#' @param model      list; results of irt analysis, as returned by function irt_model()
-#' @param irt_sum    data.frame; results of irt analysis, as returned by function irt_summary()
-#' @param steps_sum  data.frame; results of steps analysis, as returned by function steps_analysis()
+#' @param model  list; return object of irt_model()
+#' @param irt_sum  data.frame; return object of irt_summary()
+#' @param steps_sum  data.frame; return object of steps_analysis()
 #'
 #' @export
 

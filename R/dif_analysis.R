@@ -3,36 +3,34 @@
 #' Testing for differential item functioning for binary and polytomous data.
 #' Main effects and DIF effects models are estimated.
 #'
-#' @param resp data.frame containing the responses. y in {0, 1} for binary data
-#'   and y in {0, 1, ... k-1} for polytomous responses with k categories.
-#'   Missing values (-97 to -21) are coded as NA internally. Also contains a
-#'   column with the DIF variable.
-#' @param vars data.frame with all variables as rows with at least following
-#'   columns:
-#'   items: contains all item names (both scored and unscored)
-#'   further custom-named columns indicating the items to select and the item
-#'   scoring via logicals
-#' @param items character. contains name of variable (boolean) in vars that
-#'   indicates which items to use for analysis. If some of the \code{dif_vars}
-#'   come with a different set of analysis items, this argument becomes a
-#'   vector of \code{length(dif_vars)} containing the respective selection
-#'   variables in vars
-#' @param dif_vars character vector. contains the variable names to be tested
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' polytomous responses with k categories; missing values (default -999 to -1)
+#' are coded as NA internally; additionally includes ID_t as a person identifier
+#' and all variables that are further defined in the function arguments
+#' @param vars data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param items string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis; if some of the \code{dif_vars}
+#' come with a different set of analysis items, this argument becomes a
+#' vector of \code{length(dif_vars)} containing the respective selection
+#' variables in vars
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param dif_vars character vector; contains the variable names to be tested
 #'   for DIF (e.g., "gender")
-#' @param valid character string. defines name of boolean variable in dat,
-#'   indicating (in)valid cases.
-#' @param scoring character string; refers to the scoring variable in vars.
-#'   Defaults to "scoring".
-#' @param overwrite boolean; indicates whether to overwrite existing file
-#'   when saving table.
-#' @param print logical indicating whether summary is printed to the console
-#' @param save logical indicating whether summary / data is stored on hard disk
-#' @param verbose logical; should progress be printed to console?
-#' @param return_results  boolean. indicates whether to return results.
-#' @param path character vector; indicates the folder locations where the
-#'   resulting summaries (first element of vector) and data (second element of
-#'   vector) is stored on the hard drive. Please note that the
-#'   path is relative to the current working path set by here::i_am()
+#' @param scoring string; defines name of numerical variable in vars that
+#' contains the scoring factor to be applied to loading matrix; defaults to
+#' "scoring"
+#' @param print  logical; whether results shall be printed to console
+#' @param save  logical; whether results shall be saved to hard disc
+#' @param return  logical; whether results shall be returned
+#' @param path_results  string; defines path to folder where results shall be saved
+#' @param path_table  string; defines path to folder where tables shall be saved
+#' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param verbose  logical; whether to print processing information to console
+
 #' @param ... additional arguments to be passed to tam.mml
 #'
 #' @return a list of:
@@ -41,11 +39,10 @@
 #' @export
 
 dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, mvs = NULL,
-                         scoring = "scoring", overwrite = FALSE,
-                         print = TRUE, verbose = FALSE, save = TRUE,
+                         scoring = "scoring", overwrite = FALSE, save = TRUE,
+                         print = TRUE, return = FALSE, verbose = FALSE,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
-
                          ...) {
 
   check_items(items, dif_vars)
@@ -121,26 +118,27 @@ summarize_dif_analysis <- function(dif_models, dif_vars, path_table,
 #' Testing for differential item functioning for binary and polytomous data.
 #' Main effects and DIF effects models are estimated.
 #'
-#' @param resp data.frame containing the responses. y in {0, 1} for binary data
-#'   and y in {0, 1, ... k-1} for polytomous responses with k categories.
-#'   Missing values (-97 to -21) are coded as NA internally. Also contains a
-#'   column with the DIF variable.
-#' @param vars data.frame with all variables as rows with at least following
-#'   columns:
-#'   items: contains all item names (both scored and unscored)
-#'   further custom-named columns indicating the items to select and the item
-#'   scoring via logicals
-#' @param items character. contains name of variable (boolean) in vars that
-#'   indicates which items to use for analysis.
-#' @param scoring character string; refers to the scoring variable in vars.
-#'   Defaults to "scoring".
-#' @param facets character string signifying the variable to be tested for DIF
-#'   (e.g., "gender")
-#' @param scoring numeric vector; scoring factor to be applied to loading matrix;
-#'   can be NULL for Rasch model
-#' @param valid character string. defines name of boolean variable in data,
-#'   indicating (in)valid cases.
-#' @param verbose logical; should progress be printed to console?
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' polytomous responses with k categories; missing values (default -999 to -1)
+#' are coded as NA internally; additionally includes ID_t as a person identifier
+#' and all variables that are further defined in the function arguments
+#' @param vars data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param items string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis; if some of the \code{dif_vars}
+#' come with a different set of analysis items, this argument becomes a
+#' vector of \code{length(dif_vars)} containing the respective selection
+#' variables in vars
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param scoring  string; defines name of numerical variable in vars that
+#' contains the scoring factor to be applied to loading matrix; defaults to
+#' "scoring"
+#' @param facets string; defines the name of the variable to be tested for DIF
+#' (e.g., "gender")
+#' @param verbose  logical; whether to print processing information to console
 #'
 #' @return a list of:
 #'   mmod: main effects model
@@ -213,25 +211,25 @@ dif_model <- function(resp, vars, items, facets, scoring = "scoring",
 #'
 #' Testing for differential item functioning for polytomous data.
 #'
-#' @param resp data.frame containing the responses. y in {0, 1} for binary data
-#'   and y in {0, 1, ... k-1} for polytomous responses with k categories.
-#'   Missing values are coded as NA.
-#' @param facets data.frame of one column for variable to be tested for DIF;
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' polytomous responses with k categories; missing values (default -999 to -1)
+#' are coded as NA internally; additionally includes ID_t as a person identifier
+#' and all variables that are further defined in the function arguments
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param select  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param facets  data.frame of one column for variable to be tested for DIF;
 #'   column is named after DIF variable (e.g., "gender"); must contain the same
 #'   persons in the same order as resp
-#' @param formulaA an R formula for the DIF analysis
-#' @param vars data.frame with all variables as rows with at least following
-#'   columns:
-#'   items: contains all item names (both scored and unscored)
-#'   scoring: numeric; scoring of IRT items;
-#'   ???: logical, can be named arbitrarily and needs to contain the variable
-#'   names for the current estimation
-#' @param select character. contains name of variable (boolean) in vars that
-#'   indicates which items to use for analysis.
-#' @param scoring character string; refers to the scoring variable in vars.
-#'   Defaults to "scoring".
-#' @param verbose logical; should progress be printed to console?
-#' @param pid vector with person identifiers
+#' @param formulaA  an R formula for the DIF analysis
+#' @param scoring  string; defines name of numerical variable in vars that
+#' contains the scoring factor to be applied to loading matrix; defaults to
+#' "scoring"
+#' @param verbose  logical; whether to print processing information to console
+#' @param pid  character vector; contains person identifiers
 #'
 #' @return a tam.mml model
 #' @noRd
@@ -254,14 +252,12 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring",
 
 #' Summary for DIF analysis
 #'
-#' @param diflist list with main and dif model as returned by dif_model()
-#' @param print logical indicating whether summary is printed to the console
-#' @param save_at character string; indicates the folder location where the
-#'   summaries are stored on the hard drive. Please note that the
-#'   path is relative to the current working path set by here::i_am(). Defaults
-#'   to NULL (not stored)
-#' @param overwrite boolean; indicates whether to overwrite existing file when
-#'   saving table.
+#' @param diflist list; return object of dif_model(); with main and dif model
+#' @param print logical; whether results shall be printed to console
+#' @param save  logical; whether results shall be saved to hard disc
+#' @param path_results  string; defines path to folder where results shall be saved
+#' @param path_table  string; defines path to folder where tables shall be saved
+#' @param overwrite logical; whether to overwrite existing file when saving table
 #'
 #' @return list of information criteria, dif estimates and main effects in
 #'   data frames for dif analysis
@@ -298,7 +294,7 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
 
 #' Summarizes DIF effects
 #'
-#' @param obj results from DIF analyses for criterion as returned by dif_model
+#' @param obj list; return object of dif_model()
 #' @param facet character string; dif variable
 #' @param group integer; group to compare against
 #' @param group2 integer; in case of more than two groups
@@ -413,13 +409,11 @@ difsum <- function(obj, facet, group = 1, group2 = NULL) {
 #'
 #' @param dif_summaries named list of dif_summary() return objects; the list
 #'   elements must be named after their DIF variable
-#' @param save logical indicator whether the results are to be written to the
-#'   hard disk
-#' @param path_table character string; indicates the folder location where the
-#'   summaries are stored on the hard drive. Please note that the
-#'   path is relative to the current working path set by here::i_am()
-#' @param overwrite boolean; indicates whether to overwrite existing file when
-#'   saving table.
+#' @param save logical; whether results shall be saved to hard disc
+#' @param path_table string; indicates the folder location where the summaries
+#' are stored on the hard drive; please note that the path is relative to the
+#' current working path set by here::i_am()
+#' @param overwrite logical; whether to overwrite existing file when saving table
 #'
 #' @export
 

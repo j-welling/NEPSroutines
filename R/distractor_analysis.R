@@ -2,33 +2,32 @@
 #'
 #' Checks how the distractors in multiple choice items functioned.
 #'
-#' @param resp      data.frame with all respondents as rows and all variables as
-#'                  columns, needs to contain at least all competence variables
-#' @param vars      data.frame with all variables as rows with at least
-#'                  following columns:
-#'                  items: contains all item names (both scored and unscored)
-#'                  raw: unscored items (before binary and pc scoring)
-#'                  type: characer vector, identifies type of each item (e.g.
-#'                  "MC")
-#'                  correct_response: integer, identifies correct response for
-#'                  each item
-#' @param items     character. contains name of variable (boolean) in vars that
-#'                    indicates which items to use for analysis.
-#' @param valid     character string. defines name of boolean variable in dat,
-#'                    indicating (in)valid cases.
-#' @param print logical indicating whether summary is printed to the console;
-#'   prints minimum and maximum for distractors and correct responses as well as
-#'   the respective item names
-#' @param save logical indicating whether summary is saved to the hard disk
-#' @param path_results character string; indicates the folder location where the
-#'   summaries are stored on the hard drive (first, the distractor object is
-#'   saved unchanged as Rdata; second, the distractor object is saved unchanged
-#'   as an excel file with one sheet per item distractor analysis; third, one
-#'   table for the distractors and one table for the correct responses is
-#'   saved as an excel file with one sheet per table). Please note that the
-#'   path is relative to the current working path set by here::i_am(). Defaults
-#'   to NULL (not stored)
-#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' polytomous responses with k categories; missing values (default -999 to -1)
+#' are coded as NA internally; additionally includes ID_t as a person identifier
+#' and all variables that are further defined in the function arguments
+#' @param vars data.frame; contains information about items with items as rows;
+#' includes variables 'items' (character) containing item names,
+#'                    'raw' (logical) indicating unscored items,
+#'                    'type' (character) containing item type (e.g. MC),
+#'                    'correct_response' (integer) containing the correct
+#'                      response for each item,
+#' and all variables that are further defined in the function arguments
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param print  logical; whether results shall be printed to console
+#' @param save  logical; whether results shall be saved to hard disc
+#' @param return  logical; whether results shall be returned
+#' @param path_results string; indicates the folder location where the summaries
+#' are stored on the hard drive; please note that the path is relative to the
+#' current working path set by here::i_am()
+#' @param path_results string; indicates the folder location where the tables
+#' are stored on the hard drive; please note that the path is relative to the
+#' current working path set by here::i_am()
+#' @param overwrite logical; whether to overwrite existing file when saving table
 #'
 #' @return list of one data frame per item containing item-total correlations
 #'   for each possible response; correct response is marked with an *
@@ -38,10 +37,10 @@
 #' @export
 
 dis_analysis <- function(resp, vars, items, valid = NULL,
-                                save = TRUE, print = TRUE, return = FALSE,
-                                path_results = here::here('Results'),
-                                path_table = here::here('Tables'),
-                                overwrite = FALSE) {
+                         save = TRUE, print = TRUE, return = FALSE,
+                         path_results = here::here('Results'),
+                         path_table = here::here('Tables'),
+                         overwrite = FALSE) {
 
     distratcors <- list()
     distractors$analysis <- conduct_dis_analysis(resp = resp,

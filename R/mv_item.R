@@ -1,44 +1,68 @@
 #' Missing values analysis by item - all in one function
 #'
-#' @param resp      data.frame. contains item responses (integer with user-defined missing values)
-#'                  and grouping variables (boolean).
-#' @param vars      data.frame. contains all competence items as rows,
-#'                  and at least the following variables:
-#'                    character vector named "items"; contains the names of the items.
-#'                    boolean vector; indicates which items to use for analysis.
-#'                    integer vector; contains position for each item; if grouping
-#'                      exists and positions differ between groups, several variables necessary.
-#' @param items     character. contains name of variable (boolean) in vars that
-#'                  indicates which items to use for analysis.
-#' @param position  (named) character vector. contains name(s) of variable(s) in
-#'                  vars that indicate the position of subitems;
-#'                  if grouping with differing positions in testlets,
-#'                  then for each group one variable name is necessary,
-#'                  as well as names for the vector that represent names of groups
-#'                  and must be identical with items in variable "grouping"
-#'                  (e.g. position = c(easy = "position_easy", diff = "position_diff"))
-#' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
-#'                  as used in resp.
-#' @param show_all  boolean; only needed when groups exist, indicates whether
-#'                  plots shall also include the whole sample as a "group"
-#' @param mvs       named vector with definition of user-defined missing values.
-#' @param path_results     folder path for file if it shall be saved
-#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
-#' @param path_table    folder path for file if it shall be saved
-#' @param plots         boolean. indicates whether plots shall be created.
-#' @param path_plots    folder path for plots
-#' @param color   bar color
-#' @param valid   character string. defines name of boolean variable in resp,
-#' indicating (in)valid cases.
-#' @param digits    number of decimals for rounding
-#' @param warn      boolean whether to print a warning if NAs were found in resp
-#' @param return  boolean. indicates whether to return results.
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; all responses ∈ ℕ0; user-defined missing values;
+#' includes all variables that are further defined in the function arguments
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param position  (named) character vector; defines name(s) of integer
+#' variable(s) in vars that indicate position of items; if groups with differing
+#' item positions in testlets exist, then vector must be named with names of
+#' groups (as in "grouping") as names of elements and names of variables as elements
+#' @param grouping  character vector; contains for each group a name of a logical
+#' variable in resp and vars that indicates to which group belongs a person or
+#' an item
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param labels_mvs  named character vector; contains labels for user-defined
+#' missing values to use them in plot titles and printed results
+#' @param plots  logical; whether plots shall be created and saved to hard disc
+#' @param print  logical; whether results shall be printed to console
+#' @param save  logical; whether results shall be saved to hard disc
+#' @param return  logical; whether results shall be returned
+#' @param path_results  string; defines path to folder where results shall be saved
+#' @param path_table  string; defines path to folder where tables shall be saved
+#' @param path_plots  string; defines path to folder where plots shall be saved
+#' @param show_all  logical; whether whole sample shall be included as a "group"
+#' (only applicable when grouping exists)
+#' @param color  character calar or vector; defines color(s) of the bar in plots
+#' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param digits  integer; number of decimals for rounding
+#' @param warn  logical; whether to print a warning if NAs were found in resp
+#' @param verbose  logical; whether to print processing information to console
 #'
-#' @return
-#'
+#' @return (if return = TRUE) list with results:
+#'          mvlist: percentages for each item
+#'          mvsum: summary statistics across items
+#'          summary_table: table with summary statistics for TR
+#' @importFrom ?
 #' @export
 
-mv_item <- function() {
+mv_item <- function(resp, vars, items, valid = NULL,
+                    position = NULL, grouping = NULL,
+                    mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
+                            UM = -90, ND = -55, NAd = -54, AZ = -21),
+                    labels_mvs = c(
+                      ALL = "total missing items",
+                      OM = "omitted items",
+                      NV = "not valid items",
+                      NR = "not reached items",
+                      TA = "missing items due to test abortion",
+                      UM = "unspecific missing items",
+                      ND = "not determinable items",
+                      NAd = "not administered items",
+                      AZ = "missing items due to ''Angabe zurueckgesetzt''"
+                    ),
+                    plots = FALSE, print = TRUE, save = TRUE, return = FALSE,
+                    path_results = here::here("Results"),
+                    path_table = here::here("Tables"),
+                    path_plots = here::here("Plots/Missing_Responses/by_person"),
+                    show_all = FALSE, color = NULL, overwrite = FALSE,
+                    digits = 2, warn = TRUE, verbose = TRUE) {
 
   # Conduct analysis
   mv_item <- mvi_analysis()
@@ -69,34 +93,30 @@ mv_item <- function() {
 
 #' Percentage of missing responses by item
 #'
-#' @param resp      data.frame. contains item responses (integer with user-defined missing values)
-#'                  and grouping variables (boolean).
-#' @param vars      data.frame. contains all competence items as rows,
-#'                  and at least the following variables:
-#'                    character vector named "items"; contains the names of the items.
-#'                    boolean vector; indicates which items to use for analysis.
-#'                    integer vector; contains position for each item; if grouping
-#'                      exists and positions differ between groups, several variables necessary.
-#' @param items     character. contains name of variable (boolean) in vars that
-#'                  indicates which items to use for analysis.
-#' @param position  (named) character vector. contains name(s) of variable(s) in
-#'                  vars that indicate the position of subitems;
-#'                  if grouping with differing positions in testlets,
-#'                  then for each group one variable name is necessary,
-#'                  as well as names for the vector that represent names of groups
-#'                  and must be identical with items in variable "grouping"
-#'                  (e.g. position = c(easy = "position_easy", diff = "position_diff"))
-#' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
-#'                  as used in resp.
-#' @param show_all  boolean; only needed when groups exist, indicates whether
-#'                  plots shall also include the whole sample as a "group"
-#' @param mvs       named vector with definition of user-defined missing values.
-#' @param path      folder path for data
-#' @param filename  string with name of file that shall be saved
-#' @param valid   character string. defines name of boolean variable in resp,
-#' indicating (in)valid cases.
-#' @param digits    number of decimals for rounding
-#' @param warn      boolean whether to print a warning if NAs were found in resp
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; all responses ∈ ℕ0; user-defined missing values;
+#' includes all variables that are further defined in the function arguments
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param position  (named) character vector; defines name(s) of integer
+#' variable(s) in vars that indicate position of items; if groups with differing
+#' item positions in testlets exist, then vector must be named with names of
+#' groups (as in "grouping") as names of elements and names of variables as elements
+#' @param grouping  character vector; contains for each group a name of a logical
+#' variable in resp and vars that indicates to which group belongs a person or
+#' an item
+#' @param show_all  logical; whether whole sample shall be included as a "group"
+#' (only applicable when grouping exists)
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param path  string; defines path to folder where results shall be saved
+#' @param filename  string; defines name of file that shall be saved
+#' @param digits  integer; number of decimals for rounding
+#' @param warn  logical; whether to print a warning if NAs were found in resp
 #'
 #' @return   list with percentages:
 #'            mvlist: percentages for each item
@@ -104,12 +124,12 @@ mv_item <- function() {
 #' @importFrom stats median sd na.omit
 #' @export
 
-mvi_analysis <- function(resp, vars, items, position = NULL,
-                    grouping = NULL, show_all = FALSE,
-                    mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                            UM = -90, ND = -55, NAd = -54, AZ = -21),
-                    path = here::here("Data"), filename = NULL,
-                    valid = NULL, digits = 2, warn = TRUE) {
+mvi_analysis <- function(resp, vars, items, valid = NULL,
+                         position = NULL, grouping = NULL, show_all = FALSE,
+                         mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
+                                 UM = -90, ND = -55, NAd = -54, AZ = -21),
+                         path = here::here("Data"), filename = NULL,
+                         digits = 2, warn = TRUE) {
 
   # Test data
   if (is.null(grouping)) {
@@ -204,7 +224,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
                                  }))
 
       # Determine percentage of missing values for each missing type
-      results <- data.frame(mvi_calc(resp = resp_p, mvs = mvs, digits = digits))
+      results <- data.frame(mvi_calc(resp_p, mvs = mvs, digits = digits))
       mvlist$all <- cbind(mvlist$all, results)
 
       # Summary across items
@@ -229,48 +249,42 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
 #' item position. If not otherwise specified, the order in which the items are
 #' given to the function is taken as the order the items appeared in the test.
 #'
-#' @param vars      data.frame. contains all competence items as rows,
-#'                  and at least the following variables:
-#'                  character vector named "items"; contains the names of the items.
-#'                  boolean vector; indicates which items to use for analysis.
-#' @param items     character. contains name of variable (boolean) in vars that
-#'                  indicates which items to use for analysis.
-#' @param mv_i      list; return object of mvi_analysis(). mvi_analysis$list must contain
-#'                  for each group and all groups together the name of the
-#'                  user-defined missing values that are to be
-#'                  analyzed and the names of the items as its row names.
-#' @param resp      data.frame. contains item responses (integer with user-defined missing values)
-#'                  and grouping variables (boolean).
-#' @param position  (named) character vector. contains name(s) of variable(s) in
-#'                  vars that indicate the position of subitems;
-#'                  if grouping with differing positions in testlets,
-#'                  then for each group one variable name is necessary,
-#'                  as well as names for the vector that represent names of groups
-#'                  and must be identical with items in variable "grouping"
-#'                  (e.g. position = c(easy = "position_easy", diff = "position_diff"))
-#' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
-#'                  as used in resp.
-#' @param show_all  boolean; only needed when groups exist, indicates whether
-#'                  plots shall also include the whole sample as a "group"
-#' @param mvs       named vector with definition of user-defined missing values.
-#' @param filename  string with name of file that shall be saved (including type of file);
-#'                  if NULL, no file will be saved.
-#' @param path      folder path for plots
-#' @param valid   character string. defines name of boolean variable in resp,
-#' indicating (in)valid cases.
-#' @param digits    number of decimals for rounding
-#' @param warn      boolean whether to print a warning if NAs were found in resp
-#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param mv_i  list; return object of mvi_analysis()
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; all responses ∈ ℕ0; user-defined missing values;
+#' includes all variables that are further defined in the function arguments
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param position  (named) character vector; defines name(s) of integer
+#' variable(s) in vars that indicate position of items; if groups with differing
+#' item positions in testlets exist, then vector must be named with names of
+#' groups (as in "grouping") as names of elements and names of variables as elements
+#' @param grouping  character vector; contains for each group a name of a logical
+#' variable in resp and vars that indicates to which group belongs a person or
+#' an item
+#' @param show_all  logical; whether whole sample shall be included as a "group"
+#' (only applicable when grouping exists)
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param path  string; defines path to folder where table shall be saved
+#' @param filename  string; defines name of table that shall be saved
+#' @param overwrite  logical; whether to overwrite existing file when saving table
+#' @param digits  integer; number of decimals for rounding
+#' @param warn  logical; whether to print a warning if NAs were found in resp
 #'
 #' @return table with results
 #' @export
 
-mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
+mvi_table <- function(vars, items, mv_i = NULL, resp = NULL, valid = NULL,
                       position = NULL, grouping = NULL, show_all = FALSE,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       filename = NULL, path = here::here("Tables"),
-                      valid = NULL, digits = 2, warn = TRUE, overwrite = FALSE) {
+                      digits = 2, warn = TRUE, overwrite = FALSE) {
 
   # Test data
   test_mvi_data(mv_i, resp = resp, vars = vars, mvs = mvs, items = items,
@@ -314,47 +328,39 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
 #' item position. If not otherwise specified, the order in which the items are
 #' given to the function is taken as the order the items appeared in the test.
 #'
-#' @param vars      data.frame. contains all competence items as rows,
-#'                  and at least the following variables:
-#'                  character vector named "items"; contains the names of the items.
-#'                  boolean vector; indicates which items to use for analysis.
-#' @param items     character. contains name of variable (boolean) in vars that
-#'                  indicates which items to use for analysis.
-#' @param mv_i      list; return object of mvi_analysis(). mvi_analysis$list must contain
-#'                  for each group and all groups together the name of the
-#'                  user-defined missing values that are to be
-#'                  analyzed and the names of the items as its row names.
-#' @param resp      data.frame. contains item responses (integer with user-defined missing values)
-#'                  and grouping variables (boolean).
-#' @param position  (named) character vector. contains name(s) of variable(s) in
-#'                  vars that indicate the position of subitems;
-#'                  if grouping with differing positions in testlets,
-#'                  then for each group one variable name is necessary,
-#'                  as well as names for the vector that represent names of groups
-#'                  and must be identical with items in variable "grouping"
-#'                  (e.g. position = c(easy = "position_easy", diff = "position_diff"))
-#' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
-#'                  as used in resp.
-#' @param show_all  boolean; only needed when groups exist, indicates whether
-#'                  plots shall also include the whole sample as a "group"
-#' @param mvs       named vector; contains definition of user-defined missing
-#'                  values that shall be analyzed in the plot
-#' @param path      folder path for plots
-#' @param filename  string with name of file that shall be saved (excluding type of file)
-#' @param position  character vector. contains names of position variables
-#'                  (one element per grouping, same order necessary)
-#' @param color     character vector. defines bar color(s); if the data contains subgroups,
-#'                  one color per subgroup must be specified
-#' @param verbose   logical; print information to console
-#' @param valid   character string. defines name of boolean variable in resp,
-#' indicating (in)valid cases.
-#' @param digits    number of decimals for rounding
-#' @param warn      boolean whether to print a warning if NAs were found in resp
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param mv_i  list; return object of mvi_analysis()
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; all responses ∈ ℕ0; user-defined missing values;
+#' includes all variables that are further defined in the function arguments
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param position  (named) character vector; defines name(s) of integer
+#' variable(s) in vars that indicate position of items; if groups with differing
+#' item positions in testlets exist, then vector must be named with names of
+#' groups (as in "grouping") as names of elements and names of variables as elements
+#' @param grouping  character vector; contains for each group a name of a logical
+#' variable in resp and vars that indicates to which group belongs a person or
+#' an item
+#' @param show_all  logical; whether whole sample shall be included as a "group"
+#' (only applicable when grouping exists)
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param labels_mvs  named character vector; contains labels for user-defined
+#' missing values to use them in plot titles and printed results
+#' @param path  string; defines path to folder where plots shall be saved
+#' @param color  character calar or vector; defines color(s) of the bar in plots
+#' @param digits  integer; number of decimals for rounding
+#' @param warn  logical; whether to print a warning if NAs were found in resp
+#' @param verbose  logical; whether to print processing information to console
 #'
 #' @importFrom rlang .data
 #' @export
 
-mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
+mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL, valid = NULL,
                       position = NULL, grouping = NULL, show_all = FALSE,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
@@ -370,9 +376,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
                         AZ = "missing items due to ''Angabe zurueckgesetzt''"
                       ),
                       path = here::here("Plots/Missing_Responses/by_item"),
-                      filename = "Missing_responses_by_item",
-                      color = NULL, verbose = TRUE,
-                      valid = NULL, digits = 2, warn = TRUE) {
+                      color = NULL, digits = 2, verbose = TRUE, warn = TRUE) {
 
   # Test data
   test_mvi_data(mv_i, resp = resp, vars = vars, mvs = mvs, items = items,
@@ -463,7 +467,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
 
     # save plot
     ggplot2::ggsave(
-      filename = paste0(filename, " (", i,").png"),
+      filename = paste0("Missing_responses_by_item (", i,").png"),
       plot = gg, path = path, width = 2000, height = 1200, units = "px",
       dpi = 300
     )
@@ -474,15 +478,14 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
 }
 
 
-#' Print MVI results
+#' Print mvi results to console
 #'
-#' @param mv_i      list; return object of mvi_analysis(). mvi_analysis$list must contain
-#'                  for each group and all groups together the name of the
-#'                  user-defined missing values that are to be
-#'                  analyzed and the names of the items as its row names.
-#' @param labels_mvs    lables for different types of user-defined missing values
-#' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
-#'                  as used in resp.
+#' @param mv_i  list; return object of mvi_analysis()
+#' @param labels_mvs  named character vector; contains labels for user-defined
+#' missing values to use them in plot titles and printed results
+#' @param grouping  character vector; contains for each group a name of a logical
+#' variable in resp and vars that indicates to which group belongs a person or
+#' an item
 #'
 #' @export
 
@@ -526,15 +529,18 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
 
 #' Calculate and round frequency (in percentage) of one missing value type (by item)
 #'
-#' @param resp      data.frame with item responses
-#' @param mvs       named vector with definition of one user-defined missing values
-#' @param digits    number of decimals for rounding
+#' @param responses  data.frame; contains item responses with items as variables
+#' and persons as rows; all responses ∈ ℕ0; user-defined missing values;
+#' only the items administered to and the cases of the designated group
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param digits  integer; number of decimals for rounding
 #'
-#' @return   table with frequency of missing values for one missing value type (by item)
+#' @return table with frequency of missing values for one missing value type
+#' (by item)
 #' @noRd
 
-mvi_perc <- function(resp, mvs, digits = 2) {
-  perc <- data.frame(apply(resp, 2, function(x) {
+mvi_perc <- function(responses, mvs, digits = 2) {
+  perc <- data.frame(apply(responses, 2, function(x) {
     ifelse(x %in% mvs, 1, ifelse(!is.na(x), 0, NA))
   }))
   round(apply(perc, 2, mean, na.rm = TRUE) * 100, digits)
@@ -543,23 +549,26 @@ mvi_perc <- function(resp, mvs, digits = 2) {
 
 #' Create list with frequency of missing responses by item for each missing value type
 #'
-#' @param resp      data.frame with item responses
-#' @param mvs       named vector with definition of all relevant user-defined missing values
-#' @param digits    number of decimals for rounding
+#' @param responses  data.frame; contains item responses with items as variables
+#' and persons as rows; all responses ∈ ℕ0; user-defined missing values;
+#' only the items administered to and the cases of the designated group
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param digits  integer; number of decimals for rounding
 #'
-#' @return   list with frequency of missing values by item for each missing value type in mvs
+#' @return list with frequency of missing values by item for each missing value
+#' type in mvs
 #' @noRd
 
-mvi_calc <- function(resp, mvs, digits = 2) {
+mvi_calc <- function(responses, mvs, digits = 2) {
   result <- list()
 
   # Determine percentage of missing values for each missing type
   for (i in names(mvs)) {
-    result[[i]] <- mvi_perc(resp = resp, mvs = mvs[[i]], digits = digits)
+    result[[i]] <- mvi_perc(responses = responses, mvs = mvs[[i]], digits = digits)
   }
 
   # Percentage of total missing responses for each item
-  result$ALL <- mvi_perc(resp = resp, mvs = mvs, digits = digits)
+  result$ALL <- mvi_perc(responses = responses, mvs = mvs, digits = digits)
 
   return(result)
 }
@@ -567,12 +576,13 @@ mvi_calc <- function(resp, mvs, digits = 2) {
 
 #' Create list with missing values per item
 #'
-#' @param items     character vector; contains names of items
+#' @param items  character vector; contains names of items
 #' @param position  integer vector; contains position of items
-#' @param responses data.frame; contains item responses {0,1}
-#' with only the items administered to and the cases of the designated group
-#' @param mvs       named vector with definition of one user-defined missing values
-#' @param digits    number of decimals for rounding
+#' @param responses  data.frame; contains item responses with items as variables
+#' and persons as rows; all responses ∈ ℕ0; user-defined missing values;
+#' only the items administered to and the cases of the designated group
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param digits  integer; number of decimals for rounding
 #'
 #' @return   list with results of missing values per item.
 #' @noRd
@@ -592,7 +602,7 @@ create_mvlist <- function(items, position, responses, mvs, digits = 2) {
                        N = colSums(apply(responses, 2, function(x) !(x %in% mvs))))
 
   # Merge with percentage of missing values for each missing type
-  results <- data.frame(mvi_calc(resp = responses, mvs = mvs, digits = digits))
+  results <- data.frame(mvi_calc(responses, mvs = mvs, digits = digits))
   results$items <- row.names(results)
   mvlist <- merge(mvlist, results, by = 'items')
 
@@ -603,7 +613,7 @@ create_mvlist <- function(items, position, responses, mvs, digits = 2) {
 
 #' MVI summary
 #'
-#' @param mvlist  list with missing values per item as returned by function create_mvlist()
+#' @param mvlist  list; return object of create_mvlist()
 #'
 #' @return  data.frame with mean, median, SD, min and max of missing values
 #' @noRd
@@ -618,32 +628,28 @@ mvi_summary <- function(mvlist, digits = 2) {
 
 #' Test mvi data and if not incomplete, create new mv_i
 #'
-#' @param resp      data.frame. contains item responses (integer with user-defined missing values)
-#'                  and grouping variables (boolean).
-#' @param vars      data.frame. contains all competence items as rows,
-#'                  and at least the following variables:
-#'                    character vector named "items"; contains the names of the items.
-#'                    boolean vector; indicates which items to use for analysis.
-#'                    integer vector; contains position for each item; if grouping
-#'                      exists and positions differ between groups, several variables necessary.
-#' @param items     character. contains name of variable (boolean) in vars that
-#'                  indicates which items to use for analysis.
-#' @param position  (named) character vector. contains name(s) of variable(s) in
-#'                  vars that indicate the position of subitems;
-#'                  if grouping with differing positions in testlets,
-#'                  then for each group one variable name is necessary,
-#'                  as well as names for the vector that represent names of groups
-#'                  and must be identical with items in variable "grouping"
-#'                  (e.g. position = c(easy = "position_easy", diff = "position_diff"))
-#' @param grouping  character vector. contains names of groups (e.g. 'easy and 'difficult')
-#'                  as used in resp.
-#' @param show_all  boolean; only needed when groups exist, indicates whether
-#'                  plots shall also include the whole sample as a "group"
-#' @param mvs       named vector with definition of user-defined missing values.
-#' @param valid   character string. defines name of boolean variable in resp,
-#' indicating (in)valid cases.
-#' @param digits    number of decimals for rounding
-#' @param warn      boolean whether to print a warning if NAs were found in resp
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; all responses ∈ ℕ0; user-defined missing values;
+#' includes all variables that are further defined in the function arguments
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param position  (named) character vector; defines name(s) of integer
+#' variable(s) in vars that indicate position of items; if groups with differing
+#' item positions in testlets exist, then vector must be named with names of
+#' groups (as in "grouping") as names of elements and names of variables as elements
+#' @param grouping  character vector; contains for each group a name of a logical
+#' variable in resp and vars that indicates to which group belongs a person or
+#' an item
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param show_all  logical; whether whole sample shall be included as a "group"
+#' (only applicable when grouping exists)
+#' @param digits  integer; number of decimals for rounding
+#' @param warn  logical; whether to print a warning if NAs were found in resp
 #'
 #' @noRd
 

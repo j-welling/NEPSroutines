@@ -1,10 +1,8 @@
 #' Number of valid cases
 #'
-#' @param dat     data.frame with item responses (user-defined missing values)
-#'                and logical grouping variables, named after the grouping
-#'                factor (e.g. "easy" and "difficult" in the case of testlet).
-#' @param valid   character string. defines name of boolean variable in dat,
-#' indicating (in)valid cases.
+#' @param dat  data.frame; contains sociodemographic and booklet variables
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
 #'
 #' @return   character string with answer.
 #'
@@ -21,13 +19,12 @@ n_valid <- function(dat, valid = NULL) {
 
 #' Descriptives of continuous variables
 #'
-#' @param dat     data.frame with item responses (user-defined missing values)
-#'                and logical grouping variables, named after the grouping
-#'                factor (e.g. "easy" and "difficult" in the case of testlet.
-#' @param desc    character. contains names of variables for descriptive analysis.
-#' @param valid   character string. defines name of boolean variable in dat,
-#' indicating (in)valid cases.
-#' @param digits  number of decimals for rounding
+#' @param dat  data.frame; contains sociodemographic and booklet variables
+#' @param desc  character vector; contains the name(s) of the variable(s) that
+#' shall be used in analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param digits  integer; number of decimals for rounding
 #'
 #' @return   list with descriptives.
 #'
@@ -47,17 +44,14 @@ desc_con <- function(dat, desc, valid = NULL, digits = 2) {
 
 #' Descriptives of nominal variables
 #'
-#' @param dat     data.frame with item responses (user-defined missing values)
-#'                and logical grouping variables, named after the grouping
-#'                factor (e.g. "easy" and "difficult" in the case of testlet.
-#' @param desc    character. contains names of variables for descriptive analysis.
-#' @param valid   character string. defines name of boolean variable in dat,
-#' indicating (in)valid cases.
-#' @param digits  number of decimals for rounding percentages
-#' @param show_absolute boolean; indicates whether to show frequency in
-#' absolute numbers.
-#' @param show_percentage boolean; indicates whether to show frequency in
-#' relative numbers (percentage).
+#' @param dat  data.frame; contains sociodemographic and booklet variables
+#' @param desc  character vector; contains the name(s) of the variable(s) that
+#' shall be used in analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param digits  integer; number of decimals for rounding of percentages
+#' @param show_absolute logical; whether to show frequency in absolute numbers
+#' @param show_percentage logical; whether to show frequency in relative numbers
 #'
 #' @return   list with descriptives.
 #'
@@ -86,12 +80,11 @@ desc_nom <- function(dat, desc, valid = NULL, digits = 1,
 
 #' Show frequency (absolute) of answers of list of variables
 #'
-#' @param dat     data.frame with item responses (user-defined missing values)
-#'                and logical grouping variables, named after the grouping
-#'                factor (e.g. "easy" and "difficult" in the case of testlet.
-#' @param desc    character. contains names of variables for descriptive analysis.
-#' @param valid   character string. defines name of boolean variable in dat,
-#' indicating (in)valid cases.
+#' @param dat  data.frame; contains sociodemographic and booklet variables
+#' @param desc  character vector; contains the name(s) of the variable(s) that
+#' shall be used in analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
 #'
 #' @return   list with  frequency (absolute) of answers for each variable in desc.
 #'
@@ -108,13 +101,12 @@ desc_abs <- function(dat, desc, valid = NULL) {
 
 #' Show frequency (relative) of answers of list of variables
 #'
-#' @param dat     data.frame with item responses (user-defined missing values)
-#'                and logical grouping variables, named after the grouping
-#'                factor (e.g. "easy" and "difficult" in the case of testlet.
-#' @param desc    character. contains names of variables for descriptive analysis.
-#' @param valid   character string. defines name of boolean variable in dat,
-#' indicating (in)valid cases.
-#' @param digits  number of decimals for rounding
+#' @param dat  data.frame; contains sociodemographic and booklet variables
+#' @param desc  character vector; contains the name(s) of the variable(s) that
+#' shall be used in analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param digits  integer; number of decimals for rounding
 #'
 #' @return   list with frequency (relative) of answers for each variable in desc.
 #'
@@ -132,8 +124,9 @@ desc_perc <- function(dat, desc, valid = NULL, digits = 1) {
 
 #' Show attributes of selected variables
 #'
-#' @param dat data.frame containing variables
-#' @param desc character vectors containing variables to be shown
+#' @param dat  data.frame; contains sociodemographic and booklet variables
+#' @param desc  character vector; contains the name(s) of the variable(s) that
+#' shall be used in analysis
 
 show_attributes <- function(dat, desc) {
     for (var in desc) {
