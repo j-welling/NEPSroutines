@@ -42,7 +42,8 @@ dimension_analysis <- function(resp, vars, items, scoring = "scoring",
                                dim = NULL, valid = NULL, irtmodel = "PCM2",
                                maxiter = 10, snodes = 5, verbose = FALSE,
                                return = FALSE, save = TRUE,
-                               path_table = "Tables", path_results = "Results",
+                               path_results = here::here('Results'),
+                               path_table = here::here('Tables'),
                                overwrite = TRUE, print = TRUE) {
 
     dimensionality <- list()

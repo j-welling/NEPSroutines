@@ -39,7 +39,8 @@
 
 distractor_analysis <- function(resp, vars, items, valid = NULL, print = TRUE,
                                 save = TRUE, overwrite = FALSE, return = FALSE,
-                                path_results = "Results", path_table) {
+                                path_results = here::here('Results'),
+                                path_table = here::here('Tables')) {
 
     distratcors <- list()
     distractors$analysis <- conduct_distractor_analysis(resp = resp,

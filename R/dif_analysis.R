@@ -43,8 +43,9 @@
 dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL,
                          scoring = "scoring", overwrite_table = FALSE,
                          print = TRUE, verbose = FALSE, save = TRUE,
-                         return = FALSE,
-                         path_results = 'Results', path_table = 'Tables',
+                         path_results = here::here('Results'),
+                         path_table = here::here('Tables'),
+
                          ...) {
 
   check_items(items, dif_vars)
@@ -281,7 +282,8 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring",
 #' @export
 
 dif_summary <- function(diflist, print = TRUE, save = TRUE,
-                        path_table = "Tables", path_results = "Results",
+                        path_results = here::here('Results'),
+                        path_table = here::here('Tables'),
                         overwrite = FALSE) {
   # information criteria for DIF and main model
   # main effects of main and DIF model + standardized
@@ -434,8 +436,11 @@ difsum <- function(obj, facet, group = 1, group2 = NULL) {
 #'   saving table.
 #'
 #' @export
+
 build_dif_tr_tables <- function(dif_summaries, save = TRUE,
-                                path_results, path_table, overwrite = FALSE) {
+                                path_results = here::here('Results'),
+                                path_table = here::here('Tables'),
+                                overwrite = FALSE) {
 
   dif_vars <- names(dif_summaries)
 
