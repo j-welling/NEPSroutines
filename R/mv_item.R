@@ -20,9 +20,9 @@
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
-#' @param plots  logical; whether plots shall be created and saved to hard disc
+#' @param plots  logical; whether plots shall be created and saved to hard drive
 #' @param print  logical; whether results shall be printed to console
-#' @param save  logical; whether results shall be saved to hard disc
+#' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
@@ -65,13 +65,20 @@ mv_item <- function(resp, vars, items, valid = NULL,
                     digits = 2, warn = TRUE, verbose = TRUE) {
 
   # Conduct analysis
-  mv_item <- mvi_analysis()
+  mv_item <- mvi_analysis(resp = resp, vars = vars, items = items,
+                          valid = valid, position = position,
+                          grouping = grouping, show_all = show_all,
+                          mvs = mvs, digits = digits, warn = warn)
 
   # Write grouped table
-  mv_item$summary_table <- mvi_table()
+  mv_item$summary_table <- mvi_table(mv_i = mv_item, vars = vars, items = items,
+                                     grouping = grouping)
 
   # Write plots
-  if (plots) mvi_plots()
+  if (plots) mvi_plots(mv_i = mv_item, vars = vars, items = items,
+                       grouping = grouping, mvs = mvs, labels_mvs = labels_mvs,
+                       show_all = show_all, color = color, verbose = verbose,
+                       path = path_plots)
 
   # Save results
   if (save) {
@@ -83,7 +90,7 @@ mv_item <- function(resp, vars, items, valid = NULL,
   # Print results
   if (print) {
     print(mv_item$summary_table)
-    print_mvi_results()
+    print_mvi_results(mv_i, grouping = grouping, labels_mvs = labels_mvs)
   }
 
   # Return results
