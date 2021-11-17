@@ -16,8 +16,9 @@
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
-#' @param plots  logical; whether plots shall be created and saved to hard disc
-#' @param save  logical; whether results shall be saved to hard disc
+#' @param plots  logical; whether plots shall be created and saved to hard drive
+#' @param save  logical; whether results shall be saved to hard drive
+#' @param print  logical; whether results shall be printed to console
 #' @param return  logical; whether results shall be returned
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
@@ -56,23 +57,27 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
                       show_all = FALSE, color = NULL, overwrite = FALSE,
                       digits = 2, warn = TRUE, verbose = TRUE) {
 
-  mv_p <- mvp_analysis(resp = resp, vars = vars, items = items, grouping = grouping,
-                       mvs = mvs, filename = name_data, path = path_results,
-                       valid = valid, digits = digits, warn = warn)
+  mv_person <- list()
+
+  mv_person$mv_p <- mvp_analysis(resp = resp, vars = vars, items = items,
+                                 valid = valid, mvs = mvs, grouping = grouping,
+                                 digits = digits, warn = warn)
+
+  mv_person$summary <- mvp_table(mv_p = mv_p, grouping = grouping)
 
   if (plots) {
-    mvp_plots(mv_p = mv_p, vars = vars, items = items, grouping = grouping,
-              mvs = mvs, labels_mvs = labels_mvs, show_all = show_all,
-              filename = name_plots, path = path_plots, color = color,
-              verbose = verbose)
+    mvp_plots(mv_p = mv_person$mv_p, vars = vars, items = items,
+              labels_mvs = labels_mvs, grouping = grouping, show_all = show_all,
+              path = path_plots, color = color, verbose = verbose)
   }
 
   if (save) {
-    save_results(mv_p, filename = "mv_person.Rdata", path = path_results)
-    mvp_table(mv_p = mv_p, grouping = grouping, mvs = mvs,
-              filename = "mv_person.xlsx", path = path_table,
-              overwrite = overwrite)
+    save_results(mv_person, filename = "mv_person.Rdata", path = path_results)
+    save_table(mv_person$summary, filename = "mv_person.xlsx", path = path_table)
+
   }
+
+  if (print) print(mv_person$summary)
 
   if (return) return(mv_p)
 }
