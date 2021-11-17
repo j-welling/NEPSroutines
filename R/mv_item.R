@@ -355,13 +355,24 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL,
 #' @export
 
 mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
-                     position = NULL, grouping = NULL, show_all = FALSE,
-                     mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                             UM = -90, ND = -55, NAd = -54, AZ = -21),
-                     path = here::here("Plots/Missing_Responses/by_item"),
-                     filename = "Missing_responses_by_item",
-                     color = NULL, verbose = TRUE,
-                     valid = NULL, digits = 2, warn = TRUE) {
+                      position = NULL, grouping = NULL, show_all = FALSE,
+                      mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
+                              UM = -90, ND = -55, NAd = -54, AZ = -21),
+                      labels_mvs = c(
+                        ALL = "total missing items",
+                        OM = "omitted items",
+                        NV = "not valid items",
+                        NR = "not reached items",
+                        TA = "missing items due to test abortion",
+                        UM = "unspecific missing items",
+                        ND = "not determinable items",
+                        NAd = "not administered items",
+                        AZ = "missing items due to ''Angabe zurueckgesetzt''"
+                      ),
+                      path = here::here("Plots/Missing_Responses/by_item"),
+                      filename = "Missing_responses_by_item",
+                      color = NULL, verbose = TRUE,
+                      valid = NULL, digits = 2, warn = TRUE) {
 
   # Test data
   test_mvi_data(mv_i, resp = resp, vars = vars, mvs = mvs, items = items,
@@ -404,7 +415,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
                             mapping = ggplot2::aes(x = .data$position, y = y)
       ) +
         ggplot2::labs(
-          title = paste0("Missing responses by item position (", i,")"),
+          title = paste0(Hmisc::capitalize(labels_mvs[i]), " by item position"),
           x = "Item position", y = "Percentage"
         )
 
@@ -431,7 +442,7 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
         mapping = ggplot2::aes(x = .data$position, y = .data$MV, fill = .data$group)
       ) +
         ggplot2::labs(
-          title = paste0("Missing responses by item position (", i,")"),
+          title = paste0(Hmisc::capitalize(labels_mvs[i]), " by item position"),
           x = "Item position", y = "Percentage", fill = "Group"
         )
     }
@@ -475,14 +486,24 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL,
 #'
 #' @export
 
-print_mvi_results <- function(mv_i, labels_mvs, grouping = NULL) {
+print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
+                                ALL = "total missing items",
+                                OM = "omitted items",
+                                NV = "not valid items",
+                                NR = "not reached items",
+                                TA = "missing items due to test abortion",
+                                UM = "unspecific missing items",
+                                ND = "not determinable items",
+                                NAd = "not administered items",
+                                AZ = "missing items due to ''Angabe zurueckgesetzt''"
+                              )) {
   if (is.null(grouping)) {
     for (lbl in names(labels_mvs)) {
       mv_min <- min(mv_i$list[[lbl]], na.rm = TRUE)
       mv_max <- max(mv_i$list[[lbl]], na.rm = TRUE)
       item_min <- mv_i$list$items[mv_i$list[[lbl]] == mv_min]
       item_max <- mv_i$list$items[mv_i$list[[lbl]] == mv_max]
-      message("The number of ", labels_mvs[lbl], " items varied between ",
+      message("The number of ", labels_mvs[lbl], " varied between ",
               mv_min, " %", if(length(item_min) == 1) {paste0(" (item ", item_min, ")")}, " and ",
               mv_max, " %", if(length(item_max) == 1) {paste0(" (item ", item_max, ")")}, ".")
     }
@@ -494,7 +515,7 @@ print_mvi_results <- function(mv_i, labels_mvs, grouping = NULL) {
         mv_max <- max(mv_i$list[[g]][[lbl]], na.rm = TRUE)
         item_min <- mv_i$list[[g]]$items[mv_i$list[[g]][[lbl]] == mv_min]
         item_max <- mv_i$list[[g]]$items[mv_i$list[[g]][[lbl]] == mv_max]
-        message("The number of ", labels_mvs[lbl], " items in the ", g, " test version varied between ",
+        message("The number of ", labels_mvs[lbl], " in the ", g, " test version varied between ",
                 mv_min, " %", if(length(item_min) == 1) {paste0(" (item ", item_min, ")")}, " and ",
                 mv_max, " %", if(length(item_max) == 1) {paste0(" (item ", item_max, ")")}, ".")
       }

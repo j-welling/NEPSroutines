@@ -40,15 +40,15 @@ mv_person <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL
                       path_plots = here::here("Plots/Missing_Responses/by_person"),
                       color = NULL, show_all = FALSE,
                       labels_mvs = c(
-                        ALL = "total missing",
-                        OM = "omitted",
-                        NV = "not valid",
-                        NR = "not reached",
-                        TA = "test aborted",
-                        UM = "unspecific missing",
-                        ND = "not determinable",
-                        NAd = "not administered",
-                        AZ = "Angabe zurueckgesetzt"
+                        ALL = "total missing items",
+                        OM = "omitted items",
+                        NV = "not valid items",
+                        NR = "not reached items",
+                        TA = "missing items due to test abortion",
+                        UM = "unspecific missing items",
+                        ND = "not determinable items",
+                        NAd = "not administered items",
+                        AZ = "missing items due to ''Angabe zurueckgesetzt''"
                       ),
                       digits = 2, warn = TRUE, verbose = TRUE) {
 
@@ -252,21 +252,21 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       path = here::here("Plots/Missing_Responses/by_person"),
                       labels_mvs = c(
-                        ALL = "total missing",
-                        OM = "omitted",
-                        NV = "not valid",
-                        NR = "not reached",
-                        TA = "test aborted",
-                        UM = "unspecific missing",
-                        ND = "not determinable",
-                        NAd = "not administered",
-                        AZ = "Angabe zurueckgesetzt"
+                        ALL = "total missing items",
+                        OM = "omitted items",
+                        NV = "not valid items",
+                        NR = "not reached items",
+                        TA = "missing items due to test abortion",
+                        UM = "unspecific missing items",
+                        ND = "not determinable items",
+                        NAd = "not administered items",
+                        AZ = "missing items due to ''Angabe zurueckgesetzt''"
                       ),
                       color = NULL, verbose = TRUE) {
 
   # Test data
-  test_mvp_data(mv_p, resp = resp, vars = vars, valid = valid, mvs = mvs,
-                grouping = grouping)
+  test_mvp_data(mv_p, resp = resp, vars = vars,
+                valid = valid, mvs = mvs, grouping = grouping)
 
   # Prepare data
   if (is.null(grouping)) {
@@ -280,9 +280,9 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
     }
   }
 
-  # Labels
-  for (i in names(mv_all)) {
-    if (!(i %in% names(labels_mvs))) labels_mvs[i] <- "missing"
+  # Test labels
+  if (any(!names(mv_all) %in% names(labels_mvs))) {
+    stop("Please provide labels for each missing value type specified in mv_p.")
   }
 
   # Approx. number of items
@@ -317,8 +317,8 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
                             mapping = ggplot2::aes(x = .data$number, y = .data$y)
       ) +
         ggplot2::labs(
-          title = paste0(filename, " (", i,")"),
-          x = paste0("Number of ", labels_mvs[i], " items"),
+          title = paste0("Number of ", labels_mvs[i], " by person"),
+          x = paste0("Number of ", labels_mvs[i]),
           y = "Percentage"
         )
 
@@ -343,8 +343,8 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items = 'final',
         mapping = ggplot2::aes(x = .data$number, y = .data$MV, fill = .data$group)
       ) +
         ggplot2::labs(
-          title = paste0("Missing responses by person (", i,")"),
-          x = paste0("Number of ", labels_mvs[i], " items"),
+          title = paste0("Number of ", labels_mvs[i], " by person"),
+          x = paste0("Number of ", labels_mvs[i]),
           y = "Percentage", fill = "Group"
         )
     }
