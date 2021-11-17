@@ -40,7 +40,7 @@
 #'   dmod: DIF effects model
 #' @export
 
-dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL,
+dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, mvs = NULL,
                          scoring = "scoring", overwrite_table = FALSE,
                          print = TRUE, verbose = FALSE, save = TRUE,
                          path_results = here::here('Results'),
@@ -54,7 +54,7 @@ dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL,
 
   dif$models <- conduct_dif_analysis(
     items = items, dif_vars = dif_vars, resp = resp, vars = vars,
-    scoring = scoring, valid = valid, verbose = verbose
+    scoring = scoring, valid = valid, mvs = mvs, verbose = verbose
   )
 
   dif$summaries <- summarize_dif_analysis(
@@ -78,7 +78,7 @@ check_items <- function(items, dif_vars) {
 
 
 conduct_dif_analysis <- function(items, dif_vars, resp, vars, scoring,
-                                 valid, verbose) {
+                                 valid, mvs, verbose) {
 
   dif_models <- list()
 
@@ -149,7 +149,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, path_table,
 #' @export
 
 dif_model <- function(resp, vars, items, facets, scoring = "scoring",
-                      valid = NULL, verbose = FALSE) {
+                      valid = NULL, mvs = NULL, verbose = FALSE) {
 
   # Select only valid cases
   resp <- only_valid(resp, valid = valid)
@@ -163,7 +163,7 @@ dif_model <- function(resp, vars, items, facets, scoring = "scoring",
   # add default MVs message here once instead of every time, convert_mv is
   # called
   resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE,
-                       without_valid = TRUE)
+                       mvs = mvs)
   message(names(facets),
           ": User-defined missing values (-999 to -20) converted to NA.")
 
@@ -512,7 +512,7 @@ save_dif_summary <- function(diflist, res, path_results, path_table,
   save_results(dif, filename = "dif_results.Rdata", path = path_results)
 
   # Save table
-  results <- list(gof = res$gof, estimates = res$est, main_effects = res$mne)
-  save_table(results, filename = "dif_results.xlsx", path = path_table,
+  dif_table <- list(gof = res$gof, estimates = res$est, main_effects = res$mne)
+  save_table(dif_table, filename = "dif_results.xlsx", path = path_table,
              overwrite = overwrite)
 }

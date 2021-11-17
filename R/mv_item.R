@@ -97,7 +97,6 @@ mv_item <- function() {
 #' indicating (in)valid cases.
 #' @param digits    number of decimals for rounding
 #' @param warn      boolean whether to print a warning if NAs were found in resp
-#' @param return_results  boolean. indicates whether to return results.
 #'
 #' @return   list with percentages:
 #'            mvlist: percentages for each item
@@ -130,7 +129,7 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
   # Prepare data
   vars_c <- vars[vars[[items]], ]
   resp <- only_valid(resp, valid = valid)
-  resp_c <- prepare_resp(resp, vars = vars, items = items, without_valid = TRUE, convert = FALSE)
+  resp_c <- prepare_resp(resp, vars = vars, items = items)
 
   # NAs are not acknowledged in mvs-argument
   if (warn & !(NA %in% mvs) & any(resp_c %in% NA)) {
@@ -262,7 +261,6 @@ mvi_analysis <- function(resp, vars, items, position = NULL,
 #' @param digits    number of decimals for rounding
 #' @param warn      boolean whether to print a warning if NAs were found in resp
 #' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
-#' @param return_table  boolean. indicates whether to return table.
 #'
 #' @return table with results
 #' @export

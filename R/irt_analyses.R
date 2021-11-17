@@ -45,17 +45,17 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
   if (irt_type == 'dich') {
 
     irt$model.1pl <- irt_model(resp = resp, vars = vars, items = items,
-                               valid = valid, irtmodel = '1PL')
+                               valid = valid, mvs = mvs, irtmodel = '1PL')
     irt$model.2pl <- irt_model(resp = resp, vars = vars, items = items,
-                               valid = valid, irtmodel = '2PL')
+                               valid = valid, mvs = mvs, irtmodel = '2PL')
 
     irtmodel = c("1PL", "2PL")
 
   } else if (irt_type == 'poly') {
 
-    irt$model.pcm <- irt_model(resp = resp, vars = vars, items = items,
+    irt$model.pcm <- irt_model(resp = resp, vars = vars, items = items, mvs = mvs,
                                valid = valid, irtmodel = 'PCM2', scoring = scoring)
-    irt$model.gpcm <- irt_model(resp = resp, vars = vars, items = items,
+    irt$model.gpcm <- irt_model(resp = resp, vars = vars, items = items, mvs = mvs,
                                 valid = valid, irtmodel = 'GPCM', scoring = scoring)
 
     irtmodel = c("PCM2", "GPCM")
@@ -85,7 +85,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
     # IRT summary
     irt$summary <- irt_summary(resp = resp, vars = vars,
                                results = irt[[1]], disc = irt[[2]],
-                               valid = valid, digits = digits)
+                               valid = valid, mvs = mvs, digits = digits)
 
     # Model fit
     irt$model_fit <- irt_model_fit(model_dich = irt[[1]],
@@ -99,25 +99,27 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
   }
 
   # Print irt
-  if (print_results)  {
+  if (print)  {
     print(irt$summary)
     print(irt$model_fit)
     if (irt_type == 'poly') print(irt$steps)
-    print_irt_results(model = irt[[1]],
+    print_irt_summary(model = irt[[1]],
                       irt_sum = irt$summary,
                       steps_sum = irt$steps)
   }
 
   # Save irt
-  if (is.null(name_group)) {
-    name <- paste0("irt_", irt_type)
-  } else {
-    name <- paste0("irt_", irt_type, "_", name_group)
-  }
-  irt_summary <- irt[-c(1:2)]
+  if (save) {
+    if (is.null(name_group)) {
+      name <- paste0("irt_", irt_type)
+    } else {
+      name <- paste0("irt_", irt_type, "_", name_group)
+    }
+    irt_summary <- irt[-c(1:2)]
 
-  save_results(irt, filename = paste0(name, ".Rdata"), path = path_results)
-  save_table(irt_summary, filename = paste0(name, ".xlsx"), path = path_table)
+    save_results(irt, filename = paste0(name, ".Rdata"), path = path_results)
+    save_table(irt_summary, filename = paste0(name, ".xlsx"), path = path_table)
+  }
 
   # Return irt
   if (return)  return(irt)
@@ -160,9 +162,9 @@ irt_analysis <- function(resp, vars, items, valid = NULL, irt_type, scoring = NU
 #'   info_crit: data.frame with information criteria of the model
 #' @export
 
-irt_model <- function(resp, vars, items, valid = NULL, irtmodel, scoring = NULL,
+irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel, scoring = NULL,
                          path = here::here("Results"), filename = NULL,
-                         verbose = FALSE, return_results = TRUE) {
+                         verbose = FALSE) {
 
   # Check if input is correct
   if (!irtmodel %in% c("1PL", "2PL", "GPCM", "PCM2")) {
@@ -178,7 +180,7 @@ irt_model <- function(resp, vars, items, valid = NULL, irtmodel, scoring = NULL,
   check_pid(pid)
 
   # Prepare data
-  resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE, without_valid = TRUE)
+  resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE, mvs = mvs)
 
   # Create scoring matrix if not provided in function arguments
   if (!is.null(scoring)) {
@@ -336,14 +338,15 @@ wright_map <- function(results, name, path = here::here("Plots")) {
 #' @importFrom rlang .data
 #' @export
 
-irt_summary <- function(resp, vars, results, disc,
+irt_summary <- function(resp, vars, results, disc, mvs = NULL, valid = NULL,
                         path = here::here("Tables"), filename = NULL,
-                        valid = NULL, digits = 2, overwrite = FALSE) {
+                        digits = 2, overwrite = FALSE) {
 
   # prepare data
   vars$irt_items <- vars$items %in% rownames(results$mod$xsi)
   vars_ <- dplyr::rename(vars[vars$irt_items, ], item = 'items')
-  resp <- prepare_resp(resp, valid = valid, vars = vars, items = 'irt_items', convert = TRUE)
+  resp <- prepare_resp(resp, vars = vars, items = 'irt_items', valid = valid,
+                       use_only_valid = TRUE, convert = TRUE, mvs = mvs)
 
 
   # item parameters
@@ -513,7 +516,7 @@ steps_analysis <- function(results, path = here::here("Tables"), filename = NULL
 #'
 #' @export
 
-print_irt_results <- function(model, irt_sum, steps_sum = NULL) {
+print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
 
   # Percentage correct
   print("Percentage correct", quote = FALSE)

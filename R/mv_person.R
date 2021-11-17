@@ -92,7 +92,6 @@ mv_person <- function(resp, vars, items = 'final', valid = NULL, grouping = NULL
 #' @param path      folder path for file if it shall be saved
 #' @param digits    number of decimals for rounding
 #' @param warn      boolean. indicates whether to print a warning if NAs were found in resp
-#' @param return_results    boolean. indicates whether to return results.
 #'
 #' @return   list with missing values per person and
 #' for each missing value type (in percentage) is returned
@@ -115,8 +114,7 @@ mvp_analysis <- function(resp, vars, items = 'final', valid = NULL, grouping = N
 
   # Prepare data
   resp <- only_valid(resp, valid = valid)
-  resp_c <- prepare_resp(resp, vars = vars, items = items, without_valid = TRUE,
-                         convert = FALSE)
+  resp_c <- prepare_resp(resp, vars = vars, items = items)
 
   # Calculate mvs per person
   if (is.null(grouping)) {
@@ -165,7 +163,6 @@ mvp_analysis <- function(resp, vars, items = 'final', valid = NULL, grouping = N
 #'                  if NULL, no file will be saved.
 #' @param path      folder path for plots
 #' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
-#' @param return_table  boolean. indicates whether to return table.
 
 #'
 #' @return   table with missing values per person and

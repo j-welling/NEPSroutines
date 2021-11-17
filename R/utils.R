@@ -38,10 +38,11 @@ only_valid <- function(resp, valid = NULL) {
 #'
 #' @export
 
-prepare_resp <- function(resp, valid = NULL, without_valid = FALSE,
-                         vars = NULL, items = NULL, convert = FALSE) {
+prepare_resp <- function(resp, vars = NULL, items = NULL,
+                         use_only_valid = FALSE,  valid = NULL,
+                         convert = FALSE, mvs = NULL) {
 
-    if (!without_valid) resp <- only_valid(resp = resp, valid = valid)
+    if (use_only_valid) resp <- only_valid(resp = resp, valid = valid)
 
     if (!is.null(items)) {
         if (is.null(vars)) {
@@ -59,7 +60,7 @@ prepare_resp <- function(resp, valid = NULL, without_valid = FALSE,
                 "are kept.")
     }
 
-    if (convert) resp <- convert_mv(resp = resp, mvs = -999:-20)
+    if (convert) resp <- convert_mv(resp = resp, mvs = mvs)
 
     return(resp)
 }

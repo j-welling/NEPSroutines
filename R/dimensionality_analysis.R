@@ -39,19 +39,19 @@
 #' @importFrom stats AIC BIC logLik
 
 dimension_analysis <- function(resp, vars, items, scoring = "scoring",
-                               dim = NULL, valid = NULL, irtmodel = "PCM2",
-                               maxiter = 10, snodes = 5, verbose = FALSE,
-                               return = FALSE, save = TRUE,
+                               dim = NULL, valid = NULL, mvs = NULL,
+                               irtmodel = "PCM2", maxiter = 10, snodes = 5,
+                               return = FALSE, save = TRUE, print = TRUE,
                                path_results = here::here('Results'),
                                path_table = here::here('Tables'),
-                               overwrite = TRUE, print = TRUE) {
+                               overwrite = TRUE, verbose = FALSE) {
 
     dimensionality <- list()
 
     dimensionality$analysis <- conduct_dimensionality_analysis(
         resp = resp, vars = vars, items = items, scoring = scoring, dim = dim,
         valid = valid, irtmodel = irtmodel, maxiter = maxiter, snodes = snodes,
-        verbose = verbose
+        mvs = mvs, verbose = verbose
     )
     dimensionality$summary <- dimension_summary(dimensionality$analysis)
 
@@ -69,7 +69,7 @@ dimension_analysis <- function(resp, vars, items, scoring = "scoring",
 
 conduct_dimensionality_analysis <- function(resp, vars, items, scoring, dim,
                                             valid, irtmodel, maxiter, snodes,
-                                            verbose) {
+                                            verbose, mvs) {
     # Select only valid cases
     resp <- only_valid(resp, valid = valid)
 
@@ -79,7 +79,7 @@ conduct_dimensionality_analysis <- function(resp, vars, items, scoring, dim,
 
     # Select only indicated items and convert mvs
     resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE,
-                         without_valid = TRUE)
+                         mvs = mvs)
 
     # Create object for results
     dimensionality <- list()
