@@ -1,8 +1,45 @@
 #' IRT analyses for several groups
 #'
-#' @param groups named character vector; contains name of item selection variable of each group (e.g. easy = 'easy_final')
+#' @param groups named character vector; contains name of item selection
+#' variable of each group (e.g. easy = 'easy_final')
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' polytomous responses with k categories; missing values (default -999 to -1)
+#' are coded as NA internally; additionally includes ID_t as a person identifier
+#' and all variables that are further defined in the function arguments
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param irt_type  string; either "dich" (dichotomous analysis) or "poly"
+#' (polytomous analysis)
+#' @param scoring  string; defines name of numerical variable in vars that
+#' contains the scoring factor to be applied to loading matrix; can be NULL for
+#' Rasch model
+#' @param plots  logical; whether plots shall be created and saved to hard drive
+#' @param print  logical; whether results shall be printed to console
+#' @param save  logical; whether results shall be saved to hard drive
+#' @param return  logical; whether results shall be returned
+#' @param path_results  string; defines path to folder where results shall be saved
+#' @param path_table  string; defines path to folder where tables shall be saved
+#' @param path_plots  string; defines path to folder where plots shall be saved
+#' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param digits  integer; number of decimals for rounding
+#' @param verbose  logical; whether to print processing information to console
+#'
+#' @return
+#' @export
 
-grouped_irt_analysis <- function(groups) {
+grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
+                                 irt_type, scoring = NULL, plots = FALSE,
+                                 save = TRUE, print = TRUE, return = FALSE,
+                                 path_plots = here::here("Plots"),
+                                 path_tables = here::here("Tables"),
+                                 path_results = here::here("Results"),
+                                 overwrite = FALSE, digits = 2, verbose = FALSE
+                                 ) {
 
   for (g in names(groups)) {
 
@@ -10,13 +47,13 @@ grouped_irt_analysis <- function(groups) {
     items <- groups['g']
     irt_groups <- list()
 
-    irt[[g]] <-irt_analysis(resp = resp, vars = vars, items = items,
-                            valid = valid, irt_type = irt_type, print = print,
-                            scoring = scoring, plots = plots, save = save,
-                            return = TRUE, path_results = path_results,
-                            path_tables = path_tables, path_plots = path_plots,
-                            overwrite = overwrite, digits = digits,
-                            name_group = name_group)
+    irt_groups[[g]] <-irt_analysis(resp = resp, vars = vars, items = items,
+                                   valid = valid, irt_type = irt_type, print = print,
+                                   scoring = scoring, plots = plots, save = save,
+                                   return = TRUE, path_results = path_results,
+                                   path_tables = path_tables, path_plots = path_plots,
+                                   overwrite = overwrite, digits = digits,
+                                   name_group = name_group)
   }
 
   if (return) return(irt_groups)
@@ -46,9 +83,9 @@ grouped_irt_analysis <- function(groups) {
 #' @param scoring  string; defines name of numerical variable in vars that
 #' contains the scoring factor to be applied to loading matrix; can be NULL for
 #' Rasch model
-#' @param plots  logical; whether plots shall be created and saved to hard disc
+#' @param plots  logical; whether plots shall be created and saved to hard drive
 #' @param print  logical; whether results shall be printed to console
-#' @param save  logical; whether results shall be saved to hard disc
+#' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
@@ -58,7 +95,7 @@ grouped_irt_analysis <- function(groups) {
 #' @param name_group  string; defines name of group used in analysis
 #' @param verbose  logical; whether to print processing information to console
 #'
-#' @return
+#' @return   list with all results
 #' @export
 
 irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
