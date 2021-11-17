@@ -50,7 +50,7 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
                         NAd = "not administered items",
                         AZ = "missing items due to ''Angabe zurueckgesetzt''"
                       ),
-                      plots = FALSE, save = TRUE, return = FALSE,
+                      plots = FALSE, print = TRUE, save = TRUE, return = FALSE,
                       path_results = here::here("Results"),
                       path_table = here::here("Tables"),
                       path_plots = here::here("Plots/Missing_Responses/by_person"),
@@ -63,8 +63,6 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
                                  valid = valid, mvs = mvs, grouping = grouping,
                                  digits = digits, warn = warn)
 
-  mv_person$summary <- mvp_table(mv_p = mv_p, grouping = grouping)
-
   if (plots) {
     mvp_plots(mv_p = mv_person$mv_p, vars = vars, items = items,
               labels_mvs = labels_mvs, grouping = grouping, show_all = show_all,
@@ -73,14 +71,19 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
 
   if (save) {
     save_results(mv_person, filename = "mv_person.Rdata", path = path_results)
-    save_table(mv_person$summary, overwrite = overwrite, show_rownames = FALSE,
-               filename = "mv_person.xlsx", path = path_table)
+    # dass hier kein save_table steht ist Absicht
 
+    mv_person$summary <- mvp_table(mv_p = mv_person$mv_p, grouping = grouping,
+                                   filename = "mv_person", path = path_table,
+                                   overwrite = overwrite)
+
+  } else {
+      mv_person$summary <- mvp_table(mv_p = mv_person$mv_p, grouping = grouping)
   }
 
   if (print) print(mv_person$summary)
 
-  if (return) return(mv_p)
+  if (return) return(mv_person)
 }
 
 
@@ -191,7 +194,7 @@ mvp_table <- function(mv_p = NULL, grouping = NULL, overwrite = FALSE,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       filename = NULL, path = here::here("Tables"),
-                      resp = NULL, vars = NULL, items = NULL, valid = NULL,) {
+                      resp = NULL, vars = NULL, items = NULL, valid = NULL) {
 
   # Test data
   test_mvp_data(mv_p, mvs = mvs, grouping = grouping,
@@ -280,7 +283,7 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items,
                       color = NULL, verbose = TRUE) {
 
   # Test data
-  test_mvp_data(mv_p, resp = resp, vars = vars,
+  test_mvp_data(mv_p, resp = resp, vars = vars, items = items,
                 valid = valid, mvs = mvs, grouping = grouping)
 
   # Prepare data
@@ -475,11 +478,11 @@ write_mvp_table <- function(mv_p) {
 #'
 #' @noRd
 
-test_mvp_data <- function(mv_p, resp, vars, grouping, mvs, valid) {
+test_mvp_data <- function(mv_p, resp, vars, items, grouping, mvs, valid) {
   if (is.null(mv_p)) {
     if (!is.null(resp) & !is.null(vars)) {
-      mv_p <- mvp_analysis(resp, vars = vars, valid = valid, mvs = mvs,
-                           grouping = grouping)
+      mv_p <- mvp_analysis(resp, vars = vars, items = items, valid = valid,
+                           mvs = mvs, grouping = grouping)
     } else {
       stop("Please provide mv_p or resp and vars.")
     }
