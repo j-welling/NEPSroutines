@@ -1,23 +1,23 @@
 #' IRT analyses for several groups
 #'
 #' @param groups named character vector; contains name of item selection
-#' variable of each group (e.g. easy = 'easy_final')
+#'   variable of each group (e.g. easy = 'easy_final')
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
-#' polytomous responses with k categories; missing values (default -999 to -1)
-#' are coded as NA internally; additionally includes ID_t as a person identifier
-#' and all variables that are further defined in the function arguments
+#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   polytomous responses with k categories; missing values (default -999 to -1)
+#'   are coded as NA internally; additionally includes ID_t as a person identifier
+#'   and all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
-#' variables that are further defined in the function arguments
+#'   includes variable 'items' containing item names; additionally includes all
+#'   variables that are further defined in the function arguments
 #' @param valid  string; defines name of logical variable in resp that indicates
-#' (in)valid cases
+#'   (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param irt_type  string; either "dich" (dichotomous analysis) or "poly"
-#' (polytomous analysis)
+#'   (polytomous analysis)
 #' @param scoring  string; defines name of numerical variable in vars that
-#' contains the scoring factor to be applied to loading matrix; can be NULL for
-#' Rasch model
+#'   contains the scoring factor to be applied to loading matrix; can be NULL for
+#'   Rasch model
 #' @param plots  logical; whether plots shall be created and saved to hard drive
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
@@ -29,31 +29,37 @@
 #' @param digits  integer; number of decimals for rounding
 #' @param verbose  logical; whether to print processing information to console
 #'
-#' @return
+#' @return list with a list for each group with all results
+#' (as return object of irt_analysis())
 #' @export
 
 grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
                                  irt_type, scoring = NULL, plots = FALSE,
                                  save = TRUE, print = TRUE, return = FALSE,
                                  path_plots = here::here("Plots"),
-                                 path_tables = here::here("Tables"),
+                                 path_table = here::here("Tables"),
                                  path_results = here::here("Results"),
-                                 overwrite = FALSE, digits = 2, verbose = FALSE
-                                 ) {
+                                 overwrite = FALSE, digits = 2, verbose = FALSE) {
+
+  irt_groups <- list()
+  i <- 1
 
   for (g in names(groups)) {
 
+    message(toupper(paste0("\n\n\n(", i, ") irt analysis (", irt_type, ") for ",
+                           g, " items.\n")))
     name_group <- g
-    items <- groups['g']
-    irt_groups <- list()
+    items <- groups[[g]]
 
-    irt_groups[[g]] <-irt_analysis(resp = resp, vars = vars, items = items,
-                                   valid = valid, irt_type = irt_type, print = print,
-                                   scoring = scoring, plots = plots, save = save,
-                                   return = TRUE, path_results = path_results,
-                                   path_tables = path_tables, path_plots = path_plots,
-                                   overwrite = overwrite, digits = digits,
-                                   name_group = name_group)
+    irt_groups[[g]] <- irt_analysis(resp = resp, vars = vars, items = items,
+                                    valid = valid, irt_type = irt_type, print = print,
+                                    scoring = scoring, plots = plots, save = save,
+                                    return = TRUE, path_results = path_results,
+                                    path_table = path_table, path_plots = path_plots,
+                                    overwrite = overwrite, digits = digits,
+                                    name_group = name_group)
+
+    i <- i + 1
   }
 
   if (return) return(irt_groups)
@@ -66,23 +72,23 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #' polytomous data, generate summary and plots.
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
-#' polytomous responses with k categories; missing values (default -999 to -1)
-#' are coded as NA internally; additionally includes ID_t as a person identifier
-#' and all variables that are further defined in the function arguments
+#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   polytomous responses with k categories; missing values (default -999 to -1)
+#'   are coded as NA internally; additionally includes ID_t as a person identifier
+#'   and all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
-#' variables that are further defined in the function arguments
+#'   includes variable 'items' containing item names; additionally includes all
+#'   variables that are further defined in the function arguments
 #' @param items  string; defines name of logical variable in vars that indicates
-#' which items to use for the analysis
+#'   which items to use for the analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
-#' (in)valid cases
+#'   (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param irt_type  string; either "dich" (dichotomous analysis) or "poly"
-#' (polytomous analysis)
+#'   (polytomous analysis)
 #' @param scoring  string; defines name of numerical variable in vars that
-#' contains the scoring factor to be applied to loading matrix; can be NULL for
-#' Rasch model
+#'   contains the scoring factor to be applied to loading matrix; can be NULL for
+#'   Rasch model
 #' @param plots  logical; whether plots shall be created and saved to hard drive
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
@@ -102,7 +108,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
                          irt_type, scoring = NULL, plots = FALSE,
                          save = TRUE, print = TRUE, return = FALSE,
                          path_plots = here::here("Plots"),
-                         path_tables = here::here("Tables"),
+                         path_table = here::here("Tables"),
                          path_results = here::here("Results"),
                          overwrite = FALSE, digits = 2, verbose = FALSE,
                          name_group = NULL) {
@@ -140,15 +146,17 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
 
   if (plots) {
 
+    #if (!is.null(name_group)) path_plots <- paste0(path_plots, "/", name_group)
+
     for (i in seq_along(irtmodel)) {
 
-      if (!is.null(name_groups)) path_plots <- paste0(path_plots, "/", name_group)
-
       # ICC plots
-      icc_plots(model = irt[[i]], irtmodel = irtmodel[i], path = path_plots)
+      icc_plots(model = irt[[i]], irtmodel = irtmodel[i], path = path_plots,
+                name_group = name_group)
 
       # Wright map
-      wright_map(model = irt[[i]], irtmodel = irtmodel[i], path = path_plots)
+      wright_map(model = irt[[i]], irtmodel = irtmodel[i], path = path_plots,
+                 name_group = name_group)
 
     }
   }
@@ -166,16 +174,22 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
                                    irt_type = irt_type)
 
     # Steps analysis
-    if (irt_type = 'poly') {
+    if (irt_type == 'poly') {
       irt$steps <- steps_analysis(pcm_model = irt$model.pcm, digits = digits)
     }
   }
 
   # Print irt
   if (print)  {
+    message("\nIRT summary table\n")
     print(irt$summary)
+    message("\nModel fit table\n")
     print(irt$model_fit)
-    if (irt_type == 'poly') print(irt$steps)
+    if (irt_type == 'poly') {
+      message("\nSteps analysis table\n")
+      print(irt$steps)
+    }
+    message("\nSummary for TR\n")
     print_irt_summary(model = irt[[1]],
                       irt_sum = irt$summary,
                       steps_sum = irt$steps)
@@ -205,23 +219,23 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
 #' polytomous data.
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
-#' polytomous responses with k categories; missing values (default -999 to -1)
-#' are coded as NA internally; additionally includes ID_t as a person identifier
-#' and all variables that are further defined in the function arguments
+#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   polytomous responses with k categories; missing values (default -999 to -1)
+#'   are coded as NA internally; additionally includes ID_t as a person identifier
+#'   and all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
-#' variables that are further defined in the function arguments
+#'   includes variable 'items' containing item names; additionally includes all
+#'   variables that are further defined in the function arguments
 #' @param items  string; defines name of logical variable in vars that indicates
-#' which items to use for the analysis
+#'   which items to use for the analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
-#' (in)valid cases
+#'   (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param irtmodel  string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
-#' "GPCM" for GPCM analysis
+#'   "GPCM" for GPCM analysis
 #' @param scoring  string; defines name of numerical variable in vars that
-#' contains the scoring factor to be applied to loading matrix; can be NULL for
-#' Rasch model
+#'   contains the scoring factor to be applied to loading matrix; can be NULL for
+#'   Rasch model
 #' @param path  string; defines path to folder where results shall be saved
 #' @param filename  string; defines name of file that shall be saved
 #' @param verbose  logical; whether to print processing information to console
@@ -316,22 +330,30 @@ irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel,
 #'
 #' Create ICC plots for IRT models.
 #'
-#' @param results  list; return object of irt_model()
+#' @param model  list; return object of irt_model()
 #' @param irtmodel  string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
-#' "GPCM" for GPCM analysis
+#'   "GPCM" for GPCM analysis
 #' @param path  string; defines path to folder where plots shall be saved
+#' @param name_group  string; defines name of group used in analysis
 #'
 #' @export
 
-icc_plots <- function(model, irtmodel, path = here::here("Plots")) {
+icc_plots <- function(model, irtmodel, path = here::here("Plots"),
+                      name_group = NULL) {
 
-  # create directory for plots
-  check_folder(path = here::here(paste0(path, "ICCs/ICCs_for_", irtmodel)))
+  # Add group name to path
+  if (is.null(name_group)) {
+      path <- paste0(path, "/ICCs/ICCs_for_", irtmodel)
+  } else {
+      path <- paste0(path, "/ICCs/", name_group, "/ICCs_for_", irtmodel)
+  }
+
+    # create directory for plots
+  check_folder(path = here::here(path))
 
   # ICC plots
   for (i in 1:model$mod$nitems) {
-    #tiff(paste0(here::here(paste0(path, "ICCs/ICCs_for_", irtmodel, "/plots")),
-    tiff(paste0(here::here(paste0(path, "ICCs/ICCs_for_", irtmodel)),
+    tiff(paste0(here::here(paste0(path, "/item_")),
                 model$mod$item[i, 1],
                 ".tiff"),
         width = 800, height = 800, bg = "white",
@@ -350,20 +372,29 @@ icc_plots <- function(model, irtmodel, path = here::here("Plots")) {
 #'
 #' @param model  list; return object of irt_model()
 #' @param irtmodel  string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
-#' "GPCM" for GPCM analysis
+#'   "GPCM" for GPCM analysis
 #' @param path  string; defines path to folder where plots shall be saved
+#' @param name_group  string; defines name of group used in analysis
 #'
 #' @importFrom grDevices dev.off png tiff
 #' @importFrom graphics mtext text
 #' @export
 
-wright_map <- function(model, irtmodel, path = here::here("Plots")) {
+wright_map <- function(model, irtmodel, path = here::here("Plots"),
+                       name_group = NULL) {
+
+  # Add group name to path
+  if (is.null(name_group)) {
+      path <- paste0(path, "/Wright_Maps")
+  } else {
+      path <- paste0(path, "/Wright_Maps/", name_group)
+  }
 
   # Create directory for plots
-  check_folder(path = here::here(path, "/Wright_Maps"))
+  check_folder(path = here::here(path))
 
   # Create Wright Map
-  png(here::here(paste0(path, "/Wright_Maps/Wright_map_for_", irtmodel, ".png")),
+  png(here::here(paste0(path, "/Wright_map_for_", irtmodel, ".png")),
       width = 800, height = 1300, bg = "white",
       res = 300, pointsize = 10)
   TAM::IRT.WrightMap(TAM::IRT.threshold(model$mod),
@@ -387,16 +418,16 @@ wright_map <- function(model, irtmodel, path = here::here("Plots")) {
 #' Create table with results of IRT analysis.
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
-#' polytomous responses with k categories; missing values (default -999 to -1)
-#' are coded as NA internally; additionally includes ID_t as a person identifier
-#' and all variables that are further defined in the function arguments
-#' includes all variables that are further defined in the function arguments
+#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   polytomous responses with k categories; missing values (default -999 to -1)
+#'   are coded as NA internally; additionally includes ID_t as a person identifier
+#'   and all variables that are further defined in the function arguments
+#'   includes all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
-#' variables that are further defined in the function arguments
+#'   includes variable 'items' containing item names; additionally includes all
+#'   variables that are further defined in the function arguments
 #' @param valid  string; defines name of logical variable in resp that indicates
-#' (in)valid cases
+#'   (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param model_1par  list; return object of irt_model(); one parameter model
 #' @param model_2par  list; return object of irt_model(); two parameter model
@@ -486,7 +517,10 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 #' @param model_dich  list; return object of irt_model(); dichotomous analysis
 #' @param model_poly  list; return object of irt_model(); polytomous analysis
 #' @param irt_type  string; either "dich" (dichotomous analysis) or "poly"
-#' (polytomous analysis)
+#'   (polytomous analysis)
+#' @param overwrite  logical; whether to overwrite existing file when saving table
+#' @param path  string; defines path to folder where table shall be saved
+#' @param filename  string; defines name of table that shall be saved
 #'
 #' @return data.frame with AIC, BIC and number of parameters for both models
 #' @export
@@ -534,7 +568,6 @@ irt_model_fit <- function(model_dich, model_poly, irt_type, overwrite = FALSE,
 #' @param overwrite  logical; whether to overwrite existing file when saving table
 #'
 #' @return a data.frame containing the step parameters and SEs for each step
-#'
 #' @export
 
 steps_analysis <- function(pcm_model, digits = 2, overwrite = FALSE,
@@ -590,91 +623,91 @@ steps_analysis <- function(pcm_model, digits = 2, overwrite = FALSE,
 print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
 
   # Percentage correct
-  print("Percentage correct", quote = FALSE)
   pc_min <- min(irt_sum[['% correct']], na.rm = TRUE)
   pc_max <- max(irt_sum[['% correct']], na.rm = TRUE)
-  pc_mean <- round(mean(irt_sum[['% correct']], na.rm = TRUE), 2)
-  message("The percentage of correct responses within dichotomous items varied between ",
+  pc_mean <- round(mean(irt_sum[['% correct']], na.rm = TRUE))
+  message("Percentage correct:\n",
+          "The percentage of correct responses within dichotomous items varied between ",
           pc_min, " % (item ", irt_sum$Item[irt_sum[['% correct']] %in% pc_min], ") and ",
           pc_max, " % (item ", irt_sum$Item[irt_sum[['% correct']] %in% pc_max], ") with an average of ",
-          pc_mean, " % correct responses.")
+          pc_mean, " % correct responses.\n")
 
   # Item difficulties
-  print("Item difficulties", quote = FALSE)
   xsi_min <- min(irt_sum$xsi, na.rm = TRUE)
   xsi_max <- max(irt_sum$xsi, na.rm = TRUE)
   xsi_mean <- round(mean(irt_sum$xsi, na.rm = TRUE), 2)
-  message("The estimated item difficulties (or location parameters for polytomous variables) varied between ",
+  message("Item difficulties:\n",
+          "The estimated item difficulties (or location parameters for polytomous variables) varied between ",
           xsi_min, " (item ", irt_sum$Item[irt_sum$xsi %in% xsi_min], ") and ",
           xsi_max, " (item ", irt_sum$Item[irt_sum$xsi %in% xsi_max], ") with an average of ",
-          xsi_mean, ".")
+          xsi_mean, ".\n")
 
   # SE of item difficulties
-  print("SE of item difficulties", quote = FALSE)
-  message("The maximum of SEs is ", max(irt_sum$SE, na.rm = TRUE),".")
+  message("SE of item difficulties:\n",
+          "The maximum of SEs is ", max(irt_sum$SE, na.rm = TRUE),".\n")
 
   # WMNSQ
-  print("WMNSQ", quote = FALSE)
   wmnsq_min <- min(irt_sum$WMNSQ, na.rm = TRUE)
   wmnsq_max <- max(irt_sum$WMNSQ, na.rm = TRUE)
-  wmnsq_mean <- round(mean(irt_sum$wmnsq, na.rm = TRUE), 2)
-  message("The values of the WMNSQ were ... close to 1 with the lowest value being ",
+  wmnsq_mean <- round(mean(irt_sum$WMNSQ, na.rm = TRUE), 2)
+  message("WMNSQ:\n",
+          "The values of the WMNSQ were ... close to 1 with the lowest value being ",
           wmnsq_min, " (item ", irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_min], ") and the highest being ",
           wmnsq_max, " (item ", irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_max], ") with an average of ",
           wmnsq_mean, ".")
 
   wmnsq_misfit <- irt_sum$Item[irt_sum$WMNSQ > 1.15]
   if (length(wmnsq_misfit == 1)) {
-    message("Item ", wmnsq_misfit, " exhibited a WMNSQ of at least 1.15.")
+    message("Item ", wmnsq_misfit, " exhibited a WMNSQ of at least 1.15.\n")
   } else if (length(wmnsq_misfit > 1)) {
-    message("Items ", wmnsq_misfit, " exhibited a WMNSQ of at least 1.15.")
+    message("Items ", wmnsq_misfit, " exhibited a WMNSQ of at least 1.15.\n")
   }
 
   # WMNSQ t-value
-  print("WMNSQ t-value", quote = FALSE)
   t_min <- min(irt_sum$t, na.rm = TRUE)
   t_max <- max(irt_sum$t, na.rm = TRUE)
   t_mean <- round(mean(irt_sum$t, na.rm = TRUE), 2)
-  message("The WMNSQ t-values varied between ",
+  message("WMNSQ t-value:\n",
+          "The WMNSQ t-values varied between ",
           t_min, " (item ", irt_sum$Item[irt_sum$t %in% t_min], ") and ",
           t_max, " (item ", irt_sum$Item[irt_sum$t %in% t_max], ") with an average of ",
-          t_mean, ".")
+          t_mean, ".\n")
 
   t_misfit <- irt_sum$Item[abs(irt_sum$t) > 8]
   if (length(t_misfit == 1)) {
-    message("Item ", t_misfit, " exhibited an absolute t-value of at least 8.")
+    message("Item ", t_misfit, " exhibited an absolute t-value of at least 8.\n")
   } else if (length(t_misfit > 1)) {
-    message("Items ", t_misfit, " exhibited an absolute t-value of at least 8.")
+    message("Items ", t_misfit, " exhibited an absolute t-value of at least 8.\n")
   }
 
   # Correlation of item scores with total correct score
-  print("Correlation of item scores with total correct score", quote = FALSE)
   rit_min <- min(irt_sum$rit, na.rm = TRUE)
   rit_max <- max(irt_sum$rit, na.rm = TRUE)
   rit_mean <- round(mean(irt_sum$rit, na.rm = TRUE), 2)
-  message("The correlations between the item scores and the total correct scores varied between ",
+  message("Correlation of item scores with total correct score:\n",
+          "The correlations between the item scores and the total correct scores varied between ",
           rit_min, " (item ", irt_sum$Item[irt_sum$rit %in% rit_min], ") and ",
           rit_max, " (item ", irt_sum$Item[irt_sum$rit %in% rit_max], ") with an average correlation of ",
-          rit_mean, ".")
+          rit_mean, ".\n")
 
   # Model variance
-  print("Model variance", quote = FALSE)
-  message("The variance of the model was estimated to be ", round(model$mod$variance[1], 3),".")
+  message("Model variance:\n",
+          "The variance of the model was estimated to be ", round(model$mod$variance[1], 3),".\n")
 
   # Test reliability
-  print("Test reliability", quote = FALSE)
   eap_rel <- round(model$mod$EAP.rel[1], 3)
   wle_rel <- round(model$wle_rel[1], 3)
-  message("The reliabilities of the test (EAP/PV reliability = ", eap_rel,
-          ", WLE reliability = ", wle_rel, ") were ... .")
+  message("Test reliability:\n",
+          "The reliabilities of the test (EAP/PV reliability = ", eap_rel,
+          ", WLE reliability = ", wle_rel, ") were ... .\n")
 
   # Item discrimination
-  print("Item discrimination", quote = FALSE)
   disc_min <- min(irt_sum$Discr., na.rm = TRUE)
   disc_max <- max(irt_sum$Discr., na.rm = TRUE)
   disc_mean <- round(mean(irt_sum$Discr., na.rm = TRUE), 2)
-  message("The estimated discrimination parameters varied between ",
+  message("Item discrimination:\n",
+          "The estimated discrimination parameters varied between ",
           disc_min, " (item ", irt_sum$Item[irt_sum$Discr. %in% disc_min], ") and ",
           disc_max, " (item ", irt_sum$Item[irt_sum$Discr. %in% disc_max], ") with an average discrimination of ",
-          disc_mean, ".")
+          disc_mean, ".\n")
 }

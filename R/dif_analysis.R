@@ -18,6 +18,7 @@
 #' variables in vars
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
+#' @param mvs named integer vector; contains user-defined missing values
 #' @param dif_vars character vector; contains the variable names to be tested
 #'   for DIF (e.g., "gender")
 #' @param scoring string; defines name of numerical variable in vars that
@@ -30,8 +31,6 @@
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param verbose  logical; whether to print processing information to console
-
-#' @param ... additional arguments to be passed to tam.mml
 #'
 #' @return a list of:
 #'   mmod: main effects model
@@ -42,8 +41,7 @@ dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, mvs = NULL,
                          scoring = "scoring", overwrite = FALSE, save = TRUE,
                          print = TRUE, return = FALSE, verbose = FALSE,
                          path_results = here::here('Results'),
-                         path_table = here::here('Tables'),
-                         ...) {
+                         path_table = here::here('Tables')) {
 
   check_items(items, dif_vars)
 
@@ -63,7 +61,7 @@ dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, mvs = NULL,
   build_dif_tr_tables(dif_summaries = dif$summaries, save = save,
                       path_table = path_table, overwrite = overwrite)
 
-  if (return) return (dif)
+  if (return) return(dif)
 }
 
 check_items <- function(items, dif_vars) {
@@ -73,7 +71,38 @@ check_items <- function(items, dif_vars) {
   }
 }
 
-
+#' Conduct DIF analyses
+#'
+#' Testing for differential item functioning for binary and polytomous data.
+#' Main effects and DIF effects models are estimated.
+#'
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' polytomous responses with k categories; missing values (default -999 to -1)
+#' are coded as NA internally; additionally includes ID_t as a person identifier
+#' and all variables that are further defined in the function arguments
+#' @param vars data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param items string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis; if some of the \code{dif_vars}
+#' come with a different set of analysis items, this argument becomes a
+#' vector of \code{length(dif_vars)} containing the respective selection
+#' variables in vars
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param dif_vars character vector; contains the variable names to be tested
+#'   for DIF (e.g., "gender")
+#' @param scoring string; defines name of numerical variable in vars that
+#' contains the scoring factor to be applied to loading matrix; defaults to
+#' "scoring"
+#' @param verbose  logical; whether to print processing information to console
+#' @param mvs named integer vector; contains user-defined missing values
+#'
+#' @return a list of length(dif_vars) lists containing each:
+#'   mmod: main effects model
+#'   dmod: DIF effects model
+#' @export
 conduct_dif_analysis <- function(items, dif_vars, resp, vars, scoring,
                                  valid, mvs, verbose) {
 
@@ -85,7 +114,7 @@ conduct_dif_analysis <- function(items, dif_vars, resp, vars, scoring,
 
   for (i in seq_along(dif_vars)) {
     dif_models[[i]] <- dif_model(resp = resp, vars = vars, items = items[i],
-                                 facets = dif_vars[i], scoring = scoring,
+                                 dif_var = dif_vars[i], scoring = scoring,
                                  valid = valid, verbose = verbose)
   }
   names(dif_models) <- dif_vars
@@ -93,7 +122,18 @@ conduct_dif_analysis <- function(items, dif_vars, resp, vars, scoring,
   return(dif_models)
 }
 
-
+#' summarize DIF analysis
+#'
+#' @param dif_models return object of conduct_dif_analysis()
+#' @param dif_vars character vector; contains the variable names to be tested
+#'   for DIF (e.g., "gender")
+#' @param print  logical; whether results shall be printed to console
+#' @param save  logical; whether results shall be saved to hard drive
+#' @param path_results  string; defines path to folder where results shall be saved
+#' @param path_table  string; defines path to folder where tables shall be saved
+#' @param overwrite logical; whether to overwrite existing file when saving table
+#' @returns a list of dif summaries for each input entry in dif_models
+#' @export
 summarize_dif_analysis <- function(dif_models, dif_vars, path_table,
                                    path_results, print, save, overwrite) {
 
@@ -133,10 +173,11 @@ summarize_dif_analysis <- function(dif_models, dif_vars, path_table,
 #' variables in vars
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
+#' @param mvs named integer vector; contains user-defined missing values
 #' @param scoring  string; defines name of numerical variable in vars that
 #' contains the scoring factor to be applied to loading matrix; defaults to
 #' "scoring"
-#' @param facets string; defines the name of the variable to be tested for DIF
+#' @param dif_var string; defines the name of the variable to be tested for DIF
 #' (e.g., "gender")
 #' @param verbose  logical; whether to print processing information to console
 #'
@@ -145,8 +186,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, path_table,
 #'   dmod: DIF effects model
 #' @importFrom stats as.formula
 #' @export
-
-dif_model <- function(resp, vars, items, facets, scoring = "scoring",
+dif_model <- function(resp, vars, items, dif_var, scoring = "scoring",
                       valid = NULL, mvs = NULL, verbose = FALSE) {
 
   # Select only valid cases
@@ -155,19 +195,18 @@ dif_model <- function(resp, vars, items, facets, scoring = "scoring",
   # Create ID and facets variable
   pid <- resp$ID_t
   check_pid(pid)
-  facets <- resp[, facets, drop = FALSE]
+  facets <- resp[, dif_var, drop = FALSE]
 
   # Select only indicated items and convert mvs
   # add default MVs message here once instead of every time, convert_mv is
   # called
   resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE,
-                       mvs = mvs)
+                       mvs = mvs, warn = FALSE)
   message(names(facets),
-          ": User-defined missing values (-999 to -20) converted to NA.")
+          ": User-defined missing values (-999 to -1) converted to NA.")
 
   # Prepare DIF analysis
   is_pcm <- any(apply(resp, 2, max, na.rm = TRUE) > 1)
-  dif_var <- colnames(facets)
   tmp_formula <- paste("~ item +", ifelse(is_pcm, "item * step +", ""))
   formula_dmod <- as.formula(paste(tmp_formula, "item *", dif_var))
   formula_mmod <- as.formula(paste(tmp_formula, dif_var))
@@ -193,7 +232,7 @@ dif_model <- function(resp, vars, items, facets, scoring = "scoring",
       vars = vars, select = items, scoring = scoring, verbose = verbose
     )
   } else {
-    Q <- as.matrix(vars$scoring[vars[[items]]])
+    Q <- as.matrix(vars[[scoring]][vars[[items]]])
     dmod <- TAM::tam.mml.mfr(resp,
                              irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
                              formulaA = formula_dmod, verbose = verbose
@@ -274,7 +313,7 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
   group <- grep(diflist$dif_var, rownames(diflist$dmod$xsi), value = TRUE)
   group <- unique(sapply(group, function(x) {substr(x, nchar(x), nchar(x))}))
   group <- as.integer(group)
-  res <- difsum(obj = diflist, facet = diflist$dif_var, group = group,
+  res <- difsum(obj = diflist, dif_var = diflist$dif_var, group = group,
                 group2 = NULL)
   res$compared_against <- group
 
@@ -295,7 +334,8 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
 #' Summarizes DIF effects
 #'
 #' @param obj list; return object of dif_model()
-#' @param facet character string; dif variable
+#' @param dif_var character vector; contains the variable names to be tested
+#'   for DIF (e.g., "gender")
 #' @param group integer; group to compare against
 #' @param group2 integer; in case of more than two groups
 #'
@@ -304,22 +344,22 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
 #' @importFrom stats deviance
 #' @noRd
 
-difsum <- function(obj, facet, group = 1, group2 = NULL) {
+difsum <- function(obj, dif_var, group = 1, group2 = NULL) {
 
   # all included items
   it <- colnames(obj$dmod$resp_orig)
   if (is.null(it)) {
-    s <- grepl(paste0("^(.+)-", facet, group),
+    s <- grepl(paste0("^(.+)-", dif_var, group),
                rownames(obj$dmod$B))
-    it <- gsub(paste0("-", facet, group), "",
+    it <- gsub(paste0("-", dif_var, group), "",
                rownames(obj$dmod$B)[s])
   }
 
   # DIF effects for first group
   sel <- rownames(obj$dmod$xsi) %in%
-    paste0(it, ":", facet, group)
+    paste0(it, ":", dif_var, group)
   est <- obj$dmod$xsi[sel, ]
-  est$item <- gsub(paste0(":", facet, group), "", rownames(est))
+  est$item <- gsub(paste0(":", dif_var, group), "", rownames(est))
 
   # calculate DIF effect for last item (= constrained for identification)
   lst <- data.frame(item = it[!(it %in% est$item)],
@@ -332,9 +372,9 @@ difsum <- function(obj, facet, group = 1, group2 = NULL) {
   # (only relevant if more than 2 groups were used as DIF variable)
   if (!is.null(group2)) {
     sel <- rownames(obj$dmod$xsi) %in%
-      paste0(it, ":", facet, group2)
+      paste0(it, ":", dif_var, group2)
     est2 <- obj$dmod$xsi[sel, ]
-    est2$item <- gsub(paste0(":", facet, group2), "", rownames(est2))
+    est2$item <- gsub(paste0(":", dif_var, group2), "", rownames(est2))
 
     # calculate DIF effect for last item (= constrained for identification)
     lst <- data.frame(item = it[!(it %in% est2$item)],
@@ -373,10 +413,10 @@ difsum <- function(obj, facet, group = 1, group2 = NULL) {
   out <- list(est = est[, c("item", "xsi", "std", "F", "Fkrit", "p")])
 
   # main effects
-  est <- obj$dmod$xsi[rownames(obj$dmod$xsi) == paste0(facet, group), ]
+  est <- obj$dmod$xsi[rownames(obj$dmod$xsi) == paste0(dif_var, group), ]
   mne <- c(2 * est$xsi[1],
            2 * est$xsi[1] / sqrt(obj$dmod$variance[1]))
-  est <- obj$mmod$xsi[rownames(obj$mmod$xsi) == paste0(facet, group), ]
+  est <- obj$mmod$xsi[rownames(obj$mmod$xsi) == paste0(dif_var, group), ]
   mne <- rbind(mne,
                c(2 * est$xsi[1],
                  2 * est$xsi[1] / sqrt(obj$mmod$variance[1])))
@@ -389,7 +429,7 @@ difsum <- function(obj, facet, group = 1, group2 = NULL) {
 
   # goodness-of-fit indices
   gof <- data.frame(
-    `DIF variable` = facet,
+    `DIF variable` = dif_var,
     Model = c("Main effect", "DIF"),
     N = c(obj$mmod$nstud, obj$dmod$nstud),
     Deviance = c(deviance(obj$mmod), deviance(obj$dmod)),
@@ -413,6 +453,9 @@ difsum <- function(obj, facet, group = 1, group2 = NULL) {
 #' @param path_table string; indicates the folder location where the summaries
 #' are stored on the hard drive; please note that the path is relative to the
 #' current working path set by here::i_am()
+#' @param path_results string; indicates the folder location where the DIF
+#' estimates are stored on the hard drive; please note that the path is relative
+#' to the current working path set by here::i_am()
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #'
 #' @export
@@ -456,7 +499,17 @@ build_dif_tr_tables <- function(dif_summaries, save = TRUE,
   }
 }
 
-
+#' Print DIF results in the TR format
+#'
+#' @param gof data.frame; contains goodness of fit criteria for all DIF models
+#' @param est data.frame; contains DIF estimates for all models on the item
+#'   level
+#' @param print logical; whether results shall be printed to console
+#' @param save  logical; whether results shall be saved to hard drive
+#' @param path_results  string; defines path to folder where results shall be saved
+#' @param path_table  string; defines path to folder where tables shall be saved
+#' @param overwrite logical; whether to overwrite existing file when saving table
+#' @noRd
 save_dif_tr_tables <- function(gof, est, path_results, path_table, overwrite) {
 
   dif_tr_tables <- list(gof = gof, estimates = est)
@@ -466,30 +519,42 @@ save_dif_tr_tables <- function(gof, est, path_results, path_table, overwrite) {
 }
 
 
-
+#' Print DIF summaries to console
+#'
+#' @param diflist list; return object of dif_model(); with main and dif model
+#' @param res list; return object of dif_summaries()
+#' @export
 print_dif_summary <- function(diflist, res) {
   # information criteria table
-  message("Information criteria regarding the ", diflist$dif_var,
-          " DIF analysis:")
+  message("\n\nInformation criteria regarding the ", diflist$dif_var,
+          " DIF analysis:\n")
   print(res$gof)
   # main effects table
   message("\nMain effects of DIF and main effects model for ",
-          diflist$dif_var, " (compared against: ", res$compared_against, "):")
+          diflist$dif_var, " (compared against: ", res$compared_against, "):\n")
   print(res$mne)
   # problematic dif values (significant p-value, larger than 0.5 logits)
   message("\nItems exhibiting problematic DIF for ", diflist$dif_var,
-          " (|xsi| >= 0.5 and p < 0.05):")
+          " (|xsi| >= 0.5 and p < 0.05):\n")
   print(res$est[abs(res$est$xsi) >= 0.5 & res$est$p < 0.05, ])
 }
 
 
 
+#' Save DIF summaries to hard disk
+#'
+#' @param diflist list; return object of dif_model(); with main and dif model
+#' @param res list; return object of dif_summaries()
+#' @param path_results  string; defines path to folder where results shall be saved
+#' @param path_table  string; defines path to folder where tables shall be saved
+#' @param overwrite logical; whether to overwrite existing file when saving table
+#' @export
 save_dif_summary <- function(diflist, res, path_results, path_table,
                              overwrite) {
 
   # Save results
   dif_results <- list(diflist = diflist, summary = res)
-  save_results(dif, filename = "dif_results.Rdata", path = path_results)
+  save_results(dif_results, filename = "dif_results.Rdata", path = path_results)
 
   # Save table
   dif_table <- list(gof = res$gof, estimates = res$est, main_effects = res$mne)

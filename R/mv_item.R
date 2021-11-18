@@ -39,7 +39,6 @@
 #'          mvlist: percentages for each item
 #'          mvsum: summary statistics across items
 #'          summary_table: table with summary statistics for TR
-#' @importFrom ?
 #' @export
 
 mv_item <- function(resp, vars, items, valid = NULL,
@@ -72,7 +71,7 @@ mv_item <- function(resp, vars, items, valid = NULL,
 
   # Write grouped table
   mv_item$summary_table <- mvi_table(mv_i = mv_item, vars = vars, items = items,
-                                     grouping = grouping)
+                                     mvs = mvs, grouping = grouping)
 
   # Write plots
   if (plots) mvi_plots(mv_i = mv_item, vars = vars, items = items,
@@ -90,7 +89,7 @@ mv_item <- function(resp, vars, items, valid = NULL,
   # Print results
   if (print) {
     print(mv_item$summary_table)
-    print_mvi_results(mv_i, grouping = grouping, labels_mvs = labels_mvs)
+    print_mvi_results(mv_item, grouping = grouping, labels_mvs = labels_mvs)
   }
 
   # Return results
@@ -514,8 +513,8 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
       item_min <- mv_i$list$items[mv_i$list[[lbl]] == mv_min]
       item_max <- mv_i$list$items[mv_i$list[[lbl]] == mv_max]
       message("The number of ", labels_mvs[lbl], " varied between ",
-              mv_min, " %", if(length(item_min) == 1) {paste0(" (item ", item_min, ")")}, " and ",
-              mv_max, " %", if(length(item_max) == 1) {paste0(" (item ", item_max, ")")}, ".")
+              mv_min, " %", if(length(item_min) <= 3) {paste0(" (item ", item_min, ")")}, " and ",
+              mv_max, " %", if(length(item_max) <= 3) {paste0(" (item ", item_max, ")")}, ".")
     }
   } else {
     for (g in grouping) {
@@ -526,8 +525,8 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
         item_min <- mv_i$list[[g]]$items[mv_i$list[[g]][[lbl]] == mv_min]
         item_max <- mv_i$list[[g]]$items[mv_i$list[[g]][[lbl]] == mv_max]
         message("The number of ", labels_mvs[lbl], " in the ", g, " test version varied between ",
-                mv_min, " %", if(length(item_min) == 1) {paste0(" (item ", item_min, ")")}, " and ",
-                mv_max, " %", if(length(item_max) == 1) {paste0(" (item ", item_max, ")")}, ".")
+                mv_min, " %", if(length(item_min) <= 3) {paste0(" (item ", item_min, ")")}, " and ",
+                mv_max, " %", if(length(item_max) <= 3) {paste0(" (item ", item_max, ")")}, ".")
       }
     }
   }

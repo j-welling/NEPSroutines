@@ -24,7 +24,7 @@
 #' @param path_results string; indicates the folder location where the summaries
 #' are stored on the hard drive; please note that the path is relative to the
 #' current working path set by here::i_am()
-#' @param path_results string; indicates the folder location where the tables
+#' @param path_table string; indicates the folder location where the tables
 #' are stored on the hard drive; please note that the path is relative to the
 #' current working path set by here::i_am()
 #' @param overwrite logical; whether to overwrite existing file when saving table
@@ -42,11 +42,11 @@ dis_analysis <- function(resp, vars, items, valid = NULL,
                          path_table = here::here('Tables'),
                          overwrite = FALSE) {
 
-    distratcors <- list()
+    distractors <- list()
     distractors$analysis <- conduct_dis_analysis(resp = resp,
-                                                        vars = vars,
-                                                        items = items,
-                                                        valid = valid)
+                                                 vars = vars,
+                                                 items = items,
+                                                 valid = valid)
     distractors$summary <- dis_summary(distractors$analysis)
 
     if (print) print_dis_summary(distractors$summary)
@@ -60,7 +60,27 @@ dis_analysis <- function(resp, vars, items, valid = NULL,
     if (return) return(distractors)
 }
 
-
+#' Conduct distractor analysis
+#'
+#' Calculates the item-rest correlations of distractor and correct responses
+#'
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' polytomous responses with k categories; missing values (default -999 to -1)
+#' are coded as NA internally; additionally includes ID_t as a person identifier
+#' and all variables that are further defined in the function arguments
+#' @param vars data.frame; contains information about items with items as rows;
+#' includes variables 'items' (character) containing item names,
+#'                    'raw' (logical) indicating unscored items,
+#'                    'type' (character) containing item type (e.g. MC),
+#'                    'correct_response' (integer) containing the correct
+#'                      response for each item,
+#' and all variables that are further defined in the function arguments
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @export
 conduct_dis_analysis <- function(resp, vars, items, valid = NULL) {
     # prepare data
     resp <- only_valid(resp, valid = valid)
@@ -138,17 +158,21 @@ dis_summary <- function(distractors) {
     return(list(correct = rc, distractor = rd))
 }
 
-print_dis_summary <- function(print, dist_sum) {
+#' Print summary of distractor analyses
+#'
+#' @param dist_sum return object of dis_summary()
+#' @export
+print_dis_summary <- function(dist_sum) {
         rc <- dist_sum$correct
         rd <- dist_sum$distractor
         # short summary containing minimum and maximum for distractors and
         # correct responses as well as respective item names [print to console!]
-        message("Item-total correlation for correct response: \nMin. = ",
+        message("\nItem-total correlation for correct response: \nMin. = ",
                 rc[which(rc$corr == min(rc$corr)), "corr"],
                 " (", rownames(rc[which(rc$corr == min(rc$corr)),]),
                 "), Max. = ", rc[which(rc$corr == max(rc$corr)), "corr"], " (",
                 rownames(rc[which(rc$corr == max(rc$corr)),]), ")")
-        message("Item-total correlation for distractor: \nMin. = ",
+        message("\nItem-total correlation for distractor: \nMin. = ",
                 rd[which(rd$corr == min(rd$corr)), "corr"],
                 " (", rownames(rd[which(rd$corr == min(rd$corr)),]),
                 "), Max. = ", rd[which(rd$corr == max(rd$corr)), "corr"], " (",

@@ -81,7 +81,10 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
       mv_person$summary <- mvp_table(mv_p = mv_person$mv_p, grouping = grouping)
   }
 
-  if (print) print(mv_person$summary)
+  if (print) {
+    message("\nSummary table with missing values by person and missing type\n")
+    print(mv_person$summary)
+  }
 
   if (return) return(mv_person)
 }
@@ -135,7 +138,7 @@ mvp_analysis <- function(resp, vars, items, valid = NULL, grouping = NULL,
   if (is.null(grouping)) {
 
     # Determine percentage of missing values for each missing type
-    mv_p <- mvp_calc(resp = resp_c, mvs = mvs, digits = digits)
+    mv_p <- mvp_calc(responses = resp_c, mvs = mvs, digits = digits)
 
   } else {
 
@@ -144,11 +147,11 @@ mvp_analysis <- function(resp, vars, items, valid = NULL, grouping = NULL,
       resp_g <- resp_c[resp[[g]], vars$items[vars[[items]] & vars[[g]]]]
 
       # Determine percentage of missing values for each missing type
-      mv_p[[g]] <- mvp_calc(resp = resp_g, mvs = mvs, digits = digits)
+      mv_p[[g]] <- mvp_calc(responses = resp_g, mvs = mvs, digits = digits)
     }
 
     # Determine percentage of missing values for each missing type
-    mv_p$all <- mvp_calc(resp = resp_c, mvs = mvs, digits = digits)
+    mv_p$all <- mvp_calc(responses = resp_c, mvs = mvs, digits = digits)
   }
 
   # Save results
@@ -380,8 +383,10 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items,
       gg <- gg + ggplot2::scale_fill_manual(values = .data[[color]])
     }
 
-    if (end > 1) {
+    if (end > 10) {
       gg <- gg + ggplot2::scale_x_continuous(breaks = seq(0, end, 2))
+    } else if (end > 0) {
+      gg <- gg + ggplot2::scale_x_continuous(breaks = seq(0, end, 1))
     }
 
     # save plot
@@ -416,7 +421,7 @@ mvp_calc <- function(responses, mvs, digits = 2) {
     result[[i]] <- mvp_perc(responses = responses, mvs = mvs[[i]], digits = digits)
   }
 
-  # Percentage of total missing responsesonses for each person
+  # Percentage of total missing responses for each person
   result$ALL <- mvp_perc(responses = responses, mvs = mvs, digits = digits)
 
   return(result)

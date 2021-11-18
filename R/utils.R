@@ -32,6 +32,9 @@ only_valid <- function(resp, valid = NULL) {
 #' @param items  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param convert  logical; whether to convert custom missing values to NA
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param warn logical; whether warnings are to be printed to the console
+#' @param zap_labels logical; whether to convert haven_labelled to normal
 #'
 #' @return data.frame as resp, but only with valid cases
 #'
@@ -39,7 +42,8 @@ only_valid <- function(resp, valid = NULL) {
 
 prepare_resp <- function(resp, vars = NULL, items = NULL,
                          use_only_valid = FALSE,  valid = NULL,
-                         convert = FALSE, mvs = NULL) {
+                         convert = FALSE, mvs = NULL,
+                         warn = TRUE, zap_labels = TRUE) {
 
     if (use_only_valid) resp <- only_valid(resp = resp, valid = valid)
 
@@ -59,7 +63,11 @@ prepare_resp <- function(resp, vars = NULL, items = NULL,
                 "are kept.")
     }
 
-    if (convert) resp <- convert_mv(resp = resp, items = items, mvs = mvs)
+    if (convert) resp <- convert_mv(resp = resp, mvs = mvs, warn = warn)
+
+    if (zap_labels) {
+      resp <- haven::zap_labels(resp)
+    }
 
     return(resp)
 }
@@ -151,7 +159,7 @@ check_pid <- function(pid) {
 #' @param items  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param min.val minimum number of valid values; if negative, set to the default of 3
-#' @param invalid vector of invalid values (?)
+#' @param invalid vector of invalid values (defaults to NA)
 #'
 #' @return   logical vector with length = nrow(resp), indicating whether case is valid
 #' @export
@@ -196,16 +204,19 @@ min_val <- function(resp, vars, items, min.val = NULL, invalid = NA) {
 #' @param items  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param mvs  named integer vector; contains user-defined missing values
+#' @param warn logical; whether warnings are to be printed to the console
 #'
 #' @return              data.frame like resp, but without user-defined mvs
 #' @export
 
-convert_mv <- function(resp, items = NULL, mvs = NULL) {
+convert_mv <- function(resp, items = NULL, mvs = NULL, warn = TRUE) {
 
     if (is.null(mvs)) {
         mvs <- -999:-1
-        warning("No user defined missing values provided. Default of ",
-                "'-999 to -1' is used.\n")
+        if (warn) {
+          warning("No user defined missing values provided. Default of ",
+                  "'-999 to -1' is used.\n")
+        }
     }
 
     if (is.null(items)) items <- colnames(resp)
