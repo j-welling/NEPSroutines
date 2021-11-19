@@ -26,6 +26,8 @@
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
 #' @param color  character calar or vector; defines color(s) of the bar in plots
+#' @param name_grouping  string; name of the grouping variable (e.g. test version)
+#' for title and legend of plots (only needed when grouping exists)
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print a warning if NAs were found in resp
@@ -54,8 +56,8 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
                       path_results = here::here("Results"),
                       path_table = here::here("Tables"),
                       path_plots = here::here("Plots/Missing_Responses/by_person"),
-                      show_all = FALSE, color = NULL, overwrite = FALSE,
-                      digits = 2, warn = TRUE, verbose = TRUE) {
+                      show_all = FALSE, color = NULL, name_grouping = 'test version',
+                      overwrite = FALSE, digits = 2, warn = TRUE, verbose = TRUE) {
 
   mv_person <- list()
 
@@ -66,7 +68,8 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
   if (plots) {
     mvp_plots(mv_p = mv_person$mv_p, vars = vars, items = items,
               labels_mvs = labels_mvs, grouping = grouping, show_all = show_all,
-              path = path_plots, color = color, verbose = verbose)
+              path = path_plots, name_grouping = name_grouping, color = color,
+              verbose = verbose)
   }
 
   if (save) {
@@ -262,6 +265,8 @@ mvp_table <- function(mv_p = NULL, grouping = NULL, overwrite = FALSE,
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
 #' @param color  character calar or vector; defines color(s) of the bar in plots
+#' @param name_grouping  string; name of the grouping variable (e.g. test version)
+#' for title and legend of plots (only needed when grouping exists)
 #' @param verbose  logical; whether to print processing information to console
 #'
 #' @importFrom rlang .data
@@ -283,7 +288,7 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items,
                         NAd = "not administered items",
                         AZ = "missing items due to ''Angabe zurueckgesetzt''"
                       ),
-                      color = NULL, verbose = TRUE) {
+                      name_grouping = 'test version', color = NULL, verbose = TRUE) {
 
   # Test data
   test_mvp_data(mv_p, resp = resp, vars = vars, items = items,
@@ -364,9 +369,10 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items,
         mapping = ggplot2::aes(x = .data$number, y = .data$MV, fill = .data$group)
       ) +
         ggplot2::labs(
-          title = paste0(Hmisc::capitalize(labels_mvs[i]), " by person"),
-          x = paste0("Number of ", labels_mvs[i]),
-          y = "Percentage", fill = "Group"
+          title = paste0(Hmisc::capitalize(labels_mvs[i]), " by person and ",
+                         name_grouping),
+          x = paste0("Number of ", labels_mvs[i]), y = "Percentage",
+          fill = Hmisc::capitalize(name_grouping)
         )
     }
 

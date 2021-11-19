@@ -30,6 +30,8 @@
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
 #' @param color  character calar or vector; defines color(s) of the bar in plots
+#' @param name_grouping  string; name of the grouping variable (e.g. test version)
+#' for title and legend of plots (only needed when grouping exists)
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print a warning if NAs were found in resp
@@ -60,8 +62,8 @@ mv_item <- function(resp, vars, items, valid = NULL,
                     path_results = here::here("Results"),
                     path_table = here::here("Tables"),
                     path_plots = here::here("Plots/Missing_Responses/by_person"),
-                    show_all = FALSE, color = NULL, overwrite = FALSE,
-                    digits = 2, warn = TRUE, verbose = TRUE) {
+                    show_all = FALSE, color = NULL,  name_grouping = 'test version',
+                    overwrite = FALSE, digits = 2, warn = TRUE, verbose = TRUE) {
 
   # Conduct analysis
   mv_item <- mvi_analysis(resp = resp, vars = vars, items = items,
@@ -77,7 +79,7 @@ mv_item <- function(resp, vars, items, valid = NULL,
   if (plots) mvi_plots(mv_i = mv_item, vars = vars, items = items,
                        grouping = grouping, mvs = mvs, labels_mvs = labels_mvs,
                        show_all = show_all, color = color, verbose = verbose,
-                       path = path_plots)
+                       name_grouping = name_grouping, path = path_plots)
 
   # Save results
   if (save) {
@@ -362,6 +364,8 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL, valid = NULL,
 #' missing values to use them in plot titles and printed results
 #' @param path  string; defines path to folder where plots shall be saved
 #' @param color  character calar or vector; defines color(s) of the bar in plots
+#' @param name_grouping  string; name of the grouping variable (e.g. test version)
+#' for title and legend of plots (only needed when grouping exists)
 #' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print a warning if NAs were found in resp
 #' @param verbose  logical; whether to print processing information to console
@@ -385,7 +389,8 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL, valid = NULL,
                         AZ = "missing items due to ''Angabe zurueckgesetzt''"
                       ),
                       path = here::here("Plots/Missing_Responses/by_item"),
-                      color = NULL, digits = 2, verbose = TRUE, warn = TRUE) {
+                      color = NULL, name_grouping = 'test version',
+                      digits = 2, verbose = TRUE, warn = TRUE) {
 
   # Test data
   test_mvi_data(mv_i, resp = resp, vars = vars, mvs = mvs, items = items,
@@ -455,8 +460,10 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL, valid = NULL,
         mapping = ggplot2::aes(x = .data$position, y = .data$MV, fill = .data$group)
       ) +
         ggplot2::labs(
-          title = paste0(Hmisc::capitalize(labels_mvs[i]), " by item position"),
-          x = "Item position", y = "Percentage", fill = "Group"
+          title = paste0(Hmisc::capitalize(labels_mvs[i]), " by item position and ",
+                         name_grouping),
+          x = "Item position", y = "Percentage",
+          fill = Hmisc::capitalize(name_grouping)
         )
     }
 
