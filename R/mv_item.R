@@ -88,7 +88,10 @@ mv_item <- function(resp, vars, items, valid = NULL,
 
   # Print results
   if (print) {
+    message("\nTable 1 shows missing values by item position and missing type.\n",
+            "All other tables show summary statistics over all items.\n")
     print(mv_item$summary_table)
+    message("\nSummary for TR\n")
     print_mvi_results(mv_item, grouping = grouping, labels_mvs = labels_mvs)
   }
 

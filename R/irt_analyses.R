@@ -658,33 +658,33 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
 
   wmnsq_misfit <- irt_sum$Item[irt_sum$WMNSQ > 1.15]
   if (length(wmnsq_misfit == 1)) {
-    message("Item ", wmnsq_misfit, " exhibited a WMNSQ of at least 1.15.\n")
+    message("Item ", wmnsq_misfit, " exhibited a WMNSQ of at least 1.15.")
   } else if (length(wmnsq_misfit > 1)) {
-    message("Items ", wmnsq_misfit, " exhibited a WMNSQ of at least 1.15.\n")
+    message("Items ", wmnsq_misfit, " exhibited a WMNSQ of at least 1.15.")
   }
 
   # WMNSQ t-value
   t_min <- min(irt_sum$t, na.rm = TRUE)
   t_max <- max(irt_sum$t, na.rm = TRUE)
   t_mean <- round(mean(irt_sum$t, na.rm = TRUE), 2)
-  message("WMNSQ t-value:\n",
+  message("\nWMNSQ t-value:\n",
           "The WMNSQ t-values varied between ",
           t_min, " (item ", irt_sum$Item[irt_sum$t %in% t_min], ") and ",
           t_max, " (item ", irt_sum$Item[irt_sum$t %in% t_max], ") with an average of ",
-          t_mean, ".\n")
+          t_mean, ".")
 
   t_misfit <- irt_sum$Item[abs(irt_sum$t) > 8]
   if (length(t_misfit == 1)) {
-    message("Item ", t_misfit, " exhibited an absolute t-value of at least 8.\n")
+    message("Item ", t_misfit, " exhibited an absolute t-value of at least 8.")
   } else if (length(t_misfit > 1)) {
-    message("Items ", t_misfit, " exhibited an absolute t-value of at least 8.\n")
+    message("Items ", t_misfit, " exhibited an absolute t-value of at least 8.")
   }
 
   # Correlation of item scores with total correct score
   rit_min <- min(irt_sum$rit, na.rm = TRUE)
   rit_max <- max(irt_sum$rit, na.rm = TRUE)
   rit_mean <- round(mean(irt_sum$rit, na.rm = TRUE), 2)
-  message("Correlation of item scores with total correct score:\n",
+  message("\nCorrelation of item scores with total correct score:\n",
           "The correlations between the item scores and the total correct scores varied between ",
           rit_min, " (item ", irt_sum$Item[irt_sum$rit %in% rit_min], ") and ",
           rit_max, " (item ", irt_sum$Item[irt_sum$rit %in% rit_max], ") with an average correlation of ",

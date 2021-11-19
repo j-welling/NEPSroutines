@@ -11,8 +11,8 @@
 #' @param vars data.frame; contains information about items with items as rows;
 #' includes variable 'items' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items string; defines name of logical variable in vars that indicates
-#' which items to use for the analysis; if some of the \code{dif_vars}
+#' @param items character vector; defines name(s) of logical variable(s) in vars
+#' that indicates which items to use for analysis; if some of the \code{dif_vars}
 #' come with a different set of analysis items, this argument becomes a
 #' vector of \code{length(dif_vars)} containing the respective selection
 #' variables in vars
@@ -84,8 +84,8 @@ check_items <- function(items, dif_vars) {
 #' @param vars data.frame; contains information about items with items as rows;
 #' includes variable 'items' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items string; defines name of logical variable in vars that indicates
-#' which items to use for the analysis; if some of the \code{dif_vars}
+#' @param items character vector; defines name(s) of logical variable(s) in vars
+#' that indicates which items to use for analysis; if some of the \code{dif_vars}
 #' come with a different set of analysis items, this argument becomes a
 #' vector of \code{length(dif_vars)} containing the respective selection
 #' variables in vars
@@ -115,7 +115,8 @@ conduct_dif_analysis <- function(items, dif_vars, resp, vars, scoring,
   for (i in seq_along(dif_vars)) {
     dif_models[[i]] <- dif_model(resp = resp, vars = vars, items = items[i],
                                  dif_var = dif_vars[i], scoring = scoring,
-                                 valid = valid, verbose = verbose)
+                                 valid = valid, verbose = verbose,
+                                 mvs = mvs)
   }
   names(dif_models) <- dif_vars
 
@@ -214,7 +215,7 @@ dif_model <- function(resp, vars, items, dif_var, scoring = "scoring",
   mis <- is.na(facets[[dif_var]])
 
   if (any(mis)) {
-    facets <- facets[!mis, ]
+    facets <- facets[!mis, , drop = FALSE]
     resp <- resp[!mis, ]
     pid <- pid[!mis]
     warning("Missing values were found in the DIF variable. The corresponding",
