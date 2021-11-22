@@ -24,9 +24,10 @@ mv_item(
   return = FALSE,
   path_results = here::here("Results"),
   path_table = here::here("Tables"),
-  path_plots = here::here("Plots/Missing_Responses/by_person"),
+  path_plots = here::here("Plots/Missing_Responses/by_item"),
   show_all = FALSE,
   color = NULL,
+  name_grouping = "test version",
   overwrite = FALSE,
   digits = 2,
   warn = TRUE,
@@ -80,6 +81,9 @@ missing values to use them in plot titles and printed results}
 (only applicable when grouping exists)}
 
 \item{color}{character calar or vector; defines color(s) of the bar in plots}
+
+\item{name_grouping}{string; name of the grouping variable (e.g. test version)
+for title and legend of plots (only needed when grouping exists)}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 

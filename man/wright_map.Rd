@@ -14,7 +14,7 @@ wright_map(model, irtmodel, path = here::here("Plots"), name_group = NULL)
 
 \item{path}{string; defines path to folder where plots shall be saved}
 
-\item{name_group}{string; defines name of group used in analysis}
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 }
 \description{
 Create Wright maps for IRT models.

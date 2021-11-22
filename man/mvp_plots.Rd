@@ -20,6 +20,8 @@ mvp_plots(
     "missing items due to test abortion", UM = "unspecific missing items", ND =
     "not determinable items", NAd = "not administered items", AZ =
     "missing items due to ''Angabe zurueckgesetzt''"),
+  name_grouping = "test version",
+  legend_position = 0.82,
   color = NULL,
   verbose = TRUE
 )
@@ -54,6 +56,12 @@ an item}
 
 \item{labels_mvs}{named character vector; contains labels for user-defined
 missing values to use them in plot titles and printed results}
+
+\item{name_grouping}{string; name of the grouping variable (e.g. test version)
+for title and legend of plots (only needed when grouping exists)}
+
+\item{legend_position}{double; contains horizontal position of legend;
+y in {0;1} (left to right)}
 
 \item{color}{character calar or vector; defines color(s) of the bar in plots}
 

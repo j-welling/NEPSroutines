@@ -27,6 +27,8 @@ mv_person(
   show_all = FALSE,
   color = NULL,
   overwrite = FALSE,
+  name_grouping = "test version",
+  legend_position = 0.82,
   digits = 2,
   warn = TRUE,
   verbose = TRUE
@@ -76,6 +78,12 @@ missing values to use them in plot titles and printed results}
 \item{color}{character calar or vector; defines color(s) of the bar in plots}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
+
+\item{name_grouping}{string; name of the grouping variable (e.g. test version)
+for title and legend of plots (only needed when grouping exists)}
+
+\item{legend_position}{double; contains horizontal position of legend;
+y in {0;1} (left to right)}
 
 \item{digits}{integer; number of decimals for rounding}
 

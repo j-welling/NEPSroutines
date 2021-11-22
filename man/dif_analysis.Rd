@@ -32,8 +32,8 @@ and all variables that are further defined in the function arguments}
 includes variable 'items' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{items}{string; defines name of logical variable in vars that indicates
-which items to use for the analysis; if some of the \code{dif_vars}
+\item{items}{character vector; defines name(s) of logical variable(s) in vars
+that indicates which items to use for analysis; if some of the \code{dif_vars}
 come with a different set of analysis items, this argument becomes a
 vector of \code{length(dif_vars)} containing the respective selection
 variables in vars}

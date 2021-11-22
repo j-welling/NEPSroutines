@@ -4,7 +4,7 @@
 \alias{desc_con}
 \title{Descriptives of continuous variables}
 \usage{
-desc_con(dat, desc, valid = NULL, digits = 2)
+desc_con(dat, desc, valid = NULL, digits = 2, print = TRUE, return = FALSE)
 }
 \arguments{
 \item{dat}{data.frame; contains sociodemographic and booklet variables}
@@ -16,6 +16,10 @@ shall be used in analysis}
 (in)valid cases}
 
 \item{digits}{integer; number of decimals for rounding}
+
+\item{print}{logical; whether results shall be printed to console}
+
+\item{return}{logical; whether results shall be returned}
 }
 \value{
 list with descriptives.

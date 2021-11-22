@@ -4,14 +4,7 @@
 \alias{desc_nom}
 \title{Descriptives of nominal variables}
 \usage{
-desc_nom(
-  dat,
-  desc,
-  valid = NULL,
-  digits = 1,
-  show_absolute = TRUE,
-  show_percentage = TRUE
-)
+desc_nom(dat, desc, valid = NULL, digits = 1, print = TRUE, return = FALSE)
 }
 \arguments{
 \item{dat}{data.frame; contains sociodemographic and booklet variables}
@@ -24,9 +17,9 @@ shall be used in analysis}
 
 \item{digits}{integer; number of decimals for rounding of percentages}
 
-\item{show_absolute}{logical; whether to show frequency in absolute numbers}
+\item{print}{logical; whether results shall be printed to console}
 
-\item{show_percentage}{logical; whether to show frequency in relative numbers}
+\item{return}{logical; whether results shall be returned}
 }
 \value{
 list with descriptives.

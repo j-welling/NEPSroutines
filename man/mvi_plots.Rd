@@ -22,6 +22,7 @@ mvi_plots(
     "missing items due to ''Angabe zurueckgesetzt''"),
   path = here::here("Plots/Missing_Responses/by_item"),
   color = NULL,
+  name_grouping = "test version",
   digits = 2,
   verbose = TRUE,
   warn = TRUE
@@ -64,6 +65,9 @@ missing values to use them in plot titles and printed results}
 \item{path}{string; defines path to folder where plots shall be saved}
 
 \item{color}{character calar or vector; defines color(s) of the bar in plots}
+
+\item{name_grouping}{string; name of the grouping variable (e.g. test version)
+for title and legend of plots (only needed when grouping exists)}
 
 \item{digits}{integer; number of decimals for rounding}
 

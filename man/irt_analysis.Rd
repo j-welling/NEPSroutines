@@ -71,7 +71,7 @@ Rasch model}
 
 \item{verbose}{logical; whether to print processing information to console}
 
-\item{name_group}{string; defines name of group used in analysis}
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 }
 \value{
 list with all results
