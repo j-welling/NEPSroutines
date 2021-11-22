@@ -7,10 +7,10 @@
 only_valid(resp, valid = NULL)
 }
 \arguments{
-\item{resp}{data.frame with responses}
+\item{resp}{data.frame with item responses}
 
-\item{valid}{character string. defines name of boolean variable in resp,
-indicating (in)valid cases.}
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
 }
 \value{
 data.frame as resp, but only with valid cases

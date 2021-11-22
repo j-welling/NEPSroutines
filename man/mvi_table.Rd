@@ -9,68 +9,62 @@ mvi_table(
   items,
   mv_i = NULL,
   resp = NULL,
+  valid = NULL,
   position = NULL,
   grouping = NULL,
-  show.all = FALSE,
+  show_all = FALSE,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
     -21),
   filename = NULL,
   path = here::here("Tables"),
-  valid = NULL,
   digits = 2,
   warn = TRUE,
-  overwrite = FALSE,
-  return_table = FALSE
+  overwrite = FALSE
 )
 }
 \arguments{
-\item{vars}{data.frame. contains all competence items as rows,
-and at least the following variables:
-character vector named "items"; contains the names of the items.
-boolean vector; indicates which items to use for analysis.}
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'items' containing item names; additionally includes all
+variables that are further defined in the function arguments}
 
-\item{items}{character. contains name of variable (boolean) in vars that
-indicates which items to use for analysis.}
+\item{items}{string; defines name of logical variable in vars that indicates
+which items to use for the analysis}
 
-\item{mv_i}{list; return object of mvi_analysis(). mvi_analysis$list must contain
-for each group and all groups together the name of the
-user-defined missing values that are to be
-analyzed and the names of the items as its row names.}
+\item{mv_i}{list; return object of mvi_analysis()}
 
-\item{resp}{data.frame. contains item responses (integer with user-defined missing values)
-and grouping variables (boolean).}
+\item{resp}{data.frame; contains item responses with items as variables and
+persons as rows; all responses ∈ ℕ0; user-defined missing values;
+includes all variables that are further defined in the function arguments}
 
-\item{position}{(named) character vector. contains name(s) of variable(s) in
-vars that indicate the position of subitems;
-if grouping with differing positions in testlets,
-then for each group one variable name is necessary,
-as well as names for the vector that represent names of groups
-and must be identical with items in variable "grouping"
-(e.g. position = c(easy = "position_easy", diff = "position_diff"))}
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
 
-\item{grouping}{character vector. contains names of groups (e.g. 'easy and 'difficult')
-as used in resp.}
+\item{position}{(named) character vector; defines name(s) of integer
+variable(s) in vars that indicate position of items; if groups with differing
+item positions in testlets exist, then vector must be named with names of
+groups (as in "grouping") as names of elements and names of variables as elements}
 
-\item{show.all}{boolean; only needed when groups exist, indicates whether
-plots shall also include the whole sample as a "group"}
+\item{grouping}{character vector; contains for each group a name of a logical
+variable in resp and vars that indicates to which group belongs a person or
+an item}
 
-\item{mvs}{named vector with definition of user-defined missing values.}
+\item{show_all}{logical; whether whole sample shall be included as a "group"
+(only applicable when grouping exists)}
 
-\item{filename}{string with name of file that shall be saved (including type of file);
-if NULL, no file will be saved.}
+\item{mvs}{named integer vector; contains user-defined missing values}
 
-\item{path}{folder path for plots}
+\item{filename}{string; defines name of table that shall be saved}
 
-\item{valid}{character string. defines name of boolean variable in resp,
-indicating (in)valid cases.}
+\item{path}{string; defines path to folder where table shall be saved}
 
-\item{digits}{number of decimals for rounding}
+\item{digits}{integer; number of decimals for rounding}
 
-\item{warn}{boolean whether to print a warning if NAs were found in resp}
+\item{warn}{logical; whether to print a warning if NAs were found in resp}
 
-\item{overwrite}{boolean; indicates whether to overwrite existing file when saving table.}
-
-\item{return_table}{boolean. indicates whether to return table.}
+\item{overwrite}{logical; whether to overwrite existing file when saving table}
+}
+\value{
+table with results
 }
 \description{
 Plots the percentages of not reached missing values for each item by its

@@ -4,16 +4,17 @@
 \alias{wright_map}
 \title{Wright maps}
 \usage{
-wright_map(results, name, path = here::here("Plots"))
+wright_map(model, irtmodel, path = here::here("Plots"), name_group = NULL)
 }
 \arguments{
-\item{results}{list. Contains results from IRT analysis as returned by function
-'irt_model'.}
+\item{model}{list; return object of irt_model()}
 
-\item{name}{character. Part of the filename for the directory of the plots,
-following "ICCs_for_" (e.g., the kind of IRT analysis: "1PL").}
+\item{irtmodel}{string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
+"GPCM" for GPCM analysis}
 
-\item{path}{character. contains name of path for plots.}
+\item{path}{string; defines path to folder where plots shall be saved}
+
+\item{name_group}{string; defines name of group used in analysis}
 }
 \description{
 Create Wright maps for IRT models.

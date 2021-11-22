@@ -7,14 +7,13 @@
 desc_abs(dat, desc, valid = NULL)
 }
 \arguments{
-\item{dat}{data.frame with item responses (user-defined missing values)
-and logical grouping variables, named after the grouping
-factor (e.g. "easy" and "difficult" in the case of testlet.}
+\item{dat}{data.frame; contains sociodemographic and booklet variables}
 
-\item{desc}{character. contains names of variables for descriptive analysis.}
+\item{desc}{character vector; contains the name(s) of the variable(s) that
+shall be used in analysis}
 
-\item{valid}{character string. defines name of boolean variable in dat,
-indicating (in)valid cases.}
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
 }
 \value{
 list with  frequency (absolute) of answers for each variable in desc.

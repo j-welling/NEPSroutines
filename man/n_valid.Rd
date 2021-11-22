@@ -7,12 +7,10 @@
 n_valid(dat, valid = NULL)
 }
 \arguments{
-\item{dat}{data.frame with item responses (user-defined missing values)
-and logical grouping variables, named after the grouping
-factor (e.g. "easy" and "difficult" in the case of testlet.}
+\item{dat}{data.frame; contains sociodemographic and booklet variables}
 
-\item{valid}{character string. defines name of boolean variable in dat,
-indicating (in)valid cases.}
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
 }
 \value{
 character string with answer.

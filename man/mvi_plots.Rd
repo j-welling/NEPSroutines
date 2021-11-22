@@ -9,64 +9,67 @@ mvi_plots(
   items,
   mv_i = NULL,
   resp = NULL,
+  valid = NULL,
   position = NULL,
   grouping = NULL,
-  show.all = FALSE,
+  show_all = FALSE,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
     -21),
+  labels_mvs = c(ALL = "total missing items", OM = "omitted items", NV =
+    "not valid items", NR = "not reached items", TA =
+    "missing items due to test abortion", UM = "unspecific missing items", ND =
+    "not determinable items", NAd = "not administered items", AZ =
+    "missing items due to ''Angabe zurueckgesetzt''"),
   path = here::here("Plots/Missing_Responses/by_item"),
-  filename = "Missing_responses_by_item",
   color = NULL,
-  verbose = TRUE,
-  valid = NULL,
   digits = 2,
+  verbose = TRUE,
   warn = TRUE
 )
 }
 \arguments{
-\item{vars}{data.frame. contains all competence items as rows,
-and at least the following variables:
-character vector named "items"; contains the names of the items.
-boolean vector; indicates which items to use for analysis.}
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'items' containing item names; additionally includes all
+variables that are further defined in the function arguments}
 
-\item{items}{character. contains name of variable (boolean) in vars that
-indicates which items to use for analysis.}
+\item{items}{string; defines name of logical variable in vars that indicates
+which items to use for the analysis}
 
-\item{mv_i}{list; return object of mvi_analysis(). mvi_analysis$list must contain
-for each group and all groups together the name of the
-user-defined missing values that are to be
-analyzed and the names of the items as its row names.}
+\item{mv_i}{list; return object of mvi_analysis()}
 
-\item{resp}{data.frame. contains item responses (integer with user-defined missing values)
-and grouping variables (boolean).}
+\item{resp}{data.frame; contains item responses with items as variables and
+persons as rows; all responses ∈ ℕ0; user-defined missing values;
+includes all variables that are further defined in the function arguments}
 
-\item{position}{character vector. contains names of position variables
-(one element per grouping, same order necessary)}
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
 
-\item{grouping}{character vector. contains names of groups (e.g. 'easy and 'difficult')
-as used in resp.}
+\item{position}{(named) character vector; defines name(s) of integer
+variable(s) in vars that indicate position of items; if groups with differing
+item positions in testlets exist, then vector must be named with names of
+groups (as in "grouping") as names of elements and names of variables as elements}
 
-\item{show.all}{boolean; only needed when groups exist, indicates whether
-plots shall also include the whole sample as a "group"}
+\item{grouping}{character vector; contains for each group a name of a logical
+variable in resp and vars that indicates to which group belongs a person or
+an item}
 
-\item{mvs}{named vector; contains definition of user-defined missing
-values that shall be analyzed in the plot}
+\item{show_all}{logical; whether whole sample shall be included as a "group"
+(only applicable when grouping exists)}
 
-\item{path}{folder path for plots}
+\item{mvs}{named integer vector; contains user-defined missing values}
 
-\item{filename}{string with name of file that shall be saved (excluding type of file)}
+\item{labels_mvs}{named character vector; contains labels for user-defined
+missing values to use them in plot titles and printed results}
 
-\item{color}{character vector. defines bar color(s); if the data contains subgroups,
-one color per subgroup must be specified}
+\item{path}{string; defines path to folder where plots shall be saved}
 
-\item{verbose}{logical; print information to console}
+\item{color}{character calar or vector; defines color(s) of the bar in plots}
 
-\item{valid}{character string. defines name of boolean variable in resp,
-indicating (in)valid cases.}
+\item{digits}{integer; number of decimals for rounding}
 
-\item{digits}{number of decimals for rounding}
+\item{verbose}{logical; whether to print processing information to console}
 
-\item{warn}{boolean whether to print a warning if NAs were found in resp}
+\item{warn}{logical; whether to print a warning if NAs were found in resp}
 }
 \description{
 Plots the percentages of not reached missing values for each item by its

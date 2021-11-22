@@ -8,73 +8,73 @@ irt_analysis(
   resp,
   vars,
   items,
-  position,
   valid = NULL,
+  mvs = NULL,
   irt_type,
   scoring = NULL,
-  icc_plots = FALSE,
-  wright_map = FALSE,
+  plots = FALSE,
+  save = TRUE,
+  print = TRUE,
+  return = FALSE,
   path_plots = here::here("Plots"),
-  name_table = NULL,
-  name_steps = NULL,
-  path_tables = here::here("Tables"),
-  name_data = NULL,
-  path_data = here::here("Data"),
-  overwrite_table = FALSE,
+  path_table = here::here("Tables"),
+  path_results = here::here("Results"),
+  overwrite = FALSE,
   digits = 2,
-  return_results = TRUE
+  verbose = FALSE,
+  name_group = NULL
 )
 }
 \arguments{
-\item{resp}{data.frame. contains:
-(1) the responses. y in {0, 1} for binary data and y in
-  {0, 1, ... k-1} for polytomous responses with k categories
-(2) ID_t: column indicating ID of participants}
+\item{resp}{data.frame; contains item responses with items as variables and
+persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+polytomous responses with k categories; missing values (default -999 to -1)
+are coded as NA internally; additionally includes ID_t as a person identifier
+and all variables that are further defined in the function arguments}
 
-\item{vars}{data.frame. contains all competence items as rows,
-and at least the following variables:
-  character vector named "items"; contains the names of the items.
-  boolean vector; indicates which items to use for analysis.}
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'items' containing item names; additionally includes all
+variables that are further defined in the function arguments}
 
-\item{items}{character. contains name of variable (boolean) in vars that
-indicates which items to use for analysis.}
+\item{items}{string; defines name of logical variable in vars that indicates
+which items to use for the analysis}
 
-\item{position}{character string. contains name of position variable.}
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
 
-\item{valid}{character string. defines name of boolean variable in resp,
-indicating (in)valid cases.}
+\item{mvs}{named integer vector; contains user-defined missing values}
 
-\item{irt_type}{character string; either "dich" for dichotomous analysis
-or "poly" for polytomous analysis.}
+\item{irt_type}{string; either "dich" (dichotomous analysis) or "poly"
+(polytomous analysis)}
 
-\item{scoring}{numeric vector; scoring factor to be applied to loading matrix;
-can be NULL for Rasch model; if NULL for PCM model,
-scoring matrix is reconstructed from item names.}
+\item{scoring}{string; defines name of numerical variable in vars that
+contains the scoring factor to be applied to loading matrix; can be NULL for
+Rasch model}
 
-\item{icc_plots}{boolean; indicates whether to create and save ICC plots.}
+\item{plots}{logical; whether plots shall be created and saved to hard drive}
 
-\item{wright_map}{boolean; indicates whether to create and save Wright Map.}
+\item{save}{logical; whether results shall be saved to hard drive}
 
-\item{path_plots}{character. contains name of path for plots.}
+\item{print}{logical; whether results shall be printed to console}
 
-\item{name_table}{string with name of summary table file that shall be saved (including file type);
-if left empty, table will not be saved.}
+\item{return}{logical; whether results shall be returned}
 
-\item{name_steps}{string with name of steps table file that shall be saved (including file type);
-if left empty, table will not be saved; only available for partial credit models.}
+\item{path_plots}{string; defines path to folder where plots shall be saved}
 
-\item{path_tables}{character. contains name of path for tables.}
+\item{path_table}{string; defines path to folder where tables shall be saved}
 
-\item{name_data}{string with name of data file that shall be saved (including file type);
-if left empty, data will not be saved.}
+\item{path_results}{string; defines path to folder where results shall be saved}
 
-\item{path_data}{character. contains name of path for data.}
+\item{overwrite}{logical; whether to overwrite existing file when saving table}
 
-\item{overwrite_table}{boolean; indicates whether to overwrite existing file when saving table.}
+\item{digits}{integer; number of decimals for rounding}
 
-\item{digits}{number of decimals for rounding}
+\item{verbose}{logical; whether to print processing information to console}
 
-\item{return_results}{boolean. indicates whether to return results.}
+\item{name_group}{string; defines name of group used in analysis}
+}
+\value{
+list with all results
 }
 \description{
 Perform 1PL and 2PL analyses for binary or PCM and GPCM analyses for

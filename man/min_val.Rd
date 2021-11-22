@@ -4,26 +4,24 @@
 \alias{min_val}
 \title{Select sample with a minimum number of valid values}
 \usage{
-min_val(resp, vars, items, min.val = NULL, invalid = NA, warn = TRUE)
+min_val(resp, vars, items, min.val = NULL, invalid = NA)
 }
 \arguments{
-\item{resp}{data.frame with responses}
+\item{resp}{data.frame with item responses}
 
-\item{vars}{variables to check for valid values;}
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'items' containing item names; additionally includes all
+variables that are further defined in the function arguments}
 
-\item{items}{character. contains name of variable (boolean) in vars that
-indicates which items to use for analysis.}
+\item{items}{string; defines name of logical variable in vars that indicates
+which items to use for the analysis}
 
-\item{min.val}{minimum number of valid values;
-if negative, set to the default of 3}
+\item{min.val}{minimum number of valid values; if negative, set to the default of 3}
 
-\item{invalid}{vector of invalid values}
-
-\item{warn}{print warnings}
+\item{invalid}{vector of invalid values (defaults to NA)}
 }
 \value{
-boolean vector with length = nrow(resp),
-indicating whether case is valid.
+logical vector with length = nrow(resp), indicating whether case is valid
 }
 \description{
 Select sample with a minimum number of valid values

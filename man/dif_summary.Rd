@@ -4,19 +4,27 @@
 \alias{dif_summary}
 \title{Summary for DIF analysis}
 \usage{
-dif_summary(diflist, print = TRUE, save_at = NULL, overwrite = FALSE)
+dif_summary(
+  diflist,
+  print = TRUE,
+  save = TRUE,
+  path_results = here::here("Results"),
+  path_table = here::here("Tables"),
+  overwrite = FALSE
+)
 }
 \arguments{
-\item{diflist}{list with main and dif model as returned by dif_model()}
+\item{diflist}{list; return object of dif_model(); with main and dif model}
 
-\item{print}{logical indicating whether summary is printed to the console}
+\item{print}{logical; whether results shall be printed to console}
 
-\item{save_at}{character string; indicates the folder location where the
-summaries are stored on the hard drive. Please note that the
-path is relative to the current working path set by here::i_am(). Defaults
-to NULL (not stored)}
+\item{save}{logical; whether results shall be saved to hard drive}
 
-\item{overwrite}{boolean; indicates whether to overwrite existing file when saving table.}
+\item{path_results}{string; defines path to folder where results shall be saved}
+
+\item{path_table}{string; defines path to folder where tables shall be saved}
+
+\item{overwrite}{logical; whether to overwrite existing file when saving table}
 }
 \value{
 list of information criteria, dif estimates and main effects in

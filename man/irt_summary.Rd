@@ -7,54 +7,47 @@
 irt_summary(
   resp,
   vars,
-  results,
-  position,
-  disc = NULL,
+  valid = NULL,
+  mvs = NULL,
+  model_1par,
+  model_2par,
   path = here::here("Tables"),
   filename = NULL,
-  valid = NULL,
   digits = 2,
-  overwrite = FALSE,
-  return_table = TRUE
+  overwrite = FALSE
 )
 }
 \arguments{
-\item{resp}{data.frame. contains:
-(1) the responses. y in {0, 1} for binary data and y in
-{0, 1, ... k-1} for polytomous responses with k categories
-(2) ID_t: column indicating ID of participants}
+\item{resp}{data.frame; contains item responses with items as variables and
+persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+polytomous responses with k categories; missing values (default -999 to -1)
+are coded as NA internally; additionally includes ID_t as a person identifier
+and all variables that are further defined in the function arguments
+includes all variables that are further defined in the function arguments}
 
-\item{vars}{data.frame. contains information about all competence items
-and includes the following columns:
-  items: character indicating names of items.
-  final: logical indicating whether item is a final item
-  position: contains position per item. if different for
-  different groups, several variables necessary.}
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'items' containing item names; additionally includes all
+variables that are further defined in the function arguments}
 
-\item{results}{list. contains results from IRT analysis with one parameter
-(e.g., Rasch analysis)}
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
 
-\item{position}{character string. contains name of position variable}
+\item{mvs}{named integer vector; contains user-defined missing values}
 
-\item{disc}{list. contains results from IRT analysis with two parameters
-(e.g., 2PL analysis), to include item discrimination}
+\item{model_1par}{list; return object of irt_model(); one parameter model}
 
-\item{path}{character. defines name of path for table.}
+\item{model_2par}{list; return object of irt_model(); two parameter model}
 
-\item{filename}{character. defines name for excel document. if NULL (default),
-the table will not be saved.}
+\item{path}{string; defines path to folder where table shall be saved}
 
-\item{valid}{character string. defines name of boolean variable in resp,
-indicating (in)valid cases.}
+\item{filename}{string; defines name of table that shall be saved}
 
-\item{digits}{integer; how many digits after rounding}
+\item{digits}{integer; number of decimals for rounding}
 
-\item{overwrite}{boolean; indicates whether to overwrite existing file when saving table.}
-
-\item{return_table}{logical; whether resulting table should be returned}
+\item{overwrite}{logical; whether to overwrite existing file when saving table}
 }
 \value{
-a data.frame containing the item name, position, N, percentage correct,
+a data.frame containing the item name, N, percentage correct,
   item difficulty, SE, WMNSQ, t, rit, item discrimination, Q3.
 }
 \description{

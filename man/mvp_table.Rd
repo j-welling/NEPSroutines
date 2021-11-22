@@ -7,44 +7,48 @@
 mvp_table(
   mv_p = NULL,
   grouping = NULL,
-  resp = NULL,
-  vars = NULL,
-  valid = NULL,
+  overwrite = FALSE,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
     -21),
   filename = NULL,
   path = here::here("Tables"),
-  overwrite = FALSE,
-  return_table = FALSE
+  resp = NULL,
+  vars = NULL,
+  items = NULL,
+  valid = NULL
 )
 }
 \arguments{
-\item{mv_p}{list; return object of mv_person().}
+\item{mv_p}{list; return object of mv_person()}
 
-\item{grouping}{character vector. contains names of grouping variables.}
-
-\item{resp}{data.frame. contains item responses (user-defined mvs)}
-
-\item{vars}{data.frame, contains information about variables
-(for minimum columns see function "mv_person")}
-
-\item{valid}{character string. defines name of boolean variable in resp,
-indicating (in)valid cases.}
-
-\item{mvs}{named vector; contains definition of user-defined missing
-values that shall be analyzed in the plot}
-
-\item{filename}{string with name of file that shall be saved (excluding type of file);
-if NULL, no file will be saved.}
-
-\item{path}{folder path for plots}
+\item{grouping}{character vector; contains for each group a name of a logical
+variable in resp and vars that indicates to which group belongs a person or
+an item}
 
 \item{overwrite}{boolean; indicates whether to overwrite existing file when saving table.}
 
-\item{return_table}{boolean. indicates whether to return table.}
+\item{mvs}{named integer vector; contains user-defined missing values}
+
+\item{filename}{string; defines name of table that shall be saved}
+
+\item{path}{string; defines path to folder where table shall be saved}
+
+\item{resp}{data.frame; contains item responses with items as variables and
+persons as rows; all responses ∈ ℕ0; user-defined missing values;
+includes all variables that are further defined in the function arguments}
+
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'items' containing item names; additionally includes all
+variables that are further defined in the function arguments}
+
+\item{items}{string; defines name of logical variable in vars that indicates
+which items to use for the analysis}
+
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
 }
 \value{
-if return is set to TRUE, table with missing values per person and
+table with missing values per person and
 for each missing value type (in percentage)
 }
 \description{

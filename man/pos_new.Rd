@@ -4,21 +4,24 @@
 \alias{pos_new}
 \title{Calculate new position variable with only a set of variables}
 \usage{
-pos_new(vars, items = "final", position = NULL)
+pos_new(vars, items, position)
 }
 \arguments{
-\item{vars}{data.frame with information about all items}
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'items' containing item names; additionally includes all
+variables that are further defined in the function arguments}
 
-\item{items}{character. contains name of variable in vars (boolean) that
-indicates which variables to use.}
+\item{items}{string; defines name of logical variable in vars that indicates
+which items to use for the analysis}
 
-\item{position}{(named) character vector. contains name(s) of variable(s) in
-vars that indicate the position of subitems;
-if grouping, then for each group one variable name is necessary;
-names represent names of groups (e.g. easy = "position_easy")}
+\item{position}{(named) character vector; defines name(s) of integer
+variable(s) in vars that indicate position of items; if groups with differing
+item positions in testlets exist, then vector must be named with names of
+groups (as in "grouping") as names of elements and names of variables as elements}
 }
 \value{
-data.frame as input, with one extra variable indicating position of chosen variables.
+data.frame as input, with one or more extra variable(s) containing
+the (relative) position of chosen items.
 }
 \description{
 Calculate new position variable with only a set of variables

@@ -5,32 +5,27 @@
 \title{Step analysis}
 \usage{
 steps_analysis(
-  results,
-  path = here::here("Tables"),
-  filename = NULL,
+  pcm_model,
   digits = 2,
   overwrite = FALSE,
-  return_table = TRUE
+  path = here::here("Tables"),
+  filename = NULL
 )
 }
 \arguments{
-\item{results}{list. contains results from IRT analysis with one parameter
-(PCM analysis).}
+\item{pcm_model}{list; return object of irt_model(); PCM analysis}
 
-\item{path}{character. defines name of path for table.}
+\item{digits}{integer; number of decimals for rounding}
 
-\item{filename}{character. defines name for excel document. if NULL (default),
-the table will not be saved.}
+\item{overwrite}{logical; whether to overwrite existing file when saving table}
 
-\item{digits}{integer; how many digits after rounding}
+\item{path}{string; defines path to folder where table shall be saved}
 
-\item{overwrite}{boolean; indicates whether to overwrite existing file when saving table.}
-
-\item{return_table}{logical; whether resulting table should be returned}
+\item{filename}{string; defines name of table that shall be saved}
 }
 \value{
 a data.frame containing the step parameters and SEs for each step
 }
 \description{
-Create table with results of step analysis.
+Create table with pcm_model of step analysis.
 }

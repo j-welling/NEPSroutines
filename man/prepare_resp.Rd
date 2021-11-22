@@ -6,30 +6,38 @@
 \usage{
 prepare_resp(
   resp,
-  valid = NULL,
-  without_valid = FALSE,
   vars = NULL,
   items = NULL,
-  convert = FALSE
+  use_only_valid = FALSE,
+  valid = NULL,
+  convert = FALSE,
+  mvs = NULL,
+  warn = TRUE,
+  zap_labels = TRUE
 )
 }
 \arguments{
-\item{resp}{data.frame with responses}
+\item{resp}{data.frame with item responses}
 
-\item{valid}{character string. defines name of boolean variable in resp,
-indicating (in)valid cases.}
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'items' containing item names; additionally includes all
+variables that are further defined in the function arguments}
 
-\item{without_valid}{boolean; indicates whether not to check valid cases}
+\item{items}{string; defines name of logical variable in vars that indicates
+which items to use for the analysis}
 
-\item{vars}{data.frame. contains information about all competence items
-and includes the following columns:
-  items: character indicating names of items.
-  variable indicated by argument 'items'}
+\item{use_only_valid}{logical; whether to check valid cases}
 
-\item{items}{character. contains name of variable (boolean) in vars that
-indicates which items to use for analysis.}
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
 
-\item{convert}{logical; convert custom missing values to NA}
+\item{convert}{logical; whether to convert custom missing values to NA}
+
+\item{mvs}{named integer vector; contains user-defined missing values}
+
+\item{warn}{logical; whether warnings are to be printed to the console}
+
+\item{zap_labels}{logical; whether to convert haven_labelled to normal}
 }
 \value{
 data.frame as resp, but only with valid cases

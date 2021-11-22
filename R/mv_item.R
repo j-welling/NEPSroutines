@@ -61,8 +61,8 @@ mv_item <- function(resp, vars, items, valid = NULL,
                     plots = FALSE, print = TRUE, save = TRUE, return = FALSE,
                     path_results = here::here("Results"),
                     path_table = here::here("Tables"),
-                    path_plots = here::here("Plots/Missing_Responses/by_person"),
-                    show_all = FALSE, color = NULL,  name_grouping = 'test version',
+                    path_plots = here::here("Plots/Missing_Responses/by_item"),
+                    show_all = FALSE, color = NULL, name_grouping = 'test version',
                     overwrite = FALSE, digits = 2, warn = TRUE, verbose = TRUE) {
 
   # Conduct analysis

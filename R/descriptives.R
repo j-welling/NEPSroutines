@@ -25,20 +25,30 @@ n_valid <- function(dat, valid = NULL) {
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param digits  integer; number of decimals for rounding
+#' @param print  logical; whether results shall be printed to console
+#' @param return  logical; whether results shall be returned
 #'
 #' @return   list with descriptives.
 #'
 #' @export
 
-desc_con <- function(dat, desc, valid = NULL, digits = 2) {
+desc_con <- function(dat, desc, valid = NULL, digits = 2,
+                     print = TRUE, return = FALSE) {
 
     dat <- only_valid(dat, valid = valid)
 
-    sapply(dat[ , desc, drop = FALSE], function(x) {
-            d <- round(psych::describe(x), digits)
-            d[, -c(1:2)] <- format(d[, -c(1:2)], nsmall = digits)
-            d
-            })
+    stats <- data.frame(sapply(dat[ , desc, drop = FALSE], function(x) {
+             d <- data.frame(psych::describe(x))
+             d[, -c(1:2)] <- format(round(d[, -c(1:2)], digits), nsmall = digits)
+             d
+             }))
+
+    if (print) {
+        message("\nSummary statistics of sociodemographic variables:\n")
+        print(stats)
+    }
+
+    if (return) return(stats)
 }
 
 
@@ -50,31 +60,32 @@ desc_con <- function(dat, desc, valid = NULL, digits = 2) {
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param digits  integer; number of decimals for rounding of percentages
-#' @param show_absolute logical; whether to show frequency in absolute numbers
-#' @param show_percentage logical; whether to show frequency in relative numbers
+#' @param print  logical; whether results shall be printed to console
+#' @param return  logical; whether results shall be returned
 #'
 #' @return   list with descriptives.
 #'
 #' @export
 
 desc_nom <- function(dat, desc, valid = NULL, digits = 1,
-                     show_absolute = TRUE, show_percentage = TRUE) {
+                     print = TRUE, return = FALSE) {
 
     dat <- only_valid(dat, valid = valid)
 
     descriptives <- list()
+    descriptives$frequency_abs <- desc_abs(dat, desc = desc, valid = valid)
+    descriptives$frequency_perc <- desc_perc(dat, desc = desc, valid = valid,
+                                             digits = digits)
 
-    if (show_absolute) {
-        descriptives$frequency_abs <- desc_abs(dat, desc = desc,
-                                                valid = valid)
-        }
-    if (show_percentage) {
-        descriptives$frequency_perc <- desc_perc(dat, desc = desc,
-                                                 valid = valid,
-                                                 digits = digits)
+    if (print) {
+        message("\nSample size by sociodemograohic groups:\n")
+        print(descriptives$frequency_abs)
+
+        message("\nFrequency of sociodemograohic groups:\n")
+        print(descriptives$frequency_perc)
     }
 
-    return(descriptives)
+    if (return) return(descriptives)
 }
 
 
@@ -117,7 +128,7 @@ desc_perc <- function(dat, desc, valid = NULL, digits = 1) {
     dat <- only_valid(dat, valid = valid)
 
     data.frame(sapply(dat[ , desc, drop = FALSE], function(x) {
-        d <- format(round(prop.table(table(x, useNA = "always"))*100, digits), nsmall = digits)
+        d <- round(prop.table(table(x, useNA = "always"))*100, digits)
         paste0(d, " %")
         }))
 }
@@ -130,6 +141,7 @@ desc_perc <- function(dat, desc, valid = NULL, digits = 1) {
 
 show_attributes <- function(dat, desc) {
     for (var in desc) {
+        message("\nThe attributes for variable ", var, " are:\n")
         print(attributes(dat[[var]])$labels)
     }
 }

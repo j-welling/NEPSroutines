@@ -9,46 +9,45 @@ irt_model(
   vars,
   items,
   valid = NULL,
+  mvs = NULL,
   irtmodel,
   scoring = NULL,
-  path = here::here("Data"),
-  filename = NULL,
   verbose = FALSE,
-  return_results = TRUE
+  path = here::here("Results"),
+  filename = NULL
 )
 }
 \arguments{
-\item{resp}{data.frame. contains:
-(1) the responses. y in {0, 1} for binary data and y in
-  {0, 1, ... k-1} for polytomous responses with k categories
-(2) ID_t: column indicating ID of participants}
+\item{resp}{data.frame; contains item responses with items as variables and
+persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+polytomous responses with k categories; missing values (default -999 to -1)
+are coded as NA internally; additionally includes ID_t as a person identifier
+and all variables that are further defined in the function arguments}
 
-\item{vars}{data.frame. contains all competence items as rows,
-and at least the following variables:
-  character vector named "items"; contains the names of the items.
-  boolean vector; indicates which items to use for analysis.}
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'items' containing item names; additionally includes all
+variables that are further defined in the function arguments}
 
-\item{items}{character. contains name of variable (boolean) in vars that
-indicates which items to use for analysis.}
+\item{items}{string; defines name of logical variable in vars that indicates
+which items to use for the analysis}
 
-\item{valid}{character string. defines name of boolean variable in resp,
-indicating (in)valid cases.}
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
 
-\item{irtmodel}{character. "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
-"GPCM" for GPCM analyses.}
+\item{mvs}{named integer vector; contains user-defined missing values}
 
-\item{scoring}{numeric vector; scoring factor to be applied to loading matrix;
-can be NULL for Rasch model; if NULL for PCM model,
-scoring matrix is reconstructed from item names.}
+\item{irtmodel}{string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
+"GPCM" for GPCM analysis}
 
-\item{path}{folder path for data}
+\item{scoring}{string; defines name of numerical variable in vars that
+contains the scoring factor to be applied to loading matrix; can be NULL for
+Rasch model}
 
-\item{filename}{string with name of file that shall be saved (including file type).}
+\item{verbose}{logical; whether to print processing information to console}
 
-\item{verbose}{logical. If verbose == TRUE information about the estimation
-progress is printed to the console}
+\item{path}{string; defines path to folder where results shall be saved}
 
-\item{return_results}{boolean. indicates whether to return results.}
+\item{filename}{string; defines name of file that shall be saved}
 }
 \value{
 (if return_results = TRUE) a list of:

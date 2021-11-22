@@ -26,7 +26,9 @@ Depends:
     openxlsx,
     magrittr,
     rlang,
-    psych
+    psych,
+    Hmisc,
+    haven
 License: GPL-2
 Encoding: UTF-8
 LazyData: true

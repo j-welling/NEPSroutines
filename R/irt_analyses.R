@@ -98,7 +98,7 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #' @param path_plots  string; defines path to folder where plots shall be saved
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
-#' @param name_group  string; defines name of group used in analysis
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param verbose  logical; whether to print processing information to console
 #'
 #' @return   list with all results
@@ -334,7 +334,7 @@ irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel,
 #' @param irtmodel  string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
 #'   "GPCM" for GPCM analysis
 #' @param path  string; defines path to folder where plots shall be saved
-#' @param name_group  string; defines name of group used in analysis
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
 #' @export
 
@@ -374,7 +374,7 @@ icc_plots <- function(model, irtmodel, path = here::here("Plots"),
 #' @param irtmodel  string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
 #'   "GPCM" for GPCM analysis
 #' @param path  string; defines path to folder where plots shall be saved
-#' @param name_group  string; defines name of group used in analysis
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
 #' @importFrom grDevices dev.off png tiff
 #' @importFrom graphics mtext text

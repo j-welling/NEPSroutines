@@ -4,15 +4,17 @@
 \alias{convert_mv}
 \title{Convert user-defined missing values to NAs}
 \usage{
-convert_mv(resp, variables = NULL, mvs = NULL)
+convert_mv(resp, items = NULL, mvs = NULL, warn = TRUE)
 }
 \arguments{
-\item{resp}{data.frame containing the responses, scored items,
-sociodemographic and design variables}
+\item{resp}{data.frame containing the item responses}
 
-\item{variables}{character vector with names of all competence variables}
+\item{items}{string; defines name of logical variable in vars that indicates
+which items to use for the analysis}
 
-\item{mvs}{numeric vector including all user-defined missing values}
+\item{mvs}{named integer vector; contains user-defined missing values}
+
+\item{warn}{logical; whether warnings are to be printed to the console}
 }
 \value{
 data.frame like resp, but without user-defined mvs

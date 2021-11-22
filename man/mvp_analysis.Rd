@@ -7,52 +7,49 @@
 mvp_analysis(
   resp,
   vars,
-  items = "final",
+  items,
   valid = NULL,
   grouping = NULL,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
     -21),
   filename = NULL,
-  path = here::here("Data"),
+  path = here::here("Results"),
   digits = 2,
-  warn = TRUE,
-  return_results = TRUE
+  warn = TRUE
 )
 }
 \arguments{
-\item{resp}{data.frame with item responses (user-defined missing values)
-and logical grouping variables, named after the grouping
-factor (e.g. "easy" and "difficult" in the case of testlet
-difficulties) --> must be in separate columns!}
+\item{resp}{data.frame; contains item responses with items as variables and
+persons as rows; all responses ∈ ℕ0; user-defined missing values;
+includes all variables that are further defined in the function arguments}
 
-\item{vars}{data.frame. contains all competence items as rows,
-with the column "items" indicating the names of the items.}
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'items' containing item names; additionally includes all
+variables that are further defined in the function arguments}
 
-\item{items}{character. contains name of variable (boolean) in vars that
-indicates which items to items in analysis.}
+\item{items}{string; defines name of logical variable in vars that indicates
+which items to use for the analysis}
 
-\item{valid}{character string. defines name of boolean variable in resp,
-indicating (in)valid cases.}
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
 
-\item{grouping}{character vector. contains names of groups (e.g. 'easy and 'difficult')
-as itemsd in data.frame resp.}
+\item{grouping}{character vector; contains for each group a name of a logical
+variable in resp and vars that indicates to which group belongs a person or
+an item}
 
-\item{mvs}{named vector with definition of user-defined missing values}
+\item{mvs}{named integer vector; contains user-defined missing values}
 
-\item{filename}{string with name of file that shall be saved (including type of file);
-if NULL, no file will be saved.}
+\item{filename}{string; defines name of file that shall be saved}
 
-\item{path}{folder path for file if it shall be saved}
+\item{path}{string; defines path to folder where results shall be saved}
 
-\item{digits}{number of decimals for rounding}
+\item{digits}{integer; number of decimals for rounding}
 
-\item{warn}{boolean. indicates whether to print a warning if NAs were found in resp}
-
-\item{return_results}{boolean. indicates whether to return results.}
+\item{warn}{logical; whether to print a warning if NAs were found in resp}
 }
 \value{
-if return is set to TRUE, list with missing values per person and
-for each missing value type (in percentage)
+list with missing values per person and
+for each missing value type (in percentage) is returned
 }
 \description{
 Percentage of missing responses by person

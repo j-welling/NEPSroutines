@@ -8,57 +8,56 @@ mvp_plots(
   mv_p = NULL,
   resp = NULL,
   vars = NULL,
-  items = "final",
+  items,
   valid = NULL,
   grouping = NULL,
-  show.all = FALSE,
+  show_all = FALSE,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
     -21),
   path = here::here("Plots/Missing_Responses/by_person"),
-  filename = "Missing_responses_by_person",
-  lbls = c(ALL = "total missing", OM = "omitted", NV = "not valid", NR = "not reached",
-    TA = "test aborted", UM = "unspecific missing", ND = "not determinable", NAd =
-    "not administered", AZ = "Angabe zurueckgesetzt"),
+  labels_mvs = c(ALL = "total missing items", OM = "omitted items", NV =
+    "not valid items", NR = "not reached items", TA =
+    "missing items due to test abortion", UM = "unspecific missing items", ND =
+    "not determinable items", NAd = "not administered items", AZ =
+    "missing items due to ''Angabe zurueckgesetzt''"),
   color = NULL,
   verbose = TRUE
 )
 }
 \arguments{
-\item{mv_p}{percentage of missing responses by person as
-returned by mv_person()}
+\item{mv_p}{list; return object of mv_person()}
 
-\item{resp}{data.frame with item responses (user-defined missing values)
-and logical grouping variables, named after the grouping
-factor (e.g. "easy" and "difficult" in the case of testlet
-difficulties) --> must be in separate columns!}
+\item{resp}{data.frame; contains item responses with items as variables and
+persons as rows; all responses ∈ ℕ0; user-defined missing values;
+includes all variables that are further defined in the function arguments}
 
-\item{vars}{data.frame. contains all competence items as rows,
-with the column "items" indicating the names of teh items.}
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'items' containing item names; additionally includes all
+variables that are further defined in the function arguments}
 
-\item{items}{character. contains name of variable (boolean) in vars that
-indicates which items to items in analysis.}
+\item{items}{string; defines name of logical variable in vars that indicates
+which items to use for the analysis}
 
-\item{valid}{character string. defines name of boolean variable in resp,
-indicating (in)valid cases.}
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
 
-\item{grouping}{character vector. contains names of groups (e.g. 'easy and 'difficult')
-as itemsd in data.frame resp.}
+\item{grouping}{character vector; contains for each group a name of a logical
+variable in resp and vars that indicates to which group belongs a person or
+an item}
 
-\item{show.all}{logical; only needed when groups exist, indicates whether
-plots shall also include the whole sample as a "group"}
+\item{show_all}{logical; whether whole sample shall be included as a "group"
+(only applicable when grouping exists)}
 
-\item{mvs}{named vector with definition of user-defined missing values}
+\item{mvs}{named integer vector; contains user-defined missing values}
 
-\item{path}{folder path for plots}
+\item{path}{string; defines path to folder where X shall be saved}
 
-\item{filename}{string with name of file that shall be saved (excluding type of file)}
+\item{labels_mvs}{named character vector; contains labels for user-defined
+missing values to use them in plot titles and printed results}
 
-\item{lbls}{lables for different types of user-defined missing values}
+\item{color}{character calar or vector; defines color(s) of the bar in plots}
 
-\item{color}{character vector. defines bar color(s); if the data contains subgroups,
-one color per subgroup must be specified}
-
-\item{verbose}{print progress}
+\item{verbose}{logical; whether to print processing information to console}
 }
 \description{
 Plot percentage of missing values for persons

@@ -7,16 +7,15 @@
 desc_perc(dat, desc, valid = NULL, digits = 1)
 }
 \arguments{
-\item{dat}{data.frame with item responses (user-defined missing values)
-and logical grouping variables, named after the grouping
-factor (e.g. "easy" and "difficult" in the case of testlet.}
+\item{dat}{data.frame; contains sociodemographic and booklet variables}
 
-\item{desc}{character. contains names of variables for descriptive analysis.}
+\item{desc}{character vector; contains the name(s) of the variable(s) that
+shall be used in analysis}
 
-\item{valid}{character string. defines name of boolean variable in dat,
-indicating (in)valid cases.}
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
 
-\item{digits}{number of decimals for rounding}
+\item{digits}{integer; number of decimals for rounding}
 }
 \value{
 list with frequency (relative) of answers for each variable in desc.

@@ -9,27 +9,24 @@ desc_nom(
   desc,
   valid = NULL,
   digits = 1,
-  show_frequency_abs = TRUE,
-  show_frequency_perc = TRUE
+  show_absolute = TRUE,
+  show_percentage = TRUE
 )
 }
 \arguments{
-\item{dat}{data.frame with item responses (user-defined missing values)
-and logical grouping variables, named after the grouping
-factor (e.g. "easy" and "difficult" in the case of testlet.}
+\item{dat}{data.frame; contains sociodemographic and booklet variables}
 
-\item{desc}{character. contains names of variables for descriptive analysis.}
+\item{desc}{character vector; contains the name(s) of the variable(s) that
+shall be used in analysis}
 
-\item{valid}{character string. defines name of boolean variable in dat,
-indicating (in)valid cases.}
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
 
-\item{digits}{number of decimals for rounding percentages}
+\item{digits}{integer; number of decimals for rounding of percentages}
 
-\item{show_frequency_abs}{boolean; indicates whether to show frequency in
-absolute numbers.}
+\item{show_absolute}{logical; whether to show frequency in absolute numbers}
 
-\item{show_frequency_perc}{boolean; indicates whether to show frequency in
-relative numbers (percentage).}
+\item{show_percentage}{logical; whether to show frequency in relative numbers}
 }
 \value{
 list with descriptives.
