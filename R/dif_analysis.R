@@ -198,11 +198,9 @@ dif_model <- function(resp, vars, items, dif_var, scoring = "scoring",
   check_pid(pid)
   facets <- resp[, dif_var, drop = FALSE]
 
-  # Select only indicated items and convert mvs
-  # add default MVs message here once instead of every time, convert_mv is
-  # called
+  # Select only indicated items, valid responders and convert mvs
   resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE,
-                       mvs = mvs, warn = FALSE)
+                       mvs = mvs, warn = FALSE, use_only_valid = TRUE)
   message(names(facets),
           ": User-defined missing values (-999 to -1) converted to NA.")
 

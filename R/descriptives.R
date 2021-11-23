@@ -78,10 +78,10 @@ desc_nom <- function(dat, desc, valid = NULL, digits = 1,
                                              digits = digits)
 
     if (print) {
-        message("\nSample size by sociodemograohic groups:\n")
+        message("\nSample size by sociodemographic groups:\n")
         print(descriptives$frequency_abs)
 
-        message("\nFrequency of sociodemograohic groups:\n")
+        message("\nFrequency of sociodemographic groups:\n")
         print(descriptives$frequency_perc)
     }
 
