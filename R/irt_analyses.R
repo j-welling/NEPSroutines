@@ -398,7 +398,7 @@ wright_map <- function(model, irtmodel, path = here::here("Plots"),
       width = 800, height = 1300, bg = "white",
       res = 300, pointsize = 10)
   TAM::IRT.WrightMap(TAM::IRT.threshold(model$mod),
-                     main.title = "Wright map with all items",
+                     main.title = "Wright map",
                      label.items =  paste0("I",c(1:length(model$mod$xsi))),
                      item.side = "itemClassic",
                      return.thresholds = FALSE, dim.names = "",
