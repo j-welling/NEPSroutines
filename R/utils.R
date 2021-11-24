@@ -334,3 +334,41 @@ pos_new <- function(vars, items, position) {
         return(vars)
     }
 }
+
+
+#' Get name of R object as string
+#' @param object R object (e.g., vector, data.frame, ...)
+#' @returns name of object as string
+#' @noRd
+
+get_object_name <- function(object) {
+  deparse(substitute(object))
+}
+
+
+#' Score partial credit items
+#'
+#' @param resp  data.frame; contains original item responses
+#' @param subtasks  character vector; contains variable names of subtasks
+#' @param mvs  integer vector; contains user-defined missing values
+#'
+#' @export
+
+pc_scoring <- function(resp, subtasks, mvs = NULL) {
+
+    pci <- rowSums(resp[, subtasks] == 1)
+    s <- rowSums(resp[, subtasks] < 0) > 0
+    pci[s] <- -55
+
+    if (is.null(mvs)) {
+        mvs <- c(-99:-1)
+        warning("No missing values provided. c(-99:-1) used as default.")
+    }
+
+    for (mv in mvs) {
+        s <- rowSums(resp[, subtasks] == mv) == rowSums(resp[, subtasks] < 0) & rowSums(resp[, subtasks] < 0) > 0
+        pci[s] <- mv
+    }
+
+    return(pci)
+}
