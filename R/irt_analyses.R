@@ -239,6 +239,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
 #' @param path  string; defines path to folder where results shall be saved
 #' @param filename  string; defines name of file that shall be saved
 #' @param verbose  logical; whether to print processing information to console
+#' @param xsi.fixed matrix; contains fixed (linked) item parameters; optional
 #'
 #' @return (if return_results = TRUE) a list of:
 #'   mod: tam.mml; estimated item response model
@@ -252,7 +253,8 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
 
 irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel,
                       scoring = NULL, verbose = FALSE,
-                      path = here::here("Results"), filename = NULL) {
+                      path = here::here("Results"), filename = NULL,
+                      xsi.fixed = NULL) {
 
   # Check if input is correct
   if (!irtmodel %in% c("1PL", "2PL", "GPCM", "PCM2")) {
@@ -268,13 +270,15 @@ irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel,
   check_pid(pid)
 
   # Prepare data
-  resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE, mvs = mvs)
+  resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE,
+                       mvs = mvs)
 
   # Create scoring matrix if not provided in function arguments
   if (!is.null(scoring)) {
       Q = as.matrix(vars[[scoring]][vars[[items]]])
   } else if (irtmodel %in% c("GPCM", "PCM2")) {
-      stop("Please provide variable name for scoring factor for polytomous analysis.")
+      stop("Please provide variable name for scoring factor for polytomous ",
+           "analysis.")
   } else {
       Q <- NULL
   }
@@ -283,7 +287,7 @@ irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel,
   if (irtmodel %in% c("1PL", "PCM2")) {
     mod <- TAM::tam.mml(
       resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
-      verbose = verbose
+      verbose = verbose, xsi.fixed = xsi.fixed
     )
   } else {
     mod <- TAM::tam.mml.2pl(

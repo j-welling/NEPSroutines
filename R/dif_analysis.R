@@ -59,8 +59,10 @@ dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, mvs = NULL,
     print = print, save = save, overwrite = overwrite
   )
 
-  dif$tr_tables <- build_dif_tr_tables(dif_summaries = dif$summaries, save = save,
-                                       path = path_table, overwrite = overwrite)
+  dif$tr_tables <- build_dif_tr_tables(
+    dif_summaries = dif$summaries, save = save, path = path_table,
+    overwrite = overwrite
+  )
 
   if (return) return(dif)
 }
@@ -489,7 +491,7 @@ build_dif_tr_tables <- function(dif_summaries, save = TRUE,
   est <- Reduce(function(e1, e2) {dplyr::full_join(e1, e2, by = "item")}, est)
 
   mne <- lapply(dif_summaries, function(x) {
-    m <- rename(x$mne, item = 'Model')
+    m <- dplyr::rename(x$mne, item = 'Model')
     m$item <- c("Main effect (DIF model)", "Main effect (Main effect model)")
     m
   })
