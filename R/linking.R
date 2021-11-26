@@ -8,7 +8,7 @@ linking <- function(resp_previous, resp_current, resp_link_sample = NULL,
                     mvs = NULL, maxiter, snodes, verbose, anchors = NULL,
                     longitudinal = TRUE, path_table, path_results, pid = "ID_t",
                     wid = "wle", dim = "link", print = TRUE, save = TRUE,
-					return = FALSE) {
+                    return = FALSE) {
 
     # check measurement invariance over time
     link_dif <- check_dif_anchor(
@@ -80,20 +80,20 @@ link_item_parameters <- function(xsi, const, return_steps = FALSE, vars,
     xsi.fixed <- cbind(seq_along(xsi$xsi), xsi$xsi)
     rownames(xsi.fixed) <- rownames(xsi)
 
-    # identify step parameters
-    f <- !grepl("_step[1-9]$", rownames(xsi.fixed))
-
     # remove step parameters
     if (!return_steps) {
+        # identify step parameters
+        f <- !grepl("_step[1-9]$", rownames(xsi.fixed))
         xsi.fixed <- xsi.fixed[f, ]
     }
+    f <- !grepl("_step[1-9]$", rownames(xsi.fixed))
 
     # add linking constant to all parameters (except steps)
     # TAM uses the parameterization a*theta - const
     # to account for the 0.5 scoring we only have to add half the
     # linking constant to PCMs
     xsi.fixed[f, 2] <- xsi.fixed[f, 2] +
-        const * vars[[scoring]][[vars[[select]]]]
+        const * vars[[scoring]][vars[[select]]]
 
     return(xsi.fixed)
 }
@@ -141,8 +141,8 @@ link_wles <- function(wle_previous, wle_current, const,
                                    name = get_object_name(wle_current))
 
     # Remove missing values
-    wle_previous <- subset(wle_previous, !is.na(wle))
-    wle_current <- subset(wle_current, !is.na(wle))
+    wle_previous <- wle_previous[!is.na(wle_previous$wle), ]
+    wle_current <- wle_current[!is.na(wle_current$wle), ]
 
     # Select persons for link
     if (is.null(ids)) {
@@ -167,7 +167,7 @@ check_var_in_df <- function(df, var, new_var, name) {
     if (!(var %in% colnames(df))) {
         stop(paste0("Variable ", var, " not found in ", name, "."))
     }
-    names(df)[which(names(df)) == var] <- new_var
+    names(df)[which(names(df) == var)] <- new_var
 
     return(df)
 }
@@ -249,15 +249,19 @@ link_samples <- function(resp_previous, resp_current, resp_link_sample = NULL,
     resp_current_ <- resp_current[resp_current$ID_t %in% ids, ]
 
     # select irtmodel
-    is_pcm_previous <- any(apply(resp_previous_, 2, max, na.rm = TRUE) > 1)
-    is_pcm_current <- any(apply(resp_current_, 2, max, na.rm = TRUE) > 1)
+    is_pcm_previous <-
+        any(apply(resp_previous_[vars$items[vars[[select_previous]]]], 2, max,
+                  na.rm = TRUE) > 1)
+    is_pcm_current <-
+        any(apply(resp_current_[vars$items[vars[[select_current]]]], 2, max,
+                  na.rm = TRUE) > 1)
 
     # Estimate item parameters for first measurement wave
     xsi_previous <- irt_model(resp = resp_previous_, vars = vars,
                               items = select_previous,
                               valid = valid, mvs = mvs,
                               irtmodel = ifelse(is_pcm_previous, "PCM2", "1PL"),
-                              scoring = NULL, verbose = FALSE,
+                              scoring = scoring, verbose = FALSE,
                               path = NULL, filename = NULL)$mod$xsi
 
     # Estimate item parameters for second measurement wave
@@ -265,7 +269,7 @@ link_samples <- function(resp_previous, resp_current, resp_link_sample = NULL,
                              items = select_current,
                              valid = valid, mvs = mvs,
                              irtmodel = ifelse(is_pcm_current, "PCM2", "1PL"),
-                             scoring = NULL, verbose = FALSE,
+                             scoring = scoring, verbose = FALSE,
                              path = NULL, filename = NULL)$mod$xsi
 
     # Estimate item parameters for link sample
@@ -275,7 +279,7 @@ link_samples <- function(resp_previous, resp_current, resp_link_sample = NULL,
             resp = resp_link_sample, vars = vars, items = select_link_sample,
             valid = valid, mvs = mvs,
             irtmodel = ifelse(is_pcm_previous | is_pcm_current, "PCM2", "1PL"),
-            scoring = NULL, verbose = FALSE,
+            scoring = scoring, verbose = FALSE,
             path = NULL, filename = NULL
         )$mod$xsi
     }
@@ -300,9 +304,9 @@ link_samples <- function(resp_previous, resp_current, resp_link_sample = NULL,
             irtmodel = ifelse(any(apply(resp_previous_, 2, max, na.rm = TRUE) > 1),
                               "PCM2", "1PL"),
             scoring = scoring, verbose = FALSE, path = NULL, filename = NULL)
-        wle_previous <- wle_previous$wle
-        names(wle_previous)[which(names(wle_previous)) == pid] <- "ID_t"
-        names(wle_previous)[which(names(wle_previous)) == wid] <- "wle"
+        wle_previous <- as.data.frame(wle_previous$wle)
+        names(wle_previous)[which(names(wle_previous) == "pid")] <- pid
+        names(wle_previous)[which(names(wle_previous) == "theta")] <- wid
     }
 
     # Link WLEs
@@ -314,23 +318,28 @@ link_samples <- function(resp_previous, resp_current, resp_link_sample = NULL,
                           "PCM2", "1PL"),
         scoring = scoring, verbose = FALSE, path = NULL, filename = NULL,
         xsi.fixed = xsi_current.fixed)$wle
-    names(wle_current)[which(names(wle_current)) == pid] <- "ID_t"
+    names(wle_current)[which(names(wle_current) == "pid")] <- pid
+    names(wle_current)[which(names(wle_current) == "theta")] <- "wle"
+
+    out <- list(
+        wle_current = wle_current, wle_previous, const = const,
+        const.err = const.err, xsi_previous = xsi_previous,
+        xsi_current = xsi_current, xsi_link_sample = xsi_link_sample,
+        xsi_current.linked = xsi_current.linked,
+        k = length(c(anchors_previous, anchors_current)),
+        anchors = c(anchors_previous, anchors_current),
+        longitudinal = longitudinal
+    )
+
     wle_current <- link_wles(wle_previous = wle_previous,
                              wle_current = wle_current, const = const,
-                             pid = "ID_t", wid = c(wid, "wle"), ids = ids,
+                             pid = pid, wid = c(wid, "wle"), ids = ids,
                              use_longitudinal_subsample = longitudinal)
-    names(wle_previous)[which(names(wle_previous)) == pid] <- "ID_t"
-    names(wle_current)[which(names(wle_current)) == pid] <- "ID_t"
+    class(wle_current) <- "data.frame"
 
     # Return results
-    list(wle_previous = wle_previous, wle_current = wle_current,
-         const = const, const.err = const.err,
-         xsi_previous = xsi_previous, xsi_current = xsi_current,
-         xsi_link_sample = xsi_link_sample,
-         xsi_current.linked = xsi_current.linked,
-         k = length(c(anchors_previous, anchors_current)),
-         anchors = c(anchors_previous, anchors_current),
-         longitudinal = longitudinal)
+    out$wle_linked <- wle_current
+    return(out)
 }
 
 
@@ -380,8 +389,8 @@ calculate_link_parameters <- function(is_anchor_items = TRUE, select_previous,
     if (is_anchor_items) {
 
         # Identify anchor items
-        anchors_previous <- intersect(vars$items[[select_previous]],
-                                      vars$items[[select_current]])
+        anchors_previous <- intersect(vars$items[vars[[select_previous]]],
+                                      vars$items[vars[[select_current]]])
         anchors_current <- NULL
         if (!is.null(anchors)) {  # only selected anchors
             anchors_previous <- anchors_previous[anchors_previous %in% anchors]
@@ -405,11 +414,11 @@ calculate_link_parameters <- function(is_anchor_items = TRUE, select_previous,
 
         # Identify anchor items
         anchors_previous <-  # first measurement
-            intersect(vars$items[[select_previous]],
-                      vars$items[[select_link_sample]])
+            intersect(vars$items[vars[[select_previous]]],
+                      vars$items[vars[[select_link_sample]]])
         anchors_current <-  # second measurement
-            intersect(vars$items[[select_current]],
-                      vars$items[[select_link_sample]])
+            intersect(vars$items[vars[[select_current]]],
+                      vars$items[vars[[select_link_sample]]])
         if (!is.null(anchors)) {               # only selected anchors
             anchors_previous <- anchors_previous[anchors_previous %in% anchors]
             anchors_current <- anchors_current[anchors_current %in% anchors]
@@ -494,28 +503,31 @@ check_dif_anchor <- function(resp_previous, resp_current,
     resp_current_ <- resp_current[resp_current$ID_t %in% ids, ]
 
     # Item names
-    items_previous <- vars$items[[select_previous]]
-    items_current <- vars$items[[select_current]]
+    items_previous <- vars$items[vars[[select_previous]]]
+    items_current <- vars$items[vars[[select_current]]]
 
     dif <- list()
 
     if (is_anchor_group) {
-        resp <- dplyr::bind_cols(resp_previous_, resp_current_)
+        resp <- merge(resp_previous_, resp_current_, by = c("ID_t", "valid3"))
         resp$main_sample <- 1
         resp_link_sample$main_sample <- 0
         resp <- dplyr::bind_rows(resp, resp_link_sample)
+        ids <- resp$ID_t
+        resp$ID_t <- 1:nrow(resp)
 
         dif$dif_model <- dif_model(resp = resp, vars = vars, items = items,
                                    dif_var = "main_sample", scoring = scoring,
                                    valid = valid, verbose = FALSE,
                                    mvs = mvs)
+        resp$ID_t <- ids
 
-        dif$summary <- dif_summary(dif$dif_model, print = print, save = FALSE,
+        dif$summary <- dif_summary(dif$dif_model, print = FALSE, save = FALSE,
                                    overwrite = FALSE)
 
         dif$link_dif_summary <- summarize_link_dif(
-            dif_summary = dif$summary, items_previous, items_current,
-            save = FALSE, path = NULL, overwrite = FALSE
+            dif_summary = dif$summary, items_previous = items_previous,
+            items_current = items_current
         )
 
     } else {
@@ -542,7 +554,8 @@ check_dif_anchor <- function(resp_previous, resp_current,
         dif$link_dif_summary <- summarize_link_dif(
             mod_current = dif$mod_current, mod_previous = dif$mod_previous,
             items_previous = items_previous, items_current = items_current,
-            anchors = anchors)
+            anchors = anchors
+        )
     }
 
     if (return) return(dif)
@@ -551,8 +564,7 @@ check_dif_anchor <- function(resp_previous, resp_current,
 
 summarize_link_dif <- function(dif_summary = NULL, mod_current = NULL,
                                mod_previous = NULL, items_previous,
-                               items_current, anchors = NULL,
-                               save, path, overwrite) {
+                               items_current, anchors = NULL) {
 
     is_anchor_items <- is.null(dif_summary)
 
@@ -587,9 +599,11 @@ summarize_link_dif <- function(dif_summary = NULL, mod_current = NULL,
         est$item_current <- paste0(est$item_current,
                                    ifelse(est$xsi < 0.5 &
                                               est$p > 0.05, "+", ""))
-        est$xsi <- paste0(est$xsi, ifelse(est$p < 0.001, "***",
+        est$xsi <- paste0(round(est$xsi, 3),
+                          ifelse(est$p < 0.001, "***",
                                           ifelse(est$p < 0.01, "**",
                                                  ifelse(est$p < 0.05, "*", ""))))
+        est$se.xsi <- round(est$se.xsi, 3)
         est <- est[, c("item_previous", "item_current", "xsi", "se.xsi", "F")]
 
         Fkrit <- mineff$Fmin
@@ -601,10 +615,11 @@ summarize_link_dif <- function(dif_summary = NULL, mod_current = NULL,
         est_previous$item <- paste0(est_previous$item,
                                     ifelse(est_previous$xsi < 0.5 &
                                                est_previous$p > 0.05, "+", ""))
-        est_previous$xsi <- paste0(est_previous$xsi,
+        est_previous$xsi <- paste0(round(est_previous$xsi, 3),
                                    ifelse(est_previous$p < 0.001, "***",
                                           ifelse(est_previous$p < 0.01, "**",
                                                  ifelse(est_previous$p < 0.05, "*", ""))))
+        est_previous$std <- round(est_previous$std, 3)
         names(est_previous)[names(est_previous) == "item"] <- "Item 1"
         names(est_previous)[names(est_previous) == "xsi"] <- "Xsi 1"
 
@@ -612,16 +627,31 @@ summarize_link_dif <- function(dif_summary = NULL, mod_current = NULL,
         est_current$item <- paste0(est_current$item,
                                    ifelse(est_current$xsi < 0.5 &
                                               est_current$p > 0.05, "+", ""))
-        est_current$xsi <- paste0(est_current$xsi,
+        est_current$xsi <- paste0(round(est_current$xsi, 3),
                                   ifelse(est_current$p < 0.001, "***",
                                          ifelse(est_current$p < 0.01, "**",
                                                 ifelse(est_current$p < 0.05, "*", ""))))
+        est_current$std <- round(est_current$std, 3)
         names(est_current)[names(est_current) == "item"] <- "Item 2"
         names(est_current)[names(est_current) == "xsi"] <- "Xsi 2"
 
         Fkrit <- c(est_previous$Fkrit[1], est_current$Fkrit[1])
-        est <- dplyr::bind_cols(est_previous[, c("Item 1", "Xsi 1", "std", "F")],
-                                est_current[, c("Item 2", "Xsi 2", "std", "F")])
+
+        est_previous <- est_previous[, c("Item 1", "Xsi 1", "std", "F")]
+        est_current <- est_current[, c("Item 2", "Xsi 2", "std", "F")]
+
+        np <- nrow(est_previous)
+        nc <- nrow(est_current)
+        if (np < nc) {
+            tmp <- matrix(NA, nrow = nc - np, ncol = 4)
+            colnames(tmp) <- c("Item 1", "Xsi 1", "std", "F")
+            est_previous <- rbind(est_previous, tmp)
+        } else if (nc < np) {
+            tmp <- matrix(NA, nrow = np - nc, ncol = 4)
+            colnames(tmp) <- c("Item 2", "Xsi 2", "std", "F")
+            est_current <- rbind(est_current, tmp)
+        }
+        est <- cbind(est_previous, est_current)
     }
 
     res <- list(link_dif_table = est,
@@ -683,37 +713,39 @@ print_link_results <- function(link_dif, link_dim = NULL, link_results) {
                     "N link sample: ", link_dim$dimensionality$uni$nstud, "\n")
 
         xsi1 <- link_dif$link_dif_summary$link_dif_table[["Xsi 1"]]
+        xsi1 <- xsi1[!is.na(xsi1)]
         xsi2 <- link_dif$link_dif_summary$link_dif_table[["Xsi 2"]]
+        xsi2 <- xsi2[!is.na(xsi2)]
         usable <- paste0("No. of usable items for link at time 1: ",
-                         sum(!grepl("*", xsi1)), " ",
-                         round(sum(!grepl("*", xsi1)) / length(xsi1), 3) * 100,
+                         sum(!grepl("\\*", xsi1)), " ",
+                         round(sum(!grepl("\\*", xsi1)) / length(xsi1), 3) * 100,
                          "%\n",
                          "No. of usable items for link at time 2: ",
-                         sum(!grepl("*", xsi2)), " ",
-                         round(sum(!grepl("*", xsi2)) / length(xsi2), 3) * 100,
+                         sum(!grepl("\\*", xsi2)), " ",
+                         round(sum(!grepl("\\*", xsi2)) / length(xsi2), 3) * 100,
                          "%\n")
-        xsi1 <- gsub("*", "", xsi1)
-        xsi1 <- as.numeric(xsi1)
-        xsi2 <- gsub("*", "", xsi2)
-        xsi2 <- as.numeric(xsi2)
+        xsi1 <- gsub("\\*", "", xsi1)
+        xsi1 <- abs(as.numeric(xsi1))
+        xsi2 <- gsub("\\*", "", xsi2)
+        xsi2 <- abs(as.numeric(xsi2))
         dif_table <- paste0(
             dif_table,
-            "Min. estimate (previous time point): \n", min(xsi1, na.rm = T), "\n",
-            "Min. estimate (current time point): \n", min(xsi2, na.rm = T), "\n",
-            "Max. estimate (previous time point): \n", max(xsi1, na.rm = T), "\n",
-            "Min. estimate (current time point): \n", max(xsi2, na.rm = T), "\n")
+            "Min. abs. estimate (previous time point): \n", min(xsi1, na.rm = T), "\n",
+            "Min. abs. estimate (current time point): \n", min(xsi2, na.rm = T), "\n",
+            "Max. abs. estimate (previous time point): \n", max(xsi1, na.rm = T), "\n",
+            "Min. abs. estimate (current time point): \n", max(xsi2, na.rm = T), "\n")
     } else {
         xsi <- link_dif$link_dif_summary$link_dif_table[["xsi"]]
-        usable <- paste0("No. of usable items for link: ", sum(!grepl("*", xsi)),
-                         " ",
-                         round(sum(!grepl("*", xsi)) / length(xsi), 3) * 100,
+        usable <- paste0("No. of usable items for link: ",
+                         sum(!grepl("\\*", xsi)), " ",
+                         round(sum(!grepl("\\*", xsi)) / length(xsi), 3) * 100,
                          "%\n")
         xsi <- gsub("*", "", xsi)
-        xsi <- as.numeric(xsi)
+        xsi <- abs(as.numeric(xsi))
         dif_table <- paste0(
             dif_table,
-            "Min. estimate: \n", min(xsi, na.rm = T), "\n",
-            "Min. estimate: \n", max(xsi, na.rm = T), "\n")
+            "Min. abs. estimate: \n", min(xsi, na.rm = T), "\n",
+            "Min. abs. estimate: \n", max(xsi, na.rm = T), "\n")
         #
     }
     # print N longitudinal subsample, N link study
@@ -730,6 +762,7 @@ print_link_results <- function(link_dif, link_dim = NULL, link_results) {
     # print absolute number and percentage of usable items for tp1 and tp2
     cat(usable)
     # print AIC/BIC of link_dim
+    cat("Dimensionality analysis results:\n")
     lapply(link_dim$dim_sum, print)
     # print link constant and link error (link_results)
     cat(const)
