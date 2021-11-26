@@ -116,7 +116,7 @@ save_results <- function(results, filename, path) {
     # Check and create directory for data
     check_folder(path)
 
-    save(results, file = here::here(paste0(path, "/", filename)))
+    saveRDS(results, file = here::here(paste0(path, "/", filename)))
   }
 }
 
