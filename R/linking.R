@@ -565,7 +565,7 @@ check_dif_anchor <- function(resp_previous, resp_current,
     dif <- list()
 
     if (is_anchor_group) {
-        resp <- merge(resp_previous_, resp_current_, by = c("ID_t", "valid3"))
+        resp <- merge(resp_previous_, resp_current_, by = c("ID_t", valid))
         resp$main_sample <- 1
         resp_link_sample$main_sample <- 0
         resp <- dplyr::bind_rows(resp, resp_link_sample)
@@ -592,15 +592,17 @@ check_dif_anchor <- function(resp_previous, resp_current,
 
     } else {
         # select irtmodel
-        is_pcm_previous <- any(apply(resp_previous_, 2, max, na.rm = TRUE) > 1)
-        is_pcm_current <- any(apply(resp_current_, 2, max, na.rm = TRUE) > 1)
+        is_pcm_previous <- any(apply(resp_previous_[, items_previous], 2, max,
+                                     na.rm = TRUE) > 1)
+        is_pcm_current <- any(apply(resp_current_[, items_current], 2, max,
+                                    na.rm = TRUE) > 1)
 
         # Estimate item parameters for first measurement wave
         dif$mod_previous <- irt_model(
             resp = resp_previous_, vars = vars, items = select_previous,
             valid = valid, mvs = mvs,
             irtmodel = ifelse(is_pcm_previous, "PCM2", "1PL"),
-            scoring = NULL, verbose = FALSE, path = NULL, filename = NULL
+            scoring = scoring, verbose = FALSE, path = NULL, filename = NULL
         )$mod
 
         # Estimate item parameters for second measurement wave
@@ -608,7 +610,7 @@ check_dif_anchor <- function(resp_previous, resp_current,
             resp = resp_current_, vars = vars, items = select_current,
             valid = valid, mvs = mvs,
             irtmodel = ifelse(is_pcm_current, "PCM2", "1PL"),
-            scoring = NULL, verbose = FALSE, path = NULL, filename = NULL
+            scoring = scoring, verbose = FALSE, path = NULL, filename = NULL
         )$mod
 
         dif$link_dif_summary <- summarize_link_dif(
