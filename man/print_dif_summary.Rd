@@ -9,7 +9,7 @@ print_dif_summary(diflist, res)
 \arguments{
 \item{diflist}{list; return object of dif_model(); with main and dif model}
 
-\item{res}{list; return object of dif_summaries()}
+\item{res}{list; return object of dif_summary()}
 }
 \description{
 Print DIF summaries to console

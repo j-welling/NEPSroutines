@@ -8,8 +8,7 @@ dif_summary(
   diflist,
   print = TRUE,
   save = TRUE,
-  path_results = here::here("Results"),
-  path_table = here::here("Tables"),
+  path = here::here("Tables"),
   overwrite = FALSE
 )
 }
@@ -20,9 +19,7 @@ dif_summary(
 
 \item{save}{logical; whether results shall be saved to hard drive}
 
-\item{path_results}{string; defines path to folder where results shall be saved}
-
-\item{path_table}{string; defines path to folder where tables shall be saved}
+\item{path}{string; defines path to folder where tables shall be saved}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 }

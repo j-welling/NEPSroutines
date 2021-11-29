@@ -4,18 +4,20 @@
 \alias{conduct_dif_analysis}
 \title{Conduct DIF analyses}
 \usage{
-conduct_dif_analysis(items, dif_vars, resp, vars, scoring, valid, mvs, verbose)
+conduct_dif_analysis(
+  resp,
+  vars,
+  items,
+  dif_vars,
+  valid,
+  scoring,
+  mvs = NULL,
+  save = TRUE,
+  verbose = FALSE,
+  path = here::here(("Results"))
+)
 }
 \arguments{
-\item{items}{character vector; defines name(s) of logical variable(s) in vars
-that indicates which items to use for analysis; if some of the \code{dif_vars}
-come with a different set of analysis items, this argument becomes a
-vector of \code{length(dif_vars)} containing the respective selection
-variables in vars}
-
-\item{dif_vars}{character vector; contains the variable names to be tested
-for DIF (e.g., "gender")}
-
 \item{resp}{data.frame; contains item responses with items as variables and
 persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
 polytomous responses with k categories; missing values (default -999 to -1)
@@ -26,16 +28,29 @@ and all variables that are further defined in the function arguments}
 includes variable 'items' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{scoring}{string; defines name of numerical variable in vars that
-contains the scoring factor to be applied to loading matrix; defaults to
-"scoring"}
+\item{items}{character vector; defines name(s) of logical variable(s) in vars
+that indicates which items to use for analysis; if some of the \code{dif_vars}
+come with a different set of analysis items, this argument becomes a
+vector of \code{length(dif_vars)} containing the respective selection
+variables in vars}
+
+\item{dif_vars}{character vector; contains the variable names to be tested
+for DIF (e.g., "gender")}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
 
+\item{scoring}{string; defines name of numerical variable in vars that
+contains the scoring factor to be applied to loading matrix; defaults to
+"scoring"}
+
 \item{mvs}{named integer vector; contains user-defined missing values}
 
+\item{save}{logical; whether results shall be saved to hard drive}
+
 \item{verbose}{logical; whether to print processing information to console}
+
+\item{path}{string; defines path to folder where results shall be saved}
 }
 \value{
 a list of length(dif_vars) lists containing each:

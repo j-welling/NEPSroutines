@@ -14,7 +14,8 @@ irt_model(
   scoring = NULL,
   verbose = FALSE,
   path = here::here("Results"),
-  filename = NULL
+  filename = NULL,
+  xsi.fixed = NULL
 )
 }
 \arguments{
@@ -48,6 +49,8 @@ Rasch model}
 \item{path}{string; defines path to folder where results shall be saved}
 
 \item{filename}{string; defines name of file that shall be saved}
+
+\item{xsi.fixed}{matrix; contains fixed (linked) item parameters; optional}
 }
 \value{
 (if return_results = TRUE) a list of:

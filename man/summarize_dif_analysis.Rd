@@ -7,11 +7,11 @@
 summarize_dif_analysis(
   dif_models,
   dif_vars,
-  path_table,
-  path_results,
-  print,
-  save,
-  overwrite
+  print = TRUE,
+  save = TRUE,
+  overwrite = FALSE,
+  path_results = here::here("Results"),
+  path_table = here::here("Tables")
 )
 }
 \arguments{
@@ -20,15 +20,15 @@ summarize_dif_analysis(
 \item{dif_vars}{character vector; contains the variable names to be tested
 for DIF (e.g., "gender")}
 
-\item{path_table}{string; defines path to folder where tables shall be saved}
-
-\item{path_results}{string; defines path to folder where results shall be saved}
-
 \item{print}{logical; whether results shall be printed to console}
 
 \item{save}{logical; whether results shall be saved to hard drive}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
+
+\item{path_results}{string; defines path to folder where results shall be saved}
+
+\item{path_table}{string; defines path to folder where tables shall be saved}
 }
 \value{
 a list of dif summaries for each input entry in dif_models

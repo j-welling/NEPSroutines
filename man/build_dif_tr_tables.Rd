@@ -7,8 +7,7 @@
 build_dif_tr_tables(
   dif_summaries,
   save = TRUE,
-  path_results = here::here("Results"),
-  path_table = here::here("Tables"),
+  path = here::here("Tables"),
   overwrite = FALSE
 )
 }
@@ -18,15 +17,14 @@ elements must be named after their DIF variable}
 
 \item{save}{logical; whether results shall be saved to hard drive}
 
-\item{path_results}{string; indicates the folder location where the DIF
-estimates are stored on the hard drive; please note that the path is relative
-to the current working path set by here::i_am()}
-
-\item{path_table}{string; indicates the folder location where the summaries
+\item{path}{string; indicates the folder location where the summaries
 are stored on the hard drive; please note that the path is relative to the
 current working path set by here::i_am()}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
+}
+\value{
+table as shown in TR
 }
 \description{
 Combine the individual DIF analysis results to excel tables that can be
