@@ -97,11 +97,11 @@ linking <- function(resp_previous, resp_current, resp_link_sample = NULL,
         save_table(link_dif$link_dif_table, filename = "link_tr_tables.xlsx",
                    path = path_table, overwrite = overwrite,
                    show_rownames = FALSE)
-        save_results(link_dif, filename = "link_dif_results.rdata",
+        save_results(link_dif, filename = "link_dif_results.rds",
                      path = path_results)
-        save_results(link_dim, filename = "link_dim_results.rdata",
+        save_results(link_dim, filename = "link_dim_results.rds",
                      path = path_results)
-        save_results(link_results, filename = "link_analysis_results.rdata",
+        save_results(link_results, filename = "link_analysis_results.rds",
                      path = path_results)
     }
 
