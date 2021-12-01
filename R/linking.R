@@ -52,6 +52,14 @@
 #' @param path_results  string; defines path to folder where results shall be
 #'   saved
 #' @param path_table  string; defines path to folder where tables shall be saved
+#' @param diff_threshold numeric; threshold under which DIF in common link items
+#'   is accepted; defaults to .5
+#' @param anchor_item_names character matrix; contains the old (column 1) and
+#'   new (column 2) item names of the anchor items for the TR table in the
+#'   anchor item design; NOT to be confused with the argument anchors that
+#'   is a vector of the anchor items CURRENT name for the analysis; if anchors
+#'   is not NULL, anchor_item_names may also only contain the same item name
+#'   mapping as anchors
 #'
 #' @export
 linking <- function(resp_previous, resp_current, resp_link_sample = NULL,
@@ -60,7 +68,8 @@ linking <- function(resp_previous, resp_current, resp_link_sample = NULL,
                     mvs = NULL, maxiter, snodes, verbose, anchors = NULL,
                     longitudinal = TRUE, path_table, path_results, pid = "ID_t",
                     wid = "wle", dim = "link", print = TRUE, save = TRUE,
-                    return = FALSE) {
+                    return = FALSE, diff_threshold = .5,
+                    anchor_item_names = NULL) {
 
     # check measurement invariance over time
     link_dif <- check_dif_anchor(
@@ -68,7 +77,8 @@ linking <- function(resp_previous, resp_current, resp_link_sample = NULL,
         resp_link_sample = resp_link_sample, anchors = anchors, mvs = mvs,
         return = TRUE, valid = valid, scoring = scoring, vars = vars,
         items = select_link_sample, select_previous = select_previous,
-        select_current = select_current)
+        select_current = select_current, diff_threshold = diff_threshold,
+        anchor_item_names = anchor_item_names)
 
     # check unidimensionality over time
     link_dim <- check_link_dimensionality(
@@ -89,12 +99,13 @@ linking <- function(resp_previous, resp_current, resp_link_sample = NULL,
 
     # print results
     if (print) {
-        print_link_results(link_dif, link_dim, link_results)
+        print_link_results(link_dif, link_dim, link_results, diff_threshold)
     }
 
     # save results
     if (save) {
-        save_table(link_dif$link_dif_table, filename = "link_tr_tables.xlsx",
+        save_table(link_dif$link_dif_summary$link_dif_table,
+                   filename = "link_tr_tables.xlsx",
                    path = path_table, overwrite = overwrite,
                    show_rownames = FALSE)
         save_results(link_dif, filename = "link_dif_results.rds",
@@ -541,14 +552,22 @@ calculate_link_parameters <- function(is_anchor_items = TRUE, select_previous,
 #' @param select_previous character; contains name of logical variable in vars
 #'   identifying the item set for the previous measurement time point; needed to
 #'   build tables
+#' @param diff_threshold numeric; threshold under which DIF in common link items
+#'   is accepted; defaults to .5
+#' @param anchor_item_names character matrix; contains the old (column 1) and
+#'   new (column 2) item names of the anchor items for the TR table in the
+#'   anchor item design; NOT to be confused with the argument anchors that
+#'   is a vector of the anchor items CURRENT name for the analysis; if anchors
+#'   is not NULL, anchor_item_names may also only contain the same item name
+#'   mapping as anchors
 #' @return    list with DIF model(s), DIF summary and anchor items
 #' @export
 check_dif_anchor <- function(resp_previous, resp_current,
-                             resp_link_sample = NULL,
-                             anchors = NULL, mvs = NULL, return = TRUE, valid,
-                             scoring = "scoring", vars,
-                             items = NULL,
-                             select_previous, select_current) {
+                             resp_link_sample = NULL, anchors = NULL,
+                             mvs = NULL, return = TRUE, valid,
+                             scoring = "scoring", vars, items = NULL,
+                             select_previous, select_current,
+                             diff_threshold = .5, anchor_item_names = NULL) {
 
     is_anchor_group <- !is.null(resp_link_sample)
 
@@ -583,7 +602,7 @@ check_dif_anchor <- function(resp_previous, resp_current,
 
         dif$link_dif_summary <- summarize_link_dif(
             dif_summary = dif$summary, items_previous = items_previous,
-            items_current = items_current
+            items_current = items_current, diff_threshold = diff_threshold
         )
         tmp <- unlist(dif$link_dif_summary$link_dif_table[, c("Item 1",
                                                               "Item 2")])
@@ -616,7 +635,8 @@ check_dif_anchor <- function(resp_previous, resp_current,
         dif$link_dif_summary <- summarize_link_dif(
             mod_current = dif$mod_current, mod_previous = dif$mod_previous,
             items_previous = items_previous, items_current = items_current,
-            anchors = anchors
+            anchors = anchors, diff_threshold = diff_threshold,
+            anchor_item_names = anchor_item_names
         )
         tmp <- unlist(dif$link_dif_summary$link_dif_table[, c("item_previous",
                                                               "item_current")])
@@ -641,10 +661,19 @@ check_dif_anchor <- function(resp_previous, resp_current,
 #' @param items_current character vector; item names of current assessment
 #' @param anchors   character vector with link items; if NULL, all common items
 #'   are used
+#' @param diff_threshold numeric; threshold under which DIF in common link items
+#'   is accepted; defaults to .5
+#' @param anchor_item_names character matrix; contains the old (column 1) and
+#'   new (column 2) item names of the anchor items for the TR table in the
+#'   anchor item design; NOT to be confused with the argument anchors that
+#'   is a vector of the anchor items CURRENT name for the analysis; if anchors
+#'   is not NULL, anchor_item_names may also only contain the same item name
+#'   mapping as anchors
 #' @export
 summarize_link_dif <- function(dif_summary = NULL, mod_current = NULL,
                                mod_previous = NULL, items_previous,
-                               items_current, anchors = NULL) {
+                               items_current, anchors = NULL,
+                               diff_threshold = .5, anchor_item_names = NULL) {
 
     is_anchor_items <- is.null(dif_summary)
 
@@ -652,12 +681,21 @@ summarize_link_dif <- function(dif_summary = NULL, mod_current = NULL,
         # Identify anchor items
         if (is.null(anchors)) {
             anchors <- intersect(items_previous, items_current)
-            anchors <- cbind(anchors, anchors)
+        }
+        anchors <- cbind(anchors, anchors)
+        if (is.null(anchor_item_names)) {
+            item_previous <- anchors[, 1]
+            item_current <- anchors[, 2]
+        } else {
+            anchor_item_names <-
+                anchor_item_names[anchor_item_names[, 2] %in% anchors[, 2], ]
+            item_previous <- anchor_item_names[, 1]
+            item_current <- anchor_item_names[, 2]
         }
 
         # Estimate DIF
-        est <- data.frame(item_previous = anchors[, 1],
-                          item_current = anchors[, 2],
+        est <- data.frame(item_previous = item_previous,
+                          item_current = item_current,
                           xsi_previous = mod_previous$xsi[anchors[, 1], "xsi"],
                           xsi_current = mod_current$xsi[anchors[, 2], "xsi"],
                           se.xsi_previous = mod_previous$xsi[anchors[, 1], "se.xsi"],
@@ -674,10 +712,10 @@ summarize_link_dif <- function(dif_summary = NULL, mod_current = NULL,
                        verbose = FALSE)
         est$p <- mineff$pmin
         est$item_previous <- paste0(est$item_previous,
-                                    ifelse(abs(est$xsi) < 0.5 &
+                                    ifelse(abs(est$xsi) < diff_threshold &
                                                est$p > 0.05, "+", ""))
         est$item_current <- paste0(est$item_current,
-                                   ifelse(abs(est$xsi) < 0.5 &
+                                   ifelse(abs(est$xsi) < diff_threshold &
                                               est$p > 0.05, "+", ""))
         est$xsi <- paste0(round(est$xsi, 3),
                           ifelse(est$p < 0.001, "***",
@@ -693,7 +731,7 @@ summarize_link_dif <- function(dif_summary = NULL, mod_current = NULL,
         est <- dif_summary$est
         est_previous <- est[est$item %in% items_previous, ]
         est_previous$item <- paste0(est_previous$item,
-                                    ifelse(abs(est_previous$xsi) < 0.5 &
+                                    ifelse(abs(est_previous$xsi) < diff_threshold &
                                                est_previous$p > 0.05, "+", ""))
         est_previous$xsi <- paste0(round(est_previous$xsi, 3),
                                    ifelse(est_previous$p < 0.001, "***",
@@ -705,7 +743,7 @@ summarize_link_dif <- function(dif_summary = NULL, mod_current = NULL,
 
         est_current <- est[est$item %in% items_current, ]
         est_current$item <- paste0(est_current$item,
-                                   ifelse(abs(est_current$xsi) < 0.5 &
+                                   ifelse(abs(est_current$xsi) < diff_threshold &
                                               est_current$p > 0.05, "+", ""))
         est_current$xsi <- paste0(round(est_current$xsi, 3),
                                   ifelse(est_current$p < 0.001, "***",
@@ -806,8 +844,11 @@ check_link_dimensionality <- function(resp_previous, resp_current,
 #' @param link_dif return object of conduct_dif_anchor()
 #' @param link_dim return object of check_link_dimensionality()
 #' @param link_results return object of link_samples()
+#' @param diff_threshold numeric; threshold under which DIF in common link items
+#'   is accepted; defaults to .5
 #' @export
-print_link_results <- function(link_dif, link_dim, link_results) {
+print_link_results <- function(link_dif, link_dim, link_results,
+                               diff_threshold) {
     is_anchor_groups <- !is.null(link_dif$dif_model)
 
     N <- paste0("N long. subsample: ",
@@ -818,7 +859,8 @@ print_link_results <- function(link_dif, link_dim, link_results) {
 
     dif_table <- paste0("\n\n",
                         "Items eligible for link (marked with +): ",
-                        "|xsi| < 0.5 & p > 0.05; *: p < 0.05; **: p < 0.01; ",
+                        "|xsi| < ", diff_threshold,
+                        " & p > 0.05; *: p < 0.05; **: p < 0.01; ",
                         "***: p < 0.001\n\n",
                         "Eligible items: ",
                         paste(link_dif$anchors, collapse = ", "), "\n\n")

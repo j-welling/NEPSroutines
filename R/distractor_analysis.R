@@ -52,7 +52,7 @@ dis_analysis <- function(resp, vars, items, valid = NULL,
     if (print) print_dis_summary(distractors$summary)
     if (save) {
         save_results(distractors,
-                     filename = "distractors.Rdata", path = path_results)
+                     filename = "distractors.rds", path = path_results)
         save_table(distractors$analysis, overwrite = overwrite,
                    filename = "distractors.xlsx", path = path_table)
     }

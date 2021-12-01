@@ -127,7 +127,7 @@ conduct_dif_analysis <- function(resp, vars, items, dif_vars, valid, scoring,
   names(dif_models) <- dif_vars
 
   if (save) {
-      save_results(dif_models, filename = "dif_models.Rdata", path = path)
+      save_results(dif_models, filename = "dif_models.rds", path = path)
   }
 
   return(dif_models)

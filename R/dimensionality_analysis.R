@@ -55,7 +55,7 @@ dim_analysis <- function(resp, vars, items, scoring = "scoring",
 
   if (save) {
     save_results(dimensionality,
-                 filename = "dimensionality.Rdata", path = path_results)
+                 filename = "dimensionality.rds", path = path_results)
     save_table(dimensionality$summary, overwrite = overwrite,
                filename = "dimensionality.xlsx", path = path_table)
   }
