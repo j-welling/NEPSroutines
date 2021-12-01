@@ -1,8 +1,14 @@
 
 #' Create SUF
 #'
-#' @param resp
-#' @param vars
+#' @param resp  data.frame; contains item responses with items as variables and
+#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   polytomous responses with k categories; missing values (default -999 to -1)
+#'   are coded as NA internally; additionally includes ID_t as a person identifier
+#'   and all variables that are further defined in the function arguments
+#' @param vars  data.frame; contains information about items with items as rows;
+#'   includes variable 'items' containing item names; additionally includes all
+#'   variables that are further defined in the function arguments
 #' @param items_suf character; indicates the logical variable in vars which
 #'   contains the item names designated for the SUF (original scored items
 #'   before the first IRT analyses)
@@ -19,17 +25,22 @@
 #'   link_samples() / linking()
 #' @param linked_location character; path to linking results as saved by
 #'   linking(); alternative to linked_wles
-#' @param facet
-#' @param items
-#' @param valid
-#' @param mvs
-#' @param scoring
+#' @param facet character vector; contains the variable name indicating the
+#'   test rotation
+#' @param items  string; defines name of logical variable in vars that indicates
+#'   which items to use for the analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#'   (in)valid cases
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param scoring  string; defines name of numerical variable in vars that
+#'   contains the scoring factor to be applied to loading matrix; can be NULL for
+#'   Rasch model
 #' @param competence character; name of tested competence for labelling the
 #'   data (capitalized!)
 #' @param filename character; indicates final name of SUF according to study
 #' @param path_results character; indicates where SUF shall be saved
-#' @param save
-#' @param return
+#' @param save  logical; whether results shall be saved to hard drive
+#' @param return  logical; whether results shall be returned
 #' @export
 create_suf <- function(resp, vars, items_suf, wle_name, xsi_fixed = NULL,
              rotated = FALSE, linked = FALSE, wles = NULL,
@@ -99,6 +110,34 @@ create_suf <- function(resp, vars, items_suf, wle_name, xsi_fixed = NULL,
 
 
 #' Estimated WLEs with test rotation
+#' @param resp data.frame; contains item responses with items as variables and
+#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   polytomous responses with k categories; missing values (default -999 to -1)
+#'   are coded as NA internally; additionally includes ID_t as a person
+#'   identifier and all variables that are further defined in the function
+#'   arguments; if special person sets are of interest, these persons have to
+#'   be selected in resp beforehand
+#' @param vars data.frame; contains information about items with items as rows;
+#'   includes variable 'items' containing item names; additionally includes all
+#'   variables that are further defined in the function arguments
+#' @param items  string; defines name of logical variable in vars that indicates
+#'   which items to use for the analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#'   (in)valid cases
+#' @param facet character vector; contains the variable name indicating the
+#'   test rotation
+#' @param xsi_fixed matrix; fixed parameter estimates of final IRT scaling as
+#'   returned by tam.mml()
+#' @param scoring  string; defines name of numerical variable in vars that
+#'   contains the scoring factor to be applied to loading matrix; can be NULL for
+#'   Rasch model
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param wle_name character; name of the wle -- WITHOUT extension (e.g.,
+#'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
+#' @param irtmodel  string; "1PL" for Rasch, or "PCM2" for PCM analysis
+#' @return a data.frame containing ID_t, wle and se of wle (named like indicated
+#'   in wle_name)
+#' @export
 estimated_rotated_wles <- function(resp, vars, items, valid, facet, xsi_fixed,
                    scoring, mvs, wle_name, irtmodel) {
   if (is.null(facet)) {
@@ -136,6 +175,22 @@ estimated_rotated_wles <- function(resp, vars, items, valid, facet, xsi_fixed,
 }
 
 
+#' Set labels of items in SUF
+#'
+#' @param suf data.frame; SUF to be (re)labelled
+#' @param vars  data.frame; contains information about items with items as rows;
+#'   includes variable 'items' containing item names; additionally includes all
+#'   variables that are further defined in the function arguments
+#' @param items_suf character; indicates the logical variable in vars which
+#'   contains the item names designated for the SUF (original scored items
+#'   before the first IRT analyses)
+#' @param competence character; name of tested competence for labelling the
+#'   data (capitalized!)
+#' @param wle_name character; name of the wle -- WITHOUT extension (e.g.,
+#'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
+#' @param linked logical; whether the test is linked to a previous assessment
+#' @return suf with labels
+#' @export
 set_labels <- function(suf, vars, items_suf, competence, wle_name, linked) {
   attr(suf$ID_t, "label") <- "Unique person identifier"
   j <- 1
@@ -206,12 +261,18 @@ set_labels <- function(suf, vars, items_suf, competence, wle_name, linked) {
   return(suf)
 }
 
-
+#' Save SUF in three formats
+#'
+#' @param suf data.frame; SUF to be saved
+#' @param filename character; indicates final name of SUF according to study
+#' @param path_results character; indicates where SUF shall be saved
+#' @noRd
 save_suf <- function(suf, path_results, filename) {
   saveRDS(suf, file = paste0(path_results, "/", filename, ".rds"))
   haven::write_dta(suf, path = paste0(path_results, "/", filename, ".dta"))
   haven::write_sav(suf, path = paste0(path_results, "/", filename, ".sav"))
 }
+
 
 #' create sum scores
 #'
