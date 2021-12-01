@@ -10,7 +10,9 @@ summarize_link_dif(
   mod_previous = NULL,
   items_previous,
   items_current,
-  anchors = NULL
+  anchors = NULL,
+  diff_threshold = 0.5,
+  anchor_item_names = NULL
 )
 }
 \arguments{
@@ -28,6 +30,16 @@ summarize_link_dif(
 
 \item{anchors}{character vector with link items; if NULL, all common items
 are used}
+
+\item{diff_threshold}{numeric; threshold under which DIF in common link items
+is accepted; defaults to .5}
+
+\item{anchor_item_names}{character matrix; contains the old (column 1) and
+new (column 2) item names of the anchor items for the TR table in the
+anchor item design; NOT to be confused with the argument anchors that
+is a vector of the anchor items CURRENT name for the analysis; if anchors
+is not NULL, anchor_item_names may also only contain the same item name
+mapping as anchors}
 }
 \description{
 Summarize link DIF results

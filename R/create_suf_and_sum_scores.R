@@ -190,6 +190,7 @@ estimated_rotated_wles <- function(resp, vars, items, valid, facet, xsi_fixed,
 #'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
 #' @param linked logical; whether the test is linked to a previous assessment
 #' @return suf with labels
+#' @importFrom stats setNames
 #' @export
 set_labels <- function(suf, vars, items_suf, competence, wle_name, linked) {
   attr(suf$ID_t, "label") <- "Unique person identifier"
@@ -206,7 +207,7 @@ set_labels <- function(suf, vars, items_suf, competence, wle_name, linked) {
                             "unspecific missing" = -90,
                             "not determinable" = -55,
                             "not administered" = -54,
-                            "Angabe zurückgesetzt" = -21))
+                            "reset response" = -21))
       # polytomous items
     } else {
       maxK <- max(suf[[i]], na.rm = TRUE)
@@ -220,7 +221,7 @@ set_labels <- function(suf, vars, items_suf, competence, wle_name, linked) {
                             "unspecific missing" = -90,
                             "not determinable" = -55,
                             "not administered" = -54,
-                            "Angabe zurueckgesetzt" = -21))
+                            "reset response" = -21))
     }
     j <- j + 1
   }
@@ -230,7 +231,7 @@ set_labels <- function(suf, vars, items_suf, competence, wle_name, linked) {
     labels = c("omitted" = -97, "not valid" = -95,
            "not reached" = -94, "test aborted" = -91,
            "unspecific missing" = -90, "not administered" = -54,
-           "Angabe zurückgesetzt" = -21)
+           "reset response" = -21)
   )
   suf[[paste0(wle_name, "_sc2")]] <- haven::labelled_spss(
     suf[[paste0(wle_name, "_sc2")]],
@@ -238,7 +239,7 @@ set_labels <- function(suf, vars, items_suf, competence, wle_name, linked) {
     labels = c("omitted" = -97, "not valid" = -95,
            "not reached" = -94, "test aborted" = -91,
            "unspecific missing" = -90, "not administered" = -54,
-           "Angabe zurückgesetzt" = -21)
+           "reset response" = -21)
   )
   if (linked) {
     suf[[paste0(wle_name, "_sc1u")]] <- haven::labelled_spss(
@@ -247,7 +248,7 @@ set_labels <- function(suf, vars, items_suf, competence, wle_name, linked) {
       labels = c("omitted" = -97, "not valid" = -95,
              "not reached" = -94, "test aborted" = -91,
              "unspecific missing" = -90, "not administered" = -54,
-             "Angabe zurückgesetzt" = -21)
+             "reset response" = -21)
     )
     suf[[paste0(wle_name, "_sc2u")]] <- haven::labelled_spss(
       suf[[paste0(wle_name, "_sc2u")]],
@@ -255,7 +256,7 @@ set_labels <- function(suf, vars, items_suf, competence, wle_name, linked) {
       labels = c("omitted" = -97, "not valid" = -95,
              "not reached" = -94, "test aborted" = -91,
              "unspecific missing" = -90, "not administered" = -54,
-             "Angabe zurückgesetzt" = -21)
+             "reset response" = -21)
     )
   }
   return(suf)
@@ -294,7 +295,7 @@ save_suf <- function(suf, path_results, filename) {
 #' @return integer vector of length nrow(resp) containing the row sums for the
 #'   specified item set
 #' @export
-sum_scores <- function(resp, vars, items, poly_items) {
+sum_scores <- function(resp, vars, items) {
   # count only correctly scored binary or FULLY correctly scored PC items
   resp[, vars$items[vars[[items]]]] <- lapply(vars$items[vars[[items]]],
                         function(x) {

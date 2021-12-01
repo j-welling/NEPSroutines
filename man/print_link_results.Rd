@@ -4,7 +4,7 @@
 \alias{print_link_results}
 \title{Print linking results for TR}
 \usage{
-print_link_results(link_dif, link_dim, link_results)
+print_link_results(link_dif, link_dim, link_results, diff_threshold)
 }
 \arguments{
 \item{link_dif}{return object of conduct_dif_anchor()}
@@ -12,6 +12,9 @@ print_link_results(link_dif, link_dim, link_results)
 \item{link_dim}{return object of check_link_dimensionality()}
 
 \item{link_results}{return object of link_samples()}
+
+\item{diff_threshold}{numeric; threshold under which DIF in common link items
+is accepted; defaults to .5}
 }
 \description{
 Print linking results for TR

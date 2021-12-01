@@ -541,6 +541,12 @@ calculate_link_parameters <- function(is_anchor_items = TRUE, select_previous,
 #' @param anchors   data.frame with two columns including the link items
 #'            in the two waves; if NULL, all common items are used
 #' @param mvs named integer vector; contains user-defined missing values
+#' @param return  logical; whether results shall be returned
+#' @param valid string; defines name of logical variable in resp that indicates
+#'   (in)valid cases
+#' @param scoring string; defines name of numerical variable in vars that
+#'   contains the scoring factor to be applied to the link constant (e.g., only
+#'   half the link constant is needed if a PC item is scored 0.5)
 #' @param vars data.frame; contains information about items with items as rows;
 #'   includes variable 'items' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
