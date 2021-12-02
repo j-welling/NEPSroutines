@@ -467,19 +467,20 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL, valid = NULL,
         )
     }
 
-    gg <- gg +
-      ggplot2::geom_col(position = "dodge") +
-      ggplot2::scale_y_continuous(breaks = seq(0, ylim, 10),
-                                  labels = paste0(seq(0, ylim, 10), " %"),
-                                  limits = c(0, ylim)) +
-      ggplot2::scale_x_continuous(breaks = seq(0, k, floor(k/20))) +
-      ggplot2::theme_bw() +
-      ggplot2::theme(legend.justification = c(0, 1),
-                     legend.position = c(0.01, 0.99))
-
-    if (!is.null(color)) {
-      gg <- gg + ggplot2::scale_fill_manual(values = .data[[color]])
+    if (is.null(color)) {
+        gg <- gg + ggplot2::geom_col(position = "dodge")
+    }  else {
+        gg <- gg + ggplot2::geom_col(position = "dodge", fill = color)
     }
+
+    gg <- gg +
+    ggplot2::scale_y_continuous(breaks = seq(0, ylim, 10),
+                                labels = paste0(seq(0, ylim, 10), " %"),
+                                limits = c(0, ylim)) +
+    ggplot2::scale_x_continuous(breaks = seq(0, k, floor(k/20))) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(legend.justification = c(0, 1),
+                   legend.position = c(0.01, 0.99))
 
     # save plot
     ggplot2::ggsave(
