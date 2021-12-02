@@ -44,7 +44,7 @@ desc_con <- function(dat, desc, valid = NULL, digits = 2,
              }))
 
     if (print) {
-        message("\nSummary statistics of sociodemographic variables:\n")
+        message("\nSummary statistics of the continuous variables:\n")
         print(stats)
     }
 
@@ -78,10 +78,10 @@ desc_nom <- function(dat, desc, valid = NULL, digits = 1,
                                              digits = digits)
 
     if (print) {
-        message("\nSample size by sociodemographic groups:\n")
+        message("\nSample size by groups:\n")
         print(descriptives$frequency_abs)
 
-        message("\nFrequency of sociodemographic groups:\n")
+        message("\nFrequency of groups:\n")
         print(descriptives$frequency_perc)
     }
 
