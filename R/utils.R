@@ -99,7 +99,7 @@ save_table <- function(results, filename, path,
   }
 }
 
-#' Save Rdata results
+#' Save rds results
 #'
 #' @param results results to be saved
 #' @param filename string with name of results file
@@ -147,51 +147,6 @@ check_pid <- function(pid) {
     if (length(pid) != length(unique(pid))) {
         stop("There are duplicates in the person identifiers.")
     }
-}
-
-
-#' Select sample with a minimum number of valid values
-#'
-#' @param resp  data.frame with item responses
-#' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
-#' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
-#' which items to use for the analysis
-#' @param min.val minimum number of valid values; if negative, set to the default of 3
-#' @param invalid vector of invalid values (defaults to NA)
-#'
-#' @return   logical vector with length = nrow(resp), indicating whether case is valid
-#' @export
-
-min_val <- function(resp, vars, items, min.val = NULL, invalid = NA) {
-
-    vrs <- vars$items[vars[[items]]]
-    resp_ <- resp[ , vrs]
-
-    # Set minimum number of valid values
-    if (is.null(min.val) || min.val < 0) {
-        min.val <- 3
-        warning("No valid (=> 0) number of minimum valid responses per person ",
-                "(min.val) provided. Default of 3 valid responses applies.")
-    }
-
-    # Number of valid values by respondent
-    nval <- rowSums(apply(
-        subset(resp_, select = vrs), 2,
-        function(x) {
-            !(x %in% invalid)
-        }
-    ))
-
-    # Create indicator
-    valid <- (nval >= min.val)
-    attr(valid, "label") <- paste0("Case with at least ",
-                                   min.val,
-                                   " valid responses")
-
-    # Return results
-    return(valid)
 }
 
 
@@ -290,51 +245,6 @@ meht <- function(stat, df1, df2, eta2 = NULL, delta = .40,
 }
 
 
-#' Calculate new position variable with only a set of variables
-#'
-#' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
-#' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
-#' which items to use for the analysis
-#' @param position  (named) character vector; defines name(s) of integer
-#' variable(s) in vars that indicate position of items; if groups with differing
-#' item positions in testlets exist, then vector must be named with names of
-#' groups (as in "grouping") as names of elements and names of variables as elements
-#'
-#' @return   data.frame as input, with one or more extra variable(s) containing
-#' the (relative) position of chosen items.
-#' @importFrom rlang .data
-#' @export
-
-pos_new <- function(vars, items, position) {
-
-    if (length(position) == 1) {
-
-        vars_ <- vars[vars[[items]], ]
-        pos <- data.frame(items = vars_[['items']],
-                          position = vars_[[position]])
-        pos <- dplyr::arrange(pos, .data$position)
-        pos[[paste0("position_", items)]] <- seq(1, nrow(pos))
-        vars <- merge(vars, pos[ , c('items', paste0("position_", items))],
-                      by = 'items', all = TRUE)
-
-    } else {
-
-        for (g in names(position)) {
-            vars_ <- vars[vars[[items]] & !is.na(vars[[position[g]]]), ]
-            pos <- data.frame(items = vars_[['items']],
-                              position = vars_[[position[g]]])
-            pos <- dplyr::arrange(pos, .data$position)
-            pos[[paste0("position_", g, "_", items)]] <- seq(1, nrow(pos))
-            vars <- merge(vars, pos[ , c('items', paste0("position_", g, "_", items))],
-                          by = 'items', all = TRUE)
-        }
-
-        return(vars)
-    }
-}
-
 
 #' Get name of R object as string
 #' @param object R object (e.g., vector, data.frame, ...)
@@ -344,5 +254,3 @@ pos_new <- function(vars, items, position) {
 get_object_name <- function(object) {
   deparse(substitute(object))
 }
-
-
