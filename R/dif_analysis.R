@@ -160,7 +160,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars,
   }
 
   if (save) {
-      save_results(dif_models, filename = "dif_summaries.Rdata", path = path_results)
+      save_results(dif_models, filename = "dif_summaries.rds", path = path_results)
   }
 
   return(dif_summaries)

@@ -138,7 +138,7 @@ desc_perc <- function(dat, desc, valid = NULL, digits = 1) {
 #' @param dat  data.frame; contains sociodemographic and booklet variables
 #' @param desc  character vector; contains the name(s) of the variable(s) that
 #' shall be used in analysis
-
+#' @export
 show_attributes <- function(dat, desc) {
     for (var in desc) {
         message("\nThe attributes for variable ", var, " are:\n")
