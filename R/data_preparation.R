@@ -39,6 +39,7 @@ pc_scoring <- function(resp, subtasks, mvs = NULL) {
 #'   variables that are further defined in the function arguments
 #' @param pcitems character; indicates the logical variable in vars which
 #'   contains the item names of the polytomous items
+#' @param per_cat integer; minimum number of persons per category; defaults to 200
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
@@ -46,14 +47,14 @@ pc_scoring <- function(resp, subtasks, mvs = NULL) {
 #'   given PC items IN PLACE. If you want to keep the original data, please
 #'   copy and rename the items to be collapsed first.
 #' @export
-collapse_response_categories <- function(resp, vars, pcitems,
+collapse_response_categories <- function(resp, vars, pcitems, per_cat = 200,
                                          path_table = here::here("Tables"),
                                          print = TRUE, save = FALSE) {
     collapsed_items <- c()
     for (item in vars$items[[pcitems]]) {
         response <- resp[[item]]
         tab <- table(response[response >= 0])
-        collapse <- which(tab < 200)
+        collapse <- which(tab < per_cat)
         if (length(collapse) > 0) {
             collapsed_items <- c(collapsed_items, item)
         }
@@ -69,7 +70,7 @@ collapse_response_categories <- function(resp, vars, pcitems,
             resp[j, item] <- response[j] - 1
             response <- resp[[item]]
             tab <- table(response[response >= 0])
-            collapse <- which(tab < 200)
+            collapse <- which(tab < per_cat)
         }
     }
     if (print) {
@@ -111,6 +112,8 @@ dichotomous_scoring <- function(resp, vars, select, correct_response) {
         for (i in vars$items[vars[[correct_response]][vars[[select]]] == k]) {
             if (is.double(resp[[i]])) {
                 resp[[i]] <- as.numeric(resp[[i]])
+            } else if (is.factor(resp[[i]])) {
+                resp[[i]] <- as.character(resp[[i]])
             }
             resp[[i]] <- ifelse(resp[[i]] == k, 1,
                                 ifelse(resp[[i]] < 0, resp[[i]], 0))

@@ -127,7 +127,7 @@ save_results <- function(results, filename, path) {
 #' please note that the path is relative to the current working path set by
 #' here::i_am()
 #'
-#' @noRd
+#' @export
 
 check_folder <- function(path) {
     if (!file.exists(path)) {
