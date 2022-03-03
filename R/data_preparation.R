@@ -25,6 +25,7 @@ pc_scoring <- function(resp, subtasks, mvs = NULL) {
     return(pci)
 }
 
+# labels?
 
 
 #' Collapse response categories with N < 200
@@ -98,32 +99,74 @@ collapse_response_categories <- function(resp, vars, pcitems, per_cat = 200,
 #' @param vars  data.frame; contains information about items with items as rows;
 #'   includes variable 'items' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
-#' @param select  string; defines name of logical variable in vars that indicates
-#'   which (unscored) items to use for the analysis
+#' @param old_names  character vector; contains the names of the original items
+#' @param new_names  character vector; contains the names of the new items,
+#' must be in same order as parameter "old_names"
 #' @param correct_response character; indicates the logical variable in vars
 #'   which contains the correct response of the MC items
 #'
-#' @return resp with dichotomously scored MC items. Note that this function
-#'   changes the given MC items IN PLACE. If you want to keep the original data,
-#'   please copy and rename the items to be scored first.
+#' @return resp with dichotomously scored MC items.
 #' @export
-dichotomous_scoring <- function(resp, vars, select, correct_response) {
-    for (k in unique(vars[[correct_response]][vars[[select]]])) {
-        for (i in vars$items[vars[[correct_response]][vars[[select]]] == k]) {
-            if (is.double(resp[[i]])) {
-                resp[[i]] <- as.numeric(resp[[i]])
-            } else if (is.factor(resp[[i]])) {
-                resp[[i]] <- as.character(resp[[i]])
-            }
-            resp[[i]] <- ifelse(resp[[i]] == k, 1,
-                                ifelse(resp[[i]] < 0, resp[[i]], 0))
-            resp[[i]] <- as.numeric(resp[[i]])
+dichotomous_scoring <- function(resp, vars, old_names, correct_response,
+                                new_names = NULL) {
+    if (is.null(new_names)) {
+        new_names <- paste0(old_names, "_c")
+    }
+
+    for (i in seq_along(old_names)) {
+        line <- which(vars$items == old_names[i])
+        item <- vars$items[line]
+        if (is.double(resp[[item]])) {
+            resp[[item]] <- as.numeric(resp[[item]])
+        } else if (is.factor(resp[[item]])) {
+            resp[[item]] <- as.character(resp[[item]])
         }
+        correct <- vars[[correct_response]][vars$items == item]
+        resp[[new_names[i]]] <- ifelse(resp[[item]] == correct, 1,
+                                       ifelse(resp[[item]] < 0, resp[[item]], 0)
+                                       ) %>% as.numeric()
     }
 
     return(resp)
 }
 
+# labels?
+
+#' Duplicate item information in vars
+#'
+#' @param vars  data.frame; contains information about items with items as rows;
+#'   includes variable 'items' containing item names; additionally includes all
+#'   variables that are further defined in the function arguments
+#' @param old_names  character vector; contains the names of the original items
+#' @param new_names  character vector; contains the names of the new items (must
+#' be in same order as parameter "old_names"), default is old name + "_c"
+#' @param change named character vector; if some information in vars about the
+#' new items shall be changed, include the respective variable as the name and the new
+#' value as the value of the vector (e.g. change = c(raw = FALSE, dich = TRUE)),
+#' if raw shall be set to FALSE and dich to TRUE for all new items.
+#'
+#' @return vars with new rows including the duplicated items.
+#' @export
+duplicate_information <- function(vars, old_names, new_names = NULL, change = NULL) {
+    if (is.null(new_names)) {
+        new_names <- paste0(old_names, "_c")
+    }
+
+    vars_new <- vars[vars$items %in% old_names, ]
+    vars_new$items <- new_names
+    if (!is.null(change)) {
+        for (c in seq_along(change)) {
+            variable <- names(change[c])
+            new_value <- change[c]
+            vars_new[[variable]] <- new_value
+        }
+    }
+
+    vars <- rbind(vars, vars_new)
+
+    return(vars)
+
+}
 
 
 #' Select sample with a minimum number of valid values
@@ -214,3 +257,23 @@ pos_new <- function(vars, items, position) {
     }
     return(vars)
 }
+
+
+#' Calculate age from birth and test date
+#'
+#' @param birth_year
+#' @param birth_month
+#' @param test_year
+#' @param tets_month
+#'
+#' @return   numeric vector with approximate age in years
+calculate_age <- function(birth_year, birth_month, test_year, test_month) {
+    birth <- strptime(paste(birth_year, birth_month, "15", sep = "-"), "%Y-%m-%d")
+    test <- strptime(paste(test_year, test_month, "15", sep = "-"), "%Y-%m-%d")
+    age <- as.numeric(difftime(birth, test, units = "weeks")) / 52.1429
+    return(age)
+}
+
+# dichotomize_dif_variables <- function(variable, criteria, labels) {}
+# geht das wirklich? z.B. migration kategorisch, books kontinuierlich
+# lohnt sich auch kaum, da eh nur ein bis zwei Zeilen Code und ein Befehl
