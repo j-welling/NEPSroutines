@@ -1,31 +1,38 @@
 #' Score partial credit items
 #'
 #' @param resp  data.frame; contains original item responses
-#' @param subtasks  character vector; contains variable names of subtasks
+#' @param poly_items  list; contains character vector with subitems for each
+#' polytomous item, name of the vector is the name of the polytomous item (e.g.
+#' poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))
 #' @param mvs  integer vector; contains user-defined missing values
 #'
 #' @export
-pc_scoring <- function(resp, subtasks, mvs = NULL) {
 
-    pci <- rowSums(resp[, subtasks] == 1)
-    s <- rowSums(resp[, subtasks] < 0) > 0
-    pci[s] <- -55
+pc_scoring <- function(resp, poly_items, mvs = NULL) {
 
-    if (is.null(mvs)) {
-        mvs <- c(-99:-1)
-        warning("No missing values provided. c(-99:-1) used as default.")
+    for (item in names(poly_items)) {
+        subitems <- poly_items[[item]]
+
+        pci <- rowSums(resp[, subitems] == 1)
+        s <- rowSums(resp[, subitems] < 0) > 0
+        pci[s] <- -55
+
+        if (is.null(mvs)) {
+            mvs <- c(-99:-1)
+            warning("No missing values provided. c(-99:-1) used as default.")
+        }
+
+        for (mv in mvs) {
+            s <- rowSums(resp[, subitems] == mv) == rowSums(resp[, subitems] < 0) &
+                rowSums(resp[, subitems] < 0) > 0
+            pci[s] <- mv
+        }
+
+        resp[[item]] <- pci
     }
 
-    for (mv in mvs) {
-        s <- rowSums(resp[, subtasks] == mv) == rowSums(resp[, subtasks] < 0) &
-            rowSums(resp[, subtasks] < 0) > 0
-        pci[s] <- mv
-    }
-
-    return(pci)
+    return(resp)
 }
-
-# labels?
 
 
 #' Collapse response categories with N < 200
@@ -130,7 +137,6 @@ dichotomous_scoring <- function(resp, vars, old_names, correct_response,
     return(resp)
 }
 
-# labels?
 
 #' Duplicate item information in vars
 #'
@@ -165,7 +171,6 @@ duplicate_information <- function(vars, old_names, new_names = NULL, change = NU
     vars <- rbind(vars, vars_new)
 
     return(vars)
-
 }
 
 
