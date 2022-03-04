@@ -1,3 +1,76 @@
+#' Dichotomous scoring of MC items
+#'
+#' @param resp  data.frame; contains item responses with items as variables and
+#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   polytomous responses with k categories; missing values (default -999 to -1)
+#'   are coded as NA internally; additionally includes ID_t as a person identifier
+#'   and all variables that are further defined in the function arguments
+#' @param vars  data.frame; contains information about items with items as rows;
+#'   includes variable 'items' containing item names; additionally includes all
+#'   variables that are further defined in the function arguments
+#' @param old_names  character vector; contains the names of the original items
+#' @param new_names  character vector; contains the names of the new items,
+#' must be in same order as parameter "old_names"
+#'
+#' @return resp with dichotomously scored MC items.
+#' @export
+dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
+    if (is.null(new_names)) {
+        new_names <- paste0(old_names, "_c")
+    }
+
+    for (i in seq_along(old_names)) {
+        line <- which(vars$items == old_names[i])
+        item <- vars$items[line]
+        if (is.double(resp[[item]])) {
+            resp[[item]] <- as.numeric(resp[[item]])
+        } else if (is.factor(resp[[item]])) {
+            resp[[item]] <- as.character(resp[[item]])
+        }
+        correct <- vars$correct_response[vars$items == item]
+        resp[[new_names[i]]] <- ifelse(resp[[item]] == correct, 1,
+                                       ifelse(resp[[item]] < 0, resp[[item]], 0)
+        ) %>% as.numeric()
+    }
+
+    return(resp)
+}
+
+
+#' Duplicate item information in vars
+#'
+#' @param vars  data.frame; contains information about items with items as rows;
+#'   includes variable 'items' containing item names; additionally includes all
+#'   variables that are further defined in the function arguments
+#' @param old_names  character vector; contains the names of the original items
+#' @param new_names  character vector; contains the names of the new items (must
+#' be in same order as parameter "old_names"), default is old name + "_c"
+#' @param change named character vector; if some information in vars about the
+#' new items shall be changed, include the respective variable as the name and the new
+#' value as the value of the vector (e.g. change = c(raw = FALSE, dich = TRUE)),
+#' if raw shall be set to FALSE and dich to TRUE for all new items.
+#'
+#' @return vars with new rows including the duplicated items.
+#' @export
+duplicate_items <- function(vars, old_names, new_names, change = NULL) {
+
+        vars_new <- vars[vars$items %in% old_names, ]
+    vars_new$items <- new_names
+    if (!is.null(change)) {
+        for (c in seq_along(change)) {
+            variable <- names(change[c])
+            new_value <- change[c]
+            vars_new[[variable]] <- new_value
+        }
+    }
+
+    vars <- rbind(vars, vars_new)
+
+    return(vars)
+}
+
+
+
 #' Score partial credit items
 #'
 #' @param resp  data.frame; contains original item responses
@@ -95,85 +168,6 @@ collapse_response_categories <- function(resp, vars, pcitems, per_cat = 200,
 }
 
 
-
-#' Dichotomous scoring of MC items
-#'
-#' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
-#'   polytomous responses with k categories; missing values (default -999 to -1)
-#'   are coded as NA internally; additionally includes ID_t as a person identifier
-#'   and all variables that are further defined in the function arguments
-#' @param vars  data.frame; contains information about items with items as rows;
-#'   includes variable 'items' containing item names; additionally includes all
-#'   variables that are further defined in the function arguments
-#' @param old_names  character vector; contains the names of the original items
-#' @param new_names  character vector; contains the names of the new items,
-#' must be in same order as parameter "old_names"
-#' @param correct_response character; indicates the logical variable in vars
-#'   which contains the correct response of the MC items
-#'
-#' @return resp with dichotomously scored MC items.
-#' @export
-dichotomous_scoring <- function(resp, vars, old_names, correct_response,
-                                new_names = NULL) {
-    if (is.null(new_names)) {
-        new_names <- paste0(old_names, "_c")
-    }
-
-    for (i in seq_along(old_names)) {
-        line <- which(vars$items == old_names[i])
-        item <- vars$items[line]
-        if (is.double(resp[[item]])) {
-            resp[[item]] <- as.numeric(resp[[item]])
-        } else if (is.factor(resp[[item]])) {
-            resp[[item]] <- as.character(resp[[item]])
-        }
-        correct <- vars[[correct_response]][vars$items == item]
-        resp[[new_names[i]]] <- ifelse(resp[[item]] == correct, 1,
-                                       ifelse(resp[[item]] < 0, resp[[item]], 0)
-                                       ) %>% as.numeric()
-    }
-
-    return(resp)
-}
-
-
-#' Duplicate item information in vars
-#'
-#' @param vars  data.frame; contains information about items with items as rows;
-#'   includes variable 'items' containing item names; additionally includes all
-#'   variables that are further defined in the function arguments
-#' @param old_names  character vector; contains the names of the original items
-#' @param new_names  character vector; contains the names of the new items (must
-#' be in same order as parameter "old_names"), default is old name + "_c"
-#' @param change named character vector; if some information in vars about the
-#' new items shall be changed, include the respective variable as the name and the new
-#' value as the value of the vector (e.g. change = c(raw = FALSE, dich = TRUE)),
-#' if raw shall be set to FALSE and dich to TRUE for all new items.
-#'
-#' @return vars with new rows including the duplicated items.
-#' @export
-duplicate_information <- function(vars, old_names, new_names = NULL, change = NULL) {
-    if (is.null(new_names)) {
-        new_names <- paste0(old_names, "_c")
-    }
-
-    vars_new <- vars[vars$items %in% old_names, ]
-    vars_new$items <- new_names
-    if (!is.null(change)) {
-        for (c in seq_along(change)) {
-            variable <- names(change[c])
-            new_value <- change[c]
-            vars_new[[variable]] <- new_value
-        }
-    }
-
-    vars <- rbind(vars, vars_new)
-
-    return(vars)
-}
-
-
 #' Select sample with a minimum number of valid values
 #'
 #' @param resp  data.frame with item responses
@@ -266,15 +260,33 @@ pos_new <- function(vars, items, position) {
 
 #' Calculate age from birth and test date
 #'
-#' @param birth_year
-#' @param birth_month
-#' @param test_year
-#' @param tets_month
+#' @param resp  data.frame with birth and test date variables
+#' @param birth_year  string; contains name of variable with year of birth
+#' @param birth_month  string; contains name of variable with month of birth
+#' @param birth_day  string; contains name of variable with day of birth (default is 15)
+#' @param test_year  string; contains name of variable with year of test
+#' @param tets_month  string; contains name of variable with month of test
+#' @param test_day  string; contains name of variable with day of test (default is 15)
 #'
 #' @return   numeric vector with approximate age in years
-calculate_age <- function(birth_year, birth_month, test_year, test_month) {
-    birth <- strptime(paste(birth_year, birth_month, "15", sep = "-"), "%Y-%m-%d")
-    test <- strptime(paste(test_year, test_month, "15", sep = "-"), "%Y-%m-%d")
+calculate_age <- function(resp,
+                          birth_year, birth_month, birth_day = NULL,
+                          test_year, test_month, test_day = NULL) {
+
+    if (is.null(birth_day)) {
+        bday <- 15
+    } else {
+        bday <- resp[[birth_day]]
+    }
+
+    if (is.null(test_day)) {
+        tday <- 15
+    } else {
+        tday <- resp[[test_day]]
+    }
+
+    birth <- strptime(paste(resp[[birth_year]], resp[[birth_month]], bday, sep = "-"), "%Y-%m-%d")
+    test <- strptime(paste(resp[[test_year]], resp[[test_month]], tday, sep = "-"), "%Y-%m-%d")
     age <- as.numeric(difftime(birth, test, units = "weeks")) / 52.1429
     return(age)
 }
