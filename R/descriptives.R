@@ -16,7 +16,6 @@ n_valid <- function(dat, valid = NULL) {
 }
 
 
-
 #' Descriptives of continuous variables
 #'
 #' @param dat  data.frame; contains sociodemographic and booklet variables
@@ -73,16 +72,24 @@ desc_nom <- function(dat, desc, valid = NULL, digits = 1,
     dat <- only_valid(dat, valid = valid)
 
     descriptives <- list()
-    descriptives$frequency_abs <- desc_abs(dat, desc = desc, valid = valid)
-    descriptives$frequency_perc <- desc_perc(dat, desc = desc, valid = valid,
-                                             digits = digits)
+    descriptives$frequency_abs <- desc_abs(dat, desc = desc, valid = valid,
+                                           warn = FALSE)
+    descriptives$frequency_perc_NA <- desc_perc(dat, desc = desc, valid = valid,
+                                                warn = FALSE, useNA = 'alwas',
+                                                digits = digits)
+    descriptives$frequency_perc_noNA <- desc_perc(dat, desc = desc, valid = valid,
+                                                  warn = FALSE, useNA = 'no',
+                                                  digits = digits)
 
     if (print) {
         message("\nSample size by groups:\n")
         print(descriptives$frequency_abs)
 
-        message("\nFrequency of groups:\n")
-        print(descriptives$frequency_perc)
+        message("\nFrequency of groups including missing values:\n")
+        print(descriptives$frequency_perc_NA)
+
+        message("\nFrequency of groups excluding missing values:\n")
+        print(descriptives$frequency_perc_noNA)
     }
 
     if (return) return(descriptives)
@@ -96,18 +103,18 @@ desc_nom <- function(dat, desc, valid = NULL, digits = 1,
 #' shall be used in analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
+#' @param warn  logical; whether to warn if no parameter 'valid' provided
 #'
 #' @return   list with  frequency (absolute) of answers for each variable in desc.
 #'
 #' @export
 
-desc_abs <- function(dat, desc, valid = NULL) {
+desc_abs <- function(dat, desc, valid = NULL, warn = TRUE) {
 
-    dat <- only_valid(dat, valid = valid)
+    dat <- only_valid(dat, valid = valid, warn = warn)
 
     sapply(dat[ , desc, drop = FALSE], function(x) {table(x, useNA = "always")})
 }
-
 
 
 #' Show frequency (relative) of answers of list of variables
@@ -117,21 +124,26 @@ desc_abs <- function(dat, desc, valid = NULL) {
 #' shall be used in analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
+#' @param warn  logical; whether to warn if no parameter 'valid' provided
+#' @param useNA  string; "no" if NAs should not be included in table, "always"
+#' (default) if NAs should be included in table
 #' @param digits  integer; number of decimals for rounding
 #'
 #' @return   list with frequency (relative) of answers for each variable in desc.
 #'
 #' @export
 
-desc_perc <- function(dat, desc, valid = NULL, digits = 1) {
+desc_perc <- function(dat, desc, valid = NULL, warn = TRUE, useNA = 'always',
+                      digits = 1) {
 
-    dat <- only_valid(dat, valid = valid)
+    dat <- only_valid(dat, valid = valid, warn = warn)
 
     data.frame(sapply(dat[ , desc, drop = FALSE], function(x) {
-        d <- round(prop.table(table(x, useNA = "always"))*100, digits)
+        d <- round(prop.table(table(x, useNA = useNA))*100, digits)
         paste0(d, " %")
         }))
 }
+
 
 #' Show attributes of selected variables
 #'
@@ -139,6 +151,7 @@ desc_perc <- function(dat, desc, valid = NULL, digits = 1) {
 #' @param desc  character vector; contains the name(s) of the variable(s) that
 #' shall be used in analysis
 #' @export
+
 show_attributes <- function(dat, desc) {
     for (var in desc) {
         message("\nThe attributes for variable ", var, " are:\n")

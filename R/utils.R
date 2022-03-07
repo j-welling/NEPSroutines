@@ -3,15 +3,16 @@
 #' @param resp  data.frame with item responses
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
+#' @param warn  logical; whether to warn if no parameter 'valid' provided
 #'
 #' @return data.frame as resp, but only with valid cases
 #' @export
 
-only_valid <- function(resp, valid = NULL) {
+only_valid <- function(resp, valid = NULL, warn = TRUE) {
 
     if (!is.null(valid)) {
         resp <- resp[resp[[valid]], ]
-    } else {
+    } else if (warn) {
         warning("No variable with valid cases provided. All cases are used ",
                 "for analysis.")
     }
