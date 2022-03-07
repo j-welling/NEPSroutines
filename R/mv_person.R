@@ -74,13 +74,12 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
   }
 
   if (save) {
-    save_results(mv_person, filename = "mv_person.rds", path = path_results)
-    # dass hier kein save_table steht ist Absicht
-
     mv_person$summary <- mvp_table(mv_p = mv_person$mv_p, grouping = grouping,
                                    filename = "mv_person", path = path_table,
                                    overwrite = overwrite)
 
+    save_results(mv_person, filename = "mv_person.rds", path = path_results)
+    # dass hier kein save_table steht ist Absicht
   } else {
       mv_person$summary <- mvp_table(mv_p = mv_person$mv_p, grouping = grouping)
   }
