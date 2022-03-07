@@ -14,8 +14,11 @@
 #'                    'correct_response' (integer) containing the correct
 #'                      response for each item,
 #' and all variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
-#' which items to use for the analysis
+#' @param item_type  character vector; contains all item types as specified in
+#' vars$type that shall be used for distratcor analysis (default is 'MC')
+#' @param scored_version  string; defines name of variable in vars that contains
+#' the names of the scored versions of the raw items; can be left empty, then
+#' default of name_scored_item = name_unscored_item + "_c" applies
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param print  logical; whether results shall be printed to console
@@ -36,7 +39,8 @@
 #' @importFrom rlang .data
 #' @export
 
-dis_analysis <- function(resp, vars, items, valid = NULL,
+dis_analysis <- function(resp, vars, item_type = 'MC',
+                         scored_version = NULL, valid = NULL,
                          save = TRUE, print = TRUE, return = FALSE,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
@@ -45,7 +49,8 @@ dis_analysis <- function(resp, vars, items, valid = NULL,
     distractors <- list()
     distractors$analysis <- conduct_dis_analysis(resp = resp,
                                                  vars = vars,
-                                                 items = items,
+                                                 item_type = item_type,
+                                                 scored_version = scored_version,
                                                  valid = valid)
     distractors$summary <- dis_summary(distractors$analysis)
 
@@ -71,34 +76,39 @@ dis_analysis <- function(resp, vars, items, valid = NULL,
 #' and all variables that are further defined in the function arguments
 #' @param vars data.frame; contains information about items with items as rows;
 #' includes variables 'items' (character) containing item names,
-#'                    'raw' (logical) indicating unscored items,
+#'                    'dich' (logical) indicating all dichotomously scored items
+#'                    'raw' (logical) indicating all unscored items,
 #'                    'type' (character) containing item type (e.g. MC),
 #'                    'correct_response' (integer) containing the correct
 #'                      response for each item,
 #' and all variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
-#' which items to use for the analysis
+#' @param item_type  character vector; contains all item types as specified in
+#' vars$type that shall be used for distratcor analysis (default is 'MC')
+#' @param scored_version  string; defines name of variable in vars that contains
+#' the names of the scored versions of the raw items; can be left empty, then
+#' default of name_scored_item = name_unscored_item + "_c" applies
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @export
-conduct_dis_analysis <- function(resp, vars, items, valid = NULL) {
+conduct_dis_analysis <- function(resp, vars, item_type = 'MC',
+                                 scored_version = NULL, valid = NULL) {
     # prepare data
     resp <- only_valid(resp, valid = valid)
-    MC <- dplyr::select(
-        dplyr::filter(vars, vars$type == 'MC' & vars$raw == TRUE),
-        .data$items, .data$correct_response
-    )
-    scored <- vars$items[vars[[items]]]
-    var_names <- unique(c(MC$items, scored))
+
+    unscored <- vars$items[vars$type %in% item_type & vars$raw == TRUE]
+    correct <- vars$correct_response[vars$type %in% item_type & vars$raw == TRUE]
+    scored <- vars$items[vars$dich == TRUE]
+    var_names <- unique(c(unscored, scored))
+
     resp <- convert_mv(resp = resp, items = var_names)
 
     # Sum score across all items
     resp$score <- rowMeans(resp[, scored], na.rm = TRUE)
 
-    # Correlations with distractors (for MC items)
+    # Correlations with distractors (for unscored items)
     dis <- list()
 
-    for (item in MC$items) {
+    for (item in unscored) {
 
         # Create for each item a dataframe with row for each response option
         dis[[item]] <- as.data.frame(table(resp[, item]),
@@ -107,7 +117,10 @@ conduct_dis_analysis <- function(resp, vars, items, valid = NULL) {
         names(dis[[item]])[1] <- item
         dis[[item]]$rit <- NA
 
-        cscore <- resp$score - resp[, paste0(item, "_c")] / sum(vars$raw)#length(scored) # corrected total score
+        # Create corrected total score
+        scored_item <- ifelse(is.null(scored_version), paste0(item, "_c"),
+                              vars[[scored_version]][vars$items == item])
+        cscore <- resp$score - resp[, scored_item] / sum(vars$dich)#length(scored)
 
         # Correlation between each response option and corrected total score
         for (s in seq_len(nrow(dis[[item]]))) {
@@ -119,7 +132,7 @@ conduct_dis_analysis <- function(resp, vars, items, valid = NULL) {
 
         # Label correct response with *
         dis[[item]][[item]] <- ifelse(
-            dis[[item]][[item]] == MC$correct_response[MC$items == item],
+            dis[[item]][[item]] == correct[unscored == item],
             paste0("*", dis[[item]][[item]]),
             dis[[item]][[item]]
         )
