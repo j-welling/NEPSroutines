@@ -67,7 +67,7 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
                                  digits = digits, warn = warn)
 
   if (plots) {
-    mvp_plots(mv_p = mv_person$mv_p, vars = vars, items = items,
+    mvp_plots(mv_p = mv_person$mv_p, vars = vars, items = items, mvs = mvs,
               labels_mvs = labels_mvs, grouping = grouping, show_all = show_all,
               path = path_plots, color = color, verbose = verbose,
               name_grouping = name_grouping)
@@ -76,12 +76,13 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
   if (save) {
     mv_person$summary <- mvp_table(mv_p = mv_person$mv_p, grouping = grouping,
                                    filename = "mv_person", path = path_table,
-                                   overwrite = overwrite)
+                                   overwrite = overwrite, mvs = mvs)
 
     save_results(mv_person, filename = "mv_person.rds", path = path_results)
     # dass hier kein save_table steht ist Absicht
   } else {
-      mv_person$summary <- mvp_table(mv_p = mv_person$mv_p, grouping = grouping)
+      mv_person$summary <- mvp_table(mv_p = mv_person$mv_p, grouping = grouping,
+                                     mvs = mvs)
   }
 
   if (print) {
@@ -196,15 +197,13 @@ mvp_analysis <- function(resp, vars, items, valid = NULL, grouping = NULL,
 #'
 #' @export
 
-mvp_table <- function(mv_p = NULL, grouping = NULL, overwrite = FALSE,
+mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
-                      filename = NULL, path = here::here("Tables"),
-                      resp = NULL, vars = NULL, items = NULL, valid = NULL) {
+                      filename = NULL, path = here::here("Tables")) {
 
   # Test data
-  test_mvp_data(mv_p, mvs = mvs, grouping = grouping,
-                resp = resp, vars = vars, valid = valid, items = items)
+  test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
 
   # Create table
   if (is.null(grouping)) {
@@ -292,8 +291,7 @@ mvp_plots <- function(mv_p = NULL, resp = NULL, vars = NULL, items,
                       color = NULL, verbose = TRUE) {
 
   # Test data
-  test_mvp_data(mv_p, resp = resp, vars = vars, items = items,
-                valid = valid, mvs = mvs, grouping = grouping)
+  test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
 
   # Prepare data
   if (is.null(grouping)) {
@@ -471,19 +469,10 @@ write_mvp_table <- function(mv_p) {
   return(results)
 }
 
-#' Test mv_p and if incomplete, create new mv_p
+
+#' Test mv_p for completeness
 #'
-#' @param mv_p  list; return object of mv_person()
-#' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; all responses ∈ ℕ0; user-defined missing values;
-#' includes all variables that are further defined in the function arguments
-#' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
-#' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
-#' which items to use for the analysis
-#' @param valid  string; defines name of logical variable in resp that indicates
-#' (in)valid cases
+#' @param mv_p  list; return object of mvi_analysis()
 #' @param grouping  character vector; contains for each group a name of a logical
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
@@ -491,13 +480,16 @@ write_mvp_table <- function(mv_p) {
 #'
 #' @noRd
 
-test_mvp_data <- function(mv_p, resp, vars, items, grouping, mvs, valid) {
-  if (is.null(mv_p)) {
-    if (!is.null(resp) & !is.null(vars)) {
-      mv_p <- mvp_analysis(resp, vars = vars, items = items, valid = valid,
-                           mvs = mvs, grouping = grouping)
-    } else {
-      stop("Please provide mv_p or resp and vars.")
-    }
+
+test_mvp_data <- function(mv_p, grouping, mvs) {
+
+  if (is.null(grouping)) {
+    nms <- names(mv_p)[-length(mv_p)]
+  } else {
+    nms <- names(mv_p$all)[-length(mv_p$all)]
+  }
+
+  if (any(!(names(mvs) %in% nms))) {
+    stop("Please provide mv_p with all specified missing values.")
   }
 }

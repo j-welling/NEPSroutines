@@ -261,47 +261,31 @@ mvi_analysis <- function(resp, vars, items, valid = NULL,
 #' item position. If not otherwise specified, the order in which the items are
 #' given to the function is taken as the order the items appeared in the test.
 #'
+#' @param mv_i  list; return object of mvi_analysis()
 #' @param vars  data.frame; contains information about items with items as rows;
 #' includes variable 'items' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
 #' @param items  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
-#' @param mv_i  list; return object of mvi_analysis()
-#' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; all responses ∈ ℕ0; user-defined missing values;
-#' includes all variables that are further defined in the function arguments
-#' @param valid  string; defines name of logical variable in resp that indicates
-#' (in)valid cases
-#' @param position  (named) character vector; defines name(s) of integer
-#' variable(s) in vars that indicate position of items; if groups with differing
-#' item positions in testlets exist, then vector must be named with names of
-#' groups (as in "grouping") as names of elements and names of variables as elements
 #' @param grouping  character vector; contains for each group a name of a logical
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
-#' @param show_all  logical; whether whole sample shall be included as a "group"
-#' (only applicable when grouping exists)
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param path  string; defines path to folder where table shall be saved
 #' @param filename  string; defines name of table that shall be saved
 #' @param overwrite  logical; whether to overwrite existing file when saving table
-#' @param digits  integer; number of decimals for rounding
-#' @param warn  logical; whether to print a warning if NAs were found in resp
 #'
 #' @return table with results
 #' @export
 
-mvi_table <- function(vars, items, mv_i = NULL, resp = NULL, valid = NULL,
-                      position = NULL, grouping = NULL, show_all = FALSE,
+mvi_table <- function(mv_i, vars, items, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       filename = NULL, path = here::here("Tables"),
-                      digits = 2, warn = TRUE, overwrite = FALSE) {
+                      overwrite = FALSE) {
 
   # Test data
-  test_mvi_data(mv_i, resp = resp, vars = vars, mvs = mvs, items = items,
-                position = position, grouping = grouping, show_all = show_all,
-                valid = valid, digits = digits, warn = warn)
+  test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
 
   # Create table
 
@@ -340,26 +324,15 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL, valid = NULL,
 #' item position. If not otherwise specified, the order in which the items are
 #' given to the function is taken as the order the items appeared in the test.
 #'
+#' @param mv_i  list; return object of mvi_analysis()
 #' @param vars  data.frame; contains information about items with items as rows;
 #' includes variable 'items' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
 #' @param items  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
-#' @param mv_i  list; return object of mvi_analysis()
-#' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; all responses ∈ ℕ0; user-defined missing values;
-#' includes all variables that are further defined in the function arguments
-#' @param valid  string; defines name of logical variable in resp that indicates
-#' (in)valid cases
-#' @param position  (named) character vector; defines name(s) of integer
-#' variable(s) in vars that indicate position of items; if groups with differing
-#' item positions in testlets exist, then vector must be named with names of
-#' groups (as in "grouping") as names of elements and names of variables as elements
 #' @param grouping  character vector; contains for each group a name of a logical
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
-#' @param show_all  logical; whether whole sample shall be included as a "group"
-#' (only applicable when grouping exists)
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
@@ -367,15 +340,14 @@ mvi_table <- function(vars, items, mv_i = NULL, resp = NULL, valid = NULL,
 #' @param color  character calar or vector; defines color(s) of the bar in plots
 #' @param name_grouping  string; name of the grouping variable (e.g. test version)
 #' for title and legend of plots (only needed when grouping exists)
-#' @param digits  integer; number of decimals for rounding
-#' @param warn  logical; whether to print a warning if NAs were found in resp
+#' @param show_all  logical; whether whole sample shall be included as a "group"
+#' (only applicable when grouping exists)
 #' @param verbose  logical; whether to print processing information to console
 #'
 #' @importFrom rlang .data
 #' @export
 
-mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL, valid = NULL,
-                      position = NULL, grouping = NULL, show_all = FALSE,
+mvi_plots <- function(mv_i, vars, items, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       labels_mvs = c(
@@ -391,18 +363,16 @@ mvi_plots <- function(vars, items, mv_i = NULL, resp = NULL, valid = NULL,
                       ),
                       path = here::here("Plots/Missing_Responses/by_item"),
                       color = NULL, name_grouping = 'test version',
-                      digits = 2, verbose = TRUE, warn = TRUE) {
+                      show_all = FALSE, verbose = TRUE) {
 
   # Test data
-  test_mvi_data(mv_i, resp = resp, vars = vars, mvs = mvs, items = items,
-                position = position, grouping = grouping, show_all = show_all,
-                valid = valid, digits = digits, warn = warn)
+  test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
 
   # Pepare data
   mv_i <- mv_i$list
 
   if (is.null(grouping)) {
-    k <- sum(vars[[items]]) # auch hier wäre es vielleicht übersichtlicher, das Argument "items" in "select" o.Ä. umzubenennen
+    k <- sum(vars[[items]])
   } else {
     k <- NA_integer_
     for (g in grouping) {
@@ -644,62 +614,26 @@ mvi_summary <- function(mvlist, digits = 2) {
   return(mvsum)
 }
 
-#' Test mvi data and if not incomplete, create new mv_i
+#' Test mv_i for completeness
 #'
-#' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; all responses ∈ ℕ0; user-defined missing values;
-#' includes all variables that are further defined in the function arguments
-#' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
-#' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
-#' which items to use for the analysis
-#' @param valid  string; defines name of logical variable in resp that indicates
-#' (in)valid cases
-#' @param position  (named) character vector; defines name(s) of integer
-#' variable(s) in vars that indicate position of items; if groups with differing
-#' item positions in testlets exist, then vector must be named with names of
-#' groups (as in "grouping") as names of elements and names of variables as elements
+#' @param mv_i  list; return object of mvi_analysis()
 #' @param grouping  character vector; contains for each group a name of a logical
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
 #' @param mvs  named integer vector; contains user-defined missing values
-#' @param show_all  logical; whether whole sample shall be included as a "group"
-#' (only applicable when grouping exists)
-#' @param digits  integer; number of decimals for rounding
-#' @param warn  logical; whether to print a warning if NAs were found in resp
 #'
 #' @noRd
 
 
-test_mvi_data <- function(mv_i, resp, vars, mvs, items, position, grouping,
-                          show_all, valid, digits, warn) {
+test_mvi_data <- function(mv_i, grouping, mvs) {
 
-  if (is.null(mv_i)) {
-    if (!is.null(resp) & !is.null(position)) {
-      mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
-                           position = position, grouping = grouping,
-                           show_all = show_all, valid = valid,
-                           digits = digits, warn = warn)
-    } else {
-      stop("Please provide mv_i, or resp and position.")
-    }
+  if (is.null(grouping)) {
+    nms <- names(mv_i$list)[-length(mv_i$list)]
   } else {
-    if (is.null(grouping)) {
-      nms <- names(mv_i$list)
-    } else {
-      nms <- names(mv_i$list$all)
-    }
+    nms <- names(mv_i$list$all)[-length(mv_i$list$all)]
+  }
 
-    if (any(!(names(mvs) %in% nms))) {
-      if (!is.null(resp) & !is.null(position)) {
-        mv_i <- mvi_analysis(resp, vars = vars, mvs = mvs, items = items,
-                             position = position, grouping = grouping,
-                             show_all = show_all, valid = valid,
-                             digits = digits, warn = warn)
-      } else {
-        stop("Please provide mv_i with specified missing values, or resp and position.")
-      }
-    }
+  if (any(!(names(mvs) %in% nms))) {
+    stop("Please provide mv_i with all specified missing values.")
   }
 }
