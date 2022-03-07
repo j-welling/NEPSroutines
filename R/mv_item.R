@@ -189,17 +189,18 @@ mvi_analysis <- function(resp, vars, items, valid = NULL,
     for (g in grouping) {
 
       # Select administered items for the group
-      resp_g <- resp_c[resp[[g]], vars$items[vars[[items]] & vars[[g]]]]
+      vars_g <- vars_c[vars_c[[g]], ]
+      resp_g <- resp_c[resp[[g]], vars_g$items]
 
       # Number of valid responses and position
       if (length(position) == 1) {
-        pos <- vars_c[[position]]
+        pos <- vars_g[[position]]
       } else {
-        pos <- vars_c[[position[g]]]
+        pos <- vars_g[[position[g]]]
       }
 
       # Create list with results
-      mvlist[[g]] <- create_mvlist(items = vars_c$items[!is.na(pos)],
+      mvlist[[g]] <- create_mvlist(items = vars_g$items[!is.na(pos)],
                                    position = na.omit(pos),
                                    responses = resp_g,
                                    mvs = mvs,
