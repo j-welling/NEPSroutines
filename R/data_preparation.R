@@ -9,8 +9,8 @@
 #'   includes variable 'items' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
 #' @param old_names  character vector; contains the names of the original items
-#' @param new_names  character vector; contains the names of the new items,
-#' must be in same order as parameter "old_names"
+#' @param new_names  character vector; contains the names of the new items. Must
+#' be in same order as parameter "old_names"! (default is old name + "_c")
 #'
 #' @return resp with dichotomously scored MC items.
 #' @export
@@ -43,8 +43,8 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
 #'   includes variable 'items' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
 #' @param old_names  character vector; contains the names of the original items
-#' @param new_names  character vector; contains the names of the new items (must
-#' be in same order as parameter "old_names"), default is old name + "_c"
+#' @param new_names  character vector; contains the names of the new items. Must
+#' be in same order as parameter "old_names"!
 #' @param change named character vector; if some information in vars about the
 #' new items shall be changed, include the respective variable as the name and the new
 #' value as the value of the vector (e.g. change = c(raw = FALSE, dich = TRUE)),
@@ -54,7 +54,7 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
 #' @export
 duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 
-        vars_new <- vars[vars$items %in% old_names, ]
+    vars_new <- vars[vars$items %in% old_names, ]
     vars_new$items <- new_names
     if (!is.null(change)) {
         for (c in seq_along(change)) {
