@@ -10,14 +10,15 @@
 
 only_valid <- function(resp, valid = NULL, warn = TRUE) {
 
-    if (!is.null(valid)) {
-        resp <- resp[resp[[valid]], ]
-    } else if (warn) {
-        warning("No variable with valid cases provided. All cases are used ",
-                "for analysis.")
-    }
+  if(!is.null(valid)) {
+    check_logicals(resp, "resp", valid, warn = warn)
+    resp <- resp[resp[[valid]], ]
+  } else if (warn) {
+      warning("No variable with valid cases provided. ",
+              "All cases are used for analysis.\n")
+  }
 
-    return(resp)
+  return(resp)
 }
 
 
@@ -27,25 +28,36 @@ only_valid <- function(resp, valid = NULL, warn = TRUE) {
 #' converted to NAs so that they do not break the IRT analysis
 #'
 #' @param resp  data.frame containing the item responses
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'items' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param warn logical; whether warnings are to be printed to the console
 #'
-#' @return              data.frame like resp, but without user-defined mvs
+#' @return data.frame like resp, but without user-defined mvs
 #' @export
 
-convert_mv <- function(resp, items = NULL, mvs = NULL, warn = TRUE) {
+convert_mv <- function(resp, vars, select = NULL, mvs = NULL, warn = TRUE) {
 
   if (is.null(mvs)) {
+
     mvs <- -999:-1
+
     if (warn) {
-      warning("No user defined missing values provided. Default of ",
-              "'-999 to -1' is used.\n")
+      warning("No user defined missing values provided. ",
+              "Default of '-999 to -1' is used.\n")
     }
   }
 
-  if (is.null(items)) items <- colnames(resp)
+  if (is.null(select)) {
+    items <- names(resp)
+  } else {
+    check_logicals(vars, "vars", select)
+    items <- vars$items[vars[[select]]]
+    check_variables(resp, "resp", variables = items)
+  }
 
   for (i in items) {
     resp[[i]] <- replace(resp[[i]], resp[[i]] %in% mvs, NA)
@@ -80,22 +92,22 @@ prepare_resp <- function(resp, vars = NULL, items = NULL,
                          convert = FALSE, mvs = NULL,
                          warn = TRUE, zap_labels = TRUE) {
 
-    if (use_only_valid) resp <- only_valid(resp = resp, valid = valid)
+    if (use_only_valid) resp <- only_valid(resp = resp,
+                                           valid = valid,
+                                           warn = warn)
 
     if (!is.null(items)) {
         if (is.null(vars)) {
             stop("To create dataframe (resp) with only the indicated items ",
                  "please also provide vars.")
         } else {
-            if (items %in% colnames(vars)) {
-              resp <- resp[ , vars$items[vars[[items]]]]
-            } else {
-              stop(paste0("No variable with name '", items, "' exists in vars."))
-            }
+            check_logicals(vars, "vars", items, warn = warn)
+            check_variables(resp, "resp", variables = vars$items[vars[[items]]])
+            resp <- resp[ , vars$items[vars[[items]]]]
         }
     } else {
-        warning("No variable provided indicating the items to keep. All items ",
-                "are kept.")
+        warning("No variable provided indicating the items to keep. ",
+                "All items are kept.")
     }
 
     if (convert) resp <- convert_mv(resp = resp, mvs = mvs, warn = warn)
@@ -169,7 +181,7 @@ save_results <- function(results, filename, path) {
 check_folder <- function(path) {
     if (!file.exists(path)) {
         dir.create(path, recursive = TRUE)
-        warning("The location ", path, " did not exist. New folder created.")
+        warning("The location ", path, " did not exist. New folder created.\n")
     }
 }
 
@@ -198,11 +210,14 @@ check_pid <- function(pid) {
 
 check_variables <- function(df, name_df, variables) {
 
-  not_included <- !variables %in% names(df)
+  if (!is.null(variables)) {
 
-  if (sum(not_included) > 0) {
-    stop(paste0("Data.frame ", name_df, " does not include any variable with the",
-                " name '", variables[not_included], "'. Please check again.\n\n"))
+    not_included <- !variables %in% names(df)
+
+    if (sum(not_included) > 0) {
+      stop(paste0("Data.frame ", name_df, " does not include any variable with the",
+                  " name '", variables[not_included], "'. Please check again.\n"))
+    }
   }
 }
 
@@ -213,26 +228,30 @@ check_variables <- function(df, name_df, variables) {
 #' @param name_df  string; contains name of data.frame
 #' @param logicals  character vector; contains names of variables that shall be
 #' checked for correctness
+#' @param warn  logical; whether to warn if logicals include NA
 #'
 #' @export
 
-check_logicals <- function(df, name_df, logicals) {
+check_logicals <- function(df, name_df, logicals, warn = TRUE) {
 
-  check_variables(df, name_df, logicals)
+  if (!is.null(logicals)) {
 
-  no_logical <- sapply(df[ , logicals], function(x) !is.logical(x))
+    check_variables(df, name_df, logicals)
 
-  if (sum(no_logical) > 0) {
-    stop(paste0("Variable '", logicals[no_logical], "' in data.frame ",
-                name_df, " is no logical. Please check again.\n\n"))
-  }
+    no_logical <- sapply(df[ , logicals, drop = FALSE], function(x) !is.logical(x))
 
-  other_value <- sapply(df[ , logicals], function(x) any(!x %in% c(TRUE, FALSE)))
+    if (sum(no_logical) > 0) {
+      stop(paste0("Variable '", logicals[no_logical], "' in data.frame ",
+                  name_df, " is no logical. Please check again.\n"))
+    }
 
-  if (sum(other_value) > 0) {
-    stop(paste0("Logical variable '", logicals[other_value], "' in ",
-                "data.frame ", name_df, " contains other values than TRUE or ",
-                "FALSE (e.g., NA). Please check again.\n\n"))
+    other_value <- sapply(df[ , logicals, drop = FALSE], function(x) any(!x %in% c(TRUE, FALSE)))
+
+    if (warn & sum(other_value) > 0) {
+      warning(paste0("Logical variable '", logicals[other_value], "' in ",
+                     "data.frame ", name_df, " contains other values than TRUE or ",
+                     "FALSE (e.g., NA). Please check again.\n"))
+    }
   }
 }
 
@@ -242,22 +261,24 @@ check_logicals <- function(df, name_df, logicals) {
 #' @param df  data.frame; contains at least the indicated numeric variable(s)
 #' @param name_df  string; contains name of df
 #' @param numerics  character vector; contains names of variables that shall be
-#' checked for correctness
+#' checked for correctness; if NULL, all items will be used
 #' @param check_invalid  logical; whether to check df for invalid values
 #' @param dich  logical; whether to check items for non-dichotomous values
 #'
 #' @export
 
-check_numerics <- function(df, name_df, numerics, check_invalid = TRUE,
+check_numerics <- function(df, name_df, numerics = NULL, check_invalid = TRUE,
                            dich = FALSE, poly = FALSE, collapsed = TRUE) {
+
+  if(is.null(numerics)) numerics <- names(df)
 
   check_variables(df, name_df, numerics)
 
-  no_numeric <- sapply(df[ , numerics], function(x) !is.numeric(x))
+  no_numeric <- sapply(df[ , numerics, drop = FALSE], function(x) !is.numeric(x))
 
   if (sum(no_numeric) > 0) {
     stop(paste0("Variable '", numerics[no_numeric], "' in data.frame ", name_df,
-                " is no numeric variable. Please check again.\n\n"))
+                " is no numeric variable. Please check again.\n"))
   }
 
   if (check_invalid) check_invalid_values(df, name_df, items = numerics)
@@ -279,7 +300,7 @@ check_invalid_values <- function(df, name_df, items = NULL) {
 
   if (is.null(items)) items <- names(df)
 
-  if(any(df[ , items][!is.na(df[ , items])] < 0)) {
+  if(any(df[ , items, drop = FALSE][!is.na(df[ , items, drop = FALSE])] < 0)) {
     stop(paste0("Data.frame ", name_df, " contains invalid values (< 0) in ",
                 "specified items. Please check again and be sure to include all ",
                 "user defined missing values in the vector mvs. Default is ",
@@ -301,12 +322,13 @@ check_dich <- function(df, name_df, dich_items = NULL) {
 
   if (is.null(dich_items)) dich_items <- names(df)
 
-  no_dich <- sapply(df[ , dich_items], function(x) max(x, na.rm = TRUE) > 1)
+  no_dich <- sapply(df[ , dich_items, drop = FALSE], function(x) {
+    max(x, na.rm = TRUE) > 1})
 
   if (sum(no_dich) > 0) {
     stop(paste0("Variable '", dich_items[no_dich], "' in data.frame ", name_df,
                 " contains values greater than 1, although specified as",
-                " dichotomous. Please check again.\n\n"))
+                " dichotomous. Please check again.\n"))
   }
 }
 
