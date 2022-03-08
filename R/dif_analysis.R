@@ -227,7 +227,6 @@ dif_model <- function(resp, vars, items, dif_var, irt_type, scoring = 'scoring',
           ": User-defined missing values (-999 to -1) converted to NA.")
 
   # Prepare DIF analysis
-  #is_pcm <- any(apply(resp, 2, max, na.rm = TRUE) > 1)
   tmp_formula <- paste("~ item +", ifelse(is_pcm, "item * step +", ""))
   formula_dmod <- as.formula(paste(tmp_formula, "item *", dif_var))
   formula_mmod <- as.formula(paste(tmp_formula, dif_var))
@@ -243,7 +242,7 @@ dif_model <- function(resp, vars, items, dif_var, irt_type, scoring = 'scoring',
   }
 
   # DIF analysis
-  if (irt_type = 'poly') {
+  if (irt_type == 'poly') {
     mmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
       vars = vars, select = items, scoring = scoring, verbose = verbose
@@ -252,7 +251,7 @@ dif_model <- function(resp, vars, items, dif_var, irt_type, scoring = 'scoring',
       resp = resp, facets = facets, formulaA = formula_dmod, pid = pid,
       vars = vars, select = items, scoring = scoring, verbose = verbose
     )
-  } else if (irt_type = 'dich') {
+  } else if (irt_type == 'dich') {
     Q <- as.matrix(vars[[scoring]][vars[[items]]])
     dmod <- TAM::tam.mml.mfr(resp,
                              irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
