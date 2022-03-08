@@ -34,7 +34,7 @@
 #' for title and legend of plots (only needed when grouping exists)
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
-#' @param warn  logical; whether to print a warning if NAs were found in resp
+#' @param warn  logical; whether to print warnings (should be better set to true)
 #' @param verbose  logical; whether to print processing information to console
 #'
 #' @return (if return = TRUE) list with results:
@@ -65,21 +65,33 @@ mv_item <- function(resp, vars, items, valid = NULL,
                     show_all = FALSE, color = NULL, name_grouping = 'test version',
                     overwrite = FALSE, digits = 2, warn = TRUE, verbose = TRUE) {
 
+  # Test data
+  check_logicals(resp, "resp", c(valid, grouping), warn = warn)
+  check_logicals(vars, "vars", c(items, grouping), warn = warn)
+
+  if (is.null(valid)) {
+    warning("No variable with valid cases provided. ",
+            "All cases are used for analysis.\n")
+  }
+
   # Conduct analysis
   mv_item <- mvi_analysis(resp = resp, vars = vars, items = items,
                           valid = valid, position = position,
                           grouping = grouping, show_all = show_all,
-                          mvs = mvs, digits = digits, warn = warn)
+                          mvs = mvs, digits = digits, warn = warn,
+                          test = FALSE)
 
   # Write grouped table
   mv_item$summary_table <- mvi_table(mv_i = mv_item, vars = vars, items = items,
-                                     mvs = mvs, grouping = grouping)
+                                     mvs = mvs, grouping = grouping, warn = warn,
+                                     test = FALSE)
 
   # Write plots
   if (plots) mvi_plots(mv_i = mv_item, vars = vars, items = items,
                        grouping = grouping, mvs = mvs, labels_mvs = labels_mvs,
                        show_all = show_all, color = color, verbose = verbose,
-                       name_grouping = name_grouping, path = path_plots)
+                       name_grouping = name_grouping, path = path_plots,
+                       warn = warn, test = FALSE)
 
   # Save results
   if (save) {
@@ -127,7 +139,8 @@ mv_item <- function(resp, vars, items, valid = NULL,
 #' @param path  string; defines path to folder where results shall be saved
 #' @param filename  string; defines name of file that shall be saved
 #' @param digits  integer; number of decimals for rounding
-#' @param warn  logical; whether to print a warning if NAs were found in resp
+#' @param warn  logical; whether to print warnings (should be set to TRUE)
+#' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @return   list with percentages:
 #'            mvlist: percentages for each item
@@ -135,32 +148,46 @@ mv_item <- function(resp, vars, items, valid = NULL,
 #' @importFrom stats median sd na.omit
 #' @export
 
-mvi_analysis <- function(resp, vars, items, valid = NULL,
-                         position = NULL, grouping = NULL, show_all = FALSE,
+mvi_analysis <- function(resp, vars, items, position, valid = NULL,
+                         grouping = NULL, show_all = FALSE,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, NAd = -54, AZ = -21),
                          path = here::here("Data"), filename = NULL,
-                         digits = 2, warn = TRUE) {
+                         digits = 2, warn = TRUE, test = TRUE) {
 
   # Test data
+  check_numerics(vars, "vars", position)
+
+  if (test) {
+    check_logicals(resp, "resp", c(valid, grouping), warn = warn)
+    check_logicals(vars, "vars", c(items, grouping), warn = warn)
+
+    if (is.null(valid)) {
+      warning("No variable with valid cases provided. ",
+              "All cases are used for analysis.\n")
+    }
+  }
+
   if (is.null(grouping)) {
     if (length(position) > 1) {
       stop("No grouping. Please provide only one position variable.")
     }
-  } else if (length(position) == 1) {
-        warn("Only one position variable provided. ",
+  } else {
+    if (length(position) == 1 & warn) {
+        warning("Only one position variable provided. ",
         "The items of each group are therefore set to the same positions.")
     } else if (length(position) != length(grouping)) {
           stop("Position and grouping variables do not match. ",
           "Please provide either only one position variable (if positions of items do not differ between groups) ",
           "or matching position and grouping variables (if positions of items do differ between groups).")
+    }
   }
 
 
   # Prepare data
   vars_c <- vars[vars[[items]], ]
   resp <- only_valid(resp, valid = valid)
-  resp_c <- prepare_resp(resp, vars = vars, items = items)
+  resp_c <- prepare_resp(resp, vars = vars, items = items, warn = warn)
 
   # NAs are not acknowledged in mvs-argument
   if (warn & !(NA %in% mvs) & any(resp_c %in% NA)) {
@@ -274,6 +301,8 @@ mvi_analysis <- function(resp, vars, items, valid = NULL,
 #' @param path  string; defines path to folder where table shall be saved
 #' @param filename  string; defines name of table that shall be saved
 #' @param overwrite  logical; whether to overwrite existing file when saving table
+#' @param warn  logical; whether to print warnings (should be set to TRUE)
+#' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @return table with results
 #' @export
@@ -282,10 +311,13 @@ mvi_table <- function(mv_i, vars, items, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       filename = NULL, path = here::here("Tables"),
-                      overwrite = FALSE) {
+                      overwrite = FALSE, test = TRUE, warn = TRUE) {
 
   # Test data
-  test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
+  if (test) {
+    test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
+    check_logicals(vars, "vars", c(items, grouping), warn = warn)
+  }
 
   # Create table
 
@@ -343,6 +375,8 @@ mvi_table <- function(mv_i, vars, items, grouping = NULL,
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
 #' @param verbose  logical; whether to print processing information to console
+#' @param warn  logical; whether to print warnings (should be set to TRUE)
+#' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @importFrom rlang .data
 #' @export
@@ -363,10 +397,14 @@ mvi_plots <- function(mv_i, vars, items, grouping = NULL,
                       ),
                       path = here::here("Plots/Missing_Responses/by_item"),
                       color = NULL, name_grouping = 'test version',
-                      show_all = FALSE, verbose = TRUE) {
+                      show_all = FALSE, verbose = TRUE, warn = TRUE,
+                      test = TRUE) {
 
   # Test data
-  test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
+  if (test) {
+    test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
+    check_logicals(vars, "vars", c(items, grouping), warn = warn)
+  }
 
   # Pepare data
   mv_i <- mv_i$list

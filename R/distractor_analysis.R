@@ -31,6 +31,7 @@
 #' are stored on the hard drive; please note that the path is relative to the
 #' current working path set by here::i_am()
 #' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param warn  logical; whether to print warnings (should be set to TRUE)
 #'
 #' @return list of one data frame per item containing item-total correlations
 #'   for each possible response; correct response is marked with an *
@@ -39,22 +40,29 @@
 #' @importFrom rlang .data
 #' @export
 
-dis_analysis <- function(resp, vars, item_type = 'MC',
-                         scored_version = NULL, valid = NULL,
+dis_analysis <- function(resp, vars, valid = NULL, item_type = 'MC',
+                         scored_version = NULL, mvs = NULL,
                          save = TRUE, print = TRUE, return = FALSE,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
-                         overwrite = FALSE) {
+                         overwrite = FALSE, warn = TRUE) {
 
+    # Create list for results
     distractors <- list()
+
+    # Conduct distratcor analysis
     distractors$analysis <- conduct_dis_analysis(resp = resp,
                                                  vars = vars,
                                                  item_type = item_type,
                                                  scored_version = scored_version,
-                                                 valid = valid)
+                                                 valid = valid,
+                                                 warn = warn)
     distractors$summary <- dis_summary(distractors$analysis)
 
+    # Print results
     if (print) print_dis_summary(distractors$summary)
+
+    # Save results
     if (save) {
         save_results(distractors,
                      filename = "distractors.rds", path = path_results)
@@ -62,6 +70,7 @@ dis_analysis <- function(resp, vars, item_type = 'MC',
                    filename = "distractors.xlsx", path = path_table)
     }
 
+    # Save results
     if (return) return(distractors)
 }
 
@@ -89,18 +98,28 @@ dis_analysis <- function(resp, vars, item_type = 'MC',
 #' default of name_scored_item = name_unscored_item + "_c" applies
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
+#' @param warn  logical; whether to print warnings (should be set to TRUE)
+#'
 #' @export
+
 conduct_dis_analysis <- function(resp, vars, item_type = 'MC',
-                                 scored_version = NULL, valid = NULL) {
+                                 scored_version = NULL, valid = NULL,
+                                 mvs = NULL, warn = TRUE) {
+    # Test data
+    check_logicals(vars, "vars", c(scored_version, "dich", "raw"), warn = warn)
+    check_variables(vars, "vars", c("items", "type", "correct_response"))
+
     # prepare data
-    resp <- only_valid(resp, valid = valid)
+    resp <- only_valid(resp, valid = valid, warn = warn)
 
     unscored <- vars$items[vars$type %in% item_type & vars$raw == TRUE]
     correct <- vars$correct_response[vars$type %in% item_type & vars$raw == TRUE]
     scored <- vars$items[vars$dich == TRUE]
     var_names <- unique(c(unscored, scored))
 
-    resp <- convert_mv(resp = resp, items = var_names)
+    resp <- convert_mv(resp = resp, items = var_names, mvs = mvs, warn = warn)
+
+    check_numerics(resp, "resp", scored, dich = TRUE)
 
     # Sum score across all items
     resp$score <- rowMeans(resp[, scored], na.rm = TRUE)

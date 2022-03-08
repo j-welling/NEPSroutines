@@ -31,6 +31,7 @@
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param verbose  logical; whether to print processing information to console
 #'
 #' @return a list of:
@@ -43,29 +44,53 @@ dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, mvs = NULL,
                          save = TRUE, print = TRUE, return = FALSE,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
-                         verbose = FALSE) {
+                         verbose = FALSE, warn = TRUE) {
+
+  # Test data
+  check_logicals(vars, "vars", items, warn = warn)
+  check_logicals(resp, "resp", valid, warn = warn)
+  check_variables(resp, "resp", dif_vars)
+
+
+  if (!is.null(scoring)) check_numerics(vars, "vars", scoring)
+
+  if (is.null(mvs)) {
+    warning("No user defined missing values provided. ",
+            "Default of '-999 to -1' is used.\n")
+  }
+
+  if (is.null(valid)) {
+    warning("No variable with valid cases provided. ",
+            "All cases are used for analysis.\n")
+  }
 
   check_items(items, dif_vars)
 
+  # Create list for results
   dif <- list()
 
+  # Conduct dif analyses
   dif$models <- conduct_dif_analysis(
     items = items, dif_vars = dif_vars, resp = resp, vars = vars,
     irt_type = irt_type, scoring = scoring, valid = valid, save = save,
-    path = path_results, mvs = mvs, verbose = verbose
+    path = path_results, mvs = mvs, verbose = verbose, warn = warn,
+    test = FALSE
   )
 
+  # Create summary
   dif$summaries <- summarize_dif_analysis(
     dif_models = dif$models, dif_vars = dif_vars, irt_type = irt_type,
     path_table = path_table, path_results = path_results,
     print = print, save = save, overwrite = overwrite
   )
 
+  #Create table for TR
   dif$tr_tables <- build_dif_tr_tables(
     dif_summaries = dif$summaries, irt_type = irt_type, save = save,
     path = path_table, overwrite = overwrite
   )
 
+  # Return results
   if (return) return(dif)
 }
 
@@ -106,34 +131,62 @@ check_items <- function(items, dif_vars) {
 #' @param path  string; defines path to folder where results shall be saved
 #' @param verbose  logical; whether to print processing information to console
 #' @param mvs named integer vector; contains user-defined missing values
+#' @param warn  logical; whether to print warnings (should be set to TRUE)
+#' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @return a list of length(dif_vars) lists containing each:
 #'   mmod: main effects model
 #'   dmod: DIF effects model
 #' @export
-conduct_dif_analysis <- function(resp, vars, items, dif_vars, valid, irt_type,
-                                 scoring, mvs = NULL, save = TRUE,
-                                 path = here::here('Results'), verbose = FALSE) {
+conduct_dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL,
+                                 irt_type, scoring = 'scoring', mvs = NULL,
+                                 path = here::here('Results'), save = TRUE,
+                                 verbose = FALSE, warn = TRUE, test = TRUE) {
 
+  # Test data
+  if (test) {
+    check_logicals(vars, "vars", items, warn = warn)
+    check_logicals(resp, "resp", valid, warn = warn)
+    check_variables(resp, "resp", dif_vars)
+
+    if (!is.null(scoring)) check_numerics(vars, "vars", scoring)
+
+    if (is.null(mvs)) {
+      warning("No user defined missing values provided. ",
+              "Default of '-999 to -1' is used.\n")
+    }
+
+    if (is.null(valid)) {
+      warning("No variable with valid cases provided. ",
+              "All cases are used for analysis.\n")
+    }
+  }
+
+  # Create list for results
   dif_models <- list()
 
+  # Set same items to all dif variables if items has length 1
   if (length(items) == 1) {
     items <- rep(items, length(dif_vars))
   }
 
+  # Conduct dif analyses
   for (i in seq_along(dif_vars)) {
     dif_models[[i]] <- dif_model(resp = resp, vars = vars, items = items[i],
                                  valid = valid, dif_var = dif_vars[i],
                                  irt_type = irt_type, scoring = scoring,
-                                 verbose = verbose, mvs = mvs)
+                                 verbose = verbose, mvs = mvs, warn = warn,
+                                 test = FALSE)
   }
   names(dif_models) <- dif_vars
 
+  # Save results
   if (save) {
       save_results(dif_models, path = path,
                    filename = paste0("dif_", irt_type, "models.rds"))
   }
 
+  # Return results
   return(dif_models)
 }
 
@@ -148,6 +201,7 @@ conduct_dif_analysis <- function(resp, vars, items, dif_vars, valid, irt_type,
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param overwrite logical; whether to overwrite existing file when saving table
+#'
 #' @returns a list of dif summaries for each input entry in dif_models
 #' @export
 summarize_dif_analysis <- function(dif_models, dif_vars, irt_type,
@@ -202,17 +256,39 @@ summarize_dif_analysis <- function(dif_models, dif_vars, irt_type,
 #' @param dif_var string; defines the name of the variable to be tested for DIF
 #' (e.g., "gender")
 #' @param verbose  logical; whether to print processing information to console
+#' @param warn  logical; whether to print warnings (should be set to TRUE)
+#' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @return a list of:
 #'   mmod: main effects model
 #'   dmod: DIF effects model
 #' @importFrom stats as.formula
 #' @export
-dif_model <- function(resp, vars, items, dif_var, irt_type, scoring = 'scoring',
-                      valid = NULL, mvs = NULL, verbose = FALSE) {
+dif_model <- function(resp, vars, items, dif_var, scoring = 'scoring',
+                      valid = NULL, irt_type, mvs = NULL,
+                      verbose = FALSE, warn = TRUE, test = TRUE) {
+
+  # Test data
+  if (test) {
+    check_logicals(vars, "vars", items, warn = warn)
+    check_logicals(resp, "resp", valid, warn = warn)
+    check_variables(resp, "resp", dif_vars)
+
+    if (!is.null(scoring)) check_numerics(vars, "vars", scoring)
+
+    if (is.null(mvs)) {
+      warning("No user defined missing values provided. ",
+              "Default of '-999 to -1' is used.\n")
+    }
+
+    if (is.null(valid)) {
+      warning("No variable with valid cases provided. ",
+              "All cases are used for analysis.\n")
+    }
+  }
 
   # Select only valid cases
-  resp <- only_valid(resp, valid = valid)
+  resp <- only_valid(resp, valid = valid, warn = FALSE)
 
   # Create ID and facets variable
   pid <- resp$ID_t
@@ -221,13 +297,14 @@ dif_model <- function(resp, vars, items, dif_var, irt_type, scoring = 'scoring',
 
   # Select only indicated items, valid responders and convert mvs
   resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE,
-                       mvs = mvs, warn = FALSE, use_only_valid = TRUE,
-                       valid = valid)
-  message(names(facets),
-          ": User-defined missing values (-999 to -1) converted to NA.")
+                       mvs = mvs, use_only_valid = TRUE, valid = valid,
+                       warn = FALSE)
+
+  # Test resp
+  check_numerics(resp, "resp")
 
   # Prepare DIF analysis
-  tmp_formula <- paste("~ item +", ifelse(is_pcm, "item * step +", ""))
+  tmp_formula <- paste("~ item +", ifelse(irt_type == 'poly', "item * step +", ""))
   formula_dmod <- as.formula(paste(tmp_formula, "item *", dif_var))
   formula_mmod <- as.formula(paste(tmp_formula, dif_var))
   rm(tmp_formula)
@@ -243,24 +320,34 @@ dif_model <- function(resp, vars, items, dif_var, irt_type, scoring = 'scoring',
 
   # DIF analysis
   if (irt_type == 'poly') {
+
     mmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
       vars = vars, select = items, scoring = scoring, verbose = verbose
     )
+
     dmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_dmod, pid = pid,
       vars = vars, select = items, scoring = scoring, verbose = verbose
     )
+
   } else if (irt_type == 'dich') {
+
+    # Check whether resp contains only dichotomous items
+    check_dich(resp, "resp")
+
     Q <- as.matrix(vars[[scoring]][vars[[items]]])
+
     dmod <- TAM::tam.mml.mfr(resp,
                              irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
                              formulaA = formula_dmod, verbose = verbose
     )
+
     mmod <- TAM::tam.mml.mfr(resp,
                              irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
                              formulaA = formula_mmod, verbose = verbose
     )
+
   } else {
 
     stop("No valid irt_type provided. Possible are 'dich' for only dichotomous ",

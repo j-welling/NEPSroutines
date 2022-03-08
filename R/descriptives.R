@@ -75,7 +75,7 @@ desc_nom <- function(dat, desc, valid = NULL, digits = 1,
     descriptives$frequency_abs <- desc_abs(dat, desc = desc, valid = valid,
                                            warn = FALSE)
     descriptives$frequency_perc_NA <- desc_perc(dat, desc = desc, valid = valid,
-                                                warn = FALSE, useNA = 'alwas',
+                                                warn = FALSE, useNA = 'always',
                                                 digits = digits)
     descriptives$frequency_perc_noNA <- desc_perc(dat, desc = desc, valid = valid,
                                                   warn = FALSE, useNA = 'no',

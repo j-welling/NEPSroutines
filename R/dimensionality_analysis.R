@@ -81,8 +81,8 @@ dim_analysis <- function(resp, vars, items, scoring = "scoring",
 #' contains the scoring factor to be applied to loading matrix; defaults to
 #' "scoring"
 #' @param dim  character vector. contains names of all dimension variables
-#' that shall be analyzed (NOTE: the dimensions must be coded as integers from 1
-#' to the number of dimensions!)
+#' in vars that shall be analyzed (NOTE: the dimensions must be coded as integers
+#' from 1 to the number of dimensions!)
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param irtmodel  string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
@@ -91,14 +91,18 @@ dim_analysis <- function(resp, vars, items, scoring = "scoring",
 #' @param snodes  snodes as passed to the TAM function
 #' @param verbose   verbose as passed to the TAM function
 #' @param mvs named integer vector; contains user-defined missing values
+#' @param warn  logical; whether to print warnings (should be set to TRUE)
 #'
 #' @return          list of results for each dimensional analysis
 #' @export
-conduct_dim_analysis <- function(resp, vars, items, scoring, dim,
-                                 valid, irtmodel, maxiter, snodes,
-                                 verbose, mvs) {
+conduct_dim_analysis <- function(resp, vars, items, dim, scoring = 'scoring',
+                                 valid = NULL, irtmodel, maxiter, snodes,
+                                 mvs = NULL, verbose = FALSE, warn = TRUE) {
+  # Test data
+  check_logicals(vars, "vars", c(dim, scoring), warn = warn)
+
   # Select only valid cases
-  resp <- only_valid(resp, valid = valid)
+  resp <- only_valid(resp, valid = valid, warn = warn)
 
   # Create ID and facets variable
   pid <- resp$ID_t
@@ -106,7 +110,9 @@ conduct_dim_analysis <- function(resp, vars, items, scoring, dim,
 
   # Select only indicated items and convert mvs
   resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE,
-                       mvs = mvs)
+                       mvs = mvs, warn = warn)
+
+  check_numerics(resp, "resp")
 
   # Create object for results
   dimensionality <- list()

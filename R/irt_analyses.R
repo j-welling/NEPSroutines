@@ -28,6 +28,8 @@
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
 #' @param verbose  logical; whether to print processing information to console
+#' @param warn  logical; whether to print warnings (should be set to TRUE to
+#' avoid problems with the data structure)
 #'
 #' @return list with a list for each group with all results
 #' (as return object of irt_analysis())
@@ -39,11 +41,31 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
                                  path_plots = here::here("Plots"),
                                  path_table = here::here("Tables"),
                                  path_results = here::here("Results"),
-                                 overwrite = FALSE, digits = 2, verbose = FALSE) {
+                                 overwrite = FALSE, digits = 2, verbose = FALSE,
+                                 warn = TRUE) {
 
+  # Test data
+  check_logicals(vars, "vars", groups, warn = warn)
+  check_logicals(resp, "resp", valid, warn = warn)
+
+  if (!is.null(scoring)) check_numerics(vars, "vars", scoring)
+
+  if (is.null(mvs)) {
+    warning("No user defined missing values provided. ",
+            "Default of '-999 to -1' is used.\n")
+  }
+
+  if (is.null(valid)) {
+    warning("No variable with valid cases provided. ",
+            "All cases are used for analysis.\n")
+  }
+
+
+  # Create list for results
   irt_groups <- list()
   i <- 1
 
+  # Conduct irt_analysis for each group
   for (g in names(groups)) {
 
     message(toupper(paste0("\n\n\n(", i, ") irt analysis (", irt_type, ") for ",
@@ -57,7 +79,8 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
                                     return = TRUE, path_results = path_results,
                                     path_table = path_table, path_plots = path_plots,
                                     overwrite = overwrite, digits = digits,
-                                    name_group = name_group)
+                                    name_group = name_group, warn = warn,
+                                    test = FALSE)
 
     i <- i + 1
   }
@@ -100,6 +123,9 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #' @param digits  integer; number of decimals for rounding
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param verbose  logical; whether to print processing information to console
+#' @param warn  logical; whether to print warnings (should be set to TRUE to
+#' avoid problems with the data structure)
+#' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @return   list with all results
 #' @export
@@ -110,19 +136,39 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
                          path_plots = here::here("Plots"),
                          path_table = here::here("Tables"),
                          path_results = here::here("Results"),
-                         overwrite = FALSE, digits = 2, verbose = FALSE,
-                         name_group = NULL) {
+                         overwrite = FALSE, digits = 2, name_group = NULL,
+                         verbose = FALSE, warn = TRUE, test = TRUE) {
 
+  # Test data
+  if (test) {
+    check_logicals(vars, "vars", items, warn = warn)
+    check_logicals(resp, "resp", valid, warn = warn)
+
+    if(!is.null(scoring)) check_numerics(vars, "vars", scoring)
+
+    if (is.null(mvs)) {
+      warning("No user defined missing values provided. ",
+              "Default of '-999 to -1' is used.\n")
+    }
+
+    if (is.null(valid)) {
+      warning("No variable with valid cases provided. ",
+              "All cases are used for analysis.\n")
+    }
+  }
+
+  # Create list with results
   irt <- list()
 
+  # Conduct IRT analyses
   if (irt_type == 'dich') {
 
     irt$model.1pl <- irt_model(resp = resp, vars = vars, items = items,
                                valid = valid, mvs = mvs, irtmodel = '1PL',
-                               verbose = verbose)
+                               verbose = verbose, warn = warn, test = FALSE)
     irt$model.2pl <- irt_model(resp = resp, vars = vars, items = items,
                                valid = valid, mvs = mvs, irtmodel = '2PL',
-                               verbose = verbose)
+                               verbose = verbose, warn = warn, test = FALSE)
 
     irtmodel = c("1PL", "2PL")
 
@@ -130,10 +176,10 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
 
     irt$model.pcm <- irt_model(resp = resp, vars = vars, items = items, mvs = mvs,
                                valid = valid, irtmodel = 'PCM2', scoring = scoring,
-                               verbose = verbose)
+                               verbose = verbose, warn = warn, test = FALSE)
     irt$model.gpcm <- irt_model(resp = resp, vars = vars, items = items, mvs = mvs,
                                 valid = valid, irtmodel = 'GPCM', scoring = scoring,
-                                verbose = verbose)
+                                verbose = verbose, warn = warn, test = FALSE)
 
     irtmodel = c("PCM2", "GPCM")
 
@@ -144,6 +190,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
 
   }
 
+  # Create plots
   if (plots) {
 
     #if (!is.null(name_group)) path_plots <- paste0(path_plots, "/", name_group)
@@ -161,7 +208,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
     }
   }
 
-
+  # Create tables
   if (return | print | save) {
     # IRT summary
     irt$summary <- irt_summary(resp = resp, vars = vars,
@@ -179,7 +226,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
     }
   }
 
-  # Print irt
+  # Print results
   if (print)  {
     message("\nIRT summary table\n")
     print(irt$summary)
@@ -195,7 +242,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
                       steps_sum = irt$steps)
   }
 
-  # Save irt
+  # Save results
   if (save) {
     if (is.null(name_group)) {
       name <- paste0("irt_", irt_type)
@@ -209,7 +256,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
                overwrite = overwrite)
   }
 
-  # Return irt
+  # Return results
   if (return)  return(irt)
 }
 
@@ -240,6 +287,8 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
 #' @param filename  string; defines name of file that shall be saved
 #' @param verbose  logical; whether to print processing information to console
 #' @param xsi.fixed matrix; contains fixed (linked) item parameters; optional
+#' @param warn  logical; whether to print warnings (should be set to TRUE)
+#' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @return (if return_results = TRUE) a list of:
 #'   mod: tam.mml; estimated item response model
@@ -254,7 +303,25 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
 irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel,
                       scoring = NULL, verbose = FALSE,
                       path = here::here("Results"), filename = NULL,
-                      xsi.fixed = NULL) {
+                      xsi.fixed = NULL, warn = TRUE, test = TRUE) {
+
+  # Test data
+  if (test) {
+    check_logicals(vars, "vars", items, warn = warn)
+    check_logicals(resp, "resp", valid, warn = warn)
+
+    if(!is.null(scoring)) check_numerics(vars, "vars", scoring)
+
+    if (is.null(mvs)) {
+      warning("No user defined missing values provided. ",
+              "Default of '-999 to -1' is used.\n")
+    }
+
+    if (is.null(valid)) {
+      warning("No variable with valid cases provided. ",
+              "All cases are used for analysis.\n")
+    }
+  }
 
   # Check if input is correct
   if (!irtmodel %in% c("1PL", "2PL", "GPCM", "PCM2")) {
@@ -263,7 +330,7 @@ irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel,
   }
 
   # Select only valid cases
-  resp <- only_valid(resp, valid = valid)
+  resp <- only_valid(resp, valid = valid, warn = FALSE)
 
   # Create ID variable
   pid <- resp$ID_t
@@ -271,10 +338,15 @@ irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel,
 
   # Prepare data
   resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE,
-                       mvs = mvs)
+                       mvs = mvs, warn = FALSE)
+
+  # Test data
+  check_numerics(resp, "resp")
+  if (irtmodel %in% c("1PL", "2PL")) check_dich(resp, "resp")
 
   # Create scoring matrix if not provided in function arguments
   if (!is.null(scoring)) {
+      check_numerics(vars, "vars", scoring)
       Q = as.matrix(vars[[scoring]][vars[[items]]])
   } else if (irtmodel %in% c("GPCM", "PCM2")) {
       stop("Please provide variable name for scoring factor for polytomous ",
@@ -285,15 +357,19 @@ irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel,
 
   # IRT model
   if (irtmodel %in% c("1PL", "PCM2")) {
+
     mod <- TAM::tam.mml(
       resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
       verbose = verbose, xsi.fixed = xsi.fixed
     )
+
   } else {
+
     mod <- TAM::tam.mml.2pl(
       resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
       verbose = verbose
     )
+
   }
 
   # WMNSQ
@@ -439,6 +515,7 @@ wright_map <- function(model, irtmodel, path = here::here("Plots"),
 #' @param filename  string; defines name of table that shall be saved
 #' @param digits  integer; number of decimals for rounding
 #' @param overwrite  logical; whether to overwrite existing file when saving table
+#' @param warn  logical; whether to print warnings (should be set to TRUE)
 #'
 #' @return a data.frame containing the item name, N, percentage correct,
 #'   item difficulty, SE, WMNSQ, t, rit, item discrimination, Q3.
@@ -448,13 +525,14 @@ wright_map <- function(model, irtmodel, path = here::here("Plots"),
 irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
                         model_1par, model_2par,
                         path = here::here("Tables"), filename = NULL,
-                        digits = 2, overwrite = FALSE) {
+                        digits = 2, overwrite = FALSE, warn = TRUE) {
 
   # prepare data
   vars$irt_items <- vars$items %in% rownames(model_1par$mod$xsi)
   vars_ <- dplyr::rename(vars[vars$irt_items, ], item = 'items')
   resp <- prepare_resp(resp, vars = vars, items = 'irt_items', valid = valid,
-                       use_only_valid = TRUE, convert = TRUE, mvs = mvs)
+                       use_only_valid = TRUE, convert = TRUE, mvs = mvs,
+                       warn = warn)
 
 
   # item parameters

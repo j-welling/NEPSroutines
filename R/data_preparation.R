@@ -15,13 +15,16 @@
 #' @return resp with dichotomously scored MC items.
 #' @export
 dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
+
+    # Check whether variables are indeed contained in data.frames
+    check_variables(resp, "resp", old_names)
+
     if (is.null(new_names)) {
         new_names <- paste0(old_names, "_c")
     }
 
     for (i in seq_along(old_names)) {
-        line <- which(vars$items == old_names[i])
-        item <- vars$items[line]
+        item <- old_names[i]
         if (is.double(resp[[item]])) {
             resp[[item]] <- as.numeric(resp[[item]])
         } else if (is.factor(resp[[item]])) {
@@ -83,6 +86,10 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 
 pc_scoring <- function(resp, poly_items, mvs = NULL) {
 
+    # Check whether variables are indeed contained in data.frames
+    check_numerics(resp, "resp", unlist(poly_items), dich = TRUE,
+                   check_invalid = FALSE)
+
     for (item in names(poly_items)) {
         subitems <- poly_items[[item]]
 
@@ -131,15 +138,26 @@ pc_scoring <- function(resp, poly_items, mvs = NULL) {
 collapse_response_categories <- function(resp, vars, pcitems, per_cat = 200,
                                          path_table = here::here("Tables"),
                                          print = TRUE, save = FALSE) {
+
+    # Check whether variables are indeed contained in data.frames
+    check_logicals(vars, "vars", pcitems)
+    check_numerics(resp, "resp", vars$items[vars[[pcitems]]],
+                   check_invalid = FALSE)
+
     collapsed_items <- c()
-    for (item in vars$items[[pcitems]]) {
+
+    for (item in vars$items[vars[[pcitems]]]) {
+
         response <- resp[[item]]
         tab <- table(response[response >= 0])
         collapse <- which(tab < per_cat)
+
         if (length(collapse) > 0) {
             collapsed_items <- c(collapsed_items, item)
         }
+
         while (length(collapse) > 0) {
+
             # if frequency of 0 too low, left shift for all values larger than 0
             if (names(tab)[collapse[1]] == "0") {
                 j <- which(response > 0)
@@ -148,16 +166,19 @@ collapse_response_categories <- function(resp, vars, pcitems, per_cat = 200,
             } else if (as.numeric(names(tab)[collapse[1]]) >= 1) {
                 j <- which(response >= as.numeric(names(tab)[collapse[1]]))
             }
+
             resp[j, item] <- response[j] - 1
             response <- resp[[item]]
             tab <- table(response[response >= 0])
             collapse <- which(tab < per_cat)
         }
     }
+
     if (print) {
         # Which items have been collapsed?
         cat(paste(collapsed_items, collapse = ", "))
     }
+
     if (save) {
         collapsed_items <- as.matrix(collapsed_items)
         save_table(collapsed_items, filename = "collapsed_items.rds",
@@ -182,6 +203,11 @@ collapse_response_categories <- function(resp, vars, pcitems, per_cat = 200,
 #' @return   logical vector with length = nrow(resp), indicating whether case is valid
 #' @export
 min_val <- function(resp, vars, items, min.val = NULL, invalid = NA) {
+
+    # Check whether variables are indeed contained in data.frames
+    check_logicals(vars, "vars", items)
+    check_numerics(resp, "resp", vars$items[vars[[items]]],
+                   check_invalid = FALSE)
 
     vrs <- vars$items[vars[[items]]]
     resp_ <- resp[ , vrs]
@@ -231,6 +257,9 @@ min_val <- function(resp, vars, items, min.val = NULL, invalid = NA) {
 #' @export
 pos_new <- function(vars, items, position) {
 
+    # Check whether variables are indeed contained in data.frames
+    check_numerics(vars, "vars", position)
+
     if (length(position) == 1) {
 
         vars_ <- vars[vars[[items]], ]
@@ -273,6 +302,10 @@ calculate_age <- function(resp,
                           birth_year, birth_month, birth_day = NULL,
                           test_year, test_month, test_day = NULL) {
 
+    # Check whether variables are indeed contained in data.frames
+    check_variables(resp, "resp", c(birth_year, birth_month,
+                                    test_year, test_month))
+
     if (is.null(birth_day)) {
         bday <- 15
     } else {
@@ -290,7 +323,3 @@ calculate_age <- function(resp,
     age <- as.numeric(difftime(birth, test, units = "weeks")) / 52.1429
     return(age)
 }
-
-# dichotomize_dif_variables <- function(variable, criteria, labels) {}
-# geht das wirklich? z.B. migration kategorisch, books kontinuierlich
-# lohnt sich auch kaum, da eh nur ein bis zwei Zeilen Code und ein Befehl
