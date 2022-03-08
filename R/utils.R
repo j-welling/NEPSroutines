@@ -21,6 +21,40 @@ only_valid <- function(resp, valid = NULL, warn = TRUE) {
 }
 
 
+#' Convert user-defined missing values to NAs
+#'
+#' User defined missing values (usually coded as negative numbers) must be
+#' converted to NAs so that they do not break the IRT analysis
+#'
+#' @param resp  data.frame containing the item responses
+#' @param items  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param warn logical; whether warnings are to be printed to the console
+#'
+#' @return              data.frame like resp, but without user-defined mvs
+#' @export
+
+convert_mv <- function(resp, items = NULL, mvs = NULL, warn = TRUE) {
+
+  if (is.null(mvs)) {
+    mvs <- -999:-1
+    if (warn) {
+      warning("No user defined missing values provided. Default of ",
+              "'-999 to -1' is used.\n")
+    }
+  }
+
+  if (is.null(items)) items <- colnames(resp)
+
+  for (i in items) {
+    resp[[i]] <- replace(resp[[i]], resp[[i]] %in% mvs, NA)
+  }
+
+  return(resp)
+}
+
+
 #' Prepare resp for analysis
 #'
 #' @param resp  data.frame with item responses
@@ -73,6 +107,7 @@ prepare_resp <- function(resp, vars = NULL, items = NULL,
     return(resp)
 }
 
+
 #' Save table
 #'
 #' @param results table to be saved
@@ -99,6 +134,7 @@ save_table <- function(results, filename, path,
                          overwrite = overwrite)
   }
 }
+
 
 #' Save rds results
 #'
@@ -151,37 +187,127 @@ check_pid <- function(pid) {
 }
 
 
-#' Convert user-defined missing values to NAs
+#' Check variables in df for existence
 #'
-#' User defined missing values (usually coded as negative numbers) must be
-#' converted to NAs so that they do not break the IRT analysis
+#' @param df  data.frame
+#' @param name_df  string; contains name of data.frame
+#' @param variables  character vector; contains names of variables that shall be
+#' checked for inclusion in df
 #'
-#' @param resp  data.frame containing the item responses
-#' @param items  string; defines name of logical variable in vars that indicates
-#' which items to use for the analysis
-#' @param mvs  named integer vector; contains user-defined missing values
-#' @param warn logical; whether warnings are to be printed to the console
-#'
-#' @return              data.frame like resp, but without user-defined mvs
 #' @export
 
-convert_mv <- function(resp, items = NULL, mvs = NULL, warn = TRUE) {
+check_variables <- function(df, name_df, variables) {
 
-    if (is.null(mvs)) {
-        mvs <- -999:-1
-        if (warn) {
-          warning("No user defined missing values provided. Default of ",
-                  "'-999 to -1' is used.\n")
-        }
-    }
+  not_included <- !variables %in% names(df)
 
-    if (is.null(items)) items <- colnames(resp)
+  if (sum(not_included) > 0) {
+    stop(paste0("Data.frame ", name_df, " does not include any variable with the",
+                " name '", variables[not_included], "'. Please check again.\n\n"))
+  }
+}
 
-    for (i in items) {
-      resp[[i]] <- replace(resp[[i]], resp[[i]] %in% mvs, NA)
-    }
 
-    return(resp)
+#' Check logical variable(s) for correctness
+#'
+#' @param df  data.frame; contains at least the indicated logical variable(s)
+#' @param name_df  string; contains name of data.frame
+#' @param logicals  character vector; contains names of variables that shall be
+#' checked for correctness
+#'
+#' @export
+
+check_logicals <- function(df, name_df, logicals) {
+
+  check_variables(df, name_df, logicals)
+
+  no_logical <- sapply(df[ , logicals], function(x) !is.logical(x))
+
+  if (sum(no_logical) > 0) {
+    stop(paste0("Variable '", logicals[no_logical], "' in data.frame ",
+                name_df, " is no logical. Please check again.\n\n"))
+  }
+
+  other_value <- sapply(df[ , logicals], function(x) any(!x %in% c(TRUE, FALSE)))
+
+  if (sum(other_value) > 0) {
+    stop(paste0("Logical variable '", logicals[other_value], "' in ",
+                "data.frame ", name_df, " contains other values than TRUE or ",
+                "FALSE (e.g., NA). Please check again.\n\n"))
+  }
+}
+
+
+#' Check numeric variable(s) for correctness
+#'
+#' @param df  data.frame; contains at least the indicated numeric variable(s)
+#' @param name_df  string; contains name of df
+#' @param numerics  character vector; contains names of variables that shall be
+#' checked for correctness
+#' @param check_invalid  logical; whether to check df for invalid values
+#' @param dich  logical; whether to check items for non-dichotomous values
+#'
+#' @export
+
+check_numerics <- function(df, name_df, numerics, check_invalid = TRUE,
+                           dich = FALSE, poly = FALSE, collapsed = TRUE) {
+
+  check_variables(df, name_df, numerics)
+
+  no_numeric <- sapply(df[ , numerics], function(x) !is.numeric(x))
+
+  if (sum(no_numeric) > 0) {
+    stop(paste0("Variable '", numerics[no_numeric], "' in data.frame ", name_df,
+                " is no numeric variable. Please check again.\n\n"))
+  }
+
+  if (check_invalid) check_invalid_values(df, name_df, items = numerics)
+
+  if (dich) check_dich(df, name_df, dich_items = numerics)
+}
+
+
+#' Check data.frame for invalid values
+#'
+#' @param df  data.frame; contains at least the indicated variable(s)
+#' @param name_df  string; contains name of df
+#' @param items  character vector; contains names of items to be checked;
+#' if NULL, all items will be used
+#'
+#' @noRd
+
+check_invalid_values <- function(df, name_df, items = NULL) {
+
+  if (is.null(items)) items <- names(df)
+
+  if(any(df[ , items][!is.na(df[ , items])] < 0)) {
+    stop(paste0("Data.frame ", name_df, " contains invalid values (< 0) in ",
+                "specified items. Please check again and be sure to include all ",
+                "user defined missing values in the vector mvs. Default is ",
+                "-999 to -1."))
+  }
+}
+
+
+#' Check data.frame for non-dichotomous values
+#'
+#' @param df  data.frame; contains at least the indicated variable(s)
+#' @param name_df  string; contains name of df
+#' @param dich_items  character vector; contains names of items to be checked;
+#' if NULL, all items will be used
+#'
+#' @noRd
+
+check_dich <- function(df, name_df, dich_items = NULL) {
+
+  if (is.null(dich_items)) dich_items <- names(df)
+
+  no_dich <- sapply(df[ , dich_items], function(x) max(x, na.rm = TRUE) > 1)
+
+  if (sum(no_dich) > 0) {
+    stop(paste0("Variable '", dich_items[no_dich], "' in data.frame ", name_df,
+                " contains values greater than 1, although specified as",
+                " dichotomous. Please check again.\n\n"))
+  }
 }
 
 
