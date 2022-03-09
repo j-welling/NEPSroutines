@@ -391,8 +391,8 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring",
   B <- TAM::designMatrices(modeltype = "PCM", resp = resp)$B
 
   # 0.5 scoring for PCM
-  B[vars$items[vars[[select]]], , 1] <-
-    B[vars$items[vars[[select]]], , 1] * vars[[scoring]][vars[[select]]]
+  B[vars$item[vars[[select]]], , 1] <-
+    B[vars$item[vars[[select]]], , 1] * vars[[scoring]][vars[[select]]]
 
   TAM::tam.mml.mfr(formulaA = formulaA, facets = facets, B = B, pid = pid,
                    irtmodel = "PCM2", resp = resp, verbose = verbose)

@@ -414,7 +414,7 @@ mvi_plots <- function(mv_i, vars, items, grouping = NULL,
   } else {
     k <- NA_integer_
     for (g in grouping) {
-      k <- c(k, length(vars$items[vars[[items]] & vars[[g]]]))
+      k <- c(k, length(vars$item[vars[[items]] & vars[[g]]]))
     }
     k <- max(k, na.rm = TRUE)
 

@@ -30,7 +30,7 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
         } else if (is.factor(resp[[item]])) {
             resp[[item]] <- as.character(resp[[item]])
         }
-        correct <- vars$correct_response[vars$items == item]
+        correct <- vars$correct_response[vars$item == item]
         resp[[new_names[i]]] <- ifelse(resp[[item]] == correct, 1,
                                        ifelse(resp[[item]] < 0, resp[[item]], 0)
         ) %>% as.numeric()
@@ -57,7 +57,7 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
 #' @export
 duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 
-    vars_new <- vars[vars$items %in% old_names, ]
+    vars_new <- vars[vars$item %in% old_names, ]
     vars_new$items <- new_names
     if (!is.null(change)) {
         for (c in seq_along(change)) {
@@ -141,12 +141,12 @@ collapse_response_categories <- function(resp, vars, pcitems, per_cat = 200,
 
     # Check whether variables are indeed contained in data.frames
     check_logicals(vars, "vars", pcitems)
-    check_numerics(resp, "resp", vars$items[vars[[pcitems]]],
+    check_numerics(resp, "resp", vars$item[vars[[pcitems]]],
                    check_invalid = FALSE)
 
     collapsed_items <- c()
 
-    for (item in vars$items[vars[[pcitems]]]) {
+    for (item in vars$item[vars[[pcitems]]]) {
 
         response <- resp[[item]]
         tab <- table(response[response >= 0])
@@ -206,10 +206,10 @@ min_val <- function(resp, vars, items, min.val = NULL, invalid = NA) {
 
     # Check whether variables are indeed contained in data.frames
     check_logicals(vars, "vars", items)
-    check_numerics(resp, "resp", vars$items[vars[[items]]],
+    check_numerics(resp, "resp", vars$item[vars[[items]]],
                    check_invalid = FALSE)
 
-    vrs <- vars$items[vars[[items]]]
+    vrs <- vars$item[vars[[items]]]
     resp_ <- resp[ , vrs]
 
     # Set minimum number of valid values

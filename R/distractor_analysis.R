@@ -112,9 +112,9 @@ conduct_dis_analysis <- function(resp, vars, item_type = 'MC',
     # prepare data
     resp <- only_valid(resp, valid = valid, warn = warn)
 
-    unscored <- vars$items[vars$type %in% item_type & vars$raw == TRUE]
+    unscored <- vars$item[vars$type %in% item_type & vars$raw == TRUE]
     correct <- vars$correct_response[vars$type %in% item_type & vars$raw == TRUE]
-    scored <- vars$items[vars$dich == TRUE]
+    scored <- vars$item[vars$dich == TRUE]
     var_names <- unique(c(unscored, scored))
 
     resp <- convert_mv(resp = resp[ , var_names], vars = vars, mvs = mvs, warn = warn)
@@ -138,7 +138,7 @@ conduct_dis_analysis <- function(resp, vars, item_type = 'MC',
 
         # Create corrected total score
         scored_item <- ifelse(is.null(scored_version), paste0(item, "_c"),
-                              vars[[scored_version]][vars$items == item])
+                              vars[[scored_version]][vars$item == item])
         cscore <- resp$score - resp[, scored_item] / sum(vars$dich)#length(scored)
 
         # Correlation between each response option and corrected total score

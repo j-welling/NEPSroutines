@@ -323,10 +323,10 @@ link_samples <- function(resp_previous, resp_current, resp_link_sample = NULL,
 
     # select irtmodel
     is_pcm_previous <-
-        any(apply(resp_previous_[vars$items[vars[[select_previous]]]], 2, max,
+        any(apply(resp_previous_[vars$item[vars[[select_previous]]]], 2, max,
                   na.rm = TRUE) > 1)
     is_pcm_current <-
-        any(apply(resp_current_[vars$items[vars[[select_current]]]], 2, max,
+        any(apply(resp_current_[vars$item[vars[[select_current]]]], 2, max,
                   na.rm = TRUE) > 1)
 
     # Estimate item parameters for first measurement wave
@@ -468,8 +468,8 @@ calculate_link_parameters <- function(is_anchor_items = TRUE, select_previous,
     if (is_anchor_items) {
 
         # Identify anchor items
-        anchors_previous <- intersect(vars$items[vars[[select_previous]]],
-                                      vars$items[vars[[select_current]]])
+        anchors_previous <- intersect(vars$item[vars[[select_previous]]],
+                                      vars$item[vars[[select_current]]])
         anchors_current <- NULL
         if (!is.null(anchors)) {  # only selected anchors
             anchors_previous <- anchors_previous[anchors_previous %in% anchors]
@@ -493,11 +493,11 @@ calculate_link_parameters <- function(is_anchor_items = TRUE, select_previous,
 
         # Identify anchor items
         anchors_previous <-  # first measurement
-            intersect(vars$items[vars[[select_previous]]],
-                      vars$items[vars[[select_link_sample]]])
+            intersect(vars$item[vars[[select_previous]]],
+                      vars$item[vars[[select_link_sample]]])
         anchors_current <-  # second measurement
-            intersect(vars$items[vars[[select_current]]],
-                      vars$items[vars[[select_link_sample]]])
+            intersect(vars$item[vars[[select_current]]],
+                      vars$item[vars[[select_link_sample]]])
         if (!is.null(anchors)) {               # only selected anchors
             anchors_previous <- anchors_previous[anchors_previous %in% anchors]
             anchors_current <- anchors_current[anchors_current %in% anchors]
@@ -589,8 +589,8 @@ check_dif_anchor <- function(resp_previous, resp_current,
     resp_current_ <- resp_current[resp_current$ID_t %in% ids, ]
 
     # Item names
-    items_previous <- vars$items[vars[[select_previous]]]
-    items_current <- vars$items[vars[[select_current]]]
+    items_previous <- vars$item[vars[[select_previous]]]
+    items_current <- vars$item[vars[[select_current]]]
 
     dif <- list()
 

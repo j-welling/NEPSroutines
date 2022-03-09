@@ -528,7 +528,7 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
                         digits = 2, overwrite = FALSE, warn = TRUE) {
 
   # prepare data
-  vars$irt_items <- vars$items %in% rownames(model_1par$mod$xsi)
+  vars$irt_items <- vars$item %in% rownames(model_1par$mod$xsi)
   vars_ <- dplyr::rename(vars[vars$irt_items, ], item = 'items')
   resp <- prepare_resp(resp, vars = vars, items = 'irt_items', valid = valid,
                        use_only_valid = TRUE, convert = TRUE, mvs = mvs,

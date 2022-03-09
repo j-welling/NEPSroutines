@@ -55,7 +55,7 @@ convert_mv <- function(resp, vars, select = NULL, mvs = NULL, warn = TRUE) {
     items <- names(resp)
   } else {
     check_logicals(vars, "vars", select)
-    items <- vars$items[vars[[select]]]
+    items <- vars$item[vars[[select]]]
     check_variables(resp, "resp", variables = items)
   }
 
@@ -102,8 +102,8 @@ prepare_resp <- function(resp, vars = NULL, items = NULL,
                  "please also provide vars.")
         } else {
             check_logicals(vars, "vars", items, warn = warn)
-            check_variables(resp, "resp", variables = vars$items[vars[[items]]])
-            resp <- resp[ , vars$items[vars[[items]]]]
+            check_variables(resp, "resp", variables = vars$item[vars[[items]]])
+            resp <- resp[ , vars$item[vars[[items]]]]
         }
     } else {
         warning("No variable provided indicating the items to keep. ",

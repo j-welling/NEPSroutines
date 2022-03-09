@@ -176,7 +176,7 @@ mvp_analysis <- function(resp, vars, items, valid = NULL, grouping = NULL,
 
     for (g in grouping) {
 
-      resp_g <- resp_c[resp[[g]], vars$items[vars[[items]] & vars[[g]]]]
+      resp_g <- resp_c[resp[[g]], vars$item[vars[[items]] & vars[[g]]]]
 
       # Determine percentage of missing values for each missing type
       mv_p[[g]] <- mvp_calc(responses = resp_g, mvs = mvs, digits = digits)
@@ -346,7 +346,7 @@ mvp_plots <- function(mv_p, vars, items, grouping = NULL,
   } else {
     k <- NA_integer_
     for (g in grouping) {
-      k <- c(k, length(vars$items[vars[[items]] & vars[[g]]]))
+      k <- c(k, length(vars$item[vars[[items]] & vars[[g]]]))
     }
     k <- max(k, na.rm = TRUE)
   }

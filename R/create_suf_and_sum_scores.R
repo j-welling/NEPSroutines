@@ -83,7 +83,7 @@ create_suf <- function(resp, vars, items_suf, wle_name, xsi_fixed = NULL,
   }
 
   # select items for SUF
-  suf <- resp[, c("ID_t", vars$items[vars[[items_suf]]])]
+  suf <- resp[, c("ID_t", vars$item[vars[[items_suf]]])]
 
   # merge data sets
   suf <- merge(suf, wles, by = "ID_t")
@@ -173,8 +173,8 @@ estimated_rotated_wles <- function(resp, vars, items, valid = NULL, facet, xsi_f
   if (irtmodel == "PCM2") {
     # get design matrix for model with 0.5 scoring
     B <- TAM::designMatrices(modeltype = "PCM", resp = resp_)$B
-    B[vars$items[vars[[items]]], , 1] <-
-      B[vars$items[vars[[items]]], , 1] * vars[[scoring]][vars[[items]]]
+    B[vars$item[vars[[items]]], , 1] <-
+      B[vars$item[vars[[items]]], , 1] * vars[[scoring]][vars[[items]]]
   } else {
     B <- NULL
   }
@@ -211,7 +211,7 @@ estimated_rotated_wles <- function(resp, vars, items, valid = NULL, facet, xsi_f
 set_labels <- function(suf, vars, items_suf, competence, wle_name, linked) {
   attr(suf$ID_t, "label") <- "Unique person identifier"
   j <- 1
-  for (i in vars$items[vars[[items_suf]]]) {
+  for (i in vars$item[vars[[items_suf]]]) {
     # value labels
     # dichotomous items
     if (max(suf[[i]], na.rm = TRUE) == 1) {
@@ -316,7 +316,7 @@ save_suf <- function(suf, path_results, filename) {
 sum_scores <- function(resp, vars, select, warn = TRUE) {
   # Test data
   check_logicals(vars, "vars", select, warn = warn)
-  items <- vars$items[vars[[select]]]
+  items <- vars$item[vars[[select]]]
   check_numerics(resp, "resp", items)
   # count only correctly scored binary or FULLY correctly scored PC items
   resp[, items] <- lapply(items, function(x) {
