@@ -144,7 +144,8 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
     check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
 
-    if(!is.null(scoring)) check_numerics(vars, "vars", scoring)
+    if(!is.null(scoring)) check_numerics(vars, "vars", scoring,
+                                         check_invalid = TRUE)
 
     if (is.null(mvs)) {
       warning("No user defined missing values provided. ",
@@ -310,7 +311,8 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
     check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
 
-    if(!is.null(scoring)) check_numerics(vars, "vars", scoring)
+    if(!is.null(scoring)) check_numerics(vars, "vars", scoring,
+                                         check_invalid = TRUE)
 
     if (is.null(mvs)) {
       warning("No user defined missing values provided. ",
@@ -341,12 +343,12 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
                        mvs = mvs, warn = FALSE)
 
   # Test data
-  check_numerics(resp, "resp")
+  check_numerics(resp, "resp", check_invalid = TRUE)
   if (irtmodel %in% c("1PL", "2PL")) check_dich(resp, "resp")
 
   # Create scoring matrix if not provided in function arguments
   if (!is.null(scoring)) {
-      check_numerics(vars, "vars", scoring)
+      check_numerics(vars, "vars", scoring, check_invalid = TRUE)
       Q = as.matrix(vars[[scoring]][vars[[select]]])
   } else if (irtmodel %in% c("GPCM", "PCM2")) {
       stop("Please provide variable name for scoring factor for polytomous ",
@@ -532,7 +534,7 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   vars_ <- dplyr::rename(vars[vars$irt_item, ], items = 'item')
   resp <- prepare_resp(resp, vars = vars, select = 'irt_item', valid = valid,
                        use_only_valid = TRUE, convert = TRUE, mvs = mvs,
-                       warn = warn)
+                       warn = FALSE)
 
 
   # item parameters

@@ -112,7 +112,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
   resp <- prepare_resp(resp, vars = vars, select = select, convert = TRUE,
                        mvs = mvs, warn = warn)
 
-  check_numerics(resp, "resp")
+  check_numerics(resp, "resp", check_invalid = TRUE)
 
   # Create object for results
   dimensionality <- list()

@@ -156,7 +156,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
                          digits = 2, warn = TRUE, test = TRUE) {
 
   # Test data
-  check_numerics(vars, "vars", position)
+  check_numerics(vars, "vars", position, check_invalid = TRUE)
 
   if (test) {
     check_logicals(resp, "resp", c(valid, grouping), warn = warn)

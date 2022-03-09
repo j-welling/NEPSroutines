@@ -52,7 +52,8 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
   check_variables(resp, "resp", dif_vars)
 
 
-  if (!is.null(scoring)) check_numerics(vars, "vars", scoring)
+  if (!is.null(scoring)) check_numerics(vars, "vars", scoring,
+                                        check_invalid = TRUE)
 
   if (is.null(mvs)) {
     warning("No user defined missing values provided. ",
@@ -149,7 +150,8 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
     check_logicals(resp, "resp", valid, warn = warn)
     check_variables(resp, "resp", dif_vars)
 
-    if (!is.null(scoring)) check_numerics(vars, "vars", scoring)
+    if (!is.null(scoring)) check_numerics(vars, "vars", scoring,
+                                          check_invalid = TRUE)
 
     if (is.null(mvs)) {
       warning("No user defined missing values provided. ",
@@ -272,9 +274,10 @@ dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
   if (test) {
     check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
-    check_variables(resp, "resp", dif_vars)
+    check_variables(resp, "resp", dif_var)
 
-    if (!is.null(scoring)) check_numerics(vars, "vars", scoring)
+    if (!is.null(scoring)) check_numerics(vars, "vars", scoring,
+                                          check_invalid = TRUE)
 
     if (is.null(mvs)) {
       warning("No user defined missing values provided. ",
@@ -301,7 +304,7 @@ dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
                        warn = FALSE)
 
   # Test resp
-  check_numerics(resp, "resp")
+  check_numerics(resp, "resp", check_invalid = TRUE)
 
   # Prepare DIF analysis
   tmp_formula <- paste("~ item +", ifelse(irt_type == 'poly', "item * step +", ""))

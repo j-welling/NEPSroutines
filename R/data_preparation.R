@@ -87,8 +87,7 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 pc_scoring <- function(resp, poly_items, mvs = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    check_numerics(resp, "resp", unlist(poly_items), dich = TRUE,
-                   check_invalid = FALSE)
+    check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
 
     for (item in names(poly_items)) {
         subitems <- poly_items[[item]]
@@ -141,8 +140,7 @@ collapse_response_categories <- function(resp, vars, select_poly, per_cat = 200,
 
     # Check whether variables are indeed contained in data.frames
     check_logicals(vars, "vars", select_poly)
-    check_numerics(resp, "resp", vars$item[vars[[select_poly]]],
-                   check_invalid = FALSE)
+    check_numerics(resp, "resp", vars$item[vars[[select_poly]]])
 
     collapsed_items <- c()
 
@@ -207,7 +205,7 @@ min_val <- function(resp, vars, select, min.val = NULL, invalid = NA) {
     # Check whether variables are indeed contained in data.frames
     check_logicals(vars, "vars", select)
     items <- vars$item[vars[[select]]]
-    check_numerics(resp, "resp", items, check_invalid = FALSE)
+    check_numerics(resp, "resp", items)
     resp_ <- resp[ , items]
 
     # Set minimum number of valid values
@@ -256,7 +254,7 @@ min_val <- function(resp, vars, select, min.val = NULL, invalid = NA) {
 pos_new <- function(vars, select, position) {
 
     # Check whether variables are indeed contained in data.frames
-    check_numerics(vars, "vars", position)
+    check_numerics(vars, "vars", position, check_invalid = TRUE)
 
     if (length(position) == 1) {
 

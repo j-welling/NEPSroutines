@@ -73,8 +73,9 @@ linking <- function(resp_previous, resp_current, resp_link_sample = NULL,
                     anchor_item_names = NULL) {
 
     # test data
-    check_logicals(vars, "vars", c(select_current, select_previous, select_common, dim))
-    check_numerics(vars, "vars", scoring)
+    check_logicals(vars, "vars", c(select_current, select_previous, select_common))
+    check_variables(vars, "vars", dim)
+    check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
     # check measurement invariance over time
     link_dif <- check_dif_anchor(
@@ -589,6 +590,7 @@ check_dif_anchor <- function(resp_previous, resp_current,
     resp_current_ <- resp_current[resp_current$ID_t %in% ids, ]
 
     # Item names
+    items_common <- vars$item[vars[[select_common]]]
     items_previous <- vars$item[vars[[select_previous]]]
     items_current <- vars$item[vars[[select_current]]]
 
@@ -602,14 +604,17 @@ check_dif_anchor <- function(resp_previous, resp_current,
         ids <- resp$ID_t
         resp$ID_t <- 1:nrow(resp)
 
+        is_pcm_common <- any(apply(resp[ , items_common], 2, max, na.rm = TRUE) > 1)
+        irt_type <- ifelse(is_pcm_common, "poly", "dich")
+
         dif$dif_model <- dif_model(resp = resp, vars = vars, select = select_common,
                                    dif_var = "main_sample", scoring = scoring,
                                    valid = valid, verbose = FALSE,
-                                   mvs = mvs)
+                                   mvs = mvs, irt_type = irt_type)
         resp$ID_t <- ids
 
         dif$summary <- dif_summary(dif$dif_model, print = FALSE, save = FALSE,
-                                   overwrite = FALSE)
+                                   overwrite = FALSE, irt_type = irt_type)
 
         dif$link_dif_summary <- summarize_link_dif(
             dif_summary = dif$summary, items_previous = items_previous,

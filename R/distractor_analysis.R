@@ -119,7 +119,7 @@ conduct_dis_analysis <- function(resp, vars, item_type = 'MC',
 
     resp <- convert_mv(resp = resp[ , var_names], vars = vars, mvs = mvs, warn = warn)
 
-    check_numerics(resp, "resp", scored, dich = TRUE)
+    check_numerics(resp, "resp", scored, check_invalid = TRUE, dich = TRUE)
 
     # Sum score across all items
     resp$score <- rowMeans(resp[, scored], na.rm = TRUE)

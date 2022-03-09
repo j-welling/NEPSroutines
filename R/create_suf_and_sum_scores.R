@@ -163,7 +163,7 @@ estimated_rotated_wles <- function(resp, vars, select, valid = NULL, facet, xsi_
                         warn = warn)
 
   # Test resp
-  check_numerics(resp, "resp")
+  check_numerics(resp, "resp", check_invalid = TRUE)
 
   # Conduct analyses
   frmA <- as.formula(paste0("~ item + ",
@@ -317,7 +317,7 @@ sum_scores <- function(resp, vars, select, warn = TRUE) {
   # Test data
   check_logicals(vars, "vars", select, warn = warn)
   items <- vars$item[vars[[select]]]
-  check_numerics(resp, "resp", items)
+  check_numerics(resp, "resp", items, check_invalid = TRUE)
   # count only correctly scored binary or FULLY correctly scored PC items
   resp[, items] <- lapply(items, function(x) {
                           ifelse(resp[, x] == vars$max[x],
