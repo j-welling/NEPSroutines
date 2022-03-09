@@ -6,7 +6,7 @@
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#'   includes variable 'items' containing item names; additionally includes all
+#'   includes variable 'item' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
 #' @param items_suf character; indicates the logical variable in vars which
 #'   contains the item names designated for the SUF (original scored items
@@ -26,7 +26,7 @@
 #'   linking(); alternative to linked_wles
 #' @param facet character vector; contains the variable name indicating the
 #'   test rotation
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #'   which items to use for the analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
@@ -45,7 +45,7 @@
 create_suf <- function(resp, vars, items_suf, wle_name, xsi_fixed = NULL,
              rotated = FALSE, linked = FALSE, wles = NULL,
              linked_wles = NULL, linked_location = NULL,
-             facet = NULL, items = NULL, valid = NULL, mvs = NULL,
+             facet = NULL, select = NULL, valid = NULL, mvs = NULL,
              scoring = NULL, competence,
              filename = "suf", path_results = here::here('Results'),
              save = TRUE, return = FALSE) {
@@ -65,14 +65,14 @@ create_suf <- function(resp, vars, items_suf, wle_name, xsi_fixed = NULL,
 
   if (is.null(wles)) {
     # estimate current (potentially rotated) WLEs and SEs
-    irtmodel <- ifelse(any(vars[[scoring]][vars[[items]]] == 0.5),
+    irtmodel <- ifelse(any(vars[[scoring]][vars[[select]]] == 0.5),
                "PCM2", "1PL")
     if (rotated) {
-      wles <- estimated_rotated_wles(resp, vars, items, valid, facet,
+      wles <- estimated_rotated_wles(resp, vars, select, valid, facet,
                        xsi_fixed, scoring, mvs, wle_name,
                        irtmodel)
     } else {
-      wles <- irt_model(resp, vars, items, valid, mvs, irtmodel,
+      wles <- irt_model(resp, vars, select, valid, mvs, irtmodel,
                 scoring, verbose = FALSE, path = NULL,
                 filename = NULL)$wle
       names(wles) <- c("ID_t", paste0(wle_name, c("_sc1", "_sc2")))
@@ -118,9 +118,9 @@ create_suf <- function(resp, vars, items_suf, wle_name, xsi_fixed = NULL,
 #'   arguments; if special person sets are of interest, these persons have to
 #'   be selected in resp beforehand
 #' @param vars data.frame; contains information about items with items as rows;
-#'   includes variable 'items' containing item names; additionally includes all
+#'   includes variable 'item' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #'   which items to use for the analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
@@ -139,7 +139,7 @@ create_suf <- function(resp, vars, items_suf, wle_name, xsi_fixed = NULL,
 #'   in wle_name)
 #'
 #' @export
-estimated_rotated_wles <- function(resp, vars, items, valid = NULL, facet, xsi_fixed,
+estimated_rotated_wles <- function(resp, vars, select, valid = NULL, facet, xsi_fixed,
                    scoring, mvs, wle_name, irtmodel) {
 
   # Test data
@@ -158,7 +158,7 @@ estimated_rotated_wles <- function(resp, vars, items, valid = NULL, facet, xsi_f
   facet <- resp[resp[[valid]], facet, drop = FALSE]
   pid <- resp$ID_t[resp[[valid]]]
   check_pid(pid)
-  resp_ <- prepare_resp(resp, vars, items, use_only_valid = TRUE,
+  resp_ <- prepare_resp(resp, vars, select, use_only_valid = TRUE,
                         valid = valid, convert = TRUE, mvs = mvs,
                         warn = warn)
 
@@ -173,8 +173,8 @@ estimated_rotated_wles <- function(resp, vars, items, valid = NULL, facet, xsi_f
   if (irtmodel == "PCM2") {
     # get design matrix for model with 0.5 scoring
     B <- TAM::designMatrices(modeltype = "PCM", resp = resp_)$B
-    B[vars$item[vars[[items]]], , 1] <-
-      B[vars$item[vars[[items]]], , 1] * vars[[scoring]][vars[[items]]]
+    B[vars$item[vars[[select]]], , 1] <-
+      B[vars$item[vars[[select]]], , 1] * vars[[scoring]][vars[[select]]]
   } else {
     B <- NULL
   }
@@ -195,7 +195,7 @@ estimated_rotated_wles <- function(resp, vars, items, valid = NULL, facet, xsi_f
 #'
 #' @param suf data.frame; SUF to be (re)labelled
 #' @param vars  data.frame; contains information about items with items as rows;
-#'   includes variable 'items' containing item names; additionally includes all
+#'   includes variable 'item' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
 #' @param items_suf character; indicates the logical variable in vars which
 #'   contains the item names designated for the SUF (original scored items
@@ -304,7 +304,7 @@ save_suf <- function(suf, path_results, filename) {
 #'   arguments; if special person sets are of interest, these persons have to
 #'   be selected in resp beforehand
 #' @param vars data.frame; contains information about items with items as rows;
-#'   includes variable 'items' containing item names; additionally includes all
+#'   includes variable 'item' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
 #' @param select  string; defines name of logical variable in vars that indicates
 #'   which items to use for the analysis

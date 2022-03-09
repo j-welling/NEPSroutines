@@ -9,9 +9,9 @@
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
 #' @param vars data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items character vector; defines name(s) of logical variable(s) in vars
+#' @param select character vector; defines name(s) of logical variable(s) in vars
 #' that indicates which items to use for analysis; if some of the \code{dif_vars}
 #' come with a different set of analysis items, this argument becomes a
 #' vector of \code{length(dif_vars)} containing the respective selection
@@ -39,7 +39,7 @@
 #'   dmod: DIF effects model
 #' @export
 
-dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, mvs = NULL,
+dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
                          irt_type, scoring = "scoring", overwrite = FALSE,
                          save = TRUE, print = TRUE, return = FALSE,
                          path_results = here::here('Results'),
@@ -47,7 +47,7 @@ dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, mvs = NULL,
                          verbose = FALSE, warn = TRUE) {
 
   # Test data
-  check_logicals(vars, "vars", items, warn = warn)
+  check_logicals(vars, "vars", select, warn = warn)
   check_logicals(resp, "resp", valid, warn = warn)
   check_variables(resp, "resp", dif_vars)
 
@@ -64,14 +64,14 @@ dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, mvs = NULL,
             "All cases are used for analysis.\n")
   }
 
-  check_items(items, dif_vars)
+  check_items(select, dif_vars)
 
   # Create list for results
   dif <- list()
 
   # Conduct dif analyses
   dif$models <- conduct_dif_analysis(
-    items = items, dif_vars = dif_vars, resp = resp, vars = vars,
+    select = select, dif_vars = dif_vars, resp = resp, vars = vars,
     irt_type = irt_type, scoring = scoring, valid = valid, save = save,
     path = path_results, mvs = mvs, verbose = verbose, warn = warn,
     test = FALSE
@@ -94,9 +94,9 @@ dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL, mvs = NULL,
   if (return) return(dif)
 }
 
-check_items <- function(items, dif_vars) {
-  if (length(items) > 1 & length(items) != length(dif_vars)) {
-    stop("Please check 'items' and 'dif_vars'. At least one of them does ",
+check_items <- function(select, dif_vars) {
+  if (length(select) > 1 & length(select) != length(dif_vars)) {
+    stop("Please check 'select' and 'dif_vars'. At least one of them does ",
          "not match the intended analysis.")
   }
 }
@@ -112,9 +112,9 @@ check_items <- function(items, dif_vars) {
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
 #' @param vars data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items character vector; defines name(s) of logical variable(s) in vars
+#' @param select character vector; defines name(s) of logical variable(s) in vars
 #' that indicates which items to use for analysis; if some of the \code{dif_vars}
 #' come with a different set of analysis items, this argument becomes a
 #' vector of \code{length(dif_vars)} containing the respective selection
@@ -138,14 +138,14 @@ check_items <- function(items, dif_vars) {
 #'   mmod: main effects model
 #'   dmod: DIF effects model
 #' @export
-conduct_dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL,
+conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
                                  irt_type, scoring = 'scoring', mvs = NULL,
                                  path = here::here('Results'), save = TRUE,
                                  verbose = FALSE, warn = TRUE, test = TRUE) {
 
   # Test data
   if (test) {
-    check_logicals(vars, "vars", items, warn = warn)
+    check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
     check_variables(resp, "resp", dif_vars)
 
@@ -166,13 +166,13 @@ conduct_dif_analysis <- function(resp, vars, items, dif_vars, valid = NULL,
   dif_models <- list()
 
   # Set same items to all dif variables if items has length 1
-  if (length(items) == 1) {
-    items <- rep(items, length(dif_vars))
+  if (length(select) == 1) {
+    select <- rep(select, length(dif_vars))
   }
 
   # Conduct dif analyses
   for (i in seq_along(dif_vars)) {
-    dif_models[[i]] <- dif_model(resp = resp, vars = vars, items = items[i],
+    dif_models[[i]] <- dif_model(resp = resp, vars = vars, select = select[i],
                                  valid = valid, dif_var = dif_vars[i],
                                  irt_type = irt_type, scoring = scoring,
                                  verbose = verbose, mvs = mvs, warn = warn,
@@ -239,9 +239,9 @@ summarize_dif_analysis <- function(dif_models, dif_vars, irt_type,
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
 #' @param vars data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items string; defines name of logical variable in vars that indicates
+#' @param select string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis; if some of the \code{dif_vars}
 #' come with a different set of analysis items, this argument becomes a
 #' vector of \code{length(dif_vars)} containing the respective selection
@@ -264,13 +264,13 @@ summarize_dif_analysis <- function(dif_models, dif_vars, irt_type,
 #'   dmod: DIF effects model
 #' @importFrom stats as.formula
 #' @export
-dif_model <- function(resp, vars, items, dif_var, scoring = 'scoring',
+dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
                       valid = NULL, irt_type, mvs = NULL,
                       verbose = FALSE, warn = TRUE, test = TRUE) {
 
   # Test data
   if (test) {
-    check_logicals(vars, "vars", items, warn = warn)
+    check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
     check_variables(resp, "resp", dif_vars)
 
@@ -296,7 +296,7 @@ dif_model <- function(resp, vars, items, dif_var, scoring = 'scoring',
   facets <- resp[, dif_var, drop = FALSE]
 
   # Select only indicated items, valid responders and convert mvs
-  resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE,
+  resp <- prepare_resp(resp, vars = vars, select = select, convert = TRUE,
                        mvs = mvs, use_only_valid = TRUE, valid = valid,
                        warn = FALSE)
 
@@ -323,12 +323,12 @@ dif_model <- function(resp, vars, items, dif_var, scoring = 'scoring',
 
     mmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
-      vars = vars, select = items, scoring = scoring, verbose = verbose
+      vars = vars, select = select, scoring = scoring, verbose = verbose
     )
 
     dmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_dmod, pid = pid,
-      vars = vars, select = items, scoring = scoring, verbose = verbose
+      vars = vars, select = select, scoring = scoring, verbose = verbose
     )
 
   } else if (irt_type == 'dich') {
@@ -336,7 +336,7 @@ dif_model <- function(resp, vars, items, dif_var, scoring = 'scoring',
     # Check whether resp contains only dichotomous items
     check_dich(resp, "resp")
 
-    Q <- as.matrix(vars[[scoring]][vars[[items]]])
+    Q <- as.matrix(vars[[scoring]][vars[[select]]])
 
     dmod <- TAM::tam.mml.mfr(resp,
                              irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
@@ -367,7 +367,7 @@ dif_model <- function(resp, vars, items, dif_var, scoring = 'scoring',
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
 #' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis

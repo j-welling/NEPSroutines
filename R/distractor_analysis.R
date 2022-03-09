@@ -8,7 +8,7 @@
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
 #' @param vars data.frame; contains information about items with items as rows;
-#' includes variables 'items' (character) containing item names,
+#' includes variables 'item' (character) containing item names,
 #'                    'raw' (logical) indicating unscored items,
 #'                    'type' (character) containing item type (e.g. MC),
 #'                    'correct_response' (integer) containing the correct
@@ -84,7 +84,7 @@ dis_analysis <- function(resp, vars, valid = NULL, item_type = 'MC',
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
 #' @param vars data.frame; contains information about items with items as rows;
-#' includes variables 'items' (character) containing item names,
+#' includes variables 'item' (character) containing item names,
 #'                    'dich' (logical) indicating all dichotomously scored items
 #'                    'raw' (logical) indicating all unscored items,
 #'                    'type' (character) containing item type (e.g. MC),
@@ -107,7 +107,7 @@ conduct_dis_analysis <- function(resp, vars, item_type = 'MC',
                                  mvs = NULL, warn = TRUE) {
     # Test data
     check_logicals(vars, "vars", c(scored_version, "dich", "raw"), warn = warn)
-    check_variables(vars, "vars", c("items", "type", "correct_response"))
+    check_variables(vars, "vars", c("item", "type", "correct_response"))
 
     # prepare data
     resp <- only_valid(resp, valid = valid, warn = warn)

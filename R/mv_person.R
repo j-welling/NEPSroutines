@@ -4,9 +4,9 @@
 #' persons as rows; all responses ∈ ℕ0; user-defined missing values;
 #' includes all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
@@ -39,7 +39,7 @@
 #'
 #' @export
 
-mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
+mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       labels_mvs = c(
@@ -63,7 +63,7 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
 
   # Test data
   check_logicals(resp, "resp", c(valid, grouping), warn = warn)
-  check_logicals(vars, "vars", c(items, grouping), warn = warn)
+  check_logicals(vars, "vars", c(select, grouping), warn = warn)
 
   if (is.null(valid)) {
     warning("No variable with valid cases provided. ",
@@ -74,13 +74,13 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
   mv_person <- list()
 
   # Conduct analysis
-  mv_person$mv_p <- mvp_analysis(resp = resp, vars = vars, items = items,
+  mv_person$mv_p <- mvp_analysis(resp = resp, vars = vars, select = select,
                                  valid = valid, mvs = mvs, grouping = grouping,
                                  digits = digits, warn = warn, test = FALSE)
 
   # Create plots
   if (plots) {
-    mvp_plots(mv_p = mv_person$mv_p, vars = vars, items = items, mvs = mvs,
+    mvp_plots(mv_p = mv_person$mv_p, vars = vars, select = select, mvs = mvs,
               labels_mvs = labels_mvs, grouping = grouping, show_all = show_all,
               path = path_plots, color = color, verbose = verbose, warn = warn,
               test = FALSE, name_grouping = name_grouping)
@@ -116,9 +116,9 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
 #' persons as rows; all responses ∈ ℕ0; user-defined missing values;
 #' includes all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
@@ -137,7 +137,7 @@ mv_person <- function(resp, vars, items, valid = NULL, grouping = NULL,
 #'
 #' @export
 
-mvp_analysis <- function(resp, vars, items, valid = NULL, grouping = NULL,
+mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, NAd = -54, AZ = -21),
                          filename = NULL, path = here::here("Results"),
@@ -164,7 +164,7 @@ mvp_analysis <- function(resp, vars, items, valid = NULL, grouping = NULL,
 
   # Prepare data
   resp <- only_valid(resp, valid = valid)
-  resp_c <- prepare_resp(resp, vars = vars, items = items, warn = warn)
+  resp_c <- prepare_resp(resp, vars = vars, select = select, warn = warn)
 
   # Calculate mvs per person
   if (is.null(grouping)) {
@@ -176,7 +176,7 @@ mvp_analysis <- function(resp, vars, items, valid = NULL, grouping = NULL,
 
     for (g in grouping) {
 
-      resp_g <- resp_c[resp[[g]], vars$item[vars[[items]] & vars[[g]]]]
+      resp_g <- resp_c[resp[[g]], vars$item[vars[[select]] & vars[[g]]]]
 
       # Determine percentage of missing values for each missing type
       mv_p[[g]] <- mvp_calc(responses = resp_g, mvs = mvs, digits = digits)
@@ -208,16 +208,6 @@ mvp_analysis <- function(resp, vars, items, valid = NULL, grouping = NULL,
 #' @param filename  string; defines name of table that shall be saved
 #' @param path  string; defines path to folder where table shall be saved
 #' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
-#' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; all responses ∈ ℕ0; user-defined missing values;
-#' includes all variables that are further defined in the function arguments
-#' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
-#' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
-#' which items to use for the analysis
-#' @param valid  string; defines name of logical variable in resp that indicates
-#' (in)valid cases
 #' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @return   table with missing values per person and
@@ -276,9 +266,9 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
 #'
 #' @param mv_p  list; return object of mv_person()
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param grouping  character vector; contains for each group a name of a logical
 #' variable in resp and vars that indicates to which group belongs a person or
@@ -299,7 +289,7 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
 #' @importFrom rlang .data
 #' @export
 
-mvp_plots <- function(mv_p, vars, items, grouping = NULL,
+mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       labels_mvs = c(
@@ -320,7 +310,7 @@ mvp_plots <- function(mv_p, vars, items, grouping = NULL,
   # Test data
   if (test) {
     test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
-    check_logicals(vars, "vars", c(items, grouping), warn = warn)
+    check_logicals(vars, "vars", c(select, grouping), warn = warn)
   }
 
   # Prepare data
@@ -342,11 +332,11 @@ mvp_plots <- function(mv_p, vars, items, grouping = NULL,
 
   # Approx. number of items
   if (is.null(grouping)) {
-    k <- sum(vars[[items]])
+    k <- sum(vars[[select]])
   } else {
     k <- NA_integer_
     for (g in grouping) {
-      k <- c(k, length(vars$item[vars[[items]] & vars[[g]]]))
+      k <- c(k, length(vars$item[vars[[select]] & vars[[g]]]))
     }
     k <- max(k, na.rm = TRUE)
   }

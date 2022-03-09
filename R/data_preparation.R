@@ -6,7 +6,7 @@
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#'   includes variable 'items' containing item names; additionally includes all
+#'   includes variable 'item' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
 #' @param old_names  character vector; contains the names of the original items
 #' @param new_names  character vector; contains the names of the new items. Must
@@ -43,7 +43,7 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
 #' Duplicate item information in vars
 #'
 #' @param vars  data.frame; contains information about items with items as rows;
-#'   includes variable 'items' containing item names; additionally includes all
+#'   includes variable 'item' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
 #' @param old_names  character vector; contains the names of the original items
 #' @param new_names  character vector; contains the names of the new items. Must
@@ -58,7 +58,7 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
 duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 
     vars_new <- vars[vars$item %in% old_names, ]
-    vars_new$items <- new_names
+    vars_new$item <- new_names
     if (!is.null(change)) {
         for (c in seq_along(change)) {
             variable <- names(change[c])
@@ -123,9 +123,9 @@ pc_scoring <- function(resp, poly_items, mvs = NULL) {
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#'   includes variable 'items' containing item names; additionally includes all
+#'   includes variable 'item' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
-#' @param pcitems character; indicates the logical variable in vars which
+#' @param select_poly character; indicates the logical variable in vars which
 #'   contains the item names of the polytomous items
 #' @param per_cat integer; minimum number of persons per category; defaults to 200
 #' @param path_table  string; defines path to folder where tables shall be saved
@@ -135,18 +135,18 @@ pc_scoring <- function(resp, poly_items, mvs = NULL) {
 #'   given PC items IN PLACE. If you want to keep the original data, please
 #'   copy and rename the items to be collapsed first.
 #' @export
-collapse_response_categories <- function(resp, vars, pcitems, per_cat = 200,
+collapse_response_categories <- function(resp, vars, select_poly, per_cat = 200,
                                          path_table = here::here("Tables"),
                                          print = TRUE, save = FALSE) {
 
     # Check whether variables are indeed contained in data.frames
-    check_logicals(vars, "vars", pcitems)
-    check_numerics(resp, "resp", vars$item[vars[[pcitems]]],
+    check_logicals(vars, "vars", select_poly)
+    check_numerics(resp, "resp", vars$item[vars[[select_poly]]],
                    check_invalid = FALSE)
 
     collapsed_items <- c()
 
-    for (item in vars$item[vars[[pcitems]]]) {
+    for (item in vars$item[vars[[select_poly]]]) {
 
         response <- resp[[item]]
         tab <- table(response[response >= 0])
@@ -193,24 +193,22 @@ collapse_response_categories <- function(resp, vars, pcitems, per_cat = 200,
 #'
 #' @param resp  data.frame with item responses
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param min.val minimum number of valid values; if negative, set to the default of 3
 #' @param invalid vector of invalid values (defaults to NA)
 #'
 #' @return   logical vector with length = nrow(resp), indicating whether case is valid
 #' @export
-min_val <- function(resp, vars, items, min.val = NULL, invalid = NA) {
+min_val <- function(resp, vars, select, min.val = NULL, invalid = NA) {
 
     # Check whether variables are indeed contained in data.frames
-    check_logicals(vars, "vars", items)
-    check_numerics(resp, "resp", vars$item[vars[[items]]],
-                   check_invalid = FALSE)
-
-    vrs <- vars$item[vars[[items]]]
-    resp_ <- resp[ , vrs]
+    check_logicals(vars, "vars", select)
+    items <- vars$item[vars[[select]]]
+    check_numerics(resp, "resp", items, check_invalid = FALSE)
+    resp_ <- resp[ , items]
 
     # Set minimum number of valid values
     if (is.null(min.val) || min.val < 0) {
@@ -221,7 +219,7 @@ min_val <- function(resp, vars, items, min.val = NULL, invalid = NA) {
 
     # Number of valid values by respondent
     nval <- rowSums(apply(
-        subset(resp_, select = vrs), 2,
+        subset(resp_, select = items), 2,
         function(x) {
             !(x %in% invalid)
         }
@@ -242,9 +240,9 @@ min_val <- function(resp, vars, items, min.val = NULL, invalid = NA) {
 #' Calculate new position variable with only a set of variables
 #'
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param position  (named) character vector; defines name(s) of integer
 #' variable(s) in vars that indicate position of items; if groups with differing
@@ -255,7 +253,7 @@ min_val <- function(resp, vars, items, min.val = NULL, invalid = NA) {
 #' the (relative) position of chosen items.
 #' @importFrom rlang .data
 #' @export
-pos_new <- function(vars, items, position) {
+pos_new <- function(vars, select, position) {
 
     # Check whether variables are indeed contained in data.frames
     check_numerics(vars, "vars", position)
@@ -263,23 +261,23 @@ pos_new <- function(vars, items, position) {
     if (length(position) == 1) {
 
         vars_ <- vars[vars[[items]], ]
-        pos <- data.frame(items = vars_[['items']],
+        pos <- data.frame(item = vars_[['item']],
                           position = vars_[[position]])
         pos <- dplyr::arrange(pos, .data$position)
-        pos[[paste0("position_", items)]] <- seq(1, nrow(pos))
-        vars <- merge(vars, pos[ , c('items', paste0("position_", items))],
-                      by = 'items', all = TRUE)
+        pos[[paste0("position_", item)]] <- seq(1, nrow(pos))
+        vars <- merge(vars, pos[ , c('item', paste0("position_", select))],
+                      by = 'item', all = TRUE)
 
     } else {
 
         for (g in names(position)) {
-            vars_ <- vars[vars[[items]] & !is.na(vars[[position[g]]]), ]
-            pos <- data.frame(items = vars_[['items']],
+            vars_ <- vars[vars[[select]] & !is.na(vars[[position[g]]]), ]
+            pos <- data.frame(item = vars_[['item']],
                               position = vars_[[position[g]]])
             pos <- dplyr::arrange(pos, .data$position)
-            pos[[paste0("position_", g, "_", items)]] <- seq(1, nrow(pos))
-            vars <- merge(vars, pos[ , c('items', paste0("position_", g, "_", items))],
-                          by = 'items', all = TRUE)
+            pos[[paste0("position_", g, "_", item)]] <- seq(1, nrow(pos))
+            vars <- merge(vars, pos[ , c('item', paste0("position_", g, "_", select))],
+                          by = 'item', all = TRUE)
         }
 
     }

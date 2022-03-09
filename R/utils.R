@@ -29,7 +29,7 @@ only_valid <- function(resp, valid = NULL, warn = TRUE) {
 #'
 #' @param resp  data.frame containing the item responses
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
 #' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
@@ -74,9 +74,9 @@ convert_mv <- function(resp, vars, select = NULL, mvs = NULL, warn = TRUE) {
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param convert  logical; whether to convert custom missing values to NA
 #' @param mvs  named integer vector; contains user-defined missing values
@@ -87,7 +87,7 @@ convert_mv <- function(resp, vars, select = NULL, mvs = NULL, warn = TRUE) {
 #'
 #' @export
 
-prepare_resp <- function(resp, vars = NULL, items = NULL,
+prepare_resp <- function(resp, vars = NULL, select = NULL,
                          use_only_valid = FALSE,  valid = NULL,
                          convert = FALSE, mvs = NULL,
                          warn = TRUE, zap_labels = TRUE) {
@@ -96,14 +96,15 @@ prepare_resp <- function(resp, vars = NULL, items = NULL,
                                            valid = valid,
                                            warn = warn)
 
-    if (!is.null(items)) {
+    if (!is.null(select)) {
         if (is.null(vars)) {
             stop("To create dataframe (resp) with only the indicated items ",
                  "please also provide vars.")
         } else {
-            check_logicals(vars, "vars", items, warn = warn)
-            check_variables(resp, "resp", variables = vars$item[vars[[items]]])
-            resp <- resp[ , vars$item[vars[[items]]]]
+            check_logicals(vars, "vars", select, warn = warn)
+            items <- vars$item[vars[[select]]]
+            check_variables(resp, "resp", variables = items)
+            resp <- resp[ , items]
         }
     } else {
         warning("No variable provided indicating the items to keep. ",

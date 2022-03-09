@@ -8,7 +8,7 @@
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#'   includes variable 'items' containing item names; additionally includes all
+#'   includes variable 'item' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
@@ -71,9 +71,9 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
     message(toupper(paste0("\n\n\n(", i, ") irt analysis (", irt_type, ") for ",
                            g, " items.\n")))
     name_group <- g
-    items <- groups[[g]]
+    select <- groups[[g]]
 
-    irt_groups[[g]] <- irt_analysis(resp = resp, vars = vars, items = items,
+    irt_groups[[g]] <- irt_analysis(resp = resp, vars = vars, select = select,
                                     valid = valid, irt_type = irt_type, print = print,
                                     scoring = scoring, plots = plots, save = save,
                                     return = TRUE, path_results = path_results,
@@ -100,9 +100,9 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#'   includes variable 'items' containing item names; additionally includes all
+#'   includes variable 'item' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #'   which items to use for the analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
@@ -130,7 +130,7 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #' @return   list with all results
 #' @export
 
-irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
+irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
                          irt_type, scoring = NULL, plots = FALSE,
                          save = TRUE, print = TRUE, return = FALSE,
                          path_plots = here::here("Plots"),
@@ -141,7 +141,7 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
 
   # Test data
   if (test) {
-    check_logicals(vars, "vars", items, warn = warn)
+    check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
 
     if(!is.null(scoring)) check_numerics(vars, "vars", scoring)
@@ -163,10 +163,10 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
   # Conduct IRT analyses
   if (irt_type == 'dich') {
 
-    irt$model.1pl <- irt_model(resp = resp, vars = vars, items = items,
+    irt$model.1pl <- irt_model(resp = resp, vars = vars, select = select,
                                valid = valid, mvs = mvs, irtmodel = '1PL',
                                verbose = verbose, warn = warn, test = FALSE)
-    irt$model.2pl <- irt_model(resp = resp, vars = vars, items = items,
+    irt$model.2pl <- irt_model(resp = resp, vars = vars, select = select,
                                valid = valid, mvs = mvs, irtmodel = '2PL',
                                verbose = verbose, warn = warn, test = FALSE)
 
@@ -174,10 +174,10 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
 
   } else if (irt_type == 'poly') {
 
-    irt$model.pcm <- irt_model(resp = resp, vars = vars, items = items, mvs = mvs,
+    irt$model.pcm <- irt_model(resp = resp, vars = vars, select = select, mvs = mvs,
                                valid = valid, irtmodel = 'PCM2', scoring = scoring,
                                verbose = verbose, warn = warn, test = FALSE)
-    irt$model.gpcm <- irt_model(resp = resp, vars = vars, items = items, mvs = mvs,
+    irt$model.gpcm <- irt_model(resp = resp, vars = vars, select = select, mvs = mvs,
                                 valid = valid, irtmodel = 'GPCM', scoring = scoring,
                                 verbose = verbose, warn = warn, test = FALSE)
 
@@ -271,9 +271,9 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#'   includes variable 'items' containing item names; additionally includes all
+#'   includes variable 'item' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #'   which items to use for the analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
@@ -300,14 +300,14 @@ irt_analysis <- function(resp, vars, items, valid = NULL, mvs = NULL,
 #'   info_crit: data.frame with information criteria of the model
 #' @export
 
-irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel,
+irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
                       scoring = NULL, verbose = FALSE,
                       path = here::here("Results"), filename = NULL,
                       xsi.fixed = NULL, warn = TRUE, test = TRUE) {
 
   # Test data
   if (test) {
-    check_logicals(vars, "vars", items, warn = warn)
+    check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
 
     if(!is.null(scoring)) check_numerics(vars, "vars", scoring)
@@ -337,7 +337,7 @@ irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel,
   check_pid(pid)
 
   # Prepare data
-  resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE,
+  resp <- prepare_resp(resp, vars = vars, select = select, convert = TRUE,
                        mvs = mvs, warn = FALSE)
 
   # Test data
@@ -347,7 +347,7 @@ irt_model <- function(resp, vars, items, valid = NULL, mvs = NULL, irtmodel,
   # Create scoring matrix if not provided in function arguments
   if (!is.null(scoring)) {
       check_numerics(vars, "vars", scoring)
-      Q = as.matrix(vars[[scoring]][vars[[items]]])
+      Q = as.matrix(vars[[scoring]][vars[[select]]])
   } else if (irtmodel %in% c("GPCM", "PCM2")) {
       stop("Please provide variable name for scoring factor for polytomous ",
            "analysis.")
@@ -504,7 +504,7 @@ wright_map <- function(model, irtmodel, path = here::here("Plots"),
 #'   and all variables that are further defined in the function arguments
 #'   includes all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#'   includes variable 'items' containing item names; additionally includes all
+#'   includes variable 'item' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
@@ -528,9 +528,9 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
                         digits = 2, overwrite = FALSE, warn = TRUE) {
 
   # prepare data
-  vars$irt_items <- vars$item %in% rownames(model_1par$mod$xsi)
-  vars_ <- dplyr::rename(vars[vars$irt_items, ], item = 'items')
-  resp <- prepare_resp(resp, vars = vars, items = 'irt_items', valid = valid,
+  vars$irt_item <- vars$item %in% rownames(model_1par$mod$xsi)
+  vars_ <- dplyr::rename(vars[vars$irt_item, ], items = 'item')
+  resp <- prepare_resp(resp, vars = vars, select = 'irt_item', valid = valid,
                        use_only_valid = TRUE, convert = TRUE, mvs = mvs,
                        warn = warn)
 

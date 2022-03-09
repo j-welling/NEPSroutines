@@ -6,9 +6,9 @@
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
 #' @param vars data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param scoring  string; defines name of numerical variable in vars that
 #' contains the scoring factor to be applied to loading matrix; defaults to
@@ -36,7 +36,7 @@
 #' @export
 #' @importFrom stats AIC BIC logLik
 
-dim_analysis <- function(resp, vars, items, scoring = "scoring",
+dim_analysis <- function(resp, vars, select, scoring = "scoring",
                          dim = NULL, valid = NULL, mvs = NULL,
                          irtmodel = "PCM2", maxiter = 10, snodes = 5,
                          return = FALSE, save = TRUE, print = TRUE,
@@ -47,7 +47,7 @@ dim_analysis <- function(resp, vars, items, scoring = "scoring",
   dimensionality <- list()
 
   dimensionality$analysis <- conduct_dim_analysis(
-    resp = resp, vars = vars, items = items, scoring = scoring, dim = dim,
+    resp = resp, vars = vars, select = select, scoring = scoring, dim = dim,
     valid = valid, irtmodel = irtmodel, maxiter = maxiter, snodes = snodes,
     mvs = mvs, verbose = verbose
   )
@@ -73,9 +73,9 @@ dim_analysis <- function(resp, vars, items, scoring = "scoring",
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
 #' @param vars data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param scoring  string; defines name of numerical variable in vars that
 #' contains the scoring factor to be applied to loading matrix; defaults to
@@ -95,7 +95,7 @@ dim_analysis <- function(resp, vars, items, scoring = "scoring",
 #'
 #' @return          list of results for each dimensional analysis
 #' @export
-conduct_dim_analysis <- function(resp, vars, items, dim, scoring = 'scoring',
+conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
                                  valid = NULL, irtmodel, maxiter, snodes,
                                  mvs = NULL, verbose = FALSE, warn = TRUE) {
   # Test data
@@ -109,7 +109,7 @@ conduct_dim_analysis <- function(resp, vars, items, dim, scoring = 'scoring',
   check_pid(pid)
 
   # Select only indicated items and convert mvs
-  resp <- prepare_resp(resp, vars = vars, items = items, convert = TRUE,
+  resp <- prepare_resp(resp, vars = vars, select = select, convert = TRUE,
                        mvs = mvs, warn = warn)
 
   check_numerics(resp, "resp")
@@ -120,7 +120,7 @@ conduct_dim_analysis <- function(resp, vars, items, dim, scoring = 'scoring',
   ## 1D reference model
 
   # Create Q matrix
-  Q <- as.matrix(vars[[scoring]][vars[[items]]])
+  Q <- as.matrix(vars[[scoring]][vars[[select]]])
 
   # Compute reference model
   dimensionality$uni <- TAM::tam.mml(
@@ -134,13 +134,13 @@ conduct_dim_analysis <- function(resp, vars, items, dim, scoring = 'scoring',
     for (d in dim) {
 
       # Create Q matrix
-      v <- as.double(vars[vars[[items]], d])
+      v <- as.double(vars[vars[[select]], d])
       dimensions <- sort(unique(v))
       Q <- matrix(0, nrow = length(v), ncol = length(dimensions))
       for (i in dimensions) {
         Q[v == i, i] <- 1
       }
-      Q <- Q * vars[[scoring]][vars[[items]]]
+      Q <- Q * vars[[scoring]][vars[[select]]]
 
       # Compute dimensional model
       dimensionality[[d]] <- TAM::tam.mml(

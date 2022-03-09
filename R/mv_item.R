@@ -4,9 +4,9 @@
 #' persons as rows; all responses ∈ ℕ0; user-defined missing values;
 #' includes all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
@@ -43,7 +43,7 @@
 #'          summary_table: table with summary statistics for TR
 #' @export
 
-mv_item <- function(resp, vars, items, valid = NULL,
+mv_item <- function(resp, vars, select, valid = NULL,
                     position = NULL, grouping = NULL,
                     mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                             UM = -90, ND = -55, NAd = -54, AZ = -21),
@@ -67,7 +67,7 @@ mv_item <- function(resp, vars, items, valid = NULL,
 
   # Test data
   check_logicals(resp, "resp", c(valid, grouping), warn = warn)
-  check_logicals(vars, "vars", c(items, grouping), warn = warn)
+  check_logicals(vars, "vars", c(select, grouping), warn = warn)
 
   if (is.null(valid)) {
     warning("No variable with valid cases provided. ",
@@ -75,19 +75,19 @@ mv_item <- function(resp, vars, items, valid = NULL,
   }
 
   # Conduct analysis
-  mv_item <- mvi_analysis(resp = resp, vars = vars, items = items,
+  mv_item <- mvi_analysis(resp = resp, vars = vars, select = select,
                           valid = valid, position = position,
                           grouping = grouping, show_all = show_all,
                           mvs = mvs, digits = digits, warn = warn,
                           test = FALSE)
 
   # Write grouped table
-  mv_item$summary_table <- mvi_table(mv_i = mv_item, vars = vars, items = items,
+  mv_item$summary_table <- mvi_table(mv_i = mv_item, vars = vars, select = select,
                                      mvs = mvs, grouping = grouping, warn = warn,
                                      test = FALSE)
 
   # Write plots
-  if (plots) mvi_plots(mv_i = mv_item, vars = vars, items = items,
+  if (plots) mvi_plots(mv_i = mv_item, vars = vars, select = select,
                        grouping = grouping, mvs = mvs, labels_mvs = labels_mvs,
                        show_all = show_all, color = color, verbose = verbose,
                        name_grouping = name_grouping, path = path_plots,
@@ -120,9 +120,9 @@ mv_item <- function(resp, vars, items, valid = NULL,
 #' persons as rows; all responses ∈ ℕ0; user-defined missing values;
 #' includes all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
@@ -148,7 +148,7 @@ mv_item <- function(resp, vars, items, valid = NULL,
 #' @importFrom stats median sd na.omit
 #' @export
 
-mvi_analysis <- function(resp, vars, items, position, valid = NULL,
+mvi_analysis <- function(resp, vars, select, position, valid = NULL,
                          grouping = NULL, show_all = FALSE,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, NAd = -54, AZ = -21),
@@ -160,7 +160,7 @@ mvi_analysis <- function(resp, vars, items, position, valid = NULL,
 
   if (test) {
     check_logicals(resp, "resp", c(valid, grouping), warn = warn)
-    check_logicals(vars, "vars", c(items, grouping), warn = warn)
+    check_logicals(vars, "vars", c(select, grouping), warn = warn)
 
     if (is.null(valid)) {
       warning("No variable with valid cases provided. ",
@@ -185,9 +185,9 @@ mvi_analysis <- function(resp, vars, items, position, valid = NULL,
 
 
   # Prepare data
-  vars_c <- vars[vars[[items]], ]
+  vars_c <- vars[vars[[select]], ]
   resp <- only_valid(resp, valid = valid)
-  resp_c <- prepare_resp(resp, vars = vars, items = items, warn = warn)
+  resp_c <- prepare_resp(resp, vars = vars, select = select, warn = warn)
 
   # NAs are not acknowledged in mvs-argument
   if (warn & !(NA %in% mvs) & any(resp_c %in% NA)) {
@@ -198,7 +198,7 @@ mvi_analysis <- function(resp, vars, items, position, valid = NULL,
   if (is.null(grouping)) {
 
     # Create list with results
-    mvlist <- create_mvlist(items = vars_c$items,
+    mvlist <- create_mvlist(item = vars_c$item,
                             position = vars_c[[position]],
                             responses = resp_c,
                             mvs = mvs,
@@ -217,7 +217,7 @@ mvi_analysis <- function(resp, vars, items, position, valid = NULL,
 
       # Select administered items for the group
       vars_g <- vars_c[vars_c[[g]], ]
-      resp_g <- resp_c[resp[[g]], vars_g$items]
+      resp_g <- resp_c[resp[[g]], vars_g$item]
 
       # Number of valid responses and position
       if (length(position) == 1) {
@@ -227,7 +227,7 @@ mvi_analysis <- function(resp, vars, items, position, valid = NULL,
       }
 
       # Create list with results
-      mvlist[[g]] <- create_mvlist(items = vars_g$items[!is.na(pos)],
+      mvlist[[g]] <- create_mvlist(item = vars_g$item[!is.na(pos)],
                                    position = na.omit(pos),
                                    responses = resp_g,
                                    mvs = mvs,
@@ -245,10 +245,10 @@ mvi_analysis <- function(resp, vars, items, position, valid = NULL,
         for (g in grouping) {
 
           r <- data.frame(t(resp_c[resp[[g]], ]))
-          r$items <- rownames(r)
-          r <- merge(r, vars_c[, c('items', position[g])], by = "items")
+          r$item <- rownames(r)
+          r <- merge(r, vars_c[, c('item', position[g])], by = "item")
           r <- dplyr::rename(r, position = as.character(position[g]))
-          r <- dplyr::select(r,-.data$items)
+          r <- dplyr::select(r,-.data$item)
           resp_p <- dplyr::full_join(resp_p, r, by = "position")
         }
 
@@ -290,9 +290,9 @@ mvi_analysis <- function(resp, vars, items, position, valid = NULL,
 #'
 #' @param mv_i  list; return object of mvi_analysis()
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param grouping  character vector; contains for each group a name of a logical
 #' variable in resp and vars that indicates to which group belongs a person or
@@ -307,7 +307,7 @@ mvi_analysis <- function(resp, vars, items, position, valid = NULL,
 #' @return table with results
 #' @export
 
-mvi_table <- function(mv_i, vars, items, grouping = NULL,
+mvi_table <- function(mv_i, vars, select, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       filename = NULL, path = here::here("Tables"),
@@ -316,7 +316,7 @@ mvi_table <- function(mv_i, vars, items, grouping = NULL,
   # Test data
   if (test) {
     test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
-    check_logicals(vars, "vars", c(items, grouping), warn = warn)
+    check_logicals(vars, "vars", c(select, grouping), warn = warn)
   }
 
   # Create table
@@ -328,7 +328,7 @@ mvi_table <- function(mv_i, vars, items, grouping = NULL,
     } else {
 
     results <- list()
-    results$list <- data.frame(items = vars$item[vars[[items]]])
+    results$list <- data.frame(item = vars$item[vars[[select]]])
     results$summary_all <- mv_i$summary$all
 
     for (g in grouping) {
@@ -336,7 +336,7 @@ mvi_table <- function(mv_i, vars, items, grouping = NULL,
       names(mv)[-1] <- apply(data.frame(names(mv)[-1]), 2, function(x) {
         paste0(x, "_", g)
       })
-      results$list <- dplyr::full_join(results$list, mv, by = "items")
+      results$list <- dplyr::full_join(results$list, mv, by = "item")
       results[[paste0("summary_", g)]] <- mv_i$summary[[g]]
     }
   }
@@ -358,9 +358,9 @@ mvi_table <- function(mv_i, vars, items, grouping = NULL,
 #'
 #' @param mv_i  list; return object of mvi_analysis()
 #' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'items' containing item names; additionally includes all
+#' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param grouping  character vector; contains for each group a name of a logical
 #' variable in resp and vars that indicates to which group belongs a person or
@@ -381,7 +381,7 @@ mvi_table <- function(mv_i, vars, items, grouping = NULL,
 #' @importFrom rlang .data
 #' @export
 
-mvi_plots <- function(mv_i, vars, items, grouping = NULL,
+mvi_plots <- function(mv_i, vars, select, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       labels_mvs = c(
@@ -403,18 +403,18 @@ mvi_plots <- function(mv_i, vars, items, grouping = NULL,
   # Test data
   if (test) {
     test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
-    check_logicals(vars, "vars", c(items, grouping), warn = warn)
+    check_logicals(vars, "vars", c(select, grouping), warn = warn)
   }
 
   # Pepare data
   mv_i <- mv_i$list
 
   if (is.null(grouping)) {
-    k <- sum(vars[[items]])
+    k <- sum(vars[[select]])
   } else {
     k <- NA_integer_
     for (g in grouping) {
-      k <- c(k, length(vars$item[vars[[items]] & vars[[g]]]))
+      k <- c(k, length(vars$item[vars[[select]] & vars[[g]]]))
     }
     k <- max(k, na.rm = TRUE)
 
@@ -530,8 +530,8 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
     for (lbl in names(labels_mvs)) {
       mv_min <- min(mv_i$list[[lbl]], na.rm = TRUE)
       mv_max <- max(mv_i$list[[lbl]], na.rm = TRUE)
-      item_min <- mv_i$list$items[mv_i$list[[lbl]] == mv_min]
-      item_max <- mv_i$list$items[mv_i$list[[lbl]] == mv_max]
+      item_min <- mv_i$list$item[mv_i$list[[lbl]] == mv_min]
+      item_max <- mv_i$list$item[mv_i$list[[lbl]] == mv_max]
       message("The number of ", labels_mvs[lbl], " varied between ",
               mv_min, " %", if(length(item_min) <= 3) {paste0(" (item ", item_min, ")")}, " and ",
               mv_max, " %", if(length(item_max) <= 3) {paste0(" (item ", item_max, ")")}, ".")
@@ -602,7 +602,7 @@ mvi_calc <- function(responses, mvs, digits = 2) {
 
 #' Create list with missing values per item
 #'
-#' @param items  character vector; contains names of items
+#' @param item  character vector; contains names of items
 #' @param position  integer vector; contains position of items
 #' @param responses  data.frame; contains item responses with items as variables
 #' and persons as rows; all responses ∈ ℕ0; user-defined missing values;
@@ -613,24 +613,24 @@ mvi_calc <- function(responses, mvs, digits = 2) {
 #' @return   list with results of missing values per item.
 #' @noRd
 
-create_mvlist <- function(items, position, responses, mvs, digits = 2) {
+create_mvlist <- function(item, position, responses, mvs, digits = 2) {
 
-  if (length(items) != length(position) |
-      ncol(responses) != length(items) |
+  if (length(item) != length(position) |
+      ncol(responses) != length(item) |
       ncol(responses) != length(position)) {
         stop("Number of items in data.frame responses, in vector items and in vector position do not match. ",
         "Please provide matching arguments to function create_mvlist().")
       }
 
   # Create list
-  mvlist <- data.frame(items = items,
+  mvlist <- data.frame(item = item,
                        position = position,
                        N = colSums(apply(responses, 2, function(x) !(x %in% mvs))))
 
   # Merge with percentage of missing values for each missing type
   results <- data.frame(mvi_calc(responses, mvs = mvs, digits = digits))
-  results$items <- row.names(results)
-  mvlist <- merge(mvlist, results, by = 'items')
+  results$item <- row.names(results)
+  mvlist <- merge(mvlist, results, by = 'item')
 
   # Return list
   return(mvlist)
