@@ -117,7 +117,7 @@ conduct_dis_analysis <- function(resp, vars, item_type = 'MC',
     scored <- vars$items[vars$dich == TRUE]
     var_names <- unique(c(unscored, scored))
 
-    resp <- convert_mv(resp = resp, items = var_names, mvs = mvs, warn = warn)
+    resp <- convert_mv(resp = resp[ , var_names], vars = vars, mvs = mvs, warn = warn)
 
     check_numerics(resp, "resp", scored, dich = TRUE)
 

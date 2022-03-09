@@ -63,7 +63,7 @@
 #'
 #' @export
 linking <- function(resp_previous, resp_current, resp_link_sample = NULL,
-                    vars, valid, select_previous, select_current,
+                    vars, valid = NULL, select_previous, select_current,
                     select_link_sample, scoring = "scoring", overwrite = FALSE,
                     mvs = NULL, maxiter, snodes, verbose, anchors = NULL,
                     longitudinal = TRUE, path_table = here::here("Tables"),
@@ -71,6 +71,10 @@ linking <- function(resp_previous, resp_current, resp_link_sample = NULL,
                     wid = "wle", dim = "link", print = TRUE, save = TRUE,
                     return = FALSE, diff_threshold = .5,
                     anchor_item_names = NULL) {
+
+    # test data
+    check_logicals(vars, "vars", c(select_current, select_previous, select_link_sample, dim))
+    check_numerics(vars, "vars", scoring)
 
     # check measurement invariance over time
     link_dif <- check_dif_anchor(

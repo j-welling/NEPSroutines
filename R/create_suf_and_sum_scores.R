@@ -1,4 +1,3 @@
-
 #' Create SUF
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
@@ -41,6 +40,7 @@
 #' @param path_results character; indicates where SUF shall be saved
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
+#'
 #' @export
 create_suf <- function(resp, vars, items_suf, wle_name, xsi_fixed = NULL,
              rotated = FALSE, linked = FALSE, wles = NULL,
@@ -137,9 +137,15 @@ create_suf <- function(resp, vars, items_suf, wle_name, xsi_fixed = NULL,
 #' @param irtmodel  string; "1PL" for Rasch, or "PCM2" for PCM analysis
 #' @return a data.frame containing ID_t, wle and se of wle (named like indicated
 #'   in wle_name)
+#'
 #' @export
-estimated_rotated_wles <- function(resp, vars, items, valid, facet, xsi_fixed,
+estimated_rotated_wles <- function(resp, vars, items, valid = NULL, facet, xsi_fixed,
                    scoring, mvs, wle_name, irtmodel) {
+
+  # Test data
+  check_variables(resp, "resp", facet)
+  ckeck_numerics(vars, "vars", scoring)
+
   if (is.null(facet)) {
     stop("Please provide the facet indicating the testlet rotation.")
   }
@@ -147,10 +153,19 @@ estimated_rotated_wles <- function(resp, vars, items, valid, facet, xsi_fixed,
     stop("Please provide the item parameters to ensure the correct",
        " results in the WLE estimation.")
   }
+
+  # Prepare data
   facet <- resp[resp[[valid]], facet, drop = FALSE]
   pid <- resp$ID_t[resp[[valid]]]
+  check_pid(pid)
   resp_ <- prepare_resp(resp, vars, items, use_only_valid = TRUE,
-              valid, convert = TRUE, mvs)
+                        valid = valid, convert = TRUE, mvs = mvs,
+                        warn = warn)
+
+  # Test resp
+  check_numerics(resp, "resp")
+
+  # Conduct analyses
   frmA <- as.formula(paste0("~ item + ",
                 ifelse(irtmodel == "PCM2", "item*step +", ""),
                 names(facet)))
@@ -169,6 +184,7 @@ estimated_rotated_wles <- function(resp, vars, items, valid, facet, xsi_fixed,
     verbose = FALSE, pid = pid, formulaA = frmA, irtmodel = irtmodel,
     B = B
   )
+
   wles <- TAM::tam.wle(mod, progress = FALSE)[, c("pid", "theta", "error")]
   names(wles) <- c("ID_t", paste0(wle_name, c("_sc1", "_sc2")))
   return(wles)
@@ -290,21 +306,25 @@ save_suf <- function(suf, path_results, filename) {
 #' @param vars data.frame; contains information about items with items as rows;
 #'   includes variable 'items' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
-#' @param items  string; defines name of logical variable in vars that indicates
+#' @param select  string; defines name of logical variable in vars that indicates
 #'   which items to use for the analysis
 #' @return integer vector of length nrow(resp) containing the row sums for the
 #'   specified item set
+#' @param warn  logical; whether to print warnings (should be set to TRUE)
+#'
 #' @export
-sum_scores <- function(resp, vars, items) {
+sum_scores <- function(resp, vars, select, warn = TRUE) {
+  # Test data
+  check_logicals(vars, "vars", select, warn = warn)
+  items <- vars$items[vars[[select]]]
+  check_numerics(resp, "resp", items)
   # count only correctly scored binary or FULLY correctly scored PC items
-  resp[, vars$items[vars[[items]]]] <- lapply(vars$items[vars[[items]]],
-                        function(x) {
+  resp[, items] <- lapply(items, function(x) {
                           ifelse(resp[, x] == vars$max[x],
-                               1, NA)
-                        })
+                               1, NA)})
   rs <- data.frame(
     ID_t = resp$ID_t,
-    sumscore = rowSums(resp[, vars$items[vars[[items]]]], na.rm = TRUE)
+    sumscore = rowSums(resp[, items], na.rm = TRUE)
   )
   return(rs)
 }

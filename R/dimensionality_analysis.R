@@ -99,7 +99,7 @@ conduct_dim_analysis <- function(resp, vars, items, dim, scoring = 'scoring',
                                  valid = NULL, irtmodel, maxiter, snodes,
                                  mvs = NULL, verbose = FALSE, warn = TRUE) {
   # Test data
-  check_logicals(vars, "vars", c(dim, scoring), warn = warn)
+  check_variables(vars, "vars", c(dim, scoring))
 
   # Select only valid cases
   resp <- only_valid(resp, valid = valid, warn = warn)
