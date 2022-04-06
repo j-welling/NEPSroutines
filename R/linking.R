@@ -5,7 +5,7 @@
 #'    include a WLE as given in wid
 #' @param resp_current data.frame with responses of second measurement wave,
 #'    a person identifier and a variable indicating valid cases
-#' @param resp_link_sample data.frame with responses of link sample,
+#' @param resp_link_study data.frame with responses of link sample,
 #'    a person identifier and a variable indicating valid cases; variables of
 #'    the link sample have to be adapted to the item names and the item scoring
 #'    in the previous and current measurement
@@ -20,7 +20,7 @@
 #'   identifying the item set for the current measurement time point
 #' @param select_previous character; contains name of logical variable in vars
 #'   identifying the item set for the previous measurement time point
-#' @param select_common character; indicates the variable in vars
+#' @param select_link_items character; indicates the variable in vars
 #'   selecting the items that were administered in the link sample (anchor
 #'   groups design) or at both time points (anchor items design -- note that
 #'   anchor items only appear once!)
@@ -62,9 +62,10 @@
 #'   mapping as anchors
 #'
 #' @export
-linking <- function(resp_previous, resp_current, resp_link_sample = NULL,
+linking <- function(resp_previous, resp_current, resp_link_study = NULL,
                     vars, valid = NULL, select_previous, select_current,
-                    select_common, scoring = "scoring", overwrite = FALSE,
+                    select_link_items = NULL, select_anchor_items = NULL,
+                    scoring = "scoring", overwrite = FALSE,
                     mvs = NULL, maxiter, snodes, verbose, anchors = NULL,
                     longitudinal = TRUE, path_table = here::here("Tables"),
                     path_results = here::here("Results"), pid = "ID_t",
@@ -73,33 +74,34 @@ linking <- function(resp_previous, resp_current, resp_link_sample = NULL,
                     anchor_item_names = NULL) {
 
     # test data
-    check_logicals(vars, "vars", c(select_current, select_previous, select_common))
+    check_logicals(vars, "vars", c(select_current, select_previous))
     check_variables(vars, "vars", dim)
     check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
     # check measurement invariance over time
     link_dif <- check_dif_anchor(
         resp_previous = resp_previous, resp_current = resp_current,
-        resp_link_sample = resp_link_sample, anchors = anchors, mvs = mvs,
+        resp_link_study = resp_link_study, anchors = anchors, mvs = mvs,
         return = TRUE, valid = valid, scoring = scoring, vars = vars,
-        select_common = select_common, select_previous = select_previous,
+        select_link_items = select_link_items, select_previous = select_previous,
         select_current = select_current, diff_threshold = diff_threshold,
         anchor_item_names = anchor_item_names)
 
     # check unidimensionality over time
     link_dim <- check_link_dimensionality(
         resp_previous = resp_previous, resp_current = resp_current,
-        resp_link_sample = resp_link_sample, vars = vars,
-        select_common = select_common, scoring = scoring, dim = dim,
+        resp_link_study = resp_link_study, vars = vars,
+        select_link_items = select_link_items,
+        scoring = scoring, dim = dim,
         mvs = mvs, maxiter = maxiter, snodes = snodes, verbose = FALSE,
         valid = valid)
 
     # conduct linking
     link_results <- link_samples(
         resp_previous = resp_previous, resp_current = resp_current,
-        resp_link_sample = resp_link_sample, vars = vars,
+        resp_link_study = resp_link_study, vars = vars,
         select_current = select_current, select_previous = select_previous,
-        select_common = select_common, valid = valid,
+        select_link_items = select_link_items, valid = valid,
         scoring = scoring, anchors = link_dif$anchors,
         longitudinal = longitudinal, pid = pid, wid = wid, mvs = mvs)
 
@@ -176,8 +178,8 @@ link_item_parameters <- function(xsi, const, return_steps = FALSE, vars,
 
 #' Link WLEs using a known linking constant while correcting for selection
 #'
-#' @param wle_previous      data.frame with WLEs at first measurement wave
-#' @param wle_current      data.frame with WLEs at second measurement wave
+#' @param wle_previous  data.frame with WLEs at first measurement wave
+#' @param wle_current   data.frame with WLEs at second measurement wave
 #' @param const         linking constant
 #' @param pid       character; variable name used as person identifier
 #' @param wid       character; variable name used as WLE identifier; optional
@@ -238,9 +240,7 @@ link_wles <- function(wle_previous, wle_current, const, pid = "ID_t",
 
 check_var_in_df <- function(df, var, new_var, name) {
     # Set variable name for person identifier
-    if (!(var %in% colnames(df))) {
-        stop(paste0("Variable ", var, " not found in ", name, "."))
-    }
+    check_variables(df = df, name_df = name, variables = var)
     names(df)[which(names(df) == var)] <- new_var
 
     return(df)
@@ -254,7 +254,7 @@ check_var_in_df <- function(df, var, new_var, name) {
 #'    include a WLE as given in wid
 #' @param resp_current data.frame with responses of second measurement wave,
 #'    a person identifier and a variable indicating valid cases
-#' @param resp_link_sample data.frame with responses of link sample,
+#' @param resp_link_study data.frame with responses of link sample,
 #'    a person identifier and a variable indicating valid cases; variables of
 #'    the link sample have to be adapted to the item names and the item scoring
 #'    in the previous and current measurement
@@ -265,7 +265,7 @@ check_var_in_df <- function(df, var, new_var, name) {
 #'   identifying the item set for the current measurement time point
 #' @param select_previous character; contains name of logical variable in vars
 #'   identifying the item set for the previous measurement time point
-#' @param select_common character; contains name of logical variable in vars
+#' @param select_link_items character; contains name of logical variable in vars
 #'   identifying the item set for the link sample
 #' @param valid string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
@@ -288,9 +288,9 @@ check_var_in_df <- function(df, var, new_var, name) {
 #'                  k = number of anchor items
 #'                  xsi = linked item parameters
 #' @export
-link_samples <- function(resp_previous, resp_current, resp_link_sample = NULL,
+link_samples <- function(resp_previous, resp_current, resp_link_study = NULL,
                          vars, select_current, select_previous,
-                         select_common, valid, scoring,
+                         select_link_items, valid, scoring,
                          anchors = NULL, longitudinal = TRUE,
                          pid = "ID_t", wid = "wle", mvs = NULL) {
 
@@ -301,10 +301,10 @@ link_samples <- function(resp_previous, resp_current, resp_link_sample = NULL,
     resp_current <- check_var_in_df(df = resp_current, var = pid,
                                     new_var = "ID_t",
                                     name = get_object_name(resp_current))
-    if (!is.null(resp_link_sample)) {
-        resp_link_sample <- check_var_in_df(
-            df = resp_link_sample, var = pid, new_var = "ID_t",
-            name = get_object_name(resp_link_sample)
+    if (!is.null(resp_link_study)) {
+        resp_link_study <- check_var_in_df(
+            df = resp_link_study, var = pid, new_var = "ID_t",
+            name = get_object_name(resp_link_study)
         )
     }
 
@@ -346,9 +346,9 @@ link_samples <- function(resp_previous, resp_current, resp_link_sample = NULL,
 
     # Estimate item parameters for link sample
     xsi_link_sample <- NULL
-    if (!is.null(resp_link_sample)) {
+    if (!is.null(resp_link_study)) {
         xsi_link_sample <- irt_model(
-            resp = resp_link_sample, vars = vars, select = select_common,
+            resp = resp_link_study, vars = vars, select = select_link_items,
             valid = valid, mvs = mvs,
             irtmodel = ifelse(is_pcm_previous | is_pcm_current, "PCM2", "1PL"),
             scoring = scoring, verbose = FALSE, path = NULL, filename = NULL
@@ -356,10 +356,10 @@ link_samples <- function(resp_previous, resp_current, resp_link_sample = NULL,
     }
 
     res <- calculate_link_parameters(
-        is_anchor_items = is.null(resp_link_sample),
+        is_anchor_items = is.null(resp_link_study),
         select_previous = select_previous, select_current = select_current,
         anchors = anchors, xsi_previous = xsi_previous,
-        xsi_current = xsi_current, select_common = select_common,
+        xsi_current = xsi_current, select_link_items = select_link_items,
         xsi_link_sample = xsi_link_sample, vars = vars, scoring = scoring)
     const <- res$const
     const.err <- res$const.err
@@ -450,7 +450,7 @@ get_final_ids <- function(id_previous, id_current,
 #'   identifying the item set for the current measurement time point
 #' @param select_previous character; contains name of logical variable in vars
 #'   identifying the item set for the previous measurement time point
-#' @param select_common string; defines name of logical variable in vars
+#' @param select_link_items string; defines name of logical variable in vars
 #'   that indicates the items for the link sample analysis
 #' @param scoring string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to the link constant (e.g., only
@@ -462,7 +462,7 @@ get_final_ids <- function(id_previous, id_current,
 calculate_link_parameters <- function(is_anchor_items = TRUE, select_previous,
                                       select_current, anchors = NULL,
                                       xsi_previous, xsi_current,
-                                      select_common = NULL,
+                                      select_link_items = NULL,
                                       xsi_link_sample = NULL, vars,
                                       scoring = "scoring") {
     # Calculate linking constant for anchor items design
@@ -495,10 +495,10 @@ calculate_link_parameters <- function(is_anchor_items = TRUE, select_previous,
         # Identify anchor items
         anchors_previous <-  # first measurement
             intersect(vars$item[vars[[select_previous]]],
-                      vars$item[vars[[select_common]]])
+                      vars$item[vars[[select_link_items]]])
         anchors_current <-  # second measurement
             intersect(vars$item[vars[[select_current]]],
-                      vars$item[vars[[select_common]]])
+                      vars$item[vars[[select_link_items]]])
         if (!is.null(anchors)) {               # only selected anchors
             anchors_previous <- anchors_previous[anchors_previous %in% anchors]
             anchors_current <- anchors_current[anchors_current %in% anchors]
@@ -514,7 +514,7 @@ calculate_link_parameters <- function(is_anchor_items = TRUE, select_previous,
         # Linking error
         xsi_link_sample.linked <- link_item_parameters(
             xsi = xsi_link_sample, const = const1, vars = vars,
-            select = select_common, scoring = scoring)
+            select = select_link_items, scoring = scoring)
         xsi_current.linked <- link_item_parameters(
             xsi = xsi_current, const = const2, vars = vars,
             select = select_current, scoring = scoring)
@@ -542,7 +542,7 @@ calculate_link_parameters <- function(is_anchor_items = TRUE, select_previous,
 #'   contains ID_t; anchor items are named to fit the current analysis
 #' @param resp_current     data.frame with responses of second measurement wave;
 #'   contains ID_t
-#' @param resp_link_sample data.frame with responses of link sample;
+#' @param resp_link_study data.frame with responses of link sample;
 #'   contains ID_t; required if anchor group design is used
 #' @param anchors   data.frame with two columns including the link items
 #'            in the two waves; if NULL, all common items are used
@@ -556,7 +556,7 @@ calculate_link_parameters <- function(is_anchor_items = TRUE, select_previous,
 #' @param vars data.frame; contains information about items with items as rows;
 #'   includes variable 'item' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
-#' @param select_common character; contains name of logical variable in vars
+#' @param select_link_items character; contains name of logical variable in vars
 #'   identifying the item set for the both time points
 #' @param select_current character; contains name of logical variable in vars
 #'   identifying the item set for the current measurement time point; needed to
@@ -575,13 +575,13 @@ calculate_link_parameters <- function(is_anchor_items = TRUE, select_previous,
 #' @return    list with DIF model(s), DIF summary and anchor items
 #' @export
 check_dif_anchor <- function(resp_previous, resp_current,
-                             resp_link_sample = NULL, anchors = NULL,
+                             resp_link_study = NULL, anchors = NULL,
                              mvs = NULL, return = TRUE, valid,
-                             scoring = "scoring", vars, select_common = NULL,
+                             scoring = "scoring", vars, select_link_items = NULL,
                              select_previous, select_current,
                              diff_threshold = .5, anchor_item_names = NULL) {
 
-    is_anchor_group <- !is.null(resp_link_sample)
+    is_anchor_group <- !is.null(resp_link_study)
 
     # identify longitudinal subsample
     ids <- get_final_ids(id_previous = resp_previous$ID_t,
@@ -590,24 +590,25 @@ check_dif_anchor <- function(resp_previous, resp_current,
     resp_current_ <- resp_current[resp_current$ID_t %in% ids, ]
 
     # Item names
-    items_common <- vars$item[vars[[select_common]]]
     items_previous <- vars$item[vars[[select_previous]]]
     items_current <- vars$item[vars[[select_current]]]
 
     dif <- list()
 
     if (is_anchor_group) {
+        items_link_sample <- vars$item[vars[[select_link_items]]]
+
         resp <- merge(resp_previous_, resp_current_, by = c("ID_t", valid))
         resp$main_sample <- 1
-        resp_link_sample$main_sample <- 0
-        resp <- dplyr::bind_rows(resp, resp_link_sample)
+        resp_link_study$main_sample <- 0
+        resp <- dplyr::bind_rows(resp, resp_link_study)
         ids <- resp$ID_t
         resp$ID_t <- 1:nrow(resp)
 
-        is_pcm_common <- any(apply(resp[ , items_common], 2, max, na.rm = TRUE) > 1)
-        irt_type <- ifelse(is_pcm_common, "poly", "dich")
+        is_pcm_link_sample <- any(apply(resp[ , items_link_sample], 2, max, na.rm = TRUE) > 1)
+        irt_type <- ifelse(is_pcm_link_sample, "poly", "dich")
 
-        dif$dif_model <- dif_model(resp = resp, vars = vars, select = select_common,
+        dif$dif_model <- dif_model(resp = resp, vars = vars, select = select_link_items,
                                    dif_var = "main_sample", scoring = scoring,
                                    valid = valid, verbose = FALSE,
                                    mvs = mvs, irt_type = irt_type)
@@ -801,7 +802,7 @@ summarize_link_dif <- function(dif_summary = NULL, mod_current = NULL,
 #'    include a WLE as given in wid
 #' @param resp_current data.frame with responses of second measurement wave,
 #'    a person identifier and a variable indicating valid cases
-#' @param resp_link_sample data.frame with responses of link sample,
+#' @param resp_link_study data.frame with responses of link sample,
 #'    a person identifier and a variable indicating valid cases; variables of
 #'    the link sample have to be adapted to the item names and the item scoring
 #'    in the previous and current measurement
@@ -812,7 +813,7 @@ summarize_link_dif <- function(dif_summary = NULL, mod_current = NULL,
 #'   for the time points; please note that, in the anchor items design, the
 #'   common items between the time points must be named the same and, therefore,
 #'   not be doubled in vars
-#' @param select_common character; indicates the variable in vars
+#' @param select_link_items character; indicates the variable in vars
 #'   selecting the items that were administered in the link sample (anchor
 #'   groups design) or at both time points (anchor items design -- note that
 #'   anchor items only appear once!)
@@ -833,23 +834,39 @@ summarize_link_dif <- function(dif_summary = NULL, mod_current = NULL,
 #' @param verbose   verbose as passed to the TAM function
 #' @export
 check_link_dimensionality <- function(resp_previous, resp_current,
-                                     resp_link_sample, vars, select_common,
-                                     scoring, dim = "link", mvs,
-                                     irtmodel = "PCM2", maxiter, snodes,
-                                     verbose = FALSE, valid) {
-    if (is.null(resp_link_sample)) {
+                                      resp_link_study, vars, select_link_items,
+                                      scoring, dim = "link", mvs,
+                                      irtmodel = "PCM2", maxiter, snodes,
+                                      verbose = FALSE, valid) {
+    if (is.null(resp_link_study)) {
         resp <- dplyr::bind_rows(resp_previous, resp_current)
         resp$ID_t <- 1:nrow(resp)
-        dimensionality <- conduct_dim_analysis(
-            resp = resp, vars, select = select_common, scoring, dim = dim,
-            valid, irtmodel, maxiter, snodes, verbose, mvs
+
+        dimensionality <- list()
+        dimsum <- list()
+
+        dimensionality$previous <- conduct_dim_analysis(
+            resp = resp, vars = vars, select = select_previous,
+            scoring = scoring, dim = dim, valid = valid, irtmodel = irtmodel,
+            maxiter = maxiter, snodes = snodes, verbose = verbose, mvs = mvs
         )
+        dimsum$previous <- dim_summary(dimensionality$previous)
+
+        dimensionality$current <- conduct_dim_analysis(
+            resp = resp, vars = vars, select = select_current,
+            scoring = scoring, dim = dim, valid = valid, irtmodel = irtmodel,
+            maxiter = maxiter, snodes = snodes, verbose = verbose, mvs = mvs
+        )
+        dimsum$current <- <- dim_summary(dimensionality$current)
+
     } else {
         dimensionality <- conduct_dim_analysis(
-            resp = resp_link_sample, vars, select = select_common, scoring,
-            dim, valid, irtmodel, maxiter, snodes, verbose, mvs)
+            resp = resp_link_study, vars = vars, select = select_link_items,
+            scoring = scoring, dim = dim, valid = valid, irtmodel = irtmodel,
+            maxiter = maxiter, snodes = snodes, verbose = verbose, mvs = mvs
+        )
+        dimsum <- dim_summary(dimensionality)
     }
-    dimsum <- dim_summary(dimensionality)
 
     return(list(dimensionality = dimensionality, dim_sum = dimsum))
 }
@@ -865,6 +882,7 @@ check_link_dimensionality <- function(resp_previous, resp_current,
 #' @export
 print_link_results <- function(link_dif, link_dim, link_results,
                                diff_threshold) {
+
     is_anchor_groups <- !is.null(link_dif$dif_model)
 
     N <- paste0("N long. subsample: ",
@@ -909,6 +927,10 @@ print_link_results <- function(link_dif, link_dim, link_results,
             paste(range(xsi1, na.rm = T), collapse = ", "), "\n",
             "Min. / max. abs. estimate (current time point): ",
             paste(range(xsi2, na.rm = T), collapse = ", "), "\n")
+
+        # print AIC/BIC of link_dim
+        cat("Dimensionality analysis results:\n")
+        lapply(link_dim$dim_sum, print)
     } else {
         xsi <- link_dif$link_dif_summary$link_dif_table[["xsi"]]
         usable <- paste0("No. of usable items for link: ",
@@ -921,6 +943,12 @@ print_link_results <- function(link_dif, link_dim, link_results,
             dif_table,
             "Min. / max. abs. estimate: ",
             paste(range(xsi, na.rm = T), collapse = ", "), "\n")
+
+        # print AIC/BIC of link_dim
+        cat("\nDimensionality analysis results for previous test:\n")
+        lapply(link_dim$dim_sum$previous, print)
+        cat("\nDimensionality analysis results for current test:\n")
+        lapply(link_dim$dim_sum$previous, print)
     }
     # print N longitudinal subsample, N link study
     cat(N)
@@ -937,10 +965,6 @@ print_link_results <- function(link_dif, link_dim, link_results,
 
     # print absolute number and percentage of usable items for tp1 and tp2
     cat(usable)
-
-    # print AIC/BIC of link_dim
-    cat("Dimensionality analysis results:\n")
-    lapply(link_dim$dim_sum, print)
 
     # print link constant and link error (link_results)
     cat(const)
