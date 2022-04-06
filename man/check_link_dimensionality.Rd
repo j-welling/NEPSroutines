@@ -9,7 +9,7 @@ check_link_dimensionality(
   resp_current,
   resp_link_sample,
   vars,
-  select_link_sample,
+  select_common,
   scoring,
   dim = "link",
   mvs,
@@ -34,14 +34,14 @@ the link sample have to be adapted to the item names and the item scoring
 in the previous and current measurement}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments: contains an
 item identifier for all items in the link sample and a dimension identifier
 for the time points; please note that, in the anchor items design, the
 common items between the time points must be named the same and, therefore,
 not be doubled in vars}
 
-\item{select_link_sample}{character; indicates the variable in vars
+\item{select_common}{character; indicates the variable in vars
 selecting the items that were administered in the link sample (anchor
 groups design) or at both time points (anchor items design -- note that
 anchor items only appear once!)}

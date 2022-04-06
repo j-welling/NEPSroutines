@@ -5,17 +5,14 @@
 \title{Write table of user defined missing values per item (and position)}
 \usage{
 mvp_table(
-  mv_p = NULL,
+  mv_p,
   grouping = NULL,
   overwrite = FALSE,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
     -21),
   filename = NULL,
   path = here::here("Tables"),
-  resp = NULL,
-  vars = NULL,
-  items = NULL,
-  valid = NULL
+  test = TRUE
 )
 }
 \arguments{
@@ -33,19 +30,7 @@ an item}
 
 \item{path}{string; defines path to folder where table shall be saved}
 
-\item{resp}{data.frame; contains item responses with items as variables and
-persons as rows; all responses ∈ ℕ0; user-defined missing values;
-includes all variables that are further defined in the function arguments}
-
-\item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
-variables that are further defined in the function arguments}
-
-\item{items}{string; defines name of logical variable in vars that indicates
-which items to use for the analysis}
-
-\item{valid}{string; defines name of logical variable in resp that indicates
-(in)valid cases}
+\item{test}{logical; whether to test data structure (should be set to TRUE)}
 }
 \value{
 table with missing values per person and

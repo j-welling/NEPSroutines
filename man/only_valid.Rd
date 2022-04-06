@@ -4,13 +4,15 @@
 \alias{only_valid}
 \title{Select only valid cases}
 \usage{
-only_valid(resp, valid = NULL)
+only_valid(resp, valid = NULL, warn = TRUE)
 }
 \arguments{
 \item{resp}{data.frame with item responses}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
+
+\item{warn}{logical; whether to warn if no parameter 'valid' provided}
 }
 \value{
 data.frame as resp, but only with valid cases

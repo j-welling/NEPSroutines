@@ -7,7 +7,7 @@
 irt_analysis(
   resp,
   vars,
-  items,
+  select,
   valid = NULL,
   mvs = NULL,
   irt_type,
@@ -21,8 +21,10 @@ irt_analysis(
   path_results = here::here("Results"),
   overwrite = FALSE,
   digits = 2,
+  name_group = NULL,
   verbose = FALSE,
-  name_group = NULL
+  warn = TRUE,
+  test = TRUE
 )
 }
 \arguments{
@@ -33,10 +35,10 @@ are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{items}{string; defines name of logical variable in vars that indicates
+\item{select}{string; defines name of logical variable in vars that indicates
 which items to use for the analysis}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
@@ -69,9 +71,14 @@ Rasch model}
 
 \item{digits}{integer; number of decimals for rounding}
 
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
+
 \item{verbose}{logical; whether to print processing information to console}
 
-\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
+\item{warn}{logical; whether to print warnings (should be set to TRUE to
+avoid problems with the data structure)}
+
+\item{test}{logical; whether to test data structure (should be set to TRUE)}
 }
 \value{
 list with all results

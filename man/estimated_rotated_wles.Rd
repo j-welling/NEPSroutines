@@ -7,8 +7,8 @@
 estimated_rotated_wles(
   resp,
   vars,
-  items,
-  valid,
+  select,
+  valid = NULL,
   facet,
   xsi_fixed,
   scoring,
@@ -27,10 +27,10 @@ arguments; if special person sets are of interest, these persons have to
 be selected in resp beforehand}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{items}{string; defines name of logical variable in vars that indicates
+\item{select}{string; defines name of logical variable in vars that indicates
 which items to use for the analysis}
 
 \item{valid}{string; defines name of logical variable in resp that indicates

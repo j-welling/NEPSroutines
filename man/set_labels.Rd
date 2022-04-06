@@ -10,7 +10,7 @@ set_labels(suf, vars, items_suf, competence, wle_name, linked)
 \item{suf}{data.frame; SUF to be (re)labelled}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
 \item{items_suf}{character; indicates the logical variable in vars which

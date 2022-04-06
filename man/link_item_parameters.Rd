@@ -22,7 +22,7 @@ link_item_parameters(
 subsequent analysis with TAM::tam.mml()). Defaults to FALSE.}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
 \item{select}{string; defines name of logical variable in vars that

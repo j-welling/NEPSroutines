@@ -4,7 +4,15 @@
 \alias{conduct_dis_analysis}
 \title{Conduct distractor analysis}
 \usage{
-conduct_dis_analysis(resp, vars, items, valid = NULL)
+conduct_dis_analysis(
+  resp,
+  vars,
+  item_type = "MC",
+  scored_version = NULL,
+  valid = NULL,
+  mvs = NULL,
+  warn = TRUE
+)
 }
 \arguments{
 \item{resp}{data.frame; contains item responses with items as variables and
@@ -14,18 +22,25 @@ are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variables 'items' (character) containing item names,
-                   'raw' (logical) indicating unscored items,
+includes variables 'item' (character) containing item names,
+                   'dich' (logical) indicating all dichotomously scored items
+                   'raw' (logical) indicating all unscored items,
                    'type' (character) containing item type (e.g. MC),
                    'correct_response' (integer) containing the correct
                      response for each item,
 and all variables that are further defined in the function arguments}
 
-\item{items}{string; defines name of logical variable in vars that indicates
-which items to use for the analysis}
+\item{item_type}{character vector; contains all item types as specified in
+vars$type that shall be used for distratcor analysis (default is 'MC')}
+
+\item{scored_version}{string; defines name of variable in vars that contains
+the names of the scored versions of the raw items; can be left empty, then
+default of name_scored_item = name_unscored_item + "_c" applies}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
+
+\item{warn}{logical; whether to print warnings (should be set to TRUE)}
 }
 \description{
 Calculates the item-rest correlations of distractor and correct responses

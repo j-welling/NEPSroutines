@@ -7,7 +7,7 @@
 mv_person(
   resp,
   vars,
-  items,
+  select,
   valid = NULL,
   grouping = NULL,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
@@ -28,7 +28,6 @@ mv_person(
   color = NULL,
   overwrite = FALSE,
   name_grouping = "test version",
-  legend_position = 0.82,
   digits = 2,
   warn = TRUE,
   verbose = TRUE
@@ -40,10 +39,10 @@ persons as rows; all responses ∈ ℕ0; user-defined missing values;
 includes all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{items}{string; defines name of logical variable in vars that indicates
+\item{select}{string; defines name of logical variable in vars that indicates
 which items to use for the analysis}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
@@ -75,19 +74,17 @@ missing values to use them in plot titles and printed results}
 \item{show_all}{logical; whether whole sample shall be included as a "group"
 (only applicable when grouping exists)}
 
-\item{color}{character calar or vector; defines color(s) of the bar in plots}
+\item{color}{character scalar or vector; defines color(s) of the bar in plots}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 
 \item{name_grouping}{string; name of the grouping variable (e.g. test version)
 for title and legend of plots (only needed when grouping exists)}
 
-\item{legend_position}{double; contains horizontal position of legend;
-y in {0;1} (left to right)}
-
 \item{digits}{integer; number of decimals for rounding}
 
-\item{warn}{logical; whether to print a warning if NAs were found in resp}
+\item{warn}{logical; whether to print warnings (should be set to TRUE to
+avoid problems with the data structure)}
 
 \item{verbose}{logical; whether to print processing information to console}
 }

@@ -7,7 +7,7 @@
 dim_analysis(
   resp,
   vars,
-  items,
+  select,
   scoring = "scoring",
   dim = NULL,
   valid = NULL,
@@ -32,10 +32,10 @@ are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{items}{string; defines name of logical variable in vars that indicates
+\item{select}{string; defines name of logical variable in vars that indicates
 which items to use for the analysis}
 
 \item{scoring}{string; defines name of numerical variable in vars that

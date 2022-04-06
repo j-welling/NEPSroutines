@@ -4,7 +4,7 @@
 \alias{desc_abs}
 \title{Show frequency (absolute) of answers of list of variables}
 \usage{
-desc_abs(dat, desc, valid = NULL)
+desc_abs(dat, desc, valid = NULL, warn = TRUE)
 }
 \arguments{
 \item{dat}{data.frame; contains sociodemographic and booklet variables}
@@ -14,6 +14,8 @@ shall be used in analysis}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
+
+\item{warn}{logical; whether to warn if no parameter 'valid' provided}
 }
 \value{
 list with  frequency (absolute) of answers for each variable in desc.

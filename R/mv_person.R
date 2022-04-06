@@ -25,7 +25,7 @@
 #' @param path_plots  string; defines path to folder where plots shall be saved
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
-#' @param color  character calar or vector; defines color(s) of the bar in plots
+#' @param color  character scalar or vector; defines color(s) of the bar in plots
 #' @param name_grouping  string; name of the grouping variable (e.g. test version)
 #' for title and legend of plots (only needed when grouping exists)
 #' @param overwrite logical; whether to overwrite existing file when saving table

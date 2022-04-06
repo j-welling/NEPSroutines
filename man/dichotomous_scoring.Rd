@@ -4,7 +4,7 @@
 \alias{dichotomous_scoring}
 \title{Dichotomous scoring of MC items}
 \usage{
-dichotomous_scoring(resp, vars, select, correct_response)
+dichotomous_scoring(resp, vars, old_names, new_names = NULL)
 }
 \arguments{
 \item{resp}{data.frame; contains item responses with items as variables and
@@ -14,19 +14,16 @@ are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{select}{string; defines name of logical variable in vars that indicates
-which (unscored) items to use for the analysis}
+\item{old_names}{character vector; contains the names of the original items}
 
-\item{correct_response}{character; indicates the logical variable in vars
-which contains the correct response of the MC items}
+\item{new_names}{character vector; contains the names of the new items. Must
+be in same order as parameter "old_names"! (default is old name + "_c")}
 }
 \value{
-resp with dichotomously scored MC items. Note that this function
-  changes the given MC items IN PLACE. If you want to keep the original data,
-  please copy and rename the items to be scored first.
+resp with dichotomously scored MC items.
 }
 \description{
 Dichotomous scoring of MC items

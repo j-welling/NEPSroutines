@@ -7,7 +7,7 @@
 mvp_analysis(
   resp,
   vars,
-  items,
+  select,
   valid = NULL,
   grouping = NULL,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
@@ -15,7 +15,8 @@ mvp_analysis(
   filename = NULL,
   path = here::here("Results"),
   digits = 2,
-  warn = TRUE
+  warn = TRUE,
+  test = TRUE
 )
 }
 \arguments{
@@ -24,10 +25,10 @@ persons as rows; all responses ∈ ℕ0; user-defined missing values;
 includes all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{items}{string; defines name of logical variable in vars that indicates
+\item{select}{string; defines name of logical variable in vars that indicates
 which items to use for the analysis}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
@@ -45,7 +46,9 @@ an item}
 
 \item{digits}{integer; number of decimals for rounding}
 
-\item{warn}{logical; whether to print a warning if NAs were found in resp}
+\item{warn}{logical; whether to print warnings (should be set to TRUE)}
+
+\item{test}{logical; whether to test data structure (should be set to TRUE)}
 }
 \value{
 list with missing values per person and

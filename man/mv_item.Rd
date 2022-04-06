@@ -7,7 +7,7 @@
 mv_item(
   resp,
   vars,
-  items,
+  select,
   valid = NULL,
   position = NULL,
   grouping = NULL,
@@ -40,10 +40,10 @@ persons as rows; all responses ∈ ℕ0; user-defined missing values;
 includes all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{items}{string; defines name of logical variable in vars that indicates
+\item{select}{string; defines name of logical variable in vars that indicates
 which items to use for the analysis}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
@@ -89,7 +89,7 @@ for title and legend of plots (only needed when grouping exists)}
 
 \item{digits}{integer; number of decimals for rounding}
 
-\item{warn}{logical; whether to print a warning if NAs were found in resp}
+\item{warn}{logical; whether to print warnings (should be better set to true)}
 
 \item{verbose}{logical; whether to print processing information to console}
 }

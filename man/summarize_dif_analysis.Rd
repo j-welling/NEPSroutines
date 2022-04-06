@@ -7,6 +7,7 @@
 summarize_dif_analysis(
   dif_models,
   dif_vars,
+  irt_type,
   print = TRUE,
   save = TRUE,
   overwrite = FALSE,
@@ -19,6 +20,8 @@ summarize_dif_analysis(
 
 \item{dif_vars}{character vector; contains the variable names to be tested
 for DIF (e.g., "gender")}
+
+\item{irt_type}{string; either "dich" (for Rasch) or "poly" (for PCM)}
 
 \item{print}{logical; whether results shall be printed to console}
 

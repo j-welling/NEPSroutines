@@ -4,7 +4,7 @@
 \alias{sum_scores}
 \title{create sum scores}
 \usage{
-sum_scores(resp, vars, items)
+sum_scores(resp, vars, select, warn = TRUE)
 }
 \arguments{
 \item{resp}{data.frame; contains item responses with items as variables and
@@ -16,11 +16,13 @@ arguments; if special person sets are of interest, these persons have to
 be selected in resp beforehand}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{items}{string; defines name of logical variable in vars that indicates
+\item{select}{string; defines name of logical variable in vars that indicates
 which items to use for the analysis}
+
+\item{warn}{logical; whether to print warnings (should be set to TRUE)}
 }
 \value{
 integer vector of length nrow(resp) containing the row sums for the

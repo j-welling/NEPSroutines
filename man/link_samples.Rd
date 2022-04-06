@@ -11,7 +11,7 @@ link_samples(
   vars,
   select_current,
   select_previous,
-  select_link_sample,
+  select_common,
   valid,
   scoring,
   anchors = NULL,
@@ -35,7 +35,7 @@ the link sample have to be adapted to the item names and the item scoring
 in the previous and current measurement}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
 \item{select_current}{character; contains name of logical variable in vars
@@ -44,7 +44,7 @@ identifying the item set for the current measurement time point}
 \item{select_previous}{character; contains name of logical variable in vars
 identifying the item set for the previous measurement time point}
 
-\item{select_link_sample}{character; contains name of logical variable in vars
+\item{select_common}{character; contains name of logical variable in vars
 identifying the item set for the link sample}
 
 \item{valid}{string; defines name of logical variable in resp that indicates

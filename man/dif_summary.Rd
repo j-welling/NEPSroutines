@@ -6,6 +6,7 @@
 \usage{
 dif_summary(
   diflist,
+  irt_type,
   print = TRUE,
   save = TRUE,
   path = here::here("Tables"),
@@ -14,6 +15,8 @@ dif_summary(
 }
 \arguments{
 \item{diflist}{list; return object of dif_model(); with main and dif model}
+
+\item{irt_type}{string; either "dich" (for Rasch) or "poly" (for PCM)}
 
 \item{print}{logical; whether results shall be printed to console}
 

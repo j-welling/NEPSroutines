@@ -14,7 +14,7 @@ check_dif_anchor(
   valid,
   scoring = "scoring",
   vars,
-  items = NULL,
+  select_common = NULL,
   select_previous,
   select_current,
   diff_threshold = 0.5,
@@ -46,10 +46,10 @@ contains the scoring factor to be applied to the link constant (e.g., only
 half the link constant is needed if a PC item is scored 0.5)}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{items}{character; contains name of logical variable in vars
+\item{select_common}{character; contains name of logical variable in vars
 identifying the item set for the both time points}
 
 \item{select_previous}{character; contains name of logical variable in vars

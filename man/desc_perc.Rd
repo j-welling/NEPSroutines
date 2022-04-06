@@ -4,7 +4,7 @@
 \alias{desc_perc}
 \title{Show frequency (relative) of answers of list of variables}
 \usage{
-desc_perc(dat, desc, valid = NULL, digits = 1)
+desc_perc(dat, desc, valid = NULL, warn = TRUE, useNA = "always", digits = 1)
 }
 \arguments{
 \item{dat}{data.frame; contains sociodemographic and booklet variables}
@@ -14,6 +14,11 @@ shall be used in analysis}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
+
+\item{warn}{logical; whether to warn if no parameter 'valid' provided}
+
+\item{useNA}{string; "no" if NAs should not be included in table, "always"
+(default) if NAs should be included in table}
 
 \item{digits}{integer; number of decimals for rounding}
 }

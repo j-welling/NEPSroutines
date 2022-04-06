@@ -7,14 +7,17 @@
 dis_analysis(
   resp,
   vars,
-  items,
   valid = NULL,
+  item_type = "MC",
+  scored_version = NULL,
+  mvs = NULL,
   save = TRUE,
   print = TRUE,
   return = FALSE,
   path_results = here::here("Results"),
   path_table = here::here("Tables"),
-  overwrite = FALSE
+  overwrite = FALSE,
+  warn = TRUE
 )
 }
 \arguments{
@@ -25,18 +28,22 @@ are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variables 'items' (character) containing item names,
+includes variables 'item' (character) containing item names,
                    'raw' (logical) indicating unscored items,
                    'type' (character) containing item type (e.g. MC),
                    'correct_response' (integer) containing the correct
                      response for each item,
 and all variables that are further defined in the function arguments}
 
-\item{items}{string; defines name of logical variable in vars that indicates
-which items to use for the analysis}
-
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
+
+\item{item_type}{character vector; contains all item types as specified in
+vars$type that shall be used for distratcor analysis (default is 'MC')}
+
+\item{scored_version}{string; defines name of variable in vars that contains
+the names of the scored versions of the raw items; can be left empty, then
+default of name_scored_item = name_unscored_item + "_c" applies}
 
 \item{save}{logical; whether results shall be saved to hard drive}
 
@@ -53,6 +60,8 @@ are stored on the hard drive; please note that the path is relative to the
 current working path set by here::i_am()}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
+
+\item{warn}{logical; whether to print warnings (should be set to TRUE)}
 }
 \value{
 list of one data frame per item containing item-total correlations

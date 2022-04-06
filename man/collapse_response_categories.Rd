@@ -7,7 +7,8 @@
 collapse_response_categories(
   resp,
   vars,
-  pcitems,
+  select_poly,
+  per_cat = 200,
   path_table = here::here("Tables"),
   print = TRUE,
   save = FALSE
@@ -21,11 +22,13 @@ are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{pcitems}{character; indicates the logical variable in vars which
+\item{select_poly}{character; indicates the logical variable in vars which
 contains the item names of the polytomous items}
+
+\item{per_cat}{integer; minimum number of persons per category; defaults to 200}
 
 \item{path_table}{string; defines path to folder where tables shall be saved}
 

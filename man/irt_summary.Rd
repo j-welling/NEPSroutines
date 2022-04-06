@@ -14,7 +14,8 @@ irt_summary(
   path = here::here("Tables"),
   filename = NULL,
   digits = 2,
-  overwrite = FALSE
+  overwrite = FALSE,
+  warn = TRUE
 )
 }
 \arguments{
@@ -26,7 +27,7 @@ and all variables that are further defined in the function arguments
 includes all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
@@ -45,6 +46,8 @@ variables that are further defined in the function arguments}
 \item{digits}{integer; number of decimals for rounding}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
+
+\item{warn}{logical; whether to print warnings (should be set to TRUE)}
 }
 \value{
 a data.frame containing the item name, N, percentage correct,

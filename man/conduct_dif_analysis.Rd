@@ -7,14 +7,17 @@
 conduct_dif_analysis(
   resp,
   vars,
-  items,
+  select,
   dif_vars,
-  valid,
-  scoring,
+  valid = NULL,
+  irt_type,
+  scoring = "scoring",
   mvs = NULL,
+  path = here::here("Results"),
   save = TRUE,
   verbose = FALSE,
-  path = here::here(("Results"))
+  warn = TRUE,
+  test = TRUE
 )
 }
 \arguments{
@@ -25,10 +28,10 @@ are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{items}{character vector; defines name(s) of logical variable(s) in vars
+\item{select}{character vector; defines name(s) of logical variable(s) in vars
 that indicates which items to use for analysis; if some of the \code{dif_vars}
 come with a different set of analysis items, this argument becomes a
 vector of \code{length(dif_vars)} containing the respective selection
@@ -40,17 +43,23 @@ for DIF (e.g., "gender")}
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
 
+\item{irt_type}{string; either "dich" (for Rasch) or "poly" (for PCM)}
+
 \item{scoring}{string; defines name of numerical variable in vars that
 contains the scoring factor to be applied to loading matrix; defaults to
 "scoring"}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
 
+\item{path}{string; defines path to folder where results shall be saved}
+
 \item{save}{logical; whether results shall be saved to hard drive}
 
 \item{verbose}{logical; whether to print processing information to console}
 
-\item{path}{string; defines path to folder where results shall be saved}
+\item{warn}{logical; whether to print warnings (should be set to TRUE)}
+
+\item{test}{logical; whether to test data structure (should be set to TRUE)}
 }
 \value{
 a list of length(dif_vars) lists containing each:

@@ -7,12 +7,15 @@
 dif_model(
   resp,
   vars,
-  items,
+  select,
   dif_var,
   scoring = "scoring",
   valid = NULL,
+  irt_type,
   mvs = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  warn = TRUE,
+  test = TRUE
 )
 }
 \arguments{
@@ -23,10 +26,10 @@ are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{items}{string; defines name of logical variable in vars that indicates
+\item{select}{string; defines name of logical variable in vars that indicates
 which items to use for the analysis; if some of the \code{dif_vars}
 come with a different set of analysis items, this argument becomes a
 vector of \code{length(dif_vars)} containing the respective selection
@@ -42,9 +45,15 @@ contains the scoring factor to be applied to loading matrix; defaults to
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
 
+\item{irt_type}{string; either "dich" (for Rasch) or "poly" (for PCM)}
+
 \item{mvs}{named integer vector; contains user-defined missing values}
 
 \item{verbose}{logical; whether to print processing information to console}
+
+\item{warn}{logical; whether to print warnings (should be set to TRUE)}
+
+\item{test}{logical; whether to test data structure (should be set to TRUE)}
 }
 \value{
 a list of:

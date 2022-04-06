@@ -4,12 +4,16 @@
 \alias{convert_mv}
 \title{Convert user-defined missing values to NAs}
 \usage{
-convert_mv(resp, items = NULL, mvs = NULL, warn = TRUE)
+convert_mv(resp, vars, select = NULL, mvs = NULL, warn = TRUE)
 }
 \arguments{
 \item{resp}{data.frame containing the item responses}
 
-\item{items}{string; defines name of logical variable in vars that indicates
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'item' containing item names; additionally includes all
+variables that are further defined in the function arguments}
+
+\item{select}{string; defines name of logical variable in vars that indicates
 which items to use for the analysis}
 
 \item{mvs}{named integer vector; contains user-defined missing values}

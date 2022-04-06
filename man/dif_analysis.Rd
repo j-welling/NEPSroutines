@@ -7,18 +7,20 @@
 dif_analysis(
   resp,
   vars,
-  items,
+  select,
   dif_vars,
   valid = NULL,
   mvs = NULL,
+  irt_type,
   scoring = "scoring",
   overwrite = FALSE,
   save = TRUE,
   print = TRUE,
   return = FALSE,
-  verbose = FALSE,
   path_results = here::here("Results"),
-  path_table = here::here("Tables")
+  path_table = here::here("Tables"),
+  verbose = FALSE,
+  warn = TRUE
 )
 }
 \arguments{
@@ -29,10 +31,10 @@ are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{items}{character vector; defines name(s) of logical variable(s) in vars
+\item{select}{character vector; defines name(s) of logical variable(s) in vars
 that indicates which items to use for analysis; if some of the \code{dif_vars}
 come with a different set of analysis items, this argument becomes a
 vector of \code{length(dif_vars)} containing the respective selection
@@ -46,6 +48,8 @@ for DIF (e.g., "gender")}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
 
+\item{irt_type}{string; either "dich" (for Rasch) or "poly" (for PCM)}
+
 \item{scoring}{string; defines name of numerical variable in vars that
 contains the scoring factor to be applied to loading matrix; defaults to
 "scoring"}
@@ -58,11 +62,13 @@ contains the scoring factor to be applied to loading matrix; defaults to
 
 \item{return}{logical; whether results shall be returned}
 
-\item{verbose}{logical; whether to print processing information to console}
-
 \item{path_results}{string; defines path to folder where results shall be saved}
 
 \item{path_table}{string; defines path to folder where tables shall be saved}
+
+\item{verbose}{logical; whether to print processing information to console}
+
+\item{warn}{logical; whether to print warnings (should be set to TRUE)}
 }
 \value{
 a list of:

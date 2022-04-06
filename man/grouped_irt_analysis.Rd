@@ -21,7 +21,8 @@ grouped_irt_analysis(
   path_results = here::here("Results"),
   overwrite = FALSE,
   digits = 2,
-  verbose = FALSE
+  verbose = FALSE,
+  warn = TRUE
 )
 }
 \arguments{
@@ -35,7 +36,7 @@ are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
@@ -69,6 +70,9 @@ Rasch model}
 \item{digits}{integer; number of decimals for rounding}
 
 \item{verbose}{logical; whether to print processing information to console}
+
+\item{warn}{logical; whether to print warnings (should be set to TRUE to
+avoid problems with the data structure)}
 }
 \value{
 list with a list for each group with all results

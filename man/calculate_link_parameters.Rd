@@ -11,7 +11,7 @@ calculate_link_parameters(
   anchors = NULL,
   xsi_previous,
   xsi_current,
-  select_link_sample = NULL,
+  select_common = NULL,
   xsi_link_sample = NULL,
   vars,
   scoring = "scoring"
@@ -34,13 +34,13 @@ measurement}
 
 \item{xsi_current}{matrix; item difficulty parameters of current measurement}
 
-\item{select_link_sample}{string; defines name of logical variable in vars
+\item{select_common}{string; defines name of logical variable in vars
 that indicates the items for the link sample analysis}
 
 \item{xsi_link_sample}{matrix; item difficulty parameters of link sample}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
 \item{scoring}{string; defines name of numerical variable in vars that

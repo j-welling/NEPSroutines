@@ -16,7 +16,7 @@ create_suf(
   linked_wles = NULL,
   linked_location = NULL,
   facet = NULL,
-  items = NULL,
+  select = NULL,
   valid = NULL,
   mvs = NULL,
   scoring = NULL,
@@ -35,7 +35,7 @@ are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
 \item{items_suf}{character; indicates the logical variable in vars which
@@ -65,7 +65,7 @@ linking(); alternative to linked_wles}
 \item{facet}{character vector; contains the variable name indicating the
 test rotation}
 
-\item{items}{string; defines name of logical variable in vars that indicates
+\item{select}{string; defines name of logical variable in vars that indicates
 which items to use for the analysis}
 
 \item{valid}{string; defines name of logical variable in resp that indicates

@@ -6,6 +6,7 @@
 \usage{
 build_dif_tr_tables(
   dif_summaries,
+  irt_type,
   save = TRUE,
   path = here::here("Tables"),
   overwrite = FALSE
@@ -14,6 +15,8 @@ build_dif_tr_tables(
 \arguments{
 \item{dif_summaries}{named list of dif_summary() return objects; the list
 elements must be named after their DIF variable}
+
+\item{irt_type}{string; either "dich" (for Rasch) or "poly" (for PCM)}
 
 \item{save}{logical; whether results shall be saved to hard drive}
 

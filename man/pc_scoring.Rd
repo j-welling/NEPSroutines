@@ -4,12 +4,14 @@
 \alias{pc_scoring}
 \title{Score partial credit items}
 \usage{
-pc_scoring(resp, subtasks, mvs = NULL)
+pc_scoring(resp, poly_items, mvs = NULL)
 }
 \arguments{
 \item{resp}{data.frame; contains original item responses}
 
-\item{subtasks}{character vector; contains variable names of subtasks}
+\item{poly_items}{list; contains character vector with subitems for each
+polytomous item, name of the vector is the name of the polytomous item (e.g.
+poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))}
 
 \item{mvs}{integer vector; contains user-defined missing values}
 }

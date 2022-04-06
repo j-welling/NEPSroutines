@@ -7,15 +7,16 @@
 conduct_dim_analysis(
   resp,
   vars,
-  items,
-  scoring,
+  select,
   dim,
-  valid,
+  scoring = "scoring",
+  valid = NULL,
   irtmodel,
   maxiter,
   snodes,
-  verbose,
-  mvs
+  mvs = NULL,
+  verbose = FALSE,
+  warn = TRUE
 )
 }
 \arguments{
@@ -26,19 +27,19 @@ are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{items}{string; defines name of logical variable in vars that indicates
+\item{select}{string; defines name of logical variable in vars that indicates
 which items to use for the analysis}
+
+\item{dim}{character vector. contains names of all dimension variables
+in vars that shall be analyzed (NOTE: the dimensions must be coded as integers
+from 1 to the number of dimensions!)}
 
 \item{scoring}{string; defines name of numerical variable in vars that
 contains the scoring factor to be applied to loading matrix; defaults to
 "scoring"}
-
-\item{dim}{character vector. contains names of all dimension variables
-that shall be analyzed (NOTE: the dimensions must be coded as integers from 1
-to the number of dimensions!)}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
@@ -50,9 +51,11 @@ to the number of dimensions!)}
 
 \item{snodes}{snodes as passed to the TAM function}
 
+\item{mvs}{named integer vector; contains user-defined missing values}
+
 \item{verbose}{verbose as passed to the TAM function}
 
-\item{mvs}{named integer vector; contains user-defined missing values}
+\item{warn}{logical; whether to print warnings (should be set to TRUE)}
 }
 \value{
 list of results for each dimensional analysis

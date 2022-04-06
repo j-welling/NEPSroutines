@@ -5,67 +5,60 @@
 \title{Plot percentage of missing values for persons}
 \usage{
 mvp_plots(
-  mv_p = NULL,
-  resp = NULL,
-  vars = NULL,
-  items,
-  valid = NULL,
+  mv_p,
+  vars,
+  select,
   grouping = NULL,
-  show_all = FALSE,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
     -21),
-  path = here::here("Plots/Missing_Responses/by_person"),
   labels_mvs = c(ALL = "total missing items", OM = "omitted items", NV =
     "not valid items", NR = "not reached items", TA =
     "missing items due to test abortion", UM = "unspecific missing items", ND =
     "not determinable items", NAd = "not administered items", AZ =
     "missing items due to ''Angabe zurueckgesetzt''"),
-  name_grouping = "test version",
-  legend_position = 0.82,
+  path = here::here("Plots/Missing_Responses/by_person"),
+  show_all = FALSE,
   color = NULL,
-  verbose = TRUE
+  verbose = TRUE,
+  name_grouping = "test version",
+  warn = TRUE,
+  test = TRUE
 )
 }
 \arguments{
 \item{mv_p}{list; return object of mv_person()}
 
-\item{resp}{data.frame; contains item responses with items as variables and
-persons as rows; all responses ∈ ℕ0; user-defined missing values;
-includes all variables that are further defined in the function arguments}
-
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variable 'items' containing item names; additionally includes all
+includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{items}{string; defines name of logical variable in vars that indicates
+\item{select}{string; defines name of logical variable in vars that indicates
 which items to use for the analysis}
-
-\item{valid}{string; defines name of logical variable in resp that indicates
-(in)valid cases}
 
 \item{grouping}{character vector; contains for each group a name of a logical
 variable in resp and vars that indicates to which group belongs a person or
 an item}
 
-\item{show_all}{logical; whether whole sample shall be included as a "group"
-(only applicable when grouping exists)}
-
 \item{mvs}{named integer vector; contains user-defined missing values}
-
-\item{path}{string; defines path to folder where X shall be saved}
 
 \item{labels_mvs}{named character vector; contains labels for user-defined
 missing values to use them in plot titles and printed results}
 
-\item{name_grouping}{string; name of the grouping variable (e.g. test version)
-for title and legend of plots (only needed when grouping exists)}
+\item{path}{string; defines path to folder where X shall be saved}
 
-\item{legend_position}{double; contains horizontal position of legend;
-y in {0;1} (left to right)}
+\item{show_all}{logical; whether whole sample shall be included as a "group"
+(only applicable when grouping exists)}
 
 \item{color}{character calar or vector; defines color(s) of the bar in plots}
 
 \item{verbose}{logical; whether to print processing information to console}
+
+\item{name_grouping}{string; name of the grouping variable (e.g. test version)
+for title and legend of plots (only needed when grouping exists)}
+
+\item{warn}{logical; whether to print warnings (should be set to TRUE)}
+
+\item{test}{logical; whether to test data structure (should be set to TRUE)}
 }
 \description{
 Plot percentage of missing values for persons
