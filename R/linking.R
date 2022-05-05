@@ -64,7 +64,7 @@
 #' @export
 linking <- function(resp_previous, resp_current, resp_link_study = NULL,
                     vars, valid = NULL, select_previous, select_current,
-                    select_link_items = NULL, select_anchor_items = NULL,
+                    select_link_items = NULL,
                     scoring = "scoring", overwrite = FALSE,
                     mvs = NULL, maxiter, snodes, verbose, anchors = NULL,
                     longitudinal = TRUE, path_table = here::here("Tables"),
