@@ -64,6 +64,7 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
             variable <- names(change[c])
             new_value <- change[c]
             vars_new[[variable]] <- new_value
+            class(vars_new[[variable]]) <- class(vars[[variable]])
         }
     }
 
@@ -71,7 +72,6 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 
     return(vars)
 }
-
 
 
 #' Score partial credit items
@@ -196,11 +196,12 @@ collapse_response_categories <- function(resp, vars, select_poly, per_cat = 200,
 #' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #' @param min.val minimum number of valid values; if negative, set to the default of 3
-#' @param invalid vector of invalid values (defaults to NA)
+#' @param invalid vector of invalid values (if not specified,
+#' function defaults to NA and negative values)
 #'
 #' @return   logical vector with length = nrow(resp), indicating whether case is valid
 #' @export
-min_val <- function(resp, vars, select, min.val = NULL, invalid = NA) {
+min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 
     # Check whether variables are indeed contained in data.frames
     check_logicals(vars, "vars", select)
@@ -219,7 +220,9 @@ min_val <- function(resp, vars, select, min.val = NULL, invalid = NA) {
     nval <- rowSums(apply(
         subset(resp_, select = items), 2,
         function(x) {
-            !(x %in% invalid)
+            if(!is.null(invalid)) {
+                !(x %in% invalid)
+            } else (x >= 0 & !is.na(x))
         }
     ))
 
@@ -294,6 +297,7 @@ pos_new <- function(vars, select, position) {
 #' @param test_day  string; contains name of variable with day of test (default is 15)
 #'
 #' @return   numeric vector with approximate age in years
+#' @export
 calculate_age <- function(resp,
                           birth_year, birth_month, birth_day = NULL,
                           test_year, test_month, test_day = NULL) {

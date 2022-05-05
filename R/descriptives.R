@@ -11,8 +11,11 @@
 n_valid <- function(dat, valid = NULL) {
 
     dat <- only_valid(dat, valid = valid)
+    nval <- nrow(dat[dat[[valid]], ])
+    ninval <- nrow(dat) - nval
 
-    message("There are ", nrow(dat[dat[[valid]], ]), " valid cases in the dataset.")
+    message("There are ", n_val, " valid cases and ", n_inval, " invalid cases ",
+    "in the dataset.")
 }
 
 

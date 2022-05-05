@@ -191,7 +191,7 @@ check_folder <- function(path) {
 #'
 #' @param pid  character vector with person identifiers
 #'
-#' @noRd
+#' @export
 
 check_pid <- function(pid) {
     if (length(pid) != length(unique(pid))) {
