@@ -486,7 +486,7 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
     ggplot2::scale_y_continuous(breaks = seq(0, ylim, 10),
                                 labels = paste0(seq(0, ylim, 10), " %"),
                                 limits = c(0, ylim)) +
-    ggplot2::scale_x_continuous(breaks = seq(0, k, floor(k/20))) +
+    ggplot2::scale_x_continuous(breaks = seq(0, k, ifelse(k < 20, 1, floor(k/20)))) +
     ggplot2::theme_bw() +
     ggplot2::theme(legend.justification = c(0, 1),
                    legend.position = c(0.01, 0.99))
