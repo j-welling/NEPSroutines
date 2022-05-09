@@ -10,9 +10,16 @@
 
 n_valid <- function(dat, valid = NULL) {
 
-    dat <- only_valid(dat, valid = valid)
-    nval <- nrow(dat[dat[[valid]], ])
-    ninval <- nrow(dat) - nval
+    check_logicals(resp, "resp", valid, warn = TRUE)
+
+    if (!is.null(valid)) {
+        n_inval <- sum(!dat[[valid]])
+        n_val <- sum(dat[[valid]])
+    } else {
+        n_inval <- 0
+        n_val <- nrow(dat)
+        warn("No variable to identify (in)valid cases provided. Thus, all cases are counted as valid.")
+    }
 
     message("There are ", n_val, " valid cases and ", n_inval, " invalid cases ",
     "in the dataset.")
