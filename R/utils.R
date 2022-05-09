@@ -248,7 +248,7 @@ check_logicals <- function(df, name_df, logicals, warn = TRUE) {
 
     other_value <- sapply(df[ , logicals, drop = FALSE], function(x) any(!x %in% c(TRUE, FALSE)))
 
-    if (warn & sum(other_value) > 0) {
+    if (warn & (sum(other_value) > 0)) {
       warning(paste0("Logical variable '", logicals[other_value], "' in ",
                      "data.frame ", name_df, " contains other values than TRUE or ",
                      "FALSE (e.g., NA). Please check again.\n"))
