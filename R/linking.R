@@ -857,7 +857,7 @@ check_link_dimensionality <- function(resp_previous, resp_current,
             scoring = scoring, dim = dim, valid = valid, irtmodel = irtmodel,
             maxiter = maxiter, snodes = snodes, verbose = verbose, mvs = mvs
         )
-        dimsum$current <- <- dim_summary(dimensionality$current)
+        dimsum$current <- dim_summary(dimensionality$current)
 
     } else {
         dimensionality <- conduct_dim_analysis(
