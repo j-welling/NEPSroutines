@@ -148,10 +148,10 @@ desc_perc <- function(dat, desc, valid = NULL, warn = TRUE, useNA = 'always',
 
     dat <- only_valid(dat, valid = valid, warn = warn)
 
-    data.frame(sapply(dat[ , desc, drop = FALSE], function(x) {
+    sapply(dat[ , desc, drop = FALSE], function(x) {
         d <- round(prop.table(table(x, useNA = useNA))*100, digits)
         paste0(d, " %")
-        }))
+        })
 }
 
 
