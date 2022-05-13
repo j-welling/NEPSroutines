@@ -411,8 +411,10 @@ get_object_name <- function(object) {
 
 
 #' Test whether iterations have reached the maximum
-#' @param object R object (e.g., vector, data.frame, ...)
-#' @returns name of object as string
+#' @param mod  return object of TAM-functions that calculate IRT models
+#' (e.g., TAM::tam.mml)
+#' @param name_model  string; defines name of model
+#' @returns warning if iter is equal or greater than maxiter
 #' @noRd
 #'
 reached_maxiter <- function(mod, name_model) {
