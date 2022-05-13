@@ -197,6 +197,10 @@ check_pid <- function(pid) {
     if (length(pid) != length(unique(pid))) {
         stop("There are duplicates in the person identifiers.")
     }
+
+    if (any(is.na(pid))) {
+        warning("There are missing values in the person identifiers.")
+    }
 }
 
 
@@ -403,4 +407,17 @@ meht <- function(stat, df1, df2, eta2 = NULL, delta = .40,
 
 get_object_name <- function(object) {
   deparse(substitute(object))
+}
+
+
+#' Test whether iterations have reached the maximum
+#' @param object R object (e.g., vector, data.frame, ...)
+#' @returns name of object as string
+#' @noRd
+#'
+reached_maxiter <- function(mod, name_model) {
+    if (mod$iter >= mod$control$maxiter) {
+        warning(paste0("Maximum number of iterations were reached for the IRT model ",
+                       name_model, "! Model did not converge."))
+    }
 }

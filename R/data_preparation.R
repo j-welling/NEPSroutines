@@ -306,20 +306,52 @@ calculate_age <- function(resp,
     check_variables(resp, "resp", c(birth_year, birth_month,
                                     test_year, test_month))
 
+    # Check whether birth and test day exist and if not, replace with default 15
     if (is.null(birth_day)) {
         bday <- 15
     } else {
+        check_variables(resp, "resp", birth_day)
         bday <- resp[[birth_day]]
     }
 
     if (is.null(test_day)) {
         tday <- 15
     } else {
+        check_variables(resp, "resp", test_day)
         tday <- resp[[test_day]]
     }
 
-    birth <- strptime(paste(resp[[birth_year]], resp[[birth_month]], bday, sep = "-"), "%Y-%m-%d")
-    test <- strptime(paste(resp[[test_year]], resp[[test_month]], tday, sep = "-"), "%Y-%m-%d")
-    age <- as.numeric(difftime(birth, test, units = "weeks")) / 52.1429
+    # Replace missing values in birth and test date with the sample median
+    na_by <- is.na(resp[[birth_year]])
+    na_bm <- is.na(resp[[birth_month]])
+    na_ty <- is.na(resp[[test_year]])
+    na_tm <- is.na(resp[[test_month]])
+
+    if (sum(na_by) > 0) {
+        message(sum(na_by), " missing value(s) in birth year were replaced by the sample median.")
+        resp[[birth_year]][na_by] <- round(median(resp[[birth_year]], na.rm = TRUE))
+    }
+
+    if (sum(na_bm) > 0) {
+        message(sum(na_bm), " missing value(s) in birth month were replaced by the sample median.")
+        resp[[birth_month]][na_bm] <- round(median(resp[[birth_month]], na.rm = TRUE))
+    }
+
+    if (sum(na_ty) > 0) {
+        message(sum(na_ty), " missing value(s) in test year were replaced by the sample median.")
+        resp[[test_year]][na_ty] <- round(median(resp[[test_year]], na.rm = TRUE))
+    }
+
+    if (sum(na_tm) > 0) {
+        message(sum(na_tm), " missing values in test month were replaced by the sample median.")
+        resp[[test_month]][na_tm] <- round(median(resp[[test_month]], na.rm = TRUE))
+    }
+
+    # Calculate age
+    birth <- strptime(paste(resp[[birth_year]], resp[[birth_month]],
+                            bday, sep = "-"), "%Y-%m-%d")
+    test <- strptime(paste(resp[[test_year]], resp[[test_month]],
+                           tday, sep = "-"), "%Y-%m-%d")
+    age <- as.numeric(difftime(test, birth, units = "weeks")) / 52.1429
     return(age)
 }
