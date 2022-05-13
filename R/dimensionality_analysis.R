@@ -127,6 +127,9 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
     resp = resp, pid = pid, Q = Q, irtmodel = irtmodel, verbose = verbose,
     control = list(maxiter = maxiter, snodes = snodes)
   )
+
+  reached_maxiter(dimensionality$uni, "'unidimensional'")
+
   message("Finished unidimensional reference model.")
 
   if (!is.null(dim)) {
@@ -148,6 +151,9 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
         control = list(maxiter = maxiter, snodes = snodes),
         verbose = verbose
       )
+
+      reached_maxiter(dimensionality[[d]], paste0("'", d, "-dimensional'"))
+
       message("Finished ", d," model.")
     }
   }

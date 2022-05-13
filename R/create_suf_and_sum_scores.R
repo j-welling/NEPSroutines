@@ -185,6 +185,8 @@ estimated_rotated_wles <- function(resp, vars, select, valid = NULL, facet, xsi_
     B = B
   )
 
+  reached_maxiter(mod, "")
+
   wles <- TAM::tam.wle(mod, progress = FALSE)[, c("pid", "theta", "error")]
   names(wles) <- c("ID_t", paste0(wle_name, c("_sc1", "_sc2")))
   return(wles)

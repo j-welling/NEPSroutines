@@ -357,6 +357,10 @@ dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
          "analysis or 'poly' for also polytomous analysis.")
   }
 
+  # Warn if maximum number of iterations were reached
+  reached_maxiter(mmod, "without DIF")
+  reached_maxiter(dmod, "with DIF")
+
   list(mmod = mmod, dmod = dmod, dif_var = dif_var)
 }
 
