@@ -36,8 +36,9 @@
 #' @export
 
 grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
-                                 irt_type, scoring = NULL, plots = FALSE,
-                                 save = TRUE, print = TRUE, return = FALSE,
+                                 irt_type, scoring = NULL,
+                                 plots = FALSE, save = TRUE,
+                                 print = TRUE, return = FALSE,
                                  path_plots = here::here("Plots"),
                                  path_table = here::here("Tables"),
                                  path_results = here::here("Results"),
@@ -74,10 +75,12 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
     select <- groups[[g]]
 
     irt_groups[[g]] <- irt_analysis(resp = resp, vars = vars, select = select,
-                                    valid = valid, irt_type = irt_type, print = print,
-                                    scoring = scoring, plots = plots, save = save,
-                                    return = TRUE, path_results = path_results,
-                                    path_table = path_table, path_plots = path_plots,
+                                    valid = valid, irt_type = irt_type,
+                                    print = print, scoring = scoring,
+                                    plots = plots, save = save, return = TRUE,
+                                    path_results = path_results,
+                                    path_table = path_table,
+                                    path_plots = path_plots,
                                     overwrite = overwrite, digits = digits,
                                     name_group = name_group, warn = warn,
                                     test = FALSE)
@@ -131,8 +134,8 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #' @export
 
 irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
-                         irt_type, scoring = NULL, plots = FALSE,
-                         save = TRUE, print = TRUE, return = FALSE,
+                         irt_type, scoring = NULL,
+                         plots = FALSE, save = TRUE, print = TRUE, return = FALSE,
                          path_plots = here::here("Plots"),
                          path_table = here::here("Tables"),
                          path_results = here::here("Results"),
@@ -369,10 +372,13 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
 
     mod <- TAM::tam.mml.2pl(
       resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
-      verbose = verbose
+      verbose = verbose, xsi.fixed = xsi.fixed
     )
 
   }
+
+  # Warn if maximum number of iterations were reached
+  reached_maxiter(mod, paste0("'", irtmodel, "'"))
 
   # WMNSQ
   fit <- TAM::msq.itemfit(mod)$itemfit[, c("item", "Infit",
@@ -598,8 +604,8 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 #'
 #' Create table with model fit for 1 parameter and 2 parameter IRT model.
 #'
-#' @param model_dich  list; return object of irt_model(); dichotomous analysis
-#' @param model_poly  list; return object of irt_model(); polytomous analysis
+#' @param model_1p  list; return object of irt_model(); 1PL / PCM analysis
+#' @param model_2p  list; return object of irt_model(); 2PL / GPCM analysis
 #' @param irt_type  string; either "dich" (dichotomous analysis) or "poly"
 #'   (polytomous analysis)
 #' @param overwrite  logical; whether to overwrite existing file when saving table
@@ -609,12 +615,14 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 #' @return data.frame with AIC, BIC and number of parameters for both models
 #' @export
 
-irt_model_fit <- function(model_dich, model_poly, irt_type, overwrite = FALSE,
+irt_model_fit <- function(model_1p, model_2p, irt_type, overwrite = FALSE,
                           path = here::here("Tables"), filename = NULL) {
 
-  mfit <- data.frame(AIC = rep(NA_integer_, 2),
-                     BIC = rep(NA_integer_, 2),
-                     Npars = rep(NA_integer_, 2))
+  mfit <- data.frame(N = rep(NA_integer_, 2),
+                     Npars = rep(NA_integer_, 2),
+                     Deviance = rep(NA_integer_, 2),
+                     AIC = rep(NA_integer_, 2),
+                     BIC = rep(NA_integer_, 2))
 
   if(irt_type == 'dich') {
     row.names(mfit) <- c("1PL model", "2PL model")
@@ -625,13 +633,17 @@ irt_model_fit <- function(model_dich, model_poly, irt_type, overwrite = FALSE,
          "analysis or 'poly' for polytomous analysis.")
   }
 
-  mfit$AIC[1] <- model_dich$info_crit$AIC
-  mfit$BIC[1] <- model_dich$info_crit$BIC
-  mfit$Npars[1] <- model_dich$info_crit$Npars
+  mfit$N[1] <- model_1p$info_crit$n
+  mfit$Npars[1] <- model_1p$info_crit$Npars
+  mfit$Deviance[1] <- model_1p$info_crit$deviance
+  mfit$AIC[1] <- model_1p$info_crit$AIC
+  mfit$BIC[1] <- model_1p$info_crit$BIC
 
-  mfit$AIC[2] <- model_poly$info_crit$AIC
-  mfit$BIC[2] <- model_poly$info_crit$BIC
-  mfit$Npars[2] <- model_poly$info_crit$Npars
+  mfit$N[2] <- model_2p$info_crit$n
+  mfit$Npars[2] <- model_2p$info_crit$Npars
+  mfit$Deviance[2] <- model_2p$info_crit$deviance
+  mfit$AIC[2] <- model_2p$info_crit$AIC
+  mfit$BIC[2] <- model_2p$info_crit$BIC
 
   # Save table
   save_table(mfit, filename = filename, path = path, overwrite = overwrite)
@@ -660,7 +672,7 @@ steps_analysis <- function(pcm_model, digits = 2, overwrite = FALSE,
   # step parameters
   step <- round(pcm_model$mod$xsi[, c("xsi", "se.xsi")], digits)
   step$item <- sub("_step[0-9]$", "", rownames(pcm_model$mod$xsi))
-  step$step <- as.numeric(gsub(".+_c_step", "", rownames(pcm_model$mod$xsi)))
+  step$step <- as.numeric(gsub(".+_step", "", rownames(pcm_model$mod$xsi)))
   step <- step[!is.na(step$step), ]
 
   # create matrix for pcm_model
@@ -710,21 +722,24 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   pc_min <- min(irt_sum[['% correct']], na.rm = TRUE)
   pc_max <- max(irt_sum[['% correct']], na.rm = TRUE)
   pc_mean <- round(mean(irt_sum[['% correct']], na.rm = TRUE))
+  pc_median <- round(median(irt_sum[['% correct']], na.rm = TRUE))
   message("Percentage correct:\n",
           "The percentage of correct responses within dichotomous items varied between ",
           pc_min, " % (item ", irt_sum$Item[irt_sum[['% correct']] %in% pc_min], ") and ",
           pc_max, " % (item ", irt_sum$Item[irt_sum[['% correct']] %in% pc_max], ") with an average of ",
-          pc_mean, " % correct responses.\n")
+          pc_mean, " % correct responses, and a median of ",
+          pc_median, " % correct responses.\n")
 
   # Item difficulties
   xsi_min <- min(irt_sum$xsi, na.rm = TRUE)
   xsi_max <- max(irt_sum$xsi, na.rm = TRUE)
   xsi_mean <- round(mean(irt_sum$xsi, na.rm = TRUE), 2)
+  xsi_median <- round(median(irt_sum$xsi, na.rm = TRUE), 2)
   message("Item difficulties:\n",
           "The estimated item difficulties (or location parameters for polytomous variables) varied between ",
           xsi_min, " (item ", irt_sum$Item[irt_sum$xsi %in% xsi_min], ") and ",
           xsi_max, " (item ", irt_sum$Item[irt_sum$xsi %in% xsi_max], ") with an average of ",
-          xsi_mean, ".\n")
+          xsi_mean, ", and a median of ", xsi_median, ".\n")
 
   # SE of item difficulties
   message("SE of item difficulties:\n",
@@ -734,11 +749,12 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   wmnsq_min <- min(irt_sum$WMNSQ, na.rm = TRUE)
   wmnsq_max <- max(irt_sum$WMNSQ, na.rm = TRUE)
   wmnsq_mean <- round(mean(irt_sum$WMNSQ, na.rm = TRUE), 2)
+  wmnsq_median <- round(median(irt_sum$wmnsq, na.rm = TRUE), 2)
   message("WMNSQ:\n",
           "The values of the WMNSQ were ... close to 1 with the lowest value being ",
           wmnsq_min, " (item ", irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_min], ") and the highest being ",
           wmnsq_max, " (item ", irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_max], ") with an average of ",
-          wmnsq_mean, ".")
+          wmnsq_mean, ", and a median of ", wmnsq_median, ".")
 
   wmnsq_misfit <- irt_sum$Item[irt_sum$WMNSQ > 1.15]
   if (length(wmnsq_misfit == 1)) {
@@ -751,11 +767,12 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   t_min <- min(irt_sum$t, na.rm = TRUE)
   t_max <- max(irt_sum$t, na.rm = TRUE)
   t_mean <- round(mean(irt_sum$t, na.rm = TRUE), 2)
+  t_median <- round(median(irt_sum$t, na.rm = TRUE), 2)
   message("\nWMNSQ t-value:\n",
           "The WMNSQ t-values varied between ",
           t_min, " (item ", irt_sum$Item[irt_sum$t %in% t_min], ") and ",
           t_max, " (item ", irt_sum$Item[irt_sum$t %in% t_max], ") with an average of ",
-          t_mean, ".")
+          t_mean, ", and a median of ", t_median, , ".")
 
   t_misfit <- irt_sum$Item[abs(irt_sum$t) > 8]
   if (length(t_misfit == 1)) {
@@ -768,11 +785,12 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   rit_min <- min(irt_sum$rit, na.rm = TRUE)
   rit_max <- max(irt_sum$rit, na.rm = TRUE)
   rit_mean <- round(mean(irt_sum$rit, na.rm = TRUE), 2)
+  rit_median <- round(median(irt_sum$rit, na.rm = TRUE), 2)
   message("\nCorrelation of item scores with total correct score:\n",
           "The correlations between the item scores and the total correct scores varied between ",
           rit_min, " (item ", irt_sum$Item[irt_sum$rit %in% rit_min], ") and ",
           rit_max, " (item ", irt_sum$Item[irt_sum$rit %in% rit_max], ") with an average correlation of ",
-          rit_mean, ".\n")
+          rit_mean, ", and a median correlation of ", rit_median, ".\n")
 
   # Model variance
   message("Model variance:\n",
@@ -789,9 +807,10 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   disc_min <- min(irt_sum$Discr., na.rm = TRUE)
   disc_max <- max(irt_sum$Discr., na.rm = TRUE)
   disc_mean <- round(mean(irt_sum$Discr., na.rm = TRUE), 2)
+  disc_median <- round(median(irt_sum$Discr., na.rm = TRUE), 2)
   message("Item discrimination:\n",
           "The estimated discrimination parameters varied between ",
           disc_min, " (item ", irt_sum$Item[irt_sum$Discr. %in% disc_min], ") and ",
           disc_max, " (item ", irt_sum$Item[irt_sum$Discr. %in% disc_max], ") with an average discrimination of ",
-          disc_mean, ".\n")
+          disc_mean, ", and a median discrimination of ", disc_median, ".\n")
 }
