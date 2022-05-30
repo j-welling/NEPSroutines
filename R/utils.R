@@ -420,6 +420,6 @@ get_object_name <- function(object) {
 reached_maxiter <- function(mod, name_model) {
     if (mod$iter >= mod$control$maxiter) {
         warning(paste0("Maximum number of iterations were reached for the IRT model ",
-                       name_model, "! Model did not converge."))
+                       name_model, "! Model did not converge.\n"))
     }
 }
