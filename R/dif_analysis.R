@@ -225,7 +225,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, irt_type, prob_dif = 0.
 
   if (save) {
       save_results(dif_models, path = path_results,
-                   filename = paste0("dif_", irt_type, "summaries.rds"))
+                   filename = paste0("dif_", irt_type, "_summaries.rds"))
   }
 
   return(dif_summaries)
