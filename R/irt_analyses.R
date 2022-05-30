@@ -354,8 +354,8 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
       check_numerics(vars, "vars", scoring, check_invalid = TRUE)
       Q = as.matrix(vars[[scoring]][vars[[select]]])
   } else if (irtmodel %in% c("GPCM", "PCM2")) {
-      stop("Please provide variable name for scoring factor for polytomous ",
-           "analysis.")
+      warning("No variable name for scoring factor for polytomous analysis ",
+              "provided..")
   } else {
       Q <- NULL
   }
