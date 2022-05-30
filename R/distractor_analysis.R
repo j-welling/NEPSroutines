@@ -92,7 +92,7 @@ dis_analysis <- function(resp, vars, valid = NULL, item_type = 'MC',
 #'                      response for each item,
 #' and all variables that are further defined in the function arguments
 #' @param item_type  character vector; contains all item types as specified in
-#' vars$type that shall be used for distratcor analysis (default is 'MC')
+#' vars$type that shall be used for distractor analysis (default is 'MC')
 #' @param scored_version  string; defines name of variable in vars that contains
 #' the names of the scored versions of the raw items; can be left empty, then
 #' default of name_scored_item = name_unscored_item + "_c" applies
@@ -139,7 +139,7 @@ conduct_dis_analysis <- function(resp, vars, item_type = 'MC',
         # Create corrected total score
         scored_item <- ifelse(is.null(scored_version), paste0(item, "_c"),
                               vars[[scored_version]][vars$item == item])
-        cscore <- resp$score - resp[, scored_item] / sum(vars$dich)#length(scored)
+        cscore <- resp$score - resp[, scored_item] / sum(vars$dich) #length(scored)
 
         # Correlation between each response option and corrected total score
         for (s in seq_len(nrow(dis[[item]]))) {
@@ -199,18 +199,34 @@ print_dis_summary <- function(dist_sum) {
         rd <- dist_sum$distractor
         # short summary containing minimum and maximum for distractors and
         # correct responses as well as respective item names [print to console!]
-        message("\nItem-total correlation for correct response: \nMin. = ",
-                rc[which(rc$corr == min(rc$corr)), "corr"],
-                " (", rownames(rc[which(rc$corr == min(rc$corr)),]),
-                "), Max. = ", rc[which(rc$corr == max(rc$corr)), "corr"], " (",
-                rownames(rc[which(rc$corr == max(rc$corr)),]), ")")
-        message("\nItem-total correlation for distractor: \nMin. = ",
-                rd[which(rd$corr == min(rd$corr)), "corr"],
-                " (", rownames(rd[which(rd$corr == min(rd$corr)),]),
-                "), Max. = ", rd[which(rd$corr == max(rd$corr)), "corr"], " (",
-                rownames(rd[which(rd$corr == max(rd$corr)),]), ")")
 
-        # auffällige Distraktoren / korrekte Antworten anzeigen
+        # Correct responses
+        corr_min <- rc[which(rc$corr == min(rc$corr)), "corr"]
+        corr_min_names <- rownames(rc[which(rc$corr == min(rc$corr)),])
+        corr_max <- rc[which(rc$corr == max(rc$corr)), "corr"]
+        corr_max_names <- rownames(rc[which(rc$corr == max(rc$corr)),])
+        corr_med <- rc[which(rc$corr == median(rc$corr)), "corr"]
+        corr_med_names <- rownames(rc[which(rc$corr == median(rc$corr)),])
+
+        message("\nItem-total correlation for correct response: ",
+                "\nMin. = ",  corr_min, " (", corr_min_rownames, ")",
+                "\nMax. = ",  corr_max, " (", corr_max_rownames, ")",
+                "\nMed. = ",  corr_med, " (", corr_med_rownames, ")")
+
+        # Distractors
+        dist_min <- rd[which(rc$dist == min(rd$dist)), "dist"]
+        dist_min_names <- rownames(rd[which(rd$dist == min(rd$dist)),])
+        dist_max <- rc[which(rd$dist == max(rd$dist)), "dist"]
+        dist_max_names <- rownames(rd[which(rd$dist == max(rd$dist)),])
+        dist_med <- rc[which(rd$dist == median(rd$dist)), "dist"]
+        dist_med_names <- rownames(rd[which(rd$dist == median(rd$dist)),])
+
+        message("\nItem-total distelation for distractor: ",
+                "\nMin. = ",  dist_min, " (", dist_min_rownames, ")",
+                "\nMax. = ",  dist_max, " (", dist_max_rownames, ")",
+                "\nMed. = ",  dist_med, " (", dist_med_rownames, ")")
+
+        # Auffällige Distraktoren und korrekte Antworten anzeigen
         message("\n",
                 "Items with problematic item-total correlations for correct ",
                 "response (r < 0.2): \n",
@@ -218,6 +234,6 @@ print_dis_summary <- function(dist_sum) {
         message("\n",
                 "Items with problematic item-total correlations for ",
                 "distractors (r > 0.05): \n",
-                paste(rownames(rd[which(rd$corr > 0.05),]), collapse = ", "),
+                paste0(rownames(rd[which(rd$corr > 0.05),]), collapse = ", "),
                 "\n")
 }
