@@ -46,7 +46,7 @@ convert_mv <- function(resp, vars, select = NULL, mvs = NULL, warn = TRUE) {
     mvs <- -999:-1
 
     if (warn) {
-      warning("No user defined missing values provided. ",
+      warning("No user defined missing values provided for item responses. ",
               "Default of '-999 to -1' is used.\n")
     }
   }
