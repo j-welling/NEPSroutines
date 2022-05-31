@@ -25,6 +25,8 @@
 #' @param scoring string; defines name of numerical variable in vars that
 #' contains the scoring factor to be applied to loading matrix; defaults to
 #' "scoring"
+#' @param include_mv numeric; identifies threshold for which group size missing
+#' values should be included in analysis as an extra group (defaults to 200)
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
@@ -43,6 +45,7 @@
 dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
                          irt_type, scoring = "scoring", overwrite = FALSE,
                          save = TRUE, print = TRUE, return = FALSE,
+                         include_mv = 200,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
                          verbose = FALSE, warn = TRUE, prob_dif = 0.5) {
@@ -74,8 +77,8 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
   # Conduct dif analyses
   dif$models <- conduct_dif_analysis(
     select = select, dif_vars = dif_vars, resp = resp, vars = vars,
-    irt_type = irt_type, scoring = scoring, valid = valid, save = save,
-    path = path_results, mvs = mvs, verbose = verbose, warn = warn,
+    irt_type = irt_type, scoring = scoring, include_mv = include_mv, valid = valid,
+    path = path_results, mvs = mvs, verbose = verbose, warn = warn, save = save,
     test = FALSE
   )
 
@@ -129,6 +132,8 @@ check_items <- function(select, dif_vars) {
 #' @param scoring string; defines name of numerical variable in vars that
 #' contains the scoring factor to be applied to loading matrix; defaults to
 #' "scoring"
+#' @param include_mv numeric; identifies threshold for which group size missing
+#' values should be included in analysis as an extra group (defaults to 200)
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where results shall be saved
 #' @param verbose  logical; whether to print processing information to console
@@ -142,6 +147,7 @@ check_items <- function(select, dif_vars) {
 #' @export
 conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
                                  irt_type, scoring = 'scoring', mvs = NULL,
+                                 include_mv = 200,
                                  path = here::here('Results'), save = TRUE,
                                  verbose = FALSE, warn = TRUE, test = TRUE) {
 
@@ -178,6 +184,7 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
     dif_models[[i]] <- dif_model(resp = resp, vars = vars, select = select[i],
                                  valid = valid, dif_var = dif_vars[i],
                                  irt_type = irt_type, scoring = scoring,
+                                 include_mv = include_mv,
                                  verbose = verbose, mvs = mvs, warn = warn,
                                  test = FALSE)
   }
@@ -252,6 +259,8 @@ summarize_dif_analysis <- function(dif_models, dif_vars, irt_type, prob_dif = 0.
 #' vector of \code{length(dif_vars)} containing the respective selection
 #' variables in vars
 #' @param irt_type  string; either "dich" (for Rasch) or "poly" (for PCM)
+#' @param include_mv numeric; identifies threshold for which group size missing
+#' values should be included in analysis as an extra group (defaults to 200)
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param mvs named integer vector; contains user-defined missing values
@@ -270,7 +279,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, irt_type, prob_dif = 0.
 #' @importFrom stats as.formula
 #' @export
 dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
-                      valid = NULL, irt_type, mvs = NULL,
+                      valid = NULL, irt_type, include_mv = 200, mvs = NULL,
                       verbose = FALSE, warn = TRUE, test = TRUE) {
 
   # Test data
@@ -300,6 +309,7 @@ dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
   pid <- resp$ID_t
   check_pid(pid)
   facets <- resp[, dif_var, drop = FALSE]
+  lbls_facet <- attributes(resp[[dif_var]])$label
 
   # Select only indicated items, valid responders and convert mvs
   resp <- prepare_resp(resp, vars = vars, select = select, convert = TRUE,
@@ -314,14 +324,56 @@ dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
   formula_dmod <- as.formula(paste(tmp_formula, "item *", dif_var))
   formula_mmod <- as.formula(paste(tmp_formula, dif_var))
   rm(tmp_formula)
+
+  # Prepare facets
+  facets[[dif_var]] <- as.integer(facets[[dif_var]])
+  invalid <- facets[[dif_var]] < 0
+
+  if (sum(invalid, na.rm = TRUE) > 0) {
+    facets[[dif_var]][ifelse(is.na(invalid), FALSE, invalid), ] <- NA
+    warning(paste0(sum(invalid, na.rm = TRUE), " invalid values (< 0) were found",
+    " in the DIF variable ", dif_var, ". The corresponding cases were replaced",
+    " by NAs.\n"))
+  }
+
   mis <- is.na(facets[[dif_var]])
 
   if (any(mis)) {
-    facets <- facets[!mis, , drop = FALSE]
-    resp <- resp[!mis, ]
-    pid <- pid[!mis]
-    warning(paste0(sum(mis), " missing values were found in the DIF variable ",
-    dif_var, ". The corresponding cases have been excluded from the analysis.\n"))
+
+    if (sum(mis) < include_mv) {
+
+      facets <- facets[!mis, , drop = FALSE]
+      resp <- resp[!mis, ]
+      pid <- pid[!mis]
+
+      fcts <- create_facets_df(facets[[dif_var]], labels = lbls_facet)
+
+      warning(paste0(sum(mis), " missing values were found in the DIF variable ",
+                     dif_var, ". The corresponding cases have been excluded from the analysis.\n"))
+
+    } else {
+
+      vals <- unique(facets[[dif_var]])
+      max_val <- max(vals, na.rm = TRUE)
+      min_val <- min(vals, na.rm = TRUE)
+      facets[mis, ] <- max_val + 1
+
+      fcts <- create_facets_df(facets[[dif_var]], labels = lbls_facet,
+                               missings = TRUE)
+
+      # DIF analysis does not work with more than two groups when one group == 0
+      if (min_val == 0) {
+        facets <- facets + 1
+        fcts$number <- as.integer(fcts$number)
+      }
+
+      warning(paste0(sum(mis), " missing values were found in the DIF variable ",
+      dif_var, ". The corresponding cases have been included in the analysis as",
+      " an extra group.\n"))
+
+    }
+  } else {
+    fcts <- create_facets_df(facets[[dif_var]], labels = lbls_facet)
   }
 
   # DIF analysis
@@ -364,7 +416,30 @@ dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
   reached_maxiter(mmod, paste0("'", dif_var, "' without DIF"))
   reached_maxiter(dmod, paste0("'", dif_var, "' with DIF"))
 
-  list(mmod = mmod, dmod = dmod, dif_var = dif_var)
+  list(mmod = mmod, dmod = dmod, dif_var = dif_var, facets = fcts)
+}
+
+#' Create data.frame for facets with counts
+#'
+#' @param facet factor or numeric vector; defines groups of facet
+#' @param missings logical; whether table shall include missings
+#'
+#' @noRd
+create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
+
+  df <- data.frame(table(facet))
+  names(df) <- c("number", "counts")
+
+  if (!missings) {
+    row.names(df) <- paste0("Group ", sort(unique(facet)))
+    if (!is.null(labels)) df$label <- names(labels)
+  } else {
+    row.names(df) <- c(paste0("Group ", sort(unique(facet))[-length(unique(facet))]),
+                           "missings")
+    if (!is.null(labels)) df$label <- c(names(labels), "missings")
+  }
+
+  df
 }
 
 #' DIF analyses for PCM model
@@ -447,7 +522,8 @@ dif_summary <- function(diflist, irt_type, print = TRUE, save = TRUE,
     ### TG: end
 
     if (print) {
-        print_dif_summary(diflist = diflist, res = res, prob_dif = prob_dif)
+        print_dif_summary(resp = resp, diflist = diflist, res = res,
+                          prob_dif = prob_dif)
     }
 
     if (save) {
@@ -684,6 +760,10 @@ difsum <- function(obj, dif_var, groups = 1) {
         BIC = c(BIC(obj$mmod), BIC(obj$dmod)))
     out$gof <- gof
 
+
+    # facets
+    out$facets <- obj$facets
+
     out
 }
 
@@ -784,14 +864,21 @@ build_dif_tr_tables <- function(dif_summaries, irt_type, save = TRUE,
 
 #' Print DIF summaries to console
 #'
+#' @param resp  data.frame; includes all DIF variables
 #' @param diflist list; return object of dif_model(); with main and dif model
 #' @param res list; return object of dif_summary()
 #' @param prob_dif numeric scalar; indicates absolute threshold of problematic DIF (defaults to 0.5)
 #'
 #' @export
-print_dif_summary <- function(diflist, res, prob_dif = 0.5) {
+print_dif_summary <- function(resp, diflist, res, prob_dif = 0.5) {
 
-    message("\nRESULTS FOR THE DIF VARIABLE '", diflist$dif_var, "':")
+    dif_var <- diflist$dif_var
+
+    message("\nRESULTS FOR THE DIF VARIABLE '", dif_var, "':")
+
+    # facets and group counts
+    message("\nFacets and group counts:\n")
+    print(res$facets)
 
     # information criteria table
     message("\nInformation criteria:\n")
