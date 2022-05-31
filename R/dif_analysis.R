@@ -26,6 +26,8 @@
 #' "scoring"
 #' @param include_mv numeric; identifies threshold for which group size missing
 #' values should be included in analysis as an extra group (defaults to 200)
+#' @param control list; function argument as passed to TAM-functions
+#' @param pweights numeric vector; function argument as passed to TAM-functions
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
@@ -44,7 +46,7 @@
 dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
                          scoring = "scoring", overwrite = FALSE,
                          save = TRUE, print = TRUE, return = FALSE,
-                         include_mv = 200,
+                         include_mv = 200, control = NULL, pweights = NULL,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
                          verbose = FALSE, warn = TRUE, prob_dif = 0.5) {
@@ -78,7 +80,7 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
     select = select, dif_vars = dif_vars, resp = resp, vars = vars,
     scoring = scoring, include_mv = include_mv, valid = valid,
     path = path_results, mvs = mvs, verbose = verbose, warn = warn, save = save,
-    test = FALSE
+    control = control, pweights = pweights, test = FALSE
   )
 
   # Create summary
@@ -137,6 +139,8 @@ check_items <- function(select, dif_vars) {
 #' "scoring"
 #' @param include_mv numeric; identifies threshold for which group size missing
 #' values should be included in analysis as an extra group (defaults to 200)
+#' @param control list; function argument as passed to TAM-functions
+#' @param pweights numeric vector; function argument as passed to TAM-functions
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where results shall be saved
 #' @param verbose  logical; whether to print processing information to console
@@ -151,7 +155,8 @@ check_items <- function(select, dif_vars) {
 conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
                                  scoring = 'scoring', mvs = NULL, include_mv = 200,
                                  path = here::here('Results'), save = TRUE,
-                                 verbose = FALSE, warn = TRUE, test = TRUE) {
+                                 verbose = FALSE, warn = TRUE, test = TRUE,
+                                 control = NULL, pweights = NULL) {
 
   # Test data
   if (test) {
@@ -187,7 +192,7 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
                                  valid = valid, dif_var = dif_vars[i],
                                  scoring = scoring, include_mv = include_mv,
                                  verbose = verbose, mvs = mvs, warn = warn,
-                                 test = FALSE)
+                                 test = FALSE, control = control, pweights = pweights)
   }
   names(dif_models) <- dif_vars
 
@@ -274,6 +279,8 @@ summarize_dif_analysis <- function(dif_models, dif_vars, prob_dif = 0.5,
 #' "scoring"
 #' @param dif_var string; defines the name of the variable to be tested for DIF
 #' (e.g., "gender")
+#' @param control list; function argument as passed to TAM-functions
+#' @param pweights numeric vector; function argument as passed to TAM-functions
 #' @param verbose  logical; whether to print processing information to console
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
@@ -285,7 +292,8 @@ summarize_dif_analysis <- function(dif_models, dif_vars, prob_dif = 0.5,
 #' @export
 dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
                       valid = NULL, include_mv = 200, mvs = NULL,
-                      verbose = FALSE, warn = TRUE, test = TRUE) {
+                      verbose = FALSE, warn = TRUE, test = TRUE,
+                      control = NULL, pweights = NULL) {
 
   # Test data
   if (test) {
@@ -406,12 +414,14 @@ dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
 
     dmod <- TAM::tam.mml.mfr(resp,
                              irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
-                             formulaA = formula_dmod, verbose = verbose
+                             formulaA = formula_dmod, verbose = verbose,
+                             control = control, pweights = pweights
     )
 
     mmod <- TAM::tam.mml.mfr(resp,
                              irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
-                             formulaA = formula_mmod, verbose = verbose
+                             formulaA = formula_mmod, verbose = verbose,
+                             control = control, pweights = pweights
     )
 
   }
@@ -468,14 +478,16 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 #' @param scoring  string; defines name of numerical variable in vars that
 #' contains the scoring factor to be applied to loading matrix; defaults to
 #' "scoring"
+#' @param control list; function argument as passed to TAM-functions
+#' @param pweights numeric vector; function argument as passed to TAM-functions
 #' @param verbose  logical; whether to print processing information to console
 #' @param pid  character vector; contains person identifiers
 #'
 #' @return a tam.mml model
 #' @noRd
 
-pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring",
-                    pid, verbose) {
+pcm_dif <- function(resp, facets, formulaA, vars, select, pid, verbose,
+                    scoring = 'scoring', control = NULL, pweights = NULL) {
 
   # get design matrix for model
   B <- TAM::designMatrices(modeltype = "PCM", resp = resp)$B
@@ -484,7 +496,8 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring",
   B[vars$item[vars[[select]]], , 1] <- B[vars$item[vars[[select]]], , 1] * vars[[scoring]][vars[[select]]]
 
   TAM::tam.mml.mfr(formulaA = formulaA, facets = facets, B = B, pid = pid,
-                   irtmodel = "PCM2", resp = resp, verbose = verbose)
+                   irtmodel = "PCM2", resp = resp, verbose = verbose,
+                   control = control, pweights = pweights)
 
 }
 

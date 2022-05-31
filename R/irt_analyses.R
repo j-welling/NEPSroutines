@@ -16,6 +16,9 @@
 #' @param scoring  string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
+#' @param xsi.fixed matrix; contains fixed (linked) item parameters; optional
+#' @param control list; function argument as passed to TAM-functions
+#' @param pweights numeric vector; function argument as passed to TAM-functions
 #' @param plots  logical; whether plots shall be created and saved to hard drive
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
@@ -35,12 +38,12 @@
 
 grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
                                  scoring = NULL, plots = FALSE, save = TRUE,
-                                 print = TRUE, return = FALSE,
+                                 print = TRUE, return = FALSE, overwrite = FALSE,
                                  path_plots = here::here("Plots"),
                                  path_table = here::here("Tables"),
                                  path_results = here::here("Results"),
-                                 overwrite = FALSE, digits = 2, verbose = FALSE,
-                                 warn = TRUE) {
+                                 digits = 2, verbose = FALSE, warn = TRUE,
+                                 xsi.fixed = NULL, control = NULL, pweights = NULL) {
 
   # Test data
   check_logicals(vars, "vars", groups, warn = warn)
@@ -77,8 +80,9 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
                                     path_table = path_table,
                                     path_plots = path_plots,
                                     overwrite = overwrite, digits = digits,
-                                    name_group = g, warn = warn,
-                                    test = FALSE)
+                                    name_group = g, warn = warn, test = FALSE,
+                                    control = control, pweights = pweights,
+                                    xsi.fixed = xsi.fixed)
 
     i <- i + 1
   }
@@ -108,6 +112,9 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #' @param scoring  string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
+#' @param xsi.fixed matrix; contains fixed (linked) item parameters; optional
+#' @param control list; function argument as passed to TAM-functions
+#' @param pweights numeric vector; function argument as passed to TAM-functions
 #' @param plots  logical; whether plots shall be created and saved to hard drive
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
@@ -133,7 +140,8 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
                          path_table = here::here("Tables"),
                          path_results = here::here("Results"),
                          overwrite = FALSE, digits = 2, name_group = NULL,
-                         verbose = FALSE, warn = TRUE, test = TRUE) {
+                         verbose = FALSE, warn = TRUE, test = TRUE,
+                         xsi.fixed = NULL, control = NULL, pweights = NULL) {
 
   # Test data
   if (test) {
@@ -165,19 +173,27 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 
     irt$model.1pl <- irt_model(resp = resp, vars = vars, select = select,
                                valid = valid, mvs = mvs, irtmodel = '1PL',
-                               verbose = verbose, warn = warn, test = FALSE)
+                               verbose = verbose, warn = warn, test = FALSE,
+                               control = control, pweights = pweights,
+                               xsi.fixed = xsi.fixed)
     irt$model.2pl <- irt_model(resp = resp, vars = vars, select = select,
                                valid = valid, mvs = mvs, irtmodel = '2PL',
-                               verbose = verbose, warn = warn, test = FALSE)
+                               verbose = verbose, warn = warn, test = FALSE,
+                               control = control, pweights = pweights,
+                               xsi.fixed = xsi.fixed)
 
   } else if (irt_type == 'poly') {
 
     irt$model.pcm <- irt_model(resp = resp, vars = vars, select = select, mvs = mvs,
                                valid = valid, irtmodel = 'PCM2', scoring = scoring,
-                               verbose = verbose, warn = warn, test = FALSE)
+                               verbose = verbose, warn = warn, test = FALSE,
+                               control = control, pweights = pweights,
+                               xsi.fixed = xsi.fixed)
     irt$model.gpcm <- irt_model(resp = resp, vars = vars, select = select, mvs = mvs,
                                 valid = valid, irtmodel = 'GPCM', scoring = scoring,
-                                verbose = verbose, warn = warn, test = FALSE)
+                                verbose = verbose, warn = warn, test = FALSE,
+                                control = control, pweights = pweights,
+                                xsi.fixed = xsi.fixed)
 
   }
 
@@ -268,10 +284,12 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 #' @param scoring  string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
+#' @param xsi.fixed matrix; contains fixed (linked) item parameters; optional
+#' @param control list; function argument as passed to TAM-functions
+#' @param pweights numeric vector; function argument as passed to TAM-functions
 #' @param path  string; defines path to folder where results shall be saved
 #' @param filename  string; defines name of file that shall be saved
 #' @param verbose  logical; whether to print processing information to console
-#' @param xsi.fixed matrix; contains fixed (linked) item parameters; optional
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
@@ -287,6 +305,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 
 irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
                       scoring = NULL, verbose = FALSE,
+                      control = NULL, pweights = NULL,
                       path = here::here("Results"), filename = NULL,
                       xsi.fixed = NULL, warn = TRUE, test = TRUE) {
 
@@ -346,14 +365,16 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
 
     mod <- TAM::tam.mml(
       resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
-      verbose = verbose, xsi.fixed = xsi.fixed
+      verbose = verbose, xsi.fixed = xsi.fixed, control = control,
+      pweights = pweights
     )
 
   } else {
 
     mod <- TAM::tam.mml.2pl(
       resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
-      verbose = verbose, xsi.fixed = xsi.fixed
+      verbose = verbose, xsi.fixed = xsi.fixed, control = control,
+      pweights = pweights
     )
 
   }
