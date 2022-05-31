@@ -21,7 +21,6 @@
 #' @param mvs named integer vector; contains user-defined missing values
 #' @param dif_vars character vector; contains the variable names to be tested
 #'   for DIF (e.g., "gender")
-#' @param irt_type  string; either "dich" (for Rasch) or "poly" (for PCM)
 #' @param scoring string; defines name of numerical variable in vars that
 #' contains the scoring factor to be applied to loading matrix; defaults to
 #' "scoring"
@@ -43,7 +42,7 @@
 #' @export
 
 dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
-                         irt_type, scoring = "scoring", overwrite = FALSE,
+                         scoring = "scoring", overwrite = FALSE,
                          save = TRUE, print = TRUE, return = FALSE,
                          include_mv = 200,
                          path_results = here::here('Results'),
@@ -77,21 +76,21 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
   # Conduct dif analyses
   dif$models <- conduct_dif_analysis(
     select = select, dif_vars = dif_vars, resp = resp, vars = vars,
-    irt_type = irt_type, scoring = scoring, include_mv = include_mv, valid = valid,
+    scoring = scoring, include_mv = include_mv, valid = valid,
     path = path_results, mvs = mvs, verbose = verbose, warn = warn, save = save,
     test = FALSE
   )
 
   # Create summary
   dif$summaries <- summarize_dif_analysis(
-    dif_models = dif$models, dif_vars = dif_vars, irt_type = irt_type, prob_dif = prob_dif,
+    dif_models = dif$models, dif_vars = dif_vars, prob_dif = prob_dif,
     path_table = path_table, path_results = path_results,
     print = print, save = save, overwrite = overwrite
   )
 
   # Create table for TR
   dif$tr_tables <- build_dif_tr_tables(
-    dif_summaries = dif$summaries, irt_type = irt_type, save = save,
+    dif_summaries = dif$summaries,  save = save,
     path = path_table, overwrite = overwrite
   )
 
@@ -99,6 +98,11 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
   if (return) return(dif)
 }
 
+#' Checks whether arguments select and dif_vars match
+#' @param select function argument 'select'
+#' @param dif_vars function argument 'dif_vars'
+#'
+#' @noRd
 check_items <- function(select, dif_vars) {
   if (length(select) > 1 & length(select) != length(dif_vars)) {
     stop("Please check 'select' and 'dif_vars'. At least one of them does ",
@@ -126,7 +130,6 @@ check_items <- function(select, dif_vars) {
 #' variables in vars
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
-#' @param irt_type  string; either "dich" (for Rasch) or "poly" (for PCM)
 #' @param dif_vars character vector; contains the variable names to be tested
 #'   for DIF (e.g., "gender")
 #' @param scoring string; defines name of numerical variable in vars that
@@ -146,8 +149,7 @@ check_items <- function(select, dif_vars) {
 #'   dmod: DIF effects model
 #' @export
 conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
-                                 irt_type, scoring = 'scoring', mvs = NULL,
-                                 include_mv = 200,
+                                 scoring = 'scoring', mvs = NULL, include_mv = 200,
                                  path = here::here('Results'), save = TRUE,
                                  verbose = FALSE, warn = TRUE, test = TRUE) {
 
@@ -183,8 +185,7 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
   for (i in seq_along(dif_vars)) {
     dif_models[[i]] <- dif_model(resp = resp, vars = vars, select = select[i],
                                  valid = valid, dif_var = dif_vars[i],
-                                 irt_type = irt_type, scoring = scoring,
-                                 include_mv = include_mv,
+                                 scoring = scoring, include_mv = include_mv,
                                  verbose = verbose, mvs = mvs, warn = warn,
                                  test = FALSE)
   }
@@ -192,6 +193,9 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 
   # Save results
   if (save) {
+      are_poly <- sapply(select, function(x) is_poly(resp, vars, x))
+      irt_type <- ifelse(sum(are_poly) == length(are_poly), 'poly',
+                         ifelse(sum(are_poly) == 0, 'dich', 'mixed'))
       save_results(dif_models, path = path,
                    filename = paste0("dif_", irt_type, "_models.rds"))
   }
@@ -205,7 +209,6 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 #' @param dif_models return object of conduct_dif_analysis()
 #' @param dif_vars character vector; contains the variable names to be tested
 #'   for DIF (e.g., "gender")
-#' @param irt_type  string; either "dich" (for Rasch) or "poly" (for PCM)
 #' @param prob_dif numeric scalar; indicates absolute threshold of problematic DIF (defaults to 0.5)
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
@@ -215,7 +218,7 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 #'
 #' @returns a list of dif summaries for each input entry in dif_models
 #' @export
-summarize_dif_analysis <- function(dif_models, dif_vars, irt_type, prob_dif = 0.5,
+summarize_dif_analysis <- function(dif_models, dif_vars, prob_dif = 0.5,
                                    print = TRUE, save = TRUE, overwrite = FALSE,
                                    path_results = here::here('Results'),
                                    path_table = here::here('Tables')) {
@@ -224,14 +227,17 @@ summarize_dif_analysis <- function(dif_models, dif_vars, irt_type, prob_dif = 0.
 
   for (i in dif_vars) {
 
-    dif_summaries[[i]] <- dif_summary(dif_models[[i]], irt_type = irt_type,
+    dif_summaries[[i]] <- dif_summary(dif_models[[i]], prob_dif = prob_dif,
                                       print = print, overwrite = overwrite,
-                                      save = save, path = path_table,
-                                      prob_dif = prob_dif)
+                                      save = save, path = path_table)
   }
 
   if (save) {
-      save_results(dif_models, path = path_results,
+
+      are_poly <- sapply(dif_summaries, function(x) x$irt_type == 'poly')
+      irt_type <- ifelse(sum(are_poly) == length(are_poly), 'poly',
+                         ifelse(sum(are_poly) == 0, 'dich', 'mixed'))
+      save_results(dif_summaries, path = path_results,
                    filename = paste0("dif_", irt_type, "_summaries.rds"))
   }
 
@@ -258,7 +264,6 @@ summarize_dif_analysis <- function(dif_models, dif_vars, irt_type, prob_dif = 0.
 #' come with a different set of analysis items, this argument becomes a
 #' vector of \code{length(dif_vars)} containing the respective selection
 #' variables in vars
-#' @param irt_type  string; either "dich" (for Rasch) or "poly" (for PCM)
 #' @param include_mv numeric; identifies threshold for which group size missing
 #' values should be included in analysis as an extra group (defaults to 200)
 #' @param valid  string; defines name of logical variable in resp that indicates
@@ -279,7 +284,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, irt_type, prob_dif = 0.
 #' @importFrom stats as.formula
 #' @export
 dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
-                      valid = NULL, irt_type, include_mv = 200, mvs = NULL,
+                      valid = NULL, include_mv = 200, mvs = NULL,
                       verbose = FALSE, warn = TRUE, test = TRUE) {
 
   # Test data
@@ -318,6 +323,9 @@ dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
 
   # Test resp
   check_numerics(resp, "resp", check_invalid = TRUE)
+
+  # Identify IRT type
+  irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
 
   # Prepare DIF analysis
   tmp_formula <- paste("~ item +", ifelse(irt_type == 'poly', "item * step +", ""))
@@ -406,17 +414,14 @@ dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
                              formulaA = formula_mmod, verbose = verbose
     )
 
-  } else {
-
-    stop("No valid irt_type provided. Possible are 'dich' for only dichotomous ",
-         "analysis or 'poly' for also polytomous analysis.")
   }
 
   # Warn if maximum number of iterations were reached
   reached_maxiter(mmod, paste0("'", dif_var, "' without DIF"))
   reached_maxiter(dmod, paste0("'", dif_var, "' with DIF"))
 
-  list(mmod = mmod, dmod = dmod, dif_var = dif_var, facets = fcts)
+  list(mmod = mmod, dmod = dmod, facets = fcts,
+       dif_var = dif_var, irt_type = irt_type)
 }
 
 #' Create data.frame for facets with counts
@@ -487,7 +492,6 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring",
 #' Summary for DIF analysis
 #'
 #' @param diflist list; return object of dif_model(); with main and dif model
-#' @param irt_type  string; either "dich" (for Rasch) or "poly" (for PCM)
 #' @param prob_dif numeric scalar; indicates absolute threshold of problematic DIF (defaults to 0.5)
 #' @param print logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
@@ -498,7 +502,7 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, scoring = "scoring",
 #'   data frames for dif analysis
 #' @export
 
-dif_summary <- function(diflist, irt_type, print = TRUE, save = TRUE,
+dif_summary <- function(diflist, print = TRUE, save = TRUE,
                         path = here::here('Tables'), prob_dif = 0.5,
                         overwrite = FALSE) {
     # information criteria for DIF and main model
@@ -506,6 +510,7 @@ dif_summary <- function(diflist, irt_type, print = TRUE, save = TRUE,
     # DIF per item + standard error + meht p-values
 
     dif_var <- diflist$dif_var
+    irt_type <- diflist$irt_type
 
     ### TG: start
 
@@ -764,6 +769,9 @@ difsum <- function(obj, dif_var, groups = 1) {
     # facets
     out$facets <- obj$facets
 
+    # irt_type
+    out$irt_type <- obj$irt_type
+
     out
 }
 
@@ -775,7 +783,6 @@ difsum <- function(obj, dif_var, groups = 1) {
 #'
 #' @param dif_summaries named list of dif_summary() return objects; the list
 #'   elements must be named after their DIF variable
-#' @param irt_type  string; either "dich" (for Rasch) or "poly" (for PCM)
 #' @param save logical; whether results shall be saved to hard drive
 #' @param path string; indicates the folder location where the summaries
 #' are stored on the hard drive; please note that the path is relative to the
@@ -785,10 +792,13 @@ difsum <- function(obj, dif_var, groups = 1) {
 #' @return table as shown in TR
 #' @export
 
-build_dif_tr_tables <- function(dif_summaries, irt_type, save = TRUE,
-                                path = here::here('Tables'), overwrite = FALSE) {
+build_dif_tr_tables <- function(dif_summaries, save = TRUE, overwrite = FALSE,
+                                path = here::here('Tables')) {
 
     dif_vars <- names(dif_summaries)
+    are_poly <- sapply(dif_summaries, function(x) x$irt_type == 'poly')
+    irt_type <- ifelse(sum(are_poly) == length(are_poly), 'poly',
+                       ifelse(sum(are_poly) == 0, 'dich', 'mixed'))
 
     # information criteria table
     gof <- Reduce(rbind, lapply(dif_summaries, function(x) x$gof))

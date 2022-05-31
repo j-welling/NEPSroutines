@@ -13,8 +13,6 @@
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
-#' @param irt_type  string; either "dich" (dichotomous analysis) or "poly"
-#'   (polytomous analysis)
 #' @param scoring  string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
@@ -36,8 +34,7 @@
 #' @export
 
 grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
-                                 irt_type, scoring = NULL,
-                                 plots = FALSE, save = TRUE,
+                                 scoring = NULL, plots = FALSE, save = TRUE,
                                  print = TRUE, return = FALSE,
                                  path_plots = here::here("Plots"),
                                  path_table = here::here("Tables"),
@@ -61,7 +58,6 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
             "All cases are used for analysis.\n")
   }
 
-
   # Create list for results
   irt_groups <- list()
   i <- 1
@@ -69,20 +65,19 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
   # Conduct irt_analysis for each group
   for (g in names(groups)) {
 
-    message(toupper(paste0("\n\n\n(", i, ") irt analysis (", irt_type, ") for ",
-                           g, " items.\n")))
-    name_group <- g
     select <- groups[[g]]
+    message(toupper(paste0("\n\n\n(", i, ") irt analysis (",
+                           ifelse(is_poly(resp, vars, select), 'poly', 'dich'),
+                           ") for ", g, " items.\n")))
 
     irt_groups[[g]] <- irt_analysis(resp = resp, vars = vars, select = select,
-                                    valid = valid, irt_type = irt_type,
-                                    print = print, scoring = scoring,
+                                    valid = valid, print = print, scoring = scoring,
                                     plots = plots, save = save, return = TRUE,
                                     path_results = path_results,
                                     path_table = path_table,
                                     path_plots = path_plots,
                                     overwrite = overwrite, digits = digits,
-                                    name_group = name_group, warn = warn,
+                                    name_group = g, warn = warn,
                                     test = FALSE)
 
     i <- i + 1
@@ -110,8 +105,6 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
-#' @param irt_type  string; either "dich" (dichotomous analysis) or "poly"
-#'   (polytomous analysis)
 #' @param scoring  string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
@@ -134,8 +127,8 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #' @export
 
 irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
-                         irt_type, scoring = NULL,
-                         plots = FALSE, save = TRUE, print = TRUE, return = FALSE,
+                         scoring = NULL, plots = FALSE, save = TRUE,
+                         print = TRUE, return = FALSE,
                          path_plots = here::here("Plots"),
                          path_table = here::here("Tables"),
                          path_results = here::here("Results"),
@@ -161,6 +154,9 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
     }
   }
 
+  # Identify IRT type
+  irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
+
   # Create list with results
   irt <- list()
 
@@ -174,8 +170,6 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
                                valid = valid, mvs = mvs, irtmodel = '2PL',
                                verbose = verbose, warn = warn, test = FALSE)
 
-    irtmodel = c("1PL", "2PL")
-
   } else if (irt_type == 'poly') {
 
     irt$model.pcm <- irt_model(resp = resp, vars = vars, select = select, mvs = mvs,
@@ -185,29 +179,18 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
                                 valid = valid, irtmodel = 'GPCM', scoring = scoring,
                                 verbose = verbose, warn = warn, test = FALSE)
 
-    irtmodel = c("PCM2", "GPCM")
-
-  } else {
-
-    stop("No valid irt_type provided. Possible are 'dich' for dichotomous ",
-         "analysis or 'poly' for polytomous analysis.")
-
   }
 
   # Create plots
   if (plots) {
 
-    #if (!is.null(name_group)) path_plots <- paste0(path_plots, "/", name_group)
-
-    for (i in seq_along(irtmodel)) {
+    for (i in 1:2) {
 
       # ICC plots
-      icc_plots(model = irt[[i]], irtmodel = irtmodel[i], path = path_plots,
-                name_group = name_group)
+      icc_plots(model = irt[[i]], path = path_plots, name_group = name_group)
 
       # Wright map
-      wright_map(model = irt[[i]], irtmodel = irtmodel[i], path = path_plots,
-                 name_group = name_group)
+      wright_map(model = irt[[i]], path = path_plots, name_group = name_group)
 
     }
   }
@@ -216,13 +199,11 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
   if (return | print | save) {
     # IRT summary
     irt$summary <- irt_summary(resp = resp, vars = vars,
-                               model_1par = irt[[1]], model_2par = irt[[2]],
+                               model_1p = irt[[1]], model_2p = irt[[2]],
                                valid = valid, mvs = mvs, digits = digits)
 
     # Model fit
-    irt$model_fit <- irt_model_fit(model_dich = irt[[1]],
-                                   model_poly = irt[[2]],
-                                   irt_type = irt_type)
+    irt$model_fit <- irt_model_fit(model_1p = irt[[1]], model_2p = irt[[2]])
 
     # Steps analysis
     if (irt_type == 'poly') {
@@ -240,7 +221,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
       message("\nSteps analysis table\n")
       print(irt$steps)
     }
-    message("\nSummary for TR\n")
+    message("\nSUMMARY FOR TR\n")
     print_irt_summary(model = irt[[1]],
                       irt_sum = irt$summary,
                       steps_sum = irt$steps)
@@ -403,7 +384,7 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   # List with results
   results <- list(
     mod = mod, fit = fit, pars = pars, mfit = mfit,
-    wle = wle, wle_rel = wle_rel, info_crit = info_crit
+    wle = wle, wle_rel = wle_rel, info_crit = info_crit, irtmodel = irtmodel
   )
 
   # Save results
@@ -419,15 +400,15 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
 #' Create ICC plots for IRT models.
 #'
 #' @param model  list; return object of irt_model()
-#' @param irtmodel  string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
-#'   "GPCM" for GPCM analysis
 #' @param path  string; defines path to folder where plots shall be saved
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
 #' @export
 
-icc_plots <- function(model, irtmodel, path = here::here("Plots"),
-                      name_group = NULL) {
+icc_plots <- function(model, path = here::here("Plots"), name_group = NULL) {
+
+  # Identify kind of irt model
+  irtmodel <- model$irtmodel
 
   # Add group name to path
   if (is.null(name_group)) {
@@ -459,8 +440,6 @@ icc_plots <- function(model, irtmodel, path = here::here("Plots"),
 #' Create Wright maps for IRT models.
 #'
 #' @param model  list; return object of irt_model()
-#' @param irtmodel  string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
-#'   "GPCM" for GPCM analysis
 #' @param path  string; defines path to folder where plots shall be saved
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
@@ -468,8 +447,10 @@ icc_plots <- function(model, irtmodel, path = here::here("Plots"),
 #' @importFrom graphics mtext text
 #' @export
 
-wright_map <- function(model, irtmodel, path = here::here("Plots"),
-                       name_group = NULL) {
+wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
+
+  # Identify kind of irt model
+  irtmodel <- model$irtmodel
 
   # Add group name to path
   if (is.null(name_group)) {
@@ -517,8 +498,8 @@ wright_map <- function(model, irtmodel, path = here::here("Plots"),
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
-#' @param model_1par  list; return object of irt_model(); one parameter model
-#' @param model_2par  list; return object of irt_model(); two parameter model
+#' @param model_1p  list; return object of irt_model(); one parameter model
+#' @param model_2p  list; return object of irt_model(); two parameter model
 #' @param path  string; defines path to folder where table shall be saved
 #' @param filename  string; defines name of table that shall be saved
 #' @param digits  integer; number of decimals for rounding
@@ -531,21 +512,21 @@ wright_map <- function(model, irtmodel, path = here::here("Plots"),
 #' @export
 
 irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
-                        model_1par, model_2par,
+                        model_1p, model_2p,
                         path = here::here("Tables"), filename = NULL,
                         digits = 2, overwrite = FALSE, warn = TRUE) {
 
   # prepare data
-  vars$irt_item <- vars$item %in% rownames(model_1par$mod$xsi)
-  vars_ <- dplyr::rename(vars[vars$irt_item, ], items = 'item')
+  vars$irt_item <- vars$item %in% rownames(model_1p$mod$xsi)
+  vars_ <- vars[vars$irt_item, ]
   resp <- prepare_resp(resp, vars = vars, select = 'irt_item', valid = valid,
                        use_only_valid = TRUE, convert = TRUE, mvs = mvs,
                        warn = FALSE)
 
 
   # item parameters
-  pars <- model_1par$mod$xsi[, c("xsi", "se.xsi")]
-  pars$item <- rownames(model_1par$mod$xsi)
+  pars <- model_1p$mod$xsi[, c("xsi", "se.xsi")]
+  pars$item <- rownames(model_1p$mod$xsi)
   pars <- pars[vars_$item, ]
 
   # percentage correct
@@ -555,8 +536,8 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   pars$N <- colSums(!is.na(resp))
 
   # items fit
-  pars$WMNSQ   <- model_1par$fit$Infit[model_1par$fit$item %in% vars_$item]
-  pars$WMNSQ_t <- model_1par$fit$Infit_t[model_1par$fit$item %in% vars_$item]
+  pars$WMNSQ   <- model_1p$fit$Infit[model_1p$fit$item %in% vars_$item]
+  pars$WMNSQ_t <- model_1p$fit$Infit_t[model_1p$fit$item %in% vars_$item]
 
   # corrected item-total discrimination
   rit <- c()
@@ -569,19 +550,19 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   pars$rit <- rit
 
   # 2PL discrimination
-  if (!is.null(model_2par)) {
-    pars$model_2par <- model_2par$mod$item[, "B.Cat1.Dim1"]
+  if (!is.null(model_2p)) {
+    pars$model_2p <- model_2p$mod$item[, "B.Cat1.Dim1"]
     }
 
   # Yen Q3: average absolute residual correlation for items (adjusted)
-  pars$Q3 <- colMeans(abs(model_1par$mfit$aQ3.matr), na.rm = TRUE)
+  pars$Q3 <- colMeans(abs(model_1p$mfit$aQ3.matr), na.rm = TRUE)
 
   # numbering
   pars$num <- seq(1, nrow(pars))
 
   # reorder columns
   pars <- pars[ , c("num", "item", "N", "pc", "xsi", "se.xsi",
-                    "WMNSQ", "WMNSQ_t", "rit", "model_2par", "Q3")]
+                    "WMNSQ", "WMNSQ_t", "rit", "model_2p", "Q3")]
   colnames(pars) <- c("Number", "Item", "N", "% correct",
                       "xsi", "SE", "WMNSQ", "t", "rit", "Discr.", "aQ3")
   pars[, -c(1:4)] <- round(pars[, -c(1:4)], digits)
@@ -606,8 +587,6 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 #'
 #' @param model_1p  list; return object of irt_model(); 1PL / PCM analysis
 #' @param model_2p  list; return object of irt_model(); 2PL / GPCM analysis
-#' @param irt_type  string; either "dich" (dichotomous analysis) or "poly"
-#'   (polytomous analysis)
 #' @param overwrite  logical; whether to overwrite existing file when saving table
 #' @param path  string; defines path to folder where table shall be saved
 #' @param filename  string; defines name of table that shall be saved
@@ -615,7 +594,7 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 #' @return data.frame with AIC, BIC and number of parameters for both models
 #' @export
 
-irt_model_fit <- function(model_1p, model_2p, irt_type, overwrite = FALSE,
+irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE,
                           path = here::here("Tables"), filename = NULL) {
 
   mfit <- data.frame(N = rep(NA_integer_, 2),
@@ -623,6 +602,8 @@ irt_model_fit <- function(model_1p, model_2p, irt_type, overwrite = FALSE,
                      Deviance = rep(NA_integer_, 2),
                      AIC = rep(NA_integer_, 2),
                      BIC = rep(NA_integer_, 2))
+
+  irt_type <- ifelse(model_1p$irtmodel == '1PL', 'dich', 'poly')
 
   if(irt_type == 'dich') {
     row.names(mfit) <- c("1PL model", "2PL model")
@@ -749,7 +730,7 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   wmnsq_min <- min(irt_sum$WMNSQ, na.rm = TRUE)
   wmnsq_max <- max(irt_sum$WMNSQ, na.rm = TRUE)
   wmnsq_mean <- round(mean(irt_sum$WMNSQ, na.rm = TRUE), 2)
-  wmnsq_median <- round(median(irt_sum$wmnsq, na.rm = TRUE), 2)
+  wmnsq_median <- round(median(irt_sum$WMNSQ, na.rm = TRUE), 2)
   message("WMNSQ:\n",
           "The values of the WMNSQ were ... close to 1 with the lowest value being ",
           wmnsq_min, " (item ", irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_min], ") and the highest being ",
@@ -772,7 +753,7 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
           "The WMNSQ t-values varied between ",
           t_min, " (item ", irt_sum$Item[irt_sum$t %in% t_min], ") and ",
           t_max, " (item ", irt_sum$Item[irt_sum$t %in% t_max], ") with an average of ",
-          t_mean, ", and a median of ", t_median, , ".")
+          t_mean, ", and a median of ", t_median, ".")
 
   t_misfit <- irt_sum$Item[abs(irt_sum$t) > 8]
   if (length(t_misfit == 1)) {
