@@ -423,3 +423,19 @@ reached_maxiter <- function(mod, name_model) {
                        name_model, "! Model did not converge.\n"))
     }
 }
+
+#' Test whether data contains polytomous items (responses > 1)
+#' @param resp  data.frame with item responses
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'item' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param select  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#'
+#' @returns logical; whether data contains polytomous items
+#' @param noRd
+#'
+is_poly <- function(resp, vars, select) {
+  maxi <- max(resp[ , vars$item[vars[[select]]]], na.rm = TRUE)
+  maxi > 1
+}
