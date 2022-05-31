@@ -416,7 +416,7 @@ get_object_name <- function(object) {
 #' @param name_model  string; defines name of model
 #' @returns warning if iter is equal or greater than maxiter
 #' @noRd
-#'
+
 reached_maxiter <- function(mod, name_model) {
     if (mod$iter >= mod$control$maxiter) {
         warning(paste0("Maximum number of iterations were reached for the IRT model ",
@@ -433,9 +433,8 @@ reached_maxiter <- function(mod, name_model) {
 #' which items to use for the analysis
 #'
 #' @returns logical; whether data contains polytomous items
-#' @param noRd
-#'
+#' @noRd
+
 is_poly <- function(resp, vars, select) {
-  maxi <- max(resp[ , vars$item[vars[[select]]]], na.rm = TRUE)
-  maxi > 1
+  max(resp[ , vars$item[vars[[select]]]], na.rm = TRUE) > 1
 }
