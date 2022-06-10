@@ -43,12 +43,12 @@
 #'
 #' @export
 create_suf <- function(resp, vars, items_suf, wle_name, xsi_fixed = NULL,
-             rotated = FALSE, linked = FALSE, wles = NULL,
-             linked_wles = NULL, linked_location = NULL,
-             facet = NULL, select = NULL, valid = NULL, mvs = NULL,
-             scoring = NULL, competence,
-             filename = "suf", path_results = here::here('Results'),
-             save = TRUE, return = FALSE) {
+                       rotated = FALSE, linked = FALSE, wles = NULL,
+                       linked_wles = NULL, linked_location = NULL,
+                       facet = NULL, select = NULL, valid = NULL, mvs = NULL,
+                       scoring = NULL, competence,
+                       filename = "suf", path_results = here::here('Results'),
+                       save = TRUE, return = FALSE) {
 
   # check whether WLEs have already been linked
   if (linked) {
@@ -139,8 +139,8 @@ create_suf <- function(resp, vars, items_suf, wle_name, xsi_fixed = NULL,
 #'   in wle_name)
 #'
 #' @export
-estimated_rotated_wles <- function(resp, vars, select, valid = NULL, facet, xsi_fixed,
-                   scoring, mvs, wle_name, irtmodel) {
+estimated_rotated_wles <- function(resp, vars, select, valid = NULL, facet,
+                                   xsi_fixed, scoring, mvs, wle_name, irtmodel) {
 
   # Test data
   check_variables(resp, "resp", facet)
@@ -230,7 +230,7 @@ set_labels <- function(suf, vars, items_suf, competence, wle_name, linked) {
     } else {
       maxK <- max(suf[[i]], na.rm = TRUE)
       lbl <- setNames(object = seq(0, maxK),
-              paste0(seq(0, maxK), " correct of ", maxK))
+              paste0(seq(0, maxK), " of ", maxK))
       suf[[i]] <- haven::labelled_spss(suf[[i]],
                        label = paste0(competence, ": Item ", j),
                        labels = c(lbl,
