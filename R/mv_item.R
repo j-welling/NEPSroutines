@@ -618,7 +618,7 @@ create_mvlist <- function(item, position, responses, mvs, digits = 2) {
   if (length(item) != length(position) |
       ncol(responses) != length(item) |
       ncol(responses) != length(position)) {
-        stop("Number of items in data.frame responses, in vector items and in vector position do not match. ",
+        stop("Number of items in data.frame responses, in vector item and in vector position do not match. ",
         "Please provide matching arguments to function create_mvlist().")
       }
 
