@@ -350,15 +350,8 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   if (irtmodel %in% c("1PL", "2PL")) check_dich(resp, "resp")
 
   # Create scoring matrix if not provided in function arguments
-  if (!is.null(scoring)) {
-      check_numerics(vars, "vars", scoring, check_invalid = TRUE)
-      Q = as.matrix(vars[[scoring]][vars[[select]]])
-  } else if (irtmodel %in% c("GPCM", "PCM2")) {
-      warning("No variable name for scoring factor for polytomous analysis ",
-              "provided.")
-  } else {
-      Q <- NULL
-  }
+  Q <- create_q(vars, select = select, scoring = scoring,
+                poly = ifelse(irtmodel %in% c("PCM2", "GPCM"), TRUE, FALSE))
 
   # IRT model
   if (irtmodel %in% c("1PL", "PCM2")) {

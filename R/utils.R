@@ -438,3 +438,31 @@ reached_maxiter <- function(mod, name_model) {
 is_poly <- function(resp, vars, select) {
   max(resp[ , vars$item[vars[[select]]]], na.rm = TRUE) > 1
 }
+
+#' Create Q matrix for TAM-functions
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'item' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param select  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param scoring string; defines name of numerical variable in vars that
+#' contains the scoring factor to be applied to loading matrix
+#' @param poly logical; whether items include polytomous items
+#'
+#' @returns Q matrix (or NULL, if no scoring variable is provided)
+#' @noRd
+
+create_q <- function(vars, select, scoring, poly) {
+
+    if (!is.null(scoring)) {
+        Q = as.matrix(vars[[scoring]][vars[[select]]])
+    } else {
+        Q <- NULL
+        if (poly) {
+            warning("No variable name for scoring factor for polytomous analysis ",
+                    "provided. Therefore no loading matrix is used for analysis.")
+        }
+    }
+
+    Q
+}

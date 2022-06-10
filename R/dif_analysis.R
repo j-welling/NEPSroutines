@@ -22,8 +22,7 @@
 #' @param dif_vars character vector; contains the variable names to be tested
 #'   for DIF (e.g., "gender")
 #' @param scoring string; defines name of numerical variable in vars that
-#' contains the scoring factor to be applied to loading matrix; defaults to
-#' "scoring"
+#' contains the scoring factor to be applied to loading matrix
 #' @param include_mv numeric; identifies threshold for which group size missing
 #' values should be included in analysis as an extra group (defaults to 200)
 #' @param control list; function argument as passed to TAM-functions
@@ -44,7 +43,7 @@
 #' @export
 
 dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
-                         scoring = "scoring", overwrite = FALSE,
+                         scoring = NULL, overwrite = FALSE,
                          save = TRUE, print = TRUE, return = FALSE,
                          include_mv = 200, control = NULL, pweights = NULL,
                          path_results = here::here('Results'),
@@ -135,8 +134,7 @@ check_items <- function(select, dif_vars) {
 #' @param dif_vars character vector; contains the variable names to be tested
 #'   for DIF (e.g., "gender")
 #' @param scoring string; defines name of numerical variable in vars that
-#' contains the scoring factor to be applied to loading matrix; defaults to
-#' "scoring"
+#' contains the scoring factor to be applied to loading matrix
 #' @param include_mv numeric; identifies threshold for which group size missing
 #' values should be included in analysis as an extra group (defaults to 200)
 #' @param control list; function argument as passed to TAM-functions
@@ -153,7 +151,7 @@ check_items <- function(select, dif_vars) {
 #'   dmod: DIF effects model
 #' @export
 conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
-                                 scoring = 'scoring', mvs = NULL, include_mv = 200,
+                                 scoring = NULL, mvs = NULL, include_mv = 200,
                                  path = here::here('Results'), save = TRUE,
                                  verbose = FALSE, warn = TRUE, test = TRUE,
                                  control = NULL, pweights = NULL) {
@@ -275,8 +273,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, prob_dif = 0.5,
 #' (in)valid cases
 #' @param mvs named integer vector; contains user-defined missing values
 #' @param scoring  string; defines name of numerical variable in vars that
-#' contains the scoring factor to be applied to loading matrix; defaults to
-#' "scoring"
+#' contains the scoring factor to be applied to loading matrix
 #' @param dif_var string; defines the name of the variable to be tested for DIF
 #' (e.g., "gender")
 #' @param control list; function argument as passed to TAM-functions
@@ -290,7 +287,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, prob_dif = 0.5,
 #'   dmod: DIF effects model
 #' @importFrom stats as.formula
 #' @export
-dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
+dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
                       valid = NULL, include_mv = 200, mvs = NULL,
                       verbose = FALSE, warn = TRUE, test = TRUE,
                       control = NULL, pweights = NULL) {
@@ -393,7 +390,11 @@ dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
   }
 
   # DIF analysis
+
+
   if (irt_type == 'poly') {
+
+    if(is.null(scoring)) stop("Please provide a name for the scoring variable")
 
     mmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
@@ -405,12 +406,12 @@ dif_model <- function(resp, vars, select, dif_var, scoring = 'scoring',
       vars = vars, select = select, scoring = scoring, verbose = verbose
     )
 
-  } else if (irt_type == 'dich') {
+  } else {
 
     # Check whether resp contains only dichotomous items
     check_dich(resp, "resp")
 
-    Q <- as.matrix(vars[[scoring]][vars[[select]]])
+    Q <- create_q(vars, select = select, scoring = scoring, poly = FALSE)
 
     dmod <- TAM::tam.mml.mfr(resp,
                              irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
@@ -476,8 +477,7 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 #'   persons in the same order as resp
 #' @param formulaA  an R formula for the DIF analysis
 #' @param scoring  string; defines name of numerical variable in vars that
-#' contains the scoring factor to be applied to loading matrix; defaults to
-#' "scoring"
+#' contains the scoring factor to be applied to loading matrix
 #' @param control list; function argument as passed to TAM-functions
 #' @param pweights numeric vector; function argument as passed to TAM-functions
 #' @param verbose  logical; whether to print processing information to console
@@ -487,13 +487,17 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 #' @noRd
 
 pcm_dif <- function(resp, facets, formulaA, vars, select, pid, verbose,
-                    scoring = 'scoring', control = NULL, pweights = NULL) {
+                    scoring = NULL, control = NULL, pweights = NULL) {
 
   # get design matrix for model
   B <- TAM::designMatrices(modeltype = "PCM", resp = resp)$B
 
+  pcm_scoring <- ifelse(is.null(scoring),
+                        rep(1, length(vars[[select]])),
+                        vars[[scoring]][vars[[select]]])
+
   # 0.5 scoring for PCM
-  B[vars$item[vars[[select]]], , 1] <- B[vars$item[vars[[select]]], , 1] * vars[[scoring]][vars[[select]]]
+  B[vars$item[vars[[select]]], , 1] <- B[vars$item[vars[[select]]], , 1] * pcm_scoring
 
   TAM::tam.mml.mfr(formulaA = formulaA, facets = facets, B = B, pid = pid,
                    irtmodel = "PCM2", resp = resp, verbose = verbose,
