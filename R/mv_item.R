@@ -187,7 +187,8 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
   # Prepare data
   vars_c <- vars[vars[[select]], ]
   resp <- only_valid(resp, valid = valid)
-  resp_c <- prepare_resp(resp, vars = vars, select = select, warn = warn)
+  resp_c <- prepare_resp(resp, vars = vars, select = select, warn = warn,
+                         zap_labels = FALSE)
 
   # NAs are not acknowledged in mvs-argument
   if (warn & !(NA %in% mvs) & any(resp_c %in% NA)) {
@@ -229,7 +230,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
       # Create list with results
       mvlist[[g]] <- create_mvlist(item = vars_g$item[!is.na(pos)],
                                    position = na.omit(pos),
-                                   responses = resp_g,
+                                   responses = resp_g[, vars_g$item[!is.na(pos)]],
                                    mvs = mvs,
                                    digits = digits)
 
@@ -331,19 +332,19 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
     results$list <- data.frame(item = vars$item[vars[[select]]])
     results$summary_all <- mv_i$summary$all
 
-    for (g in grouping) {
-      mv <- mv_i$list[[g]]
-      names(mv)[-1] <- apply(data.frame(names(mv)[-1]), 2, function(x) {
-        paste0(x, "_", g)
-      })
-      results$list <- dplyr::full_join(results$list, mv, by = "item")
-      results[[paste0("summary_", g)]] <- mv_i$summary[[g]]
+        for (g in grouping) {
+          mv <- mv_i$list[[g]]
+          names(mv)[-1] <- apply(data.frame(names(mv)[-1]), 2, function(x) {
+            paste0(x, "_", g)
+          })
+          results$list <- dplyr::full_join(results$list, mv, by = "item")
+          results[[paste0("summary_", g)]] <- mv_i$summary[[g]]
+        }
     }
-  }
 
   # Save table
   save_table(results, filename = filename, path = path,
-             overwrite = overwrite, show_rownames = TRUE)
+             overwrite = overwrite, show_rownames = FALSE)
 
   # Return table
   return(results)
@@ -648,7 +649,8 @@ mvi_summary <- function(mvlist, digits = 2) {
   mvsum <- data.frame(t(apply(mvlist, 2, function(x) {
     round(c(mean(x), sd(x), median(x), range(x)[1], range(x)[2]), digits)
   })))
-  colnames(mvsum) <- c("Mean", "Median", "SD", "Min", "Max")
+  mvsum[1, ] <- round(mvsum[1, ])
+  colnames(mvsum) <- c("Mean", "SD", "Median", "Min", "Max")
   return(mvsum)
 }
 
