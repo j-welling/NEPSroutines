@@ -164,7 +164,8 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
 
   # Prepare data
   resp <- only_valid(resp, valid = valid)
-  resp_c <- prepare_resp(resp, vars = vars, select = select, warn = warn)
+  resp_c <- prepare_resp(resp, vars = vars, select = select, warn = warn,
+                         zap_labels = FALSE)
 
   # Calculate mvs per person
   if (is.null(grouping)) {
