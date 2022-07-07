@@ -25,6 +25,8 @@
 #' contains the scoring factor to be applied to loading matrix
 #' @param include_mv numeric; identifies threshold for which group size missing
 #' values should be included in analysis as an extra group (defaults to 200)
+#' @param two_par logical; whether two parameter model (2PL or GPCM) shall be
+#' used as base for DIF analyses (defaults to FALSE)
 #' @param control list; function argument as passed to TAM-functions
 #' @param pweights numeric vector; function argument as passed to TAM-functions
 #' @param print  logical; whether results shall be printed to console
@@ -43,7 +45,7 @@
 #' @export
 
 dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
-                         scoring = NULL, overwrite = FALSE,
+                         scoring = NULL, overwrite = FALSE, two_par = FALSE,
                          save = TRUE, print = TRUE, return = FALSE,
                          include_mv = 200, control = NULL, pweights = NULL,
                          path_results = here::here('Results'),
@@ -79,7 +81,7 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
     select = select, dif_vars = dif_vars, resp = resp, vars = vars,
     scoring = scoring, include_mv = include_mv, valid = valid,
     path = path_results, mvs = mvs, verbose = verbose, warn = warn, save = save,
-    control = control, pweights = pweights, test = FALSE
+    control = control, pweights = pweights, test = FALSE, two_par = two_par
   )
 
   # Create summary
@@ -137,6 +139,8 @@ check_items <- function(select, dif_vars) {
 #' contains the scoring factor to be applied to loading matrix
 #' @param include_mv numeric; identifies threshold for which group size missing
 #' values should be included in analysis as an extra group (defaults to 200)
+#' @param two_par logical; whether two parameter model (2PL or GPCM) shall be
+#' used as base for DIF analyses (defaults to FALSE)
 #' @param control list; function argument as passed to TAM-functions
 #' @param pweights numeric vector; function argument as passed to TAM-functions
 #' @param save  logical; whether results shall be saved to hard drive
@@ -154,7 +158,7 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
                                  scoring = NULL, mvs = NULL, include_mv = 200,
                                  path = here::here('Results'), save = TRUE,
                                  verbose = FALSE, warn = TRUE, test = TRUE,
-                                 control = NULL, pweights = NULL) {
+                                 two_par = F, control = NULL, pweights = NULL) {
 
   # Test data
   if (test) {
@@ -190,7 +194,8 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
                                  valid = valid, dif_var = dif_vars[i],
                                  scoring = scoring, include_mv = include_mv,
                                  verbose = verbose, mvs = mvs, warn = warn,
-                                 test = FALSE, control = control, pweights = pweights)
+                                 test = FALSE, two_par = two_par,
+                                 control = control, pweights = pweights)
   }
   names(dif_models) <- dif_vars
 
@@ -271,6 +276,8 @@ summarize_dif_analysis <- function(dif_models, dif_vars, prob_dif = 0.5,
 #' values should be included in analysis as an extra group (defaults to 200)
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
+#' @param two_par logical; whether two parameter model (2PL or GPCM) shall be
+#' used as base for DIF analyses (defaults to FALSE)
 #' @param mvs named integer vector; contains user-defined missing values
 #' @param scoring  string; defines name of numerical variable in vars that
 #' contains the scoring factor to be applied to loading matrix
@@ -288,8 +295,8 @@ summarize_dif_analysis <- function(dif_models, dif_vars, prob_dif = 0.5,
 #' @importFrom stats as.formula
 #' @export
 dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
-                      valid = NULL, include_mv = 200, mvs = NULL,
-                      verbose = FALSE, warn = TRUE, test = TRUE,
+                      valid = NULL, include_mv = 200, two_par = FALSE,
+                      mvs = NULL, verbose = FALSE, warn = TRUE, test = TRUE,
                       control = NULL, pweights = NULL) {
 
   # Test data
@@ -398,12 +405,14 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 
     mmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
-      vars = vars, select = select, scoring = scoring, verbose = verbose
+      vars = vars, select = select, scoring = scoring, verbose = verbose,
+      two_par = two_par
     )
 
     dmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_dmod, pid = pid,
-      vars = vars, select = select, scoring = scoring, verbose = verbose
+      vars = vars, select = select, scoring = scoring, verbose = verbose,
+      two_par = two_par
     )
 
   } else {
@@ -412,17 +421,18 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     check_dich(resp, "resp")
 
     Q <- create_q(vars, select = select, scoring = scoring, poly = FALSE)
+    irtmodel <- ifelse(two_par, '2PL', '1PL')
 
-    dmod <- TAM::tam.mml.mfr(resp,
-                             irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
-                             formulaA = formula_dmod, verbose = verbose,
-                             control = control, pweights = pweights
+    dmod <- TAM::tam.mml.mfr(resp, irtmodel = irtmodel, facets = facets,
+                             Q = Q, pid = pid, formulaA = formula_dmod,
+                             control = control, pweights = pweights,
+                             verbose = verbose
     )
 
-    mmod <- TAM::tam.mml.mfr(resp,
-                             irtmodel = "1PL", facets = facets, Q = Q, pid = pid,
-                             formulaA = formula_mmod, verbose = verbose,
-                             control = control, pweights = pweights
+    mmod <- TAM::tam.mml.mfr(resp, irtmodel = irtmodel, facets = facets,
+                             Q = Q, pid = pid, formulaA = formula_mmod,
+                             control = control, pweights = pweights,
+                             verbose = verbose
     )
 
   }
@@ -478,6 +488,8 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 #' @param formulaA  an R formula for the DIF analysis
 #' @param scoring  string; defines name of numerical variable in vars that
 #' contains the scoring factor to be applied to loading matrix
+#' @param two_par logical; whether two parameter model (2PL or GPCM) shall be
+#' used as base for DIF analyses (defaults to FALSE)
 #' @param control list; function argument as passed to TAM-functions
 #' @param pweights numeric vector; function argument as passed to TAM-functions
 #' @param verbose  logical; whether to print processing information to console
@@ -487,10 +499,10 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 #' @noRd
 
 pcm_dif <- function(resp, facets, formulaA, vars, select, pid, verbose,
-                    scoring = NULL, control = NULL, pweights = NULL) {
+                    two_par = F, scoring = NULL, control = NULL, pweights = NULL) {
 
   # get design matrix for model
-  B <- TAM::designMatrices(modeltype = "PCM", resp = resp)$B
+  B <- TAM::designMatrices(modeltype = 'PCM', resp = resp)$B
 
   pcm_scoring <- ifelse(is.null(scoring),
                         rep(1, length(vars[[select]])),
@@ -499,8 +511,11 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid, verbose,
   # 0.5 scoring for PCM
   B[vars$item[vars[[select]]], , 1] <- B[vars$item[vars[[select]]], , 1] * pcm_scoring
 
+  # set irtmodel
+  irtmodel <- ifelse(two_par, 'GPCM', 'PCM2')
+
   TAM::tam.mml.mfr(formulaA = formulaA, facets = facets, B = B, pid = pid,
-                   irtmodel = "PCM2", resp = resp, verbose = verbose,
+                   irtmodel = irtmodel, resp = resp, verbose = verbose,
                    control = control, pweights = pweights)
 
 }
