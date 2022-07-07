@@ -71,10 +71,11 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
     select <- groups[[g]]
     message(toupper(paste0("\n\n\n(", i, ") irt analysis (",
                            ifelse(is_poly(resp, vars, select), 'poly', 'dich'),
-                           ") for ", g, " items.\n")))
+                           ") for group '", g, "':\n")))
 
-    irt_groups[[g]] <- irt_analysis(resp = resp, vars = vars, select = select,
-                                    valid = valid, print = print, scoring = scoring,
+    irt_groups[[g]] <- irt_analysis(resp = resp[resp[[g]], ], vars = vars,
+                                    select = select, valid = valid,
+                                    scoring = scoring, print = print,
                                     plots = plots, save = save, return = TRUE,
                                     path_results = path_results,
                                     path_table = path_table,
@@ -214,8 +215,8 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
   # Create tables
   if (return | print | save) {
     # IRT summary
-    irt$summary <- irt_summary(resp = resp, vars = vars,
-                               model_1p = irt[[1]], model_2p = irt[[2]],
+    irt$summary <- irt_summary(resp = resp, vars = vars, results = irt[[1]],
+                               disc = irt[[2]]$mod$item[, "B.Cat1.Dim1"],
                                valid = valid, mvs = mvs, digits = digits)
 
     # Model fit
@@ -362,15 +363,22 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
       pweights = pweights
     )
 
-  } else {
+  } else if (irtmodel %in% c("2PL", "GPCM")) {
 
     mod <- TAM::tam.mml.2pl(
       resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
       verbose = verbose, xsi.fixed = xsi.fixed, control = control,
       pweights = pweights
     )
-
   }
+  # } else {
+  #
+  #   mod <- TAM::tam.mml.3pl(
+  #       resp = resp, Q = Q, pid = pid, verbose = verbose,
+  #       xsi.fixed = xsi.fixed, control = control, pweights = pweights
+  #   )
+  # }
+
 
   # Warn if maximum number of iterations were reached
   reached_maxiter(mod, paste0("'", irtmodel, "'"))
@@ -512,8 +520,8 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
-#' @param model_1p  list; return object of irt_model(); one parameter model
-#' @param model_2p  list; return object of irt_model(); two parameter model
+#' @param results  list; return object of irt_model(); one parameter model
+#' @param disc  list; return object of irt_model(); two parameter model
 #' @param path  string; defines path to folder where table shall be saved
 #' @param filename  string; defines name of table that shall be saved
 #' @param digits  integer; number of decimals for rounding
@@ -526,12 +534,12 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 #' @export
 
 irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
-                        model_1p, model_2p,
+                        results, disc = NULL,
                         path = here::here("Tables"), filename = NULL,
                         digits = 2, overwrite = FALSE, warn = TRUE) {
 
   # prepare data
-  vars$irt_item <- vars$item %in% rownames(model_1p$mod$xsi)
+  vars$irt_item <- vars$item %in% rownames(results$mod$xsi)
   vars_ <- vars[vars$irt_item, ]
   resp <- prepare_resp(resp, vars = vars, select = 'irt_item', valid = valid,
                        use_only_valid = TRUE, convert = TRUE, mvs = mvs,
@@ -539,8 +547,8 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 
 
   # item parameters
-  pars <- model_1p$mod$xsi[, c("xsi", "se.xsi")]
-  pars$item <- rownames(model_1p$mod$xsi)
+  pars <- results$mod$xsi[, c("xsi", "se.xsi")]
+  pars$item <- rownames(results$mod$xsi)
   pars <- pars[vars_$item, ]
 
   # percentage correct
@@ -550,8 +558,8 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   pars$N <- colSums(!is.na(resp))
 
   # items fit
-  pars$WMNSQ   <- model_1p$fit$Infit[model_1p$fit$item %in% vars_$item]
-  pars$WMNSQ_t <- model_1p$fit$Infit_t[model_1p$fit$item %in% vars_$item]
+  pars$WMNSQ   <- results$fit$Infit[results$fit$item %in% vars_$item]
+  pars$WMNSQ_t <- results$fit$Infit_t[results$fit$item %in% vars_$item]
 
   # corrected item-total discrimination
   rit <- c()
@@ -564,19 +572,21 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   pars$rit <- rit
 
   # 2PL discrimination
-  if (!is.null(model_2p)) {
-    pars$model_2p <- model_2p$mod$item[, "B.Cat1.Dim1"]
-    }
+  if (!(results$irtmodel %in% c("1PL", "PCM2"))) {
+      pars$disc <- results$mod$item[, "B.Cat1.Dim1"]
+  } else if (!is.null(disc)) {
+      pars$disc <- disc
+  }
 
   # Yen Q3: average absolute residual correlation for items (adjusted)
-  pars$Q3 <- colMeans(abs(model_1p$mfit$aQ3.matr), na.rm = TRUE)
+  pars$Q3 <- colMeans(abs(results$mfit$aQ3.matr), na.rm = TRUE)
 
   # numbering
   pars$num <- seq(1, nrow(pars))
 
   # reorder columns
   pars <- pars[ , c("num", "item", "N", "pc", "xsi", "se.xsi",
-                    "WMNSQ", "WMNSQ_t", "rit", "model_2p", "Q3")]
+                    "WMNSQ", "WMNSQ_t", "rit", "disc", "Q3")]
   colnames(pars) <- c("Number", "Item", "N", "% correct",
                       "xsi", "SE", "WMNSQ", "t", "rit", "Discr.", "aQ3")
   pars[, -c(1:4)] <- round(pars[, -c(1:4)], digits)
