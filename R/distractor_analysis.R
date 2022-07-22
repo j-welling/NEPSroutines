@@ -14,13 +14,15 @@
 #'                    'correct_response' (integer) containing the correct
 #'                      response for each item,
 #' and all variables that are further defined in the function arguments
-#' @param item_type  character vector; contains all item types as specified in
-#' vars$type that shall be used for distratcor analysis (default is 'MC')
-#' @param scored_version  string; defines name of variable in vars that contains
-#' the names of the scored versions of the raw items; can be left empty, then
-#' default of name_scored_item = name_unscored_item + "_c" applies
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param select_raw string; defines name of logical variable in vars that
+#' indicates all raw items that shall be used for the distractor analysis
+#' @param select_score string; defines name of logical variable in vars that
+#' indicates all items that shall be used to caculate total score
+#' @param correct string; defines name of variable in vars that contains the
+#' correct responses to the items
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
@@ -40,8 +42,9 @@
 #' @importFrom rlang .data
 #' @export
 
-dis_analysis <- function(resp, vars, valid = NULL, item_type = 'MC',
-                         scored_version = NULL, mvs = NULL,
+dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
+                         select_raw, select_score = 'dich',
+                         correct = 'correct_response',
                          save = TRUE, print = TRUE, return = FALSE,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
@@ -53,9 +56,11 @@ dis_analysis <- function(resp, vars, valid = NULL, item_type = 'MC',
     # Conduct distratcor analysis
     distractors$analysis <- conduct_dis_analysis(resp = resp,
                                                  vars = vars,
-                                                 item_type = item_type,
-                                                 scored_version = scored_version,
+                                                 select_raw = select_raw,
+                                                 select_score = select_score,
+                                                 correct = correct,
                                                  valid = valid,
+                                                 mvs = mvs,
                                                  warn = warn)
     distractors$summary <- dis_summary(distractors$analysis)
 
@@ -91,43 +96,45 @@ dis_analysis <- function(resp, vars, valid = NULL, item_type = 'MC',
 #'                    'correct_response' (integer) containing the correct
 #'                      response for each item,
 #' and all variables that are further defined in the function arguments
-#' @param item_type  character vector; contains all item types as specified in
-#' vars$type that shall be used for distractor analysis (default is 'MC')
-#' @param scored_version  string; defines name of variable in vars that contains
-#' the names of the scored versions of the raw items; can be left empty, then
-#' default of name_scored_item = name_unscored_item + "_c" applies
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param select_raw string; defines name of logical variable in vars that
+#' indicates all raw items that shall be used for the distractor analysis
+#' @param select_score string; defines name of logical variable in vars that
+#' indicates all items that shall be used to caculate total score
+#' @param correct string; defines name of variable in vars that contains the
+#' correct responses to the items
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #'
 #' @export
 
-conduct_dis_analysis <- function(resp, vars, item_type = 'MC',
-                                 scored_version = NULL, valid = NULL,
+conduct_dis_analysis <- function(resp, vars, valid = NULL,
+                                 select_raw, select_score = 'dich',
+                                 correct = 'correct_response',
                                  mvs = NULL, warn = TRUE) {
     # Test data
-    check_logicals(vars, "vars", c(scored_version, "dich", "raw"), warn = warn)
-    check_variables(vars, "vars", c("item", "type", "correct_response"))
+    check_logicals(vars, "vars", c(select_raw, select_score), warn = warn)
+    check_variables(vars, "vars", c("item", correct))
 
     # prepare data
-    resp <- only_valid(resp, valid = valid, warn = warn)
+    raw_items <- vars$item[vars[[select_raw]]]
+    items_for_score <- vars$item[vars[[select_score]]]
+    vars$keep_items <- vars[[select_raw]] | vars[[select_score]]
+    resp <- prepare_resp(resp, vars, select = 'keep_items',
+                         use_only_valid = TRUE, valid = valid,
+                         convert = TRUE, mvs = mvs, warn = warn)
 
-    unscored <- vars$item[vars$type %in% item_type & vars$raw == TRUE]
-    correct <- vars$correct_response[vars$type %in% item_type & vars$raw == TRUE]
-    scored <- vars$item[vars$dich == TRUE]
-    var_names <- unique(c(unscored, scored))
-
-    resp <- convert_mv(resp = resp[ , var_names], vars = vars, mvs = mvs, warn = warn)
-
-    check_numerics(resp, "resp", scored, check_invalid = TRUE, dich = TRUE)
+    # Check whether all items to be used for score generation are dichotomous
+    check_numerics(resp, "resp", items_for_score, check_invalid = TRUE, dich = TRUE)
 
     # Sum score across all items
-    resp$score <- rowMeans(resp[, scored], na.rm = TRUE)
+    resp$score <- rowMeans(resp[ , items_for_score], na.rm = TRUE)
 
     # Correlations with distractors (for unscored items)
     dis <- list()
 
-    for (item in unscored) {
+    for (item in raw_items) {
 
         # Create for each item a dataframe with row for each response option
         dis[[item]] <- as.data.frame(table(resp[, item]),
@@ -137,9 +144,9 @@ conduct_dis_analysis <- function(resp, vars, item_type = 'MC',
         dis[[item]]$rit <- NA
 
         # Create corrected total score
-        scored_item <- ifelse(is.null(scored_version), paste0(item, "_c"),
-                              vars[[scored_version]][vars$item == item])
-        cscore <- resp$score - resp[, scored_item] / sum(vars$dich) #length(scored)
+        item_scored <- ifelse(resp[[item]] == vars[[correct]][vars$item == item],
+                              1, 0)
+        cscore <- resp$score - item_scored / length(items_for_score)
 
         # Correlation between each response option and corrected total score
         for (s in seq_len(nrow(dis[[item]]))) {
@@ -151,7 +158,7 @@ conduct_dis_analysis <- function(resp, vars, item_type = 'MC',
 
         # Label correct response with *
         dis[[item]][[item]] <- ifelse(
-            dis[[item]][[item]] == correct[unscored == item],
+            dis[[item]][[item]] == vars[[correct]][vars$item == item],
             paste0("*", dis[[item]][[item]]),
             dis[[item]][[item]]
         )
@@ -209,22 +216,22 @@ print_dis_summary <- function(dist_sum) {
         corr_med_names <- rownames(rc[which(rc$corr == median(rc$corr)),])
 
         message("\nItem-total correlation for correct response: ",
-                "\nMin. = ",  corr_min, " (", corr_min_rownames, ")",
-                "\nMax. = ",  corr_max, " (", corr_max_rownames, ")",
-                "\nMed. = ",  corr_med, " (", corr_med_rownames, ")")
+                "\nMin. = ",  corr_min, " (", paste(corr_min_names, collapse = ","), ")",
+                "\nMax. = ",  corr_max, " (", paste(corr_max_names, collapse = ","), ")",
+                "\nMed. = ",  corr_med, " (", paste(corr_med_names, collapse = ","), ")")
 
         # Distractors
-        dist_min <- rd[which(rc$dist == min(rd$dist)), "dist"]
-        dist_min_names <- rownames(rd[which(rd$dist == min(rd$dist)),])
-        dist_max <- rc[which(rd$dist == max(rd$dist)), "dist"]
-        dist_max_names <- rownames(rd[which(rd$dist == max(rd$dist)),])
-        dist_med <- rc[which(rd$dist == median(rd$dist)), "dist"]
-        dist_med_names <- rownames(rd[which(rd$dist == median(rd$dist)),])
+        dist_min <- rd[which(rd$corr == min(rd$corr)), "corr"]
+        dist_min_names <- rownames(rd[which(rd$corr == min(rd$corr)),])
+        dist_max <- rd[which(rd$corr == max(rd$corr)), "corr"]
+        dist_max_names <- rownames(rd[which(rd$corr == max(rd$corr)),])
+        dist_med <- rd[which(rd$corr == median(rd$corr)), "corr"]
+        dist_med_names <- rownames(rd[which(rd$corr == median(rd$corr)),])
 
-        message("\nItem-total distelation for distractor: ",
-                "\nMin. = ",  dist_min, " (", dist_min_rownames, ")",
-                "\nMax. = ",  dist_max, " (", dist_max_rownames, ")",
-                "\nMed. = ",  dist_med, " (", dist_med_rownames, ")")
+        message("\nItem-total correlation for distractor: ",
+                "\nMin. = ",  dist_min, " (", paste(dist_min_names, collapse = ","), ")",
+                "\nMax. = ",  dist_max, " (", paste(dist_max_names, collapse = ","), ")",
+                "\nMed. = ",  dist_med, " (", paste(dist_med_names, collapse = ","), ")")
 
         # Auffällige Distraktoren und korrekte Antworten anzeigen
         message("\n",
