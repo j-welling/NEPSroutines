@@ -534,8 +534,12 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
       item_min <- mv_i$list$item[mv_i$list[[lbl]] == mv_min]
       item_max <- mv_i$list$item[mv_i$list[[lbl]] == mv_max]
       message("The number of ", labels_mvs[lbl], " varied between ",
-              mv_min, " %", if(length(item_min) <= 3) {paste0(" (item ", item_min, ")")}, " and ",
-              mv_max, " %", if(length(item_max) <= 3) {paste0(" (item ", item_max, ")")}, ".")
+              mv_min, " %", if(length(item_min) <= 3) {
+                  paste0(" (item ", paste(item_min, collapse = ","), ")")
+                  }, " and ",
+              mv_max, " %", if(length(item_max) <= 3) {
+                  paste0(" (item ", paste(item_max, collapse = ","), ")")
+                  }, ".")
     }
   } else {
     for (g in grouping) {
@@ -543,11 +547,15 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
       for (lbl in names(labels_mvs)) {
         mv_min <- min(mv_i$list[[g]][[lbl]], na.rm = TRUE)
         mv_max <- max(mv_i$list[[g]][[lbl]], na.rm = TRUE)
-        item_min <- mv_i$list[[g]]$items[mv_i$list[[g]][[lbl]] == mv_min]
-        item_max <- mv_i$list[[g]]$items[mv_i$list[[g]][[lbl]] == mv_max]
+        item_min <- mv_i$list[[g]]$item[mv_i$list[[g]][[lbl]] == mv_min]
+        item_max <- mv_i$list[[g]]$item[mv_i$list[[g]][[lbl]] == mv_max]
         message("The number of ", labels_mvs[lbl], " in the ", g, " test version varied between ",
-                mv_min, " %", if(length(item_min) <= 3) {paste0(" (item ", item_min, ")")}, " and ",
-                mv_max, " %", if(length(item_max) <= 3) {paste0(" (item ", item_max, ")")}, ".")
+                mv_min, " %", if(length(item_min) <= 3) {
+                    paste0(" (item ", paste(item_min, collapse = ","), ")")
+                }, " and ",
+                mv_max, " %", if(length(item_max) <= 3) {
+                    paste0(" (item ", paste(item_max, collapse = ","), ")")
+                }, ".")
       }
     }
   }
