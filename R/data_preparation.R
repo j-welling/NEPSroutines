@@ -261,11 +261,11 @@ pos_new <- function(vars, select, position) {
 
     if (length(position) == 1) {
 
-        vars_ <- vars[vars[[items]], ]
+        vars_ <- vars[vars[[select]], ]
         pos <- data.frame(item = vars_[['item']],
                           position = vars_[[position]])
         pos <- dplyr::arrange(pos, .data$position)
-        pos[[paste0("position_", item)]] <- seq(1, nrow(pos))
+        pos[[paste0("position_", select)]] <- seq(1, nrow(pos))
         vars <- merge(vars, pos[ , c('item', paste0("position_", select))],
                       by = 'item', all = TRUE)
 
@@ -276,7 +276,7 @@ pos_new <- function(vars, select, position) {
             pos <- data.frame(item = vars_[['item']],
                               position = vars_[[position[g]]])
             pos <- dplyr::arrange(pos, .data$position)
-            pos[[paste0("position_", g, "_", item)]] <- seq(1, nrow(pos))
+            pos[[paste0("position_", g, "_", select)]] <- seq(1, nrow(pos))
             vars <- merge(vars, pos[ , c('item', paste0("position_", g, "_", select))],
                           by = 'item', all = TRUE)
         }
