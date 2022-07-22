@@ -28,7 +28,8 @@
 #' @param two_par logical; whether two parameter model (2PL or GPCM) shall be
 #' used as base for DIF analyses (defaults to FALSE)
 #' @param control list; function argument as passed to TAM-functions
-#' @param pweights numeric vector; function argument as passed to TAM-functions
+#' @param pweights character; defines name of numerical variable in resp that
+#' contains person weights as passed to TAM-function
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
@@ -142,7 +143,8 @@ check_items <- function(select, dif_vars) {
 #' @param two_par logical; whether two parameter model (2PL or GPCM) shall be
 #' used as base for DIF analyses (defaults to FALSE)
 #' @param control list; function argument as passed to TAM-functions
-#' @param pweights numeric vector; function argument as passed to TAM-functions
+#' @param pweights character; defines name of numerical variable in resp that
+#' contains person weights as passed to TAM-function
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where results shall be saved
 #' @param verbose  logical; whether to print processing information to console
@@ -284,7 +286,8 @@ summarize_dif_analysis <- function(dif_models, dif_vars, prob_dif = 0.5,
 #' @param dif_var string; defines the name of the variable to be tested for DIF
 #' (e.g., "gender")
 #' @param control list; function argument as passed to TAM-functions
-#' @param pweights numeric vector; function argument as passed to TAM-functions
+#' @param pweights character; defines name of numerical variable in resp that
+#' contains person weights as passed to TAM-function
 #' @param verbose  logical; whether to print processing information to console
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
@@ -322,16 +325,20 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
   # Select only valid cases
   resp <- only_valid(resp, valid = valid, warn = FALSE)
 
-  # Create ID and facets variable
+  # Create ID, facets and pweights variable
   pid <- resp$ID_t
   check_pid(pid)
   facets <- resp[, dif_var, drop = FALSE]
   lbls_facet <- attributes(resp[[dif_var]])$label
+  if(is.null(pweights)) {
+      pws <- NULL
+  } else {
+      pws <- resp[[pweights]]
+  }
 
-  # Select only indicated items, valid responders and convert mvs
-  resp <- prepare_resp(resp, vars = vars, select = select, convert = TRUE,
-                       mvs = mvs, use_only_valid = TRUE, valid = valid,
-                       warn = FALSE)
+  # Prepare resp by converting missing values and selecting only necessary variables
+  resp <- prepare_resp(resp, vars = vars, select = select,
+                       convert = TRUE, mvs = mvs, warn = FALSE)
 
   # Test resp
   check_numerics(resp, "resp", check_invalid = TRUE)
@@ -401,18 +408,18 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 
   if (irt_type == 'poly') {
 
-    if(is.null(scoring)) stop("Please provide a name for the scoring variable")
+    if(is.null(scoring)) stop("Please provide a name of the scoring variable")
 
     mmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
       vars = vars, select = select, scoring = scoring, verbose = verbose,
-      two_par = two_par
+      two_par = two_par, control = control, pweights = pws
     )
 
     dmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_dmod, pid = pid,
       vars = vars, select = select, scoring = scoring, verbose = verbose,
-      two_par = two_par
+      two_par = two_par, control = control, pweights = pws
     )
 
   } else {
@@ -425,13 +432,13 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 
     dmod <- TAM::tam.mml.mfr(resp, irtmodel = irtmodel, facets = facets,
                              Q = Q, pid = pid, formulaA = formula_dmod,
-                             control = control, pweights = pweights,
+                             control = control, pweights = pws,
                              verbose = verbose
     )
 
     mmod <- TAM::tam.mml.mfr(resp, irtmodel = irtmodel, facets = facets,
                              Q = Q, pid = pid, formulaA = formula_mmod,
-                             control = control, pweights = pweights,
+                             control = control, pweights = pws,
                              verbose = verbose
     )
 
@@ -491,7 +498,8 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 #' @param two_par logical; whether two parameter model (2PL or GPCM) shall be
 #' used as base for DIF analyses (defaults to FALSE)
 #' @param control list; function argument as passed to TAM-functions
-#' @param pweights numeric vector; function argument as passed to TAM-functions
+#' @param pweights character; defines name of numerical variable in resp that
+#' contains person weights as passed to TAM-function
 #' @param verbose  logical; whether to print processing information to console
 #' @param pid  character vector; contains person identifiers
 #'

@@ -18,7 +18,8 @@
 #'   Rasch model
 #' @param xsi.fixed matrix; contains fixed (linked) item parameters; optional
 #' @param control list; function argument as passed to TAM-functions
-#' @param pweights numeric vector; function argument as passed to TAM-functions
+#' @param pweights character; defines name of numerical variable in resp that
+#' contains person weights as passed to TAM-function
 #' @param plots  logical; whether plots shall be created and saved to hard drive
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
@@ -115,7 +116,8 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #'   Rasch model
 #' @param xsi.fixed matrix; contains fixed (linked) item parameters; optional
 #' @param control list; function argument as passed to TAM-functions
-#' @param pweights numeric vector; function argument as passed to TAM-functions
+#' @param pweights character; defines name of numerical variable in resp that
+#' contains person weights as passed to TAM-function
 #' @param plots  logical; whether plots shall be created and saved to hard drive
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
@@ -341,6 +343,11 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   # Create ID variable
   pid <- resp$ID_t
   check_pid(pid)
+  if(is.null(pweights)) {
+      pws <- NULL
+  } else {
+      pws <- resp[[pweights]]
+  }
 
   # Prepare data
   resp <- prepare_resp(resp, vars = vars, select = select, convert = TRUE,
@@ -360,7 +367,7 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
     mod <- TAM::tam.mml(
       resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
       verbose = verbose, xsi.fixed = xsi.fixed, control = control,
-      pweights = pweights
+      pweights = pws
     )
 
   } else if (irtmodel %in% c("2PL", "GPCM")) {
@@ -368,14 +375,14 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
     mod <- TAM::tam.mml.2pl(
       resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
       verbose = verbose, xsi.fixed = xsi.fixed, control = control,
-      pweights = pweights
+      pweights = pws
     )
   }
   # } else {
   #
   #   mod <- TAM::tam.mml.3pl(
   #       resp = resp, Q = Q, pid = pid, verbose = verbose,
-  #       xsi.fixed = xsi.fixed, control = control, pweights = pweights
+  #       xsi.fixed = xsi.fixed, control = control, pweights = pws
   #   )
   # }
 
