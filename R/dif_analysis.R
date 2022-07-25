@@ -62,14 +62,16 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
   if (!is.null(scoring)) check_numerics(vars, "vars", scoring,
                                         check_invalid = TRUE)
 
-  if (is.null(mvs)) {
-    warning("No user defined missing values provided. ",
-            "Default of '-999 to -1' is used.\n")
-  }
+  if (warn) {
+      if (is.null(mvs)) {
+          warning("No user defined missing values provided. ",
+                  "Default of '-999 to -1' is used.\n")
+      }
 
-  if (is.null(valid)) {
-    warning("No variable with valid cases provided. ",
-            "All cases are used for analysis.\n")
+      if (is.null(valid)) {
+          warning("No variable with valid cases provided. ",
+                  "All cases are used for analysis.\n")
+      }
   }
 
   check_items(select, dif_vars)
@@ -171,14 +173,16 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
     if (!is.null(scoring)) check_numerics(vars, "vars", scoring,
                                           check_invalid = TRUE)
 
-    if (is.null(mvs)) {
-      warning("No user defined missing values provided. ",
-              "Default of '-999 to -1' is used.\n")
-    }
+    if (warn) {
+        if (is.null(mvs)) {
+            warning("No user defined missing values provided. ",
+                    "Default of '-999 to -1' is used.\n")
+        }
 
-    if (is.null(valid)) {
-      warning("No variable with valid cases provided. ",
-              "All cases are used for analysis.\n")
+        if (is.null(valid)) {
+            warning("No variable with valid cases provided. ",
+                    "All cases are used for analysis.\n")
+        }
     }
   }
 
@@ -311,14 +315,16 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     if (!is.null(scoring)) check_numerics(vars, "vars", scoring,
                                           check_invalid = TRUE)
 
-    if (is.null(mvs)) {
-      warning("No user defined missing values provided. ",
-              "Default of '-999 to -1' is used.\n")
-    }
+    if (warn) {
+        if (is.null(mvs)) {
+            warning("No user defined missing values provided. ",
+                    "Default of '-999 to -1' is used.\n")
+        }
 
-    if (is.null(valid)) {
-      warning("No variable with valid cases provided. ",
-              "All cases are used for analysis.\n")
+        if (is.null(valid)) {
+            warning("No variable with valid cases provided. ",
+                    "All cases are used for analysis.\n")
+        }
     }
   }
 
@@ -330,11 +336,7 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
   check_pid(pid)
   facets <- resp[, dif_var, drop = FALSE]
   lbls_facet <- attributes(resp[[dif_var]])$label
-  if(is.null(pweights)) {
-      pws <- NULL
-  } else {
-      pws <- resp[[pweights]]
-  }
+  pws <- create_ifelse(is.null(pweights), NULL, resp[[pweights]])
 
   # Prepare resp by converting missing values and selecting only necessary variables
   resp <- prepare_resp(resp, vars = vars, select = select,
@@ -462,14 +464,11 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 
   df <- data.frame(table(facet))
   names(df) <- c("number", "counts")
-
-  if (!missings) {
-    row.names(df) <- paste0("Group ", sort(unique(facet)))
-    if (!is.null(labels)) df$label <- names(labels)
-  } else {
-    row.names(df) <- c(paste0("Group ", sort(unique(facet))[-length(unique(facet))]),
-                           "missings")
-    if (!is.null(labels)) df$label <- c(names(labels), "missings")
+  row.names(df) <- create_ifelse(!missings,
+                                 paste0("Group ", sort(unique(facet))),
+                                 c(paste0("Group ", sort(unique(facet))[-length(unique(facet))]), "missings"))
+  if(!is.null(labels)) {
+      df$label <- create_ifelse(!missings, names(labels), c(names(labels), 'missings'))
   }
 
   df
