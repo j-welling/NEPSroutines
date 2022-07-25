@@ -48,18 +48,21 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 
   # Test data
   check_logicals(vars, "vars", groups, warn = warn)
-  check_logicals(resp, "resp", valid, warn = warn)
+  check_logicals(resp, "resp", c(valid, names(groups)), warn = warn)
 
   if (!is.null(scoring)) check_numerics(vars, "vars", scoring)
 
-  if (is.null(mvs)) {
-    warning("No user defined missing values provided. ",
-            "Default of '-999 to -1' is used.\n")
-  }
+  if (warn) {
 
-  if (is.null(valid)) {
-    warning("No variable with valid cases provided. ",
-            "All cases are used for analysis.\n")
+      if (is.null(mvs)) {
+        warning("No user defined missing values provided. ",
+                "Default of '-999 to -1' is used.\n")
+      }
+
+      if (is.null(valid)) {
+        warning("No variable with valid cases provided. ",
+                "All cases are used for analysis.\n")
+      }
   }
 
   # Create list for results
@@ -154,14 +157,16 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
     if(!is.null(scoring)) check_numerics(vars, "vars", scoring,
                                          check_invalid = TRUE)
 
-    if (is.null(mvs)) {
-      warning("No user defined missing values provided. ",
-              "Default of '-999 to -1' is used.\n")
-    }
+    if (warn) {
+        if (is.null(mvs)) {
+          warning("No user defined missing values provided. ",
+                  "Default of '-999 to -1' is used.\n")
+        }
 
-    if (is.null(valid)) {
-      warning("No variable with valid cases provided. ",
-              "All cases are used for analysis.\n")
+        if (is.null(valid)) {
+          warning("No variable with valid cases provided. ",
+                  "All cases are used for analysis.\n")
+        }
     }
   }
 
@@ -248,11 +253,9 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 
   # Save results
   if (save) {
-    if (is.null(name_group)) {
-      name <- paste0("irt_", irt_type)
-    } else {
-      name <- paste0("irt_", irt_type, "_", name_group)
-    }
+    name <- create_ifelse(is.null(name_group),
+                          paste0("irt_", irt_type),
+                          paste0("irt_", irt_type, "_", name_group))
     irt_summary <- irt[-c(1:2)]
 
     save_results(irt, filename = paste0(name, ".rds"), path = path_results)
@@ -320,14 +323,16 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
     if(!is.null(scoring)) check_numerics(vars, "vars", scoring,
                                          check_invalid = TRUE)
 
-    if (is.null(mvs)) {
-      warning("No user defined missing values provided. ",
-              "Default of '-999 to -1' is used.\n")
-    }
+    if (warn) {
+        if (is.null(mvs)) {
+            warning("No user defined missing values provided. ",
+                    "Default of '-999 to -1' is used.\n")
+        }
 
-    if (is.null(valid)) {
-      warning("No variable with valid cases provided. ",
-              "All cases are used for analysis.\n")
+        if (is.null(valid)) {
+            warning("No variable with valid cases provided. ",
+                    "All cases are used for analysis.\n")
+        }
     }
   }
 
@@ -343,11 +348,7 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   # Create ID variable
   pid <- resp$ID_t
   check_pid(pid)
-  if(is.null(pweights)) {
-      pws <- NULL
-  } else {
-      pws <- resp[[pweights]]
-  }
+  pws <- create_ifelse(is.null(pweights), NULL, resp[[pweights]])
 
   # Prepare data
   resp <- prepare_resp(resp, vars = vars, select = select, convert = TRUE,
@@ -395,7 +396,7 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
                                            "Infit_t", "Infit_p")]
 
   # Item parameters and standard errors
-  pars <- TAM::tam.se(mod)
+  x <- capture.output(pars <- TAM::tam.se(mod))
   pars <- dplyr::left_join(pars$xsi, pars$B, by = "item")
   names(pars) <- c("Item", "xsi", "se(xsi)", "alpha", "se(alpha)")
 
@@ -440,11 +441,9 @@ icc_plots <- function(model, path = here::here("Plots"), name_group = NULL) {
   irtmodel <- model$irtmodel
 
   # Add group name to path
-  if (is.null(name_group)) {
-      path <- paste0(path, "/ICCs/ICCs_for_", irtmodel)
-  } else {
-      path <- paste0(path, "/ICCs/", name_group, "/ICCs_for_", irtmodel)
-  }
+  path <- create_ifelse(is.null(name_group),
+                        paste0(path, "/ICCs/ICCs_for_", irtmodel),
+                        paste0(path, "/ICCs/", name_group, "/ICCs_for_", irtmodel))
 
     # create directory for plots
   check_folder(path = here::here(path))
@@ -482,11 +481,9 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
   irtmodel <- model$irtmodel
 
   # Add group name to path
-  if (is.null(name_group)) {
-      path <- paste0(path, "/Wright_Maps")
-  } else {
-      path <- paste0(path, "/Wright_Maps/", name_group)
-  }
+  path <- create_ifelse(is.null(name_group),
+                        paste0(path, "/Wright_Maps"),
+                        paste0(path, "/Wright_Maps/", name_group))
 
   # Create directory for plots
   check_folder(path = here::here(path))
@@ -732,25 +729,33 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
 
   # Percentage correct
   pc_min <- min(irt_sum[['% correct']], na.rm = TRUE)
+  pc_min_item <- irt_sum$Item[irt_sum[['% correct']] %in% pc_min]
   pc_max <- max(irt_sum[['% correct']], na.rm = TRUE)
+  pc_max_item <- irt_sum$Item[irt_sum[['% correct']] %in% pc_max]
   pc_mean <- round(mean(irt_sum[['% correct']], na.rm = TRUE))
   pc_median <- round(median(irt_sum[['% correct']], na.rm = TRUE))
   message("Percentage correct:\n",
           "The percentage of correct responses within dichotomous items varied between ",
-          pc_min, " % (item(s) ", paste(irt_sum$Item[irt_sum[['% correct']] %in% pc_min], collapse = ","), ") and ",
-          pc_max, " % (item(s) ", paste(irt_sum$Item[irt_sum[['% correct']] %in% pc_max], collapse = ","),
+          pc_min, " % (", ifelse(length(pc_min_item) > 1, "items ", "item "),
+          paste(pc_min_item, collapse = ", "), ") and ",
+          pc_max, " % (", ifelse(length(pc_max_item) > 1, "items ", "item "),
+          paste(pc_max_item, collapse = ", "),
           ") with an average of ", pc_mean, " % correct responses, and a median of ",
           pc_median, " % correct responses.\n")
 
   # Item difficulties
   xsi_min <- min(irt_sum$xsi, na.rm = TRUE)
+  xsi_min_item <- irt_sum$Item[irt_sum$xsi %in% xsi_min]
   xsi_max <- max(irt_sum$xsi, na.rm = TRUE)
+  xsi_max_item <- irt_sum$Item[irt_sum$xsi %in% xsi_max]
   xsi_mean <- round(mean(irt_sum$xsi, na.rm = TRUE), 2)
   xsi_median <- round(median(irt_sum$xsi, na.rm = TRUE), 2)
   message("Item difficulties:\n",
           "The estimated item difficulties (or location parameters for polytomous variables) varied between ",
-          xsi_min, " (item(s) ", paste(irt_sum$Item[irt_sum$xsi %in% xsi_min], collapse = ","), ") and ",
-          xsi_max, " (item(s) ", paste(irt_sum$Item[irt_sum$xsi %in% xsi_max], collapse = ","),
+          xsi_min, " % (", ifelse(length(xsi_min_item) > 1, "items ", "item "),
+          paste(xsi_min_item, collapse = ", "), ") and ",
+          xsi_max, " % (", ifelse(length(xsi_max_item) > 1, "items ", "item "),
+          paste(xsi_max_item, collapse = ", "),
           ") with an average of ", xsi_mean, ", and a median of ", xsi_median, ".\n")
 
   # SE of item difficulties
@@ -759,49 +764,62 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
 
   # WMNSQ
   wmnsq_min <- min(irt_sum$WMNSQ, na.rm = TRUE)
+  wmnsq_min_item <- irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_min]
   wmnsq_max <- max(irt_sum$WMNSQ, na.rm = TRUE)
+  wmnsq_max_item <- irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_max]
   wmnsq_mean <- round(mean(irt_sum$WMNSQ, na.rm = TRUE), 2)
   wmnsq_median <- round(median(irt_sum$WMNSQ, na.rm = TRUE), 2)
   message("WMNSQ:\n",
           "The values of the WMNSQ were ... close to 1 with the lowest value being ",
-          wmnsq_min, " (item(s) ", paste(irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_min], collapse = ","),
+          wmnsq_min, " % (", ifelse(length(wmnsq_min_item) > 1, "items ", "item "),
+          paste(wmnsq_min_item, collapse = ", "),
           ") and the highest being ",
-          wmnsq_max, " (item(s) ", paste(irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_max], collapse = ","),
+          wmnsq_max, " % (", ifelse(length(wmnsq_max_item) > 1, "items ", "item "),
+          paste(wmnsq_max_item, collapse = ", "),
           ") with an average of ",
           wmnsq_mean, ", and a median of ", wmnsq_median, ".")
 
   wmnsq_misfit <- irt_sum$Item[irt_sum$WMNSQ > 1.15]
-    message("Item(s) ", paste(wmnsq_misfit, collapse = ","),
+  message(ifelse(length(wmnsq_misfit) == 0, "No item",
+                 paste0(ifelse(length(wmnsq_misfit) > 1, "Items ", "Item "),
+                        paste(wmnsq_misfit, collapse = ", "))),
             " exhibited a WMNSQ of at least 1.15.")
 
   # WMNSQ t-value
   t_min <- min(irt_sum$t, na.rm = TRUE)
+  t_min_item <- irt_sum$Item[irt_sum$t %in% t_min]
   t_max <- max(irt_sum$t, na.rm = TRUE)
+  t_max_item <- irt_sum$Item[irt_sum$t %in% t_max]
   t_mean <- round(mean(irt_sum$t, na.rm = TRUE), 2)
   t_median <- round(median(irt_sum$t, na.rm = TRUE), 2)
   message("\nWMNSQ t-value:\n",
           "The WMNSQ t-values varied between ",
-          t_min, " (item(s) ", paste0(irt_sum$Item[irt_sum$t %in% t_min], collapse = ","), ") and ",
-          t_max, " (item(s) ", paste0(irt_sum$Item[irt_sum$t %in% t_max], collapse = ","), ") with an average of ",
+          t_min, " % (", ifelse(length(t_min_item) > 1, "items ", "item "),
+          paste(t_min_item, collapse = ", "), ") and ",
+          t_max, " % (", ifelse(length(t_max_item) > 1, "items ", "item "),
+          paste(t_max_item, collapse = ", "), ") with an average of ",
           t_mean, ", and a median of ", t_median, ".")
 
   t_misfit <- irt_sum$Item[abs(irt_sum$t) > 8]
-  if (length(t_misfit) == 1) {
-    message("Item ", t_misfit, " exhibited an absolute t-value of at least 8.")
-  } else if (length(t_misfit) > 1) {
-    message("Items ", paste(t_misfit, collapse = ","),
-            " exhibited an absolute t-value of at least 8.")
-  }
+
+  message(ifelse(length(t_misfit) == 0, "No item",
+          paste0(ifelse(length(t_misfit) > 1, "Items ", "Item "),
+          paste(t_misfit, collapse = ", "))),
+          " exhibited an absolute t-value of at least 8.")
 
   # Correlation of item scores with total correct score
   rit_min <- min(irt_sum$rit, na.rm = TRUE)
+  rit_min_item <- irt_sum$Item[irt_sum$rit %in% rit_min]
   rit_max <- max(irt_sum$rit, na.rm = TRUE)
+  rit_max_item <- irt_sum$Item[irt_sum$rit %in% rit_max]
   rit_mean <- round(mean(irt_sum$rit, na.rm = TRUE), 2)
   rit_median <- round(median(irt_sum$rit, na.rm = TRUE), 2)
   message("\nCorrelation of item scores with total correct score:\n",
           "The correlations between the item scores and the total correct scores varied between ",
-          rit_min, " (item(s) ", paste(irt_sum$Item[irt_sum$rit %in% rit_min], collapse = ","), ") and ",
-          rit_max, " (item(s) ", paste(irt_sum$Item[irt_sum$rit %in% rit_max], collapse = ","), ") with an average correlation of ",
+          rit_min, " % (", ifelse(length(rit_min_item) > 1, "items ", "item "),
+          paste(rit_min_item, collapse = ", "), ") and ",
+          rit_max, " % (", ifelse(length(rit_max_item) > 1, "items ", "item "),
+          paste(rit_max_item, collapse = ", "), ") with an average correlation of ",
           rit_mean, ", and a median correlation of ", rit_median, ".\n")
 
   # Model variance
@@ -817,12 +835,16 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
 
   # Item discrimination
   disc_min <- min(irt_sum$Discr., na.rm = TRUE)
+  disc_min_item <- irt_sum$Item[irt_sum$Discr. %in% disc_min]
   disc_max <- max(irt_sum$Discr., na.rm = TRUE)
+  disc_max_item <- irt_sum$Item[irt_sum$Discr. %in% disc_max]
   disc_mean <- round(mean(irt_sum$Discr., na.rm = TRUE), 2)
   disc_median <- round(median(irt_sum$Discr., na.rm = TRUE), 2)
   message("Item discrimination:\n",
           "The estimated discrimination parameters varied between ",
-          disc_min, " (item(s) ", paste(irt_sum$Item[irt_sum$Discr. %in% disc_min], collapse = ","), ") and ",
-          disc_max, " (item(s) ", paste(irt_sum$Item[irt_sum$Discr. %in% disc_max], collapse = ","), ") with an average discrimination of ",
+          disc_min, " % (", ifelse(length(disc_min_item) > 1, "items ", "item "),
+          paste(disc_min_item, collapse = ", "), ") and ",
+          disc_max, " % (", ifelse(length(disc_max_item) > 1, "items ", "item "),
+          paste(disc_max_item, collapse = ", "), ") with an average discrimination of ",
           disc_mean, ", and a median discrimination of ", disc_median, ".\n")
 }
