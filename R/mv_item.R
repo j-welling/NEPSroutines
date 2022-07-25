@@ -29,9 +29,10 @@
 #' @param path_plots  string; defines path to folder where plots shall be saved
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
-#' @param color  character calar or vector; defines color(s) of the bar in plots
+# #' @param color  character calar or vector; defines color(s) of the bar in plots
 #' @param name_grouping  string; name of the grouping variable (e.g. test version)
 #' for title and legend of plots (only needed when grouping exists)
+#' @param labels_legend character vector; contains legend labels (defaults to grouping names)
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print warnings (should be better set to true)
@@ -62,14 +63,15 @@ mv_item <- function(resp, vars, select, valid = NULL,
                     path_results = here::here("Results"),
                     path_table = here::here("Tables"),
                     path_plots = here::here("Plots/Missing_Responses/by_item"),
-                    show_all = FALSE, color = NULL, name_grouping = 'test version',
-                    overwrite = FALSE, digits = 2, warn = TRUE, verbose = TRUE) {
+                    show_all = FALSE, name_grouping = 'test version', #color = NULL,
+                    overwrite = FALSE, digits = 2, warn = TRUE, verbose = TRUE,
+                    labels_legend = NULL) {
 
   # Test data
   check_logicals(resp, "resp", c(valid, grouping), warn = warn)
   check_logicals(vars, "vars", c(select, grouping), warn = warn)
 
-  if (is.null(valid)) {
+  if (warn & is.null(valid)) {
     warning("No variable with valid cases provided. ",
             "All cases are used for analysis.\n")
   }
@@ -89,9 +91,9 @@ mv_item <- function(resp, vars, select, valid = NULL,
   # Write plots
   if (plots) mvi_plots(mv_i = mv_item, vars = vars, select = select,
                        grouping = grouping, mvs = mvs, labels_mvs = labels_mvs,
-                       show_all = show_all, color = color, verbose = verbose,
-                       name_grouping = name_grouping, path = path_plots,
-                       warn = warn, test = FALSE)
+                       show_all = show_all, verbose = verbose, #color = color,
+                       name_grouping = name_grouping, labels_legend = labels_legend,
+                       path = path_plots, warn = warn, test = FALSE)
 
   # Save results
   if (save) {
@@ -162,7 +164,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
     check_logicals(resp, "resp", c(valid, grouping), warn = warn)
     check_logicals(vars, "vars", c(select, grouping), warn = warn)
 
-    if (is.null(valid)) {
+    if (warn & is.null(valid)) {
       warning("No variable with valid cases provided. ",
               "All cases are used for analysis.\n")
     }
@@ -370,9 +372,10 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
 #' @param path  string; defines path to folder where plots shall be saved
-#' @param color  character calar or vector; defines color(s) of the bar in plots
+# #' @param color  character calar or vector; defines color(s) of the bar in plots
 #' @param name_grouping  string; name of the grouping variable (e.g. test version)
 #' for title and legend of plots (only needed when grouping exists)
+#' @param labels_legend character vector; contains legend labels (defaults to grouping names)
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
 #' @param verbose  logical; whether to print processing information to console
@@ -397,9 +400,9 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
                         AZ = "missing items due to ''Angabe zurueckgesetzt''"
                       ),
                       path = here::here("Plots/Missing_Responses/by_item"),
-                      color = NULL, name_grouping = 'test version',
+                      name_grouping = 'test version', #color = NULL,
                       show_all = FALSE, verbose = TRUE, warn = TRUE,
-                      test = TRUE) {
+                      test = TRUE, labels_legend = NULL) {
 
   # Test data
   if (test) {
@@ -409,21 +412,14 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
 
   # Pepare data
   mv_i <- mv_i$list
+  k <- create_ifelse(is.null(grouping), sum(vars[[select]]),
+                     max(sapply(grouping, function(x) {
+                         sum(vars[[select]] & vars[[x]])
+                     }), na.rm = TRUE))
 
-  if (is.null(grouping)) {
-    k <- sum(vars[[select]])
-  } else {
-    k <- NA_integer_
-    for (g in grouping) {
-      k <- c(k, length(vars$item[vars[[select]] & vars[[g]]]))
-    }
-    k <- max(k, na.rm = TRUE)
-
-    if (show_all) {
-      groups <- c(grouping, "all")
-    } else {
-      groups <- grouping
-    }
+  if(!is.null(grouping)) {
+      groups <- create_ifelse(show_all, c(grouping, 'all'), grouping)
+      lbls <- create_ifelse(is.null(labels_legend), grouping, labels_legend)
   }
 
   # Create directory for plots
@@ -472,18 +468,14 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
         ggplot2::labs(
           title = paste0(Hmisc::capitalize(labels_mvs[i]), " by item position and ",
                          name_grouping),
-          x = "Item position", y = "Percentage",
-          fill = Hmisc::capitalize(name_grouping)
-        )
-    }
-
-    if (is.null(color)) {
-        gg <- gg + ggplot2::geom_col(position = "dodge")
-    }  else {
-        gg <- gg + ggplot2::geom_col(position = "dodge", fill = color)
+          x = "Item position", y = "Percentage"
+        ) +
+          scale_fill_discrete(name = Hmisc::capitalize(name_grouping),
+                              labels = lbls)
     }
 
     gg <- gg +
+    ggplot2::geom_col(position = "dodge") +
     ggplot2::scale_y_continuous(breaks = seq(0, ylim, 10),
                                 labels = paste0(seq(0, ylim, 10), " %"),
                                 limits = c(0, ylim)) +
@@ -535,11 +527,13 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
       item_max <- mv_i$list$item[mv_i$list[[lbl]] == mv_max]
       message("The number of ", labels_mvs[lbl], " varied between ",
               mv_min, " %", if(length(item_min) <= 3) {
-                  paste0(" (item ", paste(item_min, collapse = ","), ")")
+                  paste0(" (", ifelse(length(item_min) > 1, "items ", "item "),
+                         paste(item_min, collapse = ", "), ")")
                   }, " and ",
               mv_max, " %", if(length(item_max) <= 3) {
-                  paste0(" (item ", paste(item_max, collapse = ","), ")")
-                  }, ".")
+                  paste0(" (", ifelse(length(item_max) > 1, "items ", "item "),
+                         paste(item_max, collapse = ", "), ")")
+              }, ".")
     }
   } else {
     for (g in grouping) {
@@ -551,10 +545,12 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
         item_max <- mv_i$list[[g]]$item[mv_i$list[[g]][[lbl]] == mv_max]
         message("The number of ", labels_mvs[lbl], " in the ", g, " test version varied between ",
                 mv_min, " %", if(length(item_min) <= 3) {
-                    paste0(" (item ", paste(item_min, collapse = ","), ")")
+                    paste0(" (", ifelse(length(item_min) > 1, "items ", "item "),
+                           paste(item_min, collapse = ", "), ")")
                 }, " and ",
                 mv_max, " %", if(length(item_max) <= 3) {
-                    paste0(" (item ", paste(item_max, collapse = ","), ")")
+                    paste0(" (", ifelse(length(item_max) > 1, "items ", "item "),
+                           paste(item_max, collapse = ", "), ")")
                 }, ".")
       }
     }
@@ -671,7 +667,6 @@ mvi_summary <- function(mvlist, digits = 2) {
 #' @param mvs  named integer vector; contains user-defined missing values
 #'
 #' @noRd
-
 
 test_mvi_data <- function(mv_i, grouping, mvs) {
 
