@@ -115,7 +115,20 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
                                  mvs = NULL, warn = TRUE) {
     # Test data
     check_logicals(vars, "vars", c(select_raw, select_score), warn = warn)
-    check_variables(vars, "vars", c("item", correct))
+    check_variables(vars, "vars", correct)
+    check_variables(resp, "resp", valid)
+
+    if (warn) {
+        if (is.null(mvs)) {
+            warning("No user defined missing values provided. ",
+                    "Default of '-999 to -1' is used.\n")
+        }
+
+        if (is.null(valid)) {
+            warning("No variable with valid cases provided. ",
+                    "All cases are used for analysis.\n")
+        }
+    }
 
     # prepare data
     raw_items <- vars$item[vars[[select_raw]]]
