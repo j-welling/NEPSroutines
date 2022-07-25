@@ -106,7 +106,7 @@ prepare_resp <- function(resp, vars = NULL, select = NULL,
             check_variables(resp, "resp", variables = items)
             resp <- resp[ , items]
         }
-    } else {
+    } else if (warn) {
         warning("No variable provided indicating the items to keep. ",
                 "All items are kept.")
     }
@@ -465,4 +465,22 @@ create_q <- function(vars, select, scoring, poly) {
     }
 
     Q
+}
+
+#' Create object depending on condition
+#' @param condition if-clause on which depends decision
+#' @param a return a if condition is TRUE
+#' @param b return b if condition is FALSE
+#'
+#' @returns Object x (a or b, depending on condition)
+#' @noRd
+create_ifelse <- function(condition, a, b) {
+
+    if(condition) {
+        x <- a
+    } else {
+        x <- b
+    }
+
+    return(x)
 }
