@@ -25,9 +25,10 @@
 #' @param path_plots  string; defines path to folder where plots shall be saved
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
-#' @param color  character scalar or vector; defines color(s) of the bar in plots
+# #' @param color  character scalar or vector; defines color(s) of the bar in plots
 #' @param name_grouping  string; name of the grouping variable (e.g. test version)
 #' for title and legend of plots (only needed when grouping exists)
+#' @param labels_legend character vector; contains legend labels (defaults to grouping names)
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print warnings (should be set to TRUE to
@@ -57,15 +58,15 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
                       path_results = here::here("Results"),
                       path_table = here::here("Tables"),
                       path_plots = here::here("Plots/Missing_Responses/by_person"),
-                      show_all = FALSE, color = NULL, overwrite = FALSE,
-                      name_grouping = 'test version',
+                      show_all = FALSE, overwrite = FALSE, #color = NULL,
+                      name_grouping = 'test version', labels_legend = NULL,
                       digits = 2, warn = TRUE, verbose = TRUE) {
 
   # Test data
   check_logicals(resp, "resp", c(valid, grouping), warn = warn)
   check_logicals(vars, "vars", c(select, grouping), warn = warn)
 
-  if (is.null(valid)) {
+  if (warn & is.null(valid)) {
     warning("No variable with valid cases provided. ",
             "All cases are used for analysis.\n")
   }
@@ -82,8 +83,9 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
   if (plots) {
     mvp_plots(mv_p = mv_person$mv_p, vars = vars, select = select, mvs = mvs,
               labels_mvs = labels_mvs, grouping = grouping, show_all = show_all,
-              path = path_plots, color = color, verbose = verbose, warn = warn,
-              test = FALSE, name_grouping = name_grouping)
+              path = path_plots, verbose = verbose, warn = warn, #color = color,
+              name_grouping = name_grouping, labels_legend = labels_legend,
+              test = FALSE)
   }
 
   # Create table
@@ -280,9 +282,10 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
 #' @param path  string; defines path to folder where X shall be saved
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
-#' @param color  character calar or vector; defines color(s) of the bar in plots
+# #' @param color  character calar or vector; defines color(s) of the bar in plots
 #' @param name_grouping  string; name of the grouping variable (e.g. test version)
 #' for title and legend of plots (only needed when grouping exists)
+#' @param labels_legend character vector; contains legend labels (defaults to grouping names)
 #' @param verbose  logical; whether to print processing information to console
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
@@ -305,8 +308,9 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                         AZ = "missing items due to ''Angabe zurueckgesetzt''"
                       ),
                       path = here::here("Plots/Missing_Responses/by_person"),
-                      show_all = FALSE, color = NULL, verbose = TRUE,
-                      name_grouping = 'test version', warn = TRUE, test = TRUE) {
+                      show_all = FALSE, verbose = TRUE, # color = NULL,
+                      name_grouping = 'test version', labels_legend = NULL,
+                      warn = TRUE, test = TRUE) {
 
   # Test data
   if (test) {
@@ -315,31 +319,20 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
   }
 
   # Prepare data
-  if (is.null(grouping)) {
-    mv_all <- mv_p
-  } else {
-    mv_all <- mv_p$all
-    if (show_all) {
-      groups <- c(grouping, "all")
-    } else {
-      groups <- grouping
-    }
+  mv_all <- create_ifelse(is.null(grouping), mv_p, mv_p$all)
+  k <- create_ifelse(is.null(grouping), sum(vars[[select]]),
+                     max(sapply(grouping, function(x) {
+                         sum(vars[[select]] & vars[[x]])
+                     }), na.rm = TRUE))
+
+  if(!is.null(grouping)) {
+      groups <- create_ifelse(show_all, c(grouping, 'all'), grouping)
+      lbls <- create_ifelse(is.null(labels_legend), grouping, labels_legend)
   }
 
   # Test labels
   if (any(!names(mv_all) %in% names(labels_mvs))) {
     stop("Please provide labels for each missing value type specified in mv_p.")
-  }
-
-  # Approx. number of items
-  if (is.null(grouping)) {
-    k <- sum(vars[[select]])
-  } else {
-    k <- NA_integer_
-    for (g in grouping) {
-      k <- c(k, length(vars$item[vars[[select]] & vars[[g]]]))
-    }
-    k <- max(k, na.rm = TRUE)
   }
 
   # Create directory for plots
@@ -387,30 +380,21 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
         ggplot2::labs(
           title = paste0(Hmisc::capitalize(labels_mvs[i]), " by person and ",
                          name_grouping),
-          x = paste0("Number of ", labels_mvs[i]), y = "Percentage",
-          fill = Hmisc::capitalize(name_grouping)
-        )
-    }
-
-    if (is.null(color)) {
-        gg <- gg + ggplot2::geom_col(position = "dodge")
-    }  else {
-        gg <- gg + ggplot2::geom_col(position = "dodge", fill = color)
+          x = paste0("Number of ", labels_mvs[i]), y = "Percentage"
+        ) +
+        scale_fill_discrete(name = Hmisc::capitalize(name_grouping),
+                            labels = lbls)
     }
 
     gg <- gg +
+      ggplot2::geom_col(position = "dodge") +
       ggplot2::scale_y_continuous(breaks = seq(0, ylim, 10),
                                   labels = paste0(seq(0, ylim, 10), " %"),
                                   limits = c(0, ylim)) +
       ggplot2::theme_bw() +
       ggplot2::theme(legend.justification = c(1, 1),
-                     legend.position = c(0.99, 0.99))
-
-    if (end > 10) {
-      gg <- gg + ggplot2::scale_x_continuous(breaks = seq(0, end, 2))
-    } else if (end > 0) {
-      gg <- gg + ggplot2::scale_x_continuous(breaks = seq(0, end, 1))
-    }
+                     legend.position = c(0.99, 0.99)) +
+      ggplot2::scale_x_continuous(breaks = seq(0, end, ifelse(end > 10, 2, 1)))
 
     # save plot
     ggplot2::ggsave(
@@ -423,6 +407,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
     if (verbose) cat("Missing plot", i, "created.\n")
   }
 }
+
 
 
 #' Create list with frequency of missing responses by person for each missing value type
