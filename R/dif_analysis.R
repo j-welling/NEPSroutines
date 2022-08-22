@@ -410,7 +410,7 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 
   if (irt_type == 'poly') {
 
-    if(is.null(scoring)) stop("Please provide a name of the scoring variable")
+    if(is.null(scoring)) warning("No scoring variable provided. All items are scored with 1.")
 
     mmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
@@ -511,9 +511,9 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid, verbose,
   # get design matrix for model
   B <- TAM::designMatrices(modeltype = 'PCM', resp = resp)$B
 
-  pcm_scoring <- ifelse(is.null(scoring),
-                        rep(1, length(vars[[select]])),
-                        vars[[scoring]][vars[[select]]])
+  pcm_scoring <- create_ifelse(is.null(scoring),
+                               rep(1, length(vars[[select]])),
+                               vars[[scoring]][vars[[select]]])
 
   # 0.5 scoring for PCM
   B[vars$item[vars[[select]]], , 1] <- B[vars$item[vars[[select]]], , 1] * pcm_scoring
