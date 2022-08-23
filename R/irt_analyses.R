@@ -355,7 +355,7 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
                        mvs = mvs, warn = FALSE)
 
   # Test data
-  check_numerics(resp, "resp", check_invalid = TRUE)
+  check_numerics(resp, "resp", check_invalid = TRUE) # this check is very important as otherwise R will be aborted!!
   if (irtmodel %in% c("1PL", "2PL")) check_dich(resp, "resp")
 
   # Create scoring matrix if not provided in function arguments
