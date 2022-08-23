@@ -551,19 +551,9 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
     dif_var <- diflist$dif_var
     irt_type <- diflist$irt_type
 
-    ### TG: start
-
-    # group <- grep(diflist$dif_var, rownames(diflist$dmod$xsi), value = TRUE)
-    # group <- unique(sapply(group, function(x) {substr(x, nchar(x), nchar(x))}))
-    # group <- as.integer(group)
-    # res <- difsum(obj = diflist, dif_var = dif_var, group = group, group2 = NULL)
-    # res$compared_against <- group
-
     groups <- diflist$mmod$xsi.facets$parameter[diflist$mmod$xsi.facets$facet == dif_var]
     groups <- gsub(diflist$dif_var, "", groups)
     res <- difsum(obj = diflist, dif_var = dif_var, groups = groups)
-
-    ### TG: end
 
     if (print) {
         print_dif_summary(resp = resp, diflist = diflist, res = res,
@@ -591,8 +581,6 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
 #' @param obj list; return object of dif_model()
 #' @param dif_var character vector; contains the variable names to be tested
 #'   for DIF (e.g., "gender")
-# #' @param group integer; group to compare against
-# #' @param group2 integer; in case of more than two groups
 #' @param groups numeric vector; contains group identificators (e.g., 1, 2)
 #'
 #' @return list of information criteria, dif estimates and main effects in
@@ -602,10 +590,7 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
 
 ### TG: start
 
-#difsum <- function(obj, dif_var, group = 1, group2 = NULL) {
 difsum <- function(obj, dif_var, groups = 1) {
-
-    ### TG: end
 
     # all included items
     it <- colnames(obj$dmod$resp_orig)
@@ -615,8 +600,6 @@ difsum <- function(obj, dif_var, groups = 1) {
         it <- gsub(paste0("-", dif_var, group), "",
                    rownames(obj$dmod$B)[s])
     }
-
-    ### TG: start
 
     # Estimated DIF effects in each group
     est <- list()
@@ -637,38 +620,6 @@ difsum <- function(obj, dif_var, groups = 1) {
     f <- sapply(est, \(x) { all(x$xsi == 0) })
     est[f][[1]]$xsi <- rowSums(sapply(est[!f], \(x) x$xsi)) * -1
 
-    # DIF effects for first group
-    # sel <- rownames(obj$dmod$xsi) %in%
-    #   paste0(it, ":", dif_var, group)
-    # est <- obj$dmod$xsi[sel, ]
-    # est$item <- gsub(paste0(":", dif_var, group), "", rownames(est))
-    #
-    # # calculate DIF effect for last item (= constrained for identification)
-    # lst <- data.frame(item = it[!(it %in% est$item)],
-    #                   xsi = sum(est$xsi),
-    #                   se.xsi = sqrt(sum(est$se.xsi^2)))
-    # est <- rbind(est, lst)
-    # rownames(est) <- NULL
-
-    # DIF effects for second group
-    # (only relevant if more than 2 groups were used as DIF variable)
-    # if (!is.null(group2)) {
-    #   sel <- rownames(obj$dmod$xsi) %in%
-    #     paste0(it, ":", dif_var, group2)
-    #   est2 <- obj$dmod$xsi[sel, ]
-    #   est2$item <- gsub(paste0(":", dif_var, group2), "", rownames(est2))
-    #
-    #   # calculate DIF effect for last item (= constrained for identification)
-    #   lst <- data.frame(item = it[!(it %in% est2$item)],
-    #                     xsi = sum(est2$xsi),
-    #                     se.xsi = sqrt(sum(est2$se.xsi^2)))
-    #   est2 <- rbind(est2, lst)
-    #   rownames(est2) <- NULL
-    # }
-
-    ### TG: end
-
-    ### TG: start
     gp <- merge(groups, groups)
     mest <- list()
     for (g in seq_len(nrow(gp))) {
@@ -679,11 +630,13 @@ difsum <- function(obj, dif_var, groups = 1) {
 
         # Differences in item parameters
         mest[[lbl]] <- est[[grps[1]]]
-        mest[[lbl]]$xsi <-  est[[grps[1]]]$xsi - est[[grps[2]]]$xsi  #2 * mest[[gp[g, 1]]]$xsi
-        mest[[lbl]]$se.xsi <- sqrt(est[[grps[1]]]$se.xsi^2 + est[[grps[2]]]$se.xsi^2)
+        mest[[lbl]]$xsi <-  est[[grps[1]]]$xsi - est[[grps[2]]]$xsi
+        mest[[lbl]]$se.xsi <- create_ifelse(any(grps == max(groups)),
+                                            sqrt(est[[grps[!grps == max(groups)]]]$se.xsi^2 * 2),
+                                            sqrt(est[[grps[1]]]$se.xsi^2 + est[[grps[2]]]$se.xsi^2))
 
         # Standardized difference
-        mest[[lbl]]$std <- mest[[lbl]]$xsi / sqrt(obj$dmod$variance[1])
+        mest[[lbl]]$std <- round(mest[[lbl]]$xsi / sqrt(obj$dmod$variance[1]), 3)
 
         # minimum effects hypothesis test
         fit_meht <- apply(mest[[lbl]][, c("xsi", "se.xsi")], 1, function(x) {
@@ -696,7 +649,7 @@ difsum <- function(obj, dif_var, groups = 1) {
               Femp = (x["xsi"] / x["se.xsi"])^2)
         })
 
-        mest[[lbl]]$p <- fit_meht["p.xsi", ]
+        mest[[lbl]]$p <- round(fit_meht["p.xsi", ], 3)
         mest[[lbl]]$Fkrit <- round(fit_meht["Fkrit", ], 3)
         mest[[lbl]]$df1 <- fit_meht["df1", ]
         mest[[lbl]]$df2 <- fit_meht["df2", ]
@@ -707,41 +660,6 @@ difsum <- function(obj, dif_var, groups = 1) {
                                        "Femp", "Fkrit", "df1", "df2", "p")]
     }
 
-    # difference in item parameters
-
-    # if (is.null(group2)) {
-    #   est$xsi <- 2 * est$xsi
-    #   est$se.xsi2 <- est$se.xsi
-    # } else {
-    #   est$xsi <- est$xsi - est2$xsi
-    #   est$se.xsi2 <- est2$se.xsi
-    # }
-
-    # standardized difference
-
-    # est$std <- est$xsi / sqrt(obj$dmod$variance[1])
-    #
-    # # minimum effects hypothesis test
-
-    # est$p <- apply(est[, c("xsi", "se.xsi", "se.xsi2")], 1, function(x) {
-    #   round(meht((x["xsi"] / sqrt(x["se.xsi"]^2 + x["se.xsi2"]^2))^2,
-    #              df1 = 1, df2 = obj$dmod$nstud - 2, verbose = FALSE)$pmin, 3)
-    # })
-    # est$Fkrit <- apply(est[, c("xsi", "se.xsi", "se.xsi2")], 1, function(x) {
-    #   round(meht((x["xsi"] / sqrt(x["se.xsi"]^2 + x["se.xsi2"]^2))^2,
-    #              df1 = 1, df2 = obj$dmod$nstud - 2, verbose = FALSE)$Fmin, 3)
-    # })
-    # est$F <- apply(est[, c("xsi", "se.xsi", "se.xsi2")], 1, function(x) {
-    #   round((x["xsi"] / sqrt(x["se.xsi"]^2 + x["se.xsi2"]^2))^2, 3)
-    # })
-
-    ### TG: end
-
-    ### TG: start
-
-    # reorder
-
-    # out <- list(est = est[, c("item", "xsi", "std", "F", "Fkrit", "p")])
     out <- list(est = mest)
 
     # main effects
@@ -773,25 +691,6 @@ difsum <- function(obj, dif_var, groups = 1) {
     }
 
     out$mne <- mne
-
-    # main effects
-
-    # mne <- data.frame(Model = c("DIF model", "Main effects model"),
-    #                   Unstandardized = rep(NA, 2),
-    #                   Standardized = rep(NA, 2))
-    # est <- obj$dmod$xsi[rownames(obj$dmod$xsi) == paste0(dif_var, group), ]
-    # mne[1, 2:3] <- c(2 * est$xsi[1],
-    #                  2 * est$xsi[1] / sqrt(obj$dmod$variance[1]))
-    # est <- obj$mmod$xsi[rownames(obj$mmod$xsi) == paste0(dif_var, group), ]
-    # mne[2, 2:3] <- c(2 * est$xsi[1],
-    #                  2 * est$xsi[1] / sqrt(obj$mmod$variance[1]))
-    #
-    # # main effects refer to item difficulties
-    # #  -> recode to person main effects
-    # out$mne <- mne
-    # out$mne[, 2:3] <- -1 * out$mne[, 2:3]
-
-    ### TG: end
 
     # goodness-of-fit indices
     gof <- data.frame(
@@ -843,17 +742,7 @@ build_dif_tr_tables <- function(dif_summaries, save = TRUE, overwrite = FALSE,
     gof <- Reduce(rbind, lapply(dif_summaries, function(x) x$gof))
     gof[,-c(1:2)] <- round(gof[, -c(1:2)])
 
-    ### TG: start
-
     # DIF effects table + main effects
-
-    # est <- lapply(dif_summaries, function(x) x$est)
-    # est <- lapply(dif_vars, function(x) {
-    #   est[[x]][[x]] <- paste0(format(round(est[[x]]$xsi, 3), nsmall = 3), " (",
-    #                           format(round(est[[x]]$std, 3), nsmall = 3), ")")
-    #   est[[x]][, c("item", x)]
-    # })
-    # est <- Reduce(function(e1, e2) {dplyr::full_join(e1, e2, by = "item")}, est)
     est <- lapply(dif_vars, function(x) {
 
         # DIF effects
@@ -881,22 +770,7 @@ build_dif_tr_tables <- function(dif_summaries, save = TRUE, overwrite = FALSE,
 
     est <- Reduce(function(e1, e2) {dplyr::full_join(e1, e2, by = "item")}, est)
 
-    # mne <- lapply(dif_summaries, function(x) {
-    #   m <- dplyr::rename(x$mne, item = 'Model')
-    #   m$item <- c("Main effect (DIF model)", "Main effect (Main effect model)")
-    #   m
-    # })
-    # mne <- lapply(dif_vars, function(x) {
-    #   mne[[x]][[x]] <- paste0(format(round(mne[[x]]$Unstandardized, 3), nsmall = 3), " (",
-    #                           format(round(mne[[x]]$Standardized, 3), nsmall = 3), ")")
-    #   mne[[x]][, c("item", x)]
-    # })
-    # mne <- Reduce(function(m1, m2) {dplyr::full_join(m1, m2, by = "item")}, mne)
-    #
-    # est <- rbind(est, mne)
-
-    ### TG: end
-
+    # Create TR table
     dif_tr_tables <- list(gof = gof, estimates = est)
 
     # format est
