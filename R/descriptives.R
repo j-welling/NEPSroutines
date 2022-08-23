@@ -168,3 +168,105 @@ show_attributes <- function(dat, desc) {
         print(attributes(dat[[var]])$labels)
     }
 }
+
+
+#' Table with sample size by test version
+#'
+#' @param dat  data.frame; contains version variable
+#' @param versions string; defines name of variable in dat that identifies test versions
+#' @param versions_lbls named character vector; links a label each value of versions
+#' (e.g. versions_lbls = c(version1 = 1, version2 = 2))
+#' @param save  logical; whether to save the table in Excel
+#' @param overwrite logical; whether to overwrite an existing table with the same name
+#' @param path string; defines path for saving the table
+#'
+#' @return table with sample size by test version
+#' @export
+
+sample_by_version <- function(dat, versions, versions_lbls = NULL, save = FALSE,
+                              overwrite = FALSE, path = here::here("Tables")) {
+
+    # Create table with results
+    df <- as.data.frame.AsIs(table(dat[[versions]]))
+    df <- rbind(df,sum(df))
+    names(df) <- 'N'
+    rownames(df)[nrow(df)] <- c("Total")
+
+    # Add labels as row names
+    if(!is.null(versions_lbls) | !is.null(attributes(vars[[versions]])$labels)) {
+        lbls <- create_ifelse(is.null(versions_lbls),
+                              attributes(vars[[versions]])$labels,
+                              versions_lbls)
+        for (v in seq(nrow(df)-1)) {
+            rownames(df)[v] <- names(which(rownames(df)[v] == lbls))
+        }
+    }
+
+    # Convert results
+    res <- data.frame(t(df))
+
+    # Save results
+    if (save) {
+        save_table(res, filename = paste0("samplesize_by_", versions, ".xlsx"),
+                   path = path, overwrite = overwrite, show_rownames = FALSE)
+    }
+
+    # Return results
+    return(res)
+}
+
+
+#' Table with item properties by test version
+#'
+#' @param vars data.frame; contains information about the competence items
+#' @param versions string; defines name of variable in vars that identifies test versions
+#' @param props string; defines name of variable in vars that identifies item properties
+#' @param versions_lbls named character vector; links a label each value of versions
+#' (e.g. versions_lbls = c(version1 = 1, version2 = 2))
+#' @param versions_lbls named character vector; links a label each value of props
+#' (e.g. props_lbls = c(prop1 = 1, prop2 = 2))
+#' @param save  logical; whether to save the table in Excel
+#' @param overwrite logical; whether to overwrite an existing table with the same name
+#' @param path string; defines path for saving the table
+#'
+#' @return table with item properties by test version
+#' @export
+
+props_by_version <- function(vars, select, versions, props,
+                             versions_lbls = NULL, props_lbls = NULL,
+                             save = FALSE, overwrite = FALSE,
+                             path = here::here("Tables")) {
+
+    # Create empty data frame
+    vars <- subset(vars, vars[[select]])
+    tbl <- addmargins(table(vars[[props]], vars[[versions]]))
+
+    # Add property labels as row names
+    if(!is.null(props_lbls) | !is.null(attributes(vars[[props]])$labels)) {
+        lbls <- create_ifelse(is.null(props_lbls),
+                              attributes(vars[[props]])$labels,
+                              props_lbls)
+        for (v in seq(nrow(tbl))) {
+            rownames(tbl)[v] <- names(which(rownames(tbl)[v] == lbls))
+        }
+    }
+
+    # Add version labels as column names
+    if(!is.null(versions_lbls) | !is.null(attributes(vars[[versions]])$labels)) {
+        lbls <- create_ifelse(is.null(versions_lbls),
+                              attributes(vars[[versions]])$labels,
+                              versions_lbls)
+        for (v in seq(nrow(tbl))) {
+            colnames(tbl)[v] <- names(which(colnames(tbl)[v] == lbls))
+        }
+    }
+
+    # Save results
+    if (save) {
+        save_table(tbl, filename = paste0(props, "_by_", versions, ".xlsx"),
+                   path = path, overwrite = overwrite, show_rownames = TRUE)
+    }
+
+    # Return results
+    return(tbl)
+}
