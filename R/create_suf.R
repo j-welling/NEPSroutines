@@ -25,13 +25,18 @@
 #' @param path_results character; indicates where SUF shall be saved
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
+#' @param warn  logical; whether to print warnings
 #'
 #' @export
 create_suf <- function(resp, vars, select, competence,
                        scores = NULL, score_name = NULL,
                        mvs = NULL, items_labels = NULL,
                        filename = "suf", path_results = here::here('Results'),
-                       save = TRUE, return = FALSE) {
+                       save = TRUE, return = FALSE, warn = TRUE) {
+
+  # Test data
+  scaling:::check_logicals(vars, "vars", select, warn = warn)
+  scaling:::check_items(vars$item[vars[[select]]])
 
   # Select items for SUF
   suf <- resp[, c("ID_t", vars$item[vars[[select]]])]
@@ -49,14 +54,15 @@ create_suf <- function(resp, vars, select, competence,
 
   # Add labels to response items, ID_t, WLEs, and SEs
   suf <-
-    set_labels(
+    scaling:::set_labels(
       suf = suf,
       vars = vars,
       select = select,
       competence = competence,
       score_name = score_name,
       mvs = mvs,
-      items_labels = items_labels
+      items_labels = items_labels,
+      test = FALSE
     )
 
   # Convert still present NA to -55 (not determinable)
@@ -64,7 +70,7 @@ create_suf <- function(resp, vars, select, competence,
 
   # (save SUF in rds, sav and dta format)
   if (save) {
-    save_suf(suf = suf, path_results = path_results, filename = filename)
+    scaling:::save_suf(suf = suf, path_results = path_results, filename = filename)
     message("SUF successfully saved!")
   }
 
@@ -92,12 +98,20 @@ create_suf <- function(resp, vars, select, competence,
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param items_labels  vector; named vector for each item used for labelling
 #'   the data
+#' @param warn  logical; whether to print warnings
+#' @param test  logical; whether to test data structure (should be set to TRUE)
+#'
 #' @return suf with labels
 #' @importFrom stats setNames
 #' @export
-set_labels <- function(suf, vars, select,
-                       competence, score_name = NULL,
-                       mvs = NULL, items_labels = NULL) {
+set_labels <- function(suf, vars, select, competence, score_name = NULL,
+                       mvs = NULL, items_labels = NULL, warn = TRUE, test = TRUE) {
+
+  # Test data
+  if (test) {
+    scaling:::check_logicals(vars, "vars", select, warn = warn)
+    scaling:::check_items(vars$item[vars[[select]]])
+  }
 
   # Label for ID_t
   attr(suf$ID_t, "label") <- "Unique person identifier"
@@ -200,6 +214,7 @@ set_labels <- function(suf, vars, select,
 #' @noRd
 save_suf <- function(suf, path_results, filename) {
 
+  check_folder(path = here::here(path_results))
   saveRDS(suf, file = paste0(path_results, "/", filename, ".rds"))
   haven::write_dta(suf, path = paste0(path_results, "/", filename, ".dta"))
   haven::write_sav(suf, path = paste0(path_results, "/", filename, ".sav"))

@@ -73,7 +73,6 @@
 #' @param digits  numeric; number of decimal places for rounding
 #' @param verbose  logical; verbose as passed to the TAM function
 #' @param warn  logical; whether to print warnings
-
 #'
 #' @export
 create_scores <- function(resp, vars, scoring = NULL,
@@ -86,19 +85,39 @@ create_scores <- function(resp, vars, scoring = NULL,
                           #scoring_previous = NULL, scoring_link_study = NULL,
                           #pweights_previous = NULL, pweights_link_study = NULL,
                           #anchors = NULL, longitudinal = TRUE,
-                          print = TRUE, save = TRUE,
-                          return = FALSE, overwrite = FALSE,
-                          path_table = here::here("Tables"),
-                          path_results = here::here("Results"),
+                          #print = TRUE, save = TRUE,
+                          return = FALSE, #overwrite = FALSE,
+                          #path_table = here::here("Tables"),
+                          #path_results = here::here("Results"),
                           do_dim = TRUE, do_dif = TRUE,
                           diff_threshold = .5, wid = NULL,
                           snodes = 0, maxiter = 1000,
                           digits = 3, verbose = TRUE, warn = TRUE) {
 
+  # Test data
+  scaling:::check_logicals(vars, "vars", select, warn = warn)
+  scaling:::check_logicals(resp, "resp", valid, warn = warn)
+  scaling:::check_items(vars$item[vars[[select]]])
+
+  if (is.null(scoring))
+    scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+
+  if (warn) {
+    if (is.null(mvs)) {
+      warning("No user defined missing values provided. ",
+              "Default of '-999 to -1' is used.\n")
+    }
+
+    if (is.null(valid)) {
+      warning("No variable with valid cases provided. ",
+              "All cases are used for analysis.\n")
+    }
+  }
+
   # # Estimate linked WLEs and SEs --> linking not yet implemented
   # if (wle & !is.null(resp_previous)) {
   #   linked_scores <-
-  #     linking(
+  #     scaling:::linking(
   #       resp = resp,
   #       resp_previous = resp_previous,
   #       resp_link_study = resp_link_study,
@@ -123,7 +142,8 @@ create_scores <- function(resp, vars, scoring = NULL,
   #       pweights_previous = pweights_previous,
   #       pweights_link_study = pweights_link_study,
   #       control_tam = control_tam,
-  #       do_dim = do_dim, do_dif = do_dif
+  #       do_dim = do_dim, do_dif = do_dif,
+  #       test = FALSE
   #     )
   #   wles_linked <- linked_scores$link_results$wle_linked
   #   names(wles_linked) <- c("ID_t", paste0(score_name, c("_sc1u", "_sc2u")))
@@ -135,14 +155,14 @@ create_scores <- function(resp, vars, scoring = NULL,
   if (wle) {
 
     if (is.null(facet) | (!is.null(facet) & is.null(xsi_fixed))) {
-      fit <- scaling::irt_analysis(
+      fit <- scaling:::irt_analysis(
         resp = resp, vars = vars, select = select,
         valid = valid, mvs = mvs,
         scoring = scoring, xsi.fixed = xsi_fixed,
         verbose = FALSE, warn = warn, return = TRUE,
-        plots = FALSE, save = FALSE, print = FALSE, test = FALSE,
+        plots = FALSE, save = FALSE, print = FALSE,
         control_tam = control_tam, control_wle = control_wle,
-        pweights = pweights
+        pweights = pweights, test = FALSE
       )
       if (is.null(fit$model.1pl)) {
         fit <- fit$model.pcm
@@ -154,12 +174,12 @@ create_scores <- function(resp, vars, scoring = NULL,
 
     if (!is.null(facet)) {
       if (is.null(xsi_fixed)) xsi_fixed <- fit$mod$xsi.fixed.estimated
-      wles <- estimate_rotated_wles(
+      wles <- scaling:::estimate_rotated_wles(
         resp = resp, vars = vars, select = select,
         valid = valid, facet = facet, mvs = mvs,
         scoring = scoring, xsi_fixed = xsi_fixed,
         wle_name = score_name, control_tam = control_tam,
-        pweights = pweights, warn = warn
+        pweights = pweights, warn = warn, test = FALSE
       )
     } else {
       wles <- as.data.frame(fit$wle[, c("pid", "theta", "error")])
@@ -171,11 +191,11 @@ create_scores <- function(resp, vars, scoring = NULL,
 
   # Estimate sum scores
   if (sum_score) {
-    sss <- estimate_sum_scores(
+    sss <- scaling:::estimate_sum_scores(
       resp = resp, vars = vars, select = select,
       valid = valid, mvs = mvs, scoring = scoring,
       score_name = score_name, warn = !wle & warn,
-      poly2dich = poly2dich
+      poly2dich = poly2dich, test = FALSE
     )
     if (wle) {
       wles <- merge(wles, sss, by = "ID_t", all = TRUE)
@@ -218,35 +238,42 @@ create_scores <- function(resp, vars, scoring = NULL,
 #' @param warn  logical; whether to print warnings
 #' @param score_name character; name of the scores -- WITHOUT extension (e.g.,
 #'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
+#' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @noRd
 estimate_sum_scores <- function(resp, vars, select, valid = NULL,
                                 mvs = NULL, scoring = NULL,
                                 poly2dich = TRUE, warn = TRUE,
-                                score_name = "score") {
-
-  # Default values
-  if (is.null(valid)) {
-    valid <- "valid"
-    resp[["valid"]] <- TRUE
-  }
-  if (is.null(scoring)) {
-    scoring <- "scoring"
-    vars[["scoring"]] <- 1
-  }
+                                score_name = "score", test = TRUE) {
 
   # Test data
-  if (warn & !is.null(scoring))
-    scaling:::check_numerics(vars, "vars", scoring)
+  if (test) {
+    scaling:::check_logicals(vars, "vars", select, warn = warn)
+    scaling:::check_logicals(resp, "resp", valid, warn = warn)
+    scaling:::check_items(vars$item[vars[[select]]])
 
-  # IDs
-  if (warn)
-    scaling:::check_pid(resp$ID_t)
+    if (is.null(scoring))
+      scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+
+    if (warn) {
+      if (is.null(mvs)) {
+        warning("No user defined missing values provided. ",
+                "Default of '-999 to -1' is used.\n")
+      }
+
+      if (is.null(valid)) {
+        warning("No variable with valid cases provided. ",
+                "All cases are used for analysis.\n")
+      }
+    }
+  }
+
+  scaling:::check_pid(resp$ID_t[resp[[valid]]])
 
   # Prepare data
   resp_ <- scaling:::prepare_resp(resp, vars, select, use_only_valid = TRUE,
-                        valid = valid, convert = TRUE, mvs = mvs,
-                        warn = warn)
+                                  valid = valid, convert = TRUE, mvs = mvs,
+                                  warn = FALSE)
   resp_[is.na(resp_)] <- 0
 
   # Score polytomous items dichotomously
@@ -258,7 +285,9 @@ estimate_sum_scores <- function(resp, vars, select, valid = NULL,
 
   # Sum score
   if (!poly2dich) {
-    scores <- vars[[scoring]][vars[[select]]]
+    scores <- scaling:::create_ifelse(is.null(scoring),
+                                      rep(1, sum(vars[[select]])),
+                                      vars[[scoring]][vars[[select]]])
     n <- nrow(resp_)
     resp_ <- resp_ * matrix(rep(scores, n),nrow = n, byrow = TRUE)
   }
@@ -305,6 +334,7 @@ estimate_sum_scores <- function(resp, vars, select, valid = NULL,
 #'    as elements of the list
 #' @param pweights numeric vector; person weights for current measurement point
 #'   passed to tam.mml.mfr()
+#' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @return a data.frame containing ID_t, wle and se of wle (named like indicated
 #'   in wle_name)
@@ -313,22 +343,36 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
                                   facet, xsi_fixed = NULL,
                                   scoring = NULL, mvs = NULL, wle_name,
                                   warn = TRUE, control_wle = NULL,
-                                  control_tam = NULL, pweights = NULL) {
+                                  control_tam = NULL, pweights = NULL,
+                                  test = TRUE) {
 
   # Test data
   scaling:::check_variables(resp, "resp", facet)
-  scaling:::check_numerics(vars, "vars", scoring)
-  if (is.null(scoring)) {
-    scoring <- "scoring"
-    vars[["scoring"]] <- 1
-  }
 
-  if (is.null(facet)) {
-    stop("Please provide the facet indicating the testlet rotation.")
-  }
   if (is.null(xsi_fixed)) {
     warning("Please provide the item parameters to ensure the correct",
             " results in the WLE estimation.")
+  }
+
+  if (test) {
+    scaling:::check_logicals(vars, "vars", select, warn = warn)
+    scaling:::check_logicals(resp, "resp", valid, warn = warn)
+    scaling:::check_items(vars$item[vars[[select]]])
+
+    if (is.null(scoring))
+      scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+
+    if (warn) {
+      if (is.null(mvs)) {
+        warning("No user defined missing values provided. ",
+                "Default of '-999 to -1' is used.\n")
+      }
+
+      if (is.null(valid)) {
+        warning("No variable with valid cases provided. ",
+                "All cases are used for analysis.\n")
+      }
+    }
   }
 
   # Identify IRT type
@@ -339,8 +383,8 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
   pid <- resp$ID_t[resp[[valid]]]
   scaling:::check_pid(pid)
   resp_ <- scaling:::prepare_resp(resp, vars, select, use_only_valid = TRUE,
-                        valid = valid, convert = TRUE, mvs = mvs,
-                        warn = warn)
+                                  valid = valid, convert = TRUE, mvs = mvs,
+                                  warn = FALSE)
 
   # Test resp
   scaling:::check_numerics(resp_, "resp", check_invalid = TRUE)
@@ -353,7 +397,9 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
   if (irt_type == "poly") {
     # get design matrix for model with 0.5 scoring
     B <- TAM::designMatrices(modeltype = "PCM", resp = resp_)$B
-    B[vars$item[vars[[select]]], , 1] <- vars[[scoring]][vars[[select]]]
+    B[vars$item[vars[[select]]], , 1] <- scaling:::create_ifelse(is.null(scoring),
+                                                                 rep(1, sum(vars[[select]])),
+                                                                 vars[[scoring]][vars[[select]]])
   } else {
     B <- NULL
   }
