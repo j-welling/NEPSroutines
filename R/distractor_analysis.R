@@ -117,6 +117,8 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
     check_logicals(vars, "vars", c(select_raw, select_score), warn = warn)
     check_variables(vars, "vars", correct)
     check_variables(resp, "resp", valid)
+    check_items(vars$item[vars[[select_raw]]])
+    check_items(vars$item[vars[[select_score]]])
 
     if (warn) {
         if (is.null(mvs)) {

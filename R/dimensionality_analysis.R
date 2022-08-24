@@ -51,6 +51,7 @@ dim_analysis <- function(resp, vars, select, scoring = "scoring",
     valid = valid, irtmodel = irtmodel, maxiter = maxiter, snodes = snodes,
     mvs = mvs, verbose = verbose
   )
+
   dimensionality$summary <- dim_summary(dimensionality$analysis)
 
   if (save) {
@@ -99,7 +100,10 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
                                  valid = NULL, irtmodel, maxiter, snodes,
                                  mvs = NULL, verbose = FALSE, warn = TRUE) {
   # Test data
+  check_logicals(vars, "vars", select, warn = warn)
+  check_logicals(resp, "resp", valid, warn = warn)
   check_variables(vars, "vars", c(dim, scoring))
+  check_items(vars$item[vars[[select]]])
 
     if (warn) {
         if (is.null(mvs)) {

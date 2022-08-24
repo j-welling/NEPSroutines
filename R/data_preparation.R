@@ -19,10 +19,16 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
     # Check whether variables are indeed contained in data.frames
     check_variables(resp, "resp", old_names)
 
+    # Check for duplicates
+    check_items(old_names)
+    if(!is.null(new_names)) check_items(new_names)
+
+    # Create new names if no names are provided
     if (is.null(new_names)) {
         new_names <- paste0(old_names, "_c")
     }
 
+    # Scoring
     for (i in seq_along(old_names)) {
         item <- old_names[i]
         if (is.double(resp[[item]])) {

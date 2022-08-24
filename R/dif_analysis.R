@@ -57,7 +57,7 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
   check_logicals(vars, "vars", select, warn = warn)
   check_logicals(resp, "resp", valid, warn = warn)
   check_variables(resp, "resp", dif_vars)
-
+  check_items(vars$item[vars[[select]]])
 
   if (!is.null(scoring)) check_numerics(vars, "vars", scoring,
                                         check_invalid = TRUE)
@@ -74,7 +74,7 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
       }
   }
 
-  check_items(select, dif_vars)
+  check_select(select, dif_vars)
 
   # Create list for results
   dif <- list()
@@ -109,7 +109,7 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
 #' @param dif_vars function argument 'dif_vars'
 #'
 #' @noRd
-check_items <- function(select, dif_vars) {
+check_select <- function(select, dif_vars) {
   if (length(select) > 1 & length(select) != length(dif_vars)) {
     stop("Please check 'select' and 'dif_vars'. At least one of them does ",
          "not match the intended analysis.")
@@ -169,6 +169,7 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
     check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
     check_variables(resp, "resp", dif_vars)
+    check_items(vars$item[vars[[select]]])
 
     if (!is.null(scoring)) check_numerics(vars, "vars", scoring,
                                           check_invalid = TRUE)
@@ -311,6 +312,7 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
     check_variables(resp, "resp", dif_var)
+    check_items(vars$item[vars[[select]]])
 
     if (!is.null(scoring)) check_numerics(vars, "vars", scoring,
                                           check_invalid = TRUE)

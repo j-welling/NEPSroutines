@@ -204,6 +204,23 @@ check_pid <- function(pid) {
 }
 
 
+#' Check item names for duplicates
+#'
+#' @param items  character vector with item names
+#'
+#' @export
+
+check_items <- function(items) {
+    if (length(items) != length(unique(items))) {
+        stop("There are duplicates in the item names.")
+    }
+
+    if (any(is.na(items))) {
+        stop("There are missing values in the item names.")
+    }
+}
+
+
 #' Check variables in df for existence
 #'
 #' @param df  data.frame

@@ -65,6 +65,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
   # Test data
   check_logicals(resp, "resp", c(valid, grouping), warn = warn)
   check_logicals(vars, "vars", c(select, grouping), warn = warn)
+  check_items(vars$item[vars[[select]]])
 
   if (warn & is.null(valid)) {
     warning("No variable with valid cases provided. ",
@@ -147,8 +148,9 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
 
   # Test data
   if (test) {
-    check_logicals(vars, "vars", grouping, warn = warn)
+    check_logicals(vars, "vars", c(grouping, select), warn = warn)
     check_logicals(resp, "resp", c(grouping, valid), warn = warn)
+    check_items(vars$item[vars[[select]]])
 
     if (is.null(valid)) {
       warning("No variable with valid cases provided. ",
@@ -316,6 +318,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
   if (test) {
     test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
     check_logicals(vars, "vars", c(select, grouping), warn = warn)
+    check_items(vars$item[vars[[select]]])
   }
 
   # Prepare data

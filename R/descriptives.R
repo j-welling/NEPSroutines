@@ -237,8 +237,11 @@ props_by_version <- function(vars, select, versions, props,
                              save = FALSE, overwrite = FALSE,
                              path = here::here("Tables")) {
 
-    # Create empty data frame
+    # Select only necessary items and check for duplicates
     vars <- subset(vars, vars[[select]])
+    check_items(vars$item)
+
+    # Create table with sum margins
     tbl <- addmargins(table(vars[[props]], vars[[versions]]))
 
     # Add property labels as row names

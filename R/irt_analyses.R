@@ -176,6 +176,8 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
     }
   }
 
+  check_items(vars$item[vars[[select]]])
+
   # Identify IRT type
   irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
 
@@ -328,6 +330,7 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   if (test) {
     check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
+    check_items(vars$item[vars[[select]]])
 
     if(!is.null(scoring)) check_numerics(vars, "vars", scoring,
                                          check_invalid = TRUE)
@@ -552,6 +555,7 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
                         digits = 2, overwrite = FALSE, warn = TRUE) {
 
   # prepare data
+  check_items(rownames(results$mod$xsi))
   vars$irt_item <- vars$item %in% rownames(results$mod$xsi)
   vars_ <- vars[vars$irt_item, ]
   resp <- prepare_resp(resp, vars = vars, select = 'irt_item', valid = valid,
