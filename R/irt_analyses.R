@@ -17,7 +17,9 @@
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
 #' @param xsi.fixed matrix; contains fixed (linked) item parameters; optional
-#' @param control list; function argument as passed to TAM-functions
+#' @param control_tam list; control argument as passed to tam.mml-functions
+#' @param control_wle list; can contain Msteps and/or convM as to pass to tam.wle()
+#'    as elements of the list
 #' @param pweights character; defines name of numerical variable in resp that
 #' contains person weights as passed to TAM-function
 #' @param plots  logical; whether plots shall be created and saved to hard drive
@@ -44,7 +46,8 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
                                  path_table = here::here("Tables"),
                                  path_results = here::here("Results"),
                                  digits = 2, verbose = FALSE, warn = TRUE,
-                                 xsi.fixed = NULL, control = NULL, pweights = NULL) {
+                                 xsi.fixed = NULL, pweights = NULL,
+                                 control_tam = NULL, control_wle = NULL) {
 
   # Test data
   check_logicals(vars, "vars", groups, warn = warn)
@@ -86,8 +89,8 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
                                     path_plots = path_plots,
                                     overwrite = overwrite, digits = digits,
                                     name_group = g, warn = warn, test = FALSE,
-                                    control = control, pweights = pweights,
-                                    xsi.fixed = xsi.fixed)
+                                    control_tam = control_tam, control_wle = control_wle,
+                                    pweights = pweights, xsi.fixed = xsi.fixed)
 
     i <- i + 1
   }
@@ -118,7 +121,9 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
 #' @param xsi.fixed matrix; contains fixed (linked) item parameters; optional
-#' @param control list; function argument as passed to TAM-functions
+#' @param control_tam list; control argument as passed to tam.mml-functions
+#' @param control_wle list; can contain Msteps and/or convM as to pass to tam.wle()
+#'    as elements of the list
 #' @param pweights character; defines name of numerical variable in resp that
 #' contains person weights as passed to TAM-function
 #' @param plots  logical; whether plots shall be created and saved to hard drive
@@ -147,7 +152,8 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
                          path_results = here::here("Results"),
                          overwrite = FALSE, digits = 2, name_group = NULL,
                          verbose = FALSE, warn = TRUE, test = TRUE,
-                         xsi.fixed = NULL, control = NULL, pweights = NULL) {
+                         xsi.fixed = NULL, pweights = NULL,
+                         control_tam = NULL, control_wle = NULL) {
 
   # Test data
   if (test) {
@@ -182,26 +188,26 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
     irt$model.1pl <- irt_model(resp = resp, vars = vars, select = select,
                                valid = valid, mvs = mvs, irtmodel = '1PL',
                                verbose = verbose, warn = warn, test = FALSE,
-                               control = control, pweights = pweights,
-                               xsi.fixed = xsi.fixed)
+                               control_tam = control_tam, control_wle = control_wle,
+                               pweights = pweights, xsi.fixed = xsi.fixed)
     irt$model.2pl <- irt_model(resp = resp, vars = vars, select = select,
                                valid = valid, mvs = mvs, irtmodel = '2PL',
                                verbose = verbose, warn = warn, test = FALSE,
-                               control = control, pweights = pweights,
-                               xsi.fixed = xsi.fixed)
+                               control_tam = control_tam, control_wle = control_wle,
+                               pweights = pweights, xsi.fixed = xsi.fixed)
 
   } else if (irt_type == 'poly') {
 
     irt$model.pcm <- irt_model(resp = resp, vars = vars, select = select, mvs = mvs,
                                valid = valid, irtmodel = 'PCM2', scoring = scoring,
                                verbose = verbose, warn = warn, test = FALSE,
-                               control = control, pweights = pweights,
-                               xsi.fixed = xsi.fixed)
+                               control_tam = control_tam, control_wle = control_wle,
+                               pweights = pweights, xsi.fixed = xsi.fixed)
     irt$model.gpcm <- irt_model(resp = resp, vars = vars, select = select, mvs = mvs,
                                 valid = valid, irtmodel = 'GPCM', scoring = scoring,
                                 verbose = verbose, warn = warn, test = FALSE,
-                                control = control, pweights = pweights,
-                                xsi.fixed = xsi.fixed)
+                                control_tam = control_tam, control_wle = control_wle,
+                                pweights = pweights, xsi.fixed = xsi.fixed)
 
   }
 
@@ -291,7 +297,9 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
 #' @param xsi.fixed matrix; contains fixed (linked) item parameters; optional
-#' @param control list; function argument as passed to TAM-functions
+#' @param control_tam list; control argument as passed to tam.mml-functions
+#' @param control_wle list; can contain Msteps and/or convM as to pass to tam.wle()
+#'    as elements of the list
 #' @param pweights numeric vector; function argument as passed to TAM-functions
 #' @param path  string; defines path to folder where results shall be saved
 #' @param filename  string; defines name of file that shall be saved
@@ -311,9 +319,10 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 
 irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
                       scoring = NULL, verbose = FALSE,
-                      control = NULL, pweights = NULL,
                       path = here::here("Results"), filename = NULL,
-                      xsi.fixed = NULL, warn = TRUE, test = TRUE) {
+                      xsi.fixed = NULL, pweights = NULL,
+                      control_tam = NULL, control_wle = NULL,
+                      warn = TRUE, test = TRUE) {
 
   # Test data
   if (test) {
@@ -367,25 +376,19 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
 
     mod <- TAM::tam.mml(
       resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
-      verbose = verbose, xsi.fixed = xsi.fixed, control = control,
-      pweights = pws
+      verbose = verbose, xsi.fixed = xsi.fixed,
+      control = control_tam, pweights = pws
     )
 
   } else if (irtmodel %in% c("2PL", "GPCM")) {
 
     mod <- TAM::tam.mml.2pl(
       resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
-      verbose = verbose, xsi.fixed = xsi.fixed, control = control,
+      verbose = verbose, xsi.fixed = xsi.fixed,
+      control = control_tam,
       pweights = pws
     )
   }
-  # } else {
-  #
-  #   mod <- TAM::tam.mml.3pl(
-  #       resp = resp, Q = Q, pid = pid, verbose = verbose,
-  #       xsi.fixed = xsi.fixed, control = control, pweights = pws
-  #   )
-  # }
 
 
   # Warn if maximum number of iterations were reached
@@ -404,7 +407,13 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   mfit <- TAM::tam.modelfit(mod, progress = verbose)
 
   # WLEs
-  wle <- TAM::tam.wle(mod, progress = verbose)
+  if (is.null(control_wle)) control_wle <- list()
+  if (is.null(control_wle$convM)) control_wle$convM <- .0001
+  if (is.null(control_wle$Msteps)) control_wle$Msteps <- 50
+
+  wle <- TAM::tam.wle(mod, convM = control_wle$convM,
+                      Msteps = control_wle$Msteps,
+                      progress = verbose)
   wle_rel <- wle$WLE.rel[1]
   wle <- wle[, c("pid", "theta", "error")]
 
