@@ -99,10 +99,10 @@ create_scores <- function(resp, vars, scoring = NULL,
   scaling:::check_logicals(resp, "resp", valid, warn = warn)
   scaling:::check_items(vars$item[vars[[select]]])
 
-  if (is.null(scoring))
+  if (!is.null(scoring))
     scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
-  if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
+  if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
 
   # # Estimate linked WLEs and SEs --> linking not yet implemented
   # if (wle & !is.null(resp_previous)) {
@@ -242,10 +242,10 @@ estimate_sum_scores <- function(resp, vars, select, valid = NULL,
     scaling:::check_logicals(resp, "resp", valid, warn = warn)
     scaling:::check_items(vars$item[vars[[select]]])
 
-    if (is.null(scoring))
+    if (!is.null(scoring))
       scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
-    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
+    if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
   scaling:::check_pid(resp$ID_t[resp[[valid]]])
@@ -342,7 +342,7 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
     if (is.null(scoring))
       scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
-    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
+    if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
   # Identify IRT type
