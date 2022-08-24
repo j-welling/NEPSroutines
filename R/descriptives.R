@@ -183,7 +183,7 @@ show_attributes <- function(dat, desc) {
 #' @return table with sample size by test version
 #' @export
 
-sample_by_version <- function(dat, versions, versions_lbls = NULL, save = FALSE,
+sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
                               overwrite = FALSE, path = here::here("Tables")) {
 
     # Create table with results
@@ -193,10 +193,10 @@ sample_by_version <- function(dat, versions, versions_lbls = NULL, save = FALSE,
     rownames(df)[nrow(df)] <- c("Total")
 
     # Add labels as row names
-    if(!is.null(versions_lbls) | !is.null(attributes(vars[[versions]])$labels)) {
-        lbls <- create_ifelse(is.null(versions_lbls),
+    if(!is.null(labels) | !is.null(attributes(vars[[versions]])$labels)) {
+        lbls <- create_ifelse(is.null(labels),
                               attributes(vars[[versions]])$labels,
-                              versions_lbls)
+                              labels)
         for (v in seq(nrow(df)-1)) {
             rownames(df)[v] <- names(which(rownames(df)[v] == lbls))
         }
@@ -224,7 +224,7 @@ sample_by_version <- function(dat, versions, versions_lbls = NULL, save = FALSE,
 #' @param versions_lbls named character vector; links a label each value of versions
 #' (e.g. versions_lbls = c(version1 = 1, version2 = 2))
 #' @param versions_lbls named character vector; links a label each value of props
-#' (e.g. props_lbls = c(prop1 = 1, prop2 = 2))
+#' (e.g. labels[[props]] = c(prop1 = 1, prop2 = 2))
 #' @param save  logical; whether to save the table in Excel
 #' @param overwrite logical; whether to overwrite an existing table with the same name
 #' @param path string; defines path for saving the table
@@ -232,44 +232,53 @@ sample_by_version <- function(dat, versions, versions_lbls = NULL, save = FALSE,
 #' @return table with item properties by test version
 #' @export
 
-props_by_version <- function(vars, select, versions, props,
-                             versions_lbls = NULL, props_lbls = NULL,
-                             save = FALSE, overwrite = FALSE,
-                             path = here::here("Tables")) {
+props_by_version <- function(vars, select, grouping, properties, labels = NULL,
+                             save = FALSE, overwrite = FALSE, path = here::here("Tables"),
+                             warn = TRUE) {
 
     # Select only necessary items and check for duplicates
+    check_logicals(vars, "vars", c(select, grouping), warn = warn)
+    check_variables(vars, "vars", properties)
     vars <- subset(vars, vars[[select]])
     check_items(vars$item)
 
-    # Create table with sum margins
-    tbl <- addmargins(table(vars[[props]], vars[[versions]]))
+    res <- list()
+    if(is.null(labels)) labels <- list()
 
-    # Add property labels as row names
-    if(!is.null(props_lbls) | !is.null(attributes(vars[[props]])$labels)) {
-        lbls <- create_ifelse(is.null(props_lbls),
-                              attributes(vars[[props]])$labels,
-                              props_lbls)
-        for (v in seq(nrow(tbl))) {
-            rownames(tbl)[v] <- names(which(rownames(tbl)[v] == lbls))
-        }
-    }
+    for (props in properties) {
 
-    # Add version labels as column names
-    if(!is.null(versions_lbls) | !is.null(attributes(vars[[versions]])$labels)) {
-        lbls <- create_ifelse(is.null(versions_lbls),
-                              attributes(vars[[versions]])$labels,
-                              versions_lbls)
-        for (v in seq(nrow(tbl))) {
-            colnames(tbl)[v] <- names(which(colnames(tbl)[v] == lbls))
-        }
+      # Create empty dataframe
+      df <- data.frame(matrix(NA, length(unique(vars[[props]])) + 1, length(grouping)))
+      names(df) <- grouping
+
+      # Add property labels as row names
+      if(!is.null(labels[[props]]) | !is.null(attributes(vars[[props]])$labels)) {
+          lbls <- create_ifelse(is.null(labels[[props]]),
+                                attributes(vars[[props]])$labels,
+                                labels[[props]])
+          for (v in seq(nrow(df)-1)) {
+              rownames(df)[v] <- names(which(rownames(df)[v] == lbls))
+          }
+      }
+
+      rownames(df)[nrow(df)] <- "Total number of items"
+
+      # Fill dataframe
+      for (g in grouping){
+        N <- as.data.frame.AsIs(table(vars[[props]][vars[[g]]]))
+        N <- rbind(N,sum(N))
+        df[[g]]<- N[seq(nrow(N)), ]
+      }
+
+      res[[props]] <- df
     }
 
     # Save results
     if (save) {
-        save_table(tbl, filename = paste0(props, "_by_", versions, ".xlsx"),
+        save_table(res, filename = paste0("item_properties_by_version.xlsx"),
                    path = path, overwrite = overwrite, show_rownames = TRUE)
     }
 
     # Return results
-    return(tbl)
+    return(res)
 }
