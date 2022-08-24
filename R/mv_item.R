@@ -71,11 +71,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
   check_logicals(resp, "resp", c(valid, grouping), warn = warn)
   check_logicals(vars, "vars", c(select, grouping), warn = warn)
   check_items(vars$item[vars[[select]]])
-
-  if (warn & is.null(valid)) {
-    warning("No variable with valid cases provided. ",
-            "All cases are used for analysis.\n")
-  }
+  if (warn) is_null_mvs_valid(valid = valid)
 
   # Conduct analysis
   mv_item <- mvi_analysis(resp = resp, vars = vars, select = select,
@@ -165,11 +161,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
     check_logicals(resp, "resp", c(valid, grouping), warn = warn)
     check_logicals(vars, "vars", c(select, grouping), warn = warn)
     check_items(vars$item[vars[[select]]])
-
-    if (warn & is.null(valid)) {
-      warning("No variable with valid cases provided. ",
-              "All cases are used for analysis.\n")
-    }
+    if (warn) is_null_mvs_valid(valid = valid)
   }
 
   if (is.null(grouping)) {

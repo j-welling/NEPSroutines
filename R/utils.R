@@ -120,6 +120,19 @@ prepare_resp <- function(resp, vars = NULL, select = NULL,
     return(resp)
 }
 
+#' Warning message if mvs is not provided
+
+is_null_mvs_valid <- function(mvs = NA, valid = NA) {
+  if (is.null(mvs)) {
+    warning("No user defined missing values provided. ",
+            "Default of '-999 to -1' is used.\n")
+  }
+
+  if (is.null(valid)) {
+    warning("No variable with valid cases provided. ",
+            "All cases are used for analysis.\n")
+  }
+}
 
 #' Save table
 #'

@@ -102,17 +102,7 @@ create_scores <- function(resp, vars, scoring = NULL,
   if (is.null(scoring))
     scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
-  if (warn) {
-    if (is.null(mvs)) {
-      warning("No user defined missing values provided. ",
-              "Default of '-999 to -1' is used.\n")
-    }
-
-    if (is.null(valid)) {
-      warning("No variable with valid cases provided. ",
-              "All cases are used for analysis.\n")
-    }
-  }
+  if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 
   # # Estimate linked WLEs and SEs --> linking not yet implemented
   # if (wle & !is.null(resp_previous)) {
@@ -255,17 +245,7 @@ estimate_sum_scores <- function(resp, vars, select, valid = NULL,
     if (is.null(scoring))
       scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
-    if (warn) {
-      if (is.null(mvs)) {
-        warning("No user defined missing values provided. ",
-                "Default of '-999 to -1' is used.\n")
-      }
-
-      if (is.null(valid)) {
-        warning("No variable with valid cases provided. ",
-                "All cases are used for analysis.\n")
-      }
-    }
+    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
   scaling:::check_pid(resp$ID_t[resp[[valid]]])
@@ -362,17 +342,7 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
     if (is.null(scoring))
       scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
-    if (warn) {
-      if (is.null(mvs)) {
-        warning("No user defined missing values provided. ",
-                "Default of '-999 to -1' is used.\n")
-      }
-
-      if (is.null(valid)) {
-        warning("No variable with valid cases provided. ",
-                "All cases are used for analysis.\n")
-      }
-    }
+    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
   # Identify IRT type

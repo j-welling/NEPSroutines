@@ -105,17 +105,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
   check_variables(vars, "vars", c(dim, scoring))
   check_items(vars$item[vars[[select]]])
 
-    if (warn) {
-        if (is.null(mvs)) {
-            warning("No user defined missing values provided. ",
-                    "Default of '-999 to -1' is used.\n")
-        }
-
-        if (is.null(valid)) {
-            warning("No variable with valid cases provided. ",
-                    "All cases are used for analysis.\n")
-        }
-    }
+  if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 
   # Select only valid cases
   resp <- only_valid(resp, valid = valid, warn = warn)

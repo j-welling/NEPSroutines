@@ -120,17 +120,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
     check_items(vars$item[vars[[select_raw]]])
     check_items(vars$item[vars[[select_score]]])
 
-    if (warn) {
-        if (is.null(mvs)) {
-            warning("No user defined missing values provided. ",
-                    "Default of '-999 to -1' is used.\n")
-        }
-
-        if (is.null(valid)) {
-            warning("No variable with valid cases provided. ",
-                    "All cases are used for analysis.\n")
-        }
-    }
+    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 
     # prepare data
     raw_items <- vars$item[vars[[select_raw]]]

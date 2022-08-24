@@ -57,22 +57,11 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
   check_logicals(vars, "vars", select, warn = warn)
   check_logicals(resp, "resp", valid, warn = warn)
   check_variables(resp, "resp", dif_vars)
-  check_items(vars$item[vars[[select]]])
 
-  if (!is.null(scoring)) check_numerics(vars, "vars", scoring,
-                                        check_invalid = TRUE)
+  if (!is.null(scoring))
+    check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
-  if (warn) {
-      if (is.null(mvs)) {
-          warning("No user defined missing values provided. ",
-                  "Default of '-999 to -1' is used.\n")
-      }
-
-      if (is.null(valid)) {
-          warning("No variable with valid cases provided. ",
-                  "All cases are used for analysis.\n")
-      }
-  }
+  if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 
   check_select(select, dif_vars)
 
@@ -169,22 +158,11 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
     check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
     check_variables(resp, "resp", dif_vars)
-    check_items(vars$item[vars[[select]]])
 
     if (!is.null(scoring)) check_numerics(vars, "vars", scoring,
                                           check_invalid = TRUE)
 
-    if (warn) {
-        if (is.null(mvs)) {
-            warning("No user defined missing values provided. ",
-                    "Default of '-999 to -1' is used.\n")
-        }
-
-        if (is.null(valid)) {
-            warning("No variable with valid cases provided. ",
-                    "All cases are used for analysis.\n")
-        }
-    }
+    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
   # Create list for results
@@ -312,23 +290,14 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
     check_variables(resp, "resp", dif_var)
-    check_items(vars$item[vars[[select]]])
 
     if (!is.null(scoring)) check_numerics(vars, "vars", scoring,
                                           check_invalid = TRUE)
 
-    if (warn) {
-        if (is.null(mvs)) {
-            warning("No user defined missing values provided. ",
-                    "Default of '-999 to -1' is used.\n")
-        }
-
-        if (is.null(valid)) {
-            warning("No variable with valid cases provided. ",
-                    "All cases are used for analysis.\n")
-        }
-    }
+    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
   }
+
+  check_items(vars$item[vars[[select]]])
 
   # Select only valid cases
   resp <- only_valid(resp, valid = valid, warn = FALSE)

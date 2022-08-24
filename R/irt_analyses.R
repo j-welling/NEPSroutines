@@ -52,21 +52,8 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
   # Test data
   check_logicals(vars, "vars", groups, warn = warn)
   check_logicals(resp, "resp", c(valid, names(groups)), warn = warn)
-
   if (!is.null(scoring)) check_numerics(vars, "vars", scoring)
-
-  if (warn) {
-
-      if (is.null(mvs)) {
-        warning("No user defined missing values provided. ",
-                "Default of '-999 to -1' is used.\n")
-      }
-
-      if (is.null(valid)) {
-        warning("No variable with valid cases provided. ",
-                "All cases are used for analysis.\n")
-      }
-  }
+  if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 
   # Create list for results
   irt_groups <- list()
@@ -159,21 +146,9 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
   if (test) {
     check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
-
-    if(!is.null(scoring)) check_numerics(vars, "vars", scoring,
-                                         check_invalid = TRUE)
-
-    if (warn) {
-        if (is.null(mvs)) {
-          warning("No user defined missing values provided. ",
-                  "Default of '-999 to -1' is used.\n")
-        }
-
-        if (is.null(valid)) {
-          warning("No variable with valid cases provided. ",
-                  "All cases are used for analysis.\n")
-        }
-    }
+    if(!is.null(scoring))
+      check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
   check_items(vars$item[vars[[select]]])
@@ -331,21 +306,9 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
     check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
     check_items(vars$item[vars[[select]]])
-
-    if(!is.null(scoring)) check_numerics(vars, "vars", scoring,
-                                         check_invalid = TRUE)
-
-    if (warn) {
-        if (is.null(mvs)) {
-            warning("No user defined missing values provided. ",
-                    "Default of '-999 to -1' is used.\n")
-        }
-
-        if (is.null(valid)) {
-            warning("No variable with valid cases provided. ",
-                    "All cases are used for analysis.\n")
-        }
-    }
+    if(!is.null(scoring))
+      check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
   # Check if input is correct

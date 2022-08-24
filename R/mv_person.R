@@ -66,11 +66,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
   check_logicals(resp, "resp", c(valid, grouping), warn = warn)
   check_logicals(vars, "vars", c(select, grouping), warn = warn)
   check_items(vars$item[vars[[select]]])
-
-  if (warn & is.null(valid)) {
-    warning("No variable with valid cases provided. ",
-            "All cases are used for analysis.\n")
-  }
+  if (warn) is_null_mvs_valid(valid = valid)
 
   # Create list for results
   mv_person <- list()
@@ -151,11 +147,7 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
     check_logicals(vars, "vars", c(grouping, select), warn = warn)
     check_logicals(resp, "resp", c(grouping, valid), warn = warn)
     check_items(vars$item[vars[[select]]])
-
-    if (is.null(valid)) {
-      warning("No variable with valid cases provided. ",
-              "All cases are used for analysis.\n")
-    }
+    if (warn) is_null_mvs_valid(valid = valid)
   }
 
   # NAs are not acknowledged in mvs-argument
