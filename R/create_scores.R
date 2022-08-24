@@ -25,7 +25,8 @@
 #' @param wle logical; whether to estimate WLEs
 #' @param sum_score logical; whether to calculate sum scores
 #' @param control_tam list; control argument as passed to tam.mml.mfr()
-#' @param control_wle list; control argument as passed to tam.wle()
+#' @param control_wle list; can contain Msteps and/or convM as to pass to tam.wle()
+#'    as elements of the list
 #' @param pweights numeric vector; person weights for current measurement point
 #'   passed to TAM-functions
 #' @param poly2dich  logical; indicates whether count only correctly scored
@@ -81,10 +82,10 @@ create_scores <- function(resp, vars, scoring = NULL,
                           mvs = NULL, wle = TRUE, sum_score = FALSE,
                           control_tam = NULL, control_wle = NULL,
                           pweights = NULL, poly2dich = TRUE,
-                          resp_previous = NULL, resp_link_study = NULL,
-                          scoring_previous = NULL, scoring_link_study = NULL,
-                          pweights_previous = NULL, pweights_link_study = NULL,
-                          anchors = NULL, longitudinal = TRUE,
+                          #resp_previous = NULL, resp_link_study = NULL,
+                          #scoring_previous = NULL, scoring_link_study = NULL,
+                          #pweights_previous = NULL, pweights_link_study = NULL,
+                          #anchors = NULL, longitudinal = TRUE,
                           print = TRUE, save = TRUE,
                           return = FALSE, overwrite = FALSE,
                           path_table = here::here("Tables"),
@@ -94,41 +95,41 @@ create_scores <- function(resp, vars, scoring = NULL,
                           snodes = 0, maxiter = 1000,
                           digits = 3, verbose = TRUE, warn = TRUE) {
 
-  # Estimate linked WLEs and SEs
-  if (wle & !is.null(resp_previous)) {
-    linked_scores <-
-      linking(
-        resp = resp,
-        resp_previous = resp_previous,
-        resp_link_study = resp_link_study,
-        vars = vars,
-        select = select,
-        valid = valid,
-        anchors = anchors,
-        mvs = mvs,
-        scoring = scoring,
-        scoring_previous = scoring_previous,
-        scoring_link_study = scoring_link_study,
-        longitudinal = longitudinal,
-        overwrite = overwrite,
-        verbose = verbose,
-        path_table = path_table,
-        path_results = path_results,
-        return = return, print = print, save = save,
-        diff_threshold = diff_threshold,
-        wid = wid, snodes = snodes, maxiter = maxiter,
-        digits = digits,
-        pweights = pweights,
-        pweights_previous = pweights_previous,
-        pweights_link_study = pweights_link_study,
-        control_tam = control_tam,
-        do_dim = do_dim, do_dif = do_dif
-      )
-    wles_linked <- linked_scores$link_results$wle_linked
-    names(wles_linked) <- c("ID_t", paste0(score_name, c("_sc1u", "_sc2u")))
-  } else {
+  # # Estimate linked WLEs and SEs --> linking not yet implemented
+  # if (wle & !is.null(resp_previous)) {
+  #   linked_scores <-
+  #     linking(
+  #       resp = resp,
+  #       resp_previous = resp_previous,
+  #       resp_link_study = resp_link_study,
+  #       vars = vars,
+  #       select = select,
+  #       valid = valid,
+  #       anchors = anchors,
+  #       mvs = mvs,
+  #       scoring = scoring,
+  #       scoring_previous = scoring_previous,
+  #       scoring_link_study = scoring_link_study,
+  #       longitudinal = longitudinal,
+  #       overwrite = overwrite,
+  #       verbose = verbose,
+  #       path_table = path_table,
+  #       path_results = path_results,
+  #       return = return, print = print, save = save,
+  #       diff_threshold = diff_threshold,
+  #       wid = wid, snodes = snodes, maxiter = maxiter,
+  #       digits = digits,
+  #       pweights = pweights,
+  #       pweights_previous = pweights_previous,
+  #       pweights_link_study = pweights_link_study,
+  #       control_tam = control_tam,
+  #       do_dim = do_dim, do_dif = do_dif
+  #     )
+  #   wles_linked <- linked_scores$link_results$wle_linked
+  #   names(wles_linked) <- c("ID_t", paste0(score_name, c("_sc1u", "_sc2u")))
+  # } else {
     wles_linked <- NULL
-  }
+  #}
 
   # Estimate (unrotated) WLEs and SEs
   if (wle) {
@@ -140,7 +141,7 @@ create_scores <- function(resp, vars, scoring = NULL,
         scoring = scoring, xsi.fixed = xsi_fixed,
         verbose = FALSE, warn = warn, return = TRUE,
         plots = FALSE, save = FALSE, print = FALSE, test = FALSE,
-        control = control_tam, pweights = pweights,
+        control_tam = control_tam, pweights = pweights,
       )
       if (is.null(fit$model.1pl)) {
         fit <- fit$model.pcm
@@ -214,6 +215,10 @@ create_scores <- function(resp, vars, scoring = NULL,
 #'   Rasch model
 #' @param poly2dich  logical; indicates whether count only correctly scored
 #'   binary or FULLY correctly scored PC items
+#' @param warn  logical; whether to print warnings
+#' @param score_name character; name of the scores -- WITHOUT extension (e.g.,
+#'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
+#'
 #' @noRd
 estimate_sum_scores <- function(resp, vars, select, valid = NULL,
                                 mvs = NULL, scoring = NULL,
@@ -287,14 +292,20 @@ estimate_sum_scores <- function(resp, vars, select, valid = NULL,
 #' @param facet character vector; contains the variable name indicating the
 #'   test rotation
 #' @param xsi_fixed matrix; fixed parameter estimates of final IRT scaling as
-#'   returned by tam.mml()
+#'   returned by tam.mml.mfr()
 #' @param scoring  string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param wle_name character; name of the wle -- WITHOUT extension (e.g.,
 #'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
-#' @param irtmodel  string; "1PL" for Rasch, or "PCM2" for PCM analysis
+#' @param warn  logical; whether to print warnings
+#' @param control_tam list; control argument as passed to tam.mml.mfr()
+#' @param control_wle list; can contain Msteps and/or convM as to pass to tam.wle()
+#'    as elements of the list
+#' @param pweights numeric vector; person weights for current measurement point
+#'   passed to tam.mml.mfr()
+#'
 #' @return a data.frame containing ID_t, wle and se of wle (named like indicated
 #'   in wle_name)
 #' @noRd
