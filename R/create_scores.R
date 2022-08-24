@@ -141,7 +141,8 @@ create_scores <- function(resp, vars, scoring = NULL,
         scoring = scoring, xsi.fixed = xsi_fixed,
         verbose = FALSE, warn = warn, return = TRUE,
         plots = FALSE, save = FALSE, print = FALSE, test = FALSE,
-        control_tam = control_tam, pweights = pweights,
+        control_tam = control_tam, control_wle = control_wle,
+        pweights = pweights
       )
       if (is.null(fit$model.1pl)) {
         fit <- fit$model.pcm
@@ -157,9 +158,8 @@ create_scores <- function(resp, vars, scoring = NULL,
         resp = resp, vars = vars, select = select,
         valid = valid, facet = facet, mvs = mvs,
         scoring = scoring, xsi_fixed = xsi_fixed,
-        wle_name = score_name,
-        control_tam = control_tam, pweights = pweights,
-        warn = warn
+        wle_name = score_name, control_tam = control_tam,
+        pweights = pweights, warn = warn
       )
     } else {
       wles <- as.data.frame(fit$wle[, c("pid", "theta", "error")])
