@@ -54,22 +54,22 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
                          verbose = FALSE, warn = TRUE, prob_dif = 0.5) {
 
   # Test data
-  check_logicals(vars, "vars", select, warn = warn)
-  check_logicals(resp, "resp", valid, warn = warn)
-  check_variables(resp, "resp", dif_vars)
+  scaling:::check_logicals(vars, "vars", select, warn = warn)
+  scaling:::check_logicals(resp, "resp", valid, warn = warn)
+  scaling:::check_variables(resp, "resp", dif_vars)
 
   if (!is.null(scoring))
-    check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+      scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
-  if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
+  if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
 
-  check_select(select, dif_vars)
+  scaling:::check_select(select, dif_vars)
 
   # Create list for results
   dif <- list()
 
   # Conduct dif analyses
-  dif$models <- conduct_dif_analysis(
+  dif$models <- scaling:::conduct_dif_analysis(
     select = select, dif_vars = dif_vars, resp = resp, vars = vars,
     scoring = scoring, include_mv = include_mv, valid = valid,
     path = path_results, mvs = mvs, verbose = verbose, warn = warn, save = save,
@@ -77,14 +77,14 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
   )
 
   # Create summary
-  dif$summaries <- summarize_dif_analysis(
+  dif$summaries <- scaling:::summarize_dif_analysis(
     dif_models = dif$models, dif_vars = dif_vars, prob_dif = prob_dif,
     path_table = path_table, path_results = path_results,
     print = print, save = save, overwrite = overwrite
   )
 
   # Create table for TR
-  dif$tr_tables <- build_dif_tr_tables(
+  dif$tr_tables <- scaling:::build_dif_tr_tables(
     dif_summaries = dif$summaries,  save = save,
     path = path_table, overwrite = overwrite
   )
@@ -155,14 +155,14 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 
   # Test data
   if (test) {
-    check_logicals(vars, "vars", select, warn = warn)
-    check_logicals(resp, "resp", valid, warn = warn)
-    check_variables(resp, "resp", dif_vars)
+      scaling:::check_logicals(vars, "vars", select, warn = warn)
+      scaling:::check_logicals(resp, "resp", valid, warn = warn)
+      scaling:::check_variables(resp, "resp", dif_vars)
 
-    if (!is.null(scoring)) check_numerics(vars, "vars", scoring,
-                                          check_invalid = TRUE)
+    if (!is.null(scoring))
+        scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
-    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
+    if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
   # Create list for results
@@ -230,8 +230,8 @@ summarize_dif_analysis <- function(dif_models, dif_vars, prob_dif = 0.5,
       are_poly <- sapply(dif_summaries, function(x) x$irt_type == 'poly')
       irt_type <- ifelse(sum(are_poly) == length(are_poly), 'poly',
                          ifelse(sum(are_poly) == 0, 'dich', 'mixed'))
-      save_results(dif_summaries, path = path_results,
-                   filename = paste0("dif_", irt_type, "_summaries.rds"))
+      scaling:::save_results(dif_summaries, path = path_results,
+                             filename = paste0("dif_", irt_type, "_summaries.rds"))
   }
 
   return(dif_summaries)
@@ -287,34 +287,34 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 
   # Test data
   if (test) {
-    check_logicals(vars, "vars", select, warn = warn)
-    check_logicals(resp, "resp", valid, warn = warn)
-    check_variables(resp, "resp", dif_var)
+      scaling:::check_logicals(vars, "vars", select, warn = warn)
+      scaling:::check_logicals(resp, "resp", valid, warn = warn)
+      scaling:::check_variables(resp, "resp", dif_var)
 
-    if (!is.null(scoring)) check_numerics(vars, "vars", scoring,
-                                          check_invalid = TRUE)
+    if (!is.null(scoring))
+        scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
-    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
+    if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
-  check_items(vars$item[vars[[select]]])
+  scaling:::check_items(vars$item[vars[[select]]])
 
   # Select only valid cases
-  resp <- only_valid(resp, valid = valid, warn = FALSE)
+  resp <- scaling:::only_valid(resp, valid = valid, warn = FALSE)
 
   # Create ID, facets and pweights variable
   pid <- resp$ID_t
   check_pid(pid)
   facets <- resp[, dif_var, drop = FALSE]
   lbls_facet <- attributes(resp[[dif_var]])$label
-  pws <- create_ifelse(is.null(pweights), NULL, resp[[pweights]])
+  pws <- scaling:::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
 
   # Prepare resp by converting missing values and selecting only necessary variables
-  resp <- prepare_resp(resp, vars = vars, select = select,
-                       convert = TRUE, mvs = mvs, warn = FALSE)
+  resp <- scaling:::prepare_resp(resp, vars = vars, select = select,
+                                 convert = TRUE, mvs = mvs, warn = FALSE)
 
   # Test resp
-  check_numerics(resp, "resp", check_invalid = TRUE)
+  scaling:::check_numerics(resp, "resp", check_invalid = TRUE)
 
   # Identify IRT type
   irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
@@ -398,9 +398,9 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
   } else {
 
     # Check whether resp contains only dichotomous items
-    check_dich(resp, "resp")
+    scaling:::check_dich(resp, "resp")
 
-    Q <- create_q(vars, select = select, scoring = scoring, poly = FALSE)
+    Q <- scaling:::create_q(vars, select = select, scoring = scoring, poly = FALSE)
     irtmodel <- ifelse(two_par, '2PL', '1PL')
 
     dmod <- TAM::tam.mml.mfr(resp, irtmodel = irtmodel, facets = facets,
@@ -418,8 +418,8 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
   }
 
   # Warn if maximum number of iterations were reached
-  reached_maxiter(mmod, paste0("'", dif_var, "' without DIF"))
-  reached_maxiter(dmod, paste0("'", dif_var, "' with DIF"))
+  scaling:::reached_maxiter(mmod, paste0("'", dif_var, "' without DIF"))
+  scaling:::reached_maxiter(dmod, paste0("'", dif_var, "' with DIF"))
 
   list(mmod = mmod, dmod = dmod, facets = fcts,
        dif_var = dif_var, irt_type = irt_type)
@@ -435,11 +435,11 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 
   df <- data.frame(table(facet))
   names(df) <- c("number", "counts")
-  row.names(df) <- create_ifelse(!missings,
-                                 paste0("Group ", sort(unique(facet))),
-                                 c(paste0("Group ", sort(unique(facet))[-length(unique(facet))]), "missings"))
+  row.names(df) <- scaling:::create_ifelse(!missings,
+                     paste0("Group ", sort(unique(facet))),
+                     c(paste0("Group ", sort(unique(facet))[-length(unique(facet))]), "missings"))
   if(!is.null(labels)) {
-      df$label <- create_ifelse(!missings, names(labels), c(names(labels), 'missings'))
+      df$label <- scaling:::create_ifelse(!missings, names(labels), c(names(labels), 'missings'))
   }
 
   df
@@ -482,9 +482,9 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid, verbose,
   # get design matrix for model
   B <- TAM::designMatrices(modeltype = 'PCM', resp = resp)$B
 
-  pcm_scoring <- create_ifelse(is.null(scoring),
-                               rep(1, length(vars[[select]])),
-                               vars[[scoring]][vars[[select]]])
+  pcm_scoring <- scaling:::create_ifelse(is.null(scoring),
+                                         rep(1, length(vars[[select]])),
+                                         vars[[scoring]][vars[[select]]])
 
   # 0.5 scoring for PCM
   B[vars$item[vars[[select]]], , 1] <- B[vars$item[vars[[select]]], , 1] * pcm_scoring
@@ -559,8 +559,6 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
 #' @importFrom stats deviance
 #' @noRd
 
-### TG: start
-
 difsum <- function(obj, dif_var, groups = 1) {
 
     # all included items
@@ -602,9 +600,9 @@ difsum <- function(obj, dif_var, groups = 1) {
         # Differences in item parameters
         mest[[lbl]] <- est[[grps[1]]]
         mest[[lbl]]$xsi <-  est[[grps[1]]]$xsi - est[[grps[2]]]$xsi
-        mest[[lbl]]$se.xsi <- create_ifelse(any(grps == max(groups)),
-                                            sqrt(est[[grps[!grps == max(groups)]]]$se.xsi^2 * 2),
-                                            sqrt(est[[grps[1]]]$se.xsi^2 + est[[grps[2]]]$se.xsi^2))
+        mest[[lbl]]$se.xsi <- scaling:::create_ifelse(any(grps == max(groups)),
+                                  sqrt(est[[grps[!grps == max(groups)]]]$se.xsi^2 * 2),
+                                  sqrt(est[[grps[1]]]$se.xsi^2 + est[[grps[2]]]$se.xsi^2))
 
         # Standardized difference
         mest[[lbl]]$std <- round(mest[[lbl]]$xsi / sqrt(obj$dmod$variance[1]), 3)
