@@ -46,7 +46,7 @@
 #' @export
 
 dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
-                         scoring = NULL, overwrite = FALSE, two_par = FALSE,
+                         scoring = NULL, overwrite = FALSE, #two_par = FALSE,
                          save = TRUE, print = TRUE, return = FALSE,
                          include_mv = 200, control = NULL, pweights = NULL,
                          path_results = here::here('Results'),
@@ -73,7 +73,7 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
     select = select, dif_vars = dif_vars, resp = resp, vars = vars,
     scoring = scoring, include_mv = include_mv, valid = valid,
     path = path_results, mvs = mvs, verbose = verbose, warn = warn, save = save,
-    control = control, pweights = pweights, test = FALSE, two_par = two_par
+    control = control, pweights = pweights, test = FALSE #, two_par = two_par
   )
 
   # Create summary
@@ -150,8 +150,8 @@ check_select <- function(select, dif_vars) {
 conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
                                  scoring = NULL, mvs = NULL, include_mv = 200,
                                  path = here::here('Results'), save = TRUE,
-                                 verbose = FALSE, warn = TRUE, test = TRUE,
-                                 two_par = F, control = NULL, pweights = NULL) {
+                                 control = NULL, pweights = NULL, #two_par = F,
+                                 verbose = FALSE, warn = TRUE, test = TRUE) {
 
   # Test data
   if (test) {
@@ -179,7 +179,7 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
                                  valid = valid, dif_var = dif_vars[i],
                                  scoring = scoring, include_mv = include_mv,
                                  verbose = verbose, mvs = mvs, warn = warn,
-                                 test = FALSE, two_par = two_par,
+                                 test = FALSE, #two_par = two_par,
                                  control = control, pweights = pweights)
   }
   names(dif_models) <- dif_vars
@@ -281,7 +281,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, prob_dif = 0.5,
 #' @importFrom stats as.formula
 #' @export
 dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
-                      valid = NULL, include_mv = 200, two_par = FALSE,
+                      valid = NULL, include_mv = 200, #two_par = FALSE,
                       mvs = NULL, verbose = FALSE, warn = TRUE, test = TRUE,
                       control = NULL, pweights = NULL) {
 
@@ -385,14 +385,14 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 
     mmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
-      vars = vars, select = select, scoring = scoring, verbose = verbose,
-      two_par = two_par, control = control, pweights = pws
+      vars = vars, select = select, scoring = scoring, #two_par = two_par,
+      verbose = verbose, control = control, pweights = pws
     )
 
     dmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_dmod, pid = pid,
-      vars = vars, select = select, scoring = scoring, verbose = verbose,
-      two_par = two_par, control = control, pweights = pws
+      vars = vars, select = select, scoring = scoring, #two_par = two_par,
+      verbose = verbose, control = control, pweights = pws
     )
 
   } else {
@@ -401,7 +401,8 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     scaling:::check_dich(resp, "resp")
 
     Q <- scaling:::create_q(vars, select = select, scoring = scoring, poly = FALSE)
-    irtmodel <- ifelse(two_par, '2PL', '1PL')
+    #irtmodel <- ifelse(two_par, '2PL', '1PL')
+    irtmodel <- '1PL'
 
     dmod <- TAM::tam.mml.mfr(resp, irtmodel = irtmodel, facets = facets,
                              Q = Q, pid = pid, formulaA = formula_dmod,
@@ -476,8 +477,8 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 #' @return a tam.mml model
 #' @noRd
 
-pcm_dif <- function(resp, facets, formulaA, vars, select, pid, verbose,
-                    two_par = F, scoring = NULL, control = NULL, pweights = NULL) {
+pcm_dif <- function(resp, facets, formulaA, vars, select, pid, #two_par = F,
+                    verbose, scoring = NULL, control = NULL, pweights = NULL) {
 
   # get design matrix for model
   B <- TAM::designMatrices(modeltype = 'PCM', resp = resp)$B
@@ -490,7 +491,8 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid, verbose,
   B[vars$item[vars[[select]]], , 1] <- B[vars$item[vars[[select]]], , 1] * pcm_scoring
 
   # set irtmodel
-  irtmodel <- ifelse(two_par, 'GPCM', 'PCM2')
+  #irtmodel <- ifelse(two_par, 'GPCM', 'PCM2')
+  irtmodel <- 'GPCM'
 
   TAM::tam.mml.mfr(formulaA = formulaA, facets = facets, B = B, pid = pid,
                    irtmodel = irtmodel, resp = resp, verbose = verbose,
