@@ -121,6 +121,11 @@ prepare_resp <- function(resp, vars = NULL, select = NULL,
 }
 
 #' Warning message if mvs is not provided
+#'
+#' @param mvs named numeric vector; contains user defined missing values
+#' @param valid string; defines name of variable in resp indicating valid cases
+#'
+#' @noRd
 
 is_null_mvs_valid <- function(mvs = NA, valid = NA) {
   if (is.null(mvs)) {
