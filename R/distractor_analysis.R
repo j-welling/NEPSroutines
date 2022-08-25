@@ -128,7 +128,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
     vars$keep_items <- vars[[select_raw]] | vars[[select_score]]
     resp <- prepare_resp(resp, vars, select = 'keep_items',
                          use_only_valid = TRUE, valid = valid,
-                         convert = TRUE, mvs = mvs, warn = warn)
+                         convert = TRUE, mvs = mvs, warn = FALSE)
 
     # Check whether all items to be used for score generation are dichotomous
     check_numerics(resp, "resp", items_for_score, check_invalid = TRUE, dich = TRUE)
@@ -221,9 +221,9 @@ print_dis_summary <- function(dist_sum) {
         corr_med_names <- rownames(rc[which(rc$corr == median(rc$corr)),])
 
         message("\nItem-total correlation for correct response: ",
-                "\nMin. = ",  corr_min, " (", paste(corr_min_names, collapse = ","), ")",
-                "\nMax. = ",  corr_max, " (", paste(corr_max_names, collapse = ","), ")",
-                "\nMed. = ",  corr_med, " (", paste(corr_med_names, collapse = ","), ")")
+                "\nMin. = ",  corr_min, " (", paste(corr_min_names, collapse = ", "), ")",
+                "\nMax. = ",  corr_max, " (", paste(corr_max_names, collapse = ", "), ")",
+                "\nMed. = ",  median(rc$corr), " (", paste(corr_med_names, collapse = ", "), ")")
 
         # Distractors
         dist_min <- rd[which(rd$corr == min(rd$corr)), "corr"]
@@ -234,9 +234,9 @@ print_dis_summary <- function(dist_sum) {
         dist_med_names <- rownames(rd[which(rd$corr == median(rd$corr)),])
 
         message("\nItem-total correlation for distractor: ",
-                "\nMin. = ",  dist_min, " (", paste(dist_min_names, collapse = ","), ")",
-                "\nMax. = ",  dist_max, " (", paste(dist_max_names, collapse = ","), ")",
-                "\nMed. = ",  dist_med, " (", paste(dist_med_names, collapse = ","), ")")
+                "\nMin. = ",  dist_min, " (", paste(dist_min_names, collapse = ", "), ")",
+                "\nMax. = ",  dist_max, " (", paste(dist_max_names, collapse = ", "), ")",
+                "\nMed. = ",  median(rd$corr), " (", paste(dist_med_names, collapse = ", "), ")")
 
         # Auffällige Distraktoren und korrekte Antworten anzeigen
         message("\n",
