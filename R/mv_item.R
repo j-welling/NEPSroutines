@@ -521,12 +521,12 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
       mv_max <- max(mv_i$list[[lbl]], na.rm = TRUE)
       item_min <- mv_i$list$item[mv_i$list[[lbl]] == mv_min]
       item_max <- mv_i$list$item[mv_i$list[[lbl]] == mv_max]
-      message("The number of ", labels_mvs[lbl], " varied between ",
-              mv_min, " %", if(length(item_min) <= 3) {
+      message("The proportion of ", labels_mvs[lbl], " varied between ",
+              mv_min, "%", if(length(item_min) <= 3) {
                   paste0(" (", ifelse(length(item_min) > 1, "items ", "item "),
                          paste(item_min, collapse = ", "), ")")
                   }, " and ",
-              mv_max, " %", if(length(item_max) <= 3) {
+              mv_max, "%", if(length(item_max) <= 3) {
                   paste0(" (", ifelse(length(item_max) > 1, "items ", "item "),
                          paste(item_max, collapse = ", "), ")")
               }, ".")
@@ -539,12 +539,12 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
         mv_max <- max(mv_i$list[[g]][[lbl]], na.rm = TRUE)
         item_min <- mv_i$list[[g]]$item[mv_i$list[[g]][[lbl]] == mv_min]
         item_max <- mv_i$list[[g]]$item[mv_i$list[[g]][[lbl]] == mv_max]
-        message("The number of ", labels_mvs[lbl], " in the ", g, " test version varied between ",
-                mv_min, " %", if(length(item_min) <= 3) {
+        message("The proportion of ", labels_mvs[lbl], " in the ", g, " test version varied between ",
+                mv_min, "%", if(length(item_min) <= 3) {
                     paste0(" (", ifelse(length(item_min) > 1, "items ", "item "),
                            paste(item_min, collapse = ", "), ")")
                 }, " and ",
-                mv_max, " %", if(length(item_max) <= 3) {
+                mv_max, "%", if(length(item_max) <= 3) {
                     paste0(" (", ifelse(length(item_max) > 1, "items ", "item "),
                            paste(item_max, collapse = ", "), ")")
                 }, ".")
