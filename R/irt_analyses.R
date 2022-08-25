@@ -712,12 +712,12 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   pc_median <- round(median(irt_sum[['% correct']], na.rm = TRUE))
   message("Percentage correct:\n",
           "The percentage of correct responses within dichotomous items varied between ",
-          pc_min, " % (", ifelse(length(pc_min_item) > 1, "items ", "item "),
+          pc_min, "% (", ifelse(length(pc_min_item) > 1, "items ", "item "),
           paste(pc_min_item, collapse = ", "), ") and ",
-          pc_max, " % (", ifelse(length(pc_max_item) > 1, "items ", "item "),
+          pc_max, "% (", ifelse(length(pc_max_item) > 1, "items ", "item "),
           paste(pc_max_item, collapse = ", "),
-          ") with an average of ", pc_mean, " % correct responses, and a median of ",
-          pc_median, " % correct responses.\n")
+          ") with an average of ", pc_mean, "% correct responses, and a median of ",
+          pc_median, "% correct responses.\n")
 
   # Item difficulties
   xsi_min <- min(irt_sum$xsi, na.rm = TRUE)
@@ -728,9 +728,9 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   xsi_median <- round(median(irt_sum$xsi, na.rm = TRUE), 2)
   message("Item difficulties:\n",
           "The estimated item difficulties (or location parameters for polytomous variables) varied between ",
-          xsi_min, " % (", ifelse(length(xsi_min_item) > 1, "items ", "item "),
+          xsi_min, " (", ifelse(length(xsi_min_item) > 1, "items ", "item "),
           paste(xsi_min_item, collapse = ", "), ") and ",
-          xsi_max, " % (", ifelse(length(xsi_max_item) > 1, "items ", "item "),
+          xsi_max, " (", ifelse(length(xsi_max_item) > 1, "items ", "item "),
           paste(xsi_max_item, collapse = ", "),
           ") with an average of ", xsi_mean, ", and a median of ", xsi_median, ".\n")
 
@@ -747,10 +747,10 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   wmnsq_median <- round(median(irt_sum$WMNSQ, na.rm = TRUE), 2)
   message("WMNSQ:\n",
           "The values of the WMNSQ were ... close to 1 with the lowest value being ",
-          wmnsq_min, " % (", ifelse(length(wmnsq_min_item) > 1, "items ", "item "),
+          wmnsq_min, " (", ifelse(length(wmnsq_min_item) > 1, "items ", "item "),
           paste(wmnsq_min_item, collapse = ", "),
           ") and the highest being ",
-          wmnsq_max, " % (", ifelse(length(wmnsq_max_item) > 1, "items ", "item "),
+          wmnsq_max, " (", ifelse(length(wmnsq_max_item) > 1, "items ", "item "),
           paste(wmnsq_max_item, collapse = ", "),
           ") with an average of ",
           wmnsq_mean, ", and a median of ", wmnsq_median, ".")
@@ -770,9 +770,9 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   t_median <- round(median(irt_sum$t, na.rm = TRUE), 2)
   message("\nWMNSQ t-value:\n",
           "The WMNSQ t-values varied between ",
-          t_min, " % (", ifelse(length(t_min_item) > 1, "items ", "item "),
+          t_min, " (", ifelse(length(t_min_item) > 1, "items ", "item "),
           paste(t_min_item, collapse = ", "), ") and ",
-          t_max, " % (", ifelse(length(t_max_item) > 1, "items ", "item "),
+          t_max, " (", ifelse(length(t_max_item) > 1, "items ", "item "),
           paste(t_max_item, collapse = ", "), ") with an average of ",
           t_mean, ", and a median of ", t_median, ".")
 
@@ -792,9 +792,9 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   rit_median <- round(median(irt_sum$rit, na.rm = TRUE), 2)
   message("\nCorrelation of item scores with total correct score:\n",
           "The correlations between the item scores and the total correct scores varied between ",
-          rit_min, " % (", ifelse(length(rit_min_item) > 1, "items ", "item "),
+          rit_min, " (", ifelse(length(rit_min_item) > 1, "items ", "item "),
           paste(rit_min_item, collapse = ", "), ") and ",
-          rit_max, " % (", ifelse(length(rit_max_item) > 1, "items ", "item "),
+          rit_max, " (", ifelse(length(rit_max_item) > 1, "items ", "item "),
           paste(rit_max_item, collapse = ", "), ") with an average correlation of ",
           rit_mean, ", and a median correlation of ", rit_median, ".\n")
 
@@ -818,9 +818,9 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   disc_median <- round(median(irt_sum$Discr., na.rm = TRUE), 2)
   message("Item discrimination:\n",
           "The estimated discrimination parameters varied between ",
-          disc_min, " % (", ifelse(length(disc_min_item) > 1, "items ", "item "),
+          disc_min, " (", ifelse(length(disc_min_item) > 1, "items ", "item "),
           paste(disc_min_item, collapse = ", "), ") and ",
-          disc_max, " % (", ifelse(length(disc_max_item) > 1, "items ", "item "),
+          disc_max, " (", ifelse(length(disc_max_item) > 1, "items ", "item "),
           paste(disc_max_item, collapse = ", "), ") with an average discrimination of ",
           disc_mean, ", and a median discrimination of ", disc_median, ".\n")
 }
