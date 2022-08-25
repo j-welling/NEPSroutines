@@ -32,7 +32,8 @@
 # #' @param color  character calar or vector; defines color(s) of the bar in plots
 #' @param name_grouping  string; name of the grouping variable (e.g. test version)
 #' for title and legend of plots (only needed when grouping exists)
-#' @param labels_legend character vector; contains legend labels (defaults to grouping names)
+#' @param labels_legend named character vector; contains legend labels
+#' (defaults to grouping names); names of elements correspond to grouping names
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print warnings (should be better set to true)
@@ -370,7 +371,8 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
 # #' @param color  character calar or vector; defines color(s) of the bar in plots
 #' @param name_grouping  string; name of the grouping variable (e.g. test version)
 #' for title and legend of plots (only needed when grouping exists)
-#' @param labels_legend character vector; contains legend labels (defaults to grouping names)
+#' @param labels_legend named character vector; contains legend labels
+#' (defaults to grouping names); names of elements correspond to grouping names
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
 #' @param verbose  logical; whether to print processing information to console
@@ -415,7 +417,13 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
 
   if(!is.null(grouping)) {
       groups <- create_ifelse(show_all, c(grouping, 'all'), grouping)
-      lbls <- create_ifelse(is.null(labels_legend), grouping, labels_legend)
+      lbls <- names(mv_p)[-length(mv_p)]
+      # If legend labels are provided, be sure to include labels in the right order
+      if(!is.null(labels_legend)) {
+        for (l in seq(lbls)) {
+          lbls[l] <- labels_legend[which(names(labels_legend) == lbls[l])]
+        }
+      }
   }
 
   # Create directory for plots

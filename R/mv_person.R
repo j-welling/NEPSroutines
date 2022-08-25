@@ -28,7 +28,8 @@
 # #' @param color  character scalar or vector; defines color(s) of the bar in plots
 #' @param name_grouping  string; name of the grouping variable (e.g. test version)
 #' for title and legend of plots (only needed when grouping exists)
-#' @param labels_legend character vector; contains legend labels (defaults to grouping names)
+#' @param labels_legend named character vector; contains legend labels
+#' (defaults to grouping names); names of elements correspond to grouping names
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print warnings (should be set to TRUE to
@@ -279,7 +280,8 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
 # #' @param color  character calar or vector; defines color(s) of the bar in plots
 #' @param name_grouping  string; name of the grouping variable (e.g. test version)
 #' for title and legend of plots (only needed when grouping exists)
-#' @param labels_legend character vector; contains legend labels (defaults to grouping names)
+#' @param labels_legend named character vector; contains legend labels
+#' (defaults to grouping names); names of elements correspond to grouping names
 #' @param verbose  logical; whether to print processing information to console
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
@@ -322,7 +324,13 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
 
   if(!is.null(grouping)) {
       groups <- create_ifelse(show_all, c(grouping, 'all'), grouping)
-      lbls <- create_ifelse(is.null(labels_legend), grouping, labels_legend)
+      lbls <- names(mv_p)[-length(mv_p)]
+      # If legend labels are provided, be sure to include labels in the right order
+      if(!is.null(labels_legend)) {
+        for (l in seq(lbls)) {
+          lbls[l] <- labels_legend[which(names(labels_legend) == lbls[l])]
+        }
+      }
   }
 
   # Test labels
