@@ -6,25 +6,22 @@
 \usage{
 build_dif_tr_tables(
   dif_summaries,
-  irt_type,
   save = TRUE,
-  path = here::here("Tables"),
-  overwrite = FALSE
+  overwrite = FALSE,
+  path = here::here("Tables")
 )
 }
 \arguments{
 \item{dif_summaries}{named list of dif_summary() return objects; the list
 elements must be named after their DIF variable}
 
-\item{irt_type}{string; either "dich" (for Rasch) or "poly" (for PCM)}
-
 \item{save}{logical; whether results shall be saved to hard drive}
+
+\item{overwrite}{logical; whether to overwrite existing file when saving table}
 
 \item{path}{string; indicates the folder location where the summaries
 are stored on the hard drive; please note that the path is relative to the
 current working path set by here::i_am()}
-
-\item{overwrite}{logical; whether to overwrite existing file when saving table}
 }
 \value{
 table as shown in TR

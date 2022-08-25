@@ -16,6 +16,9 @@ irt_model(
   path = here::here("Results"),
   filename = NULL,
   xsi.fixed = NULL,
+  pweights = NULL,
+  control_tam = NULL,
+  control_wle = NULL,
   warn = TRUE,
   test = TRUE
 )
@@ -53,6 +56,13 @@ Rasch model}
 \item{filename}{string; defines name of file that shall be saved}
 
 \item{xsi.fixed}{matrix; contains fixed (linked) item parameters; optional}
+
+\item{pweights}{numeric vector; function argument as passed to TAM-functions}
+
+\item{control_tam}{list; control argument as passed to tam.mml-functions}
+
+\item{control_wle}{list; can contain Msteps and/or convM as to pass to tam.wle()
+as elements of the list}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
 

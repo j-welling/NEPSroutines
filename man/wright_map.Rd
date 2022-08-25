@@ -4,13 +4,10 @@
 \alias{wright_map}
 \title{Wright maps}
 \usage{
-wright_map(model, irtmodel, path = here::here("Plots"), name_group = NULL)
+wright_map(model, path = here::here("Plots"), name_group = NULL)
 }
 \arguments{
 \item{model}{list; return object of irt_model()}
-
-\item{irtmodel}{string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
-"GPCM" for GPCM analysis}
 
 \item{path}{string; defines path to folder where plots shall be saved}
 

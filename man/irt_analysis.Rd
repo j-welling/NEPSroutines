@@ -10,7 +10,6 @@ irt_analysis(
   select,
   valid = NULL,
   mvs = NULL,
-  irt_type,
   scoring = NULL,
   plots = FALSE,
   save = TRUE,
@@ -24,7 +23,11 @@ irt_analysis(
   name_group = NULL,
   verbose = FALSE,
   warn = TRUE,
-  test = TRUE
+  test = TRUE,
+  xsi.fixed = NULL,
+  pweights = NULL,
+  control_tam = NULL,
+  control_wle = NULL
 )
 }
 \arguments{
@@ -45,9 +48,6 @@ which items to use for the analysis}
 (in)valid cases}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
-
-\item{irt_type}{string; either "dich" (dichotomous analysis) or "poly"
-(polytomous analysis)}
 
 \item{scoring}{string; defines name of numerical variable in vars that
 contains the scoring factor to be applied to loading matrix; can be NULL for
@@ -79,6 +79,16 @@ Rasch model}
 avoid problems with the data structure)}
 
 \item{test}{logical; whether to test data structure (should be set to TRUE)}
+
+\item{xsi.fixed}{matrix; contains fixed (linked) item parameters; optional}
+
+\item{pweights}{character; defines name of numerical variable in resp that
+contains person weights as passed to TAM-function}
+
+\item{control_tam}{list; control argument as passed to tam.mml-functions}
+
+\item{control_wle}{list; can contain Msteps and/or convM as to pass to tam.wle()
+as elements of the list}
 }
 \value{
 list with all results

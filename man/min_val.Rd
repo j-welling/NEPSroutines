@@ -4,7 +4,7 @@
 \alias{min_val}
 \title{Select sample with a minimum number of valid values}
 \usage{
-min_val(resp, vars, select, min.val = NULL, invalid = NA)
+min_val(resp, vars, select, min.val = NULL, invalid = NULL)
 }
 \arguments{
 \item{resp}{data.frame with item responses}
@@ -18,7 +18,8 @@ which items to use for the analysis}
 
 \item{min.val}{minimum number of valid values; if negative, set to the default of 3}
 
-\item{invalid}{vector of invalid values (defaults to NA)}
+\item{invalid}{vector of invalid values (if not specified,
+function defaults to NA and negative values)}
 }
 \value{
 logical vector with length = nrow(resp), indicating whether case is valid

@@ -10,11 +10,13 @@ conduct_dif_analysis(
   select,
   dif_vars,
   valid = NULL,
-  irt_type,
-  scoring = "scoring",
+  scoring = NULL,
   mvs = NULL,
+  include_mv = 200,
   path = here::here("Results"),
   save = TRUE,
+  control = NULL,
+  pweights = NULL,
   verbose = FALSE,
   warn = TRUE,
   test = TRUE
@@ -43,23 +45,31 @@ for DIF (e.g., "gender")}
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
 
-\item{irt_type}{string; either "dich" (for Rasch) or "poly" (for PCM)}
-
 \item{scoring}{string; defines name of numerical variable in vars that
-contains the scoring factor to be applied to loading matrix; defaults to
-"scoring"}
+contains the scoring factor to be applied to loading matrix}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
+
+\item{include_mv}{numeric; identifies threshold for which group size missing
+values should be included in analysis as an extra group (defaults to 200)}
 
 \item{path}{string; defines path to folder where results shall be saved}
 
 \item{save}{logical; whether results shall be saved to hard drive}
+
+\item{control}{list; function argument as passed to TAM-functions}
+
+\item{pweights}{character; defines name of numerical variable in resp that
+contains person weights as passed to TAM-function}
 
 \item{verbose}{logical; whether to print processing information to console}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
 
 \item{test}{logical; whether to test data structure (should be set to TRUE)}
+
+\item{two_par}{logical; whether two parameter model (2PL or GPCM) shall be
+used as base for DIF analyses (defaults to FALSE)}
 }
 \value{
 a list of length(dif_vars) lists containing each:

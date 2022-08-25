@@ -8,9 +8,10 @@ dis_analysis(
   resp,
   vars,
   valid = NULL,
-  item_type = "MC",
-  scored_version = NULL,
   mvs = NULL,
+  select_raw,
+  select_score = "dich",
+  correct = "correct_response",
   save = TRUE,
   print = TRUE,
   return = FALSE,
@@ -38,12 +39,16 @@ and all variables that are further defined in the function arguments}
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
 
-\item{item_type}{character vector; contains all item types as specified in
-vars$type that shall be used for distratcor analysis (default is 'MC')}
+\item{mvs}{named integer vector; contains user-defined missing values}
 
-\item{scored_version}{string; defines name of variable in vars that contains
-the names of the scored versions of the raw items; can be left empty, then
-default of name_scored_item = name_unscored_item + "_c" applies}
+\item{select_raw}{string; defines name of logical variable in vars that
+indicates all raw items that shall be used for the distractor analysis}
+
+\item{select_score}{string; defines name of logical variable in vars that
+indicates all items that shall be used to caculate total score}
+
+\item{correct}{string; defines name of variable in vars that contains the
+correct responses to the items}
 
 \item{save}{logical; whether results shall be saved to hard drive}
 

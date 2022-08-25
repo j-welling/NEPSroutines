@@ -5,21 +5,17 @@
 \title{IRT model fit}
 \usage{
 irt_model_fit(
-  model_dich,
-  model_poly,
-  irt_type,
+  model_1p,
+  model_2p,
   overwrite = FALSE,
   path = here::here("Tables"),
   filename = NULL
 )
 }
 \arguments{
-\item{model_dich}{list; return object of irt_model(); dichotomous analysis}
+\item{model_1p}{list; return object of irt_model(); 1PL / PCM analysis}
 
-\item{model_poly}{list; return object of irt_model(); polytomous analysis}
-
-\item{irt_type}{string; either "dich" (dichotomous analysis) or "poly"
-(polytomous analysis)}
+\item{model_2p}{list; return object of irt_model(); 2PL / GPCM analysis}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 

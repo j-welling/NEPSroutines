@@ -11,16 +11,19 @@ dif_analysis(
   dif_vars,
   valid = NULL,
   mvs = NULL,
-  irt_type,
-  scoring = "scoring",
+  scoring = NULL,
   overwrite = FALSE,
   save = TRUE,
   print = TRUE,
   return = FALSE,
+  include_mv = 200,
+  control = NULL,
+  pweights = NULL,
   path_results = here::here("Results"),
   path_table = here::here("Tables"),
   verbose = FALSE,
-  warn = TRUE
+  warn = TRUE,
+  prob_dif = 0.5
 )
 }
 \arguments{
@@ -48,11 +51,8 @@ for DIF (e.g., "gender")}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
 
-\item{irt_type}{string; either "dich" (for Rasch) or "poly" (for PCM)}
-
 \item{scoring}{string; defines name of numerical variable in vars that
-contains the scoring factor to be applied to loading matrix; defaults to
-"scoring"}
+contains the scoring factor to be applied to loading matrix}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 
@@ -62,6 +62,14 @@ contains the scoring factor to be applied to loading matrix; defaults to
 
 \item{return}{logical; whether results shall be returned}
 
+\item{include_mv}{numeric; identifies threshold for which group size missing
+values should be included in analysis as an extra group (defaults to 200)}
+
+\item{control}{list; function argument as passed to TAM-functions}
+
+\item{pweights}{character; defines name of numerical variable in resp that
+contains person weights as passed to TAM-function}
+
 \item{path_results}{string; defines path to folder where results shall be saved}
 
 \item{path_table}{string; defines path to folder where tables shall be saved}
@@ -69,6 +77,11 @@ contains the scoring factor to be applied to loading matrix; defaults to
 \item{verbose}{logical; whether to print processing information to console}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
+
+\item{prob_dif}{numeric scalar; indicates absolute threshold of problematic DIF (defaults to 0.5)}
+
+\item{two_par}{logical; whether two parameter model (2PL or GPCM) shall be
+used as base for DIF analyses (defaults to FALSE)}
 }
 \value{
 a list of:

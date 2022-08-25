@@ -9,8 +9,8 @@ irt_summary(
   vars,
   valid = NULL,
   mvs = NULL,
-  model_1par,
-  model_2par,
+  results,
+  disc = NULL,
   path = here::here("Tables"),
   filename = NULL,
   digits = 2,
@@ -35,9 +35,9 @@ variables that are further defined in the function arguments}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
 
-\item{model_1par}{list; return object of irt_model(); one parameter model}
+\item{results}{list; return object of irt_model(); one parameter model}
 
-\item{model_2par}{list; return object of irt_model(); two parameter model}
+\item{disc}{list; return object of irt_model(); two parameter model}
 
 \item{path}{string; defines path to folder where table shall be saved}
 

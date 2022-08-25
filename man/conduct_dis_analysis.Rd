@@ -7,9 +7,10 @@
 conduct_dis_analysis(
   resp,
   vars,
-  item_type = "MC",
-  scored_version = NULL,
   valid = NULL,
+  select_raw,
+  select_score = "dich",
+  correct = "correct_response",
   mvs = NULL,
   warn = TRUE
 )
@@ -30,15 +31,19 @@ includes variables 'item' (character) containing item names,
                      response for each item,
 and all variables that are further defined in the function arguments}
 
-\item{item_type}{character vector; contains all item types as specified in
-vars$type that shall be used for distratcor analysis (default is 'MC')}
-
-\item{scored_version}{string; defines name of variable in vars that contains
-the names of the scored versions of the raw items; can be left empty, then
-default of name_scored_item = name_unscored_item + "_c" applies}
-
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
+
+\item{select_raw}{string; defines name of logical variable in vars that
+indicates all raw items that shall be used for the distractor analysis}
+
+\item{select_score}{string; defines name of logical variable in vars that
+indicates all items that shall be used to caculate total score}
+
+\item{correct}{string; defines name of variable in vars that contains the
+correct responses to the items}
+
+\item{mvs}{named integer vector; contains user-defined missing values}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
 }

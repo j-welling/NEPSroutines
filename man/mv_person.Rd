@@ -25,9 +25,9 @@ mv_person(
   path_table = here::here("Tables"),
   path_plots = here::here("Plots/Missing_Responses/by_person"),
   show_all = FALSE,
-  color = NULL,
   overwrite = FALSE,
   name_grouping = "test version",
+  labels_legend = NULL,
   digits = 2,
   warn = TRUE,
   verbose = TRUE
@@ -74,12 +74,12 @@ missing values to use them in plot titles and printed results}
 \item{show_all}{logical; whether whole sample shall be included as a "group"
 (only applicable when grouping exists)}
 
-\item{color}{character scalar or vector; defines color(s) of the bar in plots}
-
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 
 \item{name_grouping}{string; name of the grouping variable (e.g. test version)
 for title and legend of plots (only needed when grouping exists)}
+
+\item{labels_legend}{character vector; contains legend labels (defaults to grouping names)}
 
 \item{digits}{integer; number of decimals for rounding}
 

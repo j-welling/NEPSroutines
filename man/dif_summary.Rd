@@ -6,23 +6,23 @@
 \usage{
 dif_summary(
   diflist,
-  irt_type,
   print = TRUE,
   save = TRUE,
   path = here::here("Tables"),
+  prob_dif = 0.5,
   overwrite = FALSE
 )
 }
 \arguments{
 \item{diflist}{list; return object of dif_model(); with main and dif model}
 
-\item{irt_type}{string; either "dich" (for Rasch) or "poly" (for PCM)}
-
 \item{print}{logical; whether results shall be printed to console}
 
 \item{save}{logical; whether results shall be saved to hard drive}
 
 \item{path}{string; defines path to folder where tables shall be saved}
+
+\item{prob_dif}{numeric scalar; indicates absolute threshold of problematic DIF (defaults to 0.5)}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 }

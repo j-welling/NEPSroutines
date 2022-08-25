@@ -9,13 +9,15 @@ dif_model(
   vars,
   select,
   dif_var,
-  scoring = "scoring",
+  scoring = NULL,
   valid = NULL,
-  irt_type,
+  include_mv = 200,
   mvs = NULL,
   verbose = FALSE,
   warn = TRUE,
-  test = TRUE
+  test = TRUE,
+  control = NULL,
+  pweights = NULL
 )
 }
 \arguments{
@@ -39,13 +41,13 @@ variables in vars}
 (e.g., "gender")}
 
 \item{scoring}{string; defines name of numerical variable in vars that
-contains the scoring factor to be applied to loading matrix; defaults to
-"scoring"}
+contains the scoring factor to be applied to loading matrix}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
 
-\item{irt_type}{string; either "dich" (for Rasch) or "poly" (for PCM)}
+\item{include_mv}{numeric; identifies threshold for which group size missing
+values should be included in analysis as an extra group (defaults to 200)}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
 
@@ -54,6 +56,14 @@ contains the scoring factor to be applied to loading matrix; defaults to
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
 
 \item{test}{logical; whether to test data structure (should be set to TRUE)}
+
+\item{control}{list; function argument as passed to TAM-functions}
+
+\item{pweights}{character; defines name of numerical variable in resp that
+contains person weights as passed to TAM-function}
+
+\item{two_par}{logical; whether two parameter model (2PL or GPCM) shall be
+used as base for DIF analyses (defaults to FALSE)}
 }
 \value{
 a list of:

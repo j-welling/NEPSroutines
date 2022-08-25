@@ -10,19 +10,22 @@ grouped_irt_analysis(
   vars,
   valid = NULL,
   mvs = NULL,
-  irt_type,
   scoring = NULL,
   plots = FALSE,
   save = TRUE,
   print = TRUE,
   return = FALSE,
+  overwrite = FALSE,
   path_plots = here::here("Plots"),
   path_table = here::here("Tables"),
   path_results = here::here("Results"),
-  overwrite = FALSE,
   digits = 2,
   verbose = FALSE,
-  warn = TRUE
+  warn = TRUE,
+  xsi.fixed = NULL,
+  pweights = NULL,
+  control_tam = NULL,
+  control_wle = NULL
 )
 }
 \arguments{
@@ -44,9 +47,6 @@ variables that are further defined in the function arguments}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
 
-\item{irt_type}{string; either "dich" (dichotomous analysis) or "poly"
-(polytomous analysis)}
-
 \item{scoring}{string; defines name of numerical variable in vars that
 contains the scoring factor to be applied to loading matrix; can be NULL for
 Rasch model}
@@ -59,13 +59,13 @@ Rasch model}
 
 \item{return}{logical; whether results shall be returned}
 
+\item{overwrite}{logical; whether to overwrite existing file when saving table}
+
 \item{path_plots}{string; defines path to folder where plots shall be saved}
 
 \item{path_table}{string; defines path to folder where tables shall be saved}
 
 \item{path_results}{string; defines path to folder where results shall be saved}
-
-\item{overwrite}{logical; whether to overwrite existing file when saving table}
 
 \item{digits}{integer; number of decimals for rounding}
 
@@ -73,6 +73,16 @@ Rasch model}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE to
 avoid problems with the data structure)}
+
+\item{xsi.fixed}{matrix; contains fixed (linked) item parameters; optional}
+
+\item{pweights}{character; defines name of numerical variable in resp that
+contains person weights as passed to TAM-function}
+
+\item{control_tam}{list; control argument as passed to tam.mml-functions}
+
+\item{control_wle}{list; can contain Msteps and/or convM as to pass to tam.wle()
+as elements of the list}
 }
 \value{
 list with a list for each group with all results
