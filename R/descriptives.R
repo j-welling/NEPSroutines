@@ -219,15 +219,18 @@ sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
 #' Table with item properties by test version
 #'
 #' @param vars data.frame; contains information about the competence items
-#' @param versions string; defines name of variable in vars that identifies test versions
-#' @param props string; defines name of variable in vars that identifies item properties
-#' @param versions_lbls named character vector; links a label each value of versions
-#' (e.g. versions_lbls = c(version1 = 1, version2 = 2))
-#' @param versions_lbls named character vector; links a label each value of props
-#' (e.g. labels[[props]] = c(prop1 = 1, prop2 = 2))
-#' @param save  logical; whether to save the table in Excel
+#' @param grouping  character vector; contains for each group a name of a logical
+#' variable in vars that indicates to which group belongs a person or an item
+#' @param properties character vector; defines name(s) of variable(s) in vars
+#' that identify item properties
+#' @param labels list; may contain for each variable defined in argument 'properties'
+#' a named character vector with the labels for the variable categories, the name
+#' of the vector must be identical with the name identified in 'properties'
+#' (e.g. sex = c(male = 1, female = 2))
+#' @param save logical; whether to save the table in Excel
 #' @param overwrite logical; whether to overwrite an existing table with the same name
 #' @param path string; defines path for saving the table
+#' @param warn logical; whether to print warnings (should be better set to true)
 #'
 #' @return table with item properties by test version
 #' @export
