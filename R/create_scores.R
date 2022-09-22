@@ -63,7 +63,7 @@
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param do_dim logical; whether to do dimensionality analysis for linking
 #' @param do_dif logical; whether to do dif analysis for linking
-#' @param diff_threshold numeric; threshold under which DIF in common link items
+#' @param dif_threshold numeric; threshold under which DIF in common link items
 #'   is accepted; defaults to .5
 #' @param wid variable name used as WLE identifier in first measurement wave
 #' @param snodes  snodes as passed to the TAM function for the dimensionality
@@ -89,8 +89,8 @@ create_scores <- function(resp, vars, scoring = NULL,
                           return = FALSE, #overwrite = FALSE,
                           #path_table = here::here("Tables"),
                           #path_results = here::here("Results"),
-                          do_dim = TRUE, do_dif = TRUE,
-                          diff_threshold = .5, wid = NULL,
+                          #do_dim = TRUE, do_dif = TRUE,
+                          #dif_threshold = .5, wid = NULL,
                           snodes = 0, maxiter = 1000,
                           digits = 3, verbose = TRUE, warn = TRUE) {
 
@@ -125,7 +125,7 @@ create_scores <- function(resp, vars, scoring = NULL,
   #       path_table = path_table,
   #       path_results = path_results,
   #       return = return, print = print, save = save,
-  #       diff_threshold = diff_threshold,
+  #       dif_threshold = dif_threshold,
   #       wid = wid, snodes = snodes, maxiter = maxiter,
   #       digits = digits,
   #       pweights = pweights,

@@ -22,7 +22,7 @@
 #' @param items_labels  vector; named vector for each item used for labelling
 #'   the data
 #' @param filename character; indicates final name of SUF according to study
-#' @param path_results character; indicates where SUF shall be saved
+#' @param path character; indicates where SUF shall be saved
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
 #' @param warn  logical; whether to print warnings
@@ -31,7 +31,7 @@
 create_suf <- function(resp, vars, select, competence,
                        scores = NULL, score_name = NULL,
                        mvs = NULL, items_labels = NULL,
-                       filename = "suf", path_results = here::here('Results'),
+                       filename = "suf", path = here::here('Results'),
                        save = TRUE, return = FALSE, warn = TRUE) {
 
   # Test data
@@ -70,7 +70,7 @@ create_suf <- function(resp, vars, select, competence,
 
   # (save SUF in rds, sav and dta format)
   if (save) {
-    scaling:::save_suf(suf = suf, path_results = path_results, filename = filename)
+    scaling:::save_suf(suf = suf, path = path, filename = filename)
     message("SUF successfully saved!")
   }
 
@@ -210,13 +210,13 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
 #'
 #' @param suf  data.frame; SUF to be saved
 #' @param filename  character; indicates final name of SUF according to study
-#' @param path_results  character; indicates where SUF shall be saved
+#' @param path  character; indicates where SUF shall be saved
 #' @noRd
-save_suf <- function(suf, path_results, filename) {
+save_suf <- function(suf, path, filename) {
 
-  check_folder(path = here::here(path_results))
-  saveRDS(suf, file = paste0(path_results, "/", filename, ".rds"))
-  haven::write_dta(suf, path = paste0(path_results, "/", filename, ".dta"))
-  haven::write_sav(suf, path = paste0(path_results, "/", filename, ".sav"))
+  check_folder(path = here::here(path))
+  saveRDS(suf, file = paste0(path, "/", filename, ".rds"))
+  haven::write_dta(suf, path = paste0(path, "/", filename, ".dta"))
+  haven::write_sav(suf, path = paste0(path, "/", filename, ".sav"))
 
 }
