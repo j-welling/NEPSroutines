@@ -58,7 +58,7 @@ for title and legend of plots (only needed when grouping exists)}
 
 \item{test}{logical; whether to test data structure (should be set to TRUE)}
 
-\item{labels_legend}{character vector; contains legend labels (defaults to grouping names)}
+\item{labels_legend}{character vector; contains legend labels}
 }
 \description{
 Plots the percentages of not reached missing values for each item by its

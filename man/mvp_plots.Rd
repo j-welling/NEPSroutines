@@ -54,7 +54,7 @@ missing values to use them in plot titles and printed results}
 \item{name_grouping}{string; name of the grouping variable (e.g. test version)
 for title and legend of plots (only needed when grouping exists)}
 
-\item{labels_legend}{character vector; contains legend labels (defaults to grouping names)}
+\item{labels_legend}{character vector; contains legend labels}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
 

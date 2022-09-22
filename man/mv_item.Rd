@@ -91,7 +91,7 @@ for title and legend of plots (only needed when grouping exists)}
 
 \item{verbose}{logical; whether to print processing information to console}
 
-\item{labels_legend}{character vector; contains legend labels (defaults to grouping names)}
+\item{labels_legend}{character vector; contains legend labels}
 }
 \value{
 (if return = TRUE) list with results:
