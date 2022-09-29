@@ -54,16 +54,11 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
                          verbose = FALSE, warn = TRUE, prob_dif = 0.5) {
 
   # Test data
-  scaling:::check_logicals(vars, "vars", select, warn = warn)
-  scaling:::check_logicals(resp, "resp", valid, warn = warn)
-  scaling:::check_variables(resp, "resp", dif_vars)
+  test_dif_data(resp = resp, vars = vars, select = select, valid = valid,
+                dif_vars = dif_vars, scoring = scoring, pweights = pweights,
+                mvs = mvs, warn = warn)
 
-  if (!is.null(scoring))
-      scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
-
-  if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
-
-  scaling:::check_select(select, dif_vars)
+  check_select(select, dif_vars)
 
   # Create list for results
   dif <- list()
@@ -72,7 +67,7 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
   dif$models <- scaling:::conduct_dif_analysis(
     select = select, dif_vars = dif_vars, resp = resp, vars = vars,
     scoring = scoring, include_mv = include_mv, valid = valid,
-    path = path_results, mvs = mvs, verbose = verbose, warn = warn, save = save,
+    path = path_results, mvs = mvs, verbose = verbose, warn = FALSE, save = save,
     control = control, pweights = pweights, test = FALSE #, two_par = two_par
   )
 
@@ -155,14 +150,9 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 
   # Test data
   if (test) {
-      scaling:::check_logicals(vars, "vars", select, warn = warn)
-      scaling:::check_logicals(resp, "resp", valid, warn = warn)
-      scaling:::check_variables(resp, "resp", dif_vars)
-
-    if (!is.null(scoring))
-        scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
-
-    if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
+    test_dif_data(resp = resp, vars = vars, select = select, valid = valid,
+                  dif_vars = dif_vars, scoring = scoring, pweights = pweights,
+                  mvs = mvs, warn = warn)
   }
 
   # Create list for results
@@ -178,7 +168,7 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
     dif_models[[i]] <- dif_model(resp = resp, vars = vars, select = select[i],
                                  valid = valid, dif_var = dif_vars[i],
                                  scoring = scoring, include_mv = include_mv,
-                                 verbose = verbose, mvs = mvs, warn = warn,
+                                 verbose = verbose, mvs = mvs, warn = FALSE,
                                  test = FALSE, #two_par = two_par,
                                  control = control, pweights = pweights)
   }
@@ -287,14 +277,9 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 
   # Test data
   if (test) {
-      scaling:::check_logicals(vars, "vars", select, warn = warn)
-      scaling:::check_logicals(resp, "resp", valid, warn = warn)
-      scaling:::check_variables(resp, "resp", dif_var)
-
-    if (!is.null(scoring))
-        scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
-
-    if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
+    test_dif_data(resp = resp, vars = vars, select = select, valid = valid,
+                  dif_vars = dif_var, scoring = scoring, pweights = pweights,
+                  mvs = mvs, warn = warn)
   }
 
   scaling:::check_items(vars$item[vars[[select]]])
@@ -803,4 +788,55 @@ print_dif_summary <- function(resp, diflist, res, prob_dif = 0.5) {
         }
         cat("\n\n")
     }
+}
+
+#' Test DIF data
+#'
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' polytomous responses with k categories; missing values (default -999 to -1)
+#' are coded as NA internally; additionally includes ID_t as a person identifier
+#' and all variables that are further defined in the function arguments
+#' @param vars data.frame; contains information about items with items as rows;
+#' includes variable 'item' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param select character vector; defines name(s) of logical variable(s) in vars
+#' that indicates which items to use for analysis; if some of the \code{dif_vars}
+#' come with a different set of analysis items, this argument becomes a
+#' vector of \code{length(dif_vars)} containing the respective selection
+#' variables in vars
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param mvs named integer vector; contains user-defined missing values
+#' @param dif_vars character vector; contains the variable name(s) to be tested
+#'   for DIF (e.g., "gender")
+#' @param scoring string; defines name of numerical variable in vars that
+#' contains the scoring factor to be applied to loading matrix
+#' @param pweights character; defines name of numerical variable in resp that
+#' contains person weights as passed to TAM-function
+#' @param warn  logical; whether to print warnings (should be set to TRUE)
+#'
+#' @noRd
+test_dif_data <- function(resp,
+                          vars,
+                          select,
+                          dif_vars,
+                          valid = NULL,
+                          mvs = NULL,
+                          scoring = NULL,
+                          pweights = NULL,
+                          warn = TRUE) {
+
+    scaling:::check_logicals(vars, "vars", select, warn = warn)
+    scaling:::check_logicals(resp, "resp", valid, warn = warn)
+    scaling:::check_variables(resp, "resp", dif_vars)
+
+    if (!is.null(scoring))
+        scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+
+    if (!is.null(pweights))
+        scaling:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
+
+    if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
+
 }
