@@ -111,7 +111,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
   if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 
   # Select only valid cases
-  resp <- only_valid(resp, valid = valid, warn = warn)
+  resp <- only_valid(resp, valid = valid, warn = FALSE)
 
   # Create ID and facets variable
   pid <- resp$ID_t
