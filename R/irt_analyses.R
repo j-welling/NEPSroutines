@@ -734,17 +734,22 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   xsi_max_item <- irt_sum$Item[irt_sum$xsi %in% xsi_max]
   xsi_mean <- round(mean(irt_sum$xsi, na.rm = TRUE), 2)
   xsi_median <- round(median(irt_sum$xsi, na.rm = TRUE), 2)
+  xsi_sd <- round(sd(irt_sum$xsi, na.rm = TRUE), 2)
   message("Item difficulties:\n",
           "The estimated item difficulties (or location parameters for polytomous variables) varied between ",
           xsi_min, " (", ifelse(length(xsi_min_item) > 1, "items ", "item "),
           paste(xsi_min_item, collapse = ", "), ") and ",
           xsi_max, " (", ifelse(length(xsi_max_item) > 1, "items ", "item "),
           paste(xsi_max_item, collapse = ", "),
-          ") with an average of ", xsi_mean, ", and a median of ", xsi_median, ".\n")
+          ") with an average of ", xsi_mean, " (", xsi_sd,
+          "), and a median of ", xsi_median, ".\n")
 
   # SE of item difficulties
+  se_max <- max(irt_sum$SE, na.rm = TRUE)
+  se_max_item <- irt_sum$Item[irt_sum$SE %in% se_max]
   message("SE of item difficulties:\n",
-          "The maximum of SEs is ", max(irt_sum$SE, na.rm = TRUE),".\n")
+          "The maximum of SEs is ", se_max,
+          " (", paste(se_max_item, collapse = ", "), ".\n")
 
   # WMNSQ
   wmnsq_min <- min(irt_sum$WMNSQ, na.rm = TRUE)
@@ -753,6 +758,7 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   wmnsq_max_item <- irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_max]
   wmnsq_mean <- round(mean(irt_sum$WMNSQ, na.rm = TRUE), 2)
   wmnsq_median <- round(median(irt_sum$WMNSQ, na.rm = TRUE), 2)
+  wmnsq_sd <- round(sd(irt_sum$WMNSQ, na.rm = TRUE), 2)
   message("WMNSQ:\n",
           "The values of the WMNSQ were ... close to 1 with the lowest value being ",
           wmnsq_min, " (", ifelse(length(wmnsq_min_item) > 1, "items ", "item "),
@@ -760,8 +766,8 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
           ") and the highest being ",
           wmnsq_max, " (", ifelse(length(wmnsq_max_item) > 1, "items ", "item "),
           paste(wmnsq_max_item, collapse = ", "),
-          ") with an average of ",
-          wmnsq_mean, ", and a median of ", wmnsq_median, ".")
+          ") with an average of ", wmnsq_mean, " (", wmnsq_sd,
+          "), and a median of ", wmnsq_median, ".")
 
   wmnsq_misfit <- irt_sum$Item[irt_sum$WMNSQ > 1.15]
   message(ifelse(length(wmnsq_misfit) == 0, "No item",
@@ -831,4 +837,11 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
           disc_max, " (", ifelse(length(disc_max_item) > 1, "items ", "item "),
           paste(disc_max_item, collapse = ", "), ") with an average discrimination of ",
           disc_mean, ", and a median discrimination of ", disc_median, ".\n")
+
+  # Thresholds
+  thresh_mean <- round(mean(c(TAM::IRT.threshold(model$mod)), na.rm = TRUE), 3)
+  thresh_median <- round(median(c(TAM::IRT.threshold(model$mod)), na.rm = TRUE), 3)
+  message("Thresholds:\n",
+          "The mean threshold is ", thresh_mean,
+          " and the median threshold is ", thresh_median, ".\n")
 }
