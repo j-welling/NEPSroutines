@@ -25,8 +25,6 @@
 #' contains the scoring factor to be applied to loading matrix
 #' @param include_mv numeric; identifies threshold for which group size missing
 #' values should be included in analysis as an extra group (defaults to 200)
-#' @param two_par logical; whether two parameter model (2PL or GPCM) shall be
-#' used as base for DIF analyses (defaults to FALSE)
 #' @param control list; function argument as passed to TAM-functions
 #' @param pweights character; defines name of numerical variable in resp that
 #' contains person weights as passed to TAM-function
@@ -46,7 +44,7 @@
 #' @export
 
 dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
-                         scoring = NULL, overwrite = FALSE, #two_par = FALSE,
+                         scoring = NULL, overwrite = FALSE,
                          save = TRUE, print = TRUE, return = FALSE,
                          include_mv = 200, control = NULL, pweights = NULL,
                          path_results = here::here('Results'),
@@ -67,8 +65,8 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
   dif$models <- scaling:::conduct_dif_analysis(
     select = select, dif_vars = dif_vars, resp = resp, vars = vars,
     scoring = scoring, include_mv = include_mv, valid = valid,
-    path = path_results, mvs = mvs, verbose = verbose, warn = FALSE, save = save,
-    control = control, pweights = pweights, test = FALSE #, two_par = two_par
+    path = path_results, mvs = mvs, verbose = verbose, warn = warn, save = save,
+    control = control, pweights = pweights, test = FALSE
   )
 
   # Create summary
@@ -126,8 +124,6 @@ check_select <- function(select, dif_vars) {
 #' contains the scoring factor to be applied to loading matrix
 #' @param include_mv numeric; identifies threshold for which group size missing
 #' values should be included in analysis as an extra group (defaults to 200)
-#' @param two_par logical; whether two parameter model (2PL or GPCM) shall be
-#' used as base for DIF analyses (defaults to FALSE)
 #' @param control list; function argument as passed to TAM-functions
 #' @param pweights character; defines name of numerical variable in resp that
 #' contains person weights as passed to TAM-function
@@ -145,7 +141,7 @@ check_select <- function(select, dif_vars) {
 conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
                                  scoring = NULL, mvs = NULL, include_mv = 200,
                                  path = here::here('Results'), save = TRUE,
-                                 control = NULL, pweights = NULL, #two_par = F,
+                                 control = NULL, pweights = NULL,
                                  verbose = FALSE, warn = TRUE, test = TRUE) {
 
   # Test data
@@ -168,9 +164,9 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
     dif_models[[i]] <- dif_model(resp = resp, vars = vars, select = select[i],
                                  valid = valid, dif_var = dif_vars[i],
                                  scoring = scoring, include_mv = include_mv,
-                                 verbose = verbose, mvs = mvs, warn = FALSE,
-                                 test = FALSE, #two_par = two_par,
-                                 control = control, pweights = pweights)
+                                 verbose = verbose, mvs = mvs, warn = warn,
+                                 test = FALSE, control = control,
+                                 pweights = pweights)
   }
   names(dif_models) <- dif_vars
 
@@ -251,8 +247,6 @@ summarize_dif_analysis <- function(dif_models, dif_vars, prob_dif = 0.5,
 #' values should be included in analysis as an extra group (defaults to 200)
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
-#' @param two_par logical; whether two parameter model (2PL or GPCM) shall be
-#' used as base for DIF analyses (defaults to FALSE)
 #' @param mvs named integer vector; contains user-defined missing values
 #' @param scoring  string; defines name of numerical variable in vars that
 #' contains the scoring factor to be applied to loading matrix
@@ -271,7 +265,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, prob_dif = 0.5,
 #' @importFrom stats as.formula
 #' @export
 dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
-                      valid = NULL, include_mv = 200, #two_par = FALSE,
+                      valid = NULL, include_mv = 200,
                       mvs = NULL, verbose = FALSE, warn = TRUE, test = TRUE,
                       control = NULL, pweights = NULL) {
 
@@ -316,9 +310,11 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 
   if (sum(invalid, na.rm = TRUE) > 0) {
     facets[[dif_var]][ifelse(is.na(invalid), FALSE, invalid), ] <- NA
-    warning(paste0(sum(invalid, na.rm = TRUE), " invalid values (< 0) were found",
-    " in the DIF variable ", dif_var, ". The corresponding cases were replaced",
-    " by NAs.\n"))
+    if (warn) {
+        warning(paste0(sum(invalid, na.rm = TRUE), " invalid values (< 0) were found",
+        " in the DIF variable ", dif_var, ". The corresponding cases were replaced",
+        " by NAs.\n"))
+    }
   }
 
   mis <- is.na(facets[[dif_var]])
@@ -333,8 +329,10 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 
       fcts <- create_facets_df(facets[[dif_var]], labels = lbls_facet)
 
-      warning(paste0(sum(mis), " missing values were found in the DIF variable ",
-                     dif_var, ". The corresponding cases have been excluded from the analysis.\n"))
+      if (warn) {
+        warning(paste0(sum(mis), " missing values were found in the DIF variable ",
+                       dif_var, ". The corresponding cases have been excluded from the analysis.\n"))
+      }
 
     } else {
 
@@ -352,9 +350,11 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
         fcts$number <- as.integer(fcts$number)
       }
 
-      warning(paste0(sum(mis), " missing values were found in the DIF variable ",
-      dif_var, ". The corresponding cases have been included in the analysis as",
-      " an extra group.\n"))
+      if (warn) {
+          warning(paste0(sum(mis), " missing values were found in the DIF variable ",
+          dif_var, ". The corresponding cases have been included in the analysis as",
+          " an extra group.\n"))
+      }
 
     }
   } else {
@@ -366,17 +366,18 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 
   if (irt_type == 'poly') {
 
-    if(is.null(scoring)) warning("No scoring variable provided. All items are scored with 1.")
+    if(is.null(scoring) & warn)
+        warning("No scoring variable provided. All items are scored with 1.")
 
     mmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
-      vars = vars, select = select, scoring = scoring, #two_par = two_par,
+      vars = vars, select = select, scoring = scoring,
       verbose = verbose, control = control, pweights = pws
     )
 
     dmod <- pcm_dif(
       resp = resp, facets = facets, formulaA = formula_dmod, pid = pid,
-      vars = vars, select = select, scoring = scoring, #two_par = two_par,
+      vars = vars, select = select, scoring = scoring,
       verbose = verbose, control = control, pweights = pws
     )
 
@@ -386,7 +387,6 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     scaling:::check_dich(resp, "resp")
 
     Q <- scaling:::create_q(vars, select = select, scoring = scoring, poly = FALSE)
-    #irtmodel <- ifelse(two_par, '2PL', '1PL')
     irtmodel <- '1PL'
 
     dmod <- TAM::tam.mml.mfr(resp, irtmodel = irtmodel, facets = facets,
@@ -451,8 +451,6 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 #' @param formulaA  an R formula for the DIF analysis
 #' @param scoring  string; defines name of numerical variable in vars that
 #' contains the scoring factor to be applied to loading matrix
-#' @param two_par logical; whether two parameter model (2PL or GPCM) shall be
-#' used as base for DIF analyses (defaults to FALSE)
 #' @param control list; function argument as passed to TAM-functions
 #' @param pweights character; defines name of numerical variable in resp that
 #' contains person weights as passed to TAM-function
@@ -462,7 +460,7 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 #' @return a tam.mml model
 #' @noRd
 
-pcm_dif <- function(resp, facets, formulaA, vars, select, pid, #two_par = F,
+pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
                     verbose, scoring = NULL, control = NULL, pweights = NULL) {
 
   # get design matrix for model
@@ -476,7 +474,6 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid, #two_par = F,
   B[vars$item[vars[[select]]], , 1] <- B[vars$item[vars[[select]]], , 1] * pcm_scoring
 
   # set irtmodel
-  #irtmodel <- ifelse(two_par, 'GPCM', 'PCM2')
   irtmodel <- 'GPCM'
 
   TAM::tam.mml.mfr(formulaA = formulaA, facets = facets, B = B, pid = pid,
