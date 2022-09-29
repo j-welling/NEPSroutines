@@ -52,7 +52,10 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
   # Test data
   check_logicals(vars, "vars", groups, warn = warn)
   check_logicals(resp, "resp", c(valid, names(groups)), warn = warn)
-  if (!is.null(scoring)) check_numerics(vars, "vars", scoring)
+  if (!is.null(scoring))
+    check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+  if (!is.null(pweights))
+    check_numerics(resp, "resp", pweights, check_invalid = TRUE)
   if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 
   # Create list for results
@@ -75,7 +78,7 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
                                     path_table = path_table,
                                     path_plots = path_plots,
                                     overwrite = overwrite, digits = digits,
-                                    name_group = g, warn = warn, test = FALSE,
+                                    name_group = g, warn = FALSE, test = FALSE,
                                     control_tam = control_tam, control_wle = control_wle,
                                     pweights = pweights, xsi.fixed = xsi.fixed)
 
@@ -146,8 +149,10 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
   if (test) {
     check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
-    if(!is.null(scoring))
+    if (!is.null(scoring))
       check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+    if (!is.null(pweights))
+      check_numerics(resp, "resp", pweights, check_invalid = TRUE)
     if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
@@ -164,12 +169,12 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 
     irt$model.1pl <- irt_model(resp = resp, vars = vars, select = select,
                                valid = valid, mvs = mvs, irtmodel = '1PL',
-                               verbose = verbose, warn = warn, test = FALSE,
+                               verbose = verbose, warn = FALSE, test = FALSE,
                                control_tam = control_tam, control_wle = control_wle,
                                pweights = pweights, xsi.fixed = xsi.fixed)
     irt$model.2pl <- irt_model(resp = resp, vars = vars, select = select,
                                valid = valid, mvs = mvs, irtmodel = '2PL',
-                               verbose = verbose, warn = warn, test = FALSE,
+                               verbose = verbose, warn = FALSE, test = FALSE,
                                control_tam = control_tam, control_wle = control_wle,
                                pweights = pweights, xsi.fixed = xsi.fixed)
 
@@ -177,12 +182,12 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 
     irt$model.pcm <- irt_model(resp = resp, vars = vars, select = select, mvs = mvs,
                                valid = valid, irtmodel = 'PCM2', scoring = scoring,
-                               verbose = verbose, warn = warn, test = FALSE,
+                               verbose = verbose, warn = FALSE, test = FALSE,
                                control_tam = control_tam, control_wle = control_wle,
                                pweights = pweights, xsi.fixed = xsi.fixed)
     irt$model.gpcm <- irt_model(resp = resp, vars = vars, select = select, mvs = mvs,
                                 valid = valid, irtmodel = 'GPCM', scoring = scoring,
-                                verbose = verbose, warn = warn, test = FALSE,
+                                verbose = verbose, warn = FALSE, test = FALSE,
                                 control_tam = control_tam, control_wle = control_wle,
                                 pweights = pweights, xsi.fixed = xsi.fixed)
 
@@ -277,7 +282,8 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 #' @param control_tam list; control argument as passed to tam.mml-functions
 #' @param control_wle list; can contain Msteps and/or convM as to pass to tam.wle()
 #'    as elements of the list
-#' @param pweights numeric vector; function argument as passed to TAM-functions
+#' @param pweights character; defines name of numerical variable in resp that
+#' contains person weights as passed to TAM-function
 #' @param path  string; defines path to folder where results shall be saved
 #' @param filename  string; defines name of file that shall be saved
 #' @param verbose  logical; whether to print processing information to console
@@ -306,8 +312,10 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
     check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
     check_items(vars$item[vars[[select]]])
-    if(!is.null(scoring))
+    if (!is.null(scoring))
       check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+    if (!is.null(pweights))
+      check_numerics(resp, "resp", pweights, check_invalid = TRUE)
     if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
@@ -523,7 +531,7 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   vars_ <- vars[vars$irt_item, ]
   resp <- prepare_resp(resp, vars = vars, select = 'irt_item', valid = valid,
                        use_only_valid = TRUE, convert = TRUE, mvs = mvs,
-                       warn = FALSE)
+                       warn = warn)
 
 
   # item parameters
