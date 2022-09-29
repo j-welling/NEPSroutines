@@ -459,6 +459,7 @@ reached_maxiter <- function(mod, name_model) {
     }
 }
 
+
 #' Test whether data contains polytomous items (responses > 1)
 #' @param resp  data.frame with item responses
 #' @param vars  data.frame; contains information about items with items as rows;
@@ -473,6 +474,7 @@ reached_maxiter <- function(mod, name_model) {
 is_poly <- function(resp, vars, select) {
   max(resp[ , vars$item[vars[[select]]]], na.rm = TRUE) > 1
 }
+
 
 #' Create Q matrix for TAM-functions
 #' @param vars  data.frame; contains information about items with items as rows;
@@ -502,26 +504,6 @@ create_q <- function(vars, select, scoring, poly) {
     Q
 }
 
-#' Create scoring vector
-#' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'item' containing item names; additionally includes all
-#' variables that are further defined in the function arguments
-#' @param select  string; defines name of logical variable in vars that indicates
-#' which items to use for the analysis
-#' @param scoring string; defines name of numerical variable in vars that
-#' contains the scoring factor to be applied to loading matrix
-#' @param poly logical; whether items include polytomous items
-#'
-#' @returns Q matrix (or NULL, if no scoring variable is provided)
-#' @noRd
-create_scoring <- function(resp, vars, select,
-                           scoring_poly = 0.5,
-                           scoring_dich = 1) {
-
-  ifelse(apply(resp[, vars$item[vars[[select]]]], 2, max, na.rm = TRUE) > 1,
-         scoring_poly,
-         scoring_dich)
-}
 
 #' Create object depending on condition
 #' @param condition if-clause on which depends decision
