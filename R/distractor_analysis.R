@@ -223,7 +223,7 @@ print_dis_summary <- function(dist_sum) {
         message("\nItem-total correlation for correct response: ",
                 "\nMin. = ",  corr_min, " (", paste(corr_min_names, collapse = ", "), ")",
                 "\nMax. = ",  corr_max, " (", paste(corr_max_names, collapse = ", "), ")",
-                "\nMed. = ",  median(rc$corr), " (", paste(corr_med_names, collapse = ", "), ")")
+                "\nMd. = ",  median(rc$corr), " (", paste(corr_med_names, collapse = ", "), ")")
 
         # Distractors
         dist_min <- rd[which(rd$corr == min(rd$corr)), "corr"]
@@ -236,7 +236,7 @@ print_dis_summary <- function(dist_sum) {
         message("\nItem-total correlation for distractor: ",
                 "\nMin. = ",  dist_min, " (", paste(dist_min_names, collapse = ", "), ")",
                 "\nMax. = ",  dist_max, " (", paste(dist_max_names, collapse = ", "), ")",
-                "\nMed. = ",  median(rd$corr), " (", paste(dist_med_names, collapse = ", "), ")")
+                "\nMd. = ",  median(rd$corr), " (", paste(dist_med_names, collapse = ", "), ")")
 
         # Auffällige Distraktoren und korrekte Antworten anzeigen
         message("\n",
