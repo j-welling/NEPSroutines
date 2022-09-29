@@ -81,16 +81,19 @@ create_scores <- function(resp, vars, scoring = NULL,
                           mvs = NULL, wle = TRUE, sum_score = FALSE,
                           control_tam = NULL, control_wle = NULL,
                           pweights = NULL, poly2dich = TRUE,
-                          #resp_previous = NULL, resp_link_study = NULL,
-                          #scoring_previous = NULL, scoring_link_study = NULL,
-                          #pweights_previous = NULL, pweights_link_study = NULL,
-                          #anchors = NULL, longitudinal = TRUE,
-                          #print = TRUE, save = TRUE,
-                          return = FALSE, #overwrite = FALSE,
-                          #path_table = here::here("Tables"),
-                          #path_results = here::here("Results"),
-                          #do_dim = TRUE, do_dif = TRUE,
-                          #dif_threshold = .5, wid = NULL,
+                          resp_prev = NULL, resp_link = NULL,
+                          vars_prev = NULL, vars_link = NULL,
+                          select_prev = NULL, select_link = NULL,
+                          valid_prev = NULL, valid_link = NULL,
+                          scoring_prev = NULL, scoring_link = NULL,
+                          pweights_prev = NULL, pweights_link = NULL,
+                          anchors = NULL, longitudinal = TRUE,
+                          print = TRUE, save = TRUE,
+                          return = FALSE, overwrite = FALSE,
+                          path_table = here::here("Tables"),
+                          path_results = here::here("Results"),
+                          do_dim = TRUE, do_dif = TRUE,
+                          dif_threshold = .5, wid = NULL,
                           snodes = 0, maxiter = 1000,
                           digits = 3, verbose = TRUE, warn = TRUE) {
 
@@ -98,48 +101,56 @@ create_scores <- function(resp, vars, scoring = NULL,
   scaling:::check_logicals(vars, "vars", select, warn = warn)
   scaling:::check_logicals(resp, "resp", valid, warn = warn)
   scaling:::check_items(vars$item[vars[[select]]])
+  scaling:::check_pid(resp$ID_t[ifelse(is.null(valid), TRUE, resp[[valid]])])
 
   if (!is.null(scoring))
     scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
   if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
 
-  # # Estimate linked WLEs and SEs --> linking not yet implemented
-  # if (wle & !is.null(resp_previous)) {
-  #   linked_scores <-
-  #     scaling:::linking(
-  #       resp = resp,
-  #       resp_previous = resp_previous,
-  #       resp_link_study = resp_link_study,
-  #       vars = vars,
-  #       select = select,
-  #       valid = valid,
-  #       anchors = anchors,
-  #       mvs = mvs,
-  #       scoring = scoring,
-  #       scoring_previous = scoring_previous,
-  #       scoring_link_study = scoring_link_study,
-  #       longitudinal = longitudinal,
-  #       overwrite = overwrite,
-  #       verbose = verbose,
-  #       path_table = path_table,
-  #       path_results = path_results,
-  #       return = return, print = print, save = save,
-  #       dif_threshold = dif_threshold,
-  #       wid = wid, snodes = snodes, maxiter = maxiter,
-  #       digits = digits,
-  #       pweights = pweights,
-  #       pweights_previous = pweights_previous,
-  #       pweights_link_study = pweights_link_study,
-  #       control_tam = control_tam,
-  #       do_dim = do_dim, do_dif = do_dif,
-  #       test = FALSE
-  #     )
-  #   wles_linked <- linked_scores$link_results$wle_linked
-  #   names(wles_linked) <- c("ID_t", paste0(score_name, c("_sc1u", "_sc2u")))
-  # } else {
+  # Estimate linked WLEs and SEs --> linking not yet implemented
+  if (wle & !is.null(resp_previous)) {
+    linked_scores <-
+      scaling:::linking(
+        resp_curr = resp,
+        resp_prev = resp_prev,
+        resp_link = resp_link,
+        vars_curr = vars,
+        vars_prev = vars_prev,
+        vars_link = vars_link,
+        select_curr = select,
+        select_prev = select_prev,
+        select_link = select_link,
+        valid_curr = valid,
+        valid_prev = valid_prev,
+        valid_link = valid_link,
+        scoring_curr = scoring,
+        scoring_prev = scoring_prev,
+        scoring_link = scoring_link,
+        anchors = anchors,
+        mvs = mvs,
+        longitudinal = longitudinal,
+        overwrite = overwrite,
+        verbose = verbose,
+        path_table = path_table,
+        path_results = path_results,
+        return = return, print = print, save = save,
+        dif_threshold = dif_threshold,
+        wid = wid, snodes = snodes, maxiter = maxiter,
+        digits = digits,
+        pweights_curr = pweights,
+        pweights_prev = pweights_prev,
+        pweights_link = pweights_link,
+        control_tam = control_tam,
+        do_dim = do_dim, do_dif = do_dif,
+        warn = warn,
+        test = TRUE
+      )
+    wles_linked <- linked_scores$link_results$wle_linked
+    names(wles_linked) <- c("ID_t", paste0(score_name, c("_sc1u", "_sc2u")))
+  } else {
     wles_linked <- NULL
-  #}
+  }
 
   # Estimate (unrotated) WLEs and SEs
   if (wle) {
@@ -169,7 +180,7 @@ create_scores <- function(resp, vars, scoring = NULL,
         valid = valid, facet = facet, mvs = mvs,
         scoring = scoring, xsi_fixed = xsi_fixed,
         wle_name = score_name, control_tam = control_tam,
-        pweights = pweights, warn = warn, test = FALSE
+        pweights = pweights
       )
     } else {
       wles <- as.data.frame(fit$wle[, c("pid", "theta", "error")])
@@ -184,13 +195,24 @@ create_scores <- function(resp, vars, scoring = NULL,
     sss <- scaling:::estimate_sum_scores(
       resp = resp, vars = vars, select = select,
       valid = valid, mvs = mvs, scoring = scoring,
-      score_name = score_name, warn = !wle & warn,
-      poly2dich = poly2dich, test = FALSE
+      score_name = score_name, poly2dich = poly2dich
     )
     if (wle) {
       wles <- merge(wles, sss, by = "ID_t", all = TRUE)
     } else {
       wles <- sss
+    }
+  }
+
+  if (metap) {
+    metas <- scaling:::estimate_metap(
+      resp = resp, vars = vars, select = select, valid = valid,
+      var_name = var_name, score_name = score_name, mvs = mvs
+    )
+    if (wle | sum_score) {
+      wles <- merge(wles, metas, by = "ID_t", all = TRUE)
+    } else {
+      wles <- metas
     }
   }
 
@@ -225,30 +247,13 @@ create_scores <- function(resp, vars, scoring = NULL,
 #'   Rasch model
 #' @param poly2dich  logical; indicates whether count only correctly scored
 #'   binary or FULLY correctly scored PC items
-#' @param warn  logical; whether to print warnings
 #' @param score_name character; name of the scores -- WITHOUT extension (e.g.,
 #'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
-#' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @noRd
 estimate_sum_scores <- function(resp, vars, select, valid = NULL,
                                 mvs = NULL, scoring = NULL,
-                                poly2dich = TRUE, warn = TRUE,
-                                score_name = "score", test = TRUE) {
-
-  # Test data
-  if (test) {
-    scaling:::check_logicals(vars, "vars", select, warn = warn)
-    scaling:::check_logicals(resp, "resp", valid, warn = warn)
-    scaling:::check_items(vars$item[vars[[select]]])
-
-    if (!is.null(scoring))
-      scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
-
-    if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
-  }
-
-  scaling:::check_pid(resp$ID_t[resp[[valid]]])
+                                poly2dich = TRUE, score_name = "score") {
 
   # Prepare data
   resp_ <- scaling:::prepare_resp(resp, vars, select, use_only_valid = TRUE,
@@ -308,13 +313,11 @@ estimate_sum_scores <- function(resp, vars, select, valid = NULL,
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param wle_name character; name of the wle -- WITHOUT extension (e.g.,
 #'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
-#' @param warn  logical; whether to print warnings
 #' @param control_tam list; control argument as passed to tam.mml.mfr()
 #' @param control_wle list; can contain Msteps and/or convM as to pass to tam.wle()
 #'    as elements of the list
 #' @param pweights numeric vector; person weights for current measurement point
 #'   passed to tam.mml.mfr()
-#' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @return a data.frame containing ID_t, wle and se of wle (named like indicated
 #'   in wle_name)
@@ -322,9 +325,8 @@ estimate_sum_scores <- function(resp, vars, select, valid = NULL,
 estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
                                   facet, xsi_fixed = NULL,
                                   scoring = NULL, mvs = NULL, wle_name,
-                                  warn = TRUE, control_wle = NULL,
-                                  control_tam = NULL, pweights = NULL,
-                                  test = TRUE) {
+                                  control_wle = NULL, control_tam = NULL,
+                                  pweights = NULL) {
 
   # Test data
   scaling:::check_variables(resp, "resp", facet)
@@ -332,17 +334,6 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
   if (is.null(xsi_fixed)) {
     warning("Please provide the item parameters to ensure the correct",
             " results in the WLE estimation.")
-  }
-
-  if (test) {
-    scaling:::check_logicals(vars, "vars", select, warn = warn)
-    scaling:::check_logicals(resp, "resp", valid, warn = warn)
-    scaling:::check_items(vars$item[vars[[select]]])
-
-    if (is.null(scoring))
-      scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
-
-    if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
   # Identify IRT type
@@ -392,3 +383,65 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
   return(wles)
 }
 
+#' Create meta competence scores
+#'
+#' @param resp  data.frame; contains item responses with items as variables and
+#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   polytomous responses with k categories; missing values (default -999 to -1)
+#'   are coded as NA internally; additionally includes ID_t as a person identifier
+#'   and all variables that are further defined in the function arguments
+#' @param vars  data.frame; contains information about items with items as rows;
+#'   includes variable 'item' containing item names; additionally includes all
+#'   variables that are further defined in the function arguments
+#' @param select  string; defines name of logical variable in vars that indicates
+#'   which items to use for the analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#'   (in)valid cases
+#' @param var_name  string; defines name of meta competence variable in resp
+#' @param score_name string; name of the scores -- WITHOUT extension (e.g.,
+#'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
+#' @param mvs  named integer vector; contains user-defined missing values
+#'
+#' @returns data.frame with the three variables ID_t, proportion correct ("_sc5")
+#' & difference score ("_sc6")
+#'
+#' @noRd
+estimate_metap <- function(resp, vars, select, valid = NULL,
+                           var_name, score_name = "score",
+                           mvs = NULL) {
+
+  # Calclute sum scores
+  sss <- scaling:::estimate_sum_scores(
+    resp = resp, vars = vars, select = select,
+    valid = valid, mvs = mvs, poly2dich = TRUE)
+
+  # Estimated score
+  es <- resp[, c("ID_t", var_name)]
+
+  # Merge scores
+  metap <- merge(sss, es, by = "ID_t", all = TRUE)
+
+  # Recode meta-p string variables into numeric variables
+  # Only integer numbers in the defined number range are considered valid
+  k <- sum(vars[[select]]) # number of items
+  metap[[var_name]] <- as.numeric(metap[[var_name]])
+  metap[[var_name]][is.na(metap[[var_name]]) | metap[[var_name]] > k] <- -95
+  metap$score_sc3[is.na(metap$score_sc3)] <- -95
+
+  # Select valid cases
+  f <- metap[[var_name]] >= 0 & metap$score_sc3 >= 0
+
+  # Calculate proportion correct
+  metap[[paste0(score_name, "sc_6")]][f] <- metap[[var_name]][f] / k
+
+  # Calculate difference score
+  metap[[paste0(score_name, "sc_5")]][f] <-
+    (metap[[var_name]][f] - metap$score_sc3[f]) / k
+
+  # Format results
+  metap <- metap[, c("ID_t", paste0(score_name, "sc_5"), paste0(score_name, "sc_6"))]
+  metap[is.na(metap)] <- -55
+
+  # Return results
+  return(metap)
+}
