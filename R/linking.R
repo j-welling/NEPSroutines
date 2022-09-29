@@ -1855,11 +1855,14 @@ test_linking_data <- function(vars_curr,
                               warn = warn
                               ) {
 
-  # Test select
+  # Test select and items
   scaling:::check_logicals(vars_curr, "vars_curr", select_curr, warn = warn)
+  scaling:::check_items(vars_curr$item[vars_curr[[select_curr]]])
   scaling:::check_logicals(vars_prev, "vars_prev", select_prev, warn = warn)
-  if (!is.null(select_link))
+  scaling:::check_items(vars_prev$item[vars_prev[[select_prev]]])
+  if (!is.null(select_link) & !is.null(vars_link))
     scaling:::check_logicals(vars_link, "vars_link", select_link, warn = warn)
+    scaling:::check_items(vars_link$item[vars_link[[select_link]]])
 
   # Test valid
   if (!is.null(valid_curr))
