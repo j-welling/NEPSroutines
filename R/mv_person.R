@@ -331,7 +331,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
         groups <- create_ifelse(show_all, c(grouping, 'all'), grouping)
 
     # Test labels
-    if (any(!names(mv_all) %in% names(labels_mvs))) {
+    if (any(!names(mv_all)[-length(mv_all)] %in% names(labels_mvs))) {
         stop("Please provide labels for each missing value type specified in mv_p.")
     }
 
@@ -339,7 +339,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
     check_folder(path)
 
     # for each missing type
-    for (i in names(mv_all)) {
+    for (i in names(mv_all)[-length(mv_all)]) {
 
         if (is.null(grouping)) {
 
@@ -521,6 +521,8 @@ test_mvp_data <- function(mv_p, grouping, mvs) {
 #' @export
 
 print_mvp_results <- function(mv_p) {
+
+  message("\nTable with results:\n")
 
     if ('summary' %in% names(mv_p)) {
         print(mv_p$summary)
