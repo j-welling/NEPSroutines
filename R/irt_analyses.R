@@ -820,8 +820,8 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   eap_rel <- round(model$mod$EAP.rel[1], 3)
   wle_rel <- round(model$wle_rel[1], 3)
   message("Test reliability:\n",
-          "The reliabilities of the test (EAP/PV reliability = ", eap_rel,
-          ", WLE reliability = ", wle_rel, ") were ... .\n")
+          "EAP/PV reliability = ", eap_rel, "\n",
+          "WLE reliability = ", wle_rel, "\n")
 
   # Item discrimination
   disc_min <- min(irt_sum$Discr., na.rm = TRUE)
