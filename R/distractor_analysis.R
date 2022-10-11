@@ -48,7 +48,7 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
                          save = TRUE, print = TRUE, return = FALSE,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
-                         overwrite = FALSE, warn = TRUE) {
+                         overwrite = FALSE, digits = 3, warn = TRUE) {
 
     # Create list for results
     distractors <- list()
@@ -62,7 +62,8 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
                                                  valid = valid,
                                                  mvs = mvs,
                                                  warn = warn)
-    distractors$summary <- dis_summary(distractors$analysis)
+
+    distractors$summary <- dis_summary(distractors$analysis, digits = digits)
 
     # Print results
     if (print) print_dis_summary(distractors$summary)
@@ -71,13 +72,16 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
     if (save) {
         save_results(distractors,
                      filename = "distractors.rds", path = path_results)
+        save_table(distractors$summary, overwrite = overwrite,
+                   filename = "distractors_summary.xlsx", path = path_table)
         save_table(distractors$analysis, overwrite = overwrite,
-                   filename = "distractors.xlsx", path = path_table)
+                   filename = "distractors_items.xlsx", path = path_table)
     }
 
     # Save results
     if (return) return(distractors)
 }
+
 
 #' Conduct distractor analysis
 #'
@@ -172,6 +176,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
     return(dis)
 }
 
+
 #' Summary of distractor analysis
 #'
 #' @param distractors return object of dis_analysis() function (list of
@@ -182,7 +187,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
 #'           distractor : item-total correlations for distractors
 #'
 #' @export
-dis_summary <- function(distractors) {
+dis_summary <- function(distractors, digits = 3) {
     # data.frames containing information for distractors and correct responses,
     # respectively
 
@@ -197,55 +202,59 @@ dis_summary <- function(distractors) {
 
     rc <- res[sel,]
     rd <- res[!sel,]
+    desc <- data.frame(correct = round(unlist(psych::describe(rc[, 3])), digits),
+                       distract = round(unlist(psych::describe(rd[, 3])), digits)
+    )[c(3:5, 8:9), ]
 
     # Return list with results
-    return(list(correct = rc, distractor = rd))
+    return(list(correct = rc, distractor = rd, descriptives = desc))
 }
+
 
 #' Print summary of distractor analyses
 #'
 #' @param dist_sum return object of dis_summary()
 #' @export
 print_dis_summary <- function(dist_sum) {
-        rc <- dist_sum$correct
-        rd <- dist_sum$distractor
-        # short summary containing minimum and maximum for distractors and
-        # correct responses as well as respective item names [print to console!]
+    rc <- dist_sum$correct
+    rd <- dist_sum$distractor
+    # short summary containing minimum and maximum for distractors and
+    # correct responses as well as respective item names [print to console!]
 
-        # Correct responses
-        corr_min <- rc[which(rc$corr == min(rc$corr)), "corr"]
-        corr_min_names <- rownames(rc[which(rc$corr == min(rc$corr)),])
-        corr_max <- rc[which(rc$corr == max(rc$corr)), "corr"]
-        corr_max_names <- rownames(rc[which(rc$corr == max(rc$corr)),])
-        corr_med <- rc[which(rc$corr == median(rc$corr)), "corr"]
-        corr_med_names <- rownames(rc[which(rc$corr == median(rc$corr)),])
+    # Correct responses
+    corr_min <- rc[which(rc$corr == min(rc$corr)), "corr"]
+    corr_min_names <- rownames(rc[which(rc$corr == min(rc$corr)),])
+    corr_max <- rc[which(rc$corr == max(rc$corr)), "corr"]
+    corr_max_names <- rownames(rc[which(rc$corr == max(rc$corr)),])
+    corr_med <- rc[which(rc$corr == median(rc$corr)), "corr"]
+    corr_med_names <- rownames(rc[which(rc$corr == median(rc$corr)),])
 
-        message("\nItem-total correlation for correct response: ",
-                "\nMin. = ",  corr_min, " (", paste(corr_min_names, collapse = ", "), ")",
-                "\nMax. = ",  corr_max, " (", paste(corr_max_names, collapse = ", "), ")",
-                "\nMd. = ",  median(rc$corr), " (", paste(corr_med_names, collapse = ", "), ")")
+    message("\nItem-total correlation for correct response: ",
+            "\nMin. = ",  corr_min, " (", paste(corr_min_names, collapse = ", "), ")",
+            "\nMax. = ",  corr_max, " (", paste(corr_max_names, collapse = ", "), ")",
+            "\nMd. = ",  median(rc$corr), " (", paste(corr_med_names, collapse = ", "), ")")
 
-        # Distractors
-        dist_min <- rd[which(rd$corr == min(rd$corr)), "corr"]
-        dist_min_names <- rownames(rd[which(rd$corr == min(rd$corr)),])
-        dist_max <- rd[which(rd$corr == max(rd$corr)), "corr"]
-        dist_max_names <- rownames(rd[which(rd$corr == max(rd$corr)),])
-        dist_med <- rd[which(rd$corr == median(rd$corr)), "corr"]
-        dist_med_names <- rownames(rd[which(rd$corr == median(rd$corr)),])
+    # Distractors
+    dist_min <- rd[which(rd$corr == min(rd$corr)), "corr"]
+    dist_min_names <- rownames(rd[which(rd$corr == min(rd$corr)),])
+    dist_max <- rd[which(rd$corr == max(rd$corr)), "corr"]
+    dist_max_names <- rownames(rd[which(rd$corr == max(rd$corr)),])
+    dist_med <- rd[which(rd$corr == median(rd$corr)), "corr"]
+    dist_med_names <- rownames(rd[which(rd$corr == median(rd$corr)),])
 
-        message("\nItem-total correlation for distractor: ",
-                "\nMin. = ",  dist_min, " (", paste(dist_min_names, collapse = ", "), ")",
-                "\nMax. = ",  dist_max, " (", paste(dist_max_names, collapse = ", "), ")",
-                "\nMd. = ",  median(rd$corr), " (", paste(dist_med_names, collapse = ", "), ")")
+    message("\nItem-total correlation for distractor: ",
+            "\nMin. = ",  dist_min, " (", paste(dist_min_names, collapse = ", "), ")",
+            "\nMax. = ",  dist_max, " (", paste(dist_max_names, collapse = ", "), ")",
+            "\nMd. = ",  median(rd$corr), " (", paste(dist_med_names, collapse = ", "), ")")
 
-        # Auffällige Distraktoren und korrekte Antworten anzeigen
-        message("\n",
-                "Items with problematic item-total correlations for correct ",
-                "response (r < 0.2): \n",
-                paste0(rownames(rc[which(rc$corr < 0.2),]), collapse = ", "))
-        message("\n",
-                "Items with problematic item-total correlations for ",
-                "distractors (r > 0.05): \n",
-                paste0(rownames(rd[which(rd$corr > 0.05),]), collapse = ", "),
-                "\n")
+    # Auffällige Distraktoren und korrekte Antworten anzeigen
+    message("\n",
+            "Items with problematic item-total correlations for correct ",
+            "response (r < 0.2): \n",
+            paste0(rownames(rc[which(rc$corr < 0.2),]), collapse = ", "))
+    message("\n",
+            "Items with problematic item-total correlations for ",
+            "distractors (r > 0.05): \n",
+            paste0(rownames(rd[which(rd$corr > 0.05),]), collapse = ", "),
+            "\n")
 }
