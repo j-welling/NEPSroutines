@@ -245,16 +245,22 @@ print_dis_summary <- function(dist_sum) {
     message("\nItem-total correlation for distractor: ",
             "\nMin. = ",  dist_min, " (", paste(dist_min_names, collapse = ", "), ")",
             "\nMax. = ",  dist_max, " (", paste(dist_max_names, collapse = ", "), ")",
-            "\nMd. = ",  median(rd$corr), " (", paste(dist_med_names, collapse = ", "), ")")
+            "\nMd. = ",  median(rd$corr), " (", paste(dist_med_names, collapse = ", "),
+            ")\n")
 
     # Auffällige Distraktoren und korrekte Antworten anzeigen
-    message("\n",
-            "Items with problematic item-total correlations for correct ",
+    problematic_correct_responses <- rownames(rc[which(rc$corr < 0.2),])
+    problematic_distractors <- rownames(rd[which(rd$corr > 0.05),])
+
+    if (length(problematic_correct_responses) >= 1) {
+      message("\nItems with problematic item-total correlations for correct ",
             "response (r < 0.2): \n",
-            paste0(rownames(rc[which(rc$corr < 0.2),]), collapse = ", "))
-    message("\n",
-            "Items with problematic item-total correlations for ",
-            "distractors (r > 0.05): \n",
-            paste0(rownames(rd[which(rd$corr > 0.05),]), collapse = ", "),
-            "\n")
+            paste0(problematic_correct_responses, collapse = ", "))
+    }
+
+    if (length(problematic_distractors) >= 1) {
+      message("\nItems with problematic item-total correlations for ",
+              "distractors (r > 0.05): \n",
+              paste0(problematic_distractors, collapse = ", "), "\n")
+    }
 }
