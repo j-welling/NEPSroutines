@@ -36,7 +36,8 @@
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param verbose  logical; whether to print processing information to console
-#' @param prob_dif numeric scalar; indicates absolute threshold of problematic DIF (defaults to 0.5)
+#' @param dif_threshold numeric scalar; indicates absolute threshold of
+#' problematic DIF (defaults to 0.5)
 #'
 #' @return a list of:
 #'   mmod: main effects model
@@ -49,41 +50,41 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
                          include_mv = 200, control = NULL, pweights = NULL,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
-                         verbose = FALSE, warn = TRUE, prob_dif = 0.5) {
+                         verbose = FALSE, warn = TRUE, dif_threshold = 0.5) {
 
-  # Test data
-  test_dif_data(resp = resp, vars = vars, select = select, valid = valid,
-                dif_vars = dif_vars, scoring = scoring, pweights = pweights,
-                mvs = mvs, warn = warn)
+    # Test data
+    test_dif_data(resp = resp, vars = vars, select = select, valid = valid,
+                  dif_vars = dif_vars, scoring = scoring, pweights = pweights,
+                  mvs = mvs, warn = warn)
 
-  check_select(select, dif_vars)
+    check_select(select, dif_vars)
 
-  # Create list for results
-  dif <- list()
+    # Create list for results
+    dif <- list()
 
-  # Conduct dif analyses
-  dif$models <- scaling:::conduct_dif_analysis(
-    select = select, dif_vars = dif_vars, resp = resp, vars = vars,
-    scoring = scoring, include_mv = include_mv, valid = valid,
-    path = path_results, mvs = mvs, verbose = verbose, warn = warn, save = save,
-    control = control, pweights = pweights, test = FALSE
-  )
+    # Conduct dif analyses
+    dif$models <- scaling:::conduct_dif_analysis(
+        select = select, dif_vars = dif_vars, resp = resp, vars = vars,
+        scoring = scoring, include_mv = include_mv, valid = valid,
+        path = path_results, mvs = mvs, verbose = verbose, warn = warn, save = save,
+        control = control, pweights = pweights, test = FALSE
+    )
 
-  # Create summary
-  dif$summaries <- scaling:::summarize_dif_analysis(
-    dif_models = dif$models, dif_vars = dif_vars, prob_dif = prob_dif,
-    path_table = path_table, path_results = path_results,
-    print = print, save = save, overwrite = overwrite
-  )
+    # Create summary
+    dif$summaries <- scaling:::summarize_dif_analysis(
+        dif_models = dif$models, dif_vars = dif_vars, dif_threshold = dif_threshold,
+        path_table = path_table, path_results = path_results,
+        print = print, save = save, overwrite = overwrite
+    )
 
-  # Create table for TR
-  dif$tr_tables <- scaling:::build_dif_tr_tables(
-    dif_summaries = dif$summaries,  save = save,
-    path = path_table, overwrite = overwrite
-  )
+    # Create table for TR
+    dif$tr_tables <- scaling:::build_dif_tr_tables(
+        dif_summaries = dif$summaries,  save = save,
+        path = path_table, overwrite = overwrite
+    )
 
-  # Return results
-  if (return) return(dif)
+    # Return results
+    if (return) return(dif)
 }
 
 #' Checks whether arguments select and dif_vars match
@@ -92,10 +93,10 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
 #'
 #' @noRd
 check_select <- function(select, dif_vars) {
-  if (length(select) > 1 & length(select) != length(dif_vars)) {
-    stop("Please check 'select' and 'dif_vars'. At least one of them does ",
-         "not match the intended analysis.")
-  }
+    if (length(select) > 1 & length(select) != length(dif_vars)) {
+        stop("Please check 'select' and 'dif_vars'. At least one of them does ",
+             "not match the intended analysis.")
+    }
 }
 
 #' Conduct DIF analyses
@@ -144,43 +145,43 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
                                  control = NULL, pweights = NULL,
                                  verbose = FALSE, warn = TRUE, test = TRUE) {
 
-  # Test data
-  if (test) {
-    test_dif_data(resp = resp, vars = vars, select = select, valid = valid,
-                  dif_vars = dif_vars, scoring = scoring, pweights = pweights,
-                  mvs = mvs, warn = warn)
-  }
+    # Test data
+    if (test) {
+        test_dif_data(resp = resp, vars = vars, select = select, valid = valid,
+                      dif_vars = dif_vars, scoring = scoring, pweights = pweights,
+                      mvs = mvs, warn = warn)
+    }
 
-  # Create list for results
-  dif_models <- list()
+    # Create list for results
+    dif_models <- list()
 
-  # Set same items to all dif variables if items has length 1
-  if (length(select) == 1) {
-    select <- rep(select, length(dif_vars))
-  }
+    # Set same items to all dif variables if items has length 1
+    if (length(select) == 1) {
+        select <- rep(select, length(dif_vars))
+    }
 
-  # Conduct dif analyses
-  for (i in seq_along(dif_vars)) {
-    dif_models[[i]] <- dif_model(resp = resp, vars = vars, select = select[i],
-                                 valid = valid, dif_var = dif_vars[i],
-                                 scoring = scoring, include_mv = include_mv,
-                                 verbose = verbose, mvs = mvs, warn = warn,
-                                 test = FALSE, control = control,
-                                 pweights = pweights)
-  }
-  names(dif_models) <- dif_vars
+    # Conduct dif analyses
+    for (i in seq_along(dif_vars)) {
+        dif_models[[i]] <- dif_model(resp = resp, vars = vars, select = select[i],
+                                     valid = valid, dif_var = dif_vars[i],
+                                     scoring = scoring, include_mv = include_mv,
+                                     verbose = verbose, mvs = mvs, warn = warn,
+                                     test = FALSE, control = control,
+                                     pweights = pweights)
+    }
+    names(dif_models) <- dif_vars
 
-  # Save results
-  if (save) {
-      are_poly <- sapply(select, function(x) is_poly(resp, vars, x))
-      irt_type <- ifelse(sum(are_poly) == length(are_poly), 'poly',
-                         ifelse(sum(are_poly) == 0, 'dich', 'mixed'))
-      save_results(dif_models, path = path,
-                   filename = paste0("dif_", irt_type, "_models.rds"))
-  }
+    # Save results
+    if (save) {
+        are_poly <- sapply(select, function(x) is_poly(resp, vars, x))
+        irt_type <- ifelse(sum(are_poly) == length(are_poly), 'poly',
+                           ifelse(sum(are_poly) == 0, 'dich', 'mixed'))
+        save_results(dif_models, path = path,
+                     filename = paste0("dif_", irt_type, "_models.rds"))
+    }
 
-  # Return results
-  return(dif_models)
+    # Return results
+    return(dif_models)
 }
 
 #' summarize DIF analysis
@@ -188,7 +189,8 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 #' @param dif_models return object of conduct_dif_analysis()
 #' @param dif_vars character vector; contains the variable names to be tested
 #'   for DIF (e.g., "gender")
-#' @param prob_dif numeric scalar; indicates absolute threshold of problematic DIF (defaults to 0.5)
+#' @param dif_threshold numeric scalar; indicates absolute threshold of
+#' problematic DIF (defaults to 0.5)
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path_results  string; defines path to folder where results shall be saved
@@ -197,30 +199,30 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 #'
 #' @returns a list of dif summaries for each input entry in dif_models
 #' @export
-summarize_dif_analysis <- function(dif_models, dif_vars, prob_dif = 0.5,
+summarize_dif_analysis <- function(dif_models, dif_vars, dif_threshold = 0.5,
                                    print = TRUE, save = TRUE, overwrite = FALSE,
                                    path_results = here::here('Results'),
                                    path_table = here::here('Tables')) {
 
-  dif_summaries <- list()
+    dif_summaries <- list()
 
-  for (i in dif_vars) {
+    for (i in dif_vars) {
 
-    dif_summaries[[i]] <- dif_summary(dif_models[[i]], prob_dif = prob_dif,
-                                      print = print, overwrite = overwrite,
-                                      save = save, path = path_table)
-  }
+        dif_summaries[[i]] <- dif_summary(dif_models[[i]], dif_threshold = dif_threshold,
+                                          print = print, overwrite = overwrite,
+                                          save = save, path = path_table)
+    }
 
-  if (save) {
+    if (save) {
 
-      are_poly <- sapply(dif_summaries, function(x) x$irt_type == 'poly')
-      irt_type <- ifelse(sum(are_poly) == length(are_poly), 'poly',
-                         ifelse(sum(are_poly) == 0, 'dich', 'mixed'))
-      scaling:::save_results(dif_summaries, path = path_results,
-                             filename = paste0("dif_", irt_type, "_summaries.rds"))
-  }
+        are_poly <- sapply(dif_summaries, function(x) x$irt_type == 'poly')
+        irt_type <- ifelse(sum(are_poly) == length(are_poly), 'poly',
+                           ifelse(sum(are_poly) == 0, 'dich', 'mixed'))
+        scaling:::save_results(dif_summaries, path = path_results,
+                               filename = paste0("dif_", irt_type, "_summaries.rds"))
+    }
 
-  return(dif_summaries)
+    return(dif_summaries)
 }
 
 
@@ -269,146 +271,146 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
                       mvs = NULL, verbose = FALSE, warn = TRUE, test = TRUE,
                       control = NULL, pweights = NULL) {
 
-  # Test data
-  if (test) {
-    test_dif_data(resp = resp, vars = vars, select = select, valid = valid,
-                  dif_vars = dif_var, scoring = scoring, pweights = pweights,
-                  mvs = mvs, warn = warn)
-  }
-
-  scaling:::check_items(vars$item[vars[[select]]])
-
-  # Select only valid cases
-  resp <- scaling:::only_valid(resp, valid = valid, warn = FALSE)
-
-  # Create ID, facets and pweights variable
-  pid <- resp$ID_t
-  check_pid(pid)
-  facets <- resp[, dif_var, drop = FALSE]
-  lbls_facet <- attributes(resp[[dif_var]])$label
-  pws <- scaling:::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
-
-  # Prepare resp by converting missing values and selecting only necessary variables
-  resp <- scaling:::prepare_resp(resp, vars = vars, select = select,
-                                 convert = TRUE, mvs = mvs, warn = FALSE)
-
-  # Test resp
-  scaling:::check_numerics(resp, "resp", check_invalid = TRUE)
-
-  # Identify IRT type
-  irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
-
-  # Prepare DIF analysis
-  tmp_formula <- paste("~ item +", ifelse(irt_type == 'poly', "item * step +", ""))
-  formula_dmod <- as.formula(paste(tmp_formula, "item *", dif_var))
-  formula_mmod <- as.formula(paste(tmp_formula, dif_var))
-  rm(tmp_formula)
-
-  # Prepare facets
-  facets[[dif_var]] <- as.integer(facets[[dif_var]])
-  invalid <- facets[[dif_var]] < 0
-
-  if (sum(invalid, na.rm = TRUE) > 0) {
-    facets[[dif_var]][ifelse(is.na(invalid), FALSE, invalid), ] <- NA
-    if (warn) {
-        warning(paste0(sum(invalid, na.rm = TRUE), " invalid values (< 0) were found",
-        " in the DIF variable ", dif_var, ". The corresponding cases were replaced",
-        " by NAs.\n"))
+    # Test data
+    if (test) {
+        test_dif_data(resp = resp, vars = vars, select = select, valid = valid,
+                      dif_vars = dif_var, scoring = scoring, pweights = pweights,
+                      mvs = mvs, warn = warn)
     }
-  }
 
-  mis <- is.na(facets[[dif_var]])
+    scaling:::check_items(vars$item[vars[[select]]])
 
-  if (any(mis)) {
+    # Select only valid cases
+    resp <- scaling:::only_valid(resp, valid = valid, warn = FALSE)
 
-    if (sum(mis) < include_mv) {
+    # Create ID, facets and pweights variable
+    pid <- resp$ID_t
+    check_pid(pid)
+    facets <- resp[, dif_var, drop = FALSE]
+    lbls_facet <- attributes(resp[[dif_var]])$label
+    pws <- scaling:::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
 
-      facets <- facets[!mis, , drop = FALSE]
-      resp <- resp[!mis, ]
-      pid <- pid[!mis]
+    # Prepare resp by converting missing values and selecting only necessary variables
+    resp <- scaling:::prepare_resp(resp, vars = vars, select = select,
+                                   convert = TRUE, mvs = mvs, warn = FALSE)
 
-      fcts <- create_facets_df(facets[[dif_var]], labels = lbls_facet)
+    # Test resp
+    scaling:::check_numerics(resp, "resp", check_invalid = TRUE)
 
-      if (warn) {
-        warning(paste0(sum(mis), " missing values were found in the DIF variable ",
-                       dif_var, ". The corresponding cases have been excluded from the analysis.\n"))
-      }
+    # Identify IRT type
+    irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
+
+    # Prepare DIF analysis
+    tmp_formula <- paste("~ item +", ifelse(irt_type == 'poly', "item * step +", ""))
+    formula_dmod <- as.formula(paste(tmp_formula, "item *", dif_var))
+    formula_mmod <- as.formula(paste(tmp_formula, dif_var))
+    rm(tmp_formula)
+
+    # Prepare facets
+    facets[[dif_var]] <- as.integer(facets[[dif_var]])
+    invalid <- facets[[dif_var]] < 0
+
+    if (sum(invalid, na.rm = TRUE) > 0) {
+        facets[[dif_var]][ifelse(is.na(invalid), FALSE, invalid), ] <- NA
+        if (warn) {
+            warning(paste0(sum(invalid, na.rm = TRUE), " invalid values (< 0) were found",
+                           " in the DIF variable ", dif_var, ". The corresponding cases were replaced",
+                           " by NAs.\n"))
+        }
+    }
+
+    mis <- is.na(facets[[dif_var]])
+
+    if (any(mis)) {
+
+        if (sum(mis) < include_mv) {
+
+            facets <- facets[!mis, , drop = FALSE]
+            resp <- resp[!mis, ]
+            pid <- pid[!mis]
+
+            fcts <- create_facets_df(facets[[dif_var]], labels = lbls_facet)
+
+            if (warn) {
+                warning(paste0(sum(mis), " missing values were found in the DIF variable ",
+                               dif_var, ". The corresponding cases have been excluded from the analysis.\n"))
+            }
+
+        } else {
+
+            vals <- unique(facets[[dif_var]])
+            max_val <- max(vals, na.rm = TRUE)
+            min_val <- min(vals, na.rm = TRUE)
+            facets[mis, ] <- max_val + 1
+
+            fcts <- create_facets_df(facets[[dif_var]], labels = lbls_facet,
+                                     missings = TRUE)
+
+            # DIF analysis does not work with more than two groups when one group == 0
+            if (min_val == 0) {
+                facets <- facets + 1
+                fcts$number <- as.integer(fcts$number)
+            }
+
+            if (warn) {
+                warning(paste0(sum(mis), " missing values were found in the DIF variable ",
+                               dif_var, ". The corresponding cases have been included in the analysis as",
+                               " an extra group.\n"))
+            }
+
+        }
+    } else {
+        fcts <- create_facets_df(facets[[dif_var]], labels = lbls_facet)
+    }
+
+    # DIF analysis
+
+
+    if (irt_type == 'poly') {
+
+        if(is.null(scoring) & warn)
+            warning("No scoring variable provided. All items are scored with 1.")
+
+        mmod <- pcm_dif(
+            resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
+            vars = vars, select = select, scoring = scoring,
+            verbose = verbose, control = control, pweights = pws
+        )
+
+        dmod <- pcm_dif(
+            resp = resp, facets = facets, formulaA = formula_dmod, pid = pid,
+            vars = vars, select = select, scoring = scoring,
+            verbose = verbose, control = control, pweights = pws
+        )
 
     } else {
 
-      vals <- unique(facets[[dif_var]])
-      max_val <- max(vals, na.rm = TRUE)
-      min_val <- min(vals, na.rm = TRUE)
-      facets[mis, ] <- max_val + 1
+        # Check whether resp contains only dichotomous items
+        scaling:::check_dich(resp, "resp")
 
-      fcts <- create_facets_df(facets[[dif_var]], labels = lbls_facet,
-                               missings = TRUE)
+        Q <- scaling:::create_q(vars, select = select, scoring = scoring, poly = FALSE)
+        irtmodel <- '1PL'
 
-      # DIF analysis does not work with more than two groups when one group == 0
-      if (min_val == 0) {
-        facets <- facets + 1
-        fcts$number <- as.integer(fcts$number)
-      }
+        dmod <- TAM::tam.mml.mfr(resp, irtmodel = irtmodel, facets = facets,
+                                 Q = Q, pid = pid, formulaA = formula_dmod,
+                                 control = control, pweights = pws,
+                                 verbose = verbose
+        )
 
-      if (warn) {
-          warning(paste0(sum(mis), " missing values were found in the DIF variable ",
-          dif_var, ". The corresponding cases have been included in the analysis as",
-          " an extra group.\n"))
-      }
+        mmod <- TAM::tam.mml.mfr(resp, irtmodel = irtmodel, facets = facets,
+                                 Q = Q, pid = pid, formulaA = formula_mmod,
+                                 control = control, pweights = pws,
+                                 verbose = verbose
+        )
 
     }
-  } else {
-    fcts <- create_facets_df(facets[[dif_var]], labels = lbls_facet)
-  }
 
-  # DIF analysis
+    # Warn if maximum number of iterations were reached
+    scaling:::reached_maxiter(mmod, paste0("'", dif_var, "' without DIF"))
+    scaling:::reached_maxiter(dmod, paste0("'", dif_var, "' with DIF"))
 
-
-  if (irt_type == 'poly') {
-
-    if(is.null(scoring) & warn)
-        warning("No scoring variable provided. All items are scored with 1.")
-
-    mmod <- pcm_dif(
-      resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
-      vars = vars, select = select, scoring = scoring,
-      verbose = verbose, control = control, pweights = pws
-    )
-
-    dmod <- pcm_dif(
-      resp = resp, facets = facets, formulaA = formula_dmod, pid = pid,
-      vars = vars, select = select, scoring = scoring,
-      verbose = verbose, control = control, pweights = pws
-    )
-
-  } else {
-
-    # Check whether resp contains only dichotomous items
-    scaling:::check_dich(resp, "resp")
-
-    Q <- scaling:::create_q(vars, select = select, scoring = scoring, poly = FALSE)
-    irtmodel <- '1PL'
-
-    dmod <- TAM::tam.mml.mfr(resp, irtmodel = irtmodel, facets = facets,
-                             Q = Q, pid = pid, formulaA = formula_dmod,
-                             control = control, pweights = pws,
-                             verbose = verbose
-    )
-
-    mmod <- TAM::tam.mml.mfr(resp, irtmodel = irtmodel, facets = facets,
-                             Q = Q, pid = pid, formulaA = formula_mmod,
-                             control = control, pweights = pws,
-                             verbose = verbose
-    )
-
-  }
-
-  # Warn if maximum number of iterations were reached
-  scaling:::reached_maxiter(mmod, paste0("'", dif_var, "' without DIF"))
-  scaling:::reached_maxiter(dmod, paste0("'", dif_var, "' with DIF"))
-
-  list(mmod = mmod, dmod = dmod, facets = fcts,
-       dif_var = dif_var, irt_type = irt_type)
+    list(mmod = mmod, dmod = dmod, facets = fcts,
+         dif_var = dif_var, irt_type = irt_type)
 }
 
 #' Create data.frame for facets with counts
@@ -419,16 +421,16 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 #' @noRd
 create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 
-  df <- data.frame(table(facet))
-  names(df) <- c("number", "counts")
-  row.names(df) <- scaling:::create_ifelse(!missings,
-                     paste0("Group ", sort(unique(facet))),
-                     c(paste0("Group ", sort(unique(facet))[-length(unique(facet))]), "missings"))
-  if(!is.null(labels)) {
-      df$label <- scaling:::create_ifelse(!missings, names(labels), c(names(labels), 'missings'))
-  }
+    df <- data.frame(table(facet))
+    names(df) <- c("number", "counts")
+    row.names(df) <- scaling:::create_ifelse(!missings,
+                                             paste0("Group ", sort(unique(facet))),
+                                             c(paste0("Group ", sort(unique(facet))[-length(unique(facet))]), "missings"))
+    if(!is.null(labels)) {
+        df$label <- scaling:::create_ifelse(!missings, names(labels), c(names(labels), 'missings'))
+    }
 
-  df
+    df
 }
 
 #' DIF analyses for PCM model
@@ -463,22 +465,22 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
                     verbose, scoring = NULL, control = NULL, pweights = NULL) {
 
-  # get design matrix for model
-  B <- TAM::designMatrices(modeltype = 'PCM', resp = resp)$B
+    # get design matrix for model
+    B <- TAM::designMatrices(modeltype = 'PCM', resp = resp)$B
 
-  pcm_scoring <- scaling:::create_ifelse(is.null(scoring),
-                                         rep(1, length(vars[[select]])),
-                                         vars[[scoring]][vars[[select]]])
+    pcm_scoring <- scaling:::create_ifelse(is.null(scoring),
+                                           rep(1, length(vars[[select]])),
+                                           vars[[scoring]][vars[[select]]])
 
-  # 0.5 scoring for PCM
-  B[vars$item[vars[[select]]], , 1] <- B[vars$item[vars[[select]]], , 1] * pcm_scoring
+    # 0.5 scoring for PCM
+    B[vars$item[vars[[select]]], , 1] <- B[vars$item[vars[[select]]], , 1] * pcm_scoring
 
-  # set irtmodel
-  irtmodel <- 'GPCM'
+    # set irtmodel
+    irtmodel <- 'GPCM'
 
-  TAM::tam.mml.mfr(formulaA = formulaA, facets = facets, B = B, pid = pid,
-                   irtmodel = irtmodel, resp = resp, verbose = verbose,
-                   control = control, pweights = pweights)
+    TAM::tam.mml.mfr(formulaA = formulaA, facets = facets, B = B, pid = pid,
+                     irtmodel = irtmodel, resp = resp, verbose = verbose,
+                     control = control, pweights = pweights)
 
 }
 
@@ -486,7 +488,8 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
 #' Summary for DIF analysis
 #'
 #' @param diflist list; return object of dif_model(); with main and dif model
-#' @param prob_dif numeric scalar; indicates absolute threshold of problematic DIF (defaults to 0.5)
+#' @param dif_threshold numeric scalar; indicates absolute threshold of
+#' problematic DIF (defaults to 0.5)
 #' @param print logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where tables shall be saved
@@ -497,7 +500,7 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
 #' @export
 
 dif_summary <- function(diflist, print = TRUE, save = TRUE,
-                        path = here::here('Tables'), prob_dif = 0.5,
+                        path = here::here('Tables'), dif_threshold = 0.5,
                         overwrite = FALSE) {
     # information criteria for DIF and main model
     # main effects of main and DIF model + standardized
@@ -512,7 +515,7 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
 
     if (print) {
         print_dif_summary(resp = resp, diflist = diflist, res = res,
-                          prob_dif = prob_dif)
+                          dif_threshold = dif_threshold)
     }
 
     if (save) {
@@ -585,8 +588,8 @@ difsum <- function(obj, dif_var, groups = 1) {
         mest[[lbl]] <- est[[grps[1]]]
         mest[[lbl]]$xsi <-  est[[grps[1]]]$xsi - est[[grps[2]]]$xsi
         mest[[lbl]]$se.xsi <- scaling:::create_ifelse(any(grps == max(groups)),
-                                  sqrt(est[[grps[!grps == max(groups)]]]$se.xsi^2 * 2),
-                                  sqrt(est[[grps[1]]]$se.xsi^2 + est[[grps[2]]]$se.xsi^2))
+                                                      sqrt(est[[grps[!grps == max(groups)]]]$se.xsi^2 * 2),
+                                                      sqrt(est[[grps[1]]]$se.xsi^2 + est[[grps[2]]]$se.xsi^2))
 
         # Standardized difference
         mest[[lbl]]$std <- round(mest[[lbl]]$xsi / sqrt(obj$dmod$variance[1]), 3)
@@ -743,10 +746,11 @@ build_dif_tr_tables <- function(dif_summaries, save = TRUE, overwrite = FALSE,
 #' @param resp  data.frame; includes all DIF variables
 #' @param diflist list; return object of dif_model(); with main and dif model
 #' @param res list; return object of dif_summary()
-#' @param prob_dif numeric scalar; indicates absolute threshold of problematic DIF (defaults to 0.5)
+#' @param dif_threshold numeric scalar; indicates absolute threshold of
+#' problematic DIF (defaults to 0.5)
 #'
 #' @export
-print_dif_summary <- function(resp, diflist, res, prob_dif = 0.5) {
+print_dif_summary <- function(resp, diflist, res, dif_threshold = 0.5) {
 
     dif_var <- diflist$dif_var
 
@@ -770,11 +774,11 @@ print_dif_summary <- function(resp, diflist, res, prob_dif = 0.5) {
     }
 
     # problematic dif values (significant p-value, larger than 0.5 logits)
-    message("\nItems exhibiting problematic DIF (|xsi| >= ", prob_dif, "):\n")
+    message("\nItems exhibiting problematic DIF (|xsi| >= ", dif_threshold, "):\n")
 
     for (i  in names(res$est)) {
         cat(paste0("Comparison ", i, ":\n"))
-        f <- abs(res$est[[i]]$xsi) >= prob_dif
+        f <- abs(res$est[[i]]$xsi) >= dif_threshold
         if (any(f)) {
             sig <- res$est[[i]]$p < .05
             res$est[[i]]$p <- paste0(round(res$est[[i]]$p, 3), ifelse(sig, "*", ""))
