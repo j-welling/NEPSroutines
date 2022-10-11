@@ -518,7 +518,7 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
     AZ = "missing items due to ''Angabe zurueckgesetzt''"
 )) {
     if (is.null(grouping)) {
-        for (lbl in names(labels_mvs)) {
+        for (lbl in names(mv_i$list[-c(1:3)])) {
             mv_min <- min(mv_i$list[[lbl]], na.rm = TRUE)
             mv_max <- max(mv_i$list[[lbl]], na.rm = TRUE)
             item_min <- mv_i$list$item[mv_i$list[[lbl]] == mv_min]
@@ -535,8 +535,8 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
         }
     } else {
         for (g in grouping) {
-            print(g)
-            for (lbl in names(labels_mvs)) {
+            message("\n", Hmisc::capitalize(g), ":\n")
+            for (lbl in names(mv_i$list[[g]][-c(1:3)])) {
                 mv_min <- min(mv_i$list[[g]][[lbl]], na.rm = TRUE)
                 mv_max <- max(mv_i$list[[g]][[lbl]], na.rm = TRUE)
                 item_min <- mv_i$list[[g]]$item[mv_i$list[[g]][[lbl]] == mv_min]
