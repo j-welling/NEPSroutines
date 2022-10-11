@@ -130,71 +130,108 @@ pc_scoring <- function(resp, poly_items, mvs = NULL) {
 #' @param vars  data.frame; contains information about items with items as rows;
 #'   includes variable 'item' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
-#' @param select_poly character; indicates the logical variable in vars which
+#' @param select character; indicates the logical variable in vars which
 #'   contains the item names of the polytomous items
 #' @param per_cat integer; minimum number of persons per category; defaults to 200
 #' @param path_table  string; defines path to folder where tables shall be saved
-#' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
 #' @return resp with collapsed categories. Note that this function changes the
 #'   given PC items IN PLACE. If you want to keep the original data, please
 #'   copy and rename the items to be collapsed first.
+#'
 #' @export
-collapse_response_categories <- function(resp, vars, select_poly, per_cat = 200,
+collapse_response_categories <- function(resp, vars, select, per_cat = 200,
                                          path_table = here::here("Tables"),
-                                         print = TRUE, save = FALSE) {
+                                         save = FALSE) {
+
+    poly_items <- vars$item[vars[[select]]]
 
     # Check whether variables are indeed contained in data.frames
-    check_logicals(vars, "vars", select_poly)
-    check_numerics(resp, "resp", vars$item[vars[[select_poly]]])
+    check_logicals(vars, "vars", select)
+    check_numerics(resp, "resp", poly_items)
+    check_items(poly_items)
 
     collapsed_items <- c()
+    dichotomous_items <- c()
+    problematic_items <- c()
 
-    for (item in vars$item[vars[[select_poly]]]) {
+    for (item in poly_items) {
 
         response <- resp[[item]]
         tab <- table(response[response >= 0])
-        collapse <- which(tab < per_cat)
 
-        if (length(collapse) > 0) {
-            collapsed_items <- c(collapsed_items, item)
-            item_new <- response
-
-            while (length(collapse) > 0) {
-
-                # if frequency of 0 too low, left shift for all values larger than 0
-                if (names(tab)[collapse[1]] == "0") {
-                    j <- which(response > 0)
-                    # if frequency of 1 or higher too low, left shift for all values
-                    # larger than or equal to original value
-                } else if (as.numeric(names(tab)[collapse[1]]) >= 1) {
-                    j <- which(response >= as.numeric(names(tab)[collapse[1]]))
-                }
-
-                item_new[j] <- response[j] - 1
-                response <- resp[[item]]
-                tab <- table(response[response >= 0])
-                collapse <- which(tab < per_cat)
+        # More than one response category > per_cat?
+        if (sum(tab >= per_cat) < 2) {
+            if (max(resp[[item]], na.rm = TRUE) <= 1) {
+                dichotomous_items <- c(dichotomous_items, item)
+            } else {
+                problematic_items <- c(problematic_items, item)
             }
 
-            resp[[ , paste0(item, "_collapsed")]] <- item_new
+        } else {
+
+            collapse <- which(tab < per_cat)
+
+            if (length(collapse) > 0) {
+                collapsed_items <- c(collapsed_items, item)
+
+                while (length(collapse) > 0) {
+
+                    # if frequency of 0 too low, left shift for all values larger than 0
+                    if (names(tab)[collapse[1]] == "0") {
+                        j <- which(response > 0)
+                        # if frequency of 1 or higher too low, left shift for all values
+                        # larger than or equal to original value
+                    } else if (as.numeric(names(tab)[collapse[1]]) >= 1) {
+                        j <- which(response >= as.numeric(names(tab)[collapse[1]]))
+                    }
+
+                    response[j] <- response[j] - 1
+                    tab <- table(response[response >= 0])
+                    collapse <- which(tab < per_cat)
+                }
+
+                resp[ , paste0(item, "_collapsed")] <- response
+            }
         }
     }
 
     # Which items have been collapsed?
-    collapsed_items <- data_frame(
+    item_names <- data_frame(
         original_item = collapsed_items,
         collapsed_item = paste0(collapsed_items, "_collapsed")
     )
 
-    if (print) {
-        message("\nThe following items have been collapsed:\n")
-        collapsed_items
+    # Print results
+    if(!is.null(problematic_items)) {
+      message("\nThe following items have less than two response categories with ",
+              "more than ", per_cat, " cases and were thus not collapsed. ",
+              "Please check these items manually:\n",
+              paste(problematic_items, collapse = ", "))
     }
 
+    if(!is.null(dichotomous_items)) {
+      message("\nDichotomous items were not considered for collapsing. ",
+              "The following items are dichotomous:\n",
+              paste(dichotomous_items, collapse = ", "))
+    }
+
+    if (!is.null(collapsed_items)) {
+      message("\nThe following items have been collapsed:\n")
+      print(item_names)
+    } else {
+      message("\nNo items have been collapsed.")
+    }
+
+    # Save results
     if (save) {
-        save_table(collapsed_items, filename = "collapsed_items.rds",
-                   path = path_table, overwrite = TRUE, show_rownames = TRUE)
+        save_table(results = list(collapsed = item_names,
+                                  dichotomous = dichotomous_items,
+                                  problematic = problematic_items),
+                   filename = "collapsed_items.rds",
+                   path = path_table,
+                   overwrite = TRUE,
+                   show_rownames = TRUE)
     }
 
     return(resp)
