@@ -158,33 +158,41 @@ collapse_response_categories <- function(resp, vars, select_poly, per_cat = 200,
 
         if (length(collapse) > 0) {
             collapsed_items <- c(collapsed_items, item)
-        }
+            item_new <- response
 
-        while (length(collapse) > 0) {
+            while (length(collapse) > 0) {
 
-            # if frequency of 0 too low, left shift for all values larger than 0
-            if (names(tab)[collapse[1]] == "0") {
-                j <- which(response > 0)
-                # if frequency of 1 or higher too low, left shift for all values
-                # larger than or equal to original value
-            } else if (as.numeric(names(tab)[collapse[1]]) >= 1) {
-                j <- which(response >= as.numeric(names(tab)[collapse[1]]))
+                # if frequency of 0 too low, left shift for all values larger than 0
+                if (names(tab)[collapse[1]] == "0") {
+                    j <- which(response > 0)
+                    # if frequency of 1 or higher too low, left shift for all values
+                    # larger than or equal to original value
+                } else if (as.numeric(names(tab)[collapse[1]]) >= 1) {
+                    j <- which(response >= as.numeric(names(tab)[collapse[1]]))
+                }
+
+                item_new[j] <- response[j] - 1
+                response <- resp[[item]]
+                tab <- table(response[response >= 0])
+                collapse <- which(tab < per_cat)
             }
 
-            resp[j, item] <- response[j] - 1
-            response <- resp[[item]]
-            tab <- table(response[response >= 0])
-            collapse <- which(tab < per_cat)
+            resp[[ , paste0(item, "_collapsed")]] <- item_new
         }
     }
 
+    # Which items have been collapsed?
+    collapsed_items <- data_frame(
+        original_item = collapsed_items,
+        collapsed_item = paste0(collapsed_items, "_collapsed")
+    )
+
     if (print) {
-        # Which items have been collapsed?
-        cat(paste(collapsed_items, collapse = ", "))
+        message("\nThe following items have been collapsed:\n")
+        collapsed_items
     }
 
     if (save) {
-        collapsed_items <- as.matrix(collapsed_items)
         save_table(collapsed_items, filename = "collapsed_items.rds",
                    path = path_table, overwrite = TRUE, show_rownames = TRUE)
     }
