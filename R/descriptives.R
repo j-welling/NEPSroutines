@@ -10,7 +10,7 @@
 
 n_valid <- function(dat, valid = NULL) {
 
-    check_logicals(resp, "resp", valid, warn = TRUE)
+    check_logicals(dat, "dat", valid, warn = TRUE)
 
     if (!is.null(valid)) {
         n_inval <- sum(!dat[[valid]])
