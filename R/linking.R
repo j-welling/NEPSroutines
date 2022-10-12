@@ -1531,18 +1531,10 @@ calculate_link_parameters <- function(vars_curr,
 
     # Item names
     items_curr <- vars_curr$item[vars_curr[[select_curr]]]
-    scaling:::check_numerics(resp_curr, "resp_curr", items_curr)
-
     items_prev <- vars_prev$item[vars_prev[[select_prev]]]
-    scaling:::check_numerics(resp_prev, "resp_prev", items_prev)
-
-    if (is_anchor_group) {
-        items_link <- vars_link$item[vars_link[[select_link]]]
-        scaling:::check_numerics(resp_link, "resp_link", items_link)
-    } else {
-        items_link <- NULL
-    }
-
+    items_link <- create_ifelse(is_anchor_group,
+                                vars_link$item[vars_link[[select_link]]],
+                                NULL)
 
     # Anchor group design
     if (is_anchor_group) {
@@ -1568,7 +1560,6 @@ calculate_link_parameters <- function(vars_curr,
                 vars = vars_link,
                 select = select_link,
                 scoring = scoring_link,
-                is_pcm = pre_dat$is_pcm_link,
                 warn = FALSE,
                 test = FALSE
             )
@@ -1579,7 +1570,6 @@ calculate_link_parameters <- function(vars_curr,
                 vars = vars_curr,
                 select = select_curr,
                 scoring = scoring_curr,
-                is_pcm = pre_dat$is_pcm_curr,
                 warn = FALSE,
                 test = FALSE
             )
@@ -1606,7 +1596,6 @@ calculate_link_parameters <- function(vars_curr,
                 vars = vars_curr,
                 select = select_curr,
                 scoring = scoring_curr,
-                is_pcm = pre_dat$is_pcm_curr,
                 warn = FALSE,
                 test = FALSE
             )
@@ -1637,7 +1626,6 @@ calculate_link_parameters <- function(vars_curr,
 #'   variables that are further defined in the function arguments
 #' @param select string; defines name of logical variable in vars that
 #'   indicates which items to use for the analysis
-#' @param is_pcm logical; whether analysis is based on (G)PCM
 #' @param scoring string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to the link constant (e.g., only
 #'   half the link constant is needed if a PC item is scored 0.5)
@@ -1646,7 +1634,7 @@ calculate_link_parameters <- function(vars_curr,
 #'
 #' @returns matrix in xsi.fixed format needed for TAM::tam.mml()
 #' @export
-link_item_parameters <- function(xsi, const, vars, select, is_pcm,
+link_item_parameters <- function(xsi, const, vars, select,
                                  scoring = NULL,
                                  return_steps = FALSE,
                                  warn = TRUE, test = TRUE) {
@@ -1654,16 +1642,16 @@ link_item_parameters <- function(xsi, const, vars, select, is_pcm,
     # Test data
     if (test) {
         scaling:::check_logicals(vars, "vars", select, warn = warn)
-        if (!is.null(scoring)) {
-            scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
-        } else {
-            vars$scoring <- 1
-            scoring <- "scoring"
-            if (is_pcm) {
-                warning("No variable name for scoring factor for polytomous analysis ",
-                        "provided. Scoring is set to 1 for all items.")
-            }
-        }
+    }
+
+    # Check scoring vector
+    if (!is.null(scoring)) {
+      scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+    } else {
+      vars$scoring <- 1
+      scoring <- "scoring"
+      warning("No variable name for scoring factor for polytomous analysis ",
+              "provided. Scoring is set to 1 for all items.")
     }
 
     # xsi parameters with parameter index
@@ -1855,7 +1843,7 @@ test_linking_data <- function(vars_curr,
                               warn = warn
 ) {
 
-    # Test select and items
+    # Test select and item names
     scaling:::check_logicals(vars_curr, "vars_curr", select_curr, warn = warn)
     scaling:::check_items(vars_curr$item[vars_curr[[select_curr]]])
     scaling:::check_logicals(vars_prev, "vars_prev", select_prev, warn = warn)
@@ -1864,12 +1852,20 @@ test_linking_data <- function(vars_curr,
         scaling:::check_logicals(vars_link, "vars_link", select_link, warn = warn)
     scaling:::check_items(vars_link$item[vars_link[[select_link]]])
 
+    # Test items
+    if (!is.null(resp_curr))
+      scaling:::check_numerics(resp_curr, "resp_curr", vars_curr$item[vars_curr[[select_curr]]])
+    if (!is.null(resp_prev))
+      scaling:::check_numerics(resp_prev, "resp_prev", vars_prev$item[vars_prev[[select_prev]]])
+    if (!is.null(resp_link) & !is.null(vars_link) & !is.null(select_link))
+      scaling:::check_numerics(resp_link, "resp_link", vars_link$item[vars_link[[select_link]]])
+
     # Test valid
-    if (!is.null(valid_curr))
+    if (!is.null(valid_curr) & !is.null(resp_curr))
         scaling:::check_logicals(resp_curr, "resp_curr", valid_curr, warn = warn)
-    if (!is.null(valid_prev))
+    if (!is.null(valid_prev) & !is.null(resp_prev))
         scaling:::check_logicals(resp_prev, "resp_prev", valid_prev, warn = warn)
-    if (!is.null(valid_link))
+    if (!is.null(valid_link) & !is.null(resp_link))
         scaling:::check_logicals(resp_link, "resp_link", valid_link, warn = warn)
 
     # Test scoring
@@ -1877,15 +1873,15 @@ test_linking_data <- function(vars_curr,
         scaling:::check_numerics(vars_curr, "vars_curr", scoring_curr, check_invalid = TRUE)
     if (!is.null(scoring_prev))
         scaling:::check_numerics(vars_prev, "vars_prev", scoring_prev, check_invalid = TRUE)
-    if (!is.null(scoring_link))
+    if (!is.null(scoring_link) & !is.null(vars_link))
         scaling:::check_numerics(vars_link, "vars_link", scoring_link, check_invalid = TRUE)
 
     # Test pweights
-    if (!is.null(pweights_curr))
+    if (!is.null(pweights_curr) & !is.null(resp_curr))
         scaling:::check_numerics(resp_curr, "resp_curr", pweights_curr, check_invalid = TRUE)
-    if (!is.null(pweights_prev))
+    if (!is.null(pweights_prev) & !is.null(resp_prev))
         scaling:::check_numerics(resp_prev, "resp_prev", pweights_prev, check_invalid = TRUE)
-    if (!is.null(pweights_link))
+    if (!is.null(pweights_link) & !is.null(resp_link))
         scaling:::check_numerics(resp_link, "resp_link", pweights_link, check_invalid = TRUE)
 
     # Test anchors
