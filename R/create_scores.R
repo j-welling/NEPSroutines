@@ -31,7 +31,7 @@
 #'   passed to TAM-functions
 #' @param poly2dich  logical; indicates whether count only correctly scored
 #'   binary or FULLY correctly scored PC items
-#' @param resp_previous data.frame with responses of first measurement wave,
+#' @param resp_prev data.frame with responses of first measurement wave,
 #'    a person identifier; may also include a WLE as given in wid
 #' @param resp_link_study data.frame with responses of link sample,
 #'    a person identifier;
@@ -79,6 +79,8 @@ create_scores <- function(resp, vars, scoring = NULL,
                           score_name = "score", xsi_fixed = NULL,
                           facet = NULL, select, valid = NULL,
                           mvs = NULL, wle = TRUE, sum_score = FALSE,
+                          metap = FALSE, meta_var_name = NULL,
+                          meta_score_name = NULL, meta_select = NULL,
                           control_tam = NULL, control_wle = NULL,
                           pweights = NULL, poly2dich = TRUE,
                           resp_prev = NULL, resp_link = NULL,
@@ -109,7 +111,7 @@ create_scores <- function(resp, vars, scoring = NULL,
   if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
 
   # Estimate linked WLEs and SEs --> linking not yet implemented
-  if (wle & !is.null(resp_previous)) {
+  if (wle & !is.null(resp_prev)) {
     linked_scores <-
       scaling:::linking(
         resp_curr = resp,
@@ -143,8 +145,7 @@ create_scores <- function(resp, vars, scoring = NULL,
         pweights_link = pweights_link,
         control_tam = control_tam,
         do_dim = do_dim, do_dif = do_dif,
-        warn = warn,
-        test = TRUE
+        warn = warn
       )
     wles_linked <- linked_scores$link_results$wle_linked
     names(wles_linked) <- c("ID_t", paste0(score_name, c("_sc1u", "_sc2u")))
@@ -205,9 +206,10 @@ create_scores <- function(resp, vars, scoring = NULL,
   }
 
   if (metap) {
+    meta_select <- ifelse(is.null(meta_select), select, meta_select)
     metas <- scaling:::estimate_metap(
-      resp = resp, vars = vars, select = select, valid = valid,
-      var_name = var_name, score_name = score_name, mvs = mvs
+      resp = resp, vars = vars, select = meta_select, valid = valid,
+      var_name = meta_var_name, score_name = meta_score_name, mvs = mvs
     )
     if (wle | sum_score) {
       wles <- merge(wles, metas, by = "ID_t", all = TRUE)
@@ -407,8 +409,11 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
 #'
 #' @noRd
 estimate_metap <- function(resp, vars, select, valid = NULL,
-                           var_name, score_name = "score",
+                           var_name, score_name = NULL,
                            mvs = NULL) {
+
+  if (is.null(var_name)) stop("No name for meta score variable provided.")
+  if (is.null(score_name)) score_name <- "score"
 
   # Calclute sum scores
   sss <- scaling:::estimate_sum_scores(
