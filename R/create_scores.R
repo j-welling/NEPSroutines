@@ -24,6 +24,13 @@
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param wle logical; whether to estimate WLEs
 #' @param sum_score logical; whether to calculate sum scores
+#' @param metap logical; whether to calculate metacognition score
+#' @param meta_select string; defines name of logical variable in vars that
+#'   indicates which items to use for the meta cognition analysis
+#'   (if identical to select, argument can be empty)
+#' @param meta_var_name  string; defines name of meta competence variable in resp
+#' @param meta_score_name string; name of the meta competence scores -- WITHOUT
+#'   extension (e.g., reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
 #' @param control_tam list; control argument as passed to tam.mml.mfr()
 #' @param control_wle list; can contain Msteps and/or convM as to pass to tam.wle()
 #'    as elements of the list
@@ -207,6 +214,7 @@ create_scores <- function(resp, vars, scoring = NULL,
 
   if (metap) {
     meta_select <- ifelse(is.null(meta_select), select, meta_select)
+    meta_score_name <- ifelse(is.null(meta_score_name), score_name, meta_score_name)
     metas <- scaling:::estimate_metap(
       resp = resp, vars = vars, select = meta_select, valid = valid,
       var_name = meta_var_name, score_name = meta_score_name, mvs = mvs
