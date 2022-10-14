@@ -71,7 +71,7 @@
 #' @param verbose  logical; verbose as passed to the TAM function
 #' @param dif_threshold  numeric; threshold under which DIF in common link items
 #'   is accepted; defaults to 0.5
-#' @param wid  variable name used as WLE identifier in first measurement wave
+#' @param wid  string; variable name used as WLE identifier in first measurement wave
 #' @param snodes  snodes as passed to the TAM function for the dimensionality
 #'   analyses
 #' @param maxiter maximum number of iterations as passed to the TAM function
@@ -1390,67 +1390,6 @@ link_samples <- function(resp_curr,
 }
 
 
-
-#' Link WLEs using a known linking constant while correcting for selection
-#'
-#' @param wle_prev data.frame with WLEs at first measurement wave
-#' @param wle_curr data.frame with WLEs at second measurement wave
-#' @param const linking constant
-#' @param wid character; variable name used as WLE identifier
-#' @param use_longitudinal_subsample boolean indicating whether linking should
-#'   be based on the entire samples given in wle_prev and wle_curr or
-#'   only on the longitudinal sample with common pids; defaults to TRUE
-#'
-#' @returns   linked WLEs at second measurement wave
-#' @export
-link_wles <- function(wle_prev,
-                      wle_curr,
-                      const,
-                      wid = "wle",
-                      use_longitudinal_subsample = TRUE) {
-
-    # Set variable name for WLEs
-    if (length(wid) == 1) {
-        wid <- rep(wid, 2)
-    }
-    wle_prev <- check_var_in_df(df = wle_prev, var = wid[1],
-                                new_var = "wle",
-                                name = get_object_name(wle_prev))
-    wle_curr <- check_var_in_df(df = wle_curr, var = wid[2],
-                                new_var = "wle",
-                                name = get_object_name(wle_curr))
-
-    # Remove missing values
-    wle_prev <- wle_prev[!is.na(wle_prev$wle), ]
-    wle_curr <- wle_curr[!is.na(wle_curr$wle), ]
-
-    # Select persons for link
-    ids <- get_final_ids(id_prev = wle_prev$ID_t,
-                         id_curr = wle_curr$ID_t,
-                         longitudinal_subsample = use_longitudinal_subsample)
-
-    # Link WLEs at second measurement occasion
-    correction <-
-        mean(wle_curr$wle[wle_curr$ID_t %in% ids]) -
-        mean(wle_prev$wle[wle_prev$ID_t %in% ids]) -
-        const
-    wle_curr$wle <- wle_curr$wle - correction
-
-    # Return results
-    wle_curr <- as.data.frame(wle_curr)
-    return(wle_curr)
-}
-
-
-check_var_in_df <- function(df, var, new_var, name) {
-    # Set variable name for person identifier
-    check_variables(df = df, name_df = name, variables = var)
-    names(df)[which(names(df) == var)] <- new_var
-
-    return(df)
-}
-
-
 #' calculate link constant and link error for anchor group or items design
 #'
 #' @param vars_curr data.frame; contains information about items of current
@@ -1678,9 +1617,69 @@ link_item_parameters <- function(xsi, const, vars, select,
 
 
 
+#' Link WLEs using a known linking constant while correcting for selection
+#'
+#' @param wle_prev data.frame with WLEs at first measurement wave
+#' @param wle_curr data.frame with WLEs at second measurement wave
+#' @param const linking constant
+#' @param wid character; variable name used as WLE identifier
+#' @param use_longitudinal_subsample boolean indicating whether linking should
+#'   be based on the entire samples given in wle_prev and wle_curr or
+#'   only on the longitudinal sample with common pids; defaults to TRUE
+#'
+#' @returns   linked WLEs at second measurement wave
+#' @export
+link_wles <- function(wle_prev,
+                      wle_curr,
+                      const,
+                      wid = "wle",
+                      use_longitudinal_subsample = TRUE) {
+
+    # Set variable name for WLEs
+    if (length(wid) == 1) {
+        wid <- rep(wid, 2)
+    }
+    wle_prev <- check_var_in_df(df = wle_prev, var = wid[1],
+                                new_var = "wle",
+                                name = get_object_name(wle_prev))
+    wle_curr <- check_var_in_df(df = wle_curr, var = wid[2],
+                                new_var = "wle",
+                                name = get_object_name(wle_curr))
+
+    # Remove missing values
+    wle_prev <- wle_prev[!is.na(wle_prev$wle), ]
+    wle_curr <- wle_curr[!is.na(wle_curr$wle), ]
+
+    # Select persons for link
+    ids <- get_final_ids(id_prev = wle_prev$ID_t,
+                         id_curr = wle_curr$ID_t,
+                         longitudinal_subsample = use_longitudinal_subsample)
+
+    # Link WLEs at second measurement occasion
+    correction <-
+        mean(wle_curr$wle[wle_curr$ID_t %in% ids]) -
+        mean(wle_prev$wle[wle_prev$ID_t %in% ids]) -
+        const
+    wle_curr$wle <- wle_curr$wle - correction
+
+    # Return results
+    wle_curr <- as.data.frame(wle_curr)
+    return(wle_curr)
+}
+
+check_var_in_df <- function(df, var, new_var, name) {
+    # Set variable name for person identifier
+    check_variables(df = df, name_df = name, variables = var)
+    names(df)[which(names(df) == var)] <- new_var
+
+    return(df)
+}
+
+
+
 #' Print linking results for TR
 #'
-#' @param link_dif return object of conduct_dif_anchor()
+#' @param link_dif return object of check_dif_anchor()
 #' @param link_dim return object of check_link_dimensionality()
 #' @param link_results return object of link_samples()
 #' @param dif_threshold numeric; threshold under which DIF in common link items
