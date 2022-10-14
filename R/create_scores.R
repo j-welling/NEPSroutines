@@ -110,7 +110,8 @@ create_scores <- function(resp, vars, scoring = NULL,
   scaling:::check_logicals(vars, "vars", select, warn = warn)
   scaling:::check_logicals(resp, "resp", valid, warn = warn)
   scaling:::check_items(vars$item[vars[[select]]])
-  scaling:::check_pid(resp$ID_t[ifelse(is.null(valid), TRUE, resp[[valid]])])
+  scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+  scaling:::check_pid(resp$ID_t)
 
   if (!is.null(scoring))
     scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
@@ -266,9 +267,10 @@ estimate_sum_scores <- function(resp, vars, select, valid = NULL,
                                 poly2dich = TRUE, score_name = "score") {
 
   # Prepare data
-  resp_ <- scaling:::prepare_resp(resp, vars, select, use_only_valid = TRUE,
-                                  valid = valid, convert = TRUE, mvs = mvs,
-                                  warn = FALSE)
+  resp_ <- only_valid(resp, valid = valid, warn = FALSE)
+  pid <- resp_$ID_t
+  resp_ <- scaling:::prepare_resp(resp_, vars, select, convert = TRUE,
+                                  mvs = mvs, warn = FALSE)
   resp_[is.na(resp_)] <- 0
 
   # Score polytomous items dichotomously
@@ -288,7 +290,7 @@ estimate_sum_scores <- function(resp, vars, select, valid = NULL,
   }
   sum_scores <- rowSums(resp_)
 
-  resp <- data.frame(ID_t = resp$ID_t[resp[[valid]]], sum_scores)
+  resp <- data.frame(ID_t = pid, sum_scores)
   out <- data.frame(ID_t = resp$ID_t)
   out <- merge(out, resp, by = "ID_t", all.x = TRUE)
   names(out) <- c("ID_t", paste0(score_name, "_sc3"))
