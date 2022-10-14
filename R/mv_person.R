@@ -66,6 +66,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
     check_logicals(resp, "resp", c(valid, grouping), warn = warn)
     check_logicals(vars, "vars", c(select, grouping), warn = warn)
     check_items(vars$item[vars[[select]]])
+    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
     if (warn) is_null_mvs_valid(valid = valid)
 
     # Create list for results
@@ -145,6 +146,7 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
         check_logicals(vars, "vars", c(grouping, select), warn = warn)
         check_logicals(resp, "resp", c(grouping, valid), warn = warn)
         check_items(vars$item[vars[[select]]])
+        scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
         if (warn) is_null_mvs_valid(valid = valid)
     }
 

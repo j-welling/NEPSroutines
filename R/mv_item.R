@@ -71,6 +71,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
     check_logicals(resp, "resp", c(valid, grouping), warn = warn)
     check_logicals(vars, "vars", c(select, grouping), warn = warn)
     check_items(vars$item[vars[[select]]])
+    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
     if (warn) is_null_mvs_valid(valid = valid)
 
     # Conduct analysis
@@ -161,6 +162,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
         check_logicals(resp, "resp", c(valid, grouping), warn = warn)
         check_logicals(vars, "vars", c(select, grouping), warn = warn)
         check_items(vars$item[vars[[select]]])
+        scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
         if (warn) is_null_mvs_valid(valid = valid)
     }
 

@@ -123,6 +123,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
     check_variables(resp, "resp", valid)
     check_items(vars$item[vars[[select_raw]]])
     check_items(vars$item[vars[[select_score]]])
+    scaling:::check_numerics(resp, "resp", vars$item[vars[[select_raw | select_score]]])
 
     if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 

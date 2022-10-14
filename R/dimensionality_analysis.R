@@ -106,6 +106,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
     check_logicals(resp, "resp", valid, warn = warn)
     check_variables(vars, "vars", c(dim, scoring))
     check_items(vars$item[vars[[select]]])
+    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
   }
 
   if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)

@@ -144,10 +144,9 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
                                          path_table = here::here("Tables"),
                                          save = FALSE) {
 
-    poly_items <- vars$item[vars[[select]]]
-
     # Check whether variables are indeed contained in data.frames
     check_logicals(vars, "vars", select)
+    poly_items <- vars$item[vars[[select]]]
     check_numerics(resp, "resp", poly_items)
     check_items(poly_items)
 
@@ -308,6 +307,7 @@ min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 pos_new <- function(vars, select, position) {
 
     # Check whether variables are indeed contained in data.frames
+    check_logicals(vars, "vars", select)
     check_numerics(vars, "vars", position, check_invalid = TRUE)
 
     if (length(position) == 1) {

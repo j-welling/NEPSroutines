@@ -52,6 +52,8 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
   # Test data
   check_logicals(vars, "vars", groups, warn = warn)
   check_logicals(resp, "resp", c(valid, names(groups)), warn = warn)
+  check_items(vars$item[vars[[select]]])
+  scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
   if (!is.null(scoring))
     check_numerics(vars, "vars", scoring, check_invalid = TRUE)
   if (!is.null(pweights))
@@ -149,6 +151,8 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
   if (test) {
     check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
+    check_items(vars$item[vars[[select]]])
+    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
     if (!is.null(scoring))
       check_numerics(vars, "vars", scoring, check_invalid = TRUE)
     if (!is.null(pweights))
@@ -167,29 +171,71 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
   # Conduct IRT analyses
   if (irt_type == 'dich') {
 
-    irt$model.1pl <- irt_model(resp = resp, vars = vars, select = select,
-                               valid = valid, mvs = mvs, irtmodel = '1PL',
-                               verbose = verbose, warn = FALSE, test = FALSE,
-                               control_tam = control_tam, control_wle = control_wle,
-                               pweights = pweights, xsi.fixed = xsi.fixed)
-    irt$model.2pl <- irt_model(resp = resp, vars = vars, select = select,
-                               valid = valid, mvs = mvs, irtmodel = '2PL',
-                               verbose = verbose, warn = FALSE, test = FALSE,
-                               control_tam = control_tam, control_wle = control_wle,
-                               pweights = pweights, xsi.fixed = xsi.fixed)
+    irt$model.1pl <- irt_model(
+        resp = resp,
+        vars = vars,
+        select = select,
+        valid = valid,
+        mvs = mvs,
+        irtmodel = '1PL',
+        control_tam = control_tam,
+        control_wle = control_wle,
+        pweights = pweights,
+        xsi.fixed = xsi.fixed,
+        verbose = verbose,
+        warn = FALSE,
+        test = FALSE
+    )
+
+    irt$model.2pl <- irt_model(
+        resp = resp,
+        vars = vars,
+        select = select,
+        valid = valid,
+        mvs = mvs,
+        irtmodel = '2PL',
+        control_tam = control_tam,
+        control_wle = control_wle,
+        pweights = pweights,
+        xsi.fixed = xsi.fixed,
+        verbose = verbose,
+        warn = FALSE,
+        test = FALSE
+    )
 
   } else if (irt_type == 'poly') {
 
-    irt$model.pcm <- irt_model(resp = resp, vars = vars, select = select, mvs = mvs,
-                               valid = valid, irtmodel = 'PCM2', scoring = scoring,
-                               verbose = verbose, warn = FALSE, test = FALSE,
-                               control_tam = control_tam, control_wle = control_wle,
-                               pweights = pweights, xsi.fixed = xsi.fixed)
-    irt$model.gpcm <- irt_model(resp = resp, vars = vars, select = select, mvs = mvs,
-                                valid = valid, irtmodel = 'GPCM', scoring = scoring,
-                                verbose = verbose, warn = FALSE, test = FALSE,
-                                control_tam = control_tam, control_wle = control_wle,
-                                pweights = pweights, xsi.fixed = xsi.fixed)
+      irt$model.pcm <- irt_model(
+          resp = resp,
+          vars = vars,
+          select = select,
+          valid = valid,
+          mvs = mvs,
+          irtmodel = 'PCM',
+          control_tam = control_tam,
+          control_wle = control_wle,
+          pweights = pweights,
+          xsi.fixed = xsi.fixed,
+          verbose = verbose,
+          warn = FALSE,
+          test = FALSE
+      )
+
+      irt$model.gpcm <- irt_model(
+          resp = resp,
+          vars = vars,
+          select = select,
+          valid = valid,
+          mvs = mvs,
+          irtmodel = 'GPCM',
+          control_tam = control_tam,
+          control_wle = control_wle,
+          pweights = pweights,
+          xsi.fixed = xsi.fixed,
+          verbose = verbose,
+          warn = FALSE,
+          test = FALSE
+      )
 
   }
 
@@ -312,6 +358,7 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
     check_logicals(vars, "vars", select, warn = warn)
     check_logicals(resp, "resp", valid, warn = warn)
     check_items(vars$item[vars[[select]]])
+    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
     if (!is.null(scoring))
       check_numerics(vars, "vars", scoring, check_invalid = TRUE)
     if (!is.null(pweights))
@@ -338,7 +385,7 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
                        mvs = mvs, warn = FALSE)
 
   # Test data
-  check_numerics(resp, "resp", check_invalid = TRUE) # this check is very important as otherwise R will be aborted!!
+  check_numerics(resp, "resp", check_invalid = TRUE) # this check is very important as otherwise R might be aborted!!
   if (irtmodel %in% c("1PL", "2PL")) check_dich(resp, "resp")
 
   # Create scoring matrix if not provided in function arguments
@@ -527,6 +574,7 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 
   # prepare data
   check_items(rownames(results$mod$xsi))
+  check_logicals(vars, 'vars', 'dich', warn = warn)
   vars$irt_item <- vars$item %in% rownames(results$mod$xsi)
   vars_ <- vars[vars$irt_item, ]
   resp <- prepare_resp(resp, vars = vars, select = 'irt_item', valid = valid,

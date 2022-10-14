@@ -44,6 +44,8 @@ n_valid <- function(dat, valid = NULL) {
 desc_con <- function(dat, desc, valid = NULL, digits = 2,
                      print = TRUE, return = FALSE) {
 
+    check_variables(dat, "dat", c(desc, valid))
+
     dat <- only_valid(dat, valid = valid)
 
     stats <- data.frame(sapply(dat[ , desc, drop = FALSE], function(x) {
@@ -78,6 +80,8 @@ desc_con <- function(dat, desc, valid = NULL, digits = 2,
 
 desc_nom <- function(dat, desc, valid = NULL, digits = 1,
                      print = TRUE, return = FALSE) {
+
+    check_variables(dat, "dat", c(desc, valid))
 
     dat <- only_valid(dat, valid = valid)
 
@@ -121,6 +125,8 @@ desc_nom <- function(dat, desc, valid = NULL, digits = 1,
 
 desc_abs <- function(dat, desc, valid = NULL, warn = TRUE) {
 
+    check_variables(dat, "dat", c(desc, valid))
+
     dat <- only_valid(dat, valid = valid, warn = warn)
 
     sapply(dat[ , desc, drop = FALSE], function(x) {table(x, useNA = "always")})
@@ -146,6 +152,8 @@ desc_abs <- function(dat, desc, valid = NULL, warn = TRUE) {
 desc_perc <- function(dat, desc, valid = NULL, warn = TRUE, useNA = 'always',
                       digits = 1) {
 
+    check_variables(dat, "dat", c(desc, valid))
+
     dat <- only_valid(dat, valid = valid, warn = warn)
 
     sapply(dat[ , desc, drop = FALSE], function(x) {
@@ -163,6 +171,9 @@ desc_perc <- function(dat, desc, valid = NULL, warn = TRUE, useNA = 'always',
 #' @export
 
 show_attributes <- function(dat, desc) {
+
+    check_variables(dat, "dat", desc)
+
     for (var in desc) {
         message("\nThe attributes for variable ", var, " are:\n")
         print(attributes(dat[[var]])$labels)
@@ -174,7 +185,7 @@ show_attributes <- function(dat, desc) {
 #'
 #' @param dat  data.frame; contains version variable
 #' @param versions string; defines name of variable in dat that identifies test versions
-#' @param versions_lbls named character vector; links a label each value of versions
+#' @param labels named character vector; links a label each value of versions
 #' (e.g. versions_lbls = c(version1 = 1, version2 = 2))
 #' @param save  logical; whether to save the table in Excel
 #' @param overwrite logical; whether to overwrite an existing table with the same name
@@ -185,6 +196,9 @@ show_attributes <- function(dat, desc) {
 
 sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
                               overwrite = FALSE, path = here::here("Tables")) {
+
+    # Check variable
+    check_variables(dat, "dat", versions)
 
     # Create table with results
     df <- as.data.frame.AsIs(table(dat[[versions]]))
@@ -239,9 +253,11 @@ props_by_version <- function(vars, select, grouping, properties, labels = NULL,
                              save = FALSE, overwrite = FALSE, path = here::here("Tables"),
                              warn = TRUE) {
 
-    # Select only necessary items and check for duplicates
+    # Check variables
     check_logicals(vars, "vars", c(select, grouping), warn = warn)
     check_variables(vars, "vars", properties)
+
+    # Select only necessary items and check for duplicates
     vars <- subset(vars, vars[[select]])
     check_items(vars$item)
 

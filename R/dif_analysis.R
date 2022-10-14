@@ -831,6 +831,8 @@ test_dif_data <- function(resp,
     scaling:::check_logicals(vars, "vars", select, warn = warn)
     scaling:::check_logicals(resp, "resp", valid, warn = warn)
     scaling:::check_variables(resp, "resp", dif_vars)
+    check_items(vars$item[vars[[select]]])
+    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
 
     if (!is.null(scoring))
         scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
