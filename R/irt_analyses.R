@@ -213,6 +213,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
           valid = valid,
           mvs = mvs,
           irtmodel = 'PCM2',
+          scoring = scoring,
           control_tam = control_tam,
           control_wle = control_wle,
           pweights = pweights,
@@ -229,6 +230,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
           valid = valid,
           mvs = mvs,
           irtmodel = 'GPCM',
+          scoring = scoring,
           control_tam = control_tam,
           control_wle = control_wle,
           pweights = pweights,
@@ -575,28 +577,34 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 
   # prepare data
   check_items(rownames(results$mod$xsi))
-  check_logicals(vars, 'vars', 'dich', warn = warn)
   vars$irt_item <- vars$item %in% rownames(results$mod$xsi)
-  vars_ <- vars[vars$irt_item, ]
-  resp <- prepare_resp(resp, vars = vars, select = 'irt_item', valid = valid,
-                       use_only_valid = TRUE, convert = TRUE, mvs = mvs,
-                       warn = warn)
-
+  vars <- vars[vars$irt_item, ]
+  resp <- prepare_resp(
+    resp,
+    vars = vars,
+    select = 'irt_item',
+    valid = valid,
+    use_only_valid = TRUE,
+    convert = TRUE,
+    mvs = mvs,
+    warn = warn
+  )
 
   # item parameters
   pars <- results$mod$xsi[, c("xsi", "se.xsi")]
   pars$item <- rownames(results$mod$xsi)
-  pars <- pars[vars_$item, ]
+  pars <- pars[vars$item, ]
 
   # percentage correct
-  pars$pc <- round(ifelse(vars_$dich, colMeans(resp[, vars_$item], na.rm = TRUE) * 100, NA), 2)
+  is_dich <- sapply(vars$item, function(x) max(resp[[x]], na.rm = TRUE) <= 1)
+  pars$pc <- round(ifelse(is_dich, colMeans(resp[, vars$item], na.rm = TRUE) * 100, NA), 2)
 
   # number of valid responses
   pars$N <- colSums(!is.na(resp))
 
   # items fit
-  pars$WMNSQ   <- results$fit$Infit[results$fit$item %in% vars_$item]
-  pars$WMNSQ_t <- results$fit$Infit_t[results$fit$item %in% vars_$item]
+  pars$WMNSQ   <- results$fit$Infit[results$fit$item %in% vars$item]
+  pars$WMNSQ_t <- results$fit$Infit_t[results$fit$item %in% vars$item]
 
   # corrected item-total discrimination
   rit <- c()
