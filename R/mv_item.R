@@ -63,7 +63,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
                     path_results = here::here("Results"),
                     path_table = here::here("Tables"),
                     path_plots = here::here("Plots/Missing_Responses/by_item"),
-                    show_all = FALSE, name_grouping = 'test version', #color = NULL,
+                    show_all = TRUE, name_grouping = 'test version', #color = NULL,
                     overwrite = FALSE, digits = 3, warn = TRUE, verbose = TRUE,
                     labels_legend = NULL) {
 
@@ -82,22 +82,44 @@ mv_item <- function(resp, vars, select, valid = NULL,
                             test = FALSE)
 
     # Write grouped table
-    mv_item$summary_table <- mvi_table(mv_i = mv_item, vars = vars, select = select,
-                                       mvs = mvs, grouping = grouping, warn = warn,
-                                       test = FALSE)
+    mv_item$summary_table <- mvi_table(
+      mv_i = mv_item,
+      vars = vars,
+      select = select,
+      mvs = mvs,
+      grouping = grouping,
+      warn = warn,
+      test = FALSE,
+      save = FALSE
+    )
 
     # Write plots
-    if (plots) mvi_plots(mv_i = mv_item, vars = vars, select = select,
-                         grouping = grouping, mvs = mvs, labels_mvs = labels_mvs,
-                         show_all = show_all, verbose = verbose, #color = color,
-                         name_grouping = name_grouping, labels_legend = labels_legend,
-                         path = path_plots, warn = warn, test = FALSE)
+    if (plots) mvi_plots(
+      mv_i = mv_item,
+      vars = vars,
+      select = select,
+      grouping = grouping,
+      mvs = mvs,
+      labels_mvs = labels_mvs,
+      show_all = show_all,
+      verbose = verbose,
+      #color = color,
+      name_grouping = name_grouping,
+      labels_legend = labels_legend,
+      path = path_plots,
+      warn = warn,
+      test = FALSE
+    )
 
     # Save results
     if (save) {
         save_results(mv_item, filename = "mv_item.rds", path = path_results)
-        save_table(mv_item$summary_table, overwrite = overwrite,
-                   filename = "mv_item.xlsx", path = path_table)
+        save_table(
+          mv_item$summary_table,
+          overwrite = overwrite,
+          filename = "mv_item.xlsx",
+          path = path_table
+        )
     }
 
     # Print results
@@ -137,7 +159,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
 #' (only applicable when grouping exists)
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param path  string; defines path to folder where results shall be saved
-#' @param filename  string; defines name of file that shall be saved
+#' @param save  logical; whether results shall be saved to hard drive
 #' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
@@ -149,10 +171,10 @@ mv_item <- function(resp, vars, select, valid = NULL,
 #' @export
 
 mvi_analysis <- function(resp, vars, select, position, valid = NULL,
-                         grouping = NULL, show_all = FALSE,
+                         grouping = NULL, show_all = TRUE,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, NAd = -54, AZ = -21),
-                         path = here::here("Data"), filename = NULL,
+                         path = here::here("Data"), save = TRUE,
                          digits = 3, warn = TRUE, test = TRUE) {
 
     # Test data
@@ -226,11 +248,13 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
             }
 
             # Create list with results
-            mvlist[[g]] <- create_mvlist(item = vars_g$item[!is.na(pos)],
-                                         position = na.omit(pos),
-                                         responses = resp_g[, vars_g$item[!is.na(pos)]],
-                                         mvs = mvs,
-                                         digits = digits)
+            mvlist[[g]] <- create_mvlist(
+              item = vars_g$item[!is.na(pos)],
+              position = na.omit(pos),
+              responses = resp_g[, vars_g$item[!is.na(pos)]],
+              mvs = mvs,
+              digits = digits
+            )
 
             # Summary across items
             mvsum[[g]] <- mvi_summary(mvlist[[g]][ , -c(1:2)], digits = digits)
@@ -256,10 +280,10 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
             # Number of valid responses and position
             pos <- resp_p$position
             resp_p <- dplyr::select(resp_p, -.data$position) %>% t() %>% data.frame()
-            mvlist$all <- data.frame(position = pos,
-                                     N = apply(resp_p, 2, function(x) {
-                                         sum(x >= 0, na.rm = TRUE)
-                                     }))
+            mvlist$all <- data.frame(
+              position = pos,
+              N = apply(resp_p, 2, function(x) sum(x >= 0, na.rm = TRUE))
+            )
 
             # Determine percentage of missing values for each missing type
             results <- data.frame(mvi_calc(resp_p, mvs = mvs, digits = digits))
@@ -274,7 +298,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
     mv_i <- list(list = mvlist, summary = mvsum)
 
     # Save results
-    save_results(mv_i, filename = filename, path = path)
+    save_results(mv_i, filename = "mv_item.rds", path = path)
 
     # Return results
     return(mv_i)
@@ -298,7 +322,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
 #' an item
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param path  string; defines path to folder where table shall be saved
-#' @param filename  string; defines name of table that shall be saved
+#' @param save  logical; whether results shall be saved to hard drive
 #' @param overwrite  logical; whether to overwrite existing file when saving table
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
@@ -309,7 +333,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
 mvi_table <- function(mv_i, vars, select, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
-                      filename = NULL, path = here::here("Tables"),
+                      save = TRUE, path = here::here("Tables"),
                       overwrite = FALSE, test = TRUE, warn = TRUE) {
 
     # Test data
@@ -342,8 +366,13 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
     }
 
     # Save table
-    save_table(results, filename = filename, path = path,
-               overwrite = overwrite, show_rownames = FALSE)
+    save_table(
+      results,
+      filename = "mv_item.xlsx",
+      path = path,
+      overwrite = overwrite,
+      show_rownames = FALSE
+    )
 
     # Return table
     return(results)
@@ -398,7 +427,7 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
                       ),
                       path = here::here("Plots/Missing_Responses/by_item"),
                       name_grouping = 'test version', #color = NULL,
-                      show_all = FALSE, verbose = TRUE, warn = TRUE,
+                      show_all = TRUE, verbose = TRUE, warn = TRUE,
                       test = TRUE, labels_legend = NULL) {
 
     # Test data

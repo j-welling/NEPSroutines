@@ -73,17 +73,29 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
                            ifelse(is_poly(resp, vars, select), 'poly', 'dich'),
                            ") for group '", g, "':\n")))
 
-    irt_groups[[g]] <- irt_analysis(resp = resp[resp[[g]], ], vars = vars,
-                                    select = select, valid = valid,
-                                    scoring = scoring, print = print,
-                                    plots = plots, save = save, return = TRUE,
-                                    path_results = path_results,
-                                    path_table = path_table,
-                                    path_plots = path_plots,
-                                    overwrite = overwrite, digits = digits,
-                                    name_group = g, warn = FALSE, test = FALSE,
-                                    control_tam = control_tam, control_wle = control_wle,
-                                    pweights = pweights, xsi.fixed = xsi.fixed)
+    irt_groups[[g]] <- irt_analysis(
+      resp = resp[resp[[g]], ],
+      vars = vars,
+      select = select,
+      valid = valid,
+      scoring = scoring,
+      print = print,
+      plots = plots,
+      save = save,
+      return = TRUE,
+      path_results = path_results,
+      path_table = path_table,
+      path_plots = path_plots,
+      overwrite = overwrite,
+      digits = digits,
+      name_group = g,
+      warn = FALSE,
+      test = FALSE,
+      control_tam = control_tam,
+      control_wle = control_wle,
+      pweights = pweights,
+      xsi.fixed = xsi.fixed
+    )
 
     i <- i + 1
   }
@@ -184,6 +196,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
         pweights = pweights,
         xsi.fixed = xsi.fixed,
         verbose = verbose,
+        save = FALSE,
         warn = FALSE,
         test = FALSE
     )
@@ -200,6 +213,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
         pweights = pweights,
         xsi.fixed = xsi.fixed,
         verbose = verbose,
+        save = FALSE,
         warn = FALSE,
         test = FALSE
     )
@@ -219,6 +233,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
           pweights = pweights,
           xsi.fixed = xsi.fixed,
           verbose = verbose,
+          save = FALSE,
           warn = FALSE,
           test = FALSE
       )
@@ -236,6 +251,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
           pweights = pweights,
           xsi.fixed = xsi.fixed,
           verbose = verbose,
+          save = FALSE,
           warn = FALSE,
           test = FALSE
       )
@@ -259,16 +275,31 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
   # Create tables
   if (return | print | save) {
     # IRT summary
-    irt$summary <- irt_summary(resp = resp, vars = vars, results = irt[[1]],
-                               disc = irt[[2]]$mod$item[, "B.Cat1.Dim1"],
-                               valid = valid, mvs = mvs, digits = digits)
+    irt$summary <- irt_summary(
+      resp = resp,
+      vars = vars,
+      results = irt[[1]],
+      disc = irt[[2]]$mod$item[, "B.Cat1.Dim1"],
+      valid = valid,
+      mvs = mvs,
+      digits = digits,
+      save = FALSE
+    )
 
     # Model fit
-    irt$model_fit <- irt_model_fit(model_1p = irt[[1]], model_2p = irt[[2]])
+    irt$model_fit <- irt_model_fit(
+      model_1p = irt[[1]],
+      model_2p = irt[[2]],
+      save = FALSE
+    )
 
     # Steps analysis
     if (irt_type == 'poly') {
-      irt$steps <- steps_analysis(pcm_model = irt$model.pcm, digits = digits)
+      irt$steps <- steps_analysis(
+        pcm_model = irt$model.pcm,
+        digits = digits,
+        save = FALSE
+      )
     }
   }
 
@@ -283,21 +314,29 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
       print(irt$steps)
     }
     message("\nSUMMARY FOR TR\n")
-    print_irt_summary(model = irt[[1]],
-                      irt_sum = irt$summary,
-                      steps_sum = irt$steps)
+    print_irt_summary(
+      model = irt[[1]],
+      irt_sum = irt$summary,
+      steps_sum = irt$steps
+    )
   }
 
   # Save results
   if (save) {
-    name <- create_ifelse(is.null(name_group),
-                          paste0("irt_", irt_type),
-                          paste0("irt_", irt_type, "_", name_group))
+    name <- create_ifelse(
+      is.null(name_group),
+      paste0("irt_", irt_type),
+      paste0("irt_", irt_type, "_", name_group)
+    )
     irt_summary <- irt[-c(1:2)]
 
     save_results(irt, filename = paste0(name, ".rds"), path = path_results)
-    save_table(irt_summary, filename = paste0(name, ".xlsx"), path = path_table,
-               overwrite = overwrite)
+    save_table(
+      irt_summary,
+      filename = paste0(name, ".xlsx"),
+      path = path_table,
+      overwrite = overwrite
+    )
   }
 
   # Return results
@@ -333,8 +372,9 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 #'    as elements of the list
 #' @param pweights character; defines name of numerical variable in resp that
 #' contains person weights as passed to TAM-function
+#' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where results shall be saved
-#' @param filename  string; defines name of file that shall be saved
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param verbose  logical; whether to print processing information to console
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
@@ -350,8 +390,8 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 #' @export
 
 irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
-                      scoring = NULL, verbose = FALSE,
-                      path = here::here("Results"), filename = NULL,
+                      scoring = NULL, verbose = FALSE, save = TRUE,
+                      path = here::here("Results"), name_group = NULL,
                       xsi.fixed = NULL, pweights = NULL,
                       control_tam = NULL, control_wle = NULL,
                       warn = TRUE, test = TRUE) {
@@ -384,24 +424,39 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   pws <- create_ifelse(is.null(pweights), NULL, resp[[pweights]])
 
   # Prepare data
-  resp <- prepare_resp(resp, vars = vars, select = select, convert = TRUE,
-                       mvs = mvs, warn = FALSE)
+  resp <- prepare_resp(
+    resp,
+    vars = vars,
+    select = select,
+    convert = TRUE,
+    mvs = mvs,
+    warn = FALSE
+  )
 
   # Test data
   check_numerics(resp, "resp", check_invalid = TRUE) # this check is very important as otherwise R might be aborted!!
   if (irtmodel %in% c("1PL", "2PL")) check_dich(resp, "resp")
 
   # Create scoring matrix if not provided in function arguments
-  Q <- create_q(vars, select = select, scoring = scoring,
-                poly = ifelse(irtmodel %in% c("PCM2", "GPCM"), TRUE, FALSE))
+  Q <- create_q(
+    vars,
+    select = select,
+    scoring = scoring,
+    poly = ifelse(irtmodel %in% c("PCM2", "GPCM"), TRUE, FALSE)
+  )
 
   # IRT model
   if (irtmodel %in% c("1PL", "PCM2")) {
 
     mod <- TAM::tam.mml(
-      resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
-      verbose = verbose, xsi.fixed = xsi.fixed,
-      control = control_tam, pweights = pws
+      resp = resp,
+      irtmodel = irtmodel,
+      Q = Q,
+      pid = pid,
+      verbose = verbose,
+      xsi.fixed = xsi.fixed,
+      control = control_tam,
+      pweights = pws
     )
 
   } else if (irtmodel %in% c("2PL", "GPCM")) {
@@ -435,9 +490,12 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   if (is.null(control_wle$convM)) control_wle$convM <- .0001
   if (is.null(control_wle$Msteps)) control_wle$Msteps <- 50
 
-  wle <- TAM::tam.wle(mod, convM = control_wle$convM,
-                      Msteps = control_wle$Msteps,
-                      progress = verbose)
+  wle <- TAM::tam.wle(
+    mod,
+    convM = control_wle$convM,
+    Msteps = control_wle$Msteps,
+    progress = verbose
+  )
   wle_rel <- wle$WLE.rel[1]
   wle <- wle[, c("pid", "theta", "error")]
 
@@ -446,12 +504,25 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
 
   # List with results
   results <- list(
-    mod = mod, fit = fit, pars = pars, mfit = mfit,
-    wle = wle, wle_rel = wle_rel, info_crit = info_crit, irtmodel = irtmodel
+    mod = mod,
+    fit = fit,
+    pars = pars,
+    mfit = mfit,
+    wle = wle,
+    wle_rel = wle_rel,
+    info_crit = info_crit,
+    irtmodel = irtmodel
   )
 
   # Save results
-  save_results(results, filename = filename, path = path)
+  if (save) {
+    name <- create_ifelse(
+      is.null(name_group),
+      paste0(irt_model, ".rds"),
+      paste0(irt_model, "_", name_group, ".rds")
+    )
+    save_results(results, filename = name, path = path)
+  }
 
   # Return results
   return(results)
@@ -514,9 +585,11 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
   irtmodel <- model$irtmodel
 
   # Add group name to path
-  path <- create_ifelse(is.null(name_group),
-                        paste0(path, "/Wright_Maps"),
-                        paste0(path, "/Wright_Maps/", name_group))
+  path <- create_ifelse(
+    is.null(name_group),
+    paste0(path, "/Wright_Maps"),
+    paste0(path, "/Wright_Maps/", name_group)
+  )
 
   # Create directory for plots
   check_folder(path = here::here(path))
@@ -559,8 +632,9 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param results  list; return object of irt_model(); one parameter model
 #' @param disc  list; return object of irt_model(); two parameter model
+#' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where table shall be saved
-#' @param filename  string; defines name of table that shall be saved
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param digits  integer; number of decimals for rounding
 #' @param overwrite  logical; whether to overwrite existing file when saving table
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
@@ -571,8 +645,8 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 #' @export
 
 irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
-                        results, disc = NULL,
-                        path = here::here("Tables"), filename = NULL,
+                        results, disc = NULL, save = TRUE,
+                        path = here::here("Tables"), name_group = NULL,
                         digits = 3, overwrite = FALSE, warn = TRUE) {
 
   # prepare data
@@ -641,8 +715,20 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   pars_formatted[, -c(1:4)] <- format(pars_formatted[, -c(1:4)], nsmall = digits)
 
   # Save table
-  save_table(pars_formatted, filename = filename, path = path,
-             overwrite = overwrite, show_rownames = FALSE)
+  if (save) {
+    name <- create_ifelse(
+      is.null(name_group),
+      paste0(irt_model, ".xlsx"),
+      paste0(irt_model, "_", name_group, ".xlsx")
+    )
+    save_table(
+      pars_formatted,
+      filename = name,
+      path = path,
+      overwrite = overwrite,
+      show_rownames = FALSE
+    )
+  }
 
   # Return table
   return(pars)
@@ -657,14 +743,15 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 #' @param model_1p  list; return object of irt_model(); 1PL / PCM analysis
 #' @param model_2p  list; return object of irt_model(); 2PL / GPCM analysis
 #' @param overwrite  logical; whether to overwrite existing file when saving table
+#' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where table shall be saved
-#' @param filename  string; defines name of table that shall be saved
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
 #' @return data.frame with AIC, BIC and number of parameters for both models
 #' @export
 
-irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE,
-                          path = here::here("Tables"), filename = NULL) {
+irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
+                          path = here::here("Tables"), name_group = NULL) {
 
   mfit <- data.frame(N = rep(NA_integer_, 2),
                      Npars = rep(NA_integer_, 2),
@@ -696,7 +783,19 @@ irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE,
   mfit$BIC[2] <- model_2p$info_crit$BIC
 
   # Save table
-  save_table(mfit, filename = filename, path = path, overwrite = overwrite)
+  if (save) {
+    name <- create_ifelse(
+      is.null(name_group),
+      paste0(irt_model, ".xlsx"),
+      paste0(irt_model, "_", name_group, ".xlsx")
+    )
+    save_table(
+      mfit,
+      filename = name,
+      path = path,
+      overwrite = overwrite
+    )
+  }
 
   # Return table
   return(mfit)
@@ -708,16 +807,17 @@ irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE,
 #' Create table with pcm_model of step analysis.
 #'
 #' @param pcm_model  list; return object of irt_model(); PCM analysis
+#' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where table shall be saved
-#' @param filename  string; defines name of table that shall be saved
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param digits  integer; number of decimals for rounding
 #' @param overwrite  logical; whether to overwrite existing file when saving table
 #'
 #' @return a data.frame containing the step parameters and SEs for each step
 #' @export
 
-steps_analysis <- function(pcm_model, digits = 3, overwrite = FALSE,
-                           path = here::here("Tables"), filename = NULL) {
+steps_analysis <- function(pcm_model, digits = 3, save = TRUE, overwrite = FALSE,
+                           path = here::here("Tables"), name_group = NULL) {
 
   # step parameters
   step <- round(pcm_model$mod$xsi[, c("xsi", "se.xsi")], digits)
@@ -733,23 +833,36 @@ steps_analysis <- function(pcm_model, digits = 3, overwrite = FALSE,
 
   # include step parameters and SEs
   for (i in seq_len(nrow(step))) {
-    steps[step$item[i], step$step[i]] <- paste0(format(step$xsi[i], nsmall = digits), " (",
-                                                format(step$se.xsi[i]), nsmall = digits, ")")
+    steps[step$item[i], step$step[i]] <- paste0(
+      format(step$xsi[i], nsmall = digits), " (",
+      format(step$se.xsi[i]), nsmall = digits, ")"
+    )
     pars[step$item[i], step$step[i]] <- step$xsi[i]
   }
 
   # sum 0 constraint for last step
   for (i in seq_len(nrow(steps))) {
-    steps[i, seq_len(ncol(steps))[is.na(pars[i, ])][1]] <- format(1 * sum(pars[i, ],
-                                                                          na.rm = TRUE),
-                                                                  nsmall = digits)
+    steps[i, seq_len(ncol(steps))[is.na(pars[i, ])][1]] <-
+      format(1 * sum(pars[i, ], na.rm = TRUE), nsmall = digits)
   }
 
   # convert to data.frame
   steps <- data.frame(steps)
 
   # Save table as Excel sheet
-  save_table(steps, filename = filename, path = path, overwrite = overwrite)
+  if (save) {
+    name <- create_ifelse(
+      is.null(name_group),
+      paste0(irt_model, ".xlsx"),
+      paste0(irt_model, "_", name_group, ".xlsx")
+    )
+    save_table(
+      steps,
+      filename = name,
+      path = path,
+      overwrite = overwrite
+    )
+  }
 
   # Return table
   return(steps)

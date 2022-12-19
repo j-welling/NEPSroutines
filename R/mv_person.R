@@ -58,7 +58,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
                       path_results = here::here("Results"),
                       path_table = here::here("Tables"),
                       path_plots = here::here("Plots/Missing_Responses/by_person"),
-                      show_all = FALSE, overwrite = FALSE, #color = NULL,
+                      show_all = TRUE, overwrite = FALSE, #color = NULL,
                       name_grouping = 'test version', labels_legend = NULL,
                       digits = 3, warn = TRUE, verbose = TRUE) {
 
@@ -73,31 +73,57 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
     mv_person <- list()
 
     # Conduct analysis
-    mv_person$mv_p <- mvp_analysis(resp = resp, vars = vars, select = select,
-                                   valid = valid, mvs = mvs, grouping = grouping,
-                                   digits = digits, warn = warn, test = FALSE)
+    mv_person$mv_p <- mvp_analysis(
+      resp = resp,
+      vars = vars,
+      select = select,
+      valid = valid,
+      mvs = mvs,
+      grouping = grouping,
+      digits = digits,
+      warn = warn,
+      test = FALSE
+    )
 
     # Create plots
     if (plots) {
-        mvp_plots(mv_p = mv_person$mv_p, vars = vars, select = select, mvs = mvs,
-                  labels_mvs = labels_mvs, grouping = grouping, show_all = show_all,
-                  path = path_plots, verbose = verbose, warn = warn, #color = color,
-                  name_grouping = name_grouping, labels_legend = labels_legend,
-                  test = FALSE)
+        mvp_plots(
+          mv_p = mv_person$mv_p,
+          vars = vars,
+          select = select,
+          mvs = mvs,
+          labels_mvs = labels_mvs,
+          grouping = grouping,
+          show_all = show_all,
+          path = path_plots,
+          verbose = verbose,
+          warn = warn,
+          #color = color,
+          name_grouping = name_grouping,
+          labels_legend = labels_legend,
+          test = FALSE
+        )
     }
 
     # Create table
     if (save) {
-        mv_person$summary <- mvp_table(mv_p = mv_person$mv_p, grouping = grouping,
-                                       filename = "mv_person", path = path_table,
-                                       overwrite = overwrite, mvs = mvs)
+        mv_person$summary <- mvp_table(
+          mv_p = mv_person$mv_p,
+          grouping = grouping,
+          save = save,
+          path = path_table,
+          overwrite = overwrite,
+          mvs = mvs
+        )
 
         save_results(mv_person, filename = "mv_person.rds", path = path_results)
         # dass hier kein save_table steht ist Absicht
     } else {
-        mv_person$summary <- mvp_table(mv_p = mv_person$mv_p,
-                                       grouping = grouping,
-                                       mvs = mvs)
+        mv_person$summary <- mvp_table(
+          mv_p = mv_person$mv_p,
+          grouping = grouping,
+          mvs = mvs
+        )
     }
 
     # Print results
@@ -124,8 +150,8 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
 #' @param mvs  named integer vector; contains user-defined missing values
+#' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where results shall be saved
-#' @param filename  string; defines name of file that shall be saved
 #' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
@@ -138,7 +164,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
 mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, NAd = -54, AZ = -21),
-                         filename = NULL, path = here::here("Results"),
+                         save = TRUE, path = here::here("Results"),
                          digits = 3, warn = TRUE, test = TRUE) {
 
     # Test data
@@ -160,8 +186,13 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
 
     # Prepare data
     resp <- only_valid(resp, valid = valid)
-    resp_c <- prepare_resp(resp, vars = vars, select = select, warn = warn,
-                           zap_labels = FALSE)
+    resp_c <- prepare_resp(
+      resp,
+      vars = vars,
+      select = select,
+      warn = warn,
+      zap_labels = FALSE
+    )
 
     # Calculate mvs per person
     if (is.null(grouping)) {
@@ -193,7 +224,7 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
     }
 
     # Save results
-    save_results(mv_p, filename = filename, path = path)
+    save_results(mv_p, filename = "mv_person.rds", path = path)
 
     # Return results
     return(mv_p)
@@ -211,7 +242,7 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
 #' @param mvs  named integer vector; contains user-defined missing values
-#' @param filename  string; defines name of table that shall be saved
+#' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where table shall be saved
 #' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
 #' @param test  logical; whether to test data structure (should be set to TRUE)
@@ -224,7 +255,7 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
 mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
-                      filename = NULL, path = here::here("Tables"),
+                      save = TRUE, path = here::here("Tables"),
                       test = TRUE) {
 
     # Test data
@@ -243,21 +274,29 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
     }
 
     # Save table
-    if (!is.null(filename)) {
+    if (save) {
 
         # Create directory for table
         check_folder(path)
 
         # Write table as Excel sheet
         if (is.null(grouping)) {
-            openxlsx::write.xlsx(results,
-                                 file = paste0(path, "/", filename, ".xlsx"),
-                                 showNA = FALSE, rowNames = FALSE, overwrite = overwrite)
+            openxlsx::write.xlsx(
+              results,
+              file = paste0(path, "/mv_person.xlsx"),
+              showNA = FALSE,
+              rowNames = FALSE,
+              overwrite = overwrite
+            )
         } else {
             for (g in names(mv_p)) {
-                openxlsx::write.xlsx(results[[g]],
-                                     file = paste0(path, "/", filename, "_", g, ".xlsx"),
-                                     showNA = FALSE, rowNames = FALSE, overwrite = overwrite)
+                openxlsx::write.xlsx(
+                  results[[g]],
+                  file = paste0(path, "/mv_person_", g, ".xlsx"),
+                  showNA = FALSE,
+                  rowNames = FALSE,
+                  overwrite = overwrite
+                )
             }
         }
     }
@@ -311,7 +350,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                           AZ = "missing items due to ''Angabe zurueckgesetzt''"
                       ),
                       path = here::here("Plots/Missing_Responses/by_person"),
-                      show_all = FALSE, verbose = TRUE, # color = NULL,
+                      show_all = TRUE, verbose = TRUE, # color = NULL,
                       name_grouping = 'test version', labels_legend = NULL,
                       warn = TRUE, test = TRUE) {
 
@@ -324,10 +363,12 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
 
     # Prepare data
     mv_all <- create_ifelse(is.null(grouping), mv_p, mv_p$all)
-    k <- create_ifelse(is.null(grouping), sum(vars[[select]]),
-                       max(sapply(grouping, function(x) {
-                           sum(vars[[select]] & vars[[x]])
-                       }), na.rm = TRUE))
+    k <- create_ifelse(
+      is.null(grouping),
+      sum(vars[[select]]),
+      max(sapply(grouping, function(x) sum(vars[[select]] & vars[[x]])),
+          na.rm = TRUE)
+    )
 
     if(!is.null(grouping))
         groups <- create_ifelse(show_all, c(grouping, 'all'), grouping)
@@ -350,8 +391,9 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
             mv$y[mv$number %in% names(mv_p[[i]])] <- mv_p[[i]]
             ylim <- ceiling(max(mv$y, na.rm = TRUE)/10)*10
 
-            gg <- ggplot2::ggplot(data = mv,
-                                  mapping = ggplot2::aes(x = .data$number, y = .data$y)
+            gg <- ggplot2::ggplot(
+              data = mv,
+              mapping = ggplot2::aes(x = .data$number, y = .data$y)
             ) +
                 ggplot2::labs(
                     title = paste0(Hmisc::capitalize(labels_mvs[i]), " by person"),
@@ -380,26 +422,35 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                 mapping = ggplot2::aes(x = .data$number, y = .data$MV, fill = .data$group)
             ) +
                 ggplot2::labs(
-                    title = paste0(Hmisc::capitalize(labels_mvs[i]), " by person and ",
-                                   name_grouping),
+                    title = paste0(
+                      Hmisc::capitalize(labels_mvs[i]),
+                      " by person and ",
+                      name_grouping
+                    ),
                     x = paste0("Number of ", labels_mvs[i]), y = "Percentage"
                 ) +
                 if (is.null(labels_legend)) {
                     scale_fill_discrete(name = Hmisc::capitalize(name_grouping))
                 } else {
-                    scale_fill_discrete(name = Hmisc::capitalize(name_grouping),
-                                        labels = labels_legend)
+                    scale_fill_discrete(
+                      name = Hmisc::capitalize(name_grouping),
+                      labels = labels_legend
+                    )
                 }
         }
 
         gg <- gg +
             ggplot2::geom_col(position = "dodge") +
-            ggplot2::scale_y_continuous(breaks = seq(0, ylim, 10),
-                                        labels = paste0(seq(0, ylim, 10), " %"),
-                                        limits = c(0, ylim)) +
+            ggplot2::scale_y_continuous(
+              breaks = seq(0, ylim, 10),
+              labels = paste0(seq(0, ylim, 10), " %"),
+              limits = c(0, ylim)
+            ) +
             ggplot2::theme_bw() +
-            ggplot2::theme(legend.justification = c(1, 1),
-                           legend.position = c(0.99, 0.99)) +
+            ggplot2::theme(
+              legend.justification = c(1, 1),
+              legend.position = c(0.99, 0.99)
+            ) +
             ggplot2::scale_x_continuous(breaks = seq(0, end, ifelse(end > 10, 2, 1)))
 
         # save plot
