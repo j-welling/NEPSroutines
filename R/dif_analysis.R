@@ -44,18 +44,38 @@
 #'   dmod: DIF effects model
 #' @export
 
-dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
-                         scoring = NULL, overwrite = FALSE,
-                         save = TRUE, print = TRUE, return = FALSE,
-                         include_mv = 200, control = NULL, pweights = NULL,
+dif_analysis <- function(resp,
+                         vars,
+                         select,
+                         dif_vars,
+                         valid = NULL,
+                         mvs = NULL,
+                         scoring = NULL,
+                         overwrite = FALSE,
+                         save = TRUE,
+                         print = TRUE,
+                         return = FALSE,
+                         include_mv = 200,
+                         control = NULL,
+                         pweights = NULL,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
-                         verbose = FALSE, warn = TRUE, dif_threshold = 0.5) {
+                         verbose = FALSE,
+                         warn = TRUE,
+                         dif_threshold = 0.5
+                         ) {
 
     # Test data
-    test_dif_data(resp = resp, vars = vars, select = select, valid = valid,
-                  dif_vars = dif_vars, scoring = scoring, pweights = pweights,
-                  mvs = mvs, warn = warn)
+    test_dif_data(
+      resp = resp,
+      vars = vars,
+      valid = valid,
+      dif_vars = dif_vars,
+      scoring = scoring,
+      pweights = pweights,
+      mvs = mvs,
+      warn = warn
+    )
 
     check_select(select, dif_vars)
 
@@ -64,23 +84,41 @@ dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL, mvs = NULL,
 
     # Conduct dif analyses
     dif$models <- scaling:::conduct_dif_analysis(
-        select = select, dif_vars = dif_vars, resp = resp, vars = vars,
-        scoring = scoring, include_mv = include_mv, valid = valid,
-        path = path_results, mvs = mvs, verbose = verbose, warn = warn, save = save,
-        control = control, pweights = pweights, test = FALSE
+        select = select,
+        dif_vars = dif_vars,
+        resp = resp,
+        vars = vars,
+        scoring = scoring,
+        include_mv = include_mv,
+        valid = valid,
+        path = path_results,
+        mvs = mvs,
+        verbose = verbose,
+        warn = warn,
+        save = save,
+        control = control,
+        pweights = pweights,
+        test = FALSE
     )
 
     # Create summary
     dif$summaries <- scaling:::summarize_dif_analysis(
-        dif_models = dif$models, dif_vars = dif_vars, dif_threshold = dif_threshold,
-        path_table = path_table, path_results = path_results,
-        print = print, save = save, overwrite = overwrite
+        dif_models = dif$models,
+        dif_vars = dif_vars,
+        dif_threshold = dif_threshold,
+        path_table = path_table,
+        path_results = path_results,
+        print = print,
+        save = save,
+        overwrite = overwrite
     )
 
     # Create table for TR
     dif$tr_tables <- scaling:::build_dif_tr_tables(
-        dif_summaries = dif$summaries,  save = save,
-        path = path_table, overwrite = overwrite
+        dif_summaries = dif$summaries,
+        save = save,
+        path = path_table,
+        overwrite = overwrite
     )
 
     # Return results
@@ -147,9 +185,16 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 
     # Test data
     if (test) {
-        test_dif_data(resp = resp, vars = vars, select = select, valid = valid,
-                      dif_vars = dif_vars, scoring = scoring, pweights = pweights,
-                      mvs = mvs, warn = warn)
+        test_dif_data(
+          resp = resp,
+          vars = vars,
+          valid = valid,
+          dif_vars = dif_vars,
+          scoring = scoring,
+          pweights = pweights,
+          mvs = mvs,
+          warn = warn
+        )
     }
 
     # Create list for results
@@ -273,10 +318,19 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 
     # Test data
     if (test) {
-        test_dif_data(resp = resp, vars = vars, select = select, valid = valid,
-                      dif_vars = dif_var, scoring = scoring, pweights = pweights,
-                      mvs = mvs, warn = warn)
+        test_dif_data(
+          resp = resp,
+          vars = vars,
+          valid = valid,
+          dif_vars = dif_var,
+          scoring = scoring,
+          pweights = pweights,
+          mvs = mvs,
+          warn = warn)
     }
+
+    check_items(vars$item[vars[[select]]])
+    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
 
     scaling:::check_items(vars$item[vars[[select]]])
 
@@ -801,11 +855,6 @@ print_dif_summary <- function(resp, diflist, res, dif_threshold = 0.5) {
 #' @param vars data.frame; contains information about items with items as rows;
 #' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param select character vector; defines name(s) of logical variable(s) in vars
-#' that indicates which items to use for analysis; if some of the \code{dif_vars}
-#' come with a different set of analysis items, this argument becomes a
-#' vector of \code{length(dif_vars)} containing the respective selection
-#' variables in vars
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param mvs named integer vector; contains user-defined missing values
@@ -820,7 +869,6 @@ print_dif_summary <- function(resp, diflist, res, dif_threshold = 0.5) {
 #' @noRd
 test_dif_data <- function(resp,
                           vars,
-                          select,
                           dif_vars,
                           valid = NULL,
                           mvs = NULL,
@@ -828,11 +876,8 @@ test_dif_data <- function(resp,
                           pweights = NULL,
                           warn = TRUE) {
 
-    scaling:::check_logicals(vars, "vars", select, warn = warn)
     scaling:::check_logicals(resp, "resp", valid, warn = warn)
     scaling:::check_variables(resp, "resp", dif_vars)
-    check_items(vars$item[vars[[select]]])
-    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
 
     if (!is.null(scoring))
         scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
