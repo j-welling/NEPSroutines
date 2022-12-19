@@ -60,7 +60,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
                       path_plots = here::here("Plots/Missing_Responses/by_person"),
                       show_all = FALSE, overwrite = FALSE, #color = NULL,
                       name_grouping = 'test version', labels_legend = NULL,
-                      digits = 2, warn = TRUE, verbose = TRUE) {
+                      digits = 3, warn = TRUE, verbose = TRUE) {
 
     # Test data
     check_logicals(resp, "resp", c(valid, grouping), warn = warn)
@@ -139,7 +139,7 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, NAd = -54, AZ = -21),
                          filename = NULL, path = here::here("Results"),
-                         digits = 2, warn = TRUE, test = TRUE) {
+                         digits = 3, warn = TRUE, test = TRUE) {
 
     # Test data
     if (test) {
@@ -453,7 +453,7 @@ mvp_calc <- function(responses, mvs) {
 #' with descriptive statistics
 #' @noRd
 
-mvp_summary <- function(results, digits = 2) {
+mvp_summary <- function(results, digits = 3) {
 
     # Create tables with frequencies per missing value type
     out <- apply(results, 2, function(x) {

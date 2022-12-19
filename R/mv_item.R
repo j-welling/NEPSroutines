@@ -64,7 +64,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
                     path_table = here::here("Tables"),
                     path_plots = here::here("Plots/Missing_Responses/by_item"),
                     show_all = FALSE, name_grouping = 'test version', #color = NULL,
-                    overwrite = FALSE, digits = 2, warn = TRUE, verbose = TRUE,
+                    overwrite = FALSE, digits = 3, warn = TRUE, verbose = TRUE,
                     labels_legend = NULL) {
 
     # Test data
@@ -153,7 +153,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, NAd = -54, AZ = -21),
                          path = here::here("Data"), filename = NULL,
-                         digits = 2, warn = TRUE, test = TRUE) {
+                         digits = 3, warn = TRUE, test = TRUE) {
 
     # Test data
     check_numerics(vars, "vars", position, check_invalid = TRUE)
@@ -570,7 +570,7 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
 #' (by item)
 #' @noRd
 
-mvi_perc <- function(responses, mvs, digits = 2) {
+mvi_perc <- function(responses, mvs, digits = 3) {
     perc <- data.frame(apply(responses, 2, function(x) {
         ifelse(x %in% mvs, 1, ifelse(!is.na(x), 0, NA))
     }))
@@ -590,7 +590,7 @@ mvi_perc <- function(responses, mvs, digits = 2) {
 #' type in mvs
 #' @noRd
 
-mvi_calc <- function(responses, mvs, digits = 2) {
+mvi_calc <- function(responses, mvs, digits = 3) {
 
     result <- list()
 
@@ -619,7 +619,7 @@ mvi_calc <- function(responses, mvs, digits = 2) {
 #' @return   list with results of missing values per item.
 #' @noRd
 
-create_mvlist <- function(item, position, responses, mvs, digits = 2) {
+create_mvlist <- function(item, position, responses, mvs, digits = 3) {
 
     if (length(item) != length(position) |
         ncol(responses) != length(item) |
@@ -650,7 +650,7 @@ create_mvlist <- function(item, position, responses, mvs, digits = 2) {
 #' @return  data.frame with mean, median, SD, min and max of missing values
 #' @noRd
 
-mvi_summary <- function(mvlist, digits = 2) {
+mvi_summary <- function(mvlist, digits = 3) {
     mvsum <- data.frame(t(apply(mvlist, 2, function(x) {
         round(c(mean(x), sd(x), median(x), range(x)[1], range(x)[2]), digits)
     })))

@@ -390,7 +390,7 @@ check_dich <- function(df, name_df, dich_items = NULL) {
 #' @export
 
 meht <- function(stat, df1, df2, eta2 = NULL, delta = .40,
-                 alpha = .05, digits = 2, verbose = TRUE) {
+                 alpha = .05, digits = 3, verbose = TRUE) {
 
     # Determine effect size
     if (is.null(eta2) & is.null(delta)) {

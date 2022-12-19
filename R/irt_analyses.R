@@ -45,7 +45,7 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
                                  path_plots = here::here("Plots"),
                                  path_table = here::here("Tables"),
                                  path_results = here::here("Results"),
-                                 digits = 2, verbose = FALSE, warn = TRUE,
+                                 digits = 3, verbose = FALSE, warn = TRUE,
                                  xsi.fixed = NULL, pweights = NULL,
                                  control_tam = NULL, control_wle = NULL) {
 
@@ -143,7 +143,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
                          path_plots = here::here("Plots"),
                          path_table = here::here("Tables"),
                          path_results = here::here("Results"),
-                         overwrite = FALSE, digits = 2, name_group = NULL,
+                         overwrite = FALSE, digits = 3, name_group = NULL,
                          verbose = FALSE, warn = TRUE, test = TRUE,
                          xsi.fixed = NULL, pweights = NULL,
                          control_tam = NULL, control_wle = NULL) {
@@ -573,7 +573,7 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
                         results, disc = NULL,
                         path = here::here("Tables"), filename = NULL,
-                        digits = 2, overwrite = FALSE, warn = TRUE) {
+                        digits = 3, overwrite = FALSE, warn = TRUE) {
 
   # prepare data
   check_items(rownames(results$mod$xsi))
@@ -716,7 +716,7 @@ irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE,
 #' @return a data.frame containing the step parameters and SEs for each step
 #' @export
 
-steps_analysis <- function(pcm_model, digits = 2, overwrite = FALSE,
+steps_analysis <- function(pcm_model, digits = 3, overwrite = FALSE,
                            path = here::here("Tables"), filename = NULL) {
 
   # step parameters

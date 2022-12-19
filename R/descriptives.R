@@ -41,7 +41,7 @@ n_valid <- function(dat, valid = NULL) {
 #'
 #' @export
 
-desc_con <- function(dat, desc, valid = NULL, digits = 2,
+desc_con <- function(dat, desc, valid = NULL, digits = 3,
                      print = TRUE, return = FALSE) {
 
     check_variables(dat, "dat", c(desc, valid))
@@ -78,7 +78,7 @@ desc_con <- function(dat, desc, valid = NULL, digits = 2,
 #'
 #' @export
 
-desc_nom <- function(dat, desc, valid = NULL, digits = 1,
+desc_nom <- function(dat, desc, valid = NULL, digits = 2,
                      print = TRUE, return = FALSE) {
 
     check_variables(dat, "dat", c(desc, valid))
@@ -150,7 +150,7 @@ desc_abs <- function(dat, desc, valid = NULL, warn = TRUE) {
 #' @export
 
 desc_perc <- function(dat, desc, valid = NULL, warn = TRUE, useNA = 'always',
-                      digits = 1) {
+                      digits = 2) {
 
     check_variables(dat, "dat", c(desc, valid))
 
