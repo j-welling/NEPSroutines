@@ -54,14 +54,16 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
     distractors <- list()
 
     # Conduct distratcor analysis
-    distractors$analysis <- conduct_dis_analysis(resp = resp,
-                                                 vars = vars,
-                                                 select_raw = select_raw,
-                                                 select_score = select_score,
-                                                 correct = correct,
-                                                 valid = valid,
-                                                 mvs = mvs,
-                                                 warn = warn)
+    distractors$analysis <- conduct_dis_analysis(
+      resp = resp,
+      vars = vars,
+      select_raw = select_raw,
+      select_score = select_score,
+      correct = correct,
+      valid = valid,
+      mvs = mvs,
+      warn = warn
+    )
 
     distractors$summary <- dis_summary(distractors$analysis, digits = digits)
 
@@ -123,7 +125,8 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
     check_variables(resp, "resp", valid)
     check_items(vars$item[vars[[select_raw]]])
     check_items(vars$item[vars[[select_score]]])
-    scaling:::check_numerics(resp, "resp", vars$item[vars[[select_raw | select_score]]])
+    scaling:::check_numerics(resp, "resp",
+                             vars$item[vars[[select_raw]] | vars[[select_score]]])
 
     if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 
