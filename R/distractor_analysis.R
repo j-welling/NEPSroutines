@@ -206,8 +206,10 @@ dis_summary <- function(distractors, digits = 3) {
 
     rc <- res[sel,]
     rd <- res[!sel,]
-    desc <- data.frame(correct = round(unlist(psych::describe(rc[, 3])), digits),
-                       distract = round(unlist(psych::describe(rd[, 3])), digits)
+    desc <- data.frame(
+      correct = round(unlist(psych::describe(rc[, 3])), digits),
+      distract = round(unlist(psych::describe(rd[, 3])), digits
+    )
     )[c(3:5, 8:9), ]
 
     # Return list with results

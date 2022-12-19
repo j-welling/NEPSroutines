@@ -426,15 +426,29 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
             warning("No scoring variable provided. All items are scored with 1.")
 
         mmod <- pcm_dif(
-            resp = resp, facets = facets, formulaA = formula_mmod, pid = pid,
-            vars = vars, select = select, scoring = scoring,
-            verbose = verbose, control = control, pweights = pws
+            resp = resp,
+            facets = facets,
+            formulaA = formula_mmod,
+            pid = pid,
+            vars = vars,
+            select = select,
+            scoring = scoring,
+            verbose = verbose,
+            control = control,
+            pweights = pws
         )
 
         dmod <- pcm_dif(
-            resp = resp, facets = facets, formulaA = formula_dmod, pid = pid,
-            vars = vars, select = select, scoring = scoring,
-            verbose = verbose, control = control, pweights = pws
+            resp = resp,
+            facets = facets,
+            formulaA = formula_dmod,
+            pid = pid,
+            vars = vars,
+            select = select,
+            scoring = scoring,
+            verbose = verbose,
+            control = control,
+            pweights = pws
         )
 
     } else {
@@ -445,16 +459,28 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
         Q <- scaling:::create_q(vars, select = select, scoring = scoring, poly = FALSE)
         irtmodel <- '1PL'
 
-        dmod <- TAM::tam.mml.mfr(resp, irtmodel = irtmodel, facets = facets,
-                                 Q = Q, pid = pid, formulaA = formula_dmod,
-                                 control = control, pweights = pws,
-                                 verbose = verbose
+        dmod <- TAM::tam.mml.mfr(
+          resp,
+          irtmodel = irtmodel,
+          facets = facets,
+          Q = Q,
+          pid = pid,
+          formulaA = formula_dmod,
+          control = control,
+          pweights = pws,
+          verbose = verbose
         )
 
-        mmod <- TAM::tam.mml.mfr(resp, irtmodel = irtmodel, facets = facets,
-                                 Q = Q, pid = pid, formulaA = formula_mmod,
-                                 control = control, pweights = pws,
-                                 verbose = verbose
+        mmod <- TAM::tam.mml.mfr(
+          resp,
+          irtmodel = irtmodel,
+          facets = facets,
+          Q = Q,
+          pid = pid,
+          formulaA = formula_mmod,
+          control = control,
+          pweights = pws,
+          verbose = verbose
         )
 
     }
@@ -463,8 +489,13 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     scaling:::reached_maxiter(mmod, paste0("'", dif_var, "' without DIF"))
     scaling:::reached_maxiter(dmod, paste0("'", dif_var, "' with DIF"))
 
-    list(mmod = mmod, dmod = dmod, facets = fcts,
-         dif_var = dif_var, irt_type = irt_type)
+    list(
+      mmod = mmod,
+      dmod = dmod,
+      facets = fcts,
+      dif_var = dif_var,
+      irt_type = irt_type
+    )
 }
 
 #' Create data.frame for facets with counts

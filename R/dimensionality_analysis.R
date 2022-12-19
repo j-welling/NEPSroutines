@@ -157,7 +157,10 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
 
       # Compute dimensional model
       dimensionality[[d]] <- TAM::tam.mml(
-        resp = resp, pid = pid, Q = Q, irtmodel = irtmodel,
+        resp = resp,
+        pid = pid,
+        Q = Q,
+        irtmodel = irtmodel,
         control = list(maxiter = maxiter, snodes = snodes),
         verbose = verbose
       )
@@ -174,7 +177,8 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
 
 #' Summary of dimensionality analysis (saves summary in excel sheet)
 #'
-#' @param dimensionality list with results of the dim_analysis function
+#' @param dimensionality list with results of the conduct_dim_analysis function
+#' (or results$analysis from the dim_analysis function)
 #'
 #' @return data.frame of summary results
 #'
