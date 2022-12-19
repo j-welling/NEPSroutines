@@ -52,8 +52,6 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
   # Test data
   check_logicals(vars, "vars", groups, warn = warn)
   check_logicals(resp, "resp", c(valid, names(groups)), warn = warn)
-  check_items(vars$item[vars[[select]]])
-  scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
   if (!is.null(scoring))
     check_numerics(vars, "vars", scoring, check_invalid = TRUE)
   if (!is.null(pweights))
@@ -68,6 +66,9 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
   for (g in names(groups)) {
 
     select <- groups[[g]]
+    check_items(vars$item[vars[[select]]])
+    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+
     message(toupper(paste0("\n\n\n(", i, ") irt analysis (",
                            ifelse(is_poly(resp, vars, select), 'poly', 'dich'),
                            ") for group '", g, "':\n")))
@@ -211,7 +212,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
           select = select,
           valid = valid,
           mvs = mvs,
-          irtmodel = 'PCM',
+          irtmodel = 'PCM2',
           control_tam = control_tam,
           control_wle = control_wle,
           pweights = pweights,
@@ -588,7 +589,7 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   pars <- pars[vars_$item, ]
 
   # percentage correct
-  pars$pc <- round(ifelse(vars_$dich, colMeans(resp[, vars_$item], na.rm = TRUE) * 100, NA), 0)
+  pars$pc <- round(ifelse(vars_$dich, colMeans(resp[, vars_$item], na.rm = TRUE) * 100, NA), 2)
 
   # number of valid responses
   pars$N <- colSums(!is.na(resp))
@@ -789,7 +790,7 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
           paste(xsi_min_item, collapse = ", "), ") and ",
           xsi_max, " (", ifelse(length(xsi_max_item) > 1, "items ", "item "),
           paste(xsi_max_item, collapse = ", "),
-          ") with an average of ", xsi_mean, " (", xsi_sd,
+          ") with an average of ", xsi_mean, " (SD = ", xsi_sd,
           "), and a median of ", xsi_median, ".\n")
 
   # SE of item difficulties
@@ -797,7 +798,7 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   se_max_item <- irt_sum$Item[irt_sum$SE %in% se_max]
   message("SE of item difficulties:\n",
           "The maximum of SEs is ", se_max,
-          " (", paste(se_max_item, collapse = ", "), ".\n")
+          " (", paste(se_max_item, collapse = ", "), ").\n")
 
   # WMNSQ
   wmnsq_min <- min(irt_sum$WMNSQ, na.rm = TRUE)
@@ -814,7 +815,7 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
           ") and the highest being ",
           wmnsq_max, " (", ifelse(length(wmnsq_max_item) > 1, "items ", "item "),
           paste(wmnsq_max_item, collapse = ", "),
-          ") with an average of ", wmnsq_mean, " (", wmnsq_sd,
+          ") with an average of ", wmnsq_mean, " (SD = ", wmnsq_sd,
           "), and a median of ", wmnsq_median, ".")
 
   wmnsq_misfit <- irt_sum$Item[irt_sum$WMNSQ > 1.15]
