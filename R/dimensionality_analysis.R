@@ -38,7 +38,7 @@
 
 dim_analysis <- function(resp, vars, select, scoring = "scoring",
                          dim = NULL, valid = NULL, mvs = NULL,
-                         irtmodel = "PCM2", maxiter = 10, snodes = 5,
+                         irtmodel = "PCM2", maxiter = 10000, snodes = 5000,
                          return = FALSE, save = TRUE, print = TRUE,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
@@ -98,9 +98,9 @@ dim_analysis <- function(resp, vars, select, scoring = "scoring",
 #' @return          list of results for each dimensional analysis
 #' @export
 conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
-                                 valid = NULL, irtmodel, maxiter, snodes,
-                                 mvs = NULL, verbose = FALSE, warn = TRUE,
-                                 test = TRUE) {
+                                 valid = NULL, irtmodel, maxiter = 10000,
+                                 snodes = 5000, mvs = NULL, verbose = FALSE,
+                                 warn = TRUE, test = TRUE) {
   # Test data
   if (test) {
     check_logicals(vars, "vars", select, warn = warn)

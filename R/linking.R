@@ -109,7 +109,7 @@ linking <- function(resp_curr,
                     print = TRUE, save = TRUE, return = FALSE,
                     overwrite = FALSE, verbose = TRUE,
                     wid = NULL, dif_threshold = 0.5,
-                    snodes = 0, maxiter = 1000,
+                    snodes = 5000, maxiter = 10000,
                     digits = 3, control_tam = NULL,
                     do_dif = TRUE, do_dim = TRUE, warn = TRUE) {
 
@@ -946,8 +946,8 @@ check_link_dimensionality <- function(resp_curr,
                                       mvs = NULL,
                                       anchors = NULL,
                                       verbose = FALSE,
-                                      maxiter = 1000,
-                                      snodes = 0,
+                                      maxiter = 10000,
+                                      snodes = 5000,
                                       warn = TRUE,
                                       test = TRUE) {
 
