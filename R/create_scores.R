@@ -119,7 +119,7 @@ create_scores <- function(resp, vars, scoring = NULL,
                           path_results = here::here("Results"),
                           do_dim = TRUE, do_dif = TRUE,
                           dif_threshold = .5, wid = NULL,
-                          snodes = 0, maxiter = 1000,
+                          snodes = 5000, maxiter = 10000,
                           digits = 3, verbose = TRUE, warn = TRUE) {
 
   # Test data
