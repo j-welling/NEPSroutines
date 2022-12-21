@@ -61,9 +61,6 @@ values should be included in analysis as an extra group (defaults to 200)}
 
 \item{pweights}{character; defines name of numerical variable in resp that
 contains person weights as passed to TAM-function}
-
-\item{two_par}{logical; whether two parameter model (2PL or GPCM) shall be
-used as base for DIF analyses (defaults to FALSE)}
 }
 \value{
 a list of:

@@ -4,7 +4,7 @@
 \alias{print_dif_summary}
 \title{Print DIF summaries to console}
 \usage{
-print_dif_summary(resp, diflist, res, prob_dif = 0.5)
+print_dif_summary(resp, diflist, res, dif_threshold = 0.5)
 }
 \arguments{
 \item{resp}{data.frame; includes all DIF variables}
@@ -13,7 +13,8 @@ print_dif_summary(resp, diflist, res, prob_dif = 0.5)
 
 \item{res}{list; return object of dif_summary()}
 
-\item{prob_dif}{numeric scalar; indicates absolute threshold of problematic DIF (defaults to 0.5)}
+\item{dif_threshold}{numeric scalar; indicates absolute threshold of
+problematic DIF (defaults to 0.5)}
 }
 \description{
 Print DIF summaries to console

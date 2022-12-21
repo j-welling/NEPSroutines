@@ -6,10 +6,11 @@
 \usage{
 steps_analysis(
   pcm_model,
-  digits = 2,
+  digits = 3,
+  save = TRUE,
   overwrite = FALSE,
   path = here::here("Tables"),
-  filename = NULL
+  name_group = NULL
 )
 }
 \arguments{
@@ -17,11 +18,13 @@ steps_analysis(
 
 \item{digits}{integer; number of decimals for rounding}
 
+\item{save}{logical; whether results shall be saved to hard drive}
+
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 
 \item{path}{string; defines path to folder where table shall be saved}
 
-\item{filename}{string; defines name of table that shall be saved}
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 }
 \value{
 a data.frame containing the step parameters and SEs for each step

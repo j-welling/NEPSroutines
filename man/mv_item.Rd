@@ -25,10 +25,10 @@ mv_item(
   path_results = here::here("Results"),
   path_table = here::here("Tables"),
   path_plots = here::here("Plots/Missing_Responses/by_item"),
-  show_all = FALSE,
+  show_all = TRUE,
   name_grouping = "test version",
   overwrite = FALSE,
-  digits = 2,
+  digits = 3,
   warn = TRUE,
   verbose = TRUE,
   labels_legend = NULL

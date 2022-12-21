@@ -10,7 +10,7 @@ mvp_table(
   overwrite = FALSE,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
     -21),
-  filename = NULL,
+  save = TRUE,
   path = here::here("Tables"),
   test = TRUE
 )
@@ -26,7 +26,7 @@ an item}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
 
-\item{filename}{string; defines name of table that shall be saved}
+\item{save}{logical; whether results shall be saved to hard drive}
 
 \item{path}{string; defines path to folder where table shall be saved}
 

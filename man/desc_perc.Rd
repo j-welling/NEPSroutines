@@ -4,7 +4,7 @@
 \alias{desc_perc}
 \title{Show frequency (relative) of answers of list of variables}
 \usage{
-desc_perc(dat, desc, valid = NULL, warn = TRUE, useNA = "always", digits = 1)
+desc_perc(dat, desc, valid = NULL, warn = TRUE, useNA = "always", digits = 2)
 }
 \arguments{
 \item{dat}{data.frame; contains sociodemographic and booklet variables}

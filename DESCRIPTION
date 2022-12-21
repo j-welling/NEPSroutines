@@ -1,19 +1,21 @@
 Package: scaling
 Type: Package
 Title: Implementing the NEPS Scaling Guidelines
-Version: 0.3.0
+Version: 0.4.0
 Authors@R: c(
     person("Jana", "Welling", email = "jana.welling@lifbi.de", 
            role = c("cre", "aut")),
     person("Anna", "Scharl", email = "anna.scharl@lifbi.de", 
            role = c("aut")),
     person("Timo", "Gnambs", email = "timo.gnambs@lifbi.de", 
+           role = c("aut")),
+    person("Tanja", "Kutscher", email = "tanja.kutscher@lifbi.de", 
            role = c("aut"))
     )
 Description: This package contains a collection of functions for the scaling 
     of NEPS competence data. It is based on standardized scaling scripts and 
-    comprises Rasch and 2PL analyses for binary and polytomous data, distractor, 
-    dimensionality and DIF analyses as well as missing values analyses.
+    comprises Rasch and 2PL analyses for binary and polytomous data, missing values, distractor, 
+    dimensionality and DIF analyses as well as linking and SUF creation.
     Next to providing functions for analysis, the package may also include 
     functionalities for progress reports in the future.
 Depends:
@@ -33,4 +35,4 @@ Depends:
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3

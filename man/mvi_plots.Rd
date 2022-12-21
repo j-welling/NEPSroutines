@@ -18,7 +18,7 @@ mvi_plots(
     "missing items due to ''Angabe zurueckgesetzt''"),
   path = here::here("Plots/Missing_Responses/by_item"),
   name_grouping = "test version",
-  show_all = FALSE,
+  show_all = TRUE,
   verbose = TRUE,
   warn = TRUE,
   test = TRUE,

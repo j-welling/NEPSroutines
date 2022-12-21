@@ -11,9 +11,10 @@ irt_summary(
   mvs = NULL,
   results,
   disc = NULL,
+  save = TRUE,
   path = here::here("Tables"),
-  filename = NULL,
-  digits = 2,
+  name_group = NULL,
+  digits = 3,
   overwrite = FALSE,
   warn = TRUE
 )
@@ -39,9 +40,11 @@ variables that are further defined in the function arguments}
 
 \item{disc}{list; return object of irt_model(); two parameter model}
 
+\item{save}{logical; whether results shall be saved to hard drive}
+
 \item{path}{string; defines path to folder where table shall be saved}
 
-\item{filename}{string; defines name of table that shall be saved}
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 
 \item{digits}{integer; number of decimals for rounding}
 

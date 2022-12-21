@@ -14,7 +14,7 @@ create_suf(
   mvs = NULL,
   items_labels = NULL,
   filename = "suf",
-  path_results = here::here("Results"),
+  path = here::here("Results"),
   save = TRUE,
   return = FALSE,
   warn = TRUE
@@ -40,7 +40,7 @@ data}
 
 \item{scores}{data.frame; contains test scores (potentially with standard
 errors) as variables and persons as rows; additionally includes ID_t as a
-person identifier}
+person identifier; return object of functions c}
 
 \item{score_name}{character; name of the scores -- WITHOUT extension (e.g.,
 reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)}
@@ -52,7 +52,7 @@ the data}
 
 \item{filename}{character; indicates final name of SUF according to study}
 
-\item{path_results}{character; indicates where SUF shall be saved}
+\item{path}{character; indicates where SUF shall be saved}
 
 \item{save}{logical; whether results shall be saved to hard drive}
 

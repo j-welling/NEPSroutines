@@ -11,12 +11,12 @@ mvi_analysis(
   position,
   valid = NULL,
   grouping = NULL,
-  show_all = FALSE,
+  show_all = TRUE,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
     -21),
   path = here::here("Data"),
-  filename = NULL,
-  digits = 2,
+  save = TRUE,
+  digits = 3,
   warn = TRUE,
   test = TRUE
 )
@@ -52,7 +52,7 @@ an item}
 
 \item{path}{string; defines path to folder where results shall be saved}
 
-\item{filename}{string; defines name of file that shall be saved}
+\item{save}{logical; whether results shall be saved to hard drive}
 
 \item{digits}{integer; number of decimals for rounding}
 

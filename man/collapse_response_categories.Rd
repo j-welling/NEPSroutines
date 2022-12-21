@@ -7,10 +7,9 @@
 collapse_response_categories(
   resp,
   vars,
-  select_poly,
+  select,
   per_cat = 200,
   path_table = here::here("Tables"),
-  print = TRUE,
   save = FALSE
 )
 }
@@ -25,14 +24,12 @@ and all variables that are further defined in the function arguments}
 includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{select_poly}{character; indicates the logical variable in vars which
+\item{select}{character; indicates the logical variable in vars which
 contains the item names of the polytomous items}
 
 \item{per_cat}{integer; minimum number of persons per category; defaults to 200}
 
 \item{path_table}{string; defines path to folder where tables shall be saved}
-
-\item{print}{logical; whether results shall be printed to console}
 
 \item{save}{logical; whether results shall be saved to hard drive}
 }

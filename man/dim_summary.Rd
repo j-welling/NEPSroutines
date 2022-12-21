@@ -7,7 +7,8 @@
 dim_summary(dimensionality)
 }
 \arguments{
-\item{dimensionality}{list with results of the dim_analysis function}
+\item{dimensionality}{list with results of the conduct_dim_analysis function
+(or results$analysis from the dim_analysis function)}
 }
 \value{
 data.frame of summary results

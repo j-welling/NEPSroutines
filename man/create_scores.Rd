@@ -16,14 +16,37 @@ create_scores(
   mvs = NULL,
   wle = TRUE,
   sum_score = FALSE,
+  metap = FALSE,
+  meta_var_name = NULL,
+  meta_score_name = NULL,
+  meta_select = NULL,
   control_tam = NULL,
   control_wle = NULL,
   pweights = NULL,
   poly2dich = TRUE,
+  resp_prev = NULL,
+  resp_link = NULL,
+  vars_prev = NULL,
+  vars_link = NULL,
+  select_prev = NULL,
+  select_link = NULL,
+  valid_prev = NULL,
+  valid_link = NULL,
+  scoring_prev = NULL,
+  scoring_link = NULL,
+  pweights_prev = NULL,
+  pweights_link = NULL,
+  anchors = NULL,
+  longitudinal = TRUE,
+  print = TRUE,
+  save = TRUE,
   return = FALSE,
+  overwrite = FALSE,
+  path_table = here::here("Tables"),
+  path_results = here::here("Results"),
   do_dim = TRUE,
   do_dif = TRUE,
-  diff_threshold = 0.5,
+  dif_threshold = 0.5,
   wid = NULL,
   snodes = 0,
   maxiter = 1000,
@@ -68,6 +91,17 @@ which items to use for the analysis}
 
 \item{sum_score}{logical; whether to calculate sum scores}
 
+\item{metap}{logical; whether to calculate metacognition score}
+
+\item{meta_var_name}{string; defines name of meta competence variable in resp}
+
+\item{meta_score_name}{string; name of the meta competence scores -- WITHOUT
+extension (e.g., reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)}
+
+\item{meta_select}{string; defines name of logical variable in vars that
+indicates which items to use for the meta cognition analysis
+(if identical to select, argument can be empty)}
+
 \item{control_tam}{list; control argument as passed to tam.mml.mfr()}
 
 \item{control_wle}{list; can contain Msteps and/or convM as to pass to tam.wle()
@@ -79,48 +113,47 @@ passed to TAM-functions}
 \item{poly2dich}{logical; indicates whether count only correctly scored
 binary or FULLY correctly scored PC items}
 
-\item{return}{logical; whether results shall be returned}
-
-\item{do_dim}{logical; whether to do dimensionality analysis for linking}
-
-\item{do_dif}{logical; whether to do dif analysis for linking}
-
-\item{diff_threshold}{numeric; threshold under which DIF in common link items
-is accepted; defaults to .5}
-
-\item{wid}{variable name used as WLE identifier in first measurement wave}
-
-\item{snodes}{snodes as passed to the TAM function for the dimensionality
-analyses}
-
-\item{maxiter}{maximum number of iterations as passed to the TAM function
-for the dimensionality analyses}
-
-\item{digits}{numeric; number of decimal places for rounding}
-
-\item{verbose}{logical; verbose as passed to the TAM function}
-
-\item{warn}{logical; whether to print warnings}
-
-\item{resp_previous}{data.frame with responses of first measurement wave,
+\item{resp_prev}{data.frame with responses of first measurement wave,
 a person identifier; may also include a WLE as given in wid}
 
-\item{resp_link_study}{data.frame with responses of link sample,
+\item{resp_link}{data.frame with responses of link sample,
 a person identifier;}
 
-\item{pweights_previous}{numeric vector; person weights for previous
-measurement point passed to TAM-functions}
+\item{vars_prev}{data.frame; contains information about items of previous
+measurement wave with items as rows; includes variable 'item' containing item
+names and may include variable with item scoring}
 
-\item{pweights_link_study}{numeric vector; person weights for link study
-passed to TAM-functions}
+\item{vars_link}{data.frame; contains information about items of link study
+with items as rows; includes variable 'item' containing item names and may
+include variable with item scoring; required if anchor group design is used}
 
-\item{scoring_previous}{numeric; named vector with the scoring factors to
+\item{select_prev}{character; contains name of logical variable in vars_prev
+identifying the item set for the previous measurement wave}
+
+\item{select_link}{character; contains name of logical variable in vars_link
+identifying the item set for the link study; required if anchor group design
+is used}
+
+\item{valid_prev}{string; defines name of logical variable in resp_prev that
+indicates (in)valid cases for the previous measurement wave}
+
+\item{valid_link}{string; defines name of logical variable in resp_link that
+indicates (in)valid cases for the link study; optional variable for anchor
+group design}
+
+\item{scoring_prev}{numeric; named vector with the scoring factors to
 be applied to the loading matrix of the previous measurement point; can be
 NULL for the Rasch model}
 
-\item{scoring_link_study}{numeric; named vector with the scoring factors to
+\item{scoring_link}{numeric; named vector with the scoring factors to
 be applied to the loading matrix of the link study; can be NULL for the
 Rasch model}
+
+\item{pweights_prev}{numeric vector; person weights for previous
+measurement point passed to TAM-functions}
+
+\item{pweights_link}{numeric vector; person weights for link study
+passed to TAM-functions}
 
 \item{anchors}{character; data.frame with two columns including the link
 items; for anchor item designs the first column refers to the previous
@@ -136,13 +169,36 @@ cohort linking (FALSE)}
 
 \item{save}{logical; whether results shall be saved to hard drive}
 
+\item{return}{logical; whether results shall be returned}
+
 \item{overwrite}{logical; whether to overwrite existing file when saving
 table}
+
+\item{path_table}{string; defines path to folder where tables shall be saved}
 
 \item{path_results}{string; defines path to folder where results shall be
 saved}
 
-\item{path_table}{string; defines path to folder where tables shall be saved}
+\item{do_dim}{logical; whether to do dimensionality analysis for linking}
+
+\item{do_dif}{logical; whether to do dif analysis for linking}
+
+\item{dif_threshold}{numeric; threshold under which DIF in common link items
+is accepted; defaults to .5}
+
+\item{wid}{variable name used as WLE identifier in first measurement wave}
+
+\item{snodes}{snodes as passed to the TAM function for the dimensionality
+analyses}
+
+\item{maxiter}{maximum number of iterations as passed to the TAM function
+for the dimensionality analyses}
+
+\item{digits}{numeric; number of decimal places for rounding}
+
+\item{verbose}{logical; verbose as passed to the TAM function}
+
+\item{warn}{logical; whether to print warnings}
 }
 \description{
 Create scores

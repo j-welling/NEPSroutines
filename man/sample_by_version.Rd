@@ -18,14 +18,14 @@ sample_by_version(
 
 \item{versions}{string; defines name of variable in dat that identifies test versions}
 
+\item{labels}{named character vector; links a label each value of versions
+(e.g. versions_lbls = c(version1 = 1, version2 = 2))}
+
 \item{save}{logical; whether to save the table in Excel}
 
 \item{overwrite}{logical; whether to overwrite an existing table with the same name}
 
 \item{path}{string; defines path for saving the table}
-
-\item{versions_lbls}{named character vector; links a label each value of versions
-(e.g. versions_lbls = c(version1 = 1, version2 = 2))}
 }
 \value{
 table with sample size by test version

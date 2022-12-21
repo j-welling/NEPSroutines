@@ -9,7 +9,7 @@ dif_summary(
   print = TRUE,
   save = TRUE,
   path = here::here("Tables"),
-  prob_dif = 0.5,
+  dif_threshold = 0.5,
   overwrite = FALSE
 )
 }
@@ -22,7 +22,8 @@ dif_summary(
 
 \item{path}{string; defines path to folder where tables shall be saved}
 
-\item{prob_dif}{numeric scalar; indicates absolute threshold of problematic DIF (defaults to 0.5)}
+\item{dif_threshold}{numeric scalar; indicates absolute threshold of
+problematic DIF (defaults to 0.5)}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 }

@@ -16,7 +16,8 @@ conduct_dim_analysis(
   snodes,
   mvs = NULL,
   verbose = FALSE,
-  warn = TRUE
+  warn = TRUE,
+  test = TRUE
 )
 }
 \arguments{
@@ -56,6 +57,8 @@ contains the scoring factor to be applied to loading matrix; defaults to
 \item{verbose}{verbose as passed to the TAM function}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
+
+\item{test}{logical; whether to test data structure (should be set to TRUE)}
 }
 \value{
 list of results for each dimensional analysis

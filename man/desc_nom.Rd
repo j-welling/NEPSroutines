@@ -4,7 +4,7 @@
 \alias{desc_nom}
 \title{Descriptives of nominal variables}
 \usage{
-desc_nom(dat, desc, valid = NULL, digits = 1, print = TRUE, return = FALSE)
+desc_nom(dat, desc, valid = NULL, digits = 2, print = TRUE, return = FALSE)
 }
 \arguments{
 \item{dat}{data.frame; contains sociodemographic and booklet variables}

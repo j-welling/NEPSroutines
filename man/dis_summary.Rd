@@ -4,11 +4,13 @@
 \alias{dis_summary}
 \title{Summary of distractor analysis}
 \usage{
-dis_summary(distractors)
+dis_summary(distractors, digits = 3)
 }
 \arguments{
 \item{distractors}{return object of dis_analysis() function (list of
 data frames containing item-total correlations for each item)}
+
+\item{digits}{integer; number of decimals for rounding}
 }
 \value{
 list of data frames

@@ -18,6 +18,7 @@ dis_analysis(
   path_results = here::here("Results"),
   path_table = here::here("Tables"),
   overwrite = FALSE,
+  digits = 3,
   warn = TRUE
 )
 }
@@ -65,6 +66,8 @@ are stored on the hard drive; please note that the path is relative to the
 current working path set by here::i_am()}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
+
+\item{digits}{integer; number of decimals for rounding}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
 }

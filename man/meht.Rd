@@ -12,7 +12,7 @@ meht(
   eta2 = NULL,
   delta = 0.4,
   alpha = 0.05,
-  digits = 2,
+  digits = 3,
   verbose = TRUE
 )
 }

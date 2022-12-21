@@ -67,9 +67,6 @@ contains person weights as passed to TAM-function}
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
 
 \item{test}{logical; whether to test data structure (should be set to TRUE)}
-
-\item{two_par}{logical; whether two parameter model (2PL or GPCM) shall be
-used as base for DIF analyses (defaults to FALSE)}
 }
 \value{
 a list of length(dif_vars) lists containing each:

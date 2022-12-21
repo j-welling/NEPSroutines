@@ -19,7 +19,7 @@ irt_analysis(
   path_table = here::here("Tables"),
   path_results = here::here("Results"),
   overwrite = FALSE,
-  digits = 2,
+  digits = 3,
   name_group = NULL,
   verbose = FALSE,
   warn = TRUE,

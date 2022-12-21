@@ -13,8 +13,9 @@ irt_model(
   irtmodel,
   scoring = NULL,
   verbose = FALSE,
+  save = TRUE,
   path = here::here("Results"),
-  filename = NULL,
+  name_group = NULL,
   xsi.fixed = NULL,
   pweights = NULL,
   control_tam = NULL,
@@ -51,13 +52,16 @@ Rasch model}
 
 \item{verbose}{logical; whether to print processing information to console}
 
+\item{save}{logical; whether results shall be saved to hard drive}
+
 \item{path}{string; defines path to folder where results shall be saved}
 
-\item{filename}{string; defines name of file that shall be saved}
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 
 \item{xsi.fixed}{matrix; contains fixed (linked) item parameters; optional}
 
-\item{pweights}{numeric vector; function argument as passed to TAM-functions}
+\item{pweights}{character; defines name of numerical variable in resp that
+contains person weights as passed to TAM-function}
 
 \item{control_tam}{list; control argument as passed to tam.mml-functions}
 

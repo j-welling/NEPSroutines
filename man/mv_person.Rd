@@ -24,11 +24,11 @@ mv_person(
   path_results = here::here("Results"),
   path_table = here::here("Tables"),
   path_plots = here::here("Plots/Missing_Responses/by_person"),
-  show_all = FALSE,
+  show_all = TRUE,
   overwrite = FALSE,
   name_grouping = "test version",
   labels_legend = NULL,
-  digits = 2,
+  digits = 3,
   warn = TRUE,
   verbose = TRUE
 )

@@ -19,7 +19,7 @@ grouped_irt_analysis(
   path_plots = here::here("Plots"),
   path_table = here::here("Tables"),
   path_results = here::here("Results"),
-  digits = 2,
+  digits = 3,
   verbose = FALSE,
   warn = TRUE,
   xsi.fixed = NULL,

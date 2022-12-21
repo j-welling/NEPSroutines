@@ -9,9 +9,7 @@ check_numerics(
   name_df,
   numerics = NULL,
   check_invalid = FALSE,
-  dich = FALSE,
-  poly = FALSE,
-  collapsed = TRUE
+  dich = FALSE
 )
 }
 \arguments{

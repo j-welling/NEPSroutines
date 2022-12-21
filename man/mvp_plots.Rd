@@ -17,7 +17,7 @@ mvp_plots(
     "not determinable items", NAd = "not administered items", AZ =
     "missing items due to ''Angabe zurueckgesetzt''"),
   path = here::here("Plots/Missing_Responses/by_person"),
-  show_all = FALSE,
+  show_all = TRUE,
   verbose = TRUE,
   name_grouping = "test version",
   labels_legend = NULL,

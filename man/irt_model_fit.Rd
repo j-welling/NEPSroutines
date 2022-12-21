@@ -8,8 +8,9 @@ irt_model_fit(
   model_1p,
   model_2p,
   overwrite = FALSE,
+  save = TRUE,
   path = here::here("Tables"),
-  filename = NULL
+  name_group = NULL
 )
 }
 \arguments{
@@ -19,9 +20,11 @@ irt_model_fit(
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 
+\item{save}{logical; whether results shall be saved to hard drive}
+
 \item{path}{string; defines path to folder where table shall be saved}
 
-\item{filename}{string; defines name of table that shall be saved}
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 }
 \value{
 data.frame with AIC, BIC and number of parameters for both models

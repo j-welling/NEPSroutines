@@ -23,7 +23,7 @@ dif_analysis(
   path_table = here::here("Tables"),
   verbose = FALSE,
   warn = TRUE,
-  prob_dif = 0.5
+  dif_threshold = 0.5
 )
 }
 \arguments{
@@ -78,10 +78,8 @@ contains person weights as passed to TAM-function}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
 
-\item{prob_dif}{numeric scalar; indicates absolute threshold of problematic DIF (defaults to 0.5)}
-
-\item{two_par}{logical; whether two parameter model (2PL or GPCM) shall be
-used as base for DIF analyses (defaults to FALSE)}
+\item{dif_threshold}{numeric scalar; indicates absolute threshold of
+problematic DIF (defaults to 0.5)}
 }
 \value{
 a list of:
