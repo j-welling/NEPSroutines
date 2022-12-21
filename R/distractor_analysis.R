@@ -33,6 +33,7 @@
 #' are stored on the hard drive; please note that the path is relative to the
 #' current working path set by here::i_am()
 #' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #'
 #' @return list of one data frame per item containing item-total correlations
@@ -185,6 +186,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
 #'
 #' @param distractors return object of dis_analysis() function (list of
 #'   data frames containing item-total correlations for each item)
+#' @param digits  integer; number of decimals for rounding
 #'
 #' @return list of data frames
 #'           correct : item-total correlations for correct responses

@@ -675,6 +675,7 @@ create_mvlist <- function(item, position, responses, mvs, digits = 3) {
 #' MVI summary
 #'
 #' @param mvlist  list; return object of create_mvlist()
+#' @param digits  integer; number of decimals for rounding
 #'
 #' @return  data.frame with mean, median, SD, min and max of missing values
 #' @noRd

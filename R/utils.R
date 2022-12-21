@@ -308,7 +308,7 @@ check_logicals <- function(df, name_df, logicals, warn = TRUE) {
 #' @export
 
 check_numerics <- function(df, name_df, numerics = NULL, check_invalid = FALSE,
-                           dich = FALSE, poly = FALSE, collapsed = TRUE) {
+                           dich = FALSE) {
 
   if(is.null(numerics)) numerics <- names(df)
 

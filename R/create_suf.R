@@ -16,9 +16,6 @@
 #' @param scores  data.frame; contains test scores (potentially with standard
 #'   errors) as variables and persons as rows; additionally includes ID_t as a
 #'   person identifier; return object of functions c
-#' @param metap  data.frame; contains meta competence scores as variables and
-#' persons as rows; additionally includes ID_t as a person identifier;
-#' return object of function create_metap()
 #' @param score_name  character; name of the scores -- WITHOUT extension (e.g.,
 #'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
 #' @param mvs  named integer vector; contains user-defined missing values

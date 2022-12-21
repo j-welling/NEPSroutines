@@ -40,16 +40,32 @@
 #'   binary or FULLY correctly scored PC items
 #' @param resp_prev data.frame with responses of first measurement wave,
 #'    a person identifier; may also include a WLE as given in wid
-#' @param resp_link_study data.frame with responses of link sample,
+#' @param resp_link data.frame with responses of link sample,
 #'    a person identifier;
-#' @param pweights_previous numeric vector; person weights for previous
+#' @param vars_prev data.frame; contains information about items of previous
+#' measurement wave with items as rows; includes variable 'item' containing item
+#' names and may include variable with item scoring
+#' @param vars_link data.frame; contains information about items of link study
+#' with items as rows; includes variable 'item' containing item names and may
+#' include variable with item scoring; required if anchor group design is used
+#' @param select_prev character; contains name of logical variable in vars_prev
+#' identifying the item set for the previous measurement wave
+#' @param select_link character; contains name of logical variable in vars_link
+#' identifying the item set for the link study; required if anchor group design
+#' is used
+#' @param valid_prev string; defines name of logical variable in resp_prev that
+#' indicates (in)valid cases for the previous measurement wave
+#' @param valid_link string; defines name of logical variable in resp_link that
+#' indicates (in)valid cases for the link study; optional variable for anchor
+#' group design
+#' @param pweights_prev numeric vector; person weights for previous
 #'   measurement point passed to TAM-functions
-#' @param pweights_link_study numeric vector; person weights for link study
+#' @param pweights_link numeric vector; person weights for link study
 #'   passed to TAM-functions
-#' @param scoring_previous  numeric; named vector with the scoring factors to
+#' @param scoring_prev  numeric; named vector with the scoring factors to
 #'   be applied to the loading matrix of the previous measurement point; can be
 #'   NULL for the Rasch model
-#' @param scoring_link_study  numeric; named vector with the scoring factors to
+#' @param scoring_link  numeric; named vector with the scoring factors to
 #'   be applied to the loading matrix of the link study; can be NULL for the
 #'   Rasch model
 #' @param anchors  character; data.frame with two columns including the link

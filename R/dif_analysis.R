@@ -502,17 +502,23 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 #'
 #' @param facet factor or numeric vector; defines groups of facet
 #' @param missings logical; whether table shall include missings
+#' @param labels character vector; contains names of facets
 #'
 #' @noRd
 create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 
     df <- data.frame(table(facet))
     names(df) <- c("number", "counts")
-    row.names(df) <- scaling:::create_ifelse(!missings,
-                                             paste0("Group ", sort(unique(facet))),
-                                             c(paste0("Group ", sort(unique(facet))[-length(unique(facet))]), "missings"))
+    row.names(df) <- scaling:::create_ifelse(
+      !missings,
+      paste0("Group ", sort(unique(facet))),
+      c(paste0("Group ", sort(unique(facet))[-length(unique(facet))]), "missings")
+    )
     if(!is.null(labels)) {
-        df$label <- scaling:::create_ifelse(!missings, names(labels), c(names(labels), 'missings'))
+        df$label <- scaling:::create_ifelse(
+          !missings,
+          names(labels),
+          c(names(labels), 'missings'))
     }
 
     df

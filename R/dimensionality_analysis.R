@@ -93,6 +93,7 @@ dim_analysis <- function(resp, vars, select, scoring = "scoring",
 #' @param verbose   verbose as passed to the TAM function
 #' @param mvs named integer vector; contains user-defined missing values
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
+#' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @return          list of results for each dimensional analysis
 #' @export

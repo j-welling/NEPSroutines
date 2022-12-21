@@ -233,6 +233,8 @@ sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
 #' Table with item properties by test version
 #'
 #' @param vars data.frame; contains information about the competence items
+#' @param select  string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
 #' @param grouping  character vector; contains for each group a name of a logical
 #' variable in vars that indicates to which group belongs a person or an item
 #' @param properties character vector; defines name(s) of variable(s) in vars
