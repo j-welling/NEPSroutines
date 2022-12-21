@@ -488,7 +488,7 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   # WLEs
   if (is.null(control_wle)) control_wle <- list()
   if (is.null(control_wle$convM)) control_wle$convM <- .0001
-  if (is.null(control_wle$Msteps)) control_wle$Msteps <- 50
+  if (is.null(control_wle$Msteps)) control_wle$Msteps <- 1000
 
   wle <- TAM::tam.wle(
     mod,
