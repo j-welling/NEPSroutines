@@ -182,13 +182,23 @@ create_scores <- function(resp, vars, scoring = NULL,
 
     if (is.null(facet) | (!is.null(facet) & is.null(xsi_fixed))) {
       fit <- scaling:::irt_analysis(
-        resp = resp, vars = vars, select = select,
-        valid = valid, mvs = mvs,
-        scoring = scoring, xsi.fixed = xsi_fixed,
-        verbose = FALSE, warn = warn, return = TRUE,
-        plots = FALSE, save = FALSE, print = FALSE,
-        control_tam = control_tam, control_wle = control_wle,
-        pweights = pweights, test = FALSE
+        resp = resp,
+        vars = vars,
+        select = select,
+        valid = valid,
+        mvs = mvs,
+        scoring = scoring,
+        xsi.fixed = xsi_fixed,
+        verbose = FALSE,
+        warn = warn,
+        return = TRUE,
+        plots = FALSE,
+        save = FALSE,
+        print = FALSE,
+        control_tam = control_tam,
+        control_wle = control_wle,
+        pweights = pweights,
+        test = FALSE
       )
       if (is.null(fit$model.1pl)) {
         fit <- fit$model.pcm
