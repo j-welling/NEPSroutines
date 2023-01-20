@@ -10,7 +10,7 @@
 
 only_valid <- function(resp, valid = NULL, warn = TRUE) {
 
-  if(!is.null(valid)) {
+  if (!is.null(valid)) {
     check_logicals(resp, "resp", valid, warn = warn)
     resp <- resp[resp[[valid]], ]
   } else if (warn) {
@@ -310,7 +310,7 @@ check_logicals <- function(df, name_df, logicals, warn = TRUE) {
 check_numerics <- function(df, name_df, numerics = NULL, check_invalid = FALSE,
                            dich = FALSE) {
 
-  if(is.null(numerics)) numerics <- names(df)
+  if (is.null(numerics)) numerics <- names(df)
 
   check_variables(df, name_df, numerics)
 
@@ -340,7 +340,7 @@ check_invalid_values <- function(df, name_df, items = NULL) {
 
   if (is.null(items)) items <- names(df)
 
-  if(any(df[ , items, drop = FALSE][!is.na(df[ , items, drop = FALSE])] < 0)) {
+  if (any(df[ , items, drop = FALSE][!is.na(df[ , items, drop = FALSE])] < 0)) {
     stop(paste0("Data.frame ", name_df, " contains invalid values (< 0) in ",
                 "specified items. Please check again and be sure to include all ",
                 "user defined missing values in the vector mvs. Default is ",
