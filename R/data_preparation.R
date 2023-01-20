@@ -17,11 +17,11 @@
 dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    check_variables(resp, "resp", old_names)
+    scaling::check_variables(resp, "resp", old_names) ### add the name of package before the function
 
     # Check for duplicates
-    check_items(old_names)
-    if(!is.null(new_names)) check_items(new_names)
+    scaling::check_items(old_names)     ### add the name of package before the function
+    if(!is.null(new_names)) scaling::check_items(new_names)  ### add the name of package before the function
 
     # Create new names if no names are provided
     if (is.null(new_names)) {
@@ -93,7 +93,7 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 pc_scoring <- function(resp, poly_items, mvs = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
+    scaling::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE) ### add the name of package before the function
 
     for (item in names(poly_items)) {
         subitems <- poly_items[[item]]
@@ -145,16 +145,19 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
                                          save = FALSE) {
 
     # Check whether variables are indeed contained in data.frames
-    check_logicals(vars, "vars", select)
-    poly_items <- vars$item[vars[[select]]]
-    check_numerics(resp, "resp", poly_items)
-    check_items(poly_items)
+   ### check_logicals(vars, "vars", select) ### Deaktivate check_logicals for 'vars' because the variables from 'resp'(not from 'vars') are needed
+   ### polyt_items <- vars$item[vars[[select]]] ### Changed (see line below), because the variables are not taken from the record 'vars', but from the vars$item
+    polyt_items <- vars$item[(vars$item %in% select) == TRUE]
+    scaling::check_numerics(resp, "resp", polyt_items) ### replace 'poly_items' by 'polyt_items' to avoid bug, because workspace already contains an object named poly_item
+                                                       ### add the name of package befor the function
+    scaling::check_items(polyt_items) ### replace 'poly_items' by 'polyt_items' to avoid bug, because workspace already contains an object named poly_item
+                                                       ### add the name of package befor the function
 
     collapsed_items <- c()
     dichotomous_items <- c()
     problematic_items <- c()
 
-    for (item in poly_items) {
+    for (item in polyt_items) { ### replace 'poly_items' by 'polyt_items' to avoid bug, because workspace already contains an object named poly_item
 
         response <- resp[[item]]
         tab <- table(response[response >= 0])
@@ -202,14 +205,14 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
     )
 
     # Print results
-    if(!is.null(problematic_items)) {
+    if (!is.null(problematic_items)) {
       message("\nThe following items have less than two response categories with ",
               "more than ", per_cat, " cases and were thus not collapsed. ",
               "Please check these items manually:\n",
               paste(problematic_items, collapse = ", "))
     }
 
-    if(!is.null(dichotomous_items)) {
+    if (!is.null(dichotomous_items)) {
       message("\nDichotomous items were not considered for collapsing. ",
               "The following items are dichotomous:\n",
               paste(dichotomous_items, collapse = ", "))
@@ -254,9 +257,9 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
 min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    check_logicals(vars, "vars", select)
+    scaling::check_logicals(vars, "vars", select) ### add the name of package before the function
     items <- vars$item[vars[[select]]]
-    check_numerics(resp, "resp", items)
+    scaling::check_numerics(resp, "resp", items)  ### add the name of package before the function
     resp_ <- resp[ , items]
 
     # Set minimum number of valid values
@@ -270,7 +273,7 @@ min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
     nval <- rowSums(apply(
         subset(resp_, select = items), 2,
         function(x) {
-            if(!is.null(invalid)) {
+            if (!is.null(invalid)) {
                 !(x %in% invalid)
             } else (x >= 0 & !is.na(x))
         }
@@ -307,8 +310,8 @@ min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 pos_new <- function(vars, select, position) {
 
     # Check whether variables are indeed contained in data.frames
-    check_logicals(vars, "vars", select)
-    check_numerics(vars, "vars", position, check_invalid = TRUE)
+    scaling::check_logicals(vars, "vars", select) ### add the name of package before the function
+    scaling::check_numerics(vars, "vars", position, check_invalid = TRUE) ### add the name of package before the function
 
     if (length(position) == 1) {
 
@@ -354,21 +357,21 @@ calculate_age <- function(resp,
                           test_year, test_month, test_day = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    check_variables(resp, "resp", c(birth_year, birth_month,
+    scaling::check_variables(resp, "resp", c(birth_year, birth_month, ### add the name of package before the function
                                     test_year, test_month))
 
     # Check whether birth and test day exist and if not, replace with default 15
     if (is.null(birth_day)) {
         bday <- 15
     } else {
-        check_variables(resp, "resp", birth_day)
+        scaling::check_variables(resp, "resp", birth_day) ### add the name of package before the function
         bday <- resp[[birth_day]]
     }
 
     if (is.null(test_day)) {
         tday <- 15
     } else {
-        check_variables(resp, "resp", test_day)
+        scaling::check_variables(resp, "resp", test_day) ### add the name of package before the function
         tday <- resp[[test_day]]
     }
 
