@@ -698,9 +698,10 @@ check_dif_anchor <- function(resp_curr,
             irtmodel = ifelse(pre_dat$is_pcm_prev, "PCM2", "1PL"),
             verbose = FALSE,
             path = NULL,
-            filename = NULL,
+            name_group = NULL,  ### replace 'filename = NULL' by 'name_group = NULL'
             pweights = pweights_prev,
             control_tam = control_tam,
+            save = FALSE,
             warn = FALSE,
             test = FALSE
         )$mod
@@ -717,9 +718,10 @@ check_dif_anchor <- function(resp_curr,
             irtmodel = ifelse(pre_dat$is_pcm_curr, "PCM2", "1PL"),
             verbose = FALSE,
             path = NULL,
-            filename = NULL,
+            name_group = NULL,  ### replace 'filename = NULL' by 'name_group = NULL',
             pweights = pweights_curr,
             control_tam = control_tam,
+            save = FALSE,
             warn = FALSE,
             test = FALSE
         )$mod
@@ -737,9 +739,10 @@ check_dif_anchor <- function(resp_curr,
                 irtmodel = ifelse(pre_dat$is_pcm_link, "PCM2", "1PL"),
                 verbose = FALSE,
                 path = NULL,
-                filename = NULL,
+                name_group = NULL,  ### replace 'filename = NULL' by 'name_group = NULL'
                 pweights = pweights_link,
                 control_tam = control_tam,
+                save = FALSE,
                 warn = FALSE,
                 test = FALSE
             )$mod
@@ -1241,9 +1244,10 @@ link_samples <- function(resp_curr,
             irtmodel = ifelse(pre_dat$is_pcm_prev, "PCM2", "1PL"),
             verbose = FALSE,
             path = NULL,
-            filename = NULL,
+            name_group = NULL,  ### replace 'filename = NULL' by 'name_group = NULL'
             pweights = pweights_prev,
             control_tam = control_tam,
+            save = FALSE,
             warn = FALSE,
             test = FALSE
         )$mod$xsi
@@ -1260,9 +1264,10 @@ link_samples <- function(resp_curr,
             irtmodel = ifelse(pre_dat$is_pcm_curr, "PCM2", "1PL"),
             verbose = FALSE,
             path = NULL,
-            filename = NULL,
+            name_group = NULL,  ### replace 'filename = NULL' by 'name_group = NULL'
             pweights = pweights_curr,
             control_tam = control_tam,
+            save = FALSE,
             warn = FALSE,
             test = FALSE
         )$mod$xsi
@@ -1280,9 +1285,10 @@ link_samples <- function(resp_curr,
                 irtmodel = ifelse(pre_dat$is_pcm_link, "PCM2", "1PL"),
                 verbose = FALSE,
                 path = NULL,
-                filename = NULL,
+                name_group = NULL,  ### replace 'filename = NULL' by 'name_group = NULL'
                 pweights = pweights_link,
                 control_tam = control_tam,
+                save = FALSE,
                 warn = FALSE,
                 test = FALSE
             )$mod$xsi
@@ -1323,9 +1329,10 @@ link_samples <- function(resp_curr,
                 irtmodel = ifelse(pre_dat$is_pcm_prev, "PCM2", "1PL"),
                 verbose = FALSE,
                 path = NULL,
-                filename = NULL,
+                name_group = NULL,  ### replace 'filename = NULL' by 'name_group = NULL'
                 pweights = pweights_prev,
                 control_tam = control_tam,
+                save = FALSE,
                 warn = FALSE,
                 test = FALSE
             )$wle
@@ -1349,9 +1356,10 @@ link_samples <- function(resp_curr,
             irtmodel = ifelse(pre_dat$is_pcm_curr, "PCM2", "1PL"),
             verbose = FALSE,
             path = NULL,
-            filename = NULL,
+            name_group = NULL,  ### replace 'filename = NULL' by 'name_group = NULL'
             pweights = pweights_curr,
             control_tam = control_tam,
+            save = FALSE,
             warn = FALSE,
             test = FALSE
         )$wle
