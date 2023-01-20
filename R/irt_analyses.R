@@ -664,21 +664,38 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
     warn = warn
   )
 
+  # create dataframe
+  rows <- nrow(results$mod$xsi)
+  pars <- data.frame(
+      Item = rep(NA, rows),
+      N = rep(NA, rows),
+      correct = rep(NA, rows),
+      xsi = rep(NA, rows),
+      SE = rep(NA, rows),
+      WMNSQ = rep(NA, rows),
+      t = rep(NA, rows),
+      rit = rep(NA, rows),
+      aQ3 = rep(NA, rows)
+  )
+
   # item parameters
-  pars <- results$mod$xsi[, c("xsi", "se.xsi")]
-  pars$item <- rownames(results$mod$xsi)
-  pars <- pars[vars$item, ]
+  pars$Item <- rownames(results$mod$xsi)
+  pars$xsi <- results$mod$xsi$xsi
+  pars$SE <- results$mod$xsi$se.xsi
+
+  # proceed only with selected variables
+  pars <- pars[pars$Item %in% vars$item, ]
 
   # percentage correct
   is_dich <- sapply(vars$item, function(x) max(resp[[x]], na.rm = TRUE) <= 1)
-  pars$pc <- round(ifelse(is_dich, colMeans(resp[, vars$item], na.rm = TRUE) * 100, NA), 2)
+  pars$correct <- round(ifelse(is_dich, colMeans(resp[, vars$item], na.rm = TRUE) * 100, NA), 2)
 
   # number of valid responses
   pars$N <- colSums(!is.na(resp))
 
   # items fit
   pars$WMNSQ   <- results$fit$Infit[results$fit$item %in% vars$item]
-  pars$WMNSQ_t <- results$fit$Infit_t[results$fit$item %in% vars$item]
+  pars$t <- results$fit$Infit_t[results$fit$item %in% vars$item]
 
   # corrected item-total discrimination
   rit <- c()
@@ -690,29 +707,20 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   }
   pars$rit <- rit
 
+  # Yen Q3: average absolute residual correlation for items (adjusted)
+  pars$aQ3 <- colMeans(abs(results$mfit$aQ3.matr), na.rm = TRUE)
+
   # 2PL discrimination
   if (!(results$irtmodel %in% c("1PL", "PCM2"))) {
-      pars$disc <- results$mod$item[, "B.Cat1.Dim1"]
+      pars$Discr. <- results$mod$item[, "B.Cat1.Dim1"]
   } else if (!is.null(disc)) {
-      pars$disc <- disc
+      pars$Discr. <- disc
   }
 
-  # Yen Q3: average absolute residual correlation for items (adjusted)
-  pars$Q3 <- colMeans(abs(results$mfit$aQ3.matr), na.rm = TRUE)
-
-  # numbering
-  pars$num <- seq(1, nrow(pars))
-
-  # reorder columns
-  pars <- pars[ , c("num", "item", "N", "pc", "xsi", "se.xsi",
-                    "WMNSQ", "WMNSQ_t", "rit", "disc", "Q3")]
-  colnames(pars) <- c("Number", "Item", "N", "% correct",
-                      "xsi", "SE", "WMNSQ", "t", "rit", "Discr.", "aQ3")
-  pars[, -c(1:4)] <- round(pars[, -c(1:4)], digits)
-
   # Format table
+  pars[, -c(1:3)] <- round(pars[ , -c(1:3)], digits)
   pars_formatted <- pars
-  pars_formatted[, -c(1:4)] <- format(pars_formatted[, -c(1:4)], nsmall = digits)
+  pars_formatted[, -c(1:3)] <- format(pars_formatted[, -c(1:3)], nsmall = digits)
 
   # Save table
   if (save) {
