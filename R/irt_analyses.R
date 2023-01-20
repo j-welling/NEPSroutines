@@ -518,8 +518,8 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   if (save) {
     name <- create_ifelse(
       is.null(name_group),
-      paste0(irt_model, ".rds"),
-      paste0(irt_model, "_", name_group, ".rds")
+      paste0(irtmodel, ".rds"),
+      paste0(irtmodel, "_", name_group, ".rds")
     )
     save_results(results, filename = name, path = path)
   }
@@ -718,8 +718,8 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   if (save) {
     name <- create_ifelse(
       is.null(name_group),
-      paste0(irt_model, ".xlsx"),
-      paste0(irt_model, "_", name_group, ".xlsx")
+      paste0(results$irtmodel, ".xlsx"),
+      paste0(results$irtmodel, "_", name_group, ".xlsx")
     )
     save_table(
       pars_formatted,
@@ -786,8 +786,8 @@ irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
   if (save) {
     name <- create_ifelse(
       is.null(name_group),
-      paste0(irt_model, ".xlsx"),
-      paste0(irt_model, "_", name_group, ".xlsx")
+      paste0("model.fit_", irt_type, ".xlsx"),
+      paste0("model.fit_", irt_type, "_", name_group, ".xlsx")
     )
     save_table(
       mfit,
@@ -853,8 +853,8 @@ steps_analysis <- function(pcm_model, digits = 3, save = TRUE, overwrite = FALSE
   if (save) {
     name <- create_ifelse(
       is.null(name_group),
-      paste0(irt_model, ".xlsx"),
-      paste0(irt_model, "_", name_group, ".xlsx")
+      paste0("steps_analysis", ".xlsx"),
+      paste0("steps_analysis", "_", name_group, ".xlsx")
     )
     save_table(
       steps,
