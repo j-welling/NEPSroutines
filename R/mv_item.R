@@ -75,11 +75,19 @@ mv_item <- function(resp, vars, select, valid = NULL,
     if (warn) is_null_mvs_valid(valid = valid)
 
     # Conduct analysis
-    mv_item <- mvi_analysis(resp = resp, vars = vars, select = select,
-                            valid = valid, position = position,
-                            grouping = grouping, show_all = show_all,
-                            mvs = mvs, digits = digits, warn = warn,
-                            test = FALSE)
+    mv_item <- mvi_analysis(
+        resp = resp,
+        vars = vars,
+        select = select,
+        valid = valid,
+        position = position,
+        grouping = grouping,
+        show_all = show_all,
+        mvs = mvs,
+        digits = digits,
+        warn = warn,
+        test = FALSE
+    )
 
     # Write grouped table
     mv_item$summary_table <- mvi_table(
@@ -366,13 +374,15 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
     }
 
     # Save table
-    save_table(
-      results,
-      filename = "mv_item.xlsx",
-      path = path,
-      overwrite = overwrite,
-      show_rownames = FALSE
-    )
+    if (save) {
+        save_table(
+          results,
+          filename = "mv_item.xlsx",
+          path = path,
+          overwrite = overwrite,
+          show_rownames = FALSE
+        )
+    }
 
     # Return table
     return(results)
