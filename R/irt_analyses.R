@@ -890,12 +890,12 @@ steps_analysis <- function(pcm_model, digits = 3, save = TRUE, overwrite = FALSE
 print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
 
   # Percentage correct
-  pc_min <- min(irt_sum[['% correct']], na.rm = TRUE)
-  pc_min_item <- irt_sum$Item[irt_sum[['% correct']] %in% pc_min]
-  pc_max <- max(irt_sum[['% correct']], na.rm = TRUE)
-  pc_max_item <- irt_sum$Item[irt_sum[['% correct']] %in% pc_max]
-  pc_mean <- round(mean(irt_sum[['% correct']], na.rm = TRUE))
-  pc_median <- round(median(irt_sum[['% correct']], na.rm = TRUE))
+  pc_min <- min(irt_sum[['correct']], na.rm = TRUE)
+  pc_min_item <- irt_sum$Item[irt_sum[['correct']] %in% pc_min]
+  pc_max <- max(irt_sum[['correct']], na.rm = TRUE)
+  pc_max_item <- irt_sum$Item[irt_sum[['correct']] %in% pc_max]
+  pc_mean <- round(mean(irt_sum[['correct']], na.rm = TRUE))
+  pc_median <- round(median(irt_sum[['correct']], na.rm = TRUE))
   message("Percentage correct:\n",
           "The percentage of correct responses within dichotomous items varied between ",
           pc_min, "% (", ifelse(length(pc_min_item) > 1, "items ", "item "),
