@@ -699,8 +699,8 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 
   # corrected item-total discrimination
   rit <- c()
-  for (i in pars$item) {
-    rest <- pars$item[!(pars$item %in% i)]
+  for (i in pars$Item) {
+    rest <- pars$Item[!(pars$Item %in% i)]
     score <- NA
     score <- rowSums(resp[, rest], na.rm = TRUE)
     rit <- c(rit, cor(resp[, i], score, use = "complete.obs"))
