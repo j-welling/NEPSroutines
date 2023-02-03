@@ -126,8 +126,6 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
     check_variables(resp, "resp", valid)
     check_items(vars$item[vars[[select_raw]]])
     check_items(vars$item[vars[[select_score]]])
-    scaling:::check_numerics(resp, "resp",
-                             vars$item[vars[[select_raw]] | vars[[select_score]]])
 
     if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 
@@ -135,9 +133,16 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
     raw_items <- vars$item[vars[[select_raw]]]
     items_for_score <- vars$item[vars[[select_score]]]
     vars$keep_items <- vars[[select_raw]] | vars[[select_score]]
-    resp <- prepare_resp(resp, vars, select = 'keep_items',
-                         use_only_valid = TRUE, valid = valid,
-                         convert = TRUE, mvs = mvs, warn = FALSE)
+    resp <- prepare_resp(
+      resp,
+      vars,
+      select = 'keep_items',
+      use_only_valid = TRUE,
+      valid = valid,
+      convert = TRUE,
+      mvs = mvs,
+      warn = FALSE
+    )
 
     # Check whether all items to be used for score generation are dichotomous
     check_numerics(resp, "resp", items_for_score, check_invalid = TRUE, dich = TRUE)
@@ -151,15 +156,18 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
     for (item in raw_items) {
 
         # Create for each item a dataframe with row for each response option
-        dis[[item]] <- as.data.frame(table(resp[, item]),
-                                     responseName = "N",
-                                     stringsAsFactors = FALSE)
+        dis[[item]] <- as.data.frame(
+          table(resp[, item]),
+          responseName = "N",
+          stringsAsFactors = FALSE
+        )
         names(dis[[item]])[1] <- item
         dis[[item]]$rit <- NA
 
         # Create corrected total score
-        item_scored <- ifelse(resp[[item]] == vars[[correct]][vars$item == item],
-                              1, 0)
+        item_scored <- ifelse(
+          resp[[item]] == vars[[correct]][vars$item == item], 1, 0
+        )
         cscore <- resp$score - item_scored / length(items_for_score)
 
         # Correlation between each response option and corrected total score
