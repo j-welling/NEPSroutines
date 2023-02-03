@@ -86,6 +86,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
         mvs = mvs,
         digits = digits,
         warn = warn,
+        save = FALSE,
         test = FALSE
     )
 
@@ -306,7 +307,9 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
     mv_i <- list(list = mvlist, summary = mvsum)
 
     # Save results
-    save_results(mv_i, filename = "mv_item.rds", path = path)
+    if (save) {
+      save_results(mv_i, filename = "mv_item.rds", path = path)
+    }
 
     # Return results
     return(mv_i)

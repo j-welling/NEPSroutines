@@ -82,6 +82,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
       grouping = grouping,
       digits = digits,
       warn = warn,
+      save = FALSE,
       test = FALSE
     )
 
@@ -224,7 +225,9 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
     }
 
     # Save results
-    save_results(mv_p, filename = "mv_person.rds", path = path)
+    if (save) {
+      save_results(mv_p, filename = "mv_person.rds", path = path)
+    }
 
     # Return results
     return(mv_p)
