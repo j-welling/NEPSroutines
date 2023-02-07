@@ -28,6 +28,7 @@
 #' @param print  logical; whether results shall be printed to console
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param verbose   verbose as passed to the TAM function
 #'
@@ -42,27 +43,46 @@ dim_analysis <- function(resp, vars, select, scoring = "scoring",
                          return = FALSE, save = TRUE, print = TRUE,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
-                         overwrite = TRUE, verbose = FALSE) {
+                         name_group = NULL, overwrite = TRUE,
+                         verbose = FALSE) {
 
   dimensionality <- list()
 
-  dimensionality$analysis <- conduct_dim_analysis(
+  dimensionality$analysis <- scaling:::conduct_dim_analysis(
     resp = resp, vars = vars, select = select, scoring = scoring, dim = dim,
     valid = valid, irtmodel = irtmodel, maxiter = maxiter, snodes = snodes,
-    mvs = mvs, verbose = verbose, test = TRUE
+    mvs = mvs, verbose = verbose, save = FALSE, test = TRUE
   )
 
-  dimensionality$summary <- dim_summary(dimensionality$analysis)
+  dimensionality$summary <- scaling:::dim_summary(
+      dimensionality$analysis,
+      save = FALSE
+  )
 
+  # Save results
   if (save) {
-    save_results(dimensionality,
-                 filename = "dimensionality.rds", path = path_results)
-    save_table(dimensionality$summary, overwrite = overwrite,
-               filename = "dimensionality.xlsx", path = path_table)
+      name <- scaling::create_ifelse(
+          is.null(name_group),
+          paste0("dimensionality"),
+          paste0("dimensionality_", name_group)
+      )
+      scaling::save_results(
+          dimensionality,
+          filename = paste0(name, ".rds"),
+          path = path_results
+      )
+      scaling::save_table(
+          dimensionality$summary,
+          overwrite = overwrite,
+          filename = paste0(name, ".xlsx"),
+          path = path_table
+      )
   }
 
+  # Print results
   if (print) print_dim_summary(dimensionality$summary)
 
+  # Return results
   if (return) return(dimensionality)
 }
 
@@ -92,6 +112,9 @@ dim_analysis <- function(resp, vars, select, scoring = "scoring",
 #' @param snodes  snodes as passed to the TAM function
 #' @param verbose   verbose as passed to the TAM function
 #' @param mvs named integer vector; contains user-defined missing values
+#' @param save  logical; whether results shall be saved to hard drive
+#' @param path  string; defines path to folder where results shall be saved
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
@@ -100,30 +123,38 @@ dim_analysis <- function(resp, vars, select, scoring = "scoring",
 conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
                                  valid = NULL, irtmodel, maxiter = 10000,
                                  snodes = 5000, mvs = NULL, verbose = FALSE,
+                                 save = TRUE, name_group = NULL,
+                                 path = here::here('Results'),
                                  warn = TRUE, test = TRUE) {
   # Test data
   if (test) {
-    check_logicals(vars, "vars", select, warn = warn)
-    check_logicals(resp, "resp", valid, warn = warn)
-    check_variables(vars, "vars", c(dim, scoring))
-    check_items(vars$item[vars[[select]]])
-    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+      scaling::check_logicals(vars, "vars", select, warn = warn)
+      scaling::check_logicals(resp, "resp", valid, warn = warn)
+      scaling::check_variables(vars, "vars", c(dim, scoring))
+      scaling::check_items(vars$item[vars[[select]]])
+      scaling::check_numerics(resp, "resp", vars$item[vars[[select]]])
   }
 
-  if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
+  if (warn) scaling::is_null_mvs_valid(mvs = mvs, valid = valid)
 
   # Select only valid cases
-  resp <- only_valid(resp, valid = valid, warn = FALSE)
+  resp <- scaling::only_valid(resp, valid = valid, warn = FALSE)
 
   # Create ID and facets variable
   pid <- resp$ID_t
-  check_pid(pid)
+  scaling::check_pid(pid)
 
   # Select only indicated items and convert mvs
-  resp <- prepare_resp(resp, vars = vars, select = select, convert = TRUE,
-                       mvs = mvs, warn = warn)
+  resp <- scaling::prepare_resp(
+      resp,
+      vars = vars,
+      select = select,
+      convert = TRUE,
+      mvs = mvs,
+      warn = warn
+  )
 
-  check_numerics(resp, "resp", check_invalid = TRUE)
+  scaling::check_numerics(resp, "resp", check_invalid = TRUE)
 
   # Create object for results
   dimensionality <- list()
@@ -139,7 +170,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
     control = list(maxiter = maxiter, snodes = snodes)
   )
 
-  reached_maxiter(dimensionality$uni, "'unidimensional'")
+  scaling::reached_maxiter(dimensionality$uni, "'unidimensional'")
 
   message("Finished unidimensional reference model.")
 
@@ -166,12 +197,23 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
         verbose = verbose
       )
 
-      reached_maxiter(dimensionality[[d]], paste0("'", d, "-dimensional'"))
+      scaling::reached_maxiter(dimensionality[[d]], paste0("'", d, "-dimensional'"))
 
       message("Finished ", d," model.")
     }
   }
 
+  # Save results
+  if (save) {
+      name <- scaling::create_ifelse(
+          is.null(name_group),
+          paste0("dimensionality.rds"),
+          paste0("dimensionality_", name_group, ".rds")
+      )
+      scaling::save_results(dimensionality, filename = name, path = path)
+  }
+
+  # Return results
   return(dimensionality)
 }
 
@@ -180,13 +222,17 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
 #'
 #' @param dimensionality list with results of the conduct_dim_analysis function
 #' (or results$analysis from the dim_analysis function)
+#' @param save  logical; whether table shall be saved to hard drive
+#' @param path  string; defines path to folder where table shall be saved
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
 #' @return data.frame of summary results
 #'
 #' @importFrom stats logLik AIC BIC cov2cor
 #' @export
 #'
-dim_summary <- function(dimensionality) {
+dim_summary <- function(dimensionality, save = FALSE, name_group = NULL,
+                        path = here::here("Tables")) {
 
   dim <- names(dimensionality)
   dimsum <- list()
@@ -202,6 +248,17 @@ dim_summary <- function(dimensionality) {
   }
   dimsum[["Goodness Of fit"]] <- gof
 
+  # Save results
+  if (save) {
+      name <- scaling::create_ifelse(
+          is.null(name_group),
+          paste0("dimensionality.xlsx"),
+          paste0("dimensionality_", name_group, ".xlsx")
+      )
+      scaling::save_table(dimsum, overwrite = overwrite, filename = name, path = path)
+  }
+
+  # Return results
   return(dimsum)
 }
 
