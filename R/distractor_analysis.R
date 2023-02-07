@@ -32,6 +32,7 @@
 #' @param path_table string; indicates the folder location where the tables
 #' are stored on the hard drive; please note that the path is relative to the
 #' current working path set by here::i_am()
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
@@ -45,7 +46,7 @@
 
 dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
                          select_raw, select_score = 'dich',
-                         correct = 'correct_response',
+                         correct = 'correct_response', name_group = NULL,
                          save = TRUE, print = TRUE, return = FALSE,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
@@ -55,7 +56,7 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
     distractors <- list()
 
     # Conduct distratcor analysis
-    distractors$analysis <- conduct_dis_analysis(
+    distractors$analysis <- scaling:::conduct_dis_analysis(
       resp = resp,
       vars = vars,
       select_raw = select_raw,
@@ -63,25 +64,46 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
       correct = correct,
       valid = valid,
       mvs = mvs,
-      warn = warn
+      warn = warn,
+      save = FALSE
     )
 
-    distractors$summary <- dis_summary(distractors$analysis, digits = digits)
+    distractors$summary <- scaling:::dis_summary(
+        distractors$analysis,
+        digits = digits,
+        save = FALSE
+    )
 
     # Print results
-    if (print) print_dis_summary(distractors$summary)
+    if (print) scaling:::print_dis_summary(distractors$summary)
 
     # Save results
     if (save) {
-        save_results(distractors,
-                     filename = "distractors.rds", path = path_results)
-        save_table(distractors$summary, overwrite = overwrite,
-                   filename = "distractors_summary.xlsx", path = path_table)
-        save_table(distractors$analysis, overwrite = overwrite,
-                   filename = "distractors_items.xlsx", path = path_table)
+        name <- scaling::create_ifelse(
+            is.null(name_group),
+            paste0("distractors"),
+            paste0("distractors_", name_group)
+        )
+        scaling::save_results(
+            distractors,
+            filename = paste0(name, ".rds"),
+            path = path_results
+        )
+        scaling::save_table(
+            distractors$summary,
+            overwrite = overwrite,
+            filename = paste0(name, "_summary.xlsx"),
+            path = path_table
+        )
+        scaling::save_table(
+            distractors$analysis,
+            overwrite = overwrite,
+            filename = paste0(name, "_items.xlsx"),
+            path = path_table
+        )
     }
 
-    # Save results
+    # Return results
     if (return) return(distractors)
 }
 
@@ -112,6 +134,11 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
 #' indicates all items that shall be used to caculate total score
 #' @param correct string; defines name of variable in vars that contains the
 #' correct responses to the items
+#' @param save  logical; whether results shall be saved to hard drive
+#' @param path  string; indicates the folder location where the results
+#' are stored on the hard drive; please note that the path is relative to the
+#' current working path set by here::i_am()
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #'
 #' @export
@@ -119,21 +146,23 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
 conduct_dis_analysis <- function(resp, vars, valid = NULL,
                                  select_raw, select_score = 'dich',
                                  correct = 'correct_response',
-                                 mvs = NULL, warn = TRUE) {
+                                 mvs = NULL, save = TRUE, name_group = NULL,
+                                 path = here::here('Results'),
+                                 warn = TRUE) {
     # Test data
-    check_logicals(vars, "vars", c(select_raw, select_score), warn = warn)
-    check_variables(vars, "vars", correct)
-    check_variables(resp, "resp", valid)
-    check_items(vars$item[vars[[select_raw]]])
-    check_items(vars$item[vars[[select_score]]])
+    scaling::check_logicals(vars, "vars", c(select_raw, select_score), warn = warn)
+    scaling::check_variables(vars, "vars", correct)
+    scaling::check_variables(resp, "resp", valid)
+    scaling::check_items(vars$item[vars[[select_raw]]])
+    scaling::check_items(vars$item[vars[[select_score]]])
 
-    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
+    if (warn) scaling::is_null_mvs_valid(mvs = mvs, valid = valid)
 
     # prepare data
     raw_items <- vars$item[vars[[select_raw]]]
     items_for_score <- vars$item[vars[[select_score]]]
     vars$keep_items <- vars[[select_raw]] | vars[[select_score]]
-    resp <- prepare_resp(
+    resp <- scaling::prepare_resp(
       resp,
       vars,
       select = 'keep_items',
@@ -145,7 +174,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
     )
 
     # Check whether all items to be used for score generation are dichotomous
-    check_numerics(resp, "resp", items_for_score, check_invalid = TRUE, dich = TRUE)
+    scaling::check_numerics(resp, "resp", items_for_score, check_invalid = TRUE, dich = TRUE)
 
     # Sum score across all items
     resp$score <- rowMeans(resp[ , items_for_score], na.rm = TRUE)
@@ -186,6 +215,17 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
         )
     }
 
+    # Save results
+    if (save) {
+        name <- scaling::create_ifelse(
+            is.null(name_group),
+            paste0("distractors.rds"),
+            paste0("distractors_", name_group, ".rds")
+        )
+        scaling::save_results(dis, filename = name, path = path)
+    }
+
+    # Return results
     return(dis)
 }
 
@@ -195,13 +235,20 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
 #' @param distractors return object of dis_analysis() function (list of
 #'   data frames containing item-total correlations for each item)
 #' @param digits  integer; number of decimals for rounding
+#' @param save  logical; whether results shall be saved to hard drive
+#' @param path  string; indicates the folder location where the results
+#' are stored on the hard drive; please note that the path is relative to the
+#' current working path set by here::i_am()
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
+#' @param overwrite logical; whether to overwrite existing file when saving table
 #'
 #' @return list of data frames
 #'           correct : item-total correlations for correct responses
 #'           distractor : item-total correlations for distractors
 #'
 #' @export
-dis_summary <- function(distractors, digits = 3) {
+dis_summary <- function(distractors, digits = 3, save = TRUE, name_group = NULL,
+                        path = here::here('Tables'), overwrite = FALSE) {
     # data.frames containing information for distractors and correct responses,
     # respectively
 
@@ -222,8 +269,21 @@ dis_summary <- function(distractors, digits = 3) {
     )
     )[c(3:5, 8:9), ]
 
+    # Create list with results
+    results <- list(correct = rc, distractor = rd, descriptives = desc)
+
+    # Save results
+    if (save) {
+        name <- scaling::create_ifelse(
+            is.null(name_group),
+            paste0("distractors_summary.xlsx"),
+            paste0("distractors_summary_", name_group, ".xlsx")
+        )
+        scaling::save_table(results, overwrite = overwrite, filename = name, path = path)
+    }
+
     # Return list with results
-    return(list(correct = rc, distractor = rd, descriptives = desc))
+    return(results)
 }
 
 
