@@ -239,9 +239,12 @@ dim_summary <- function(dimensionality, save = FALSE, name_group = NULL,
   gof <- data.frame(Stat = c("loglik", "AIC", "BIC"))
 
   for (d in dim) {
-    gof[[d]] <- c(logLik(dimensionality[[d]]),
-                  AIC(dimensionality[[d]]),
-                  BIC(dimensionality[[d]]))
+    gof[[d]] <- c(
+        dimensionality[[d]]$ic$Npars,
+        logLik(dimensionality[[d]]),
+        AIC(dimensionality[[d]]),
+        BIC(dimensionality[[d]])
+    )
     tmp <- dimensionality[[d]]$variance
     dimsum[[paste("Cor-Var", d)]] <- cov2cor(tmp)
     diag(dimsum[[paste("Cor-Var", d)]]) <- diag(tmp)
