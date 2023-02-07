@@ -521,6 +521,7 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     scaling::reached_maxiter(mmod, paste0("'", dif_var, "' without DIF"))
     scaling::reached_maxiter(dmod, paste0("'", dif_var, "' with DIF"))
 
+    # Return results
     list(
       mmod = mmod,
       dmod = dmod,
