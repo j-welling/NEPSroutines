@@ -282,6 +282,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, dif_threshold = 0.5,
             print = print,
             overwrite = overwrite,
             save = save,
+            name_group = name_group,
             path = path_table
         )
     }
@@ -297,7 +298,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, dif_threshold = 0.5,
         name <- scaling:::create_name(
             paste0("dif_", irt_type, "_summaries"), name_group, ".rds"
         )
-        scaling:::save_results(dif_summaries, path = path, filename = name)
+        scaling:::save_results(dif_summaries, path = path_results, filename = name)
     }
 
     # Return results
@@ -675,7 +676,7 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
     # Save results
     if (save) {
         name <- scaling:::create_name(
-            paste0("dif_", irt_type, "_", dif_var), name_group, ".xslx"
+            paste0("dif_", irt_type, "_", dif_var), name_group, ".xlsx"
         )
         res_ <- res
         names(res_$est) <- paste0("Estimates ", names(res_$est))
@@ -897,7 +898,7 @@ build_dif_tr_tables <- function(dif_summaries, save = TRUE, overwrite = FALSE,
     # Save results
     if (save) {
         name <- scaling:::create_name(
-            paste0("dif_", irt_type, "_TR"), name_group, ".xslx"
+            paste0("dif_", irt_type, "_TR"), name_group, ".xlsx"
         )
         scaling:::save_table(
             dif_tr_tables,
