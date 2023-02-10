@@ -137,7 +137,11 @@ mv_item <- function(resp, vars, select, valid = NULL,
                 "All other tables show summary statistics over all items.\n")
         print(mv_item$summary_table)
         message("\nSummary for TR\n")
-        scaling:::print_mvi_results(mv_item, grouping = grouping, labels_mvs = labels_mvs)
+        scaling:::print_mvi_results(
+            mv_item,
+            name_grouping = name_grouping,
+            labels_mvs = labels_mvs
+        )
     }
 
     # Return results
@@ -514,8 +518,17 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
                 if (is.null(labels_legend)) {
                     scale_fill_discrete(name = Hmisc::capitalize(name_grouping))
                 } else {
-                    scale_fill_discrete(name = Hmisc::capitalize(name_grouping),
-                                        labels = labels_legend)
+                    if (length(labels_legend) != length(groups)) {
+                        warning("Number of provided legend labels does not ",
+                                "correspond to number of groups. ",
+                                "Group labels are used instead.")
+                        scale_fill_discrete(name = Hmisc::capitalize(name_grouping))
+                    } else {
+                        scale_fill_discrete(
+                            name = Hmisc::capitalize(name_grouping),
+                            labels = labels_legend
+                        )
+                    }
                 }
         }
 
@@ -547,13 +560,14 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
 #' @param mv_i  list; return object of mvi_analysis()
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
-#' @param grouping  character vector; contains for each group a name of a logical
-#' variable in resp and vars that indicates to which group belongs a person or
-#' an item
+#' @param name_grouping  string; name of the grouping variable (e.g. test version)
+#' for title and legend of plots (only needed when grouping exists)
 #'
 #' @export
 
-print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
+print_mvi_results <- function(mv_i,
+                              name_grouping = 'test version',
+                              labels_mvs = c(
     ALL = "total missing items",
     OM = "omitted items",
     NV = "not valid items",
@@ -564,7 +578,7 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
     NAd = "not administered items",
     AZ = "missing items due to ''Angabe zurueckgesetzt''"
 )) {
-    if (is.null(grouping)) {
+    if (is.data.frame(mv_i$list)) {
         for (lbl in names(mv_i$list[-c(1:3)])) {
             mv_min <- min(mv_i$list[[lbl]], na.rm = TRUE)
             mv_max <- max(mv_i$list[[lbl]], na.rm = TRUE)
@@ -581,14 +595,15 @@ print_mvi_results <- function(mv_i, grouping = NULL, labels_mvs = c(
                     }, ".")
         }
     } else {
-        for (g in grouping) {
+        for (g in names(mv_i$list)[-length(names(mv_i$list))]) {
             message("\n", Hmisc::capitalize(g), ":\n")
             for (lbl in names(mv_i$list[[g]][-c(1:3)])) {
                 mv_min <- min(mv_i$list[[g]][[lbl]], na.rm = TRUE)
                 mv_max <- max(mv_i$list[[g]][[lbl]], na.rm = TRUE)
                 item_min <- mv_i$list[[g]]$item[mv_i$list[[g]][[lbl]] == mv_min]
                 item_max <- mv_i$list[[g]]$item[mv_i$list[[g]][[lbl]] == mv_max]
-                message("The proportion of ", labels_mvs[lbl], " in the ", g, " test version varied between ",
+                message("The proportion of ", labels_mvs[lbl], " in the ", g,
+                        " ", name_grouping, " varied between ",
                         mv_min, "%", if(length(item_min) <= 3) {
                             paste0(" (", ifelse(length(item_min) > 1, "items ", "item "),
                                    paste(item_min, collapse = ", "), ")")

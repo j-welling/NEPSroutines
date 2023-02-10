@@ -434,10 +434,17 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                 if (is.null(labels_legend)) {
                     scale_fill_discrete(name = Hmisc::capitalize(name_grouping))
                 } else {
-                    scale_fill_discrete(
-                      name = Hmisc::capitalize(name_grouping),
-                      labels = labels_legend
-                    )
+                    if (length(labels_legend) != length(groups)) {
+                        warning("Number of provided legend labels does not ",
+                                "correspond to number of groups. ",
+                                "Group labels are used instead.")
+                        scale_fill_discrete(name = Hmisc::capitalize(name_grouping))
+                    } else {
+                        scale_fill_discrete(
+                          name = Hmisc::capitalize(name_grouping),
+                          labels = labels_legend
+                        )
+                    }
                 }
         }
 
