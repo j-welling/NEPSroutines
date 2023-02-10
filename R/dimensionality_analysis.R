@@ -224,7 +224,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
 #' @export
 #'
 dim_summary <- function(dimensionality, save = FALSE, name_group = NULL,
-                        path = here::here("Tables")) {
+                        overwrite = FALSE, path = here::here("Tables")) {
 
   dim <- names(dimensionality)
   dimsum <- list()
