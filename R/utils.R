@@ -11,8 +11,8 @@
 only_valid <- function(resp, valid = NULL, warn = TRUE) {
 
   if (!is.null(valid)) {
-    check_logicals(resp, "resp", valid, warn = warn)
-    resp <- resp[resp[[valid]], ]
+      scaling:::check_logicals(resp, "resp", valid, warn = warn)
+      resp <- resp[resp[[valid]], ]
   } else if (warn) {
       warning("No variable with valid cases provided. ",
               "All cases are used for analysis.\n")
@@ -52,11 +52,11 @@ convert_mv <- function(resp, vars, select = NULL, mvs = NULL, warn = TRUE) {
   }
 
   if (is.null(select)) {
-    items <- names(resp)
+      items <- names(resp)
   } else {
-    check_logicals(vars, "vars", select)
-    items <- vars$item[vars[[select]]]
-    check_variables(resp, "resp", variables = items)
+      scaling:::check_logicals(vars, "vars", select)
+      items <- vars$item[vars[[select]]]
+      scaling:::check_variables(resp, "resp", variables = items)
   }
 
   for (i in items) {
@@ -92,18 +92,22 @@ prepare_resp <- function(resp, vars = NULL, select = NULL,
                          convert = FALSE, mvs = NULL,
                          warn = TRUE, zap_labels = TRUE) {
 
-    if (use_only_valid) resp <- only_valid(resp = resp,
-                                           valid = valid,
-                                           warn = warn)
+    # Use only valid cases
+    if (use_only_valid) resp <- scaling:::only_valid(
+      resp = resp,
+      valid = valid,
+      warn = warn
+    )
 
+    # Select only certain variables
     if (!is.null(select)) {
         if (is.null(vars)) {
             stop("To create dataframe (resp) with only the indicated items ",
                  "please also provide vars.")
         } else {
-            check_logicals(vars, "vars", select, warn = warn)
+            scaling:::check_logicals(vars, "vars", select, warn = warn)
             items <- vars$item[vars[[select]]]
-            check_variables(resp, "resp", variables = items)
+            scaling:::check_variables(resp, "resp", variables = items)
             resp <- resp[ , items]
         }
     } else if (warn) {
@@ -111,12 +115,15 @@ prepare_resp <- function(resp, vars = NULL, select = NULL,
                 "All items are kept.")
     }
 
-    if (convert) resp <- convert_mv(resp = resp, mvs = mvs, warn = warn)
+    # Convert missing values to NA
+    if (convert) resp <- scaling:::convert_mv(resp = resp, mvs = mvs, warn = warn)
 
+    # Zap labels of variables
     if (zap_labels) {
       resp <- haven::zap_labels(resp)
     }
 
+    # Return resp
     return(resp)
 }
 
@@ -158,11 +165,16 @@ save_table <- function(results, filename, path,
   if (!is.null(filename)) {
 
     # Check and create directory for table
-    check_folder(path)
+    scaling:::check_folder(path)
 
-    openxlsx::write.xlsx(results, file = paste0(path, "/", filename),
-                         showNA = FALSE, rowNames = show_rownames,
-                         overwrite = overwrite)
+    # Write table
+    openxlsx::write.xlsx(
+        results,
+        file = paste0(path, "/", filename),
+        showNA = FALSE,
+        rowNames = show_rownames,
+        overwrite = overwrite
+    )
   }
 }
 
@@ -182,7 +194,7 @@ save_results <- function(results, filename, path) {
   if (!is.null(filename)) {
 
     # Check and create directory for data
-    check_folder(path)
+    scaling:::check_folder(path)
 
     saveRDS(results, file = here::here(paste0(path, "/", filename)))
   }
@@ -276,7 +288,8 @@ check_logicals <- function(df, name_df, logicals, warn = TRUE) {
 
   if (!is.null(logicals)) {
 
-    check_variables(df, name_df, logicals)
+    # Check whether variables are included in dataframe
+    scaling:::check_variables(df, name_df, logicals)
 
     no_logical <- sapply(df[ , logicals, drop = FALSE], function(x) !is.logical(x))
 
@@ -312,7 +325,8 @@ check_numerics <- function(df, name_df, numerics = NULL, check_invalid = FALSE,
 
   if (is.null(numerics)) numerics <- names(df)
 
-  check_variables(df, name_df, numerics)
+  # Check whether variables are included in dataframe
+  scaling:::check_variables(df, name_df, numerics)
 
   no_numeric <- sapply(df[ , numerics, drop = FALSE], function(x) !is.numeric(x))
 
@@ -321,9 +335,11 @@ check_numerics <- function(df, name_df, numerics = NULL, check_invalid = FALSE,
                 " is no numeric variable. Please check again.\n"))
   }
 
-  if (check_invalid) check_invalid_values(df, name_df, items = numerics)
+  # Check whether variables contain invalid values
+  if (check_invalid) scaling:::check_invalid_values(df, name_df, items = numerics)
 
-  if (dich) check_dich(df, name_df, dich_items = numerics)
+  # Check whether variables are dichotomous
+  if (dich) scaling:::check_dich(df, name_df, dich_items = numerics)
 }
 
 
@@ -521,4 +537,23 @@ create_ifelse <- function(condition, a, b) {
     }
 
     return(x)
+}
+
+
+#' Create object depending on condition
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
+#' @param start first part of name
+#' @param end second part of name
+#'
+#' @returns string with filename
+#' @noRd
+create_name <- function(start, name_group = NULL, end = NULL, sep = "_") {
+
+    name <- scaling:::create_ifelse(
+        is.null(name_group),
+        paste0(start, end),
+        paste0(start, sep, name_group, end)
+    )
+
+    return(name)
 }

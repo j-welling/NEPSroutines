@@ -10,7 +10,7 @@
 
 n_valid <- function(dat, valid = NULL) {
 
-    check_logicals(dat, "dat", valid, warn = TRUE)
+    scaling:::check_logicals(dat, "dat", valid, warn = TRUE)
 
     if (!is.null(valid)) {
         n_inval <- sum(!dat[[valid]])
@@ -44,9 +44,9 @@ n_valid <- function(dat, valid = NULL) {
 desc_con <- function(dat, desc, valid = NULL, digits = 3,
                      print = TRUE, return = FALSE) {
 
-    check_variables(dat, "dat", c(desc, valid))
+    scaling:::check_variables(dat, "dat", c(desc, valid))
 
-    dat <- only_valid(dat, valid = valid)
+    dat <- scaling:::only_valid(dat, valid = valid)
 
     stats <- data.frame(sapply(dat[ , desc, drop = FALSE], function(x) {
              d <- data.frame(psych::describe(x))
@@ -81,19 +81,33 @@ desc_con <- function(dat, desc, valid = NULL, digits = 3,
 desc_nom <- function(dat, desc, valid = NULL, digits = 2,
                      print = TRUE, return = FALSE) {
 
-    check_variables(dat, "dat", c(desc, valid))
+    scaling:::check_variables(dat, "dat", c(desc, valid))
 
-    dat <- only_valid(dat, valid = valid)
+    dat <- scaling:::only_valid(dat, valid = valid)
 
     descriptives <- list()
-    descriptives$frequency_abs <- desc_abs(dat, desc = desc, valid = valid,
-                                           warn = FALSE)
-    descriptives$frequency_perc_NA <- desc_perc(dat, desc = desc, valid = valid,
-                                                warn = FALSE, useNA = 'always',
-                                                digits = digits)
-    descriptives$frequency_perc_noNA <- desc_perc(dat, desc = desc, valid = valid,
-                                                  warn = FALSE, useNA = 'no',
-                                                  digits = digits)
+    descriptives$frequency_abs <- scaling:::desc_abs(
+        dat,
+        desc = desc,
+        valid = valid,
+        warn = FALSE
+    )
+    descriptives$frequency_perc_NA <- scaling:::desc_perc(
+        dat,
+        desc = desc,
+        valid = valid,
+        warn = FALSE,
+        useNA = 'always',
+        digits = digits
+    )
+    descriptives$frequency_perc_noNA <- scaling:::desc_perc(
+        dat,
+        desc = desc,
+        valid = valid,
+        warn = FALSE,
+        useNA = 'no',
+        digits = digits
+    )
 
     if (print) {
         message("\nSample size by groups:\n")
@@ -125,9 +139,9 @@ desc_nom <- function(dat, desc, valid = NULL, digits = 2,
 
 desc_abs <- function(dat, desc, valid = NULL, warn = TRUE) {
 
-    check_variables(dat, "dat", c(desc, valid))
+    scaling:::check_variables(dat, "dat", c(desc, valid))
 
-    dat <- only_valid(dat, valid = valid, warn = warn)
+    dat <- scaling:::only_valid(dat, valid = valid, warn = warn)
 
     sapply(dat[ , desc, drop = FALSE], function(x) {table(x, useNA = "always")})
 }
@@ -152,9 +166,9 @@ desc_abs <- function(dat, desc, valid = NULL, warn = TRUE) {
 desc_perc <- function(dat, desc, valid = NULL, warn = TRUE, useNA = 'always',
                       digits = 2) {
 
-    check_variables(dat, "dat", c(desc, valid))
+    scaling:::check_variables(dat, "dat", c(desc, valid))
 
-    dat <- only_valid(dat, valid = valid, warn = warn)
+    dat <- scaling:::only_valid(dat, valid = valid, warn = warn)
 
     sapply(dat[ , desc, drop = FALSE], function(x) {
       d <- round(prop.table(table(x, useNA = useNA))*100, digits)
@@ -172,7 +186,7 @@ desc_perc <- function(dat, desc, valid = NULL, warn = TRUE, useNA = 'always',
 
 show_attributes <- function(dat, desc) {
 
-    check_variables(dat, "dat", desc)
+    scaling:::check_variables(dat, "dat", desc)
 
     for (var in desc) {
         message("\nThe attributes for variable ", var, " are:\n")
@@ -198,7 +212,7 @@ sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
                               overwrite = FALSE, path = here::here("Tables")) {
 
     # Check variable
-    check_variables(dat, "dat", versions)
+    scaling:::check_variables(dat, "dat", versions)
 
     # Create table with results
     df <- as.data.frame.AsIs(table(dat[[versions]]))
@@ -208,9 +222,11 @@ sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
 
     # Add labels as row names
     if(!is.null(labels) | !is.null(attributes(vars[[versions]])$labels)) {
-        lbls <- create_ifelse(is.null(labels),
-                              attributes(vars[[versions]])$labels,
-                              labels)
+        lbls <- scaling:::create_ifelse(
+            is.null(labels),
+            attributes(vars[[versions]])$labels,
+            labels
+        )
         for (v in seq(nrow(df)-1)) {
             rownames(df)[v] <- names(which(rownames(df)[v] == lbls))
         }
@@ -221,8 +237,13 @@ sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
 
     # Save results
     if (save) {
-        save_table(res, filename = paste0("samplesize_by_", versions, ".xlsx"),
-                   path = path, overwrite = overwrite, show_rownames = FALSE)
+        scaling:::save_table(
+            res,
+            filename = paste0("samplesize_by_", versions, ".xlsx"),
+            path = path,
+            overwrite = overwrite,
+            show_rownames = FALSE
+        )
     }
 
     # Return results
@@ -256,12 +277,12 @@ props_by_version <- function(vars, select, grouping, properties, labels = NULL,
                              warn = TRUE) {
 
     # Check variables
-    check_logicals(vars, "vars", c(select, grouping), warn = warn)
-    check_variables(vars, "vars", properties)
+    scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
+    scaling:::check_variables(vars, "vars", properties)
 
     # Select only necessary items and check for duplicates
     vars <- subset(vars, vars[[select]])
-    check_items(vars$item)
+    scaling:::check_items(vars$item)
 
     res <- list()
     if(is.null(labels)) labels <- list()
@@ -274,9 +295,11 @@ props_by_version <- function(vars, select, grouping, properties, labels = NULL,
 
       # Add property labels as row names
       if(!is.null(labels[[props]]) | !is.null(attributes(vars[[props]])$labels)) {
-          lbls <- create_ifelse(is.null(labels[[props]]),
-                                attributes(vars[[props]])$labels,
-                                labels[[props]])
+          lbls <- scaling:::create_ifelse(
+              is.null(labels[[props]]),
+              attributes(vars[[props]])$labels,
+              labels[[props]]
+          )
           for (v in seq(nrow(df)-1)) {
               rownames(df)[v] <- names(which(rownames(df)[v] == lbls))
           }
@@ -296,8 +319,13 @@ props_by_version <- function(vars, select, grouping, properties, labels = NULL,
 
     # Save results
     if (save) {
-        save_table(res, filename = paste0("item_properties_by_version.xlsx"),
-                   path = path, overwrite = overwrite, show_rownames = TRUE)
+        scaling:::save_table(
+            res,
+            filename = paste0("item_properties_by_version.xlsx"),
+            path = path,
+            overwrite = overwrite,
+            show_rownames = TRUE
+        )
     }
 
     # Return results

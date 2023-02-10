@@ -68,14 +68,14 @@ mv_item <- function(resp, vars, select, valid = NULL,
                     labels_legend = NULL) {
 
     # Test data
-    check_logicals(resp, "resp", c(valid, grouping), warn = warn)
-    check_logicals(vars, "vars", c(select, grouping), warn = warn)
-    check_items(vars$item[vars[[select]]])
+    scaling:::check_logicals(resp, "resp", c(valid, grouping), warn = warn)
+    scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
+    scaling:::check_items(vars$item[vars[[select]]])
     scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
-    if (warn) is_null_mvs_valid(valid = valid)
+    if (warn) scaling:::is_null_mvs_valid(valid = valid)
 
     # Conduct analysis
-    mv_item <- mvi_analysis(
+    mv_item <- scaling:::mvi_analysis(
         resp = resp,
         vars = vars,
         select = select,
@@ -91,7 +91,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
     )
 
     # Write grouped table
-    mv_item$summary_table <- mvi_table(
+    mv_item$summary_table <- scaling:::mvi_table(
       mv_i = mv_item,
       vars = vars,
       select = select,
@@ -103,7 +103,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
     )
 
     # Write plots
-    if (plots) mvi_plots(
+    if (plots) scaling:::mvi_plots(
       mv_i = mv_item,
       vars = vars,
       select = select,
@@ -122,8 +122,8 @@ mv_item <- function(resp, vars, select, valid = NULL,
 
     # Save results
     if (save) {
-        save_results(mv_item, filename = "mv_item.rds", path = path_results)
-        save_table(
+        scaling:::save_results(mv_item, filename = "mv_item.rds", path = path_results)
+        scaling:::save_table(
           mv_item$summary_table,
           overwrite = overwrite,
           filename = "mv_item.xlsx",
@@ -137,7 +137,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
                 "All other tables show summary statistics over all items.\n")
         print(mv_item$summary_table)
         message("\nSummary for TR\n")
-        print_mvi_results(mv_item, grouping = grouping, labels_mvs = labels_mvs)
+        scaling:::print_mvi_results(mv_item, grouping = grouping, labels_mvs = labels_mvs)
     }
 
     # Return results
@@ -183,18 +183,18 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
                          grouping = NULL, show_all = TRUE,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, NAd = -54, AZ = -21),
-                         path = here::here("Data"), save = TRUE,
+                         path = here::here("Results"), save = TRUE,
                          digits = 3, warn = TRUE, test = TRUE) {
 
     # Test data
-    check_numerics(vars, "vars", position, check_invalid = TRUE)
+    scaling:::check_numerics(vars, "vars", position, check_invalid = TRUE)
 
     if (test) {
-        check_logicals(resp, "resp", c(valid, grouping), warn = warn)
-        check_logicals(vars, "vars", c(select, grouping), warn = warn)
-        check_items(vars$item[vars[[select]]])
+        scaling:::check_logicals(resp, "resp", c(valid, grouping), warn = warn)
+        scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
+        scaling:::check_items(vars$item[vars[[select]]])
         scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
-        if (warn) is_null_mvs_valid(valid = valid)
+        if (warn) scaling:::is_null_mvs_valid(valid = valid)
     }
 
     if (is.null(grouping)) {
@@ -215,8 +215,8 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
 
     # Prepare data
     vars_c <- vars[vars[[select]], ]
-    resp <- only_valid(resp, valid = valid)
-    resp_c <- prepare_resp(resp, vars = vars, select = select, warn = warn,
+    resp <- scaling:::only_valid(resp, valid = valid)
+    resp_c <- scaling:::prepare_resp(resp, vars = vars, select = select, warn = warn,
                            zap_labels = FALSE)
 
     # NAs are not acknowledged in mvs-argument
@@ -228,14 +228,16 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
     if (is.null(grouping)) {
 
         # Create list with results
-        mvlist <- create_mvlist(item = vars_c$item,
-                                position = vars_c[[position]],
-                                responses = resp_c,
-                                mvs = mvs,
-                                digits = digits)
+        mvlist <- scaling:::create_mvlist(
+            item = vars_c$item,
+            position = vars_c[[position]],
+            responses = resp_c,
+            mvs = mvs,
+            digits = digits
+        )
 
         # Summary across items
-        mvsum <- mvi_summary(mvlist[ , -c(1:2)], digits = digits)
+        mvsum <- scaling:::mvi_summary(mvlist[ , -c(1:2)], digits = digits)
 
     } else {
 
@@ -257,7 +259,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
             }
 
             # Create list with results
-            mvlist[[g]] <- create_mvlist(
+            mvlist[[g]] <- scaling:::create_mvlist(
               item = vars_g$item[!is.na(pos)],
               position = na.omit(pos),
               responses = resp_g[, vars_g$item[!is.na(pos)]],
@@ -266,7 +268,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
             )
 
             # Summary across items
-            mvsum[[g]] <- mvi_summary(mvlist[[g]][ , -c(1:2)], digits = digits)
+            mvsum[[g]] <- scaling:::mvi_summary(mvlist[[g]][ , -c(1:2)], digits = digits)
         }
 
         if (length(position) > 1) {
@@ -299,7 +301,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
             mvlist$all <- cbind(mvlist$all, results)
 
             # Summary across items
-            mvsum$all <- mvi_summary(mvlist$all[ , -1], digits = digits)
+            mvsum$all <- scaling:::mvi_summary(mvlist$all[ , -1], digits = digits)
         }
     }
 
@@ -308,7 +310,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
 
     # Save results
     if (save) {
-      save_results(mv_i, filename = "mv_item.rds", path = path)
+        scaling:::save_results(mv_i, filename = "mv_item.rds", path = path)
     }
 
     # Return results
@@ -349,9 +351,9 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
 
     # Test data
     if (test) {
-        test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
-        check_logicals(vars, "vars", c(select, grouping), warn = warn)
-        check_items(vars$item[vars[[select]]])
+        scaling:::test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
+        scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
+        scaling:::check_items(vars$item[vars[[select]]])
     }
 
     # Create table
@@ -378,7 +380,7 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
 
     # Save table
     if (save) {
-        save_table(
+        scaling:::save_table(
           results,
           filename = "mv_item.xlsx",
           path = path,
@@ -445,23 +447,24 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
 
     # Test data
     if (test) {
-        test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
-        check_logicals(vars, "vars", c(select, grouping), warn = warn)
-        check_items(vars$item[vars[[select]]])
+        scaling:::test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
+        scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
+        scaling:::check_items(vars$item[vars[[select]]])
     }
 
     # Pepare data
     mv_i <- mv_i$list
-    k <- create_ifelse(is.null(grouping), sum(vars[[select]]),
-                       max(sapply(grouping, function(x) {
-                           sum(vars[[select]] & vars[[x]])
-                       }), na.rm = TRUE))
+    k <- scaling:::create_ifelse(
+        is.null(grouping),
+        sum(vars[[select]]),
+        max(sapply(grouping, function(x) {sum(vars[[select]] & vars[[x]])}), na.rm = TRUE)
+    )
 
     if(!is.null(grouping))
-        groups <- create_ifelse(show_all, c(grouping, 'all'), grouping)
+        groups <- scaling:::create_ifelse(show_all, c(grouping, 'all'), grouping)
 
     # Create directory for plots
-    check_folder(path)
+    scaling:::check_folder(path)
 
     # Create plots
 
@@ -638,11 +641,11 @@ mvi_calc <- function(responses, mvs, digits = 3) {
 
     # Determine percentage of missing values for each missing type
     for (i in names(mvs)) {
-        result[[i]] <- mvi_perc(responses = responses, mvs = mvs[[i]], digits = digits)
+        result[[i]] <- scaling:::mvi_perc(responses = responses, mvs = mvs[[i]], digits = digits)
     }
 
     # Percentage of total missing responses for each item
-    result$ALL <- mvi_perc(responses = responses, mvs = mvs, digits = digits)
+    result$ALL <- scaling:::mvi_perc(responses = responses, mvs = mvs, digits = digits)
 
     return(result)
 }
@@ -671,9 +674,11 @@ create_mvlist <- function(item, position, responses, mvs, digits = 3) {
     }
 
     # Create list
-    mvlist <- data.frame(item = item,
-                         position = position,
-                         N = colSums(apply(responses, 2, function(x) !(x %in% mvs))))
+    mvlist <- data.frame(
+        item = item,
+        position = position,
+        N = colSums(apply(responses, 2, function(x) !(x %in% mvs)))
+    )
 
     # Merge with percentage of missing values for each missing type
     results <- data.frame(mvi_calc(responses, mvs = mvs, digits = digits))

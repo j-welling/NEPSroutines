@@ -63,17 +63,17 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
                       digits = 3, warn = TRUE, verbose = TRUE) {
 
     # Test data
-    check_logicals(resp, "resp", c(valid, grouping), warn = warn)
-    check_logicals(vars, "vars", c(select, grouping), warn = warn)
-    check_items(vars$item[vars[[select]]])
+    scaling:::check_logicals(resp, "resp", c(valid, grouping), warn = warn)
+    scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
+    scaling:::check_items(vars$item[vars[[select]]])
     scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
-    if (warn) is_null_mvs_valid(valid = valid)
+    if (warn) scaling:::is_null_mvs_valid(valid = valid)
 
     # Create list for results
     mv_person <- list()
 
     # Conduct analysis
-    mv_person$mv_p <- mvp_analysis(
+    mv_person$mv_p <- scaling:::mvp_analysis(
       resp = resp,
       vars = vars,
       select = select,
@@ -88,7 +88,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
 
     # Create plots
     if (plots) {
-        mvp_plots(
+        scaling:::mvp_plots(
           mv_p = mv_person$mv_p,
           vars = vars,
           select = select,
@@ -108,7 +108,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
 
     # Create table
     if (save) {
-        mv_person$summary <- mvp_table(
+        mv_person$summary <- scaling:::mvp_table(
           mv_p = mv_person$mv_p,
           grouping = grouping,
           save = save,
@@ -117,10 +117,10 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
           mvs = mvs
         )
 
-        save_results(mv_person, filename = "mv_person.rds", path = path_results)
+        scaling:::save_results(mv_person, filename = "mv_person.rds", path = path_results)
         # dass hier kein save_table steht ist Absicht
     } else {
-        mv_person$summary <- mvp_table(
+        mv_person$summary <- scaling:::mvp_table(
           mv_p = mv_person$mv_p,
           grouping = grouping,
           mvs = mvs
@@ -128,7 +128,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
     }
 
     # Print results
-    if (print) print_mvp_results(mv_person$mv_p)
+    if (print) scaling:::print_mvp_results(mv_person$mv_p)
 
     # Return results
     if (return) return(mv_person)
@@ -170,11 +170,11 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
 
     # Test data
     if (test) {
-        check_logicals(vars, "vars", c(grouping, select), warn = warn)
-        check_logicals(resp, "resp", c(grouping, valid), warn = warn)
-        check_items(vars$item[vars[[select]]])
+        scaling:::check_logicals(vars, "vars", c(grouping, select), warn = warn)
+        scaling:::check_logicals(resp, "resp", c(grouping, valid), warn = warn)
+        scaling:::check_items(vars$item[vars[[select]]])
         scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
-        if (warn) is_null_mvs_valid(valid = valid)
+        if (warn) scaling:::is_null_mvs_valid(valid = valid)
     }
 
     # NAs are not acknowledged in mvs-argument
@@ -186,8 +186,8 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
     mv_p <- list()
 
     # Prepare data
-    resp <- only_valid(resp, valid = valid)
-    resp_c <- prepare_resp(
+    resp <- scaling:::only_valid(resp, valid = valid)
+    resp_c <- scaling:::prepare_resp(
       resp,
       vars = vars,
       select = select,
@@ -199,8 +199,8 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
     if (is.null(grouping)) {
 
         # Determine percentage of missing values for each missing type
-        results <- mvp_calc(responses = resp_c, mvs = mvs)
-        mv_p <- mvp_summary(results, digits = digits)
+        results <- scaling:::mvp_calc(responses = resp_c, mvs = mvs)
+        mv_p <- scaling:::mvp_summary(results, digits = digits)
 
     } else {
 
@@ -212,21 +212,21 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
             resp_g <- resp_c[resp[[g]], vars$item[vars[[select]] & vars[[g]]]]
 
             # Create dataframe with missing values per person and missing value type
-            results[[g]] <- mvp_calc(responses = resp_g, mvs = mvs)
+            results[[g]] <- scaling:::mvp_calc(responses = resp_g, mvs = mvs)
             results$all <- rbind(results$all, results[[g]])
 
             # Calculate summaries
-            mv_p[[g]]<- mvp_summary(results[[g]], digits = digits)
+            mv_p[[g]]<- scaling:::mvp_summary(results[[g]], digits = digits)
         }
 
         # Calculate summaries for whole sample
-        mv_p$all<- mvp_summary(results$all, digits = digits)
+        mv_p$all<- scaling:::mvp_summary(results$all, digits = digits)
 
     }
 
     # Save results
     if (save) {
-      save_results(mv_p, filename = "mv_person.rds", path = path)
+        scaling:::save_results(mv_p, filename = "mv_person.rds", path = path)
     }
 
     # Return results
@@ -263,16 +263,16 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
 
     # Test data
     if (test) {
-        test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
+        scaling:::test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
     }
 
     # Create table
     if (is.null(grouping)) {
-        results <- write_mvp_table(mv_p)
+        results <- scaling:::write_mvp_table(mv_p)
     } else {
         results <- list()
         for (g in names(mv_p)) {
-            results[[g]] <- write_mvp_table(mv_p[[g]])
+            results[[g]] <- scaling:::write_mvp_table(mv_p[[g]])
         }
     }
 
@@ -280,7 +280,7 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
     if (save) {
 
         # Create directory for table
-        check_folder(path)
+        scaling:::check_folder(path)
 
         # Write table as Excel sheet
         if (is.null(grouping)) {
@@ -359,22 +359,21 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
 
     # Test data
     if (test) {
-        test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
-        check_logicals(vars, "vars", c(select, grouping), warn = warn)
-        check_items(vars$item[vars[[select]]])
+        scaling:::test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
+        scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
+        scaling:::check_items(vars$item[vars[[select]]])
     }
 
     # Prepare data
-    mv_all <- create_ifelse(is.null(grouping), mv_p, mv_p$all)
-    k <- create_ifelse(
+    mv_all <- scaling:::create_ifelse(is.null(grouping), mv_p, mv_p$all)
+    k <- scaling:::create_ifelse(
       is.null(grouping),
       sum(vars[[select]]),
-      max(sapply(grouping, function(x) sum(vars[[select]] & vars[[x]])),
-          na.rm = TRUE)
+      max(sapply(grouping, function(x) sum(vars[[select]] & vars[[x]])), na.rm = TRUE)
     )
 
     if(!is.null(grouping))
-        groups <- create_ifelse(show_all, c(grouping, 'all'), grouping)
+        groups <- scaling:::create_ifelse(show_all, c(grouping, 'all'), grouping)
 
     # Test labels
     if (any(!names(mv_all)[-length(mv_all)] %in% names(labels_mvs))) {
@@ -382,7 +381,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
     }
 
     # Create directory for plots
-    check_folder(path)
+    scaling:::check_folder(path)
 
     # for each missing type
     for (i in names(mv_all)[-length(mv_all)]) {
