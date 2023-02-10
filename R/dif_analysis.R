@@ -34,6 +34,7 @@
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param verbose  logical; whether to print processing information to console
 #' @param dif_threshold numeric scalar; indicates absolute threshold of
@@ -60,6 +61,7 @@ dif_analysis <- function(resp,
                          pweights = NULL,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
+                         name_group = NULL,
                          verbose = FALSE,
                          warn = TRUE,
                          dif_threshold = 0.5
@@ -96,6 +98,7 @@ dif_analysis <- function(resp,
         verbose = verbose,
         warn = warn,
         save = save,
+        name_group = name_group,
         control = control,
         pweights = pweights,
         test = FALSE
@@ -110,6 +113,7 @@ dif_analysis <- function(resp,
         path_results = path_results,
         print = print,
         save = save,
+        name_group = name_group,
         overwrite = overwrite
     )
 
@@ -117,6 +121,7 @@ dif_analysis <- function(resp,
     dif$tr_tables <- scaling:::build_dif_tr_tables(
         dif_summaries = dif$summaries,
         save = save,
+        name_group = name_group,
         path = path_table,
         overwrite = overwrite
     )
@@ -168,6 +173,7 @@ check_select <- function(select, dif_vars) {
 #' contains person weights as passed to TAM-function
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where results shall be saved
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param verbose  logical; whether to print processing information to console
 #' @param mvs named integer vector; contains user-defined missing values
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
@@ -180,7 +186,7 @@ check_select <- function(select, dif_vars) {
 conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
                                  scoring = NULL, mvs = NULL, include_mv = 200,
                                  path = here::here('Results'), save = TRUE,
-                                 control = NULL, pweights = NULL,
+                                 name_group = NULL, control = NULL, pweights = NULL,
                                  verbose = FALSE, warn = TRUE, test = TRUE) {
 
     # Test data
@@ -218,9 +224,10 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
             verbose = verbose,
             mvs = mvs,
             warn = warn,
-            test = FALSE,
             control = control,
-            pweights = pweights
+            pweights = pweights,
+            save = FALSE,
+            test = FALSE
         )
     }
     names(dif_models) <- dif_vars
@@ -228,13 +235,15 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
     # Save results
     if (save) {
         are_poly <- sapply(select, function(x) is_poly(resp, vars, x))
-        irt_type <- ifelse(sum(are_poly) == length(are_poly), 'poly',
-                           ifelse(sum(are_poly) == 0, 'dich', 'mixed'))
-        scaling::save_results(
-            dif_models,
-            path = path,
-            filename = paste0("dif_", irt_type, "_models.rds")
+        irt_type <- ifelse(
+            sum(are_poly) == length(are_poly),
+            'poly',
+            ifelse(sum(are_poly) == 0, 'dich', 'mixed')
         )
+        name <- scaling:::create_name(
+            paste0("dif_", irt_type, "_models"), name_group, ".rds"
+        )
+        scaling:::save_results(dif_models, path = path, filename = name)
     }
 
     # Return results
@@ -253,13 +262,15 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
 #' @returns a list of dif summaries for each input entry in dif_models
 #' @export
 summarize_dif_analysis <- function(dif_models, dif_vars, dif_threshold = 0.5,
                                    print = TRUE, save = TRUE, overwrite = FALSE,
                                    path_results = here::here('Results'),
-                                   path_table = here::here('Tables')) {
+                                   path_table = here::here('Tables'),
+                                   name_group = NULL) {
 
     dif_summaries <- list()
 
@@ -283,11 +294,10 @@ summarize_dif_analysis <- function(dif_models, dif_vars, dif_threshold = 0.5,
             'poly',
             ifelse(sum(are_poly) == 0, 'dich', 'mixed')
         )
-        scaling::save_results(
-            dif_summaries,
-            path = path_results,
-            filename = paste0("dif_", irt_type, "_summaries.rds")
+        name <- scaling:::create_name(
+            paste0("dif_", irt_type, "_summaries"), name_group, ".rds"
         )
+        scaling:::save_results(dif_summaries, path = path, filename = name)
     }
 
     # Return results
@@ -326,6 +336,9 @@ summarize_dif_analysis <- function(dif_models, dif_vars, dif_threshold = 0.5,
 #' @param control list; function argument as passed to TAM-functions
 #' @param pweights character; defines name of numerical variable in resp that
 #' contains person weights as passed to TAM-function
+#' @param save  logical; whether results shall be saved to hard drive
+#' @param path  string; defines path to folder where results shall be saved
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param verbose  logical; whether to print processing information to console
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
@@ -338,7 +351,8 @@ summarize_dif_analysis <- function(dif_models, dif_vars, dif_threshold = 0.5,
 dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
                       valid = NULL, include_mv = 200,
                       mvs = NULL, verbose = FALSE, warn = TRUE, test = TRUE,
-                      control = NULL, pweights = NULL) {
+                      control = NULL, pweights = NULL, save = TRUE,
+                      path = here::here("Results"), name_group = NULL) {
 
     # Test data
     if (test) {
@@ -353,27 +367,26 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
           warn = warn)
     }
 
-    scaling::check_items(vars$item[vars[[select]]])
-    scaling::check_numerics(resp, "resp", vars$item[vars[[select]]])
-
-    scaling::check_items(vars$item[vars[[select]]])
+    scaling:::check_items(vars$item[vars[[select]]])
+    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+    scaling:::check_items(vars$item[vars[[select]]])
 
     # Select only valid cases
-    resp <- scaling::only_valid(resp, valid = valid, warn = FALSE)
+    resp <- scaling:::only_valid(resp, valid = valid, warn = FALSE)
 
     # Create ID, facets and pweights variable
     pid <- resp$ID_t
-    scaling::check_pid(pid)
+    scaling:::check_pid(pid)
     facets <- resp[, dif_var, drop = FALSE]
     lbls_facet <- attributes(resp[[dif_var]])$label
-    pws <- scaling::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
+    pws <- scaling:::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
 
     # Prepare resp by converting missing values and selecting only necessary variables
-    resp <- scaling::prepare_resp(resp, vars = vars, select = select,
+    resp <- scaling:::prepare_resp(resp, vars = vars, select = select,
                                    convert = TRUE, mvs = mvs, warn = FALSE)
 
     # Test resp
-    scaling::check_numerics(resp, "resp", check_invalid = TRUE)
+    scaling:::check_numerics(resp, "resp", check_invalid = TRUE)
 
     # Identify IRT type
     irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
@@ -486,9 +499,9 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     } else {
 
         # Check whether resp contains only dichotomous items
-        scaling::check_dich(resp, "resp")
+        scaling:::check_dich(resp, "resp")
 
-        Q <- scaling::create_q(vars, select = select, scoring = scoring, poly = FALSE)
+        Q <- scaling:::create_q(vars, select = select, scoring = scoring, poly = FALSE)
         irtmodel <- '1PL'
 
         dmod <- TAM::tam.mml.mfr(
@@ -518,17 +531,28 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     }
 
     # Warn if maximum number of iterations were reached
-    scaling::reached_maxiter(mmod, paste0("'", dif_var, "' without DIF"))
-    scaling::reached_maxiter(dmod, paste0("'", dif_var, "' with DIF"))
+    scaling:::reached_maxiter(mmod, paste0("'", dif_var, "' without DIF"))
+    scaling:::reached_maxiter(dmod, paste0("'", dif_var, "' with DIF"))
+
+    # Create list with results
+    results <- list(
+        mmod = mmod,
+        dmod = dmod,
+        facets = fcts,
+        dif_var = dif_var,
+        irt_type = irt_type
+    )
+
+    # Save results
+    if (save) {
+        name <- scaling:::create_name(
+            paste0("dif_", irt_type, "_model"), name_group, ".rds"
+        )
+        scaling:::save_results(results, path = path, filename = name)
+    }
 
     # Return results
-    list(
-      mmod = mmod,
-      dmod = dmod,
-      facets = fcts,
-      dif_var = dif_var,
-      irt_type = irt_type
-    )
+    return(results)
 }
 
 #' Create data.frame for facets with counts
@@ -617,6 +641,7 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
 #' @param print logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where tables shall be saved
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #'
 #' @return list of information criteria, dif estimates and main effects in
@@ -625,7 +650,7 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
 
 dif_summary <- function(diflist, print = TRUE, save = TRUE,
                         path = here::here('Tables'), dif_threshold = 0.5,
-                        overwrite = FALSE) {
+                        overwrite = FALSE, name_group = NULL) {
     # information criteria for DIF and main model
     # main effects of main and DIF model + standardized
     # DIF per item + standard error + meht p-values
@@ -649,14 +674,16 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
 
     # Save results
     if (save) {
-        name <- paste0("dif_", irt_type, "_", dif_var, ".xlsx")
+        name <- scaling:::create_name(
+            paste0("dif_", irt_type, "_", dif_var), name_group, ".xslx"
+        )
         res_ <- res
         names(res_$est) <- paste0("Estimates ", names(res_$est))
         names(res_$mne) <- paste0("Main effect ", names(res_$mne))
         res_ <- c(res_, res_$est, res_$mne)
         res_$est <- res_$mne <- NULL
         names(res_) <- gsub(":", "", names(res_))
-        scaling::save_table(
+        scaling:::save_table(
             res_,
             filename = name,
             path = path,
@@ -819,12 +846,13 @@ difsum <- function(obj, dif_var, groups = 1) {
 #' are stored on the hard drive; please note that the path is relative to the
 #' current working path set by here::i_am()
 #' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
 #' @return table as shown in TR
 #' @export
 
 build_dif_tr_tables <- function(dif_summaries, save = TRUE, overwrite = FALSE,
-                                path = here::here('Tables')) {
+                                path = here::here('Tables'), name_group = NULL) {
 
     dif_vars <- names(dif_summaries)
     are_poly <- sapply(dif_summaries, function(x) x$irt_type == 'poly')
@@ -868,9 +896,12 @@ build_dif_tr_tables <- function(dif_summaries, save = TRUE, overwrite = FALSE,
 
     # Save results
     if (save) {
-        scaling::save_table(
+        name <- scaling:::create_name(
+            paste0("dif_", irt_type, "_TR"), name_group, ".xslx"
+        )
+        scaling:::save_table(
             dif_tr_tables,
-            filename = paste0("dif_", irt_type, "_TR_tables.xlsx"),
+            filename = name,
             path = path,
             overwrite = overwrite,
             show_rownames = FALSE
