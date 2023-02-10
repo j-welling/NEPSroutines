@@ -169,8 +169,8 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
       warn = FALSE
     )
 
-    # Check whether all items to be used for score generation are dichotomous
-    scaling::check_numerics(resp, "resp", items_for_score, check_invalid = TRUE, dich = TRUE)
+    # Check whether all items to be used for score generation are valid numerics
+    scaling::check_numerics(resp, "resp", items_for_score, check_invalid = TRUE)
 
     # Sum score across all items
     resp$score <- rowMeans(resp[ , items_for_score], na.rm = TRUE)
@@ -286,12 +286,12 @@ print_dis_summary <- function(dist_sum) {
     # correct responses as well as respective item names [print to console!]
 
     # Correct responses
-    corr_min <- rc[which(rc$corr == min(rc$corr)), "corr"]
-    corr_min_names <- rownames(rc[which(rc$corr == min(rc$corr)),])
-    corr_max <- rc[which(rc$corr == max(rc$corr)), "corr"]
-    corr_max_names <- rownames(rc[which(rc$corr == max(rc$corr)),])
-    corr_med <- rc[which(rc$corr == median(rc$corr)), "corr"]
-    corr_med_names <- rownames(rc[which(rc$corr == median(rc$corr)),])
+    corr_min <- min(rc$corr)
+    corr_min_names <- rownames(rc[which(rc$corr == corr_min),])
+    corr_max <- max(rc$corr)
+    corr_max_names <- rownames(rc[which(rc$corr == corr_max),])
+    corr_med <- median(rc$corr)
+    corr_med_names <- rownames(rc[which(rc$corr == corr_med),])
 
     message("\nItem-total correlation for correct response: ",
             "\nMin. = ",  corr_min, " (", paste(corr_min_names, collapse = ", "), ")",
@@ -299,12 +299,12 @@ print_dis_summary <- function(dist_sum) {
             "\nMd. = ",  median(rc$corr), " (", paste(corr_med_names, collapse = ", "), ")")
 
     # Distractors
-    dist_min <- rd[which(rd$corr == min(rd$corr)), "corr"]
-    dist_min_names <- rownames(rd[which(rd$corr == min(rd$corr)),])
-    dist_max <- rd[which(rd$corr == max(rd$corr)), "corr"]
-    dist_max_names <- rownames(rd[which(rd$corr == max(rd$corr)),])
-    dist_med <- rd[which(rd$corr == median(rd$corr)), "corr"]
-    dist_med_names <- rownames(rd[which(rd$corr == median(rd$corr)),])
+    dist_min <- min(rd$corr)
+    dist_min_names <- rownames(rd[which(rd$corr == dist_min),])
+    dist_max <- max(rd$corr)
+    dist_max_names <- rownames(rd[which(rd$corr == dist_max),])
+    dist_med <- median(rd$corr)
+    dist_med_names <- rownames(rd[which(rd$corr == dist_med),])
 
     message("\nItem-total correlation for distractor: ",
             "\nMin. = ",  dist_min, " (", paste(dist_min_names, collapse = ", "), ")",
