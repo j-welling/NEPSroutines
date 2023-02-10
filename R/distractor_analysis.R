@@ -79,23 +79,19 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
 
     # Save results
     if (save) {
-        name <- scaling::create_ifelse(
-            is.null(name_group),
-            paste0("distractors"),
-            paste0("distractors_", name_group)
-        )
-        scaling::save_results(
+        name <- scaling:::create_name("distractors", name_group)
+        scaling:::save_results(
             distractors,
             filename = paste0(name, ".rds"),
             path = path_results
         )
-        scaling::save_table(
+        scaling:::save_table(
             distractors$summary,
             overwrite = overwrite,
             filename = paste0(name, "_summary.xlsx"),
             path = path_table
         )
-        scaling::save_table(
+        scaling:::save_table(
             distractors$analysis,
             overwrite = overwrite,
             filename = paste0(name, "_items.xlsx"),
@@ -156,7 +152,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
     scaling::check_items(vars$item[vars[[select_raw]]])
     scaling::check_items(vars$item[vars[[select_score]]])
 
-    if (warn) scaling::is_null_mvs_valid(mvs = mvs, valid = valid)
+    if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
 
     # prepare data
     raw_items <- vars$item[vars[[select_raw]]]
@@ -217,12 +213,8 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
 
     # Save results
     if (save) {
-        name <- scaling::create_ifelse(
-            is.null(name_group),
-            paste0("distractors.rds"),
-            paste0("distractors_", name_group, ".rds")
-        )
-        scaling::save_results(dis, filename = name, path = path)
+        name <- scaling:::create_name("distractors", name_group, ".rds")
+        scaling:::save_results(dis, filename = name, path = path)
     }
 
     # Return results
@@ -274,12 +266,8 @@ dis_summary <- function(distractors, digits = 3, save = TRUE, name_group = NULL,
 
     # Save results
     if (save) {
-        name <- scaling::create_ifelse(
-            is.null(name_group),
-            paste0("distractors_summary.xlsx"),
-            paste0("distractors_summary_", name_group, ".xlsx")
-        )
-        scaling::save_table(results, overwrite = overwrite, filename = name, path = path)
+        name <- scaling:::create_name("distractors_summary", name_group, ".xlsx")
+        scaling:::save_table(results, overwrite = overwrite, filename = name, path = path)
     }
 
     # Return list with results

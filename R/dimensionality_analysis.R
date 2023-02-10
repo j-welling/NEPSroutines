@@ -61,17 +61,13 @@ dim_analysis <- function(resp, vars, select, scoring = "scoring",
 
   # Save results
   if (save) {
-      name <- scaling::create_ifelse(
-          is.null(name_group),
-          paste0("dimensionality"),
-          paste0("dimensionality_", name_group)
-      )
-      scaling::save_results(
+      name <- scaling:::create_name("dimensionality", name_group)
+      scaling:::save_results(
           dimensionality,
           filename = paste0(name, ".rds"),
           path = path_results
       )
-      scaling::save_table(
+      scaling:::save_table(
           dimensionality$summary,
           overwrite = overwrite,
           filename = paste0(name, ".xlsx"),
@@ -80,7 +76,7 @@ dim_analysis <- function(resp, vars, select, scoring = "scoring",
   }
 
   # Print results
-  if (print) print_dim_summary(dimensionality$summary)
+  if (print) scaling:::print_dim_summary(dimensionality$summary)
 
   # Return results
   if (return) return(dimensionality)
@@ -135,10 +131,10 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
       scaling::check_numerics(resp, "resp", vars$item[vars[[select]]])
   }
 
-  if (warn) scaling::is_null_mvs_valid(mvs = mvs, valid = valid)
+  if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
 
   # Select only valid cases
-  resp <- scaling::only_valid(resp, valid = valid, warn = FALSE)
+  resp <- scaling:::only_valid(resp, valid = valid, warn = FALSE)
 
   # Create ID and facets variable
   pid <- resp$ID_t
@@ -151,7 +147,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
       select = select,
       convert = TRUE,
       mvs = mvs,
-      warn = warn
+      warn = FALSE
   )
 
   scaling::check_numerics(resp, "resp", check_invalid = TRUE)
@@ -170,7 +166,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
     control = list(maxiter = maxiter, snodes = snodes)
   )
 
-  scaling::reached_maxiter(dimensionality$uni, "'unidimensional'")
+  scaling:::reached_maxiter(dimensionality$uni, "'unidimensional'")
 
   message("Finished unidimensional reference model.")
 
@@ -197,7 +193,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
         verbose = verbose
       )
 
-      scaling::reached_maxiter(dimensionality[[d]], paste0("'", d, "-dimensional'"))
+      scaling:::reached_maxiter(dimensionality[[d]], paste0("'", d, "-dimensional'"))
 
       message("Finished ", d," model.")
     }
@@ -205,12 +201,8 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
 
   # Save results
   if (save) {
-      name <- scaling::create_ifelse(
-          is.null(name_group),
-          paste0("dimensionality.rds"),
-          paste0("dimensionality_", name_group, ".rds")
-      )
-      scaling::save_results(dimensionality, filename = name, path = path)
+      name <- scaling:::create_name("dimensionality", name_group, ".rds")
+      scaling:::save_results(dimensionality, filename = name, path = path)
   }
 
   # Return results
@@ -236,7 +228,7 @@ dim_summary <- function(dimensionality, save = FALSE, name_group = NULL,
 
   dim <- names(dimensionality)
   dimsum <- list()
-  gof <- data.frame(Stat = c("loglik", "AIC", "BIC"))
+  gof <- data.frame(Stat = c("Npars", "loglik", "AIC", "BIC"))
 
   for (d in dim) {
     gof[[d]] <- c(
@@ -253,12 +245,8 @@ dim_summary <- function(dimensionality, save = FALSE, name_group = NULL,
 
   # Save results
   if (save) {
-      name <- scaling::create_ifelse(
-          is.null(name_group),
-          paste0("dimensionality.xlsx"),
-          paste0("dimensionality_", name_group, ".xlsx")
-      )
-      scaling::save_table(dimsum, overwrite = overwrite, filename = name, path = path)
+      name <- scaling:::create_name("dimensionality", name_group, ".xlsx")
+      scaling:::save_table(dimsum, overwrite = overwrite, filename = name, path = path)
   }
 
   # Return results

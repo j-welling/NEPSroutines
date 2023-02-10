@@ -49,56 +49,56 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
                                  xsi.fixed = NULL, pweights = NULL,
                                  control_tam = NULL, control_wle = NULL) {
 
-  # Test data
-  check_logicals(vars, "vars", groups, warn = warn)
-  check_logicals(resp, "resp", c(valid, names(groups)), warn = warn)
-  if (!is.null(scoring))
-    check_numerics(vars, "vars", scoring, check_invalid = TRUE)
-  if (!is.null(pweights))
-    check_numerics(resp, "resp", pweights, check_invalid = TRUE)
-  if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
+    # Test data
+    scaling:::check_logicals(vars, "vars", groups, warn = warn)
+    scaling:::check_logicals(resp, "resp", c(valid, names(groups)), warn = warn)
+    if (!is.null(scoring))
+        scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+    if (!is.null(pweights))
+        scaling:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
+    if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
 
-  # Create list for results
-  irt_groups <- list()
-  i <- 1
+    # Create list for results
+    irt_groups <- list()
+    i <- 1
 
-  # Conduct irt_analysis for each group
-  for (g in names(groups)) {
+    # Conduct irt_analysis for each group
+    for (g in names(groups)) {
 
-    select <- groups[[g]]
-    check_items(vars$item[vars[[select]]])
-    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+        select <- groups[[g]]
+        scaling:::check_items(vars$item[vars[[select]]])
+        scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
 
-    message(toupper(paste0("\n\n\n(", i, ") irt analysis (",
-                           ifelse(is_poly(resp, vars, select), 'poly', 'dich'),
-                           ") for group '", g, "':\n")))
+        message(toupper(paste0("\n\n\n(", i, ") irt analysis (",
+                               ifelse(is_poly(resp, vars, select), 'poly', 'dich'),
+                               ") for group '", g, "':\n")))
 
-    irt_groups[[g]] <- irt_analysis(
-      resp = resp[resp[[g]], ],
-      vars = vars,
-      select = select,
-      valid = valid,
-      scoring = scoring,
-      print = print,
-      plots = plots,
-      save = save,
-      return = TRUE,
-      path_results = path_results,
-      path_table = path_table,
-      path_plots = path_plots,
-      overwrite = overwrite,
-      digits = digits,
-      name_group = g,
-      warn = FALSE,
-      test = FALSE,
-      control_tam = control_tam,
-      control_wle = control_wle,
-      pweights = pweights,
-      xsi.fixed = xsi.fixed
-    )
+        irt_groups[[g]] <- scaling:::irt_analysis(
+          resp = resp[resp[[g]], ],
+          vars = vars,
+          select = select,
+          valid = valid,
+          scoring = scoring,
+          print = print,
+          plots = plots,
+          save = save,
+          return = TRUE,
+          path_results = path_results,
+          path_table = path_table,
+          path_plots = path_plots,
+          overwrite = overwrite,
+          digits = digits,
+          name_group = g,
+          warn = FALSE,
+          test = FALSE,
+          control_tam = control_tam,
+          control_wle = control_wle,
+          pweights = pweights,
+          xsi.fixed = xsi.fixed
+        )
 
-    i <- i + 1
-  }
+        i <- i + 1
+    }
 
   if (return) return(irt_groups)
 }
@@ -160,67 +160,67 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
                          xsi.fixed = NULL, pweights = NULL,
                          control_tam = NULL, control_wle = NULL) {
 
-  # Test data
-  if (test) {
-    check_logicals(vars, "vars", select, warn = warn)
-    check_logicals(resp, "resp", valid, warn = warn)
-    check_items(vars$item[vars[[select]]])
-    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
-    if (!is.null(scoring))
-      check_numerics(vars, "vars", scoring, check_invalid = TRUE)
-    if (!is.null(pweights))
-      check_numerics(resp, "resp", pweights, check_invalid = TRUE)
-    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
-  }
+    # Test data
+    if (test) {
+        scaling:::check_logicals(vars, "vars", select, warn = warn)
+        scaling:::check_logicals(resp, "resp", valid, warn = warn)
+        scaling:::check_items(vars$item[vars[[select]]])
+        scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+        if (!is.null(scoring))
+            scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+        if (!is.null(pweights))
+            scaling:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
+        if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
+    }
 
-  check_items(vars$item[vars[[select]]])
+    scaling:::check_items(vars$item[vars[[select]]])
 
-  # Identify IRT type
-  irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
+    # Identify IRT type
+    irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
 
-  # Create list with results
-  irt <- list()
+    # Create list with results
+    irt <- list()
 
-  # Conduct IRT analyses
-  if (irt_type == 'dich') {
+    # Conduct IRT analyses
+    if (irt_type == 'dich') {
 
-    irt$model.1pl <- irt_model(
-        resp = resp,
-        vars = vars,
-        select = select,
-        valid = valid,
-        mvs = mvs,
-        irtmodel = '1PL',
-        control_tam = control_tam,
-        control_wle = control_wle,
-        pweights = pweights,
-        xsi.fixed = xsi.fixed,
-        verbose = verbose,
-        save = FALSE,
-        warn = FALSE,
-        test = FALSE
-    )
+        irt$model.1pl <- scaling:::irt_model(
+            resp = resp,
+            vars = vars,
+            select = select,
+            valid = valid,
+            mvs = mvs,
+            irtmodel = '1PL',
+            control_tam = control_tam,
+            control_wle = control_wle,
+            pweights = pweights,
+            xsi.fixed = xsi.fixed,
+            verbose = verbose,
+            save = FALSE,
+            warn = FALSE,
+            test = FALSE
+        )
 
-    irt$model.2pl <- irt_model(
-        resp = resp,
-        vars = vars,
-        select = select,
-        valid = valid,
-        mvs = mvs,
-        irtmodel = '2PL',
-        control_tam = control_tam,
-        control_wle = control_wle,
-        pweights = pweights,
-        xsi.fixed = xsi.fixed,
-        verbose = verbose,
-        save = FALSE,
-        warn = FALSE,
-        test = FALSE
-    )
+        irt$model.2pl <- scaling:::irt_model(
+            resp = resp,
+            vars = vars,
+            select = select,
+            valid = valid,
+            mvs = mvs,
+            irtmodel = '2PL',
+            control_tam = control_tam,
+            control_wle = control_wle,
+            pweights = pweights,
+            xsi.fixed = xsi.fixed,
+            verbose = verbose,
+            save = FALSE,
+            warn = FALSE,
+            test = FALSE
+        )
 
-  } else if (irt_type == 'poly') {
+    } else if (irt_type == 'poly') {
 
-      irt$model.pcm <- irt_model(
+      irt$model.pcm <- scaling:::irt_model(
           resp = resp,
           vars = vars,
           select = select,
@@ -238,7 +238,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
           test = FALSE
       )
 
-      irt$model.gpcm <- irt_model(
+      irt$model.gpcm <- scaling:::irt_model(
           resp = resp,
           vars = vars,
           select = select,
@@ -256,7 +256,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
           test = FALSE
       )
 
-  }
+    }
 
   # Create plots
   if (plots) {
@@ -264,10 +264,10 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
     for (i in 1:2) {
 
       # ICC plots
-      icc_plots(model = irt[[i]], path = path_plots, name_group = name_group)
+      scaling:::icc_plots(model = irt[[i]], path = path_plots, name_group = name_group)
 
       # Wright map
-      wright_map(model = irt[[i]], path = path_plots, name_group = name_group)
+      scaling:::wright_map(model = irt[[i]], path = path_plots, name_group = name_group)
 
     }
   }
@@ -275,7 +275,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
   # Create tables
   if (return | print | save) {
     # IRT summary
-    irt$summary <- irt_summary(
+    irt$summary <- scaling:::irt_summary(
       resp = resp,
       vars = vars,
       results = irt[[1]],
@@ -287,7 +287,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
     )
 
     # Model fit
-    irt$model_fit <- irt_model_fit(
+    irt$model_fit <- scaling:::irt_model_fit(
       model_1p = irt[[1]],
       model_2p = irt[[2]],
       save = FALSE
@@ -295,7 +295,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 
     # Steps analysis
     if (irt_type == 'poly') {
-      irt$steps <- steps_analysis(
+      irt$steps <- scaling:::steps_analysis(
         pcm_model = irt$model.pcm,
         digits = digits,
         save = FALSE
@@ -314,7 +314,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
       print(irt$steps)
     }
     message("\nSUMMARY FOR TR\n")
-    print_irt_summary(
+    scaling:::print_irt_summary(
       model = irt[[1]],
       irt_sum = irt$summary,
       steps_sum = irt$steps
@@ -323,20 +323,16 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 
   # Save results
   if (save) {
-    name <- create_ifelse(
-      is.null(name_group),
-      paste0("irt_", irt_type),
-      paste0("irt_", irt_type, "_", name_group)
-    )
-    irt_summary <- irt[-c(1:2)]
+      name <- scaling:::create_name(paste0("irt_", irt_type), name_group)
+      irt_summary <- irt[-c(1:2)]
 
-    save_results(irt, filename = paste0(name, ".rds"), path = path_results)
-    save_table(
-      irt_summary,
-      filename = paste0(name, ".xlsx"),
-      path = path_table,
-      overwrite = overwrite
-    )
+      scaling:::save_results(irt, filename = paste0(name, ".rds"), path = path_results)
+      scaling:::save_table(
+        irt_summary,
+        filename = paste0(name, ".xlsx"),
+        path = path_table,
+        overwrite = overwrite
+      )
   }
 
   # Return results
@@ -398,15 +394,15 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
 
   # Test data
   if (test) {
-    check_logicals(vars, "vars", select, warn = warn)
-    check_logicals(resp, "resp", valid, warn = warn)
-    check_items(vars$item[vars[[select]]])
-    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
-    if (!is.null(scoring))
-      check_numerics(vars, "vars", scoring, check_invalid = TRUE)
-    if (!is.null(pweights))
-      check_numerics(resp, "resp", pweights, check_invalid = TRUE)
-    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
+      scaling:::check_logicals(vars, "vars", select, warn = warn)
+      scaling:::check_logicals(resp, "resp", valid, warn = warn)
+      scaling:::check_items(vars$item[vars[[select]]])
+      scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+      if (!is.null(scoring))
+          scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+      if (!is.null(pweights))
+          scaling:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
+      if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
   # Check if input is correct
@@ -416,15 +412,15 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   }
 
   # Select only valid cases
-  resp <- only_valid(resp, valid = valid, warn = FALSE)
+  resp <- scaling:::only_valid(resp, valid = valid, warn = FALSE)
 
   # Create ID variable
   pid <- resp$ID_t
-  check_pid(pid)
-  pws <- create_ifelse(is.null(pweights), NULL, resp[[pweights]])
+  scaling:::check_pid(pid)
+  pws <- scaling:::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
 
   # Prepare data
-  resp <- prepare_resp(
+  resp <- scaling:::prepare_resp(
     resp,
     vars = vars,
     select = select,
@@ -434,11 +430,11 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   )
 
   # Test data
-  check_numerics(resp, "resp", check_invalid = TRUE) # this check is very important as otherwise R might be aborted!!
-  if (irtmodel %in% c("1PL", "2PL")) check_dich(resp, "resp")
+  scaling:::check_numerics(resp, "resp", check_invalid = TRUE) # this check is very important as otherwise R might be aborted!!
+  if (irtmodel %in% c("1PL", "2PL")) scaling:::check_dich(resp, "resp")
 
   # Create scoring matrix if not provided in function arguments
-  Q <- create_q(
+  Q <- scaling:::create_q(
     vars,
     select = select,
     scoring = scoring,
@@ -471,7 +467,7 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
 
 
   # Warn if maximum number of iterations were reached
-  reached_maxiter(mod, paste0("'", irtmodel, "'"))
+  scaling:::reached_maxiter(mod, paste0("'", irtmodel, "'"))
 
   # WMNSQ
   fit <- TAM::msq.itemfit(mod)$itemfit[, c("item", "Infit",
@@ -516,12 +512,8 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
 
   # Save results
   if (save) {
-    name <- create_ifelse(
-      is.null(name_group),
-      paste0(irtmodel, ".rds"),
-      paste0(irtmodel, "_", name_group, ".rds")
-    )
-    save_results(results, filename = name, path = path)
+      name <- scaling:::create_name(irtmodel, name_group, ".rds")
+      scaling:::save_results(results, filename = name, path = path)
   }
 
   # Return results
@@ -545,12 +537,14 @@ icc_plots <- function(model, path = here::here("Plots"), name_group = NULL) {
   irtmodel <- model$irtmodel
 
   # Add group name to path
-  path <- create_ifelse(is.null(name_group),
-                        paste0(path, "/ICCs/ICCs_for_", irtmodel),
-                        paste0(path, "/ICCs/", name_group, "/ICCs_for_", irtmodel))
+  path <- scaling:::create_ifelse(
+      is.null(name_group),
+      paste0(path, "/ICCs/ICCs_for_", irtmodel),
+      paste0(path, "/ICCs/", name_group, "/ICCs_for_", irtmodel)
+  )
 
-    # create directory for plots
-  check_folder(path = here::here(path))
+  # create directory for plots
+  scaling:::check_folder(path = here::here(path))
 
   # ICC plots
   for (i in 1:model$mod$nitems) {
@@ -585,14 +579,10 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
   irtmodel <- model$irtmodel
 
   # Add group name to path
-  path <- create_ifelse(
-    is.null(name_group),
-    paste0(path, "/Wright_Maps"),
-    paste0(path, "/Wright_Maps/", name_group)
-  )
+  path <- scaling:::create_name(paste0(path, "/Wright_Maps"), name_group, sep = "/")
 
   # Create directory for plots
-  check_folder(path = here::here(path))
+  scaling:::check_folder(path = here::here(path))
 
   # Create Wright Map
   png(here::here(paste0(path, "/Wright_map_for_", irtmodel, ".png")),
@@ -650,10 +640,10 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
                         digits = 3, overwrite = FALSE, warn = TRUE) {
 
   # prepare data
-  check_items(rownames(results$mod$xsi))
+  scaling:::check_items(rownames(results$mod$xsi))
   vars$irt_item <- vars$item %in% rownames(results$mod$xsi)
   vars <- vars[vars$irt_item, ]
-  resp <- prepare_resp(
+  resp <- scaling:::prepare_resp(
     resp,
     vars = vars,
     select = 'irt_item',
@@ -724,12 +714,8 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 
   # Save table
   if (save) {
-    name <- create_ifelse(
-      is.null(name_group),
-      paste0(results$irtmodel, ".xlsx"),
-      paste0(results$irtmodel, "_", name_group, ".xlsx")
-    )
-    save_table(
+    name <- scaling:::create_name(results$irtmodel, name_group, ".xlsx")
+    scaling:::save_table(
       pars_formatted,
       filename = name,
       path = path,
@@ -761,11 +747,13 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
                           path = here::here("Tables"), name_group = NULL) {
 
-  mfit <- data.frame(N = rep(NA_integer_, 2),
-                     Npars = rep(NA_integer_, 2),
-                     Deviance = rep(NA_integer_, 2),
-                     AIC = rep(NA_integer_, 2),
-                     BIC = rep(NA_integer_, 2))
+  mfit <- data.frame(
+      N = rep(NA_integer_, 2),
+      Npars = rep(NA_integer_, 2),
+      Deviance = rep(NA_integer_, 2),
+      AIC = rep(NA_integer_, 2),
+      BIC = rep(NA_integer_, 2)
+  )
 
   irt_type <- ifelse(model_1p$irtmodel == '1PL', 'dich', 'poly')
 
@@ -792,12 +780,8 @@ irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
 
   # Save table
   if (save) {
-    name <- create_ifelse(
-      is.null(name_group),
-      paste0("model.fit_", irt_type, ".xlsx"),
-      paste0("model.fit_", irt_type, "_", name_group, ".xlsx")
-    )
-    save_table(
+    name <- scaling:::create_name(paste0("model.fit_", irt_type), name_group, ".xlsx")
+    scaling:::save_table(
       mfit,
       filename = name,
       path = path,
@@ -859,12 +843,8 @@ steps_analysis <- function(pcm_model, digits = 3, save = TRUE, overwrite = FALSE
 
   # Save table as Excel sheet
   if (save) {
-    name <- create_ifelse(
-      is.null(name_group),
-      paste0("steps_analysis", ".xlsx"),
-      paste0("steps_analysis", "_", name_group, ".xlsx")
-    )
-    save_table(
+    name <- scaling:::create_name("steps_analysis", name_group, ".xlsx")
+    scaling:::save_table(
       steps,
       filename = name,
       path = path,
