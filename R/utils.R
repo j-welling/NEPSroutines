@@ -542,8 +542,9 @@ create_ifelse <- function(condition, a, b) {
 
 #' Create object depending on condition
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
-#' @param start first part of name
-#' @param end second part of name
+#' @param start string; first part of name
+#' @param end string; last part of name
+#' @param sep string; separator between first part and group name (Default is "_")
 #'
 #' @returns string with filename
 #' @noRd
