@@ -279,7 +279,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
       resp = resp,
       vars = vars,
       results = irt[[1]],
-      disc = irt[[2]]$mod$item[, "B.Cat1.Dim1"],
+      disc = irt[[2]],
       valid = valid,
       mvs = mvs,
       digits = digits,
@@ -704,7 +704,7 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   if (!(results$irtmodel %in% c("1PL", "PCM2"))) {
       pars$Discr. <- results$mod$item[, "B.Cat1.Dim1"]
   } else if (!is.null(disc)) {
-      pars$Discr. <- disc
+      pars$Discr. <- disc$mod$item[, "B.Cat1.Dim1"]
   }
 
   # Format table
