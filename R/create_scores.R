@@ -24,6 +24,11 @@
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param wle logical; whether to estimate WLEs
 #' @param sum_score logical; whether to calculate sum scores
+#' @param sum_select string; defines name of logical variable in vars that indicates
+#'   which items to use for the analysis
+#'   (if identical to select, argument can be empty)
+#' @param max_cat string; defines name of numeric variable in vars that indicates
+#'  the maximum number of response options for the items
 #' @param metap logical; whether to calculate metacognition score
 #' @param meta_select string; defines name of logical variable in vars that
 #'   indicates which items to use for the meta cognition analysis
@@ -102,6 +107,8 @@ create_scores <- function(resp, vars, scoring = NULL,
                           score_name = "score", xsi_fixed = NULL,
                           facet = NULL, select, valid = NULL,
                           mvs = NULL, wle = TRUE, sum_score = FALSE,
+                          sum_select = NULL,
+                          max_cat = NULL,
                           metap = FALSE, meta_var_name = NULL,
                           meta_score_name = NULL, meta_select = NULL,
                           control_tam = NULL, control_wle = NULL,
@@ -227,8 +234,10 @@ create_scores <- function(resp, vars, scoring = NULL,
 
   # Estimate sum scores
   if (sum_score) {
+    sum_select <- ifelse(is.null(sum_select), select, sum_select)
     sss <- scaling:::estimate_sum_scores(
-      resp = resp, vars = vars, select = select,
+      resp = resp, vars = vars, select = sum_select,
+      maxCat = max_cat,
       valid = valid, mvs = mvs, scoring = scoring,
       score_name = score_name, poly2dich = poly2dich
     )
@@ -288,9 +297,12 @@ create_scores <- function(resp, vars, scoring = NULL,
 #'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
 #'
 #' @noRd
-estimate_sum_scores <- function(resp, vars, select, valid = NULL,
+estimate_sum_scores <- function(resp, vars, select, maxCat,
+                                valid = NULL,
                                 mvs = NULL, scoring = NULL,
                                 poly2dich = TRUE, score_name = "score") {
+
+  if (is.null(maxCat)) stop("No name for variable containing the maximum number of response options for the items provided.")
 
   # Prepare data
   resp_ <- only_valid(resp, valid = valid, warn = FALSE)
@@ -301,9 +313,12 @@ estimate_sum_scores <- function(resp, vars, select, valid = NULL,
 
   # Score polytomous items dichotomously
   if (poly2dich) {
-    resp_ <- apply(resp_, 2, \(x) {
-      ifelse(x %in% max(x), 1, 0)
-    })
+    for (i in vars$item[vars[[select]]]) {
+      score <- vars[[maxCat]][vars$item==i]
+      resp_[[i]][resp_[[i]] != score] <- 0
+      resp_[[i]][resp_[[i]] == score] <- 1
+    }
+    rm(i, score)
   }
 
   # Sum score
@@ -451,9 +466,10 @@ estimate_metap <- function(resp, vars, select, valid = NULL,
   if (is.null(var_name)) stop("No name for meta score variable provided.")
   if (is.null(score_name)) score_name <- "score"
 
-  # Calclute sum scores
+  # Calculate sum scores
   sss <- scaling:::estimate_sum_scores(
     resp = resp, vars = vars, select = select,
+    maxCat = max_cat,
     valid = valid, mvs = mvs, poly2dich = TRUE)
 
   # Estimated score
@@ -473,14 +489,14 @@ estimate_metap <- function(resp, vars, select, valid = NULL,
   f <- metap[[var_name]] >= 0 & metap$score_sc3 >= 0
 
   # Calculate proportion correct
-  metap[[paste0(score_name, "sc_6")]][f] <- metap[[var_name]][f] / k
+  metap[[paste0(score_name, "_sc6")]][f] <- metap[[var_name]][f] / k
 
   # Calculate difference score
-  metap[[paste0(score_name, "sc_5")]][f] <-
+  metap[[paste0(score_name, "_sc5")]][f] <-
     (metap[[var_name]][f] - metap$score_sc3[f]) / k
 
   # Format results
-  metap <- metap[, c("ID_t", paste0(score_name, "sc_5"), paste0(score_name, "sc_6"))]
+  metap <- metap[, c("ID_t", paste0(score_name, "_sc5"), paste0(score_name, "_sc6"))]
   metap[is.na(metap)] <- -55
 
   # Return results
