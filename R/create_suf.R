@@ -31,8 +31,8 @@
 create_suf <- function(resp, vars, select, competence,
                        scores = NULL, score_name = NULL,
                        mvs = NULL, items_labels = NULL,
-                       filename = "suf", path = here::here('SUF'), ###Replace ('Results') by ('SUF')
-                       save = TRUE, return = FALSE, warn = TRUE) {
+                       filename = "suf", path = here::here('SUF'),
+                       save = TRUE, return = TRUE, warn = TRUE) {
 
   # Test data
   scaling:::check_logicals(vars, "vars", select, warn = warn)
@@ -216,7 +216,7 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
 #' @noRd
 save_suf <- function(suf, path, filename) {
 
-  scaling::check_folder(path = here::here(path))    ### add the name of apckage before the function
+  scaling::check_folder(path = here::here(path))
   saveRDS(suf, file = paste0(path, "/", filename, ".rds"))
   haven::write_dta(suf, path = paste0(path, "/", filename, ".dta"))
   haven::write_sav(suf, path = paste0(path, "/", filename, ".sav"))
