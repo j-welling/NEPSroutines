@@ -4,7 +4,7 @@
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #'
-#' @return   character string with answer.
+#' @return   character string containing the numbers of valid and invalid cases.
 #'
 #' @export
 
@@ -37,7 +37,8 @@ n_valid <- function(dat, valid = NULL) {
 #' @param print  logical; whether results shall be printed to console
 #' @param return  logical; whether results shall be returned
 #'
-#' @return   list with descriptives.
+#' @return   list with descriptive statistics (n, mean, etc.) for each variable
+#' defined in 'desc'.
 #'
 #' @export
 
@@ -74,7 +75,8 @@ desc_con <- function(dat, desc, valid = NULL, digits = 3,
 #' @param print  logical; whether results shall be printed to console
 #' @param return  logical; whether results shall be returned
 #'
-#' @return   list with descriptives.
+#' @return   list containing a table with frequencies (absolute & relative)
+#' for each variable defined in 'desc'.
 #'
 #' @export
 
@@ -133,7 +135,7 @@ desc_nom <- function(dat, desc, valid = NULL, digits = 2,
 #' (in)valid cases
 #' @param warn  logical; whether to warn if no parameter 'valid' provided
 #'
-#' @return   list with  frequency (absolute) of answers for each variable in desc.
+#' @return   list (table) with  absolute frequencies for each variable in 'desc'.
 #'
 #' @export
 
@@ -159,7 +161,7 @@ desc_abs <- function(dat, desc, valid = NULL, warn = TRUE) {
 #' (default) if NAs should be included in table
 #' @param digits  integer; number of decimals for rounding
 #'
-#' @return   list with frequency (relative) of answers for each variable in desc.
+#' @return   list (table) with relative frequencies for each variable in 'desc'.
 #'
 #' @export
 
@@ -195,38 +197,38 @@ show_attributes <- function(dat, desc) {
 }
 
 
-#' Table with sample size by test version
+#' Table with sample size by groups
 #'
-#' @param dat  data.frame; contains version variable
-#' @param versions string; defines name of variable in dat that identifies test versions
-#' @param labels named character vector; links a label each value of versions
-#' (e.g. versions_lbls = c(version1 = 1, version2 = 2))
+#' @param dat  data.frame; contains grouping variable
+#' @param grouping string; defines name of variable in dat that identifies groups
+#' @param labels named character vector; links a label each value of groups
+#' (e.g. labels = c(easy = 1, difficult = 2))
 #' @param save  logical; whether to save the table in Excel
 #' @param overwrite logical; whether to overwrite an existing table with the same name
 #' @param path string; defines path for saving the table
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
-#' @return table with sample size by test version
+#' @return data.frame with sample size by groups.
 #' @export
 
-sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
-                              overwrite = FALSE, path = here::here("Tables"),
-                              name_group = NULL) {
+sample_by_group <- function(dat, grouping, labels = NULL, save = FALSE,
+                            overwrite = FALSE, path = here::here("Tables"),
+                            name_group = NULL) {
 
     # Check variable
-    scaling:::check_variables(dat, "dat", versions)
+    scaling:::check_variables(dat, "dat", grouping)
 
     # Create table with results
-    df <- as.data.frame.AsIs(table(dat[[versions]]))
+    df <- as.data.frame.AsIs(table(dat[[grouping]]))
     df <- rbind(df,sum(df))
     names(df) <- 'N'
     rownames(df)[nrow(df)] <- c("Total")
 
     # Add labels as row names
-    if(!is.null(labels) | !is.null(attributes(vars[[versions]])$labels)) {
+    if(!is.null(labels) | !is.null(attributes(vars[[grouping]])$labels)) {
         lbls <- scaling:::create_ifelse(
             is.null(labels),
-            attributes(vars[[versions]])$labels,
+            attributes(vars[[grouping]])$labels,
             labels
         )
         for (v in seq(nrow(df)-1)) {
@@ -240,7 +242,7 @@ sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
     # Save results
     if (save) {
         name <- scaling:::create_name(
-            paste0("samplesize_by_", versions),
+            paste0("sample.size.by.", grouping),
             name_group,
             ".xlsx"
         )
@@ -258,12 +260,12 @@ sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
 }
 
 
-#' Table with item properties by test version
+#' Table with item properties by groups
 #'
 #' @param vars data.frame; contains information about the competence items
 #' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
-#' @param grouping  character vector; contains for each group a name of a logical
+#' @param groups  character vector; contains for each group a name of a logical
 #' variable in vars that indicates to which group belongs a person or an item
 #' @param properties character vector; defines name(s) of variable(s) in vars
 #' that identify item properties
@@ -271,21 +273,23 @@ sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
 #' a named character vector with the labels for the variable categories, the name
 #' of the vector must be identical with the name identified in 'properties'
 #' (e.g. sex = c(male = 1, female = 2))
+#' @param name_grouping  string; name of the grouping variable (e.g. 'test version')
 #' @param save logical; whether to save the table in Excel
 #' @param overwrite logical; whether to overwrite an existing table with the same name
 #' @param path string; defines path for saving the table
-#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
+#' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
 #' @param warn logical; whether to print warnings (should be better set to true)
 #'
-#' @return table with item properties by test version
+#' @return data.frame with item properties by groups.
 #' @export
 
-props_by_version <- function(vars, select, grouping, properties, labels = NULL,
-                             save = FALSE, overwrite = FALSE, path = here::here("Tables"),
-                             name_group = NULL, warn = TRUE) {
+props_by_group <- function(vars, select, groups, properties, labels = NULL,
+                           name_grouping = 'version', save = FALSE,
+                           overwrite = FALSE, path = here::here("Tables"),
+                           name_group = NULL, warn = TRUE) {
 
     # Check variables
-    scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
+    scaling:::check_logicals(vars, "vars", c(select, groups), warn = warn)
     scaling:::check_variables(vars, "vars", properties)
 
     # Select only necessary items and check for duplicates
@@ -298,8 +302,8 @@ props_by_version <- function(vars, select, grouping, properties, labels = NULL,
     for (props in properties) {
 
       # Create empty dataframe
-      df <- data.frame(matrix(NA, length(unique(vars[[props]])) + 1, length(grouping)))
-      names(df) <- grouping
+      df <- data.frame(matrix(NA, length(unique(vars[[props]])) + 1, length(groups)))
+      names(df) <- groups
 
       # Add property labels as row names
       if(!is.null(labels[[props]]) | !is.null(attributes(vars[[props]])$labels)) {
@@ -316,7 +320,7 @@ props_by_version <- function(vars, select, grouping, properties, labels = NULL,
       rownames(df)[nrow(df)] <- "Total number of items"
 
       # Fill dataframe
-      for (g in grouping){
+      for (g in groups){
         N <- as.data.frame.AsIs(table(vars[[props]][vars[[g]]]))
         N <- rbind(N,sum(N))
         df[[g]]<- N[seq(nrow(N)), ]
@@ -327,7 +331,11 @@ props_by_version <- function(vars, select, grouping, properties, labels = NULL,
 
     # Save results
     if (save) {
-        name <- scaling:::create_name("item_properties_by_version", name_group, ".xlsx")
+        name <- scaling:::create_name(
+          paste0("item.properties.by.", name_grouping),
+          name_group,
+          ".xlsx"
+        )
         scaling:::save_table(
             res,
             filename = name,

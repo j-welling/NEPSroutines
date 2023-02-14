@@ -40,9 +40,10 @@
 #' @param dif_threshold numeric scalar; indicates absolute threshold of
 #' problematic DIF (defaults to 0.5)
 #'
-#' @return a list of:
-#'   mmod: main effects model
-#'   dmod: DIF effects model
+#' @return (if return = TRUE) a list of:
+#'   models: list with DIF model results for all variables defined in 'dif_vars'
+#'   summaries: list with a summary of DIF results for all variables defined in 'dif_vars'
+#'   tr_tables: table for TR with summary of results for all variables defined in 'dif_vars'
 #' @export
 
 dif_analysis <- function(resp,
@@ -562,6 +563,7 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 #' @param missings logical; whether table shall include missings
 #' @param labels character vector; contains names of facets
 #'
+#' @return table with frequency of facets
 #' @noRd
 create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 

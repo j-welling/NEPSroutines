@@ -40,9 +40,9 @@
 #' @param verbose  logical; whether to print processing information to console
 #'
 #' @return (if return = TRUE) list with results:
-#'          mvlist: percentages for each item
-#'          mvsum: summary statistics across items
-#'          summary_table: table with summary statistics for TR
+#'            list: percentages for each item
+#'            summary: summary statistics across items
+#'            summary_table: table with summary statistics for TR
 #' @export
 
 mv_item <- function(resp, vars, select, valid = NULL,
@@ -186,9 +186,9 @@ mv_item <- function(resp, vars, select, valid = NULL,
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
-#' @return   list with percentages:
-#'            mvlist: percentages for each item
-#'            mvsum: summary statistics across items
+#' @return    list with percentages:
+#'              list: percentages for each item
+#'              summary: summary statistics across items
 #' @importFrom stats median sd na.omit
 #' @export
 
@@ -355,7 +355,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
-#' @return table with results
+#' @return table with summary statistics for TR.
 #' @export
 
 mvi_table <- function(mv_i, vars, select, grouping = NULL,

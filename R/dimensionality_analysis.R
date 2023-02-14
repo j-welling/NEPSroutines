@@ -32,7 +32,9 @@
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param verbose   verbose as passed to the TAM function
 #'
-#' @return          list of results for each dimensional analysis
+#' @return   (if return = TRUE) list of results:
+#'  analysis: list with results for each dimensionality model
+#'  summary: list with summary of results (variance-covariance matrices & model fit)
 #'
 #' @export
 #' @importFrom stats AIC BIC logLik
@@ -114,7 +116,7 @@ dim_analysis <- function(resp, vars, select, scoring = "scoring",
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
-#' @return          list of results for each dimensional analysis
+#' @return   list with results for each dimensionality model.
 #' @export
 conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
                                  valid = NULL, irtmodel, maxiter = 10000,
@@ -218,7 +220,9 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
 #' @param path  string; defines path to folder where table shall be saved
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
-#' @return data.frame of summary results
+#' @return list with summary of results:
+#'  Cor-Var X: variance-covariance matrix for each dimensionality model (= X)
+#'  Goodness of fit: table with number of parameters, Loglikelihood, AIC & BIC for each model
 #'
 #' @importFrom stats logLik AIC BIC cov2cor
 #' @export
@@ -241,7 +245,7 @@ dim_summary <- function(dimensionality, save = FALSE, name_group = NULL,
     dimsum[[paste("Cor-Var", d)]] <- cov2cor(tmp)
     diag(dimsum[[paste("Cor-Var", d)]]) <- diag(tmp)
   }
-  dimsum[["Goodness Of fit"]] <- gof
+  dimsum[["Goodness of fit"]] <- gof
 
   # Save results
   if (save) {

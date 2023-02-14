@@ -8,12 +8,8 @@
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
 #' @param vars data.frame; contains information about items with items as rows;
-#' includes variables 'item' (character) containing item names,
-#'                    'raw' (logical) indicating unscored items,
-#'                    'type' (character) containing item type (e.g. MC),
-#'                    'correct_response' (integer) containing the correct
-#'                      response for each item,
-#' and all variables that are further defined in the function arguments
+#' includes variables 'item' (character) containing item names and all variables
+#' that are further defined in the function arguments
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
@@ -37,8 +33,10 @@
 #' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #'
-#' @return list of one data frame per item containing item-total correlations
-#'   for each possible response; correct response is marked with an *
+#' @return (if return = TRUE) list with results:
+#'   analysis: list with one data frame per item containing item-total correlations
+#'     for each possible response; correct response is marked with an *
+#'   summary: list with summary of results
 #'
 #' @importFrom stats cor
 #' @importFrom rlang .data
@@ -114,13 +112,8 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
 #' @param vars data.frame; contains information about items with items as rows;
-#' includes variables 'item' (character) containing item names,
-#'                    'dich' (logical) indicating all dichotomously scored items
-#'                    'raw' (logical) indicating all unscored items,
-#'                    'type' (character) containing item type (e.g. MC),
-#'                    'correct_response' (integer) containing the correct
-#'                      response for each item,
-#' and all variables that are further defined in the function arguments
+#' includes variables 'item' (character) containing item names and all variables
+#' that are further defined in the function arguments
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
@@ -137,6 +130,8 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #'
+#' @return list with one data frame per item containing item-total correlations
+#'   for each possible response; correct response is marked with an *
 #' @export
 
 conduct_dis_analysis <- function(resp, vars, valid = NULL,
@@ -235,8 +230,9 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #'
 #' @return list of data frames
-#'           correct : item-total correlations for correct responses
-#'           distractor : item-total correlations for distractors
+#'           correct: item-total correlations for correct responses
+#'           distractor: item-total correlations for distractors
+#'           descriptives: table with summary of results
 #'
 #' @export
 dis_summary <- function(distractors, digits = 3, save = TRUE, name_group = NULL,

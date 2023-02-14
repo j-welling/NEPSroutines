@@ -35,8 +35,8 @@
 #' @param warn  logical; whether to print warnings (should be set to TRUE to
 #' avoid problems with the data structure)
 #'
-#' @return list with a list for each group with all results
-#' (as return object of irt_analysis())
+#' @return (if return = TRUE) list with a list for each group with all results
+#' (as return object of irt_analysis()) as list elements.
 #' @export
 
 grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
@@ -146,7 +146,13 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #' avoid problems with the data structure)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
-#' @return   list with all results
+#' @return   (if return = TRUE) list with all results:
+#'             model.1pl/model.pcm: results of irt analysis with one parameter
+#'             model.2pl/model.gpcm: results of irt analysis with two parameters
+#'           (depending on function arguments / type of analysis) +
+#'             summary: table with results for TR
+#'             model_fit: table with goodness of fit indicators for all mdoels
+#'             steps: table with results of steps analysis (only for polytomous analysis)
 #' @export
 
 irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
@@ -375,7 +381,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
-#' @return (if return_results = TRUE) a list of:
+#' @return list with results:
 #'   mod: tam.mml; estimated item response model
 #'   fit: data.frame; item fit (WMNSQ) of the model
 #'   pars: data.frame; item difficulties and scoring parameters with respective standard errors
@@ -629,7 +635,7 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 #' @param overwrite  logical; whether to overwrite existing file when saving table
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #'
-#' @return a data.frame containing the item name, N, percentage correct,
+#' @return a data.frame (for TR) containing the item name, N, percentage correct,
 #'   item difficulty, SE, WMNSQ, t, rit, item discrimination, Q3.
 #' @importFrom rlang .data
 #' @export
@@ -740,7 +746,8 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 #' @param path  string; defines path to folder where table shall be saved
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
-#' @return data.frame with AIC, BIC and number of parameters for both models
+#' @return data.frame with N, Deviance, AIC, BIC and number of parameters for
+#' both models.
 #' @export
 
 irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
@@ -804,7 +811,7 @@ irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
 #' @param digits  integer; number of decimals for rounding
 #' @param overwrite  logical; whether to overwrite existing file when saving table
 #'
-#' @return a data.frame containing the step parameters and SEs for each step
+#' @return a data.frame containing the step parameters and SEs for each step.
 #' @export
 
 steps_analysis <- function(pcm_model, digits = 3, save = TRUE, overwrite = FALSE,

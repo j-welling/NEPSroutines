@@ -36,8 +36,9 @@
 #' avoid problems with the data structure)
 #' @param verbose  logical; whether to print processing information to console
 #'
-#' @return   (if return = TRUE) list with missing values per person and
-#' each missing value type (in percentage)
+#' @return   (if return = TRUE) list with results:
+#'             mv_p: list with missing values per person and each missing value type (in percentage)
+#'             summary: table with summary statistics for TR.
 #'
 #' @export
 
@@ -163,8 +164,8 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
-#' @return   list with missing values per person and
-#' for each missing value type (in percentage) is returned
+#' @return   list with missing values per person and for each missing value type
+#' (in percentage).
 #'
 #' @export
 
@@ -258,8 +259,8 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
 #' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
 #' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
-#' @return   table with missing values per person and
-#' for each missing value type (in percentage)
+#' @return   table with missing values per person and for each missing value type
+#' (in percentage) as well as summary statistics for TR.
 #'
 #' @export
 
