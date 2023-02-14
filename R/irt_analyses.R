@@ -537,18 +537,18 @@ icc_plots <- function(model, path = here::here("Plots"), name_group = NULL) {
   irtmodel <- model$irtmodel
 
   # Add group name to path
-  path <- scaling:::create_ifelse(
+  path_ <- scaling:::create_ifelse(
       is.null(name_group),
       paste0(path, "/ICCs/ICCs_for_", irtmodel),
       paste0(path, "/ICCs/", name_group, "/ICCs_for_", irtmodel)
   )
 
   # create directory for plots
-  scaling:::check_folder(path = here::here(path))
+  scaling:::check_folder(path = here::here(path_))
 
   # ICC plots
   for (i in 1:model$mod$nitems) {
-    tiff(paste0(here::here(paste0(path, "/item_")),
+    tiff(paste0(here::here(paste0(path_, "/item_")),
                 model$mod$item[i, 1],
                 ".tiff"),
         width = 800, height = 800, bg = "white",
