@@ -677,7 +677,7 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   pars <- pars[pars$Item %in% vars$item, ]
 
   # percentage correct
-  pars$correct <- round(ifelse(vars_dich, colMeans(resp[, vars$item], na.rm = TRUE) * 100, NA), 2)
+  pars$correct <- round(ifelse(vars$dich, colMeans(resp[, vars$item], na.rm = TRUE) * 100, NA), 2)
 
   # number of valid responses
   pars$N <- colSums(!is.na(resp))
