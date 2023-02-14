@@ -388,7 +388,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 #'   mfit: data.frame; (adjusted) Yen's Q3 statistics of the model
 #'   wle: data.frame; WLEs for the model
 #'   wle_rel: numeric; WLE reliability of the model
-#'   info_crit: data.frame with information criteria of the model
+#'   info_crit: data.frame with information criteria of the model.
 #' @export
 
 irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,

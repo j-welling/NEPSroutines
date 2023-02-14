@@ -5,7 +5,7 @@
 #' (in)valid cases
 #' @param warn  logical; whether to warn if no parameter 'valid' provided
 #'
-#' @return data.frame as resp, but only with valid cases
+#' @return resp without invalid cases.
 #' @export
 
 only_valid <- function(resp, valid = NULL, warn = TRUE) {
@@ -36,7 +36,7 @@ only_valid <- function(resp, valid = NULL, warn = TRUE) {
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param warn logical; whether warnings are to be printed to the console
 #'
-#' @return data.frame like resp, but without user-defined mvs
+#' @return resp without user-defined missing values.
 #' @export
 
 convert_mv <- function(resp, vars, select = NULL, mvs = NULL, warn = TRUE) {
@@ -83,7 +83,7 @@ convert_mv <- function(resp, vars, select = NULL, mvs = NULL, warn = TRUE) {
 #' @param warn logical; whether warnings are to be printed to the console
 #' @param zap_labels logical; whether to convert haven_labelled to normal
 #'
-#' @return data.frame as resp, but only with valid cases
+#' @return resp with some changes, depending on function arguments.
 #'
 #' @export
 
@@ -484,7 +484,7 @@ reached_maxiter <- function(mod, name_model) {
 #' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
 #'
-#' @returns logical; whether data contains polytomous items
+#' @returns logical; whether data contains polytomous items.
 #' @noRd
 
 is_poly <- function(resp, vars, select) {
@@ -502,7 +502,7 @@ is_poly <- function(resp, vars, select) {
 #' contains the scoring factor to be applied to loading matrix
 #' @param poly logical; whether items include polytomous items
 #'
-#' @returns Q matrix (or NULL, if no scoring variable is provided)
+#' @returns Q matrix (or NULL, if no scoring variable is provided).
 #' @noRd
 
 create_q <- function(vars, select, scoring, poly) {
@@ -526,7 +526,7 @@ create_q <- function(vars, select, scoring, poly) {
 #' @param a return a if condition is TRUE
 #' @param b return b if condition is FALSE
 #'
-#' @returns Object x (a or b, depending on condition)
+#' @returns Object x (a or b, depending on condition).
 #' @noRd
 create_ifelse <- function(condition, a, b) {
 
@@ -546,7 +546,7 @@ create_ifelse <- function(condition, a, b) {
 #' @param end string; last part of name
 #' @param sep string; separator between first part and group name (Default is "_")
 #'
-#' @returns string with filename
+#' @returns string with filename.
 #' @noRd
 create_name <- function(start, name_group = NULL, end = NULL, sep = "_") {
 

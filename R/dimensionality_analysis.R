@@ -34,7 +34,7 @@
 #'
 #' @return   (if return = TRUE) list of results:
 #'  analysis: list with results for each dimensionality model
-#'  summary: list with summary of results (variance-covariance matrices & model fit)
+#'  summary: list with summary of results (variance-covariance matrices & model fit).
 #'
 #' @export
 #' @importFrom stats AIC BIC logLik
@@ -222,7 +222,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
 #'
 #' @return list with summary of results:
 #'  Cor-Var X: variance-covariance matrix for each dimensionality model (= X)
-#'  Goodness of fit: table with number of parameters, Loglikelihood, AIC & BIC for each model
+#'  Goodness of fit: table with number of parameters, Loglikelihood, AIC & BIC for each model.
 #'
 #' @importFrom stats logLik AIC BIC cov2cor
 #' @export

@@ -504,7 +504,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
 #' only the items administered to and the cases of the designated group
 #' @param mvs  named integer vector; contains user-defined missing values
 #'
-#' @return  data.frame with missing values per person and missing value type
+#' @return  data.frame with missing values per person and missing value type.
 #' @noRd
 
 mvp_calc <- function(responses, mvs) {
@@ -531,7 +531,7 @@ mvp_calc <- function(responses, mvs) {
 #' @param digits  integer; number of decimals for rounding
 #'
 #' @return list with frequency tables per missing value type and a summary table
-#' with descriptive statistics
+#' with descriptive statistics.
 #' @noRd
 
 mvp_summary <- function(results, digits = 3) {
@@ -554,7 +554,7 @@ mvp_summary <- function(results, digits = 3) {
 #'
 #' @param mv_p  list; return object of mv_person()
 #'
-#' @return   table with frequency of missing values for one missing value type
+#' @return   table with frequency of missing values for one missing value type.
 #' @export
 
 write_mvp_table <- function(mv_p) {

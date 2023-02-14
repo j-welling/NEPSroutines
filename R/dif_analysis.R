@@ -265,7 +265,7 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
-#' @returns a list of dif summaries for each input entry in dif_models
+#' @returns a list of dif summaries for each input entry in dif_models.
 #' @export
 summarize_dif_analysis <- function(dif_models, dif_vars, dif_threshold = 0.5,
                                    print = TRUE, save = TRUE, overwrite = FALSE,
@@ -347,7 +347,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, dif_threshold = 0.5,
 #'
 #' @return a list of:
 #'   mmod: main effects model
-#'   dmod: DIF effects model
+#'   dmod: DIF effects model.
 #' @importFrom stats as.formula
 #' @export
 dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
@@ -563,7 +563,7 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 #' @param missings logical; whether table shall include missings
 #' @param labels character vector; contains names of facets
 #'
-#' @return table with frequency of facets
+#' @return table with frequency of facets.
 #' @noRd
 create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 
@@ -610,7 +610,7 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 #' @param verbose  logical; whether to print processing information to console
 #' @param pid  character vector; contains person identifiers
 #'
-#' @return a tam.mml model
+#' @return a tam.mml model.
 #' @noRd
 
 pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
@@ -648,7 +648,7 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #'
 #' @return list of information criteria, dif estimates and main effects in
-#'   data frames for dif analysis
+#'   data frames for dif analysis.
 #' @export
 
 dif_summary <- function(diflist, print = TRUE, save = TRUE,
@@ -708,7 +708,7 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
 #' @param groups numeric vector; contains group identificators (e.g., 1, 2)
 #'
 #' @return list of information criteria, dif estimates and main effects in
-#'   data frames for dif analysis
+#'   data frames for dif analysis.
 #' @importFrom stats deviance
 #' @noRd
 
@@ -851,7 +851,7 @@ difsum <- function(obj, dif_var, groups = 1) {
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
-#' @return table as shown in TR
+#' @return table with results for TR.
 #' @export
 
 build_dif_tr_tables <- function(dif_summaries, save = TRUE, overwrite = FALSE,

@@ -42,7 +42,7 @@
 #' @return (if return = TRUE) list with results:
 #'            list: percentages for each item
 #'            summary: summary statistics across items
-#'            summary_table: table with summary statistics for TR
+#'            summary_table: table with summary statistics for TR.
 #' @export
 
 mv_item <- function(resp, vars, select, valid = NULL,
@@ -188,7 +188,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
 #'
 #' @return    list with percentages:
 #'              list: percentages for each item
-#'              summary: summary statistics across items
+#'              summary: summary statistics across items.
 #' @importFrom stats median sd na.omit
 #' @export
 
@@ -642,7 +642,7 @@ print_mvi_results <- function(mv_i,
 #' @param digits  integer; number of decimals for rounding
 #'
 #' @return table with frequency of missing values for one missing value type
-#' (by item)
+#' (by item).
 #' @noRd
 
 mvi_perc <- function(responses, mvs, digits = 3) {
@@ -662,7 +662,7 @@ mvi_perc <- function(responses, mvs, digits = 3) {
 #' @param digits  integer; number of decimals for rounding
 #'
 #' @return list with frequency of missing values by item for each missing value
-#' type in mvs
+#' type in mvs.
 #' @noRd
 
 mvi_calc <- function(responses, mvs, digits = 3) {
@@ -725,7 +725,7 @@ create_mvlist <- function(item, position, responses, mvs, digits = 3) {
 #' @param mvlist  list; return object of create_mvlist()
 #' @param digits  integer; number of decimals for rounding
 #'
-#' @return  data.frame with mean, median, SD, min and max of missing values
+#' @return  data.frame with mean, median, SD, min and max of missing values.
 #' @noRd
 
 mvi_summary <- function(mvlist, digits = 3) {

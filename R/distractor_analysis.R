@@ -36,7 +36,7 @@
 #' @return (if return = TRUE) list with results:
 #'   analysis: list with one data frame per item containing item-total correlations
 #'     for each possible response; correct response is marked with an *
-#'   summary: list with summary of results
+#'   summary: list with summary of results.
 #'
 #' @importFrom stats cor
 #' @importFrom rlang .data
@@ -131,7 +131,7 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #'
 #' @return list with one data frame per item containing item-total correlations
-#'   for each possible response; correct response is marked with an *
+#'   for each possible response; correct response is marked with an *.
 #' @export
 
 conduct_dis_analysis <- function(resp, vars, valid = NULL,
@@ -232,7 +232,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
 #' @return list of data frames
 #'           correct: item-total correlations for correct responses
 #'           distractor: item-total correlations for distractors
-#'           descriptives: table with summary of results
+#'           descriptives: table with summary of results.
 #'
 #' @export
 dis_summary <- function(distractors, digits = 3, save = TRUE, name_group = NULL,
