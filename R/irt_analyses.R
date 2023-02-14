@@ -579,13 +579,13 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
   irtmodel <- model$irtmodel
 
   # Add group name to path
-  path <- scaling:::create_name(paste0(path, "/Wright_Maps"), name_group, sep = "/")
+  path_ <- scaling:::create_name(paste0(path, "/Wright_Maps"), name_group, sep = "/")
 
   # Create directory for plots
-  scaling:::check_folder(path = here::here(path))
+  scaling:::check_folder(path = here::here(path_))
 
   # Create Wright Map
-  png(here::here(paste0(path, "/Wright_map_for_", irtmodel, ".png")),
+  png(here::here(paste0(path_, "/Wright_map_for_", irtmodel, ".png")),
       width = 800, height = 1300, bg = "white",
       res = 300, pointsize = 10)
   TAM::IRT.WrightMap(TAM::IRT.threshold(model$mod),
