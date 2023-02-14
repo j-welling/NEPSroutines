@@ -53,7 +53,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
                           UM = "unspecific missing items",
                           ND = "not determinable items",
                           NAd = "not administered items",
-                          AZ = "missing items due to ''Angabe zurueckgesetzt''"
+                          AZ = "missing items due to 'Angabe zurueckgesetzt'"
                       ),
                       plots = FALSE, print = TRUE, save = TRUE, return = FALSE,
                       path_results = here::here("Results"),
@@ -98,12 +98,13 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
           labels_mvs = labels_mvs,
           grouping = grouping,
           show_all = show_all,
-          path = path_plots,
-          verbose = verbose,
-          warn = warn,
-          #color = color,
           name_grouping = name_grouping,
           labels_legend = labels_legend,
+          #color = color,
+          path = path_plots,
+          name_group = name_group,
+          verbose = verbose,
+          warn = warn,
           test = FALSE
         )
     }
@@ -306,7 +307,7 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
         } else {
             for (g in names(mv_p)) {
                 name <- scaling:::create_name(
-                    paste0(path, "/mv_person", g),
+                    paste0(path, "/mv_person_", g),
                     name_group,
                     ".xlsx"
                 )
@@ -368,7 +369,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                           UM = "unspecific missing items",
                           ND = "not determinable items",
                           NAd = "not administered items",
-                          AZ = "missing items due to ''Angabe zurueckgesetzt''"
+                          AZ = "missing items due to 'Angabe zurueckgesetzt'"
                       ),
                       path = here::here("Plots/Missing_Responses/by_person"),
                       show_all = TRUE, name_group = NULL, # color = NULL,
@@ -399,7 +400,8 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
     }
 
     # Create directory for plots
-    scaling:::check_folder(path)
+    path_ <- scaling:::create_name(path, name_group, sep = "/")
+    scaling:::check_folder(path_)
 
     # for each missing type
     for (i in names(mv_all)[-length(mv_all)]) {
@@ -481,7 +483,6 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
             ggplot2::scale_x_continuous(breaks = seq(0, end, ifelse(end > 10, 2, 1)))
 
         # save plot
-        path_ <- scaling:::create_name(path, name_group, sep = "/")
         ggplot2::ggsave(
             filename = paste0("Missing_responses_by_person (", i,").png"),
             plot = gg, path = path_, width = 2000, height = 1200, units = "px",
