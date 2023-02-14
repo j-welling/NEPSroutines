@@ -58,7 +58,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
                         UM = "unspecific missing items",
                         ND = "not determinable items",
                         NAd = "not administered items",
-                        AZ = "missing items due to ''Angabe zurueckgesetzt''"
+                        AZ = "missing items due to 'Angabe zurueckgesetzt'"
                     ),
                     plots = FALSE, print = TRUE, save = TRUE, return = FALSE,
                     path_results = here::here("Results"),
@@ -118,6 +118,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
       name_grouping = name_grouping,
       labels_legend = labels_legend,
       path = path_plots,
+      name_group = name_group,
       warn = warn,
       test = FALSE
     )
@@ -455,7 +456,7 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
                           UM = "unspecific missing items",
                           ND = "not determinable items",
                           NAd = "not administered items",
-                          AZ = "missing items due to ''Angabe zurueckgesetzt''"
+                          AZ = "missing items due to 'Angabe zurueckgesetzt'"
                       ),
                       path = here::here("Plots/Missing_Responses/by_item"),
                       name_group = NULL, name_grouping = 'test version',
@@ -481,7 +482,8 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
         groups <- scaling:::create_ifelse(show_all, c(grouping, 'all'), grouping)
 
     # Create directory for plots
-    scaling:::check_folder(path)
+    path_ <- scaling:::create_name(path, name_group, sep = "/")
+    scaling:::check_folder(path_)
 
     # Create plots
 
@@ -556,7 +558,6 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
                            legend.position = c(0.01, 0.99))
 
         # save plot
-        path_ <- scaling:::create_name(path, name_group, sep = "/")
         ggplot2::ggsave(
             filename = paste0("Missing_responses_by_item (", i,").png"),
             plot = gg, path = path_, width = 2000, height = 1200, units = "px",
@@ -582,16 +583,16 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
 print_mvi_results <- function(mv_i,
                               name_grouping = 'test version',
                               labels_mvs = c(
-    ALL = "total missing items",
-    OM = "omitted items",
-    NV = "not valid items",
-    NR = "not reached items",
-    TA = "missing items due to test abortion",
-    UM = "unspecific missing items",
-    ND = "not determinable items",
-    NAd = "not administered items",
-    AZ = "missing items due to ''Angabe zurueckgesetzt''"
-)) {
+                                  ALL = "total missing items",
+                                  OM = "omitted items",
+                                  NV = "not valid items",
+                                  NR = "not reached items",
+                                  TA = "missing items due to test abortion",
+                                  UM = "unspecific missing items",
+                                  ND = "not determinable items",
+                                  NAd = "not administered items",
+                                  AZ = "missing items due to 'Angabe zurueckgesetzt'"
+                                  )) {
     if (is.data.frame(mv_i$list)) {
         for (lbl in names(mv_i$list[-c(1:3)])) {
             mv_min <- min(mv_i$list[[lbl]], na.rm = TRUE)
