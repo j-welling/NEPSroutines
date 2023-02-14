@@ -30,6 +30,7 @@
 #' for title and legend of plots (only needed when grouping exists)
 #' @param labels_legend character vector; contains legend labels
 #' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
 #' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print warnings (should be set to TRUE to
 #' avoid problems with the data structure)
@@ -58,8 +59,9 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
                       path_results = here::here("Results"),
                       path_table = here::here("Tables"),
                       path_plots = here::here("Plots/Missing_Responses/by_person"),
-                      show_all = TRUE, overwrite = FALSE, #color = NULL,
+                      show_all = TRUE, overwrite = FALSE, name_group = NULL,
                       name_grouping = 'test version', labels_legend = NULL,
+                      #color = NULL,
                       digits = 3, warn = TRUE, verbose = TRUE) {
 
     # Test data
@@ -114,10 +116,12 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
           save = save,
           path = path_table,
           overwrite = overwrite,
+          name_group = name_group,
           mvs = mvs
         )
 
-        scaling:::save_results(mv_person, filename = "mv_person.rds", path = path_results)
+        name <- scaling:::create_name("mv_person", name_group, ".rds")
+        scaling:::save_results(mv_person, filename = name, path = path_results)
         # dass hier kein save_table steht ist Absicht
     } else {
         mv_person$summary <- scaling:::mvp_table(
@@ -153,6 +157,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where results shall be saved
+#' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
 #' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
@@ -166,7 +171,7 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, NAd = -54, AZ = -21),
                          save = TRUE, path = here::here("Results"),
-                         digits = 3, warn = TRUE, test = TRUE) {
+                         name_group = NULL, digits = 3, warn = TRUE, test = TRUE) {
 
     # Test data
     if (test) {
@@ -226,7 +231,8 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
 
     # Save results
     if (save) {
-        scaling:::save_results(mv_p, filename = "mv_person.rds", path = path)
+        name <- scaling:::create_name("mv_person", name_group, ".rds")
+        scaling:::save_results(mv_p, filename = name, path = path)
     }
 
     # Return results
@@ -247,7 +253,8 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where table shall be saved
-#' @param overwrite boolean; indicates whether to overwrite existing file when saving table.
+#' @param overwrite boolean; indicates whether to overwrite existing file when saving table
+#' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
 #' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @return   table with missing values per person and
@@ -259,7 +266,7 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, NAd = -54, AZ = -21),
                       save = TRUE, path = here::here("Tables"),
-                      test = TRUE) {
+                      name_group = NULL, test = TRUE) {
 
     # Test data
     if (test) {
@@ -284,18 +291,28 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
 
         # Write table as Excel sheet
         if (is.null(grouping)) {
+            name <- scaling:::create_name(
+                paste0(path, "/mv_person"),
+                name_group,
+                ".xlsx"
+            )
             openxlsx::write.xlsx(
               results,
-              file = paste0(path, "/mv_person.xlsx"),
+              file = name,
               showNA = FALSE,
               rowNames = FALSE,
               overwrite = overwrite
             )
         } else {
             for (g in names(mv_p)) {
+                name <- scaling:::create_name(
+                    paste0(path, "/mv_person", g),
+                    name_group,
+                    ".xlsx"
+                )
                 openxlsx::write.xlsx(
                   results[[g]],
-                  file = paste0(path, "/mv_person_", g, ".xlsx"),
+                  file = name,
                   showNA = FALSE,
                   rowNames = FALSE,
                   overwrite = overwrite
@@ -327,6 +344,7 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
 #' @param path  string; defines path to folder where X shall be saved
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
+#' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
 # #' @param color  character calar or vector; defines color(s) of the bar in plots
 #' @param name_grouping  string; name of the grouping variable (e.g. test version)
 #' for title and legend of plots (only needed when grouping exists)
@@ -353,9 +371,9 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                           AZ = "missing items due to ''Angabe zurueckgesetzt''"
                       ),
                       path = here::here("Plots/Missing_Responses/by_person"),
-                      show_all = TRUE, verbose = TRUE, # color = NULL,
+                      show_all = TRUE, name_group = NULL, # color = NULL,
                       name_grouping = 'test version', labels_legend = NULL,
-                      warn = TRUE, test = TRUE) {
+                      verbose = TRUE, warn = TRUE, test = TRUE) {
 
     # Test data
     if (test) {
@@ -463,9 +481,10 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
             ggplot2::scale_x_continuous(breaks = seq(0, end, ifelse(end > 10, 2, 1)))
 
         # save plot
+        path_ <- scaling:::create_name(path, name_group, sep = "/")
         ggplot2::ggsave(
             filename = paste0("Missing_responses_by_person (", i,").png"),
-            plot = gg, path = path, width = 2000, height = 1200, units = "px",
+            plot = gg, path = path_, width = 2000, height = 1200, units = "px",
             dpi = 300
         )
 

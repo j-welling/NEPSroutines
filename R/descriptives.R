@@ -204,12 +204,14 @@ show_attributes <- function(dat, desc) {
 #' @param save  logical; whether to save the table in Excel
 #' @param overwrite logical; whether to overwrite an existing table with the same name
 #' @param path string; defines path for saving the table
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
 #' @return table with sample size by test version
 #' @export
 
 sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
-                              overwrite = FALSE, path = here::here("Tables")) {
+                              overwrite = FALSE, path = here::here("Tables"),
+                              name_group = NULL) {
 
     # Check variable
     scaling:::check_variables(dat, "dat", versions)
@@ -237,9 +239,14 @@ sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
 
     # Save results
     if (save) {
+        name <- scaling:::create_name(
+            paste0("samplesize_by_", versions),
+            name_group,
+            ".xlsx"
+        )
         scaling:::save_table(
             res,
-            filename = paste0("samplesize_by_", versions, ".xlsx"),
+            filename = name,
             path = path,
             overwrite = overwrite,
             show_rownames = FALSE
@@ -267,6 +274,7 @@ sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
 #' @param save logical; whether to save the table in Excel
 #' @param overwrite logical; whether to overwrite an existing table with the same name
 #' @param path string; defines path for saving the table
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param warn logical; whether to print warnings (should be better set to true)
 #'
 #' @return table with item properties by test version
@@ -274,7 +282,7 @@ sample_by_version <- function(dat, versions, labels = NULL, save = FALSE,
 
 props_by_version <- function(vars, select, grouping, properties, labels = NULL,
                              save = FALSE, overwrite = FALSE, path = here::here("Tables"),
-                             warn = TRUE) {
+                             name_group = NULL, warn = TRUE) {
 
     # Check variables
     scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
@@ -319,9 +327,10 @@ props_by_version <- function(vars, select, grouping, properties, labels = NULL,
 
     # Save results
     if (save) {
+        name <- scaling:::create_name("item_properties_by_version", name_group, ".xlsx")
         scaling:::save_table(
             res,
-            filename = paste0("item_properties_by_version.xlsx"),
+            filename = name,
             path = path,
             overwrite = overwrite,
             show_rownames = TRUE
