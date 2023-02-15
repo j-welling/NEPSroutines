@@ -671,9 +671,6 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
     groups <- gsub(diflist$dif_var, "", groups)
     res <- difsum(obj = diflist, dif_var = dif_var, groups = groups, digits = digits)
 
-    # Prepare results
-    res$mne <- res
-
     # Print results
     if (print) {
         scaling:::print_dif_summary(
@@ -785,8 +782,8 @@ difsum <- function(obj, dif_var, groups = 1, digits = 3) {
         })
 
         mest[[lbl]]$p <- round(fit_meht["p.xsi", ], 3)
-        mest[[lbl]]$Femp <- round(fit_meht["Femp.xsi", ], 3)
-        mest[[lbl]]$Fkrit <- round(fit_meht["Fkrit", ], 3)
+        mest[[lbl]]$Femp <- round(fit_meht["Femp.xsi", ], digits)
+        mest[[lbl]]$Fkrit <- round(fit_meht["Fkrit", ], digits)
         mest[[lbl]]$df1 <- fit_meht["df1", ]
         mest[[lbl]]$df2 <- fit_meht["df2", ]
 
