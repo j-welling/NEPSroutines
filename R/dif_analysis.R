@@ -39,6 +39,7 @@
 #' @param verbose  logical; whether to print processing information to console
 #' @param dif_threshold numeric scalar; indicates absolute threshold of
 #' problematic DIF (defaults to 0.5)
+#' @param digits  integer; number of decimals for rounding
 #'
 #' @return (if return = TRUE) a list of:
 #'   models: list with DIF model results for all variables defined in 'dif_vars'
@@ -65,7 +66,8 @@ dif_analysis <- function(resp,
                          name_group = NULL,
                          verbose = FALSE,
                          warn = TRUE,
-                         dif_threshold = 0.5
+                         dif_threshold = 0.5,
+                         digits = 3
                          ) {
 
     # Test data
@@ -115,7 +117,8 @@ dif_analysis <- function(resp,
         print = print,
         save = save,
         name_group = name_group,
-        overwrite = overwrite
+        overwrite = overwrite,
+        digits = digits
     )
 
     # Create table for TR
@@ -264,6 +267,7 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
+#' @param digits  integer; number of decimals for rounding
 #'
 #' @returns a list of dif summaries for each input entry in dif_models.
 #' @export
@@ -271,7 +275,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, dif_threshold = 0.5,
                                    print = TRUE, save = TRUE, overwrite = FALSE,
                                    path_results = here::here('Results'),
                                    path_table = here::here('Tables'),
-                                   name_group = NULL) {
+                                   name_group = NULL, digits = 3) {
 
     dif_summaries <- list()
 
@@ -284,7 +288,8 @@ summarize_dif_analysis <- function(dif_models, dif_vars, dif_threshold = 0.5,
             overwrite = overwrite,
             save = save,
             name_group = name_group,
-            path = path_table
+            path = path_table,
+            digits = digits
         )
     }
 
@@ -646,6 +651,7 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
 #' @param path  string; defines path to folder where tables shall be saved
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param digits  integer; number of decimals for rounding
 #'
 #' @return list of information criteria, dif estimates and main effects in
 #'   data frames for dif analysis.
@@ -653,7 +659,7 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
 
 dif_summary <- function(diflist, print = TRUE, save = TRUE,
                         path = here::here('Tables'), dif_threshold = 0.5,
-                        overwrite = FALSE, name_group = NULL) {
+                        overwrite = FALSE, name_group = NUL, digits = 3L) {
     # information criteria for DIF and main model
     # main effects of main and DIF model + standardized
     # DIF per item + standard error + meht p-values
@@ -663,7 +669,10 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
 
     groups <- diflist$mmod$xsi.facets$parameter[diflist$mmod$xsi.facets$facet == dif_var]
     groups <- gsub(diflist$dif_var, "", groups)
-    res <- difsum(obj = diflist, dif_var = dif_var, groups = groups)
+    res <- difsum(obj = diflist, dif_var = dif_var, groups = groups, digits = digits)
+
+    # Prepare results
+    res$mne <- res
 
     # Print results
     if (print) {
@@ -677,15 +686,16 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
 
     # Save results
     if (save) {
-        name <- scaling:::create_name(
-            paste0("dif_", irt_type, "_", dif_var), name_group, ".xlsx"
-        )
         res_ <- res
         names(res_$est) <- paste0("Estimates ", names(res_$est))
         names(res_$mne) <- paste0("Main effect ", names(res_$mne))
         res_ <- c(res_, res_$est, res_$mne)
         res_$est <- res_$mne <- NULL
         names(res_) <- gsub(":", "", names(res_))
+
+        name <- scaling:::create_name(
+            paste0("dif_", irt_type, "_", dif_var), name_group, ".xlsx"
+        )
         scaling:::save_table(
             res_,
             filename = name,
@@ -706,13 +716,14 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
 #' @param dif_var character vector; contains the variable names to be tested
 #'   for DIF (e.g., "gender")
 #' @param groups numeric vector; contains group identificators (e.g., 1, 2)
+#' @param digits  integer; number of decimals for rounding
 #'
 #' @return list of information criteria, dif estimates and main effects in
 #'   data frames for dif analysis.
 #' @importFrom stats deviance
 #' @noRd
 
-difsum <- function(obj, dif_var, groups = 1) {
+difsum <- function(obj, dif_var, groups = 1, digits = 3) {
 
     # all included items
     it <- colnames(obj$dmod$resp_orig)
@@ -752,13 +763,15 @@ difsum <- function(obj, dif_var, groups = 1) {
 
         # Differences in item parameters
         mest[[lbl]] <- est[[grps[1]]]
-        mest[[lbl]]$xsi <-  est[[grps[1]]]$xsi - est[[grps[2]]]$xsi
-        mest[[lbl]]$se.xsi <- scaling:::create_ifelse(any(grps == max(groups)),
-                                                      sqrt(est[[grps[!grps == max(groups)]]]$se.xsi^2 * 2),
-                                                      sqrt(est[[grps[1]]]$se.xsi^2 + est[[grps[2]]]$se.xsi^2))
+        mest[[lbl]]$xsi <-  round(est[[grps[1]]]$xsi - est[[grps[2]]]$xsi, digits)
+        mest[[lbl]]$se.xsi <- round(scaling:::create_ifelse(
+          any(grps == max(groups)),
+          sqrt(est[[grps[!grps == max(groups)]]]$se.xsi^2 * 2),
+          sqrt(est[[grps[1]]]$se.xsi^2 + est[[grps[2]]]$se.xsi^2)
+        ), digits)
 
         # Standardized difference
-        mest[[lbl]]$std <- round(mest[[lbl]]$xsi / sqrt(obj$dmod$variance[1]), 3)
+        mest[[lbl]]$std <- round(mest[[lbl]]$xsi / sqrt(obj$dmod$variance[1]), digits)
 
         # minimum effects hypothesis test
         fit_meht <- apply(mest[[lbl]][, c("xsi", "se.xsi")], 1, function(x) {
@@ -772,15 +785,16 @@ difsum <- function(obj, dif_var, groups = 1) {
         })
 
         mest[[lbl]]$p <- round(fit_meht["p.xsi", ], 3)
+        mest[[lbl]]$Femp <- round(fit_meht["Femp.xsi", ], 3)
         mest[[lbl]]$Fkrit <- round(fit_meht["Fkrit", ], 3)
         mest[[lbl]]$df1 <- fit_meht["df1", ]
         mest[[lbl]]$df2 <- fit_meht["df2", ]
-        mest[[lbl]]$Femp <- round(fit_meht["Femp.xsi", ], 3)
 
         # reorder
         mest[[lbl]] <- mest[[lbl]][, c("item", "xsi", "se.xsi", "std",
                                        "Femp", "Fkrit", "df1", "df2", "p")]
     }
+
 
     out <- list(est = mest)
 
@@ -795,9 +809,11 @@ difsum <- function(obj, dif_var, groups = 1) {
         if (lbl %in% names(mne) | grps[[1]] == grps[[2]]) next
 
         # Differences in main effects
-        mne[[lbl]] <- data.frame(Model = c("DIF model", "Main effects model"),
-                                 Unstandardized = rep(NA, 2),
-                                 Standardized = rep(NA, 2))
+        mne[[lbl]] <- data.frame(
+          Model = c("DIF model", "Main effects model"),
+          Unstandardized = rep(NA, 2),
+          Standardized = rep(NA, 2)
+        )
         mn1 <- mns_dmod$xsi[mns_dmod$parameter == paste0(dif_var, grps[1])]
         mn2 <- mns_dmod$xsi[mns_dmod$parameter == paste0(dif_var, grps[2])]
         mne[[lbl]][1, 2:3] <- c(mn1 - mn2,
@@ -809,7 +825,7 @@ difsum <- function(obj, dif_var, groups = 1) {
 
         # main effects refer to item difficulties
         #  -> recode to person main effects
-        mne[[lbl]][, 2:3] <- -1 * mne[[lbl]][, 2:3]
+        mne[[lbl]][, 2:3] <- round(-1 * mne[[lbl]][, 2:3], digits)
     }
 
     out$mne <- mne
@@ -819,12 +835,12 @@ difsum <- function(obj, dif_var, groups = 1) {
         `DIF variable` = dif_var,
         Model = c("Main effect", "DIF"),
         N = c(obj$mmod$nstud, obj$dmod$nstud),
-        Deviance = c(deviance(obj$mmod), deviance(obj$dmod)),
+        Deviance = round(c(deviance(obj$mmod), deviance(obj$dmod))),
         `Number of parameters` = c(obj$mmod$ic$Npars, obj$dmod$ic$Npars),
-        AIC = c(AIC(obj$mmod), AIC(obj$dmod)),
-        BIC = c(BIC(obj$mmod), BIC(obj$dmod)))
+        AIC = round(c(AIC(obj$mmod), AIC(obj$dmod))),
+        BIC = round(c(BIC(obj$mmod), BIC(obj$dmod)))
+    )
     out$gof <- gof
-
 
     # facets
     out$facets <- obj$facets

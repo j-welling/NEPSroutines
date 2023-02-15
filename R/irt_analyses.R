@@ -324,7 +324,8 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
     scaling:::print_irt_summary(
       model = irt[[1]],
       irt_sum = irt$summary,
-      steps_sum = irt$steps
+      steps_sum = irt$steps,
+      digits = digits
     )
   }
 
@@ -873,26 +874,28 @@ steps_analysis <- function(pcm_model, digits = 3, save = TRUE, overwrite = FALSE
 #' @param model  list; return object of irt_model()
 #' @param irt_sum  data.frame; return object of irt_summary()
 #' @param steps_sum  data.frame; return object of steps_analysis()
+#' @param digits  integer; number of decimals for rounding
 #'
 #' @export
 
-print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
+print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
 
   # Percentage correct
-  pc_min <- min(irt_sum[['correct']], na.rm = TRUE)
-  pc_min_item <- irt_sum$Item[irt_sum[['correct']] %in% pc_min]
-  pc_max <- max(irt_sum[['correct']], na.rm = TRUE)
-  pc_max_item <- irt_sum$Item[irt_sum[['correct']] %in% pc_max]
-  pc_mean <- round(mean(irt_sum[['correct']], na.rm = TRUE))
-  pc_median <- round(median(irt_sum[['correct']], na.rm = TRUE))
+  pc_min <- min(irt_sum$correct, na.rm = TRUE)
+  pc_min_item <- irt_sum$Item[irt_sum$correct %in% pc_min]
+  pc_max <- max(irt_sum$correct, na.rm = TRUE)
+  pc_max_item <- irt_sum$Item[irt_sum$correct %in% pc_max]
+  pc_mean <- round(mean(irt_sum$correct, na.rm = TRUE), 2)
+  pc_median <- round(median(irt_sum$correct, na.rm = TRUE), 2)
+  pc_sd <- round(sd(irt_sum$correct, na.rm = TRUE), 2)
   message("Percentage correct:\n",
           "The percentage of correct responses within dichotomous items varied between ",
           pc_min, "% (", ifelse(length(pc_min_item) > 1, "items ", "item "),
           paste(pc_min_item, collapse = ", "), ") and ",
           pc_max, "% (", ifelse(length(pc_max_item) > 1, "items ", "item "),
           paste(pc_max_item, collapse = ", "),
-          ") with an average of ", pc_mean, "% correct responses, and a median of ",
-          pc_median, "% correct responses.\n")
+          ") with an average of ", pc_mean, "% (SD = ",
+          pc_sd, "%), and a median of ", pc_median, "% correct responses.\n")
 
   # Item difficulties
   xsi_min <- min(irt_sum$xsi, na.rm = TRUE)
@@ -916,25 +919,25 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   se_max_item <- irt_sum$Item[irt_sum$SE %in% se_max]
   message("SE of item difficulties:\n",
           "The maximum of SEs is ", se_max,
-          " (", paste(se_max_item, collapse = ", "), ").\n")
+          " (", ifelse(length(se_max_item) > 1, "items ", "item "),
+          paste(se_max_item, collapse = ", "), ").\n")
 
   # WMNSQ
   wmnsq_min <- min(irt_sum$WMNSQ, na.rm = TRUE)
   wmnsq_min_item <- irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_min]
   wmnsq_max <- max(irt_sum$WMNSQ, na.rm = TRUE)
   wmnsq_max_item <- irt_sum$Item[irt_sum$WMNSQ %in% wmnsq_max]
-  wmnsq_mean <- round(mean(irt_sum$WMNSQ, na.rm = TRUE), 2)
-  wmnsq_median <- round(median(irt_sum$WMNSQ, na.rm = TRUE), 2)
-  wmnsq_sd <- round(sd(irt_sum$WMNSQ, na.rm = TRUE), 2)
+  wmnsq_mean <- round(mean(irt_sum$WMNSQ, na.rm = TRUE), digits)
+  wmnsq_median <- round(median(irt_sum$WMNSQ, na.rm = TRUE), digits)
+  wmnsq_sd <- round(sd(irt_sum$WMNSQ, na.rm = TRUE), digits)
   message("WMNSQ:\n",
-          "The values of the WMNSQ were ... close to 1 with the lowest value being ",
-          wmnsq_min, " (", ifelse(length(wmnsq_min_item) > 1, "items ", "item "),
-          paste(wmnsq_min_item, collapse = ", "),
-          ") and the highest being ",
-          wmnsq_max, " (", ifelse(length(wmnsq_max_item) > 1, "items ", "item "),
-          paste(wmnsq_max_item, collapse = ", "),
-          ") with an average of ", wmnsq_mean, " (SD = ", wmnsq_sd,
-          "), and a median of ", wmnsq_median, ".")
+          "The WMNSQ value varied between ", wmnsq_min, " (",
+          ifelse(length(wmnsq_min_item) > 1, "items ", "item "),
+          paste(wmnsq_min_item, collapse = ", "), ") and ", wmnsq_max, " (",
+          ifelse(length(wmnsq_max_item) > 1, "items ", "item "),
+          paste(wmnsq_max_item, collapse = ", "), ") with an average of ",
+          wmnsq_mean, " (SD = ", wmnsq_sd, "), and a median of ",
+          wmnsq_median, ".")
 
   wmnsq_misfit <- irt_sum$Item[irt_sum$WMNSQ > 1.15]
   message(ifelse(length(wmnsq_misfit) == 0, "No item",
@@ -947,15 +950,16 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   t_min_item <- irt_sum$Item[irt_sum$t %in% t_min]
   t_max <- max(irt_sum$t, na.rm = TRUE)
   t_max_item <- irt_sum$Item[irt_sum$t %in% t_max]
-  t_mean <- round(mean(irt_sum$t, na.rm = TRUE), 2)
-  t_median <- round(median(irt_sum$t, na.rm = TRUE), 2)
+  t_mean <- round(mean(irt_sum$t, na.rm = TRUE), digits)
+  t_median <- round(median(irt_sum$t, na.rm = TRUE), digits)
+  t_sd <- round(sd(irt_sum$t, na.rm = TRUE), digits)
   message("\nWMNSQ t-value:\n",
           "The WMNSQ t-values varied between ",
           t_min, " (", ifelse(length(t_min_item) > 1, "items ", "item "),
           paste(t_min_item, collapse = ", "), ") and ",
           t_max, " (", ifelse(length(t_max_item) > 1, "items ", "item "),
           paste(t_max_item, collapse = ", "), ") with an average of ",
-          t_mean, ", and a median of ", t_median, ".")
+          t_mean, " (SD = ", t_sd, "), and a median of ", t_median, ".")
 
   t_misfit <- irt_sum$Item[abs(irt_sum$t) > 8]
 
@@ -969,19 +973,22 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   rit_min_item <- irt_sum$Item[irt_sum$rit %in% rit_min]
   rit_max <- max(irt_sum$rit, na.rm = TRUE)
   rit_max_item <- irt_sum$Item[irt_sum$rit %in% rit_max]
-  rit_mean <- round(mean(irt_sum$rit, na.rm = TRUE), 2)
-  rit_median <- round(median(irt_sum$rit, na.rm = TRUE), 2)
+  rit_mean <- round(mean(irt_sum$rit, na.rm = TRUE), digits)
+  rit_median <- round(median(irt_sum$rit, na.rm = TRUE), digits)
+  rit_sd <- round(sd(irt_sum$rit, na.rm = TRUE), digits)
   message("\nCorrelation of item scores with total correct score:\n",
           "The correlations between the item scores and the total correct scores varied between ",
           rit_min, " (", ifelse(length(rit_min_item) > 1, "items ", "item "),
           paste(rit_min_item, collapse = ", "), ") and ",
           rit_max, " (", ifelse(length(rit_max_item) > 1, "items ", "item "),
           paste(rit_max_item, collapse = ", "), ") with an average correlation of ",
-          rit_mean, ", and a median correlation of ", rit_median, ".\n")
+          rit_mean, " (SD = ", rit_sd, "), and a median correlation of ",
+          rit_median, ".\n")
 
   # Model variance
   message("Model variance:\n",
-          "The variance of the model was estimated to be ", round(model$mod$variance[1], 3),".\n")
+          "The variance of the model was estimated to be ",
+          round(model$mod$variance[1], 3),".\n")
 
   # Test reliability
   eap_rel <- round(model$mod$EAP.rel[1], 3)
@@ -995,19 +1002,21 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL) {
   disc_min_item <- irt_sum$Item[irt_sum$Discr. %in% disc_min]
   disc_max <- max(irt_sum$Discr., na.rm = TRUE)
   disc_max_item <- irt_sum$Item[irt_sum$Discr. %in% disc_max]
-  disc_mean <- round(mean(irt_sum$Discr., na.rm = TRUE), 2)
-  disc_median <- round(median(irt_sum$Discr., na.rm = TRUE), 2)
+  disc_mean <- round(mean(irt_sum$Discr., na.rm = TRUE), digits)
+  disc_median <- round(median(irt_sum$Discr., na.rm = TRUE), digits)
+  disc_sd <- round(sd(irt_sum$Discr., na.rm = TRUE), digits)
   message("Item discrimination:\n",
           "The estimated discrimination parameters varied between ",
           disc_min, " (", ifelse(length(disc_min_item) > 1, "items ", "item "),
           paste(disc_min_item, collapse = ", "), ") and ",
           disc_max, " (", ifelse(length(disc_max_item) > 1, "items ", "item "),
           paste(disc_max_item, collapse = ", "), ") with an average discrimination of ",
-          disc_mean, ", and a median discrimination of ", disc_median, ".\n")
+          disc_mean, " (SD = ", disc_sd, "), and a median discrimination of ",
+          disc_median, ".\n")
 
   # Thresholds
-  thresh_mean <- round(mean(c(TAM::IRT.threshold(model$mod)), na.rm = TRUE), 3)
-  thresh_median <- round(median(c(TAM::IRT.threshold(model$mod)), na.rm = TRUE), 3)
+  thresh_mean <- round(mean(c(TAM::IRT.threshold(model$mod)), na.rm = TRUE), digits)
+  thresh_median <- round(median(c(TAM::IRT.threshold(model$mod)), na.rm = TRUE), digits)
   message("Thresholds:\n",
           "The mean threshold is ", thresh_mean,
           " and the median threshold is ", thresh_median, ".\n")

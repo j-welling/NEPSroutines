@@ -31,6 +31,7 @@
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param verbose   verbose as passed to the TAM function
+#' @param digits  integer; number of decimals for rounding
 #'
 #' @return   (if return = TRUE) list of results:
 #'  analysis: list with results for each dimensionality model
@@ -46,18 +47,29 @@ dim_analysis <- function(resp, vars, select, scoring = "scoring",
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
                          name_group = NULL, overwrite = TRUE,
-                         verbose = FALSE) {
+                         verbose = FALSE, digits = 3) {
 
   dimensionality <- list()
 
   dimensionality$analysis <- scaling:::conduct_dim_analysis(
-    resp = resp, vars = vars, select = select, scoring = scoring, dim = dim,
-    valid = valid, irtmodel = irtmodel, maxiter = maxiter, snodes = snodes,
-    mvs = mvs, verbose = verbose, save = FALSE, test = TRUE
+    resp = resp,
+    vars = vars,
+    select = select,
+    scoring = scoring,
+    dim = dim,
+    valid = valid,
+    irtmodel = irtmodel,
+    maxiter = maxiter,
+    snodes = snodes,
+    mvs = mvs,
+    verbose = verbose,
+    save = FALSE,
+    test = TRUE
   )
 
   dimensionality$summary <- scaling:::dim_summary(
       dimensionality$analysis,
+      digits = digits,
       save = FALSE
   )
 
@@ -164,7 +176,11 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
 
   # Compute reference model
   dimensionality$uni <- TAM::tam.mml(
-    resp = resp, pid = pid, Q = Q, irtmodel = irtmodel, verbose = verbose,
+    resp = resp,
+    pid = pid,
+    Q = Q,
+    irtmodel = irtmodel,
+    verbose = verbose,
     control = list(maxiter = maxiter, snodes = snodes)
   )
 
@@ -219,6 +235,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
 #' @param save  logical; whether table shall be saved to hard drive
 #' @param path  string; defines path to folder where table shall be saved
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
+#' @param digits  integer; number of decimals for rounding
 #'
 #' @return list with summary of results:
 #'  Cor-Var X: variance-covariance matrix for each dimensionality model (= X)
@@ -228,7 +245,8 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
 #' @export
 #'
 dim_summary <- function(dimensionality, save = FALSE, name_group = NULL,
-                        overwrite = FALSE, path = here::here("Tables")) {
+                        overwrite = FALSE, path = here::here("Tables"),
+                        digits = 3) {
 
   dim <- names(dimensionality)
   dimsum <- list()
@@ -237,13 +255,13 @@ dim_summary <- function(dimensionality, save = FALSE, name_group = NULL,
   for (d in dim) {
     gof[[d]] <- c(
         dimensionality[[d]]$ic$Npars,
-        logLik(dimensionality[[d]]),
-        AIC(dimensionality[[d]]),
-        BIC(dimensionality[[d]])
+        round(logLik(dimensionality[[d]])),
+        round(AIC(dimensionality[[d]])),
+        round(BIC(dimensionality[[d]]))
     )
     tmp <- dimensionality[[d]]$variance
-    dimsum[[paste("Cor-Var", d)]] <- cov2cor(tmp)
-    diag(dimsum[[paste("Cor-Var", d)]]) <- diag(tmp)
+    dimsum[[paste("Cor-Var", d)]] <- round(cov2cor(tmp), digits)
+    diag(dimsum[[paste("Cor-Var", d)]]) <- round(diag(tmp), digits)
   }
   dimsum[["Goodness of fit"]] <- gof
 
