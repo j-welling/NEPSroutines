@@ -86,6 +86,7 @@
 #' @param return  logical; whether results shall be returned
 #' @param overwrite logical; whether to overwrite existing file when saving
 #'   table
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param path_results  string; defines path to folder where results shall be
 #'   saved
 #' @param path_table  string; defines path to folder where tables shall be saved
@@ -120,8 +121,8 @@ create_scores <- function(resp, vars, scoring = NULL,
                           scoring_prev = NULL, scoring_link = NULL,
                           pweights_prev = NULL, pweights_link = NULL,
                           anchors = NULL, longitudinal = TRUE,
-                          print = TRUE, save = TRUE,
-                          return = FALSE, overwrite = FALSE,
+                          print = TRUE, save = TRUE, return = FALSE,
+                          overwrite = FALSE, name_group = NULL,
                           path_table = here::here("Tables"),
                           path_results = here::here("Results"),
                           do_dim = TRUE, do_dif = TRUE,
@@ -218,10 +219,16 @@ create_scores <- function(resp, vars, scoring = NULL,
     if (!is.null(facet)) {
       if (is.null(xsi_fixed)) xsi_fixed <- fit$mod$xsi.fixed.estimated
       wles <- scaling:::estimate_rotated_wles(
-        resp = resp, vars = vars, select = select,
-        valid = valid, facet = facet, mvs = mvs,
-        scoring = scoring, xsi_fixed = xsi_fixed,
-        wle_name = score_name, control_tam = control_tam,
+        resp = resp,
+        vars = vars,
+        select = select,
+        valid = valid,
+        facet = facet,
+        mvs = mvs,
+        scoring = scoring,
+        xsi_fixed = xsi_fixed,
+        wle_name = score_name,
+        control_tam = control_tam,
         pweights = pweights
       )
     } else {
@@ -236,10 +243,15 @@ create_scores <- function(resp, vars, scoring = NULL,
   if (sum_score) {
     sum_select <- ifelse(is.null(sum_select), select, sum_select)
     sss <- scaling:::estimate_sum_scores(
-      resp = resp, vars = vars, select = sum_select,
+      resp = resp,
+      vars = vars,
+      select = sum_select,
       maxCat = max_cat,
-      valid = valid, mvs = mvs, scoring = scoring,
-      score_name = score_name, poly2dich = poly2dich
+      valid = valid,
+      mvs = mvs,
+      scoring = scoring,
+      score_name = score_name,
+      poly2dich = poly2dich
     )
     if (wle) {
       wles <- merge(wles, sss, by = "ID_t", all = TRUE)
@@ -252,8 +264,13 @@ create_scores <- function(resp, vars, scoring = NULL,
     meta_select <- ifelse(is.null(meta_select), select, meta_select)
     meta_score_name <- ifelse(is.null(meta_score_name), score_name, meta_score_name)
     metas <- scaling:::estimate_metap(
-      resp = resp, vars = vars, select = meta_select, valid = valid,
-      var_name = meta_var_name, score_name = meta_score_name, mvs = mvs
+      resp = resp,
+      vars = vars,
+      select = meta_select,
+      valid = valid,
+      var_name = meta_var_name,
+      score_name = meta_score_name,
+      mvs = mvs
     )
     if (wle | sum_score) {
       wles <- merge(wles, metas, by = "ID_t", all = TRUE)
@@ -262,13 +279,21 @@ create_scores <- function(resp, vars, scoring = NULL,
     }
   }
 
-  # Return results
-  if (return & !is.null(wles_linked)) {
-    return(list(wle = wles, linking = linked_scores))
-  } else {
-    return(wles)
+  # Create results object
+  scores <- scaling:::create_ifelse(
+      !is.null(wles_linked),
+      list(wle = wles, linking = linked_scores),
+      wles
+  )
+
+  # Save results
+  if (save) {
+      name <- scaling:::create_name("scores", name_group, ".rds")
+      scaling:::save_results(scores, filename = name, path = path_results)
   }
 
+  # Return results
+  if(return) return(scores)
 }
 
 
@@ -323,9 +348,11 @@ estimate_sum_scores <- function(resp, vars, select, maxCat,
 
   # Sum score
   if (!poly2dich) {
-    scores <- scaling:::create_ifelse(is.null(scoring),
-                                      rep(1, sum(vars[[select]])),
-                                      vars[[scoring]][vars[[select]]])
+    scores <- scaling:::create_ifelse(
+        is.null(scoring),
+        rep(1, sum(vars[[select]])),
+        vars[[scoring]][vars[[select]]]
+    )
     n <- nrow(resp_)
     resp_ <- resp_ * matrix(rep(scores, n),nrow = n, byrow = TRUE)
   }
@@ -336,6 +363,7 @@ estimate_sum_scores <- function(resp, vars, select, maxCat,
   out <- merge(out, resp, by = "ID_t", all.x = TRUE)
   names(out) <- c("ID_t", paste0(score_name, "_sc3"))
 
+  # Return results
   return(out)
 
 }
@@ -396,9 +424,16 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
   facet <- resp[resp[[valid]], facet, drop = FALSE]
   pid <- resp$ID_t[resp[[valid]]]
   scaling:::check_pid(pid)
-  resp_ <- scaling:::prepare_resp(resp, vars, select, use_only_valid = TRUE,
-                                  valid = valid, convert = TRUE, mvs = mvs,
-                                  warn = FALSE)
+  resp_ <- scaling:::prepare_resp(
+      resp = resp,
+      vars = vars,
+      select = select,
+      use_only_valid = TRUE,
+      valid = valid,
+      convert = TRUE,
+      mvs = mvs,
+      warn = FALSE
+  )
 
   # Test resp
   scaling:::check_numerics(resp_, "resp", check_invalid = TRUE)
@@ -411,9 +446,11 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
   if (irt_type == "poly") {
     # get design matrix for model with 0.5 scoring
     B <- TAM::designMatrices(modeltype = "PCM", resp = resp_)$B
-    B[vars$item[vars[[select]]], , 1] <- scaling:::create_ifelse(is.null(scoring),
-                                                                 rep(1, sum(vars[[select]])),
-                                                                 vars[[scoring]][vars[[select]]])
+    B[vars$item[vars[[select]]], , 1] <- scaling:::create_ifelse(
+        is.null(scoring),
+        rep(1, sum(vars[[select]])),
+        vars[[scoring]][vars[[select]]]
+    )
   } else {
     B <- NULL
   }
@@ -429,10 +466,14 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
   if (is.null(control_wle)) control_wle <- list()
   if (is.null(control_wle$convM)) control_wle$convM <- .0001
   if (is.null(control_wle$Msteps)) control_wle$Msteps <- 50
-  wles <- TAM::tam.wle(mod, convM = control_wle$convM,
-                       Msteps = control_wle$Msteps,
-                       progress = FALSE)[, c("pid", "theta", "error")]
+  wles <- TAM::tam.wle(
+      mod, convM = control_wle$convM,
+      Msteps = control_wle$Msteps,
+      progress = FALSE
+  )[, c("pid", "theta", "error")]
   names(wles) <- c("ID_t", paste0(wle_name, c("_sc1", "_sc2")))
+
+  # Return results
   return(wles)
 }
 

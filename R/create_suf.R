@@ -21,7 +21,7 @@
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param items_labels  vector; named vector for each item used for labelling
 #'   the data
-#' @param filename character; indicates final name of SUF according to study
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param path character; indicates where SUF shall be saved
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
@@ -31,7 +31,7 @@
 create_suf <- function(resp, vars, select, competence,
                        scores = NULL, score_name = NULL,
                        mvs = NULL, items_labels = NULL,
-                       filename = "suf", path = here::here('SUF'),
+                       name_group = NULL, path = here::here('SUF'),
                        save = TRUE, return = TRUE, warn = TRUE) {
 
   # Test data
@@ -70,15 +70,13 @@ create_suf <- function(resp, vars, select, competence,
 
   # (save SUF in rds, sav and dta format)
   if (save) {
-    scaling:::save_suf(suf = suf, path = path, filename = filename)
+    name <- scaling:::create_name("suf", name_group)
+    scaling:::save_suf(suf = suf, path = path, filename = name)
     message("SUF successfully saved!")
   }
 
   # Return SUF
-  if (return) {
-    return(suf)
-  }
-
+  if (return) return(suf)
 }
 
 
@@ -202,8 +200,8 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
 
   }
 
+  # Return SUF
   return(suf)
-
 }
 
 
