@@ -788,6 +788,8 @@ irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
   mfit$AIC[2] <- model_2p$info_crit$AIC
   mfit$BIC[2] <- model_2p$info_crit$BIC
 
+  mfit <- round(mfit)
+
   # Save table
   if (save) {
     name <- scaling:::create_name(paste0("model.fit_", irt_type), name_group, ".xlsx")

@@ -128,6 +128,7 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
 #' are stored on the hard drive; please note that the path is relative to the
 #' current working path set by here::i_am()
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
+#' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #'
 #' @return list with one data frame per item containing item-total correlations
@@ -139,7 +140,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
                                  correct = 'correct_response',
                                  mvs = NULL, save = TRUE, name_group = NULL,
                                  path = here::here('Results'),
-                                 warn = TRUE) {
+                                 digits = 3, warn = TRUE) {
     # Test data
     scaling::check_logicals(vars, "vars", c(select_raw, select_score), warn = warn)
     scaling::check_variables(vars, "vars", correct)
@@ -195,7 +196,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
 
             # Create score vectors and compute correlation
             iscore <- ifelse(resp[, item] == dis[[item]][[item]][s], 1, 0)
-            dis[[item]]$rit[s] <- round(cor(iscore, cscore, use = "complete.obs"), 2)
+            dis[[item]]$rit[s] <- round(cor(iscore, cscore, use = "complete.obs"), digits)
         }
 
         # Label correct response with *
@@ -292,7 +293,7 @@ print_dis_summary <- function(dist_sum) {
     message("\nItem-total correlation for correct response: ",
             "\nMin. = ",  corr_min, " (", paste(corr_min_names, collapse = ", "), ")",
             "\nMax. = ",  corr_max, " (", paste(corr_max_names, collapse = ", "), ")",
-            "\nMd. = ",  median(rc$corr), " (", paste(corr_med_names, collapse = ", "), ")")
+            "\nMd. = ",  corr_med, " (", paste(corr_med_names, collapse = ", "), ")")
 
     # Distractors
     dist_min <- min(rd$corr)
@@ -305,7 +306,7 @@ print_dis_summary <- function(dist_sum) {
     message("\nItem-total correlation for distractor: ",
             "\nMin. = ",  dist_min, " (", paste(dist_min_names, collapse = ", "), ")",
             "\nMax. = ",  dist_max, " (", paste(dist_max_names, collapse = ", "), ")",
-            "\nMd. = ",  median(rd$corr), " (", paste(dist_med_names, collapse = ", "),
+            "\nMd. = ",  dist_med, " (", paste(dist_med_names, collapse = ", "),
             ")\n")
 
     # Auffällige Distraktoren und korrekte Antworten anzeigen
