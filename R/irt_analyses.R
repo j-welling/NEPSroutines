@@ -646,6 +646,7 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
                         digits = 3, overwrite = FALSE, warn = TRUE) {
 
   # prepare data
+  scaling:::check_logicals(vars, "vars", "dich", warn = warn)
   scaling:::check_items(rownames(results$mod$xsi))
   vars$irt_item <- vars$item %in% rownames(results$mod$xsi)
   vars <- vars[vars$irt_item, ]
