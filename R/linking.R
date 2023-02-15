@@ -66,8 +66,8 @@
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
-#' @param overwrite  logical; whether to overwrite existing file when saving
-#'   table
+#' @param overwrite  logical; whether to overwrite existing file when saving table
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param verbose  logical; verbose as passed to the TAM function
 #' @param dif_threshold  numeric; threshold under which DIF in common link items
 #'   is accepted; defaults to 0.5
@@ -107,7 +107,7 @@ linking <- function(resp_curr,
                     path_table = here::here("Tables"),
                     path_results = here::here("Results"),
                     print = TRUE, save = TRUE, return = FALSE,
-                    overwrite = FALSE, verbose = TRUE,
+                    overwrite = FALSE, name_group = NULL, verbose = TRUE,
                     wid = NULL, dif_threshold = 0.5,
                     snodes = 5000, maxiter = 10000,
                     digits = 3, control_tam = NULL,
@@ -138,9 +138,12 @@ linking <- function(resp_curr,
         warn = warn
     )
 
+    # Create list with results
+    linking <- list()
+
     # Check measurement invariance over time
     if (do_dif) {
-        link_dif <-
+        linking$link_dif <-
             check_dif_anchor(
                 resp_curr = resp_curr,
                 resp_prev = resp_prev,
@@ -168,13 +171,11 @@ linking <- function(resp_curr,
                 warn = FALSE,
                 test = FALSE
             )
-    } else {
-        link_dif <- NULL
     }
 
     # Check unidimensionality for anchor items
     if (do_dim) {
-        link_dim <-
+        linking$link_dim <-
             check_link_dimensionality(
                 resp_curr = resp_curr,
                 resp_prev = resp_prev,
@@ -199,12 +200,10 @@ linking <- function(resp_curr,
                 warn = FALSE,
                 test = FALSE
             )
-    } else {
-        link_dim <- NULL
     }
 
     # Conduct linking
-    link_results <-
+    linking$link_results <-
         link_samples(
             resp_curr = resp_curr,
             resp_prev = resp_prev,
@@ -236,9 +235,9 @@ linking <- function(resp_curr,
     # Print results
     if (print & do_dif & do_dim) {
         print_link_results(
-            link_dif = link_dif,
-            link_dim = link_dim,
-            link_results = link_results,
+            link_dif = linking$link_dif,
+            link_dim = linking$link_dim,
+            link_results = linking$link_results,
             dif_threshold = dif_threshold,
             digits = digits
         )
@@ -246,46 +245,33 @@ linking <- function(resp_curr,
 
     # Save results
     if (save) {
+
         if (do_dif) {
+
             if (is.null(resp_link)) {
-                varcor <- link_dim$dim_sum$`Cor-Var anchoritems`
+                varcor <- linking$link_dim$dim_sum$`Cor-Var anchoritems`
             } else {
-                varcor <- link_dim$dim_sum$`Cor-Var wave`
+                varcor <- linking$link_dim$dim_sum$`Cor-Var wave`
             }
+
+            name <- scaling:::create_name("linking", name_group, ".xlsx")
             scaling:::save_table(
-                list(DIF = link_dif$link_dif_summary$link_dif_table,
+                list(DIF = linking$link_dif$link_dif_summary$link_dif_table,
                      'Dimensionality (Cor-Var)' = varcor,
-                     'Dimensionality (GoF)' = link_dim$dim_sum$`Goodness Of fit`),
-                filename = "link_tr_tables.xlsx",
+                     'Dimensionality (GoF)' = linking$link_dim$dim_sum$`Goodness Of fit`),
+                filename = name,
                 path = path_table,
                 overwrite = overwrite,
                 show_rownames = FALSE
             )
-            scaling:::save_results(
-                link_dif,
-                filename = "link_dif_results.rds",
-                path = path_results
-            )
         }
-        if (do_dim) {
-            scaling:::save_results(
-                link_dim,
-                filename = "link_dim_results.rds",
-                path = path_results
-            )
-        }
-        scaling:::save_results(
-            link_results,
-            filename = "link_analysis_results.rds",
-            path = path_results
-        )
+
+        name <- scaling:::create_name("linking", name_group, ".rds")
+        scaling:::save_results(linking, filename = name, path = path_results)
     }
 
     # Return results
-    if (return) {
-        return(list(link_dif = link_dif, link_dim = link_dim,
-                    link_results = link_results))
-    }
+    if (return) return(linking)
 
 }
 
@@ -763,6 +749,7 @@ check_dif_anchor <- function(resp_curr,
     f <- grepl("^item_.+$", names(dif$link_dif_summary$link_dif_table))
     dif$anchors <- dif$link_dif_summary$link_dif_table[, f]
 
+    # Return results
     if (return) return(dif)
 
 }
@@ -863,6 +850,7 @@ summarize_link_dif <- function(mod_curr,
     est <- est[, grepl("(^wave$)|(^item_.+$)|(^xsi$)|(^se.xsi$)|(^F$)|(^p$)|(^dif_flag$)",
                        names(est))]
 
+    # Return results
     res <- list(link_dif_table = est, Fkrit = mineff$Fmin, dfkrit = mineff$df2)
     return(res)
 }
@@ -1073,6 +1061,7 @@ check_link_dimensionality <- function(resp_curr,
         dimsum$current <- dim_summary(dimensionality$current)
     }
 
+    # Return results
     return(list(dimensionality = dimensionality, dim_sum = dimsum))
 
 }
@@ -1393,6 +1382,8 @@ link_samples <- function(resp_curr,
             anchors = pre_dat$anchors,
             longitudinal = longitudinal
         )
+
+    # Return results
     return(out)
 
 }
@@ -1556,6 +1547,7 @@ calculate_link_parameters <- function(vars_curr,
 
     }
 
+    # Return results
     return(list(const = const, const.err = const.err,
                 xsi_curr.linked = xsi_curr.linked))
 }
@@ -1620,6 +1612,7 @@ link_item_parameters <- function(xsi, const, vars, select,
 
     xsi.fixed[f, 2] <- xsi.fixed[f, 2] + const * vars[[scoring]][vars[[select]]]
 
+    # Return results
     return(xsi.fixed)
 }
 
@@ -1671,8 +1664,7 @@ link_wles <- function(wle_prev,
     wle_curr$wle <- wle_curr$wle - correction
 
     # Return results
-    wle_curr <- as.data.frame(wle_curr)
-    return(wle_curr)
+    return(as.data.frame(wle_curr))
 }
 
 check_var_in_df <- function(df, var, new_var, name) {
