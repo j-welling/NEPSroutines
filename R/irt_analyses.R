@@ -50,7 +50,7 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
                                  control_tam = NULL, control_wle = NULL) {
 
     # Test data
-    scaling:::check_logicals(vars, "vars", groups, warn = warn)
+    scaling:::check_logicals(vars, "vars", c(groups, "dich"), warn = warn)
     scaling:::check_logicals(resp, "resp", c(valid, names(groups)), warn = warn)
     if (!is.null(scoring))
         scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
@@ -168,7 +168,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 
     # Test data
     if (test) {
-        scaling:::check_logicals(vars, "vars", select, warn = warn)
+        scaling:::check_logicals(vars, "vars", c(select, "dich"), warn = warn)
         scaling:::check_logicals(resp, "resp", valid, warn = warn)
         scaling:::check_items(vars$item[vars[[select]]])
         scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
@@ -289,7 +289,8 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
       valid = valid,
       mvs = mvs,
       digits = digits,
-      save = FALSE
+      save = FALSE,
+      test = FALSE
     )
 
     # Model fit
@@ -634,6 +635,7 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 #' @param digits  integer; number of decimals for rounding
 #' @param overwrite  logical; whether to overwrite existing file when saving table
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
+#' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
 #' @return a data.frame (for TR) containing the item name, N, percentage correct,
 #'   item difficulty, SE, WMNSQ, t, rit, item discrimination, Q3.
@@ -643,10 +645,10 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
                         results, disc = NULL, save = TRUE,
                         path = here::here("Tables"), name_group = NULL,
-                        digits = 3, overwrite = FALSE, warn = TRUE) {
+                        digits = 3, overwrite = FALSE, warn = TRUE, test = TRUE) {
 
   # prepare data
-  scaling:::check_logicals(vars, "vars", "dich", warn = warn)
+  if (test) scaling:::check_logicals(vars, "vars", "dich", warn = warn)
   scaling:::check_items(rownames(results$mod$xsi))
   vars$irt_item <- vars$item %in% rownames(results$mod$xsi)
   vars <- vars[vars$irt_item, ]
