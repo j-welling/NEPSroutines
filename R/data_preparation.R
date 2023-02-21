@@ -17,11 +17,11 @@
 dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    scaling::check_variables(resp, "resp", old_names) ### add the name of package before the function
+    scaling::check_variables(resp, "resp", old_names)
 
     # Check for duplicates
-    scaling::check_items(old_names)     ### add the name of package before the function
-    if(!is.null(new_names)) scaling::check_items(new_names)  ### add the name of package before the function
+    scaling::check_items(old_names)
+    if(!is.null(new_names)) scaling::check_items(new_names)
 
     # Create new names if no names are provided
     if (is.null(new_names)) {
@@ -93,7 +93,7 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 pc_scoring <- function(resp, poly_items, mvs = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    scaling::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE) ### add the name of package before the function
+    scaling::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
 
     for (item in names(poly_items)) {
         subitems <- poly_items[[item]]
@@ -145,19 +145,15 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
                                          save = FALSE) {
 
     # Check whether variables are indeed contained in data.frames
-   ### check_logicals(vars, "vars", select) ### Deaktivate check_logicals for 'vars' because the variables from 'resp'(not from 'vars') are needed
-   ### polyt_items <- vars$item[vars[[select]]] ### Changed (see line below), because the variables are not taken from the record 'vars', but from the vars$item
     polyt_items <- vars$item[(vars$item %in% select) == TRUE]
-    scaling::check_numerics(resp, "resp", polyt_items) ### replace 'poly_items' by 'polyt_items' to avoid bug, because workspace already contains an object named poly_item
-                                                       ### add the name of package befor the function
-    scaling::check_items(polyt_items) ### replace 'poly_items' by 'polyt_items' to avoid bug, because workspace already contains an object named poly_item
-                                                       ### add the name of package befor the function
+    scaling::check_numerics(resp, "resp", polyt_items)
+    scaling::check_items(polyt_items)
 
     collapsed_items <- c()
     dichotomous_items <- c()
     problematic_items <- c()
 
-    for (item in polyt_items) { ### replace 'poly_items' by 'polyt_items' to avoid bug, because workspace already contains an object named poly_item
+    for (item in polyt_items) {
 
         response <- resp[[item]]
         tab <- table(response[response >= 0])
@@ -199,7 +195,7 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
     }
 
     # Which items have been collapsed?
-    item_names <- data_frame(
+    item_names <- tibble::tibble(
         original_item = collapsed_items,
         collapsed_item = paste0(collapsed_items, "_collapsed")
     )
@@ -230,7 +226,7 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
         save_table(results = list(collapsed = item_names,
                                   dichotomous = dichotomous_items,
                                   problematic = problematic_items),
-                   filename = "collapsed_items.rds",
+                   filename = "collapsed_items.xlsx",
                    path = path_table,
                    overwrite = TRUE,
                    show_rownames = TRUE)
@@ -257,9 +253,9 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
 min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    scaling::check_logicals(vars, "vars", select) ### add the name of package before the function
+    scaling::check_logicals(vars, "vars", select)
     items <- vars$item[vars[[select]]]
-    scaling::check_numerics(resp, "resp", items)  ### add the name of package before the function
+    scaling::check_numerics(resp, "resp", items)
     resp_ <- resp[ , items]
 
     # Set minimum number of valid values
@@ -310,8 +306,8 @@ min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 pos_new <- function(vars, select, position) {
 
     # Check whether variables are indeed contained in data.frames
-    scaling::check_logicals(vars, "vars", select) ### add the name of package before the function
-    scaling::check_numerics(vars, "vars", position, check_invalid = TRUE) ### add the name of package before the function
+    scaling::check_logicals(vars, "vars", select)
+    scaling::check_numerics(vars, "vars", position, check_invalid = TRUE)
 
     if (length(position) == 1) {
 
@@ -357,21 +353,21 @@ calculate_age <- function(resp,
                           test_year, test_month, test_day = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    scaling::check_variables(resp, "resp", c(birth_year, birth_month, ### add the name of package before the function
+    scaling::check_variables(resp, "resp", c(birth_year, birth_month,
                                     test_year, test_month))
 
     # Check whether birth and test day exist and if not, replace with default 15
     if (is.null(birth_day)) {
         bday <- 15
     } else {
-        scaling::check_variables(resp, "resp", birth_day) ### add the name of package before the function
+        scaling::check_variables(resp, "resp", birth_day)
         bday <- resp[[birth_day]]
     }
 
     if (is.null(test_day)) {
         tday <- 15
     } else {
-        scaling::check_variables(resp, "resp", test_day) ### add the name of package before the function
+        scaling::check_variables(resp, "resp", test_day)
         tday <- resp[[test_day]]
     }
 
