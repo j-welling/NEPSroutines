@@ -31,7 +31,7 @@
 create_suf <- function(resp, vars, select, competence,
                        scores = NULL, score_name = NULL,
                        mvs = NULL, items_labels = NULL,
-                       name_group = NULL, path = here::here('SUF'),
+                       name_group = NULL, path = here::here('suf'),
                        save = TRUE, return = TRUE, warn = TRUE) {
 
   # Test data
