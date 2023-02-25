@@ -276,6 +276,7 @@ create_scores <- function(resp, vars, scoring = NULL,
       valid = valid,
       var_name = meta_var_name,
       score_name = meta_score_name,
+      max_cat = max_cat,                  
       mvs = mvs
     )
     if (wle | sum_score) {
@@ -318,6 +319,8 @@ create_scores <- function(resp, vars, scoring = NULL,
 #'   which items to use for the analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
+#' @param maxCat string; defines name of numeric variable in vars that indicates
+#'  the maximum number of response options for the items
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param scoring  string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
@@ -328,10 +331,15 @@ create_scores <- function(resp, vars, scoring = NULL,
 #'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
 #'
 #' @noRd
-estimate_sum_scores <- function(resp, vars, select, maxCat,
+estimate_sum_scores <- function(resp,
+                                vars,
+                                select,
+                                maxCat,
                                 valid = NULL,
-                                mvs = NULL, scoring = NULL,
-                                poly2dich = TRUE, score_name = "score") {
+                                mvs = NULL,
+                                scoring = NULL,
+                                poly2dich = TRUE,
+                                score_name = "score") {
 
   if (is.null(maxCat)) stop("No name for variable containing the maximum number of response options for the items provided.")
 
@@ -500,24 +508,35 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
 #' @param var_name  string; defines name of meta competence variable in resp
 #' @param score_name string; name of the scores -- WITHOUT extension (e.g.,
 #'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
+#' @param max_cat string; defines name of numeric variable in vars that indicates
+#'  the maximum number of response options for the items
 #' @param mvs  named integer vector; contains user-defined missing values
-#'
 #' @returns data.frame with the three variables ID_t, proportion correct ("_sc5")
 #' & difference score ("_sc6")
 #'
 #' @noRd
-estimate_metap <- function(resp, vars, select, valid = NULL,
-                           var_name, score_name = NULL,
+estimate_metap <- function(resp,
+                           vars,
+                           select,
+                           valid = NULL,
+                           var_name,
+                           score_name = NULL,
+                           max_cat,
                            mvs = NULL) {
 
   if (is.null(var_name)) stop("No name for meta score variable provided.")
   if (is.null(score_name)) score_name <- "score"
 
+
   # Calculate sum scores
   sss <- scaling:::estimate_sum_scores(
-    resp = resp, vars = vars, select = select,
+    resp = resp,
+    vars = vars,
+    select = select,
     maxCat = max_cat,
-    valid = valid, mvs = mvs, poly2dich = TRUE)
+    valid = valid,
+    mvs = mvs,
+    poly2dich = TRUE)
 
   # Estimated score
   es <- resp[, c("ID_t", var_name)]
