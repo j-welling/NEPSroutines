@@ -129,12 +129,6 @@ create_scores <- function(resp, vars, scoring = NULL,
                           # digits = 3, verbose = TRUE,                         # commented out because linking is not yet implemented
                           warn = TRUE) {
 
-  # Test data
-  scaling:::check_logicals(vars, "vars", select, warn = warn)
-  scaling:::check_logicals(resp, "resp", valid, warn = warn)
-  scaling:::check_items(vars$item[vars[[select]]])
-  scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
-  scaling:::check_pid(resp$ID_t)
 
   if (!is.null(scoring))
     scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
@@ -193,6 +187,13 @@ create_scores <- function(resp, vars, scoring = NULL,
   # Estimate (unrotated) WLEs and SEs
   if (wle) {
 
+    # Test data
+    scaling:::check_logicals(vars, "vars", select, warn = warn)
+    scaling:::check_logicals(resp, "resp", valid, warn = warn)
+    scaling:::check_items(vars$item[vars[[select]]])
+    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+    scaling:::check_pid(resp$ID_t)
+
     if (is.null(facet) | (!is.null(facet) & is.null(xsi_fixed))) {
       fit <- scaling:::irt_analysis(
         resp = resp,
@@ -247,7 +248,14 @@ create_scores <- function(resp, vars, scoring = NULL,
 
   # Estimate sum scores
   if (sum_score) {
-    sum_select <- ifelse(is.null(sum_select), select, sum_select)
+
+    # Test data
+    scaling:::check_logicals(vars, "vars", sum_select, warn = warn)
+    scaling:::check_logicals(resp, "resp", valid, warn = warn)
+    scaling:::check_items(vars$item[vars[[sum_select]]])
+    scaling:::check_numerics(resp, "resp", vars$item[vars[[sum_select]]])
+    scaling:::check_pid(resp$ID_t)
+
     sss <- scaling:::estimate_sum_scores(
       resp = resp,
       vars = vars,
@@ -267,8 +275,15 @@ create_scores <- function(resp, vars, scoring = NULL,
   }
 
   if (metap) {
-    meta_select <- ifelse(is.null(meta_select), select, meta_select)
     meta_score_name <- ifelse(is.null(meta_score_name), score_name, meta_score_name)
+
+    # Test data
+    scaling:::check_logicals(vars, "vars", meta_select, warn = warn)
+    scaling:::check_logicals(resp, "resp", valid, warn = warn)
+    scaling:::check_items(vars$item[vars[[meta_select]]])
+    scaling:::check_numerics(resp, "resp", vars$item[vars[[meta_select]]])
+    scaling:::check_pid(resp$ID_t)
+
     metas <- scaling:::estimate_metap(
       resp = resp,
       vars = vars,
@@ -276,7 +291,7 @@ create_scores <- function(resp, vars, scoring = NULL,
       valid = valid,
       var_name = meta_var_name,
       score_name = meta_score_name,
-      max_cat = max_cat,                  
+      max_cat = max_cat,
       mvs = mvs
     )
     if (wle | sum_score) {
