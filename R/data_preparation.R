@@ -63,8 +63,10 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
 #' @export
 duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 
-    vars_new <- vars[vars$item %in% old_names, ]
-    vars_new$item <- new_names
+  vars_new <- vars[vars$item %in% old_names, ]
+  vars_new <- vars_new[match(old_names, vars_new$item), ]
+  vars_new$item <- new_names
+
     if (!is.null(change)) {
         for (c in seq_along(change)) {
             variable <- names(change[c])
