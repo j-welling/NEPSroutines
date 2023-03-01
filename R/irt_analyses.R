@@ -847,7 +847,7 @@ steps_analysis <- function(pcm_model, digits = 3, save = TRUE, overwrite = FALSE
   # sum 0 constraint for last step
   for (i in seq_len(nrow(steps))) {
     steps[i, seq_len(ncol(steps))[is.na(pars[i, ])][1]] <-
-      format(1 * sum(pars[i, ], na.rm = TRUE), nsmall = digits)
+      format(-1 * sum(pars[i, ], na.rm = TRUE), nsmall = digits)
   }
 
   # convert to data.frame
