@@ -1,6 +1,6 @@
 #' Number of valid cases
 #'
-#' @param dat  data.frame; contains sociodemographic and booklet variables
+#' @param resp  data.frame; contains sociodemographic and booklet variables
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #'
@@ -8,16 +8,16 @@
 #'
 #' @export
 
-n_valid <- function(dat, valid = NULL) {
+n_valid <- function(resp, valid = NULL) {
 
-    scaling:::check_logicals(dat, "dat", valid, warn = TRUE)
+    scaling:::check_logicals(resp, "resp", valid, warn = TRUE)
 
     if (!is.null(valid)) {
-        n_inval <- sum(!dat[[valid]])
-        n_val <- sum(dat[[valid]])
+        n_inval <- sum(!resp[[valid]])
+        n_val <- sum(resp[[valid]])
     } else {
         n_inval <- 0
-        n_val <- nrow(dat)
+        n_val <- nrow(resp)
         warn("No variable to identify (in)valid cases provided. Thus, all cases are counted as valid.")
     }
 
@@ -28,7 +28,7 @@ n_valid <- function(dat, valid = NULL) {
 
 #' Descriptives of continuous variables
 #'
-#' @param dat  data.frame; contains sociodemographic and booklet variables
+#' @param resp  data.frame; contains sociodemographic and booklet variables
 #' @param desc  character vector; contains the name(s) of the variable(s) that
 #' shall be used in analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
@@ -42,14 +42,14 @@ n_valid <- function(dat, valid = NULL) {
 #'
 #' @export
 
-desc_con <- function(dat, desc, valid = NULL, digits = 3,
+desc_con <- function(resp, desc, valid = NULL, digits = 3,
                      print = TRUE, return = FALSE) {
 
-    scaling:::check_variables(dat, "dat", c(desc, valid))
+    scaling:::check_variables(resp, "resp", c(desc, valid))
 
-    dat <- scaling:::only_valid(dat, valid = valid)
+    resp <- scaling:::only_valid(resp, valid = valid)
 
-    stats <- data.frame(sapply(dat[ , desc, drop = FALSE], function(x) {
+    stats <- data.frame(sapply(resp[ , desc, drop = FALSE], function(x) {
              d <- data.frame(psych::describe(x))
              d[, -c(1:2)] <- format(round(d[, -c(1:2)], digits), nsmall = digits)
              d
@@ -66,7 +66,7 @@ desc_con <- function(dat, desc, valid = NULL, digits = 3,
 
 #' Descriptives of nominal variables
 #'
-#' @param dat  data.frame; contains sociodemographic and booklet variables
+#' @param resp  data.frame; contains sociodemographic and booklet variables
 #' @param desc  character vector; contains the name(s) of the variable(s) that
 #' shall be used in analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
@@ -80,22 +80,22 @@ desc_con <- function(dat, desc, valid = NULL, digits = 3,
 #'
 #' @export
 
-desc_nom <- function(dat, desc, valid = NULL, digits = 2,
+desc_nom <- function(resp, desc, valid = NULL, digits = 2,
                      print = TRUE, return = FALSE) {
 
-    scaling:::check_variables(dat, "dat", c(desc, valid))
+    scaling:::check_variables(resp, "resp", c(desc, valid))
 
-    dat <- scaling:::only_valid(dat, valid = valid)
+    resp <- scaling:::only_valid(resp, valid = valid)
 
     descriptives <- list()
     descriptives$frequency_abs <- scaling:::desc_abs(
-        dat,
+        resp,
         desc = desc,
         valid = valid,
         warn = FALSE
     )
     descriptives$frequency_perc_NA <- scaling:::desc_perc(
-        dat,
+        resp,
         desc = desc,
         valid = valid,
         warn = FALSE,
@@ -103,7 +103,7 @@ desc_nom <- function(dat, desc, valid = NULL, digits = 2,
         digits = digits
     )
     descriptives$frequency_perc_noNA <- scaling:::desc_perc(
-        dat,
+        resp,
         desc = desc,
         valid = valid,
         warn = FALSE,
@@ -128,7 +128,7 @@ desc_nom <- function(dat, desc, valid = NULL, digits = 2,
 
 #' Show frequency (absolute) of answers of list of variables
 #'
-#' @param dat  data.frame; contains sociodemographic and booklet variables
+#' @param resp  data.frame; contains sociodemographic and booklet variables
 #' @param desc  character vector; contains the name(s) of the variable(s) that
 #' shall be used in analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
@@ -139,19 +139,19 @@ desc_nom <- function(dat, desc, valid = NULL, digits = 2,
 #'
 #' @export
 
-desc_abs <- function(dat, desc, valid = NULL, warn = TRUE) {
+desc_abs <- function(resp, desc, valid = NULL, warn = TRUE) {
 
-    scaling:::check_variables(dat, "dat", c(desc, valid))
+    scaling:::check_variables(resp, "resp", c(desc, valid))
 
-    dat <- scaling:::only_valid(dat, valid = valid, warn = warn)
+    resp <- scaling:::only_valid(resp, valid = valid, warn = warn)
 
-    sapply(dat[ , desc, drop = FALSE], function(x) {table(x, useNA = "always")})
+    sapply(resp[ , desc, drop = FALSE], function(x) {table(x, useNA = "always")})
 }
 
 
 #' Show frequency (relative) of answers of list of variables
 #'
-#' @param dat  data.frame; contains sociodemographic and booklet variables
+#' @param resp  data.frame; contains sociodemographic and booklet variables
 #' @param desc  character vector; contains the name(s) of the variable(s) that
 #' shall be used in analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
@@ -165,14 +165,14 @@ desc_abs <- function(dat, desc, valid = NULL, warn = TRUE) {
 #'
 #' @export
 
-desc_perc <- function(dat, desc, valid = NULL, warn = TRUE, useNA = 'always',
+desc_perc <- function(resp, desc, valid = NULL, warn = TRUE, useNA = 'always',
                       digits = 2) {
 
-    scaling:::check_variables(dat, "dat", c(desc, valid))
+    scaling:::check_variables(resp, "resp", c(desc, valid))
 
-    dat <- scaling:::only_valid(dat, valid = valid, warn = warn)
+    resp <- scaling:::only_valid(resp, valid = valid, warn = warn)
 
-    sapply(dat[ , desc, drop = FALSE], function(x) {
+    sapply(resp[ , desc, drop = FALSE], function(x) {
       d <- round(prop.table(table(x, useNA = useNA))*100, digits)
       paste0(d, "%")
       })
@@ -181,26 +181,26 @@ desc_perc <- function(dat, desc, valid = NULL, warn = TRUE, useNA = 'always',
 
 #' Show attributes of selected variables
 #'
-#' @param dat  data.frame; contains sociodemographic and booklet variables
+#' @param resp  data.frame; contains sociodemographic and booklet variables
 #' @param desc  character vector; contains the name(s) of the variable(s) that
 #' shall be used in analysis
 #' @export
 
-show_attributes <- function(dat, desc) {
+show_attributes <- function(resp, desc) {
 
-    scaling:::check_variables(dat, "dat", desc)
+    scaling:::check_variables(resp, "resp", desc)
 
     for (var in desc) {
         message("\nThe attributes for variable ", var, " are:\n")
-        print(attributes(dat[[var]])$labels)
+        print(attributes(resp[[var]])$labels)
     }
 }
 
 
 #' Table with sample size by groups
 #'
-#' @param dat  data.frame; contains grouping variable
-#' @param grouping string; defines name of variable in dat that identifies groups
+#' @param resp  data.frame; contains grouping variable
+#' @param grouping_variable string; defines name of variable in resp that identifies groups
 #' @param labels named character vector; links a label each value of groups
 #' (e.g. labels = c(easy = 1, difficult = 2))
 #' @param save  logical; whether to save the table in Excel
@@ -211,24 +211,24 @@ show_attributes <- function(dat, desc) {
 #' @return data.frame with sample size by groups.
 #' @export
 
-sample_by_group <- function(dat, grouping, labels = NULL, save = FALSE,
+sample_by_group <- function(resp, grouping_variable, labels = NULL, save = FALSE,
                             overwrite = FALSE, path = here::here("Tables"),
                             name_group = NULL) {
 
     # Check variable
-    scaling:::check_variables(dat, "dat", grouping)
+    scaling:::check_variables(resp, "resp", grouping_variable)
 
     # Create table with results
-    df <- as.data.frame.AsIs(table(dat[[grouping]]))
+    df <- as.data.frame.AsIs(table(resp[[grouping_variable]]))
     df <- rbind(df,sum(df))
     names(df) <- 'N'
     rownames(df)[nrow(df)] <- c("Total")
 
     # Add labels as row names
-    if(!is.null(labels) | !is.null(attributes(vars[[grouping]])$labels)) {
+    if(!is.null(labels) | !is.null(attributes(vars[[grouping_variable]])$labels)) {
         lbls <- scaling:::create_ifelse(
             is.null(labels),
-            attributes(vars[[grouping]])$labels,
+            attributes(vars[[grouping_variable]])$labels,
             labels
         )
         for (v in seq(nrow(df)-1)) {
@@ -242,7 +242,7 @@ sample_by_group <- function(dat, grouping, labels = NULL, save = FALSE,
     # Save results
     if (save) {
         name <- scaling:::create_name(
-            paste0("sample.size.by.", grouping),
+            paste0("sample.size.by.", grouping_variable),
             name_group,
             ".xlsx"
         )
@@ -265,7 +265,7 @@ sample_by_group <- function(dat, grouping, labels = NULL, save = FALSE,
 #' @param vars data.frame; contains information about the competence items
 #' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
-#' @param groups  character vector; contains for each group a name of a logical
+#' @param grouping  character vector; contains for each group a name of a logical
 #' variable in vars that indicates to which group belongs a person or an item
 #' @param properties character vector; defines name(s) of variable(s) in vars
 #' that identify item properties
