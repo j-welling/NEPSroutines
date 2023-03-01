@@ -283,13 +283,13 @@ sample_by_group <- function(resp, grouping_variable, labels = NULL, save = FALSE
 #' @return data.frame with item properties by groups.
 #' @export
 
-props_by_group <- function(vars, select, groups, properties, labels = NULL,
+props_by_group <- function(vars, select, grouping, properties, labels = NULL,
                            name_grouping = 'version', save = FALSE,
                            overwrite = FALSE, path = here::here("Tables"),
                            name_group = NULL, warn = TRUE) {
 
     # Check variables
-    scaling:::check_logicals(vars, "vars", c(select, groups), warn = warn)
+    scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
     scaling:::check_variables(vars, "vars", properties)
 
     # Select only necessary items and check for duplicates
@@ -302,8 +302,8 @@ props_by_group <- function(vars, select, groups, properties, labels = NULL,
     for (props in properties) {
 
       # Create empty dataframe
-      df <- data.frame(matrix(NA, length(unique(vars[[props]])) + 1, length(groups)))
-      names(df) <- groups
+      df <- data.frame(matrix(NA, length(unique(vars[[props]])) + 1, length(grouping)))
+      names(df) <- grouping
 
       # Add property labels as row names
       if(!is.null(labels[[props]]) | !is.null(attributes(vars[[props]])$labels)) {
@@ -320,7 +320,7 @@ props_by_group <- function(vars, select, groups, properties, labels = NULL,
       rownames(df)[nrow(df)] <- "Total number of items"
 
       # Fill dataframe
-      for (g in groups){
+      for (g in grouping){
         N <- as.data.frame.AsIs(table(vars[[props]][vars[[g]]]))
         N <- rbind(N,sum(N))
         df[[g]]<- N[seq(nrow(N)), ]
