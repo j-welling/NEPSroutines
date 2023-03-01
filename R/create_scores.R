@@ -178,9 +178,8 @@ create_scores <- function(resp, vars, scoring = NULL,
   #   names(wles_linked) <- c("ID_t", paste0(score_name, c("_sc1u", "_sc2u")))
   # } else {
   #   wles_linked <- NULL
+  #   linked_scores <- NULL
   # }
-
-  wles_linked <- NULL # !! delete this line when linking is implemented !!
 
   #############################################################################
 
@@ -242,8 +241,8 @@ create_scores <- function(resp, vars, scoring = NULL,
       names(wles) <- c("ID_t", paste0(score_name, c("_sc1", "_sc2")))
     }
 
-    if (!is.null(wles_linked))
-      wles <- merge(wles, wles_linked, by = "ID_t", all = TRUE)
+    # if (!is.null(wles_linked))                                                # commented out because linking is not yet implemented
+      # wles <- merge(wles, wles_linked, by = "ID_t", all = TRUE)               # commented out because linking is not yet implemented
   }
 
   # Estimate sum scores
@@ -274,6 +273,7 @@ create_scores <- function(resp, vars, scoring = NULL,
     }
   }
 
+  # Estimate metap scores
   if (metap) {
     meta_score_name <- ifelse(is.null(meta_score_name), score_name, meta_score_name)
 
@@ -302,11 +302,8 @@ create_scores <- function(resp, vars, scoring = NULL,
   }
 
   # Create results object
-  scores <- scaling:::create_ifelse(
-      !is.null(wles_linked),
-      list(wle = wles, linking = linked_scores),
-      wles
-  )
+  scores <- data.frame(wles) # !!delete this line when linking is implemeted!!
+  # scores <- list(wle = wles, linking = linked_scores)                         # commented out because linking is not yet implemented
 
   # Save results
   if (save) {
