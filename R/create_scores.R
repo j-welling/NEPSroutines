@@ -27,13 +27,13 @@
 #' @param sum_select string; defines name of logical variable in vars that indicates
 #'   which items to use for the analysis
 #'   (if identical to select, argument can be empty)
-#' @param max_cat string; defines name of numeric variable in vars that indicates
+#' @param num_cat string; defines name of numeric variable in vars that indicates
 #'  the maximum number of response options for the items
 #' @param metap logical; whether to calculate metacognition score
 #' @param meta_select string; defines name of logical variable in vars that
 #'   indicates which items to use for the meta cognition analysis
 #'   (if identical to select, argument can be empty)
-#' @param meta_var_name  string; defines name of meta competence variable in resp
+#' @param meta_variable  string; defines name of meta competence variable in resp
 #' @param meta_score_name string; name of the meta competence scores -- WITHOUT
 #'   extension (e.g., reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
 #' @param control_tam list; control argument as passed to tam.mml.mfr()
@@ -103,12 +103,12 @@
 #' @param warn  logical; whether to print warnings
 #'
 #' @export
-create_scores <- function(resp, vars, scoring = NULL,
-                          score_name = "score", xsi_fixed = NULL,
-                          facet = NULL, select, valid = NULL,
-                          mvs = NULL, wle = TRUE, sum_score = FALSE,
-                          sum_select = NULL, max_cat = NULL,
-                          metap = FALSE, meta_var_name = NULL,
+create_scores <- function(resp, vars, select, scoring = NULL,
+                          score_name = 'score', num_cat = 'num_cat',
+                          xsi_fixed = NULL, facet = NULL, valid = NULL,
+                          mvs = NULL, wle = TRUE,
+                          sum_score = FALSE, sum_select = NULL,
+                          metap = FALSE, meta_variable = NULL,
                           meta_score_name = NULL, meta_select = NULL,
                           control_tam = NULL, control_wle = NULL,
                           pweights = NULL, poly2dich = TRUE,
@@ -132,6 +132,9 @@ create_scores <- function(resp, vars, scoring = NULL,
 
   if (!is.null(scoring))
     scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+
+  if (sum_score | metap)
+    scaling:::check_variables(vars, "vars", num_cat)
 
   if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
 
@@ -248,6 +251,13 @@ create_scores <- function(resp, vars, scoring = NULL,
   # Estimate sum scores
   if (sum_score) {
 
+    # Select
+    if (is.null(sum_select)) {
+      sum_select <- select
+      warning("No variable 'sum_select' provided for sum scores. All items as ",
+              "specified in variable '", select, "' are used instead.")
+    }
+
     # Test data
     scaling:::check_logicals(vars, "vars", sum_select, warn = warn)
     scaling:::check_logicals(resp, "resp", valid, warn = warn)
@@ -259,7 +269,7 @@ create_scores <- function(resp, vars, scoring = NULL,
       resp = resp,
       vars = vars,
       select = sum_select,
-      maxCat = max_cat,
+      num_cat = num_cat,
       valid = valid,
       mvs = mvs,
       scoring = scoring,
@@ -275,11 +285,19 @@ create_scores <- function(resp, vars, scoring = NULL,
 
   # Estimate metap scores
   if (metap) {
+
+    # Test and prepare data
+    if (is.null(meta_variable)) stop("No argument 'meta_variable' provided.")
     meta_score_name <- ifelse(is.null(meta_score_name), score_name, meta_score_name)
 
-    # Test data
+    if (is.null(meta_select)) {
+      meta_select <- select
+      warning("No variable 'meta_select' provided for meta scores. All items as ",
+              "specified in variable '", select, "' are used instead.")
+    }
+
     scaling:::check_logicals(vars, "vars", meta_select, warn = warn)
-    scaling:::check_logicals(resp, "resp", valid, warn = warn)
+    scaling:::check_logicals(resp, "resp", c(valid, meta_variable), warn = warn)
     scaling:::check_items(vars$item[vars[[meta_select]]])
     scaling:::check_numerics(resp, "resp", vars$item[vars[[meta_select]]])
     scaling:::check_pid(resp$ID_t)
@@ -289,9 +307,9 @@ create_scores <- function(resp, vars, scoring = NULL,
       vars = vars,
       select = meta_select,
       valid = valid,
-      var_name = meta_var_name,
+      meta_variable = meta_variable,
       score_name = meta_score_name,
-      max_cat = max_cat,
+      num_cat = num_cat,
       mvs = mvs
     )
     if (wle | sum_score) {
@@ -303,7 +321,7 @@ create_scores <- function(resp, vars, scoring = NULL,
 
   # Create results object
   scores <- data.frame(wles) # !!delete this line when linking is implemeted!!
-  # scores <- list(wle = wles, linking = linked_scores)                         # commented out because linking is not yet implemented
+  # scores <- list(wle = wles, linking = linked_scores) # commented out because linking is not yet implemented
 
   # Save results
   if (save) {
@@ -331,7 +349,7 @@ create_scores <- function(resp, vars, scoring = NULL,
 #'   which items to use for the analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
-#' @param maxCat string; defines name of numeric variable in vars that indicates
+#' @param num_cat string; defines name of numeric variable in vars that indicates
 #'  the maximum number of response options for the items
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param scoring  string; defines name of numerical variable in vars that
@@ -346,14 +364,12 @@ create_scores <- function(resp, vars, scoring = NULL,
 estimate_sum_scores <- function(resp,
                                 vars,
                                 select,
-                                maxCat,
+                                num_cat = 'num_cat',
                                 valid = NULL,
                                 mvs = NULL,
                                 scoring = NULL,
                                 poly2dich = TRUE,
                                 score_name = "score") {
-
-  if (is.null(maxCat)) stop("No name for variable containing the maximum number of response options for the items provided.")
 
   # Prepare data
   resp_ <- only_valid(resp, valid = valid, warn = FALSE)
@@ -365,7 +381,7 @@ estimate_sum_scores <- function(resp,
   # Score polytomous items dichotomously
   if (poly2dich) {
     for (i in vars$item[vars[[select]]]) {
-      score <- vars[[maxCat]][vars$item==i]
+      score <- vars[[num_cat]][vars$item==i]
       resp_[[i]][resp_[[i]] != score] <- 0
       resp_[[i]][resp_[[i]] == score] <- 1
     }
@@ -517,10 +533,10 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
 #'   which items to use for the analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
-#' @param var_name  string; defines name of meta competence variable in resp
+#' @param meta_variable  string; defines name of meta competence variable in resp
 #' @param score_name string; name of the scores -- WITHOUT extension (e.g.,
 #'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
-#' @param max_cat string; defines name of numeric variable in vars that indicates
+#' @param num_cat string; defines name of numeric variable in vars that indicates
 #'  the maximum number of response options for the items
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @returns data.frame with the three variables ID_t, proportion correct ("_sc5")
@@ -531,27 +547,23 @@ estimate_metap <- function(resp,
                            vars,
                            select,
                            valid = NULL,
-                           var_name,
-                           score_name = NULL,
-                           max_cat,
+                           meta_variable,
+                           score_name = 'score',
+                           num_cat = 'num_cat',
                            mvs = NULL) {
-
-  if (is.null(var_name)) stop("No name for meta score variable provided.")
-  if (is.null(score_name)) score_name <- "score"
-
 
   # Calculate sum scores
   sss <- scaling:::estimate_sum_scores(
     resp = resp,
     vars = vars,
     select = select,
-    maxCat = max_cat,
+    num_cat = num_cat,
     valid = valid,
     mvs = mvs,
     poly2dich = TRUE)
 
   # Estimated score
-  es <- resp[, c("ID_t", var_name)]
+  es <- resp[, c("ID_t", meta_variable)]
 
   # Merge scores
   metap <- merge(sss, es, by = "ID_t", all = TRUE)
@@ -559,19 +571,19 @@ estimate_metap <- function(resp,
   # Recode meta-p string variables into numeric variables
   # Only integer numbers in the defined number range are considered valid
   k <- sum(vars[[select]]) # number of items
-  metap[[var_name]] <- as.numeric(metap[[var_name]])
-  metap[[var_name]][is.na(metap[[var_name]]) | metap[[var_name]] > k] <- -95
+  metap[[meta_variable]] <- as.numeric(metap[[meta_variable]])
+  metap[[meta_variable]][is.na(metap[[meta_variable]]) | metap[[meta_variable]] > k] <- -95
   metap$score_sc3[is.na(metap$score_sc3)] <- -95
 
   # Select valid cases
-  f <- metap[[var_name]] >= 0 & metap$score_sc3 >= 0
+  f <- metap[[meta_variable]] >= 0 & metap$score_sc3 >= 0
 
   # Calculate proportion correct
-  metap[[paste0(score_name, "_sc6")]][f] <- metap[[var_name]][f] / k
+  metap[[paste0(score_name, "_sc6")]][f] <- metap[[meta_variable]][f] / k
 
   # Calculate difference score
   metap[[paste0(score_name, "_sc5")]][f] <-
-    (metap[[var_name]][f] - metap$score_sc3[f]) / k
+    (metap[[meta_variable]][f] - metap$score_sc3[f]) / k
 
   # Format results
   metap <- metap[, c("ID_t", paste0(score_name, "_sc5"), paste0(score_name, "_sc6"))]
