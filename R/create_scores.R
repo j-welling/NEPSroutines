@@ -297,9 +297,9 @@ create_scores <- function(resp, vars, select, scoring = NULL,
     }
 
     scaling:::check_logicals(vars, "vars", meta_select, warn = warn)
-    scaling:::check_logicals(resp, "resp", c(valid, meta_variable), warn = warn)
+    scaling:::check_logicals(resp, "resp", valid, warn = warn)
     scaling:::check_items(vars$item[vars[[meta_select]]])
-    scaling:::check_numerics(resp, "resp", vars$item[vars[[meta_select]]])
+    scaling:::check_numerics(resp, "resp", c(meta_variable, vars$item[vars[[meta_select]]]))
     scaling:::check_pid(resp$ID_t)
 
     metas <- scaling:::estimate_metap(
