@@ -438,19 +438,44 @@ calculate_age <- function(resp,
 #' @param poly_items  list; contains character vector with subitems for each
 #' polytomous item, name of the vector is the name of the polytomous item (e.g.
 #' poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))
-#'
-#' @return   numeric vector with number of subitems/categories for all items
+#' @param select_suf string; defines name of logical variable in vars that indicates
+#' which items to use for the calculation (e.g. 'suf')
+#' @return   numeric vector with number of subitems/categories for the items to be included in suf
 #' @export
-calculate_num_cat <- function(vars, poly_items) {
+calculate_num_cat <- function(vars, poly_items = NULL, select_suf) {
 
-  # Create named vector with number of categories for each polytomous item
-  poly_cat <- sapply(poly_items, function(x) length(x))
-  names(poly_cat) <- names(poly_items)
+  # Check arguments
+  if (is.null(select_suf)) stop ("No items for suf provided")
 
-  # Create vector with number of categories for all items in vars
-  num_cat <- 1
-  for (item in names(poly_cat)) num_cat[vars$item == item] <- poly_cat[[item]]
+  # Test data
+  # scaling:::check_logicals(vars, "vars", select_suf, warn = warn)
+  
+ if(is.null(poly_items)) {
+	# Create vector with number of categories for items to be included in suf
+  	## All items get a value of 1 as the number of categories
+  	num_cat <- c()
+  	for(item in vars$item[vars[[select_suf]]])  (num_cat[vars$item==item] <- 1)  
+  	rm(item)
+ }
+  else {
+       	# Check arguments
+    	if (is.null(poly_items)) stop("No list of polytomous items with subitems provided")
+    
+  	# Create named vector with number of categories for each polytomous item
+  	poly_cat <- sapply(poly_items, function(x) length(x))
+ 	names(poly_cat) <- names(poly_items)
 
-  # Return vector
+ 	# Create vector with number of categories for items to be included in suf
+  	## At first, all items get a value of 1 as the number of categories
+  	num_cat <- c()
+  	for(item in vars$item[vars[[select_suf]]])  (num_cat[vars$item==item] <- 1)  
+  	rm(item)
+
+  	## Replace value of 1 by the correct number of categories for polytomous items
+  	for (item in names(poly_cat)) num_cat[vars$item == item] <- poly_cat[[item]]
+  	rm(item)
+  }
+
+  	# Return vector
   return(num_cat)
 }
