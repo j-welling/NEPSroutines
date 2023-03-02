@@ -36,8 +36,8 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
         } else if (is.factor(resp[[item]])) {
             resp[[item]] <- as.character(resp[[item]])
         }
-        correct <- vars$correct_response[vars$item == item]
-        resp[[new_names[i]]] <- ifelse(resp[[item]] == correct, 1,
+        correct <- strsplit(vars$correct_response[vars$item == item], ";")[[1]]
+        resp[[new_names[i]]] <- ifelse(resp[[item]] %in% correct, 1,
                                        ifelse(resp[[item]] < 0, resp[[item]], 0)
         ) %>% as.numeric()
     }
@@ -449,18 +449,18 @@ calculate_num_cat <- function(vars, poly_items = NULL, select_suf) {
 
   # Test data
   # scaling:::check_logicals(vars, "vars", select_suf, warn = warn)
-  
+
  if(is.null(poly_items)) {
 	# Create vector with number of categories for items to be included in suf
   	## All items get a value of 1 as the number of categories
   	num_cat <- c()
-  	for(item in vars$item[vars[[select_suf]]])  (num_cat[vars$item==item] <- 1)  
+  	for(item in vars$item[vars[[select_suf]]])  (num_cat[vars$item==item] <- 1)
   	rm(item)
  }
   else {
        	# Check arguments
     	if (is.null(poly_items)) stop("No list of polytomous items with subitems provided")
-    
+
   	# Create named vector with number of categories for each polytomous item
   	poly_cat <- sapply(poly_items, function(x) length(x))
  	names(poly_cat) <- names(poly_items)
@@ -468,7 +468,7 @@ calculate_num_cat <- function(vars, poly_items = NULL, select_suf) {
  	# Create vector with number of categories for items to be included in suf
   	## At first, all items get a value of 1 as the number of categories
   	num_cat <- c()
-  	for(item in vars$item[vars[[select_suf]]])  (num_cat[vars$item==item] <- 1)  
+  	for(item in vars$item[vars[[select_suf]]])  (num_cat[vars$item==item] <- 1)
   	rm(item)
 
   	## Replace value of 1 by the correct number of categories for polytomous items
