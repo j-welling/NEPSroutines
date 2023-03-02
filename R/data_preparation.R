@@ -438,19 +438,17 @@ calculate_age <- function(resp,
 #' @param poly_items  list; contains character vector with subitems for each
 #' polytomous item, name of the vector is the name of the polytomous item (e.g.
 #' poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))
-#' @param select_dich  string; name of logical variable in vars that identifies
-#' all dichotomous items for which number of categories is set to 1
 #'
 #' @return   numeric vector with number of subitems/categories for all items
 #' @export
-calculate_num_cat <- function(vars, poly_items, select_dich = 'dich') {
+calculate_num_cat <- function(vars, poly_items) {
 
   # Create named vector with number of categories for each polytomous item
   poly_cat <- sapply(poly_items, function(x) length(x))
   names(poly_cat) <- names(poly_items)
 
   # Create vector with number of categories for all items in vars
-  num_cat <- ifelse(vars[[select_dich]], 1, NA)
+  num_cat <- 1
   for (item in names(poly_cat)) num_cat[vars$item == item] <- poly_cat[[item]]
 
   # Return vector
