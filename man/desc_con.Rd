@@ -4,10 +4,10 @@
 \alias{desc_con}
 \title{Descriptives of continuous variables}
 \usage{
-desc_con(dat, desc, valid = NULL, digits = 3, print = TRUE, return = FALSE)
+desc_con(resp, desc, valid = NULL, digits = 3, print = TRUE, return = FALSE)
 }
 \arguments{
-\item{dat}{data.frame; contains sociodemographic and booklet variables}
+\item{resp}{data.frame; contains sociodemographic and booklet variables}
 
 \item{desc}{character vector; contains the name(s) of the variable(s) that
 shall be used in analysis}
@@ -22,7 +22,8 @@ shall be used in analysis}
 \item{return}{logical; whether results shall be returned}
 }
 \value{
-list with descriptives.
+list with descriptive statistics (n, mean, etc.) for each variable
+defined in 'desc'.
 }
 \description{
 Descriptives of continuous variables

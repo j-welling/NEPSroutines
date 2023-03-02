@@ -27,7 +27,8 @@ irt_model_fit(
 \item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 }
 \value{
-data.frame with AIC, BIC and number of parameters for both models
+data.frame with N, Deviance, AIC, BIC and number of parameters for
+both models.
 }
 \description{
 Create table with model fit for 1 parameter and 2 parameter IRT model.

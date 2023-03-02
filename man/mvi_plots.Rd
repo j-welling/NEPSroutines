@@ -15,14 +15,15 @@ mvi_plots(
     "not valid items", NR = "not reached items", TA =
     "missing items due to test abortion", UM = "unspecific missing items", ND =
     "not determinable items", NAd = "not administered items", AZ =
-    "missing items due to ''Angabe zurueckgesetzt''"),
+    "missing items due to 'Angabe zurueckgesetzt'"),
   path = here::here("Plots/Missing_Responses/by_item"),
+  name_group = NULL,
   name_grouping = "test version",
   show_all = TRUE,
+  labels_legend = NULL,
   verbose = TRUE,
   warn = TRUE,
-  test = TRUE,
-  labels_legend = NULL
+  test = TRUE
 )
 }
 \arguments{
@@ -46,19 +47,21 @@ missing values to use them in plot titles and printed results}
 
 \item{path}{string; defines path to folder where plots shall be saved}
 
-\item{name_grouping}{string; name of the grouping variable (e.g. test version)
+\item{name_group}{string; defines name of group used in analysis (e.g. 'settingA')}
+
+\item{name_grouping}{string; name of the grouping variable (e.g. 'test version')
 for title and legend of plots (only needed when grouping exists)}
 
 \item{show_all}{logical; whether whole sample shall be included as a "group"
 (only applicable when grouping exists)}
+
+\item{labels_legend}{character vector; contains legend labels}
 
 \item{verbose}{logical; whether to print processing information to console}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
 
 \item{test}{logical; whether to test data structure (should be set to TRUE)}
-
-\item{labels_legend}{character vector; contains legend labels}
 }
 \description{
 Plots the percentages of not reached missing values for each item by its

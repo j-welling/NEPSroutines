@@ -4,18 +4,36 @@
 \alias{dis_summary}
 \title{Summary of distractor analysis}
 \usage{
-dis_summary(distractors, digits = 3)
+dis_summary(
+  distractors,
+  digits = 3,
+  save = TRUE,
+  name_group = NULL,
+  path = here::here("Tables"),
+  overwrite = FALSE
+)
 }
 \arguments{
 \item{distractors}{return object of dis_analysis() function (list of
 data frames containing item-total correlations for each item)}
 
 \item{digits}{integer; number of decimals for rounding}
+
+\item{save}{logical; whether results shall be saved to hard drive}
+
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
+
+\item{path}{string; indicates the folder location where the results
+are stored on the hard drive; please note that the path is relative to the
+current working path set by here::i_am()}
+
+\item{overwrite}{logical; whether to overwrite existing file when saving table}
 }
 \value{
 list of data frames
-          correct : item-total correlations for correct responses
-          distractor : item-total correlations for distractors
+          correct: item-total correlations for correct responses
+          distractor: item-total correlations for distractors
+          descriptives: table with summary of results.
 }
 \description{
 Summary of distractor analysis

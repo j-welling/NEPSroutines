@@ -10,7 +10,9 @@ dif_summary(
   save = TRUE,
   path = here::here("Tables"),
   dif_threshold = 0.5,
-  overwrite = FALSE
+  overwrite = FALSE,
+  name_group = NUL,
+  digits = 3L
 )
 }
 \arguments{
@@ -26,10 +28,14 @@ dif_summary(
 problematic DIF (defaults to 0.5)}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
+
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
+
+\item{digits}{integer; number of decimals for rounding}
 }
 \value{
 list of information criteria, dif estimates and main effects in
-  data frames for dif analysis
+  data frames for dif analysis.
 }
 \description{
 Summary for DIF analysis

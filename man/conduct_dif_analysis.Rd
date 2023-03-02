@@ -15,6 +15,7 @@ conduct_dif_analysis(
   include_mv = 200,
   path = here::here("Results"),
   save = TRUE,
+  name_group = NULL,
   control = NULL,
   pweights = NULL,
   verbose = FALSE,
@@ -56,6 +57,8 @@ values should be included in analysis as an extra group (defaults to 200)}
 \item{path}{string; defines path to folder where results shall be saved}
 
 \item{save}{logical; whether results shall be saved to hard drive}
+
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 
 \item{control}{list; function argument as passed to TAM-functions}
 

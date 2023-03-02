@@ -17,7 +17,10 @@ dif_model(
   warn = TRUE,
   test = TRUE,
   control = NULL,
-  pweights = NULL
+  pweights = NULL,
+  save = TRUE,
+  path = here::here("Results"),
+  name_group = NULL
 )
 }
 \arguments{
@@ -61,11 +64,17 @@ values should be included in analysis as an extra group (defaults to 200)}
 
 \item{pweights}{character; defines name of numerical variable in resp that
 contains person weights as passed to TAM-function}
+
+\item{save}{logical; whether results shall be saved to hard drive}
+
+\item{path}{string; defines path to folder where results shall be saved}
+
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 }
 \value{
 a list of:
   mmod: main effects model
-  dmod: DIF effects model
+  dmod: DIF effects model.
 }
 \description{
 Testing for differential item functioning for binary and polytomous data.

@@ -40,7 +40,7 @@ which items to use for the analysis}
 \item{zap_labels}{logical; whether to convert haven_labelled to normal}
 }
 \value{
-data.frame as resp, but only with valid cases
+resp with some changes, depending on function arguments.
 }
 \description{
 Prepare resp for analysis

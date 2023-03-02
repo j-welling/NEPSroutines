@@ -6,20 +6,19 @@
 \usage{
 print_mvi_results(
   mv_i,
-  grouping = NULL,
+  name_grouping = "test version",
   labels_mvs = c(ALL = "total missing items", OM = "omitted items", NV =
     "not valid items", NR = "not reached items", TA =
     "missing items due to test abortion", UM = "unspecific missing items", ND =
     "not determinable items", NAd = "not administered items", AZ =
-    "missing items due to ''Angabe zurueckgesetzt''")
+    "missing items due to 'Angabe zurueckgesetzt'")
 )
 }
 \arguments{
 \item{mv_i}{list; return object of mvi_analysis()}
 
-\item{grouping}{character vector; contains for each group a name of a logical
-variable in resp and vars that indicates to which group belongs a person or
-an item}
+\item{name_grouping}{string; name of the grouping variable (e.g. test version)
+for title and legend of plots (only needed when grouping exists)}
 
 \item{labels_mvs}{named character vector; contains labels for user-defined
 missing values to use them in plot titles and printed results}

@@ -14,8 +14,9 @@ mvi_analysis(
   show_all = TRUE,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
     -21),
-  path = here::here("Data"),
+  path = here::here("Results"),
   save = TRUE,
+  name_group = NULL,
   digits = 3,
   warn = TRUE,
   test = TRUE
@@ -54,6 +55,8 @@ an item}
 
 \item{save}{logical; whether results shall be saved to hard drive}
 
+\item{name_group}{string; defines name of group used in analysis (e.g. 'settingA')}
+
 \item{digits}{integer; number of decimals for rounding}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
@@ -62,8 +65,8 @@ an item}
 }
 \value{
 list with percentages:
-           mvlist: percentages for each item
-           mvsum: summary statistics across items
+             list: percentages for each item
+             summary: summary statistics across items.
 }
 \description{
 Percentage of missing responses by item

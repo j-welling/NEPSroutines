@@ -32,11 +32,12 @@ linking(
   save = TRUE,
   return = FALSE,
   overwrite = FALSE,
+  name_group = NULL,
   verbose = TRUE,
   wid = NULL,
   dif_threshold = 0.5,
-  snodes = 0,
-  maxiter = 1000,
+  snodes = 5000,
+  maxiter = 10000,
   digits = 3,
   control_tam = NULL,
   do_dif = TRUE,
@@ -137,8 +138,9 @@ saved}
 
 \item{return}{logical; whether results shall be returned}
 
-\item{overwrite}{logical; whether to overwrite existing file when saving
-table}
+\item{overwrite}{logical; whether to overwrite existing file when saving table}
+
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 
 \item{verbose}{logical; verbose as passed to the TAM function}
 

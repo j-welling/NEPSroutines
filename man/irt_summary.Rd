@@ -16,7 +16,8 @@ irt_summary(
   name_group = NULL,
   digits = 3,
   overwrite = FALSE,
-  warn = TRUE
+  warn = TRUE,
+  test = TRUE
 )
 }
 \arguments{
@@ -51,9 +52,11 @@ variables that are further defined in the function arguments}
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
+
+\item{test}{logical; whether to test data structure (should be set to TRUE)}
 }
 \value{
-a data.frame containing the item name, N, percentage correct,
+a data.frame (for TR) containing the item name, N, percentage correct,
   item difficulty, SE, WMNSQ, t, rit, item discrimination, Q3.
 }
 \description{

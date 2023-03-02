@@ -4,10 +4,10 @@
 \alias{desc_perc}
 \title{Show frequency (relative) of answers of list of variables}
 \usage{
-desc_perc(dat, desc, valid = NULL, warn = TRUE, useNA = "always", digits = 2)
+desc_perc(resp, desc, valid = NULL, warn = TRUE, useNA = "always", digits = 2)
 }
 \arguments{
-\item{dat}{data.frame; contains sociodemographic and booklet variables}
+\item{resp}{data.frame; contains sociodemographic and booklet variables}
 
 \item{desc}{character vector; contains the name(s) of the variable(s) that
 shall be used in analysis}
@@ -23,7 +23,7 @@ shall be used in analysis}
 \item{digits}{integer; number of decimals for rounding}
 }
 \value{
-list with frequency (relative) of answers for each variable in desc.
+list (table) with relative frequencies for each variable in 'desc'.
 }
 \description{
 Show frequency (relative) of answers of list of variables

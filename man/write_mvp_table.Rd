@@ -10,7 +10,7 @@ write_mvp_table(mv_p)
 \item{mv_p}{list; return object of mv_person()}
 }
 \value{
-table with frequency of missing values for one missing value type
+table with frequency of missing values for one missing value type.
 }
 \description{
 Convert results of missing values by person to table

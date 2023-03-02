@@ -13,10 +13,10 @@ create_suf(
   score_name = NULL,
   mvs = NULL,
   items_labels = NULL,
-  filename = "suf",
-  path = here::here("Results"),
+  name_group = NULL,
+  path = here::here("suf"),
   save = TRUE,
-  return = FALSE,
+  return = TRUE,
   warn = TRUE
 )
 }
@@ -50,7 +50,7 @@ reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)}
 \item{items_labels}{vector; named vector for each item used for labelling
 the data}
 
-\item{filename}{character; indicates final name of SUF according to study}
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 
 \item{path}{character; indicates where SUF shall be saved}
 

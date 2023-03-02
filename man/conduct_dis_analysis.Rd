@@ -12,6 +12,10 @@ conduct_dis_analysis(
   select_score = "dich",
   correct = "correct_response",
   mvs = NULL,
+  save = TRUE,
+  name_group = NULL,
+  path = here::here("Results"),
+  digits = 3,
   warn = TRUE
 )
 }
@@ -23,13 +27,8 @@ are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variables 'item' (character) containing item names,
-                   'dich' (logical) indicating all dichotomously scored items
-                   'raw' (logical) indicating all unscored items,
-                   'type' (character) containing item type (e.g. MC),
-                   'correct_response' (integer) containing the correct
-                     response for each item,
-and all variables that are further defined in the function arguments}
+includes variables 'item' (character) containing item names and all variables
+that are further defined in the function arguments}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
@@ -45,7 +44,21 @@ correct responses to the items}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
 
+\item{save}{logical; whether results shall be saved to hard drive}
+
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
+
+\item{path}{string; indicates the folder location where the results
+are stored on the hard drive; please note that the path is relative to the
+current working path set by here::i_am()}
+
+\item{digits}{integer; number of decimals for rounding}
+
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
+}
+\value{
+list with one data frame per item containing item-total correlations
+  for each possible response; correct response is marked with an *.
 }
 \description{
 Calculates the item-rest correlations of distractor and correct responses

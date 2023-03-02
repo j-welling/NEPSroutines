@@ -23,8 +23,8 @@ check_link_dimensionality(
   mvs = NULL,
   anchors = NULL,
   verbose = FALSE,
-  maxiter = 1000,
-  snodes = 0,
+  maxiter = 10000,
+  snodes = 5000,
   warn = TRUE,
   test = TRUE
 )

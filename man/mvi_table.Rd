@@ -14,6 +14,7 @@ mvi_table(
   save = TRUE,
   path = here::here("Tables"),
   overwrite = FALSE,
+  name_group = NULL,
   test = TRUE,
   warn = TRUE
 )
@@ -40,12 +41,14 @@ an item}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 
+\item{name_group}{string; defines name of group used in analysis (e.g. 'settingA')}
+
 \item{test}{logical; whether to test data structure (should be set to TRUE)}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
 }
 \value{
-table with results
+table with summary statistics for TR.
 }
 \description{
 Plots the percentages of not reached missing values for each item by its

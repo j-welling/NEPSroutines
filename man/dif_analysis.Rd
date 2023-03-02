@@ -21,9 +21,11 @@ dif_analysis(
   pweights = NULL,
   path_results = here::here("Results"),
   path_table = here::here("Tables"),
+  name_group = NULL,
   verbose = FALSE,
   warn = TRUE,
-  dif_threshold = 0.5
+  dif_threshold = 0.5,
+  digits = 3
 )
 }
 \arguments{
@@ -74,17 +76,22 @@ contains person weights as passed to TAM-function}
 
 \item{path_table}{string; defines path to folder where tables shall be saved}
 
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
+
 \item{verbose}{logical; whether to print processing information to console}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
 
 \item{dif_threshold}{numeric scalar; indicates absolute threshold of
 problematic DIF (defaults to 0.5)}
+
+\item{digits}{integer; number of decimals for rounding}
 }
 \value{
-a list of:
-  mmod: main effects model
-  dmod: DIF effects model
+(if return = TRUE) a list of:
+  models: list with DIF model results for all variables defined in 'dif_vars'
+  summaries: list with a summary of DIF results for all variables defined in 'dif_vars'
+  tr_tables: table for TR with summary of results for all variables defined in 'dif_vars'
 }
 \description{
 Testing for differential item functioning for binary and polytomous data.

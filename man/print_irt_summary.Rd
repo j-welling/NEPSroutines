@@ -4,7 +4,7 @@
 \alias{print_irt_summary}
 \title{Print IRT results}
 \usage{
-print_irt_summary(model, irt_sum, steps_sum = NULL)
+print_irt_summary(model, irt_sum, steps_sum = NULL, digits = 3)
 }
 \arguments{
 \item{model}{list; return object of irt_model()}
@@ -12,6 +12,8 @@ print_irt_summary(model, irt_sum, steps_sum = NULL)
 \item{irt_sum}{data.frame; return object of irt_summary()}
 
 \item{steps_sum}{data.frame; return object of steps_analysis()}
+
+\item{digits}{integer; number of decimals for rounding}
 }
 \description{
 Print and highlight IRT (and steps) analysis results.

@@ -85,8 +85,8 @@ contains person weights as passed to TAM-function}
 as elements of the list}
 }
 \value{
-list with a list for each group with all results
-(as return object of irt_analysis())
+(if return = TRUE) list with a list for each group with all results
+(as return object of irt_analysis()) as list elements.
 }
 \description{
 IRT analyses for several groups

@@ -16,7 +16,7 @@ mv_person(
     "not valid items", NR = "not reached items", TA =
     "missing items due to test abortion", UM = "unspecific missing items", ND =
     "not determinable items", NAd = "not administered items", AZ =
-    "missing items due to ''Angabe zurueckgesetzt''"),
+    "missing items due to 'Angabe zurueckgesetzt'"),
   plots = FALSE,
   print = TRUE,
   save = TRUE,
@@ -26,6 +26,7 @@ mv_person(
   path_plots = here::here("Plots/Missing_Responses/by_person"),
   show_all = TRUE,
   overwrite = FALSE,
+  name_group = NULL,
   name_grouping = "test version",
   labels_legend = NULL,
   digits = 3,
@@ -76,6 +77,8 @@ missing values to use them in plot titles and printed results}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 
+\item{name_group}{string; defines name of group used in analysis (e.g. 'settingA')}
+
 \item{name_grouping}{string; name of the grouping variable (e.g. test version)
 for title and legend of plots (only needed when grouping exists)}
 
@@ -89,8 +92,9 @@ avoid problems with the data structure)}
 \item{verbose}{logical; whether to print processing information to console}
 }
 \value{
-(if return = TRUE) list with missing values per person and
-each missing value type (in percentage)
+(if return = TRUE) list with results:
+            mv_p: list with missing values per person and each missing value type (in percentage)
+            summary: table with summary statistics for TR.
 }
 \description{
 Missing values by person analysis

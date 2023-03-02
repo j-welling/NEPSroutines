@@ -4,14 +4,31 @@
 \alias{dim_summary}
 \title{Summary of dimensionality analysis (saves summary in excel sheet)}
 \usage{
-dim_summary(dimensionality)
+dim_summary(
+  dimensionality,
+  save = FALSE,
+  name_group = NULL,
+  overwrite = FALSE,
+  path = here::here("Tables"),
+  digits = 3
+)
 }
 \arguments{
 \item{dimensionality}{list with results of the conduct_dim_analysis function
 (or results$analysis from the dim_analysis function)}
+
+\item{save}{logical; whether table shall be saved to hard drive}
+
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
+
+\item{path}{string; defines path to folder where table shall be saved}
+
+\item{digits}{integer; number of decimals for rounding}
 }
 \value{
-data.frame of summary results
+list with summary of results:
+ Cor-Var X: variance-covariance matrix for each dimensionality model (= X)
+ Goodness of fit: table with number of parameters, Loglikelihood, AIC & BIC for each model.
 }
 \description{
 Summary of dimensionality analysis (saves summary in excel sheet)

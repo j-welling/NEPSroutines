@@ -8,7 +8,8 @@ build_dif_tr_tables(
   dif_summaries,
   save = TRUE,
   overwrite = FALSE,
-  path = here::here("Tables")
+  path = here::here("Tables"),
+  name_group = NULL
 )
 }
 \arguments{
@@ -22,9 +23,11 @@ elements must be named after their DIF variable}
 \item{path}{string; indicates the folder location where the summaries
 are stored on the hard drive; please note that the path is relative to the
 current working path set by here::i_am()}
+
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 }
 \value{
-table as shown in TR
+table with results for TR.
 }
 \description{
 Combine the individual DIF analysis results to excel tables that can be

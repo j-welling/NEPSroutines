@@ -13,15 +13,17 @@ dim_analysis(
   valid = NULL,
   mvs = NULL,
   irtmodel = "PCM2",
-  maxiter = 10,
-  snodes = 5,
+  maxiter = 10000,
+  snodes = 5000,
   return = FALSE,
   save = TRUE,
   print = TRUE,
   path_results = here::here("Results"),
   path_table = here::here("Tables"),
+  name_group = NULL,
   overwrite = TRUE,
-  verbose = FALSE
+  verbose = FALSE,
+  digits = 3
 )
 }
 \arguments{
@@ -68,12 +70,18 @@ to the number of dimensions!)}
 
 \item{path_table}{string; defines path to folder where tables shall be saved}
 
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
+
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 
 \item{verbose}{verbose as passed to the TAM function}
+
+\item{digits}{integer; number of decimals for rounding}
 }
 \value{
-list of results for each dimensional analysis
+(if return = TRUE) list of results:
+ analysis: list with results for each dimensionality model
+ summary: list with summary of results (variance-covariance matrices & model fit).
 }
 \description{
 Dimensionality analysis

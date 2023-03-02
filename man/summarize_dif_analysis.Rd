@@ -12,7 +12,9 @@ summarize_dif_analysis(
   save = TRUE,
   overwrite = FALSE,
   path_results = here::here("Results"),
-  path_table = here::here("Tables")
+  path_table = here::here("Tables"),
+  name_group = NULL,
+  digits = 3
 )
 }
 \arguments{
@@ -33,9 +35,13 @@ problematic DIF (defaults to 0.5)}
 \item{path_results}{string; defines path to folder where results shall be saved}
 
 \item{path_table}{string; defines path to folder where tables shall be saved}
+
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
+
+\item{digits}{integer; number of decimals for rounding}
 }
 \value{
-a list of dif summaries for each input entry in dif_models
+a list of dif summaries for each input entry in dif_models.
 }
 \description{
 summarize DIF analysis

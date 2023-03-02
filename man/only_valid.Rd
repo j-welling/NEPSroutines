@@ -15,7 +15,7 @@ only_valid(resp, valid = NULL, warn = TRUE)
 \item{warn}{logical; whether to warn if no parameter 'valid' provided}
 }
 \value{
-data.frame as resp, but only with valid cases
+resp without invalid cases.
 }
 \description{
 Select only valid cases

@@ -14,6 +14,7 @@ mvp_analysis(
     -21),
   save = TRUE,
   path = here::here("Results"),
+  name_group = NULL,
   digits = 3,
   warn = TRUE,
   test = TRUE
@@ -44,6 +45,8 @@ an item}
 
 \item{path}{string; defines path to folder where results shall be saved}
 
+\item{name_group}{string; defines name of group used in analysis (e.g. 'settingA')}
+
 \item{digits}{integer; number of decimals for rounding}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
@@ -51,8 +54,8 @@ an item}
 \item{test}{logical; whether to test data structure (should be set to TRUE)}
 }
 \value{
-list with missing values per person and
-for each missing value type (in percentage) is returned
+list with missing values per person and for each missing value type
+(in percentage).
 }
 \description{
 Percentage of missing responses by person

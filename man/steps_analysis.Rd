@@ -27,7 +27,7 @@ steps_analysis(
 \item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 }
 \value{
-a data.frame containing the step parameters and SEs for each step
+a data.frame containing the step parameters and SEs for each step.
 }
 \description{
 Create table with pcm_model of step analysis.

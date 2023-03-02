@@ -12,6 +12,7 @@ mvp_table(
     -21),
   save = TRUE,
   path = here::here("Tables"),
+  name_group = NULL,
   test = TRUE
 )
 }
@@ -22,7 +23,7 @@ mvp_table(
 variable in resp and vars that indicates to which group belongs a person or
 an item}
 
-\item{overwrite}{boolean; indicates whether to overwrite existing file when saving table.}
+\item{overwrite}{boolean; indicates whether to overwrite existing file when saving table}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
 
@@ -30,11 +31,13 @@ an item}
 
 \item{path}{string; defines path to folder where table shall be saved}
 
+\item{name_group}{string; defines name of group used in analysis (e.g. 'settingA')}
+
 \item{test}{logical; whether to test data structure (should be set to TRUE)}
 }
 \value{
-table with missing values per person and
-for each missing value type (in percentage)
+table with missing values per person and for each missing value type
+(in percentage) as well as summary statistics for TR.
 }
 \description{
 Plots the percentages of not reached missing values for each item by its

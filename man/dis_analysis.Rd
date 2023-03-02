@@ -12,6 +12,7 @@ dis_analysis(
   select_raw,
   select_score = "dich",
   correct = "correct_response",
+  name_group = NULL,
   save = TRUE,
   print = TRUE,
   return = FALSE,
@@ -30,12 +31,8 @@ are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
-includes variables 'item' (character) containing item names,
-                   'raw' (logical) indicating unscored items,
-                   'type' (character) containing item type (e.g. MC),
-                   'correct_response' (integer) containing the correct
-                     response for each item,
-and all variables that are further defined in the function arguments}
+includes variables 'item' (character) containing item names and all variables
+that are further defined in the function arguments}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
@@ -50,6 +47,8 @@ indicates all items that shall be used to caculate total score}
 
 \item{correct}{string; defines name of variable in vars that contains the
 correct responses to the items}
+
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 
 \item{save}{logical; whether results shall be saved to hard drive}
 
@@ -72,8 +71,10 @@ current working path set by here::i_am()}
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
 }
 \value{
-list of one data frame per item containing item-total correlations
-  for each possible response; correct response is marked with an *
+(if return = TRUE) list with results:
+  analysis: list with one data frame per item containing item-total correlations
+    for each possible response; correct response is marked with an *
+  summary: list with summary of results.
 }
 \description{
 Checks how the distractors in multiple choice items functioned.

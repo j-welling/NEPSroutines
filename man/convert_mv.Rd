@@ -21,7 +21,7 @@ which items to use for the analysis}
 \item{warn}{logical; whether warnings are to be printed to the console}
 }
 \value{
-data.frame like resp, but without user-defined mvs
+resp without user-defined missing values.
 }
 \description{
 User defined missing values (usually coded as negative numbers) must be

@@ -4,10 +4,10 @@
 \alias{show_attributes}
 \title{Show attributes of selected variables}
 \usage{
-show_attributes(dat, desc)
+show_attributes(resp, desc)
 }
 \arguments{
-\item{dat}{data.frame; contains sociodemographic and booklet variables}
+\item{resp}{data.frame; contains sociodemographic and booklet variables}
 
 \item{desc}{character vector; contains the name(s) of the variable(s) that
 shall be used in analysis}

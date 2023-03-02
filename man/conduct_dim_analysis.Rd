@@ -12,10 +12,13 @@ conduct_dim_analysis(
   scoring = "scoring",
   valid = NULL,
   irtmodel,
-  maxiter,
-  snodes,
+  maxiter = 10000,
+  snodes = 5000,
   mvs = NULL,
   verbose = FALSE,
+  save = TRUE,
+  name_group = NULL,
+  path = here::here("Results"),
   warn = TRUE,
   test = TRUE
 )
@@ -56,12 +59,18 @@ contains the scoring factor to be applied to loading matrix; defaults to
 
 \item{verbose}{verbose as passed to the TAM function}
 
+\item{save}{logical; whether results shall be saved to hard drive}
+
+\item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
+
+\item{path}{string; defines path to folder where results shall be saved}
+
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}
 
 \item{test}{logical; whether to test data structure (should be set to TRUE)}
 }
 \value{
-list of results for each dimensional analysis
+list with results for each dimensionality model.
 }
 \description{
 Conduct dimensionality analysis

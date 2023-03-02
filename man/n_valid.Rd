@@ -4,16 +4,16 @@
 \alias{n_valid}
 \title{Number of valid cases}
 \usage{
-n_valid(dat, valid = NULL)
+n_valid(resp, valid = NULL)
 }
 \arguments{
-\item{dat}{data.frame; contains sociodemographic and booklet variables}
+\item{resp}{data.frame; contains sociodemographic and booklet variables}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
 }
 \value{
-character string with answer.
+character string containing the numbers of valid and invalid cases.
 }
 \description{
 Number of valid cases

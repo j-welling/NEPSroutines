@@ -73,14 +73,14 @@ as elements of the list}
 \item{test}{logical; whether to test data structure (should be set to TRUE)}
 }
 \value{
-(if return_results = TRUE) a list of:
+list with results:
   mod: tam.mml; estimated item response model
   fit: data.frame; item fit (WMNSQ) of the model
   pars: data.frame; item difficulties and scoring parameters with respective standard errors
   mfit: data.frame; (adjusted) Yen's Q3 statistics of the model
   wle: data.frame; WLEs for the model
   wle_rel: numeric; WLE reliability of the model
-  info_crit: data.frame with information criteria of the model
+  info_crit: data.frame with information criteria of the model.
 }
 \description{
 Perform Rasch or 2PL analyses for binary or PCM or GPCM analyses for
