@@ -17,11 +17,11 @@
 dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    scaling::check_variables(resp, "resp", old_names)
+    scaling:::check_variables(resp, "resp", old_names)
 
     # Check for duplicates
-    scaling::check_items(old_names)
-    if(!is.null(new_names)) scaling::check_items(new_names)
+    scaling:::check_items(old_names)
+    if(!is.null(new_names)) scaling:::check_items(new_names)
 
     # Create new names if no names are provided
     if (is.null(new_names)) {
@@ -70,7 +70,7 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
     if (!is.null(change)) {
         for (c in seq_along(change)) {
             variable <- names(change[c])
-            new_value <- change[c]
+            new_value <- change[[c]]
             vars_new[[variable]] <- new_value
             class(vars_new[[variable]]) <- class(vars[[variable]])
         }
@@ -95,7 +95,7 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 pc_scoring <- function(resp, poly_items, mvs = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    scaling::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
+    scaling:::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
 
     for (item in names(poly_items)) {
         subitems <- poly_items[[item]]
@@ -149,8 +149,8 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
 
   # Check whether variables are indeed contained in data.frames
   polyt_items <- vars$item[(vars$item %in% select) == TRUE]
-  scaling::check_numerics(resp, "resp", polyt_items)
-  scaling::check_items(polyt_items)
+  scaling:::check_numerics(resp, "resp", polyt_items)
+  scaling:::check_items(polyt_items)
 
   collapsed_items <- c()
   dichotomous_items <- c()
@@ -276,9 +276,9 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
 min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    scaling::check_logicals(vars, "vars", select)
+    scaling:::check_logicals(vars, "vars", select)
     items <- vars$item[vars[[select]]]
-    scaling::check_numerics(resp, "resp", items)
+    scaling:::check_numerics(resp, "resp", items)
     resp_ <- resp[ , items]
 
     # Set minimum number of valid values
@@ -329,8 +329,8 @@ min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 pos_new <- function(vars, select, position) {
 
     # Check whether variables are indeed contained in data.frames
-    scaling::check_logicals(vars, "vars", select)
-    scaling::check_numerics(vars, "vars", position, check_invalid = TRUE)
+    scaling:::check_logicals(vars, "vars", select)
+    scaling:::check_numerics(vars, "vars", position, check_invalid = TRUE)
 
     if (length(position) == 1) {
 
@@ -376,21 +376,23 @@ calculate_age <- function(resp,
                           test_year, test_month, test_day = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    scaling::check_variables(resp, "resp", c(birth_year, birth_month,
-                                    test_year, test_month))
+    scaling:::check_variables(
+        resp, "resp",
+        c(birth_year, birth_month, test_year, test_month)
+    )
 
     # Check whether birth and test day exist and if not, replace with default 15
     if (is.null(birth_day)) {
         bday <- 15
     } else {
-        scaling::check_variables(resp, "resp", birth_day)
+        scaling:::check_variables(resp, "resp", birth_day)
         bday <- resp[[birth_day]]
     }
 
     if (is.null(test_day)) {
         tday <- 15
     } else {
-        scaling::check_variables(resp, "resp", test_day)
+        scaling:::check_variables(resp, "resp", test_day)
         tday <- resp[[test_day]]
     }
 
@@ -444,38 +446,25 @@ calculate_age <- function(resp,
 #' @export
 calculate_num_cat <- function(vars, poly_items = NULL, select_suf) {
 
-  # Check arguments
-  if (is.null(select_suf)) stop ("No items for suf provided")
-
   # Test data
-  # scaling:::check_logicals(vars, "vars", select_suf, warn = warn)
+  scaling:::check_logicals(vars, "vars", select_suf, warn = TRUE)
 
- if(is.null(poly_items)) {
-	# Create vector with number of categories for items to be included in suf
-  	## All items get a value of 1 as the number of categories
-  	num_cat <- c()
-  	for(item in vars$item[vars[[select_suf]]])  (num_cat[vars$item==item] <- 1)
-  	rm(item)
- }
-  else {
-       	# Check arguments
-    	if (is.null(poly_items)) stop("No list of polytomous items with subitems provided")
+  # Create vector with number of categories for items to be included in suf
+  ## All items get a value of 1 as the number of categories
+  num_cat <- c()
+  for(item in vars$item[vars[[select_suf]]]) (num_cat[vars$item==item] <- 1)
+  rm(item)
+
+  if(!is.null(poly_items)) {
 
   	# Create named vector with number of categories for each polytomous item
   	poly_cat <- sapply(poly_items, function(x) length(x))
  	names(poly_cat) <- names(poly_items)
 
- 	# Create vector with number of categories for items to be included in suf
-  	## At first, all items get a value of 1 as the number of categories
-  	num_cat <- c()
-  	for(item in vars$item[vars[[select_suf]]])  (num_cat[vars$item==item] <- 1)
-  	rm(item)
-
-  	## Replace value of 1 by the correct number of categories for polytomous items
+  	# Replace value of 1 by the correct number of categories for polytomous items
   	for (item in names(poly_cat)) num_cat[vars$item == item] <- poly_cat[[item]]
-  	rm(item)
   }
 
-  	# Return vector
+  # Return vector
   return(num_cat)
 }
