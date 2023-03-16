@@ -22,6 +22,8 @@
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
+#' @param missing_by_design  numeric; user defined missing value for missing by
+#' design (is necessary for calculating N_administered)
 #' @param wle logical; whether to estimate WLEs
 #' @param sum_score logical; whether to calculate sum scores
 #' @param sum_select string; defines name of logical variable in vars that indicates
@@ -106,7 +108,7 @@
 create_scores <- function(resp, vars, select, scoring = NULL,
                           score_name = 'score', num_cat = 'num_cat',
                           xsi_fixed = NULL, facet = NULL, valid = NULL,
-                          mvs = NULL, wle = TRUE,
+                          mvs = NULL, missing_by_design = -54, wle = TRUE,
                           sum_score = FALSE, sum_select = NULL,
                           metap = FALSE, meta_variable = NULL,
                           meta_score_name = NULL, meta_select = NULL,
@@ -203,6 +205,7 @@ create_scores <- function(resp, vars, select, scoring = NULL,
         select = select,
         valid = valid,
         mvs = mvs,
+        missing_by_design = missing_by_design,
         scoring = scoring,
         xsi.fixed = xsi_fixed,
         verbose = FALSE,

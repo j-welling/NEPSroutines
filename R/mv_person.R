@@ -14,6 +14,8 @@
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
 #' @param mvs  named integer vector; contains user-defined missing values
+#' @param missing_by_design  integer; user defined missing value for missing by
+#' design
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
 #' @param plots  logical; whether plots shall be created and saved to hard drive
@@ -44,7 +46,7 @@
 
 mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                              UM = -90, ND = -55, NAd = -54, AZ = -21),
+                              UM = -90, ND = -55, MD = -54, AZ = -21),
                       labels_mvs = c(
                           ALL = "total missing items",
                           OM = "omitted items",
@@ -53,9 +55,10 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
                           TA = "missing items due to test abortion",
                           UM = "unspecific missing items",
                           ND = "not determinable items",
-                          NAd = "not administered items",
+                          MD = "items missing by design",
                           AZ = "missing items due to 'Angabe zurueckgesetzt'"
                       ),
+                      missing_by_design = -54,
                       plots = FALSE, print = TRUE, save = TRUE, return = FALSE,
                       path_results = here::here("Results"),
                       path_table = here::here("Tables"),
@@ -72,6 +75,9 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
     scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
     if (warn) scaling:::is_null_mvs_valid(valid = valid)
 
+    # Missing by design
+    if (!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
+
     # Create list for results
     mv_person <- list()
 
@@ -82,6 +88,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
       select = select,
       valid = valid,
       mvs = mvs,
+      missing_by_design = missing_by_design,
       grouping = grouping,
       digits = digits,
       warn = warn,
@@ -157,6 +164,8 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
 #' @param mvs  named integer vector; contains user-defined missing values
+#' @param missing_by_design  integer; user defined missing value for missing by
+#' design
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where results shall be saved
 #' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
@@ -171,7 +180,8 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
 
 mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                                 UM = -90, ND = -55, NAd = -54, AZ = -21),
+                                 UM = -90, ND = -55, MD = -54, AZ = -21),
+                         missing_by_design = -54,
                          save = TRUE, path = here::here("Results"),
                          name_group = NULL, digits = 3, warn = TRUE, test = TRUE) {
 
@@ -185,9 +195,11 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
     }
 
     # NAs are not acknowledged in mvs-argument
-    if (!(NA %in% mvs) & any(resp %in% NA)) {
+    if (warn & any(resp %in% NA))
         warning("NAs found in resp! These values are ignored.")
-    }
+
+    # Missing by design
+    if(!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
 
     # Create list for results
     mv_p <- list()
@@ -266,14 +278,12 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
 
 mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                              UM = -90, ND = -55, NAd = -54, AZ = -21),
+                              UM = -90, ND = -55, MD = -54, AZ = -21),
                       save = TRUE, path = here::here("Tables"),
                       name_group = NULL, test = TRUE) {
 
     # Test data
-    if (test) {
-        scaling:::test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
-    }
+    if (test) scaling:::test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
 
     # Create table
     if (is.null(grouping)) {
@@ -360,7 +370,7 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
 
 mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                              UM = -90, ND = -55, NAd = -54, AZ = -21),
+                              UM = -90, ND = -55, MD = -54, AZ = -21),
                       labels_mvs = c(
                           ALL = "total missing items",
                           OM = "omitted items",
@@ -369,7 +379,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                           TA = "missing items due to test abortion",
                           UM = "unspecific missing items",
                           ND = "not determinable items",
-                          NAd = "not administered items",
+                          MD = "items missing by design",
                           AZ = "missing items due to 'Angabe zurueckgesetzt'"
                       ),
                       path = here::here("Plots/Missing_Responses/by_person"),
@@ -541,7 +551,7 @@ mvp_summary <- function(results, digits = 3) {
         round(prop.table(table(x)) * 100, digits)
     })
 
-    # Create table with descriptive statistics for all misisng value types
+    # Create table with descriptive statistics for all missing value types
     out$summary <- sapply(results, function(x) {
         round(psych::describe(x), digits)[c(3:5, 8:9)]
     })

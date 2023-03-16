@@ -13,6 +13,8 @@
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
+#' @param missing_by_design  numeric; user defined missing value for missing by
+#' design (is necessary for calculating N_administered)
 #' @param scoring  string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
@@ -40,8 +42,9 @@
 #' @export
 
 grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
-                                 scoring = NULL, plots = FALSE, save = TRUE,
-                                 print = TRUE, return = FALSE, overwrite = FALSE,
+                                 missing_by_design = -54, scoring = NULL,
+                                 plots = FALSE, save = TRUE, print = TRUE,
+                                 return = FALSE, overwrite = FALSE,
                                  path_plots = here::here("Plots"),
                                  path_table = here::here("Tables"),
                                  path_results = here::here("Results"),
@@ -79,6 +82,8 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
           select = select,
           valid = valid,
           scoring = scoring,
+          mvs = mvs,
+          missing_by_design = missing_by_design,
           print = print,
           plots = plots,
           save = save,
@@ -122,6 +127,8 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
+#' @param missing_by_design  numeric; user defined missing value for missing by
+#' design (is necessary for calculating N_administered)
 #' @param scoring  string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
@@ -156,8 +163,8 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #' @export
 
 irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
-                         scoring = NULL, plots = FALSE, save = TRUE,
-                         print = TRUE, return = FALSE,
+                         missing_by_design = -54, scoring = NULL,
+                         plots = FALSE, save = TRUE, print = TRUE, return = FALSE,
                          path_plots = here::here("Plots"),
                          path_table = here::here("Tables"),
                          path_results = here::here("Results"),
@@ -288,6 +295,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
       disc = irt[[2]],
       valid = valid,
       mvs = mvs,
+      missing_by_design = missing_by_design,
       digits = digits,
       save = FALSE,
       test = FALSE
@@ -628,6 +636,8 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
+#' @param missing_by_design  numeric; user-defined missing value for missing by
+#' design (is necessary for calculating N_administered)
 #' @param results  list; return object of irt_model(); one parameter model
 #' @param disc  list; return object of irt_model(); two parameter model
 #' @param save  logical; whether results shall be saved to hard drive
@@ -644,31 +654,33 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 #' @export
 
 irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
+                        missing_by_design = -54,
                         results, disc = NULL, save = TRUE,
                         path = here::here("Tables"), name_group = NULL,
                         digits = 3, overwrite = FALSE, warn = TRUE, test = TRUE) {
 
-  # prepare data
+  # test data data
   if (test) scaling:::check_logicals(vars, "vars", "dich", warn = warn)
   scaling:::check_items(rownames(results$mod$xsi))
+
+  # prepare data
   vars$irt_item <- vars$item %in% rownames(results$mod$xsi)
   vars <- vars[vars$irt_item, ]
   resp <- scaling:::prepare_resp(
-    resp,
-    vars = vars,
-    select = 'irt_item',
-    valid = valid,
-    use_only_valid = TRUE,
-    convert = TRUE,
-    mvs = mvs,
-    warn = warn
+      resp,
+      vars = vars,
+      select = 'irt_item',
+      valid = valid,
+      use_only_valid = TRUE,
+      warn = warn
   )
 
   # create dataframe
   rows <- nrow(results$mod$xsi)
   pars <- data.frame(
       Item = rep(NA, rows),
-      N = rep(NA, rows),
+      N_administered = rep(NA, rows),
+      N_valid = rep(NA, rows),
       correct = rep(NA, rows),
       xsi = rep(NA, rows),
       SE = rep(NA, rows),
@@ -686,11 +698,21 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   # proceed only with selected variables
   pars <- pars[pars$Item %in% vars$item, ]
 
+  # number of administered items
+  pars$N_administered <- scaling:::create_ifelse(
+      is.null(missing_by_design),
+      rep(nrow(resp), rows),
+      sapply(resp, function(x) sum(!(x %in% missing_by_design)))
+  )
+
+  # convert missing values in NAs
+  resp <- scaling:::convert_mv(resp, vars, mvs = mvs, warn = FALSE)
+
   # percentage correct
   pars$correct <- round(ifelse(vars$dich, colMeans(resp[, vars$item], na.rm = TRUE) * 100, NA), 2)
 
-  # number of valid responses
-  pars$N <- colSums(!is.na(resp))
+  # Number of valid responses
+  pars$N_valid <- colSums(!is.na(resp))
 
   # items fit
   pars$WMNSQ   <- results$fit$Infit[results$fit$item %in% vars$item]

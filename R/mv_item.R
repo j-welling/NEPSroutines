@@ -18,6 +18,8 @@
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
 #' @param mvs  named integer vector; contains user-defined missing values
+#' @param missing_by_design  integer; user defined missing value for missing by
+#' design
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
 #' @param plots  logical; whether plots shall be created and saved to hard drive
@@ -48,7 +50,7 @@
 mv_item <- function(resp, vars, select, valid = NULL,
                     position = NULL, grouping = NULL,
                     mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                            UM = -90, ND = -55, NAd = -54, AZ = -21),
+                            UM = -90, ND = -55, MD = -54, AZ = -21),
                     labels_mvs = c(
                         ALL = "total missing items",
                         OM = "omitted items",
@@ -57,9 +59,10 @@ mv_item <- function(resp, vars, select, valid = NULL,
                         TA = "missing items due to test abortion",
                         UM = "unspecific missing items",
                         ND = "not determinable items",
-                        NAd = "not administered items",
+                        MD = "items missing by design",
                         AZ = "missing items due to 'Angabe zurueckgesetzt'"
                     ),
+                    missing_by_design = -54,
                     plots = FALSE, print = TRUE, save = TRUE, return = FALSE,
                     path_results = here::here("Results"),
                     path_table = here::here("Tables"),
@@ -76,6 +79,9 @@ mv_item <- function(resp, vars, select, valid = NULL,
     scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
     if (warn) scaling:::is_null_mvs_valid(valid = valid)
 
+    # Missing by design
+    if (!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
+
     # Conduct analysis
     mv_item <- scaling:::mvi_analysis(
         resp = resp,
@@ -86,6 +92,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
         grouping = grouping,
         show_all = show_all,
         mvs = mvs,
+        missing_by_design = missing_by_design,
         digits = digits,
         warn = warn,
         save = FALSE,
@@ -179,6 +186,8 @@ mv_item <- function(resp, vars, select, valid = NULL,
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
 #' @param mvs  named integer vector; contains user-defined missing values
+#' @param missing_by_design  integer; user defined missing value for missing by
+#' design
 #' @param path  string; defines path to folder where results shall be saved
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
@@ -195,7 +204,8 @@ mv_item <- function(resp, vars, select, valid = NULL,
 mvi_analysis <- function(resp, vars, select, position, valid = NULL,
                          grouping = NULL, show_all = TRUE,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                                 UM = -90, ND = -55, NAd = -54, AZ = -21),
+                                 UM = -90, ND = -55, MD = -54, AZ = -21),
+                         missing_by_design = -54,
                          path = here::here("Results"), save = TRUE,
                          name_group = NULL, digits = 3, warn = TRUE, test = TRUE) {
 
@@ -225,16 +235,26 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
         }
     }
 
-
     # Prepare data
     vars_c <- vars[vars[[select]], ]
     resp <- scaling:::only_valid(resp, valid = valid)
-    resp_c <- scaling:::prepare_resp(resp, vars = vars, select = select, warn = warn,
-                           zap_labels = FALSE)
+    resp_c <- scaling:::prepare_resp(
+        resp,
+        vars = vars,
+        select = select,
+        warn = warn,
+        zap_labels = FALSE
+    )
 
     # NAs are not acknowledged in mvs-argument
-    if (warn & !(NA %in% mvs) & any(resp_c %in% NA)) {
-        warning("NAs found in resp! These values are ignored.")
+    if (warn & any(resp_c %in% NA)) {
+      warning("NAs found in resp! These values are ignored.")
+    }
+
+    # Convert all values missing by design
+    if (!is.null(missing_by_design)) {
+        resp_c <- scaling:::convert_mv(resp_c, vars_c, mvs = missing_by_design)
+        mvs <- mvs[!(mvs %in% missing_by_design)]
     }
 
     # Create results
@@ -265,11 +285,11 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
             resp_g <- resp_c[resp[[g]], vars_g$item]
 
             # Number of valid responses and position
-            if (length(position) == 1) {
-                pos <- vars_g[[position]]
-            } else {
-                pos <- vars_g[[position[g]]]
-            }
+            pos <- scaling:::create_ifelse(
+                length(position) == 1,
+                vars_g[[position]],
+                vars_g[[position[g]]]
+            )
 
             # Create list with results
             mvlist[[g]] <- scaling:::create_mvlist(
@@ -360,7 +380,7 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
 
 mvi_table <- function(mv_i, vars, select, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                              UM = -90, ND = -55, NAd = -54, AZ = -21),
+                              UM = -90, ND = -55, MD = -54, AZ = -21),
                       save = TRUE, path = here::here("Tables"),
                       overwrite = FALSE, name_group = NULL,
                       test = TRUE, warn = TRUE) {
@@ -446,7 +466,7 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
 
 mvi_plots <- function(mv_i, vars, select, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                              UM = -90, ND = -55, NAd = -54, AZ = -21),
+                              UM = -90, ND = -55, MD = -54, AZ = -21),
                       labels_mvs = c(
                           ALL = "total missing items",
                           OM = "omitted items",
@@ -455,7 +475,7 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
                           TA = "missing items due to test abortion",
                           UM = "unspecific missing items",
                           ND = "not determinable items",
-                          NAd = "not administered items",
+                          MD = "items missing by design",
                           AZ = "missing items due to 'Angabe zurueckgesetzt'"
                       ),
                       path = here::here("Plots/Missing_Responses/by_item"),
@@ -512,9 +532,10 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
                 mv <- merge(mv, mv_i[[g]], by = 'position', all = TRUE)
             }
 
-            mv <- dplyr::filter(dplyr::select(mv, c("position",
-                                                    tidyselect::all_of(groups))),
-                                !is.na(mv$position))
+            mv <- dplyr::filter(
+                dplyr::select(mv, c("position", tidyselect::all_of(groups))),
+                !is.na(mv$position)
+            )
 
             mv_wide <- tidyr::gather(mv, key = "group", value = "MV",
                                      tidyselect::all_of(groups))
@@ -523,12 +544,18 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
             # create plot
             gg <- ggplot2::ggplot(
                 data = mv_wide,
-                mapping = ggplot2::aes(x = .data$position, y = .data$MV, fill = .data$group)
+                mapping = ggplot2::aes(
+                    x = .data$position,
+                    y = .data$MV,
+                    fill = .data$group
+                )
             ) +
                 ggplot2::labs(
-                    title = paste0(Hmisc::capitalize(labels_mvs[i]), " by item position and ",
+                    title = paste0(Hmisc::capitalize(labels_mvs[i]),
+                                   " by item position and ",
                                    name_grouping),
-                    x = "Item position", y = "Percentage"
+                    x = "Item position",
+                    y = "Percentage"
                 ) +
                 if (is.null(labels_legend)) {
                     scale_fill_discrete(name = Hmisc::capitalize(name_grouping))
@@ -590,11 +617,11 @@ print_mvi_results <- function(mv_i,
                                   TA = "missing items due to test abortion",
                                   UM = "unspecific missing items",
                                   ND = "not determinable items",
-                                  NAd = "not administered items",
+                                  MD = "items missing by design",
                                   AZ = "missing items due to 'Angabe zurueckgesetzt'"
                                   )) {
     if (is.data.frame(mv_i$list)) {
-        for (lbl in names(mv_i$list[-c(1:3)])) {
+        for (lbl in names(mv_i$list[-c(1:4)])) {
             mv_min <- min(mv_i$list[[lbl]], na.rm = TRUE)
             mv_max <- max(mv_i$list[[lbl]], na.rm = TRUE)
             item_min <- mv_i$list$item[mv_i$list[[lbl]] == mv_min]
@@ -612,7 +639,7 @@ print_mvi_results <- function(mv_i,
     } else {
         for (g in names(mv_i$list)[-length(names(mv_i$list))]) {
             message("\n", Hmisc::capitalize(g), ":\n")
-            for (lbl in names(mv_i$list[[g]][-c(1:3)])) {
+            for (lbl in names(mv_i$list[[g]][-c(1:4)])) {
                 mv_min <- min(mv_i$list[[g]][[lbl]], na.rm = TRUE)
                 mv_max <- max(mv_i$list[[g]][[lbl]], na.rm = TRUE)
                 item_min <- mv_i$list[[g]]$item[mv_i$list[[g]][[lbl]] == mv_min]
@@ -707,7 +734,8 @@ create_mvlist <- function(item, position, responses, mvs, digits = 3) {
     mvlist <- data.frame(
         item = item,
         position = position,
-        N = colSums(apply(responses, 2, function(x) !(x %in% mvs)))
+        N_administered = colSums(apply(responses, 2, function(x) !is.na(x))),
+        N_valid = colSums(apply(responses, 2, function(x) !(x %in% mvs | is.na(x))))
     )
 
     # Merge with percentage of missing values for each missing type
