@@ -225,10 +225,10 @@ sample_by_group <- function(resp, grouping_variable, labels = NULL, save = FALSE
     rownames(df)[nrow(df)] <- c("Total")
 
     # Add labels as row names
-    if(!is.null(labels) | !is.null(attributes(vars[[grouping_variable]])$labels)) {
+    if(!is.null(labels) | !is.null(attributes(resp[[grouping_variable]])$labels)) {
         lbls <- scaling:::create_ifelse(
             is.null(labels),
-            attributes(vars[[grouping_variable]])$labels,
+            attributes(resp[[grouping_variable]])$labels,
             labels
         )
         for (v in seq(nrow(df)-1)) {
@@ -305,26 +305,34 @@ props_by_group <- function(vars, select, grouping, properties, labels = NULL,
       df <- data.frame(matrix(NA, length(unique(vars[[props]])) + 1, length(grouping)))
       names(df) <- grouping
 
-      # Add property labels as row names
-      if(!is.null(labels[[props]]) | !is.null(attributes(vars[[props]])$labels)) {
-          lbls <- scaling:::create_ifelse(
-              is.null(labels[[props]]),
-              attributes(vars[[props]])$labels,
-              labels[[props]]
-          )
-          for (v in seq(nrow(df)-1)) {
-              rownames(df)[v] <- names(which(rownames(df)[v] == lbls))
-          }
+      # Add values as rownames
+      if (is.factor(vars[[props]])) {
+        rownames(df) <- c(levels(vars[[props]]), "total")
+      } else {
+        rownames(df) <- c(unique(vars[[props]]), "total")
       }
-
-      rownames(df)[nrow(df)] <- "Total number of items"
 
       # Fill dataframe
       for (g in grouping){
         N <- as.data.frame.AsIs(table(vars[[props]][vars[[g]]]))
-        N <- rbind(N,sum(N))
-        df[[g]]<- N[seq(nrow(N)), ]
+        N <- rbind(N, total = sum(N))
+        df[rownames(N), g]<- N
       }
+
+      # Add property labels as row names (if existent)
+      if((!is.null(labels[[props]])) | (!is.null(attributes(vars[[props]])$labels))) {
+        lbls <- scaling:::create_ifelse(
+          is.null(labels[[props]]),
+          attributes(vars[[props]])$labels,
+          labels[[props]]
+        )
+        for (v in seq(nrow(df)-1)) {
+          rownames(df)[v] <- names(which(rownames(df)[v] == lbls))
+        }
+      }
+
+      # Add last row name
+      rownames(df)[nrow(df)] <- "Total number of items"
 
       res[[props]] <- df
     }
