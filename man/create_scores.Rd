@@ -15,6 +15,7 @@ create_scores(
   facet = NULL,
   valid = NULL,
   mvs = NULL,
+  missing_by_design = -54,
   wle = TRUE,
   sum_score = FALSE,
   sum_select = NULL,
@@ -67,6 +68,9 @@ test rotation}
 (in)valid cases}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
+
+\item{missing_by_design}{numeric; user defined missing value for missing by
+design (is necessary for calculating N_administered)}
 
 \item{wle}{logical; whether to estimate WLEs}
 

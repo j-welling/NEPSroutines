@@ -7,10 +7,10 @@
 collapse_response_categories(
   resp,
   vars,
-  select,
+  select = "poly",
   per_cat = 200,
-  path_table = here::here("Tables"),
-  save = FALSE
+  save = FALSE,
+  path_table = here::here("Tables")
 )
 }
 \arguments{
@@ -29,14 +29,16 @@ contains the item names of the polytomous items}
 
 \item{per_cat}{integer; minimum number of persons per category; defaults to 200}
 
-\item{path_table}{string; defines path to folder where tables shall be saved}
-
 \item{save}{logical; whether results shall be saved to hard drive}
+
+\item{path_table}{string; defines path to folder where tables shall be saved}
 }
 \value{
 resp with collapsed categories. Note that this function changes the
   given PC items IN PLACE. If you want to keep the original data, please
   copy and rename the items to be collapsed first.
+
+data.frame resp with collapsed and original items
 }
 \description{
 Collapse response categories with N < 200

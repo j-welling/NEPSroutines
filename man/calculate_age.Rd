@@ -6,11 +6,11 @@
 \usage{
 calculate_age(
   resp,
-  birth_year,
-  birth_month,
+  birth_year = "birthy",
+  birth_month = "birthm",
+  test_year = "testy",
+  test_month = "testm",
   birth_day = NULL,
-  test_year,
-  test_month,
   test_day = NULL
 )
 }
@@ -21,13 +21,20 @@ calculate_age(
 
 \item{birth_month}{string; contains name of variable with month of birth}
 
-\item{birth_day}{string; contains name of variable with day of birth (default is 15)}
+\item{test_year}{string or integer; contains either the name of the variable
+in resp that includes the test year for each participant or one number with
+the test year if it's the same for all participants}
 
-\item{test_year}{string; contains name of variable with year of test}
+\item{test_month}{string or integer; contains either the name of the variable
+in resp that includes the test month for each participant or one number with
+the test month if it's the same for all participants}
 
-\item{test_day}{string; contains name of variable with day of test (default is 15)}
+\item{birth_day}{string; contains name of variable with day of birth
+(default is median)}
 
-\item{tets_month}{string; contains name of variable with month of test}
+\item{test_day}{string or integer; contains either the name of the variable
+in resp that includes the test day for each participant or one number with
+the test day if it's the same for all participants (default is median)}
 }
 \value{
 numeric vector with approximate age in years

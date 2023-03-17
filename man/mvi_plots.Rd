@@ -9,12 +9,11 @@ mvi_plots(
   vars,
   select,
   grouping = NULL,
-  mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
-    -21),
+  mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21),
   labels_mvs = c(ALL = "total missing items", OM = "omitted items", NV =
     "not valid items", NR = "not reached items", TA =
     "missing items due to test abortion", UM = "unspecific missing items", ND =
-    "not determinable items", NAd = "not administered items", AZ =
+    "not determinable items", MD = "items missing by design", AZ =
     "missing items due to 'Angabe zurueckgesetzt'"),
   path = here::here("Plots/Missing_Responses/by_item"),
   name_group = NULL,

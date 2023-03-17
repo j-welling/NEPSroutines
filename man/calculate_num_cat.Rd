@@ -4,7 +4,7 @@
 \alias{calculate_num_cat}
 \title{Calculate number of categories for each item}
 \usage{
-calculate_num_cat(vars, poly_items, select_dich = "dich")
+calculate_num_cat(vars, poly_items = NULL, select_suf)
 }
 \arguments{
 \item{vars}{data.frame; contains information about items with items as rows;
@@ -15,11 +15,11 @@ variables that are further defined in the function arguments}
 polytomous item, name of the vector is the name of the polytomous item (e.g.
 poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))}
 
-\item{select_dich}{string; name of logical variable in vars that identifies
-all dichotomous items for which number of categories is set to 1}
+\item{select_suf}{string; defines name of logical variable in vars that indicates
+which items to use for the calculation (e.g. 'suf')}
 }
 \value{
-numeric vector with number of subitems/categories for all items
+numeric vector with number of subitems/categories for the items to be included in suf
 }
 \description{
 Calculate number of categories for each item

@@ -12,8 +12,8 @@ mvi_analysis(
   valid = NULL,
   grouping = NULL,
   show_all = TRUE,
-  mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
-    -21),
+  mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21),
+  missing_by_design = -54,
   path = here::here("Results"),
   save = TRUE,
   name_group = NULL,
@@ -50,6 +50,9 @@ an item}
 (only applicable when grouping exists)}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
+
+\item{missing_by_design}{integer; user defined missing value for missing by
+design}
 
 \item{path}{string; defines path to folder where results shall be saved}
 

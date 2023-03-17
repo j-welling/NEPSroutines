@@ -10,6 +10,7 @@ grouped_irt_analysis(
   vars,
   valid = NULL,
   mvs = NULL,
+  missing_by_design = -54,
   scoring = NULL,
   plots = FALSE,
   save = TRUE,
@@ -46,6 +47,9 @@ variables that are further defined in the function arguments}
 (in)valid cases}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
+
+\item{missing_by_design}{numeric; user defined missing value for missing by
+design (is necessary for calculating N_administered)}
 
 \item{scoring}{string; defines name of numerical variable in vars that
 contains the scoring factor to be applied to loading matrix; can be NULL for

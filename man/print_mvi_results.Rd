@@ -10,7 +10,7 @@ print_mvi_results(
   labels_mvs = c(ALL = "total missing items", OM = "omitted items", NV =
     "not valid items", NR = "not reached items", TA =
     "missing items due to test abortion", UM = "unspecific missing items", ND =
-    "not determinable items", NAd = "not administered items", AZ =
+    "not determinable items", MD = "items missing by design", AZ =
     "missing items due to 'Angabe zurueckgesetzt'")
 )
 }

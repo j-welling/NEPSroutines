@@ -15,6 +15,9 @@ poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subi
 
 \item{mvs}{integer vector; contains user-defined missing values}
 }
+\value{
+resp including unscored (raw) and scored items
+}
 \description{
 Score partial credit items
 }

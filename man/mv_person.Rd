@@ -10,13 +10,13 @@ mv_person(
   select,
   valid = NULL,
   grouping = NULL,
-  mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, NAd = -54, AZ =
-    -21),
+  mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21),
   labels_mvs = c(ALL = "total missing items", OM = "omitted items", NV =
     "not valid items", NR = "not reached items", TA =
     "missing items due to test abortion", UM = "unspecific missing items", ND =
-    "not determinable items", NAd = "not administered items", AZ =
+    "not determinable items", MD = "items missing by design", AZ =
     "missing items due to 'Angabe zurueckgesetzt'"),
+  missing_by_design = -54,
   plots = FALSE,
   print = TRUE,
   save = TRUE,
@@ -57,6 +57,9 @@ an item}
 
 \item{labels_mvs}{named character vector; contains labels for user-defined
 missing values to use them in plot titles and printed results}
+
+\item{missing_by_design}{integer; user defined missing value for missing by
+design}
 
 \item{plots}{logical; whether plots shall be created and saved to hard drive}
 
