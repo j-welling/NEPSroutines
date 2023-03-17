@@ -11,10 +11,12 @@
 #' @param old_names  character vector; contains the names of the original items
 #' @param new_names  character vector; contains the names of the new items. Must
 #' be in same order as parameter "old_names"! (default is old name + "_c")
+#' @param sep string; defines type of punctuation used for separating several
+#' correct responses in the variable correct_response in vars (default is ";")
 #'
 #' @return resp with dichotomously scored MC items.
 #' @export
-dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
+dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL, sep = ";") {
 
     # Check whether variables are indeed contained in data.frames
     scaling:::check_variables(resp, "resp", old_names)
@@ -36,10 +38,11 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
         } else if (is.factor(resp[[item]])) {
             resp[[item]] <- as.character(resp[[item]])
         }
-        correct <- strsplit(vars$correct_response[vars$item == item], ";")[[1]]
+        correct <- strsplit(vars$correct_response[vars$item == item], sep)[[1]]
         resp[[new_names[i]]] <- ifelse(resp[[item]] %in% correct, 1,
                                        ifelse(resp[[item]] < 0, resp[[item]], 0)
-        ) %>% as.numeric()
+        )
+        resp[[new_names[i]]] <- as.numeric(resp[[new_names[i]]])
     }
 
     return(resp)
@@ -63,10 +66,18 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL) {
 #' @export
 duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 
+  # Check whether all items are indeed included in vars
+  if (any(!(old_names %in% vars$item))) {
+    stop("Item/s '", paste(old_names[!(old_names %in% vars$item)], collapse = "', '"),
+         "' is/are not included in vars! Please check again.")
+  }
+
+  # Create new dataframe
   vars_new <- vars[vars$item %in% old_names, ]
   vars_new <- vars_new[match(old_names, vars_new$item), ]
   vars_new$item <- new_names
 
+  # Change variable values
     if (!is.null(change)) {
         for (c in seq_along(change)) {
             variable <- names(change[c])
@@ -90,6 +101,7 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 #' poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))
 #' @param mvs  integer vector; contains user-defined missing values
 #'
+#' @return resp including unscored (raw) and scored items
 #' @export
 
 pc_scoring <- function(resp, poly_items, mvs = NULL) {
@@ -142,13 +154,15 @@ pc_scoring <- function(resp, poly_items, mvs = NULL) {
 #'   copy and rename the items to be collapsed first.
 #'
 #' @export
+#' @return data.frame resp with collapsed and original items
 
-collapse_response_categories <- function(resp, vars, select, per_cat = 200,
-                                         path_table = here::here("Tables"),
-                                         save = FALSE) {
+collapse_response_categories <- function(resp, vars, select = 'poly',
+                                         per_cat = 200,save = FALSE,
+                                         path_table = here::here("Tables")) {
 
   # Check whether variables are indeed contained in data.frames
-  polyt_items <- vars$item[(vars$item %in% select) == TRUE]
+  scaling:::check_logicals(vars, "vars", select, warn = TRUE)
+  polyt_items <- vars$item[vars[[select]]]
   scaling:::check_numerics(resp, "resp", polyt_items)
   scaling:::check_items(polyt_items)
 
@@ -159,10 +173,16 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
   for (item in polyt_items) {
 
     response <- resp[[item]]
-    tab <- table(response[response >= 0])
 
-    # Skip dichotomous items
-    if (max(resp[[item]], na.rm = TRUE) <= 1) {
+    # Create table with all possible categories (= from minimum to maximum value)
+    vals <- unique(response[response >= 0 & !is.na(response)])
+    values <- 0:max(vals)
+    tab <- sapply(values, function (x) sum(response == x, na.rm = TRUE))
+    names(tab) <- values
+
+    # Skip dichotomous items with response categories 0 and 1
+    if (length(values) <= 2) {
+
       dichotomous_items <- c(dichotomous_items, item)
 
     } else {
@@ -180,18 +200,18 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
             j <- which(response > 0)
 
             # for highest score: left shift current value
-          } else if (collapse_values[1] == max(response)) {
+          } else if (collapse_values[1] == max(response, na.rm = TRUE)) {
 
-            j <- which(response == max(response))
+            j <- which(response == max(response, na.rm = TRUE))
 
-            # for scores between 1 and highest score, if the next score has
+            # for scores between lowest and highest score, if the next score has
             #  a smaller frequency than the previous score:
             #  left shift all values greater than the current value
           } else if (tab[collapse[1] - 1] > tab[collapse[1] + 1]) {
 
             j <- which(response > collapse_values[1])
 
-            # for scores between 1 and highest score, if the previou score has
+            # for scores between 1 and highest score, if the previous score has
             #  a smaller frequency than the next score:
             #  left shift the current value and all values greater than the
             #  current value
@@ -202,16 +222,29 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
           }
 
           response[j] <- response[j] - 1
-          tab <- table(response[response >= 0])
+
+          # Create table with all possible categories (= from minimum to maximum value)
+          vals <- unique(response[response >= 0 & !is.na(response)])
+          values <- 0:max(vals)
+          tab <- sapply(values, function (x) sum(response == x, na.rm = TRUE))
+          names(tab) <- values
+
+          # Determine categories for collapsing
           collapse <- which(tab < per_cat)
           collapse_values <- as.numeric(names(collapse))
+
+          if (length(tab) <= 1) break
         }
 
-        if (length(collapse) == 0) {
+        if (length(collapse) == 0 & length(values) >= 2) {
+
           resp[ , paste0(item, "_collapsed")] <- response
           collapsed_items <- c(collapsed_items, item)
+
         } else {
+
           problematic_items <- c(problematic_items, item)
+
         }
       }
     }
@@ -225,15 +258,15 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
 
   # Print results
   if (!is.null(problematic_items)) {
-    message("\nThe following items have less than two response categories with ",
-            "more than ", per_cat, " cases and were thus not collapsed. ",
+    message("\nThe following items resulted in less than two response categories ",
+            "with more than ", per_cat, " cases and were thus not collapsed. ",
             "Please check these items manually:\n",
             paste(problematic_items, collapse = ", "))
   }
 
   if (!is.null(dichotomous_items)) {
     message("\nDichotomous items were not considered for collapsing. ",
-            "The following items are dichotomous:\n",
+            "The following items have less than three response categories::\n",
             paste(dichotomous_items, collapse = ", "))
   }
 
@@ -257,6 +290,35 @@ collapse_response_categories <- function(resp, vars, select, per_cat = 200,
 
   return(resp)
 }
+
+
+
+#' Create table for all possible response categories (even if n = 0)
+#'
+#' @param response responses for one item
+#'
+#' @return  table
+#' @export
+create_table <- function(response) {
+
+  # Create table with all possible categories (= from minimum to maximum value)
+
+  # # Different approaches for character or numeric variables
+  # if (is.character(vals)) {
+  #   if (vals[1] == toupper(vals[1])) {
+  #     nums <- which(LETTERS %in% vals)
+  #     values <- LETTERS[min(nums):max(nums)]
+  #   } else {
+  #     nums <- which(letters %in% vals)
+  #     values <- letters[min(nums):max(nums)]
+  #   }
+  # } else {
+  #   values <- min(vals):max(vals)
+  # }
+
+  return(tab)
+}
+
 
 
 #' Select sample with a minimum number of valid values
@@ -364,22 +426,44 @@ pos_new <- function(vars, select, position) {
 #' @param resp  data.frame with birth and test date variables
 #' @param birth_year  string; contains name of variable with year of birth
 #' @param birth_month  string; contains name of variable with month of birth
-#' @param birth_day  string; contains name of variable with day of birth (default is 15)
-#' @param test_year  string; contains name of variable with year of test
-#' @param tets_month  string; contains name of variable with month of test
-#' @param test_day  string; contains name of variable with day of test (default is 15)
+#' @param birth_day  string; contains name of variable with day of birth
+#' (default is median)
+#' @param test_year  string or integer; contains either the name of the variable
+#' in resp that includes the test year for each participant or one number with
+#' the test year if it's the same for all participants
+#' @param test_month  string or integer; contains either the name of the variable
+#' in resp that includes the test month for each participant or one number with
+#' the test month if it's the same for all participants
+#' @param test_day  string or integer; contains either the name of the variable
+#' in resp that includes the test day for each participant or one number with
+#' the test day if it's the same for all participants (default is median)
 #'
 #' @return   numeric vector with approximate age in years
 #' @export
 calculate_age <- function(resp,
-                          birth_year, birth_month, birth_day = NULL,
-                          test_year, test_month, test_day = NULL) {
+                          birth_year = "birthy", birth_month = "birthm",
+                          test_year = "testy", test_month = "testm",
+                          birth_day = NULL, test_day = NULL) {
 
-    # Check whether variables are indeed contained in data.frames
-    scaling:::check_variables(
-        resp, "resp",
-        c(birth_year, birth_month, test_year, test_month)
-    )
+    # Check and create birth date variables
+    scaling:::check_variables(resp, "resp", c(birth_year, birth_month)    )
+    byear <- resp[[birth_year]]
+    bmonth <- resp[[birth_month]]
+
+    # Check and create test date variables
+    if (is.numeric(test_year)) {
+        tyear <- test_year
+    } else {
+        scaling:::check_variables(resp, "resp", test_year)
+        tyear <- resp[[test_year]]
+    }
+
+    if (is.numeric(test_month)) {
+        tmonth <- test_month
+    } else {
+        scaling:::check_variables(resp, "resp", test_month)
+        tmonth <- resp[[test_month]]
+    }
 
     # Check whether birth and test day exist and if not, replace with default 15
     if (is.null(birth_day)) {
@@ -391,42 +475,42 @@ calculate_age <- function(resp,
 
     if (is.null(test_day)) {
         tday <- 15
+    } else if (is.numeric(test_day)) {
+        tday <- test_day
     } else {
         scaling:::check_variables(resp, "resp", test_day)
         tday <- resp[[test_day]]
     }
 
     # Replace missing values in birth and test date with the sample median
-    na_by <- is.na(resp[[birth_year]])
-    na_bm <- is.na(resp[[birth_month]])
-    na_ty <- is.na(resp[[test_year]])
-    na_tm <- is.na(resp[[test_month]])
+    na_by <- is.na(byear)
+    na_bm <- is.na(bmonth)
+    na_ty <- is.na(tyear)
+    na_tm <- is.na(tmonth)
 
     if (sum(na_by) > 0) {
         message(sum(na_by), " missing value(s) in birth year were replaced by the sample median.")
-        resp[[birth_year]][na_by] <- round(median(resp[[birth_year]], na.rm = TRUE))
+        byear[na_by] <- round(median(byear, na.rm = TRUE))
     }
 
     if (sum(na_bm) > 0) {
         message(sum(na_bm), " missing value(s) in birth month were replaced by the sample median.")
-        resp[[birth_month]][na_bm] <- round(median(resp[[birth_month]], na.rm = TRUE))
+        bmonth[na_bm] <- round(median(bmonth, na.rm = TRUE))
     }
 
     if (sum(na_ty) > 0) {
         message(sum(na_ty), " missing value(s) in test year were replaced by the sample median.")
-        resp[[test_year]][na_ty] <- round(median(resp[[test_year]], na.rm = TRUE))
+        tyear[na_ty] <- round(median(tyear, na.rm = TRUE))
     }
 
     if (sum(na_tm) > 0) {
         message(sum(na_tm), " missing values in test month were replaced by the sample median.")
-        resp[[test_month]][na_tm] <- round(median(resp[[test_month]], na.rm = TRUE))
+        tmonth[na_tm] <- round(median(tmonth, na.rm = TRUE))
     }
 
     # Calculate age
-    birth <- strptime(paste(resp[[birth_year]], resp[[birth_month]],
-                            bday, sep = "-"), "%Y-%m-%d")
-    test <- strptime(paste(resp[[test_year]], resp[[test_month]],
-                           tday, sep = "-"), "%Y-%m-%d")
+    birth <- strptime(paste(byear, bmonth, bday, sep = "-"), "%Y-%m-%d")
+    test <- strptime(paste(tyear, tmonth, tday, sep = "-"), "%Y-%m-%d")
     age <- as.numeric(difftime(test, birth, units = "weeks")) / 52.1429
     return(age)
 }
