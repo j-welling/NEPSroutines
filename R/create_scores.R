@@ -488,25 +488,32 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
                             ifelse(irt_type == "poly", "item*step +", ""),
                             names(facet)))
 
-  if (irt_type == "poly") {
-    # get design matrix for model with 0.5 scoring
-    B <- TAM::designMatrices(modeltype = "PCM", resp = resp_)$B
-    B[vars$item[vars[[select]]], , 1] <- scaling:::create_ifelse(
-        is.null(scoring),
-        rep(1, sum(vars[[select]])),
-        vars[[scoring]][vars[[select]]]
-    )
-  } else {
-    B <- NULL
+  # Design matrix for model
+  des <- TAM::designMatrices.mfr2(resp = resp_, facets = facet, formulaA = frmA)
+  resp2 <- des$gresp$gresp.noStep
+  A <- des$A$A.3d[ , , -des$xsi.elim[, 2]]
+  B <- des$B$B.3d
+
+  # 0.5 scoring for PCMs
+  if (irt_type == "poly" & !is.null(scoring)) {
+    v <- sub(paste0('-', names(facet)[1], '.+$'), "", rownames(B))
+    v <- merge(data.frame(item = v), vars[vars[[select]], c("item", scoring)], by.x = "item")
+    v[[2]][is.na(v[[2]])] <- 1
+    B[, , 1] <- B[, , 1] * v[[2]]
   }
 
-
-  mod <- TAM::tam.mml.mfr(
-    resp = resp_, facets = facet, xsi.fixed = xsi_fixed,
-    verbose = FALSE, pid = pid, formulaA = frmA,
-    irtmodel = ifelse(irt_type == "poly", "PCM2", "1PL"),
-    B = B, control = control_tam, pweights = pweights
+  # Fit model
+  mod <- TAM::tam.mml(
+    resp = resp2,
+    A = A,
+    B = B,
+    xsi.fixed = xsi_fixed,
+    verbose = FALSE,
+    pid = pid,
+    control = control_tam,
+    pweights = pweights
   )
+
 
   if (is.null(control_wle)) control_wle <- list()
   if (is.null(control_wle$convM)) control_wle$convM <- .0001
