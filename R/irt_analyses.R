@@ -711,7 +711,7 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   resp <- scaling:::convert_mv(resp, vars, mvs = mvs, warn = FALSE)
 
   # percentage correct
-  pars$correct <- round(ifelse(vars$dich, colMeans(resp[, vars$item], na.rm = TRUE) * 100, NA), 2)
+  pars$correct <- round(ifelse(vars$dich, colMeans(resp[, vars$item], na.rm = TRUE) * 100, NA), digits)
 
   # Number of valid responses
   pars$N_valid <- colSums(!is.na(resp))
@@ -1048,7 +1048,7 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
           disc_median, ".\n")
 
   # Thresholds
-  thresholds <- TAM::IRT.threshold(model$mod)
+  thresholds <- round(TAM::IRT.threshold(model$mod), digits)
   thresh_min <- min(thresholds, na.rm = TRUE)
   thresh_min_item <- row.names(thresholds)[which(thresholds %in% thresh_min)]
   thresh_max <- max(thresholds, na.rm = TRUE)
