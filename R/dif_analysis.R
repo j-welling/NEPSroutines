@@ -111,6 +111,7 @@ dif_analysis <- function(resp,
     dif$summaries <- scaling:::summarize_dif_analysis(
         dif_models = dif$models,
         dif_vars = dif_vars,
+        vars = vars,
         dif_threshold = dif_threshold,
         path_table = path_table,
         path_results = path_results,
@@ -124,10 +125,12 @@ dif_analysis <- function(resp,
     # Create table for TR
     dif$tr_tables <- scaling:::build_dif_tr_tables(
         dif_summaries = dif$summaries,
+        vars = vars,
         save = save,
         name_group = name_group,
         path = path_table,
-        overwrite = overwrite
+        overwrite = overwrite,
+        digits = digits
     )
 
     # Return results
@@ -259,6 +262,8 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 #' @param dif_models return object of conduct_dif_analysis()
 #' @param dif_vars character vector; contains the variable names to be tested
 #'   for DIF (e.g., "gender")
+#' @param vars data.frame; contains information about items with items as rows;
+#' includes variable 'item' containing item names
 #' @param dif_threshold numeric scalar; indicates absolute threshold of
 #' problematic DIF (defaults to 0.5)
 #' @param print  logical; whether results shall be printed to console
@@ -271,7 +276,7 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 #'
 #' @returns a list of dif summaries for each input entry in dif_models.
 #' @export
-summarize_dif_analysis <- function(dif_models, dif_vars, dif_threshold = 0.5,
+summarize_dif_analysis <- function(dif_models, dif_vars, vars, dif_threshold = 0.5,
                                    print = TRUE, save = TRUE, overwrite = FALSE,
                                    path_results = here::here('Results'),
                                    path_table = here::here('Tables'),
@@ -283,6 +288,7 @@ summarize_dif_analysis <- function(dif_models, dif_vars, dif_threshold = 0.5,
 
         dif_summaries[[i]] <- scaling:::dif_summary(
             dif_models[[i]],
+            vars = vars,
             dif_threshold = dif_threshold,
             print = print,
             overwrite = overwrite,
@@ -644,6 +650,8 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
 #' Summary for DIF analysis
 #'
 #' @param diflist list; return object of dif_model(); with main and dif model
+#' @param vars data.frame; contains information about items with items as rows;
+#' includes variable 'item' containing item names
 #' @param dif_threshold numeric scalar; indicates absolute threshold of
 #' problematic DIF (defaults to 0.5)
 #' @param print logical; whether results shall be printed to console
@@ -657,7 +665,7 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
 #'   data frames for dif analysis.
 #' @export
 
-dif_summary <- function(diflist, print = TRUE, save = TRUE,
+dif_summary <- function(diflist, vars, print = TRUE, save = TRUE,
                         path = here::here('Tables'), dif_threshold = 0.5,
                         overwrite = FALSE, name_group = NUL, digits = 3L) {
     # information criteria for DIF and main model
@@ -667,9 +675,18 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
     dif_var <- diflist$dif_var
     irt_type <- diflist$irt_type
 
+    # Determine groups
     groups <- diflist$mmod$xsi.facets$parameter[diflist$mmod$xsi.facets$facet == dif_var]
     groups <- gsub(diflist$dif_var, "", groups)
-    res <- difsum(obj = diflist, dif_var = dif_var, groups = groups, digits = digits)
+
+    # Create summary for DIF analysis
+    res <- scaling:::difsum(
+      obj = diflist,
+      dif_var = dif_var,
+      vars = vars,
+      groups = groups,
+      digits = digits
+    )
 
     # Print results
     if (print) {
@@ -712,6 +729,8 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
 #' @param obj list; return object of dif_model()
 #' @param dif_var character vector; contains the variable names to be tested
 #'   for DIF (e.g., "gender")
+#' @param vars data.frame; contains information about items with items as rows;
+#' includes variable 'item' containing item names
 #' @param groups numeric vector; contains group identificators (e.g., 1, 2)
 #' @param digits  integer; number of decimals for rounding
 #'
@@ -720,7 +739,7 @@ dif_summary <- function(diflist, print = TRUE, save = TRUE,
 #' @importFrom stats deviance
 #' @noRd
 
-difsum <- function(obj, dif_var, groups = 1, digits = 3) {
+difsum <- function(obj, dif_var, vars, groups = 1, digits = 3) {
 
     # all included items
     it <- colnames(obj$dmod$resp_orig)
@@ -790,6 +809,10 @@ difsum <- function(obj, dif_var, groups = 1, digits = 3) {
         # reorder
         mest[[lbl]] <- mest[[lbl]][, c("item", "xsi", "se.xsi", "std",
                                        "Femp", "Fkrit", "df1", "df2", "p")]
+        ord <- sapply(mest[[lbl]]$item, function(x) {
+          which(vars$item[vars$item %in% mest[[lbl]]$item] == x)
+        })
+        mest[[lbl]] <- mest[[lbl]][ord, ]
     }
 
 
@@ -857,18 +880,23 @@ difsum <- function(obj, dif_var, groups = 1, digits = 3) {
 #'
 #' @param dif_summaries named list of dif_summary() return objects; the list
 #'   elements must be named after their DIF variable
+#' @param vars data.frame; contains information about items with items as rows;
+#' includes variable 'item' containing item names
 #' @param save logical; whether results shall be saved to hard drive
 #' @param path string; indicates the folder location where the summaries
 #' are stored on the hard drive; please note that the path is relative to the
 #' current working path set by here::i_am()
 #' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param digits  integer; number of decimals for rounding
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #'
 #' @return table with results for TR.
 #' @export
 
-build_dif_tr_tables <- function(dif_summaries, save = TRUE, overwrite = FALSE,
-                                path = here::here('Tables'), name_group = NULL) {
+build_dif_tr_tables <- function(dif_summaries, vars,
+                                save = TRUE, overwrite = FALSE,
+                                path = here::here('Tables'), digits = 3,
+                                name_group = NULL) {
 
     dif_vars <- names(dif_summaries)
     are_poly <- sapply(dif_summaries, function(x) x$irt_type == 'poly')
@@ -884,16 +912,19 @@ build_dif_tr_tables <- function(dif_summaries, save = TRUE, overwrite = FALSE,
 
         # DIF effects
         r <- sapply(dif_summaries[[x]]$est, \(y) {
-            paste0(format(round(y$xsi, 3), nsmall = 3), " (",
-                   format(round(y$std, 3), nsmall = 3), ")")
-
+            paste0(
+              format(round(y$xsi, digits), nsmall = digits), " (",
+              format(round(y$std, digits), nsmall = digits), ")"
+            )
         })
         colnames(r) <- paste(x, colnames(r))
 
         # Main effects
         m <- sapply(dif_summaries[[x]]$mne, \(y) {
-            paste0(format(round(y$Unstandardized, 3), nsmall = 3), " (",
-                   format(round(y$Standardized, 3), nsmall = 3), ")")
+            paste0(
+              format(round(y$Unstandardized, digits), nsmall = digits), " (",
+              format(round(y$Standardized, digits), nsmall = digits), ")"
+            )
         })
         colnames(m) <- paste(x, colnames(m))
 
@@ -905,7 +936,18 @@ build_dif_tr_tables <- function(dif_summaries, save = TRUE, overwrite = FALSE,
         dplyr::as_tibble(rm)
     })
 
+    # Combine DIF variables
     est <- Reduce(function(e1, e2) {dplyr::full_join(e1, e2, by = "item")}, est)
+
+    # Reorder
+    est$ord <- rep(NA, nrow(est))
+    itm <- est$item %in% vars$item
+    est$ord[itm] <- sapply(est$item[itm], function(x) {
+      which(vars$item[vars$item %in% est$item] == x)
+    })
+    est$ord[!itm] <- c(nrow(est)-1, nrow(est))
+    est <- dplyr::arrange(est, by = ord)
+    est$ord <- NULL
 
     # Create TR table
     dif_tr_tables <- list(gof = gof, estimates = est)
