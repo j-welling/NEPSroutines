@@ -20,6 +20,7 @@
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param missing_by_design  integer; user defined missing value for missing by
 #' design
+#' @param not_reached
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
 #' @param plots  logical; whether plots shall be created and saved to hard drive
@@ -47,7 +48,7 @@
 #'            summary_table: table with summary statistics for TR.
 #' @export
 
-mv_item <- function(resp, vars, select, valid = NULL,
+mv_item <- function(resp, vars, select, valid = NULL, multi_stage = FALSE,
                     position = NULL, grouping = NULL,
                     mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                             UM = -90, ND = -55, MD = -54, AZ = -21),
@@ -62,7 +63,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
                         MD = "items missing by design",
                         AZ = "missing items due to 'Angabe zurueckgesetzt'"
                     ),
-                    missing_by_design = -54,
+                    missing_by_design = -54, not_reached = -94,
                     plots = FALSE, print = TRUE, save = TRUE, return = FALSE,
                     path_results = here::here("Results"),
                     path_table = here::here("Tables"),
@@ -113,21 +114,21 @@ mv_item <- function(resp, vars, select, valid = NULL,
 
     # Write plots
     if (plots) scaling:::mvi_plots(
-      mv_i = mv_item,
-      vars = vars,
-      select = select,
-      grouping = grouping,
-      mvs = mvs,
-      labels_mvs = labels_mvs,
-      show_all = show_all,
-      verbose = verbose,
-      #color = color,
-      name_grouping = name_grouping,
-      labels_legend = labels_legend,
-      path = path_plots,
-      name_group = name_group,
-      warn = warn,
-      test = FALSE
+        mv_i = mv_item,
+        vars = vars,
+        select = select,
+        grouping = grouping,
+        mvs = mvs,
+        labels_mvs = labels_mvs,
+        show_all = show_all,
+        verbose = verbose,
+        #color = color,
+        name_grouping = name_grouping,
+        labels_legend = labels_legend,
+        path = path_plots,
+        name_group = name_group,
+        warn = warn,
+        test = FALSE
     )
 
     # Save results
@@ -326,7 +327,8 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
             resp_p <- dplyr::select(resp_p, -.data$position) %>% t() %>% data.frame()
             mvlist$all <- data.frame(
               position = pos,
-              N = apply(resp_p, 2, function(x) sum(x >= 0, na.rm = TRUE))
+              N_administered = colSums(apply(resp_p, 2, function(x) !is.na(x))),
+              N_valid = colSums(apply(resp_p, 2, function(x) !(x %in% mvs | is.na(x))))
             )
 
             # Determine percentage of missing values for each missing type
@@ -335,6 +337,20 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
 
             # Summary across items
             mvsum$all <- scaling:::mvi_summary(mvlist$all[ , -1], digits = digits)
+
+        } else {
+
+          # Create list with results
+          mvlist$all <- scaling:::create_mvlist(
+            item = vars_c$item,
+            position = vars_c[[position]],
+            responses = resp_c[, vars_c$item],
+            mvs = mvs,
+            digits = digits
+          )
+
+          # Summary across items
+          mvsum$all <- scaling:::mvi_summary(mvlist$all[ , -c(1:2)], digits = digits)
         }
     }
 
@@ -468,132 +484,144 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, MD = -54, AZ = -21),
                       labels_mvs = c(
-                          ALL = "total missing items",
-                          OM = "omitted items",
-                          NV = "not valid items",
-                          NR = "not reached items",
-                          TA = "missing items due to test abortion",
-                          UM = "unspecific missing items",
-                          ND = "not determinable items",
-                          MD = "items missing by design",
-                          AZ = "missing items due to 'Angabe zurueckgesetzt'"
+                        ALL = "total missing items",
+                        OM = "omitted items",
+                        NV = "not valid items",
+                        NR = "not reached items",
+                        TA = "missing items due to test abortion",
+                        UM = "unspecific missing items",
+                        ND = "not determinable items",
+                        MD = "items missing by design",
+                        AZ = "missing items due to 'Angabe zurueckgesetzt'"
                       ),
                       path = here::here("Plots/Missing_Responses/by_item"),
                       name_group = NULL, name_grouping = 'test version',
                       show_all = TRUE, labels_legend = NULL, #color = NULL,
                       verbose = TRUE, warn = TRUE, test = TRUE) {
 
-    # Test data
-    if (test) {
-        scaling:::test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
-        scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
-        scaling:::check_items(vars$item[vars[[select]]])
-    }
+  # Test data
+  if (test) {
+    scaling:::test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
+    scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
+    scaling:::check_items(vars$item[vars[[select]]])
+  }
 
-    # Pepare data
-    mv_i <- mv_i$list
-    k <- scaling:::create_ifelse(
-        is.null(grouping),
-        sum(vars[[select]]),
-        max(sapply(grouping, function(x) {sum(vars[[select]] & vars[[x]])}), na.rm = TRUE)
-    )
+  # Pepare data
+  mv_i <- mv_i$list
+  k <- scaling:::create_ifelse(
+    is.null(grouping),
+    sum(vars[[select]]),
+    max(sapply(grouping, function(x) {sum(vars[[select]] & vars[[x]])}), na.rm = TRUE)
+  )
 
-    if(!is.null(grouping))
-        groups <- scaling:::create_ifelse(show_all, c(grouping, 'all'), grouping)
+  if(!is.null(grouping))
+    groups <- scaling:::create_ifelse(show_all, c(grouping, 'all'), grouping)
 
-    # Create directory for plots
-    path_ <- scaling:::create_name(path, name_group, sep = "/")
-    scaling:::check_folder(path_)
+  # Create directory for plots
+  path_ <- scaling:::create_name(path, name_group, sep = "/")
+  scaling:::check_folder(path_)
 
-    # Create plots
+  # Create plots
 
-    for (i in names(mvs)) {
+  for (i in names(mvs)) {
 
-        if (is.null(grouping)) {
+    if (is.null(grouping)) {
 
-            # create plot
-            y <- mv_i[[i]]
-            ylim <- ceiling(max(y, na.rm = TRUE)/10)*10
+      # create plot
+      y <- mv_i[[i]]
+      ylim <- ceiling(max(y, na.rm = TRUE)/10)*10
 
-            gg <- ggplot2::ggplot(data = mv_i,
-                                  mapping = ggplot2::aes(x = .data$position, y = y)
-            ) +
-                ggplot2::labs(
-                    title = paste0(Hmisc::capitalize(labels_mvs[i]), " by item position"),
-                    x = "Item position", y = "Percentage"
-                )
-
-        } else {
-
-            mv <- data.frame(position = NA)
-
-            for (g in groups) {
-                mv_i[[g]][[g]] <- mv_i[[g]][[i]]
-                mv <- merge(mv, mv_i[[g]], by = 'position', all = TRUE)
-            }
-
-            mv <- dplyr::filter(
-                dplyr::select(mv, c("position", tidyselect::all_of(groups))),
-                !is.na(mv$position)
-            )
-
-            mv_wide <- tidyr::gather(mv, key = "group", value = "MV",
-                                     tidyselect::all_of(groups))
-            ylim <- ceiling(max(mv_wide$MV, na.rm = TRUE)/10)*10
-
-            # create plot
-            gg <- ggplot2::ggplot(
-                data = mv_wide,
-                mapping = ggplot2::aes(
-                    x = .data$position,
-                    y = .data$MV,
-                    fill = .data$group
-                )
-            ) +
-                ggplot2::labs(
-                    title = paste0(Hmisc::capitalize(labels_mvs[i]),
-                                   " by item position and ",
-                                   name_grouping),
-                    x = "Item position",
-                    y = "Percentage"
-                ) +
-                if (is.null(labels_legend)) {
-                    scale_fill_discrete(name = Hmisc::capitalize(name_grouping))
-                } else {
-                    if (length(labels_legend) != length(groups)) {
-                        warning("Number of provided legend labels does not ",
-                                "correspond to number of groups. ",
-                                "Group labels are used instead.")
-                        scale_fill_discrete(name = Hmisc::capitalize(name_grouping))
-                    } else {
-                        scale_fill_discrete(
-                            name = Hmisc::capitalize(name_grouping),
-                            labels = labels_legend
-                        )
-                    }
-                }
-        }
-
-        gg <- gg +
-            ggplot2::geom_col(position = "dodge") +
-            ggplot2::scale_y_continuous(breaks = seq(0, ylim, 10),
-                                        labels = paste0(seq(0, ylim, 10), " %"),
-                                        limits = c(0, ylim)) +
-            ggplot2::scale_x_continuous(breaks = seq(0, k, ifelse(k < 20, 1, floor(k/20)))) +
-            ggplot2::theme_bw() +
-            ggplot2::theme(legend.justification = c(0, 1),
-                           legend.position = c(0.01, 0.99))
-
-        # save plot
-        ggplot2::ggsave(
-            filename = paste0("Missing_responses_by_item (", i,").png"),
-            plot = gg, path = path_, width = 2000, height = 1200, units = "px",
-            dpi = 300
+      gg <- ggplot2::ggplot(
+        data = mv_i, mapping = ggplot2::aes(x = position, y = y)
+      ) +
+        ggplot2::labs(
+          title = paste0(Hmisc::capitalize(labels_mvs[i]), " by item position"),
+          x = "Item position", y = "Percentage"
         )
 
-        # Print progress
-        if (verbose) cat("Missing plot", i, "created.\n")
+    } else {
+
+      mv <- data.frame(position = NA)
+
+      for (g in groups) {
+        mv_i[[g]][[g]] <- mv_i[[g]][[i]]
+        mv <- merge(mv, mv_i[[g]], by = 'position', all = TRUE)
+      }
+
+      mv <- dplyr::filter(
+        dplyr::select(mv, c("position", tidyselect::all_of(groups))),
+        !is.na(mv$position)
+      )
+
+      mv_wide <- tidyr::gather(mv, key = "group", value = "MV",
+                               tidyselect::all_of(groups))
+      ylim <- ceiling(max(mv_wide$MV, na.rm = TRUE)/10)*10
+
+      # create plot
+      gg <- ggplot2::ggplot(
+        data = mv_wide,
+        mapping = ggplot2::aes(
+          x = position,
+          y = MV,
+          fill = group
+        )
+      ) +
+        ggplot2::labs(
+          title = paste0(
+            Hmisc::capitalize(labels_mvs[i]),
+            " by item position and ",
+            name_grouping
+          ),
+          x = "Item position",
+          y = "Percentage"
+        ) +
+        if (is.null(labels_legend)) {
+          ggplot2::scale_fill_discrete(
+            name = Hmisc::capitalize(name_grouping)
+          )
+        } else {
+          if (length(labels_legend) != length(groups)) {
+            warning("Number of provided legend labels does not ",
+                    "correspond to number of groups. ",
+                    "Group labels are used instead.")
+            ggplot2::scale_fill_discrete(
+              name = Hmisc::capitalize(name_grouping)
+            )
+          } else {
+            ggplot2::scale_fill_discrete(
+              name = Hmisc::capitalize(name_grouping),
+              labels = labels_legend
+            )
+          }
+        }
     }
+
+    gg <- gg +
+      ggplot2::geom_col(position = "dodge") +
+      ggplot2::scale_y_continuous(
+        breaks = seq(0, ylim, 10),
+        labels = paste0(seq(0, ylim, 10), " %"),
+        limits = c(0, ylim)
+      ) +
+      ggplot2::scale_x_continuous(
+        breaks = seq(0, k, ifelse(k < 20, 1, floor(k/20)))
+      ) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(
+        legend.justification = c(0, 1),
+        legend.position = c(0.01, 0.99)
+      )
+
+    # save plot
+    ggplot2::ggsave(
+      filename = paste0("Missing_responses_by_item (", i,").png"),
+      plot = gg, path = path_, width = 2000, height = 1200, units = "px",
+      dpi = 300
+    )
+
+    # Print progress
+    if (verbose) cat("Missing plot", i, "created.\n")
+  }
 }
 
 
@@ -730,7 +758,7 @@ create_mvlist <- function(item, position, responses, mvs, digits = 3) {
              "Please provide matching arguments to function create_mvlist().")
     }
 
-    # Create list
+    # Create dataframe
     mvlist <- data.frame(
         item = item,
         position = position,
@@ -742,6 +770,9 @@ create_mvlist <- function(item, position, responses, mvs, digits = 3) {
     results <- data.frame(mvi_calc(responses, mvs = mvs, digits = digits))
     results$item <- row.names(results)
     mvlist <- merge(mvlist, results, by = 'item')
+
+    # Order dataframe
+    mvlist[mvlist$position, ] <- mvlist # dplyr::arrange() funktioniert nicht
 
     # Return list
     return(mvlist)

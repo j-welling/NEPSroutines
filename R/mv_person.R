@@ -452,7 +452,11 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
             # create plot
             gg <- ggplot2::ggplot(
                 data = mv_wide,
-                mapping = ggplot2::aes(x = .data$number, y = .data$MV, fill = .data$group)
+                mapping = ggplot2::aes(
+                  x = number,
+                  y = MV,
+                  fill = group
+                )
             ) +
                 ggplot2::labs(
                     title = paste0(
@@ -463,15 +467,19 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                     x = paste0("Number of ", labels_mvs[i]), y = "Percentage"
                 ) +
                 if (is.null(labels_legend)) {
-                    scale_fill_discrete(name = Hmisc::capitalize(name_grouping))
+                   ggplot2::scale_fill_discrete(
+                     name = Hmisc::capitalize(name_grouping)
+                   )
                 } else {
                     if (length(labels_legend) != length(groups)) {
                         warning("Number of provided legend labels does not ",
                                 "correspond to number of groups. ",
                                 "Group labels are used instead.")
-                        scale_fill_discrete(name = Hmisc::capitalize(name_grouping))
+                        ggplot2::scale_fill_discrete(
+                          name = Hmisc::capitalize(name_grouping)
+                        )
                     } else {
-                        scale_fill_discrete(
+                        ggplot2::scale_fill_discrete(
                           name = Hmisc::capitalize(name_grouping),
                           labels = labels_legend
                         )
@@ -486,12 +494,14 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
               labels = paste0(seq(0, ylim, 10), " %"),
               limits = c(0, ylim)
             ) +
+            ggplot2::scale_x_continuous(
+              breaks = seq(0, end, ifelse(end > 10, 2, 1))
+            ) +
             ggplot2::theme_bw() +
             ggplot2::theme(
               legend.justification = c(1, 1),
               legend.position = c(0.99, 0.99)
-            ) +
-            ggplot2::scale_x_continuous(breaks = seq(0, end, ifelse(end > 10, 2, 1)))
+            )
 
         # save plot
         ggplot2::ggsave(
