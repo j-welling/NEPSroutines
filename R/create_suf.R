@@ -21,6 +21,7 @@
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param items_labels  vector; named vector for each item used for labelling
 #'   the data
+#' @param suf_name character; name of suf (defaults to 'suf')
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param path character; indicates where SUF shall be saved
 #' @param save  logical; whether results shall be saved to hard drive
@@ -28,9 +29,8 @@
 #' @param warn  logical; whether to print warnings
 #'
 #' @export
-create_suf <- function(resp, vars, select, competence,
-                       scores = NULL, score_name = NULL,
-                       mvs = NULL, items_labels = NULL,
+create_suf <- function(resp, vars, select, competence, scores = NULL, mvs = NULL,
+                       score_name = NULL, items_labels = NULL, suf_name = 'suf',
                        name_group = NULL, path = here::here('suf'),
                        save = TRUE, return = TRUE, warn = TRUE) {
 
@@ -45,9 +45,7 @@ create_suf <- function(resp, vars, select, competence,
   nr <- apply(suf, 1, function(x) { all(is.na(x) | x < 0) })
 
   # Add scores to data set
-  if (!is.null(scores)) {
-    suf <- merge(suf, scores, by = "ID_t", all.x = TRUE)
-  }
+  if (!is.null(scores)) suf <- merge(suf, scores, by = "ID_t", all.x = TRUE)
 
   # Set unit non-response
   suf[nr, ] <- -56
@@ -70,7 +68,7 @@ create_suf <- function(resp, vars, select, competence,
 
   # (save SUF in rds, sav and dta format)
   if (save) {
-    name <- scaling:::create_name("suf", name_group)
+    name <- scaling:::create_name(suf_name, name_group)
     scaling:::save_suf(suf = suf, path = path, filename = name)
     message("SUF successfully saved!")
   }
