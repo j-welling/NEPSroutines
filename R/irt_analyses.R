@@ -486,8 +486,7 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   scaling:::reached_maxiter(mod, paste0("'", irtmodel, "'"))
 
   # WMNSQ
-  fit <- TAM::msq.itemfit(mod)$itemfit[, c("item", "Infit",
-                                           "Infit_t", "Infit_p")]
+  fit <- TAM::msq.itemfit(mod)$itemfit[, c("item", "Infit", "Infit_t", "Infit_p")]
 
   # Item parameters and standard errors
   x <- capture.output(pars <- TAM::tam.se(mod))
@@ -594,6 +593,9 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
   # Identify kind of irt model
   irtmodel <- model$irtmodel
 
+  # Label for plot
+  lbl <- ifelse(irtmodel %in% c("PCM2", "GPCM"), "Category thresholds", "Item difficulties")
+
   # Add group name to path
   path_ <- scaling:::create_name(paste0(path, "/Wright_Maps"), name_group, sep = "/")
 
@@ -613,7 +615,7 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
                      axis.items = "",
                      axis.persons = "")
   text(0, 0, "")
-  mtext("Item difficulties", 3, line = 0.5, cex = .65)
+  mtext(lbl, 3, line = 0.5, cex = .65)
   mtext("Respondents", 3, line = 0.5, cex = .65, at = 0.04)
   mtext("Logits", 3, line = 0.5, cex = .65, at = 1)
   dev.off()
@@ -784,7 +786,9 @@ irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
       Npars = rep(NA_integer_, 2),
       Deviance = rep(NA_integer_, 2),
       AIC = rep(NA_integer_, 2),
-      BIC = rep(NA_integer_, 2)
+      BIC = rep(NA_integer_, 2),
+      EAPrel = rep(NA_integer_, 2),
+      WLErel = rep(NA_integer_, 2)
   )
 
   irt_type <- ifelse(model_1p$irtmodel == '1PL', 'dich', 'poly')
@@ -811,6 +815,11 @@ irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
   mfit$BIC[2] <- model_2p$info_crit$BIC
 
   mfit <- round(mfit)
+
+  mfit$EAPrel[1] <- round(model_1p$mod$EAP.rel[1], 3)
+  mfit$WLErel[1] <- round(model_1p$wle_rel[1], 3)
+  mfit$EAPrel[2] <- round(model_2p$mod$EAP.rel[1], 3)
+  mfit$WLErel[2] <- round(model_2p$wle_rel[1], 3)
 
   # Save table
   if (save) {
@@ -909,9 +918,9 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
   pc_min_item <- irt_sum$Item[irt_sum$correct %in% pc_min]
   pc_max <- max(irt_sum$correct, na.rm = TRUE)
   pc_max_item <- irt_sum$Item[irt_sum$correct %in% pc_max]
-  pc_mean <- round(mean(irt_sum$correct, na.rm = TRUE), 2)
-  pc_median <- round(median(irt_sum$correct, na.rm = TRUE), 2)
-  pc_sd <- round(sd(irt_sum$correct, na.rm = TRUE), 2)
+  pc_mean <- round(mean(irt_sum$correct, na.rm = TRUE), digits)
+  pc_median <- round(median(irt_sum$correct, na.rm = TRUE), digits)
+  pc_sd <- round(sd(irt_sum$correct, na.rm = TRUE), digits)
   message("Percentage correct:\n",
           "The percentage of correct responses within dichotomous items varied between ",
           pc_min, "% (", ifelse(length(pc_min_item) > 1, "items ", "item "),
@@ -926,9 +935,9 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
   xsi_min_item <- irt_sum$Item[irt_sum$xsi %in% xsi_min]
   xsi_max <- max(irt_sum$xsi, na.rm = TRUE)
   xsi_max_item <- irt_sum$Item[irt_sum$xsi %in% xsi_max]
-  xsi_mean <- round(mean(irt_sum$xsi, na.rm = TRUE), 2)
-  xsi_median <- round(median(irt_sum$xsi, na.rm = TRUE), 2)
-  xsi_sd <- round(sd(irt_sum$xsi, na.rm = TRUE), 2)
+  xsi_mean <- round(mean(irt_sum$xsi, na.rm = TRUE), digits)
+  xsi_median <- round(median(irt_sum$xsi, na.rm = TRUE), digits)
+  xsi_sd <- round(sd(irt_sum$xsi, na.rm = TRUE), digits)
   message("Item difficulties:\n",
           "The estimated item difficulties (or location parameters for polytomous variables) varied between ",
           xsi_min, " (", ifelse(length(xsi_min_item) > 1, "items ", "item "),
@@ -1039,9 +1048,20 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
           disc_median, ".\n")
 
   # Thresholds
-  thresh_mean <- round(mean(c(TAM::IRT.threshold(model$mod)), na.rm = TRUE), digits)
-  thresh_median <- round(median(c(TAM::IRT.threshold(model$mod)), na.rm = TRUE), digits)
+  thresholds <- TAM::IRT.threshold(model$mod)
+  thresh_min <- min(thresholds, na.rm = TRUE)
+  thresh_min_item <- row.names(thresholds)[which(thresholds %in% thresh_min)]
+  thresh_max <- max(thresholds, na.rm = TRUE)
+  thresh_max_item <- row.names(thresholds)[which(thresholds %in% thresh_max)]
+  thresh_mean <- round(mean(thresholds, na.rm = TRUE), digits)
+  thresh_median <- round(median(thresholds, na.rm = TRUE), digits)
+  thresh_sd <- round(sd(thresholds, na.rm = TRUE), digits)
   message("Thresholds:\n",
-          "The mean threshold is ", thresh_mean,
-          " and the median threshold is ", thresh_median, ".\n")
+          "The estimated thresholds varied between ", round(thresh_min, digits),
+          " (", ifelse(length(thresh_min_item) > 1, "items ", "item "),
+          paste(thresh_min_item, collapse = ", "), ") and ", round(thresh_max, digits),
+          " (", ifelse(length(thresh_max_item) > 1, "items ", "item "),
+          paste(thresh_max_item, collapse = ", "),
+          ") with an average of ", thresh_mean, " (SD = ", thresh_sd,
+          "), and a median of ", thresh_median, ".\n")
 }
