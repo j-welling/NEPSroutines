@@ -38,9 +38,11 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL, sep = "
         } else if (is.factor(resp[[item]])) {
             resp[[item]] <- as.character(resp[[item]])
         }
-        correct <- strsplit(vars$correct_response[vars$item == item], sep)[[1]]
-        resp[[new_names[i]]] <- ifelse(resp[[item]] %in% correct, 1,
-                                       ifelse(resp[[item]] < 0, resp[[item]], 0)
+        correct <- strsplit(
+          as.character(vars$correct_response[vars$item == item]), sep
+        )[[1]]
+        resp[[new_names[i]]] <- ifelse(
+          resp[[item]] %in% correct, 1, ifelse(resp[[item]] < 0, resp[[item]], 0)
         )
         resp[[new_names[i]]] <- as.numeric(resp[[new_names[i]]])
     }
@@ -112,9 +114,10 @@ pc_scoring <- function(resp, poly_items, mvs = NULL) {
     for (item in names(poly_items)) {
         subitems <- poly_items[[item]]
 
-        pci <- rowSums(resp[, subitems] == 1)
-        s <- rowSums(resp[, subitems] < 0) > 0
-        pci[s] <- -55
+        pc_item <- rowSums(resp[, subitems] == 1)
+        number_missing <- rowSums(resp[, subitems] < 0)
+        any_missing <- number_missing > 0
+        pc_item[any_missing] <- -55
 
         if (is.null(mvs)) {
             mvs <- c(-99:-1)
@@ -122,12 +125,12 @@ pc_scoring <- function(resp, poly_items, mvs = NULL) {
         }
 
         for (mv in mvs) {
-            s <- rowSums(resp[, subitems] == mv) == rowSums(resp[, subitems] < 0) &
-                rowSums(resp[, subitems] < 0) > 0
-            pci[s] <- mv
+            all_this_missing_type <-
+                (rowSums(resp[, subitems] == mv) == number_missing) & any_missing
+            pc_item[all_this_missing_type] <- mv
         }
 
-        resp[[item]] <- pci
+        resp[[item]] <- pc_item
     }
 
     return(resp)
