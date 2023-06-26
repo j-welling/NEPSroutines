@@ -316,11 +316,11 @@ props_by_group <- function(vars, select, grouping, properties, labels = NULL,
       for (g in grouping){
         N <- as.data.frame.AsIs(table(vars[[props]][vars[[g]]]))
         N <- rbind(N, total = sum(N))
-        df[rownames(N), g]<- N
+        df[rownames(N), g] <- N
       }
 
       # Add property labels as row names (if existent)
-      if((!is.null(labels[[props]])) | (!is.null(attributes(vars[[props]])$labels))) {
+      if( (!is.null(labels[[props]])) | (!is.null(attributes(vars[[props]])$labels)) ) {
         lbls <- scaling:::create_ifelse(
           is.null(labels[[props]]),
           attributes(vars[[props]])$labels,
