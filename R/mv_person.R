@@ -27,7 +27,7 @@
 #' @param path_plots  string; defines path to folder where plots shall be saved
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
-# #' @param color  character scalar or vector; defines color(s) of the bar in plots
+#' @param color  character scalar or vector; defines color(s) of the bar in plots
 #' @param name_grouping  string; name of the grouping variable (e.g. test version)
 #' for title and legend of plots (only needed when grouping exists)
 #' @param labels_legend character vector; contains legend labels
@@ -58,14 +58,13 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
                           MD = "items missing by design",
                           AZ = "missing items due to 'Angabe zurueckgesetzt'"
                       ),
-                      missing_by_design = -54,
+                      missing_by_design = -54, color = NULL,
                       plots = FALSE, print = TRUE, save = TRUE, return = FALSE,
                       path_results = here::here("Results"),
                       path_table = here::here("Tables"),
                       path_plots = here::here("Plots/Missing_Responses/by_person"),
                       show_all = TRUE, overwrite = FALSE, name_group = NULL,
                       name_grouping = 'test version', labels_legend = NULL,
-                      #color = NULL,
                       digits = 3, warn = TRUE, verbose = TRUE) {
 
     # Test data
@@ -108,7 +107,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
           show_all = show_all,
           name_grouping = name_grouping,
           labels_legend = labels_legend,
-          #color = color,
+          color = color,
           path = path_plots,
           name_group = name_group,
           verbose = verbose,
@@ -357,7 +356,7 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
 #' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
-# #' @param color  character calar or vector; defines color(s) of the bar in plots
+#' @param color  character scalar or vector; defines color(s) of the bar in plots
 #' @param name_grouping  string; name of the grouping variable (e.g. test version)
 #' for title and legend of plots (only needed when grouping exists)
 #' @param labels_legend character vector; contains legend labels
@@ -383,7 +382,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                           AZ = "missing items due to 'Angabe zurueckgesetzt'"
                       ),
                       path = here::here("Plots/Missing_Responses/by_person"),
-                      show_all = TRUE, name_group = NULL, # color = NULL,
+                      show_all = TRUE, name_group = NULL, color = NULL,
                       name_grouping = 'test version', labels_legend = NULL,
                       verbose = TRUE, warn = TRUE, test = TRUE) {
 
@@ -404,6 +403,18 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
 
     if(!is.null(grouping))
         groups <- scaling:::create_ifelse(show_all, c(grouping, 'all'), grouping)
+
+    # Check color argument
+    grps <- create_ifelse(is.null(grouping), 1, length(groups))
+
+    if (!is.null(color)) {
+      if (length(color) != grps) {
+        stop(paste0('The number of provided colors does not match the number ',
+                    'of groups (', grps, ').'))
+      }
+    } else {
+      color <- colorspace::sequential_hcl(grps)
+    }
 
     # Test labels
     if (any(!names(mv_all)[-length(mv_all)] %in% names(labels_mvs))) {
@@ -426,7 +437,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
 
             gg <- ggplot2::ggplot(
               data = mv,
-              mapping = ggplot2::aes(x = .data$number, y = .data$y)
+              mapping = ggplot2::aes(x = number, y = y, fill = color)
             ) +
                 ggplot2::labs(
                     title = paste0(Hmisc::capitalize(labels_mvs[i]), " by person"),
@@ -467,21 +478,24 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                     x = paste0("Number of ", labels_mvs[i]), y = "Percentage"
                 ) +
                 if (is.null(labels_legend)) {
-                   ggplot2::scale_fill_discrete(
-                     name = Hmisc::capitalize(name_grouping)
+                   ggplot2::scale_fill_manual(
+                     name = Hmisc::capitalize(name_grouping),
+                     values = color
                    )
                 } else {
                     if (length(labels_legend) != length(groups)) {
                         warning("Number of provided legend labels does not ",
                                 "correspond to number of groups. ",
                                 "Group labels are used instead.")
-                        ggplot2::scale_fill_discrete(
-                          name = Hmisc::capitalize(name_grouping)
+                        ggplot2::scale_fill_manual(
+                          name = Hmisc::capitalize(name_grouping),
+                          values = color
                         )
                     } else {
-                        ggplot2::scale_fill_discrete(
+                        ggplot2::scale_fill_manual(
                           name = Hmisc::capitalize(name_grouping),
-                          labels = labels_legend
+                          labels = labels_legend,
+                          values = color
                         )
                     }
                 }
@@ -529,7 +543,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
 
 mvp_calc <- function(responses, mvs) {
 
-    result <- data.frame(matrix(NA, nrow(responses), length(mvs)+1))
+    result <- data.frame(matrix(NA, nrow(responses), length(mvs) + 1))
     names(result) <- c(names(mvs), 'ALL')
 
     # Determine percentage of missing values for each missing type
@@ -557,7 +571,7 @@ mvp_calc <- function(responses, mvs) {
 mvp_summary <- function(results, digits = 3) {
 
     # Create tables with frequencies per missing value type
-    out <- apply(results, 2, function(x) {
+    out <- lapply(results, function(x) {
         round(prop.table(table(x)) * 100, digits)
     })
 

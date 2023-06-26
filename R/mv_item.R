@@ -20,7 +20,6 @@
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param missing_by_design  integer; user defined missing value for missing by
 #' design
-#' @param not_reached
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
 #' @param plots  logical; whether plots shall be created and saved to hard drive
@@ -32,7 +31,7 @@
 #' @param path_plots  string; defines path to folder where plots shall be saved
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
-# #' @param color  character calar or vector; defines color(s) of the bar in plots
+#' @param color  character scalar or vector; defines color(s) of the bar in plots
 #' @param name_grouping  string; name of the grouping variable (e.g. test version)
 #' for title and legend of plots (only needed when grouping exists)
 #' @param labels_legend character vector; contains legend labels
@@ -48,7 +47,7 @@
 #'            summary_table: table with summary statistics for TR.
 #' @export
 
-mv_item <- function(resp, vars, select, valid = NULL, multi_stage = FALSE,
+mv_item <- function(resp, vars, select, valid = NULL,
                     position = NULL, grouping = NULL,
                     mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                             UM = -90, ND = -55, MD = -54, AZ = -21),
@@ -63,13 +62,13 @@ mv_item <- function(resp, vars, select, valid = NULL, multi_stage = FALSE,
                         MD = "items missing by design",
                         AZ = "missing items due to 'Angabe zurueckgesetzt'"
                     ),
-                    missing_by_design = -54, not_reached = -94,
+                    missing_by_design = -54,
                     plots = FALSE, print = TRUE, save = TRUE, return = FALSE,
                     path_results = here::here("Results"),
                     path_table = here::here("Tables"),
                     path_plots = here::here("Plots/Missing_Responses/by_item"),
-                    show_all = TRUE, name_grouping = 'test version', #color = NULL,
-                    overwrite = FALSE, name_group = NULL,
+                    show_all = TRUE, name_grouping = 'test version',
+                    overwrite = FALSE, name_group = NULL, color = NULL,
                     digits = 3, warn = TRUE, verbose = TRUE,
                     labels_legend = NULL) {
 
@@ -122,7 +121,7 @@ mv_item <- function(resp, vars, select, valid = NULL, multi_stage = FALSE,
         labels_mvs = labels_mvs,
         show_all = show_all,
         verbose = verbose,
-        #color = color,
+        color = color,
         name_grouping = name_grouping,
         labels_legend = labels_legend,
         path = path_plots,
@@ -466,7 +465,7 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
 #' @param path  string; defines path to folder where plots shall be saved
-# #' @param color  character calar or vector; defines color(s) of the bar in plots
+#' @param color  character scalar or vector; defines color(s) of the bar in plots
 #' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
 #' @param name_grouping  string; name of the grouping variable (e.g. 'test version')
 #' for title and legend of plots (only needed when grouping exists)
@@ -496,7 +495,7 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
                       ),
                       path = here::here("Plots/Missing_Responses/by_item"),
                       name_group = NULL, name_grouping = 'test version',
-                      show_all = TRUE, labels_legend = NULL, #color = NULL,
+                      show_all = TRUE, labels_legend = NULL, color = NULL,
                       verbose = TRUE, warn = TRUE, test = TRUE) {
 
   # Test data
@@ -517,6 +516,18 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
   if(!is.null(grouping))
     groups <- scaling:::create_ifelse(show_all, c(grouping, 'all'), grouping)
 
+  # Check color argument
+  grps <- create_ifelse(is.null(grouping), 1, length(groups))
+
+  if (!is.null(color)) {
+    if (length(color) != grps) {
+      stop(paste0('The number of provided colors does not match the number ',
+                  'of groups (', grps, ').'))
+    }
+  } else {
+    color <- colorspace::sequential_hcl(grps)
+  }
+
   # Create directory for plots
   path_ <- scaling:::create_name(path, name_group, sep = "/")
   scaling:::check_folder(path_)
@@ -532,7 +543,7 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
       ylim <- ceiling(max(y, na.rm = TRUE)/10)*10
 
       gg <- ggplot2::ggplot(
-        data = mv_i, mapping = ggplot2::aes(x = position, y = y)
+        data = mv_i, mapping = ggplot2::aes(x = position, y = y, fill = color)
       ) +
         ggplot2::labs(
           title = paste0(Hmisc::capitalize(labels_mvs[i]), " by item position"),
@@ -576,21 +587,24 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
           y = "Percentage"
         ) +
         if (is.null(labels_legend)) {
-          ggplot2::scale_fill_discrete(
-            name = Hmisc::capitalize(name_grouping)
+          ggplot2::scale_fill_manual(
+            name = Hmisc::capitalize(name_grouping),
+            values = color
           )
         } else {
           if (length(labels_legend) != length(groups)) {
             warning("Number of provided legend labels does not ",
                     "correspond to number of groups. ",
                     "Group labels are used instead.")
-            ggplot2::scale_fill_discrete(
-              name = Hmisc::capitalize(name_grouping)
+            ggplot2::scale_fill_manual(
+              name = Hmisc::capitalize(name_grouping),
+              values = color
             )
           } else {
-            ggplot2::scale_fill_discrete(
+            ggplot2::scale_fill_manual(
               name = Hmisc::capitalize(name_grouping),
-              labels = labels_legend
+              labels = labels_legend,
+              values = color
             )
           }
         }
