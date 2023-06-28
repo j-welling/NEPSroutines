@@ -18,6 +18,8 @@
 #' design
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
+#' @param missing_by_design  integer; user defined missing value for missing by
+#' design
 #' @param plots  logical; whether plots shall be created and saved to hard drive
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param print  logical; whether results shall be printed to console
@@ -103,6 +105,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
           select = select,
           mvs = mvs,
           labels_mvs = labels_mvs,
+          missing_by_design = missing_by_design,
           grouping = grouping,
           show_all = show_all,
           name_grouping = name_grouping,
@@ -125,7 +128,8 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
           path = path_table,
           overwrite = overwrite,
           name_group = name_group,
-          mvs = mvs
+          mvs = mvs,
+          missing_by_design = missing_by_design
         )
 
         name <- scaling:::create_name("mv_person", name_group, ".rds")
@@ -136,6 +140,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
           mv_p = mv_person$mv_p,
           grouping = grouping,
           mvs = mvs,
+          missing_by_design = missing_by_design,
           save = FALSE
         )
     }
@@ -265,6 +270,8 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
 #' @param mvs  named integer vector; contains user-defined missing values
+#' @param missing_by_design  integer; user defined missing value for missing by
+#' design
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where table shall be saved
 #' @param overwrite boolean; indicates whether to overwrite existing file when saving table
@@ -279,10 +286,14 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
 mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, MD = -54, AZ = -21),
+                      missing_by_design = -54,
                       save = TRUE, path = here::here("Tables"),
                       name_group = NULL, test = TRUE) {
 
-    # Test data
+  # Missing by design
+  if(!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
+
+  # Test data
     if (test) scaling:::test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
 
     # Create table
@@ -338,7 +349,6 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
 }
 
 
-#'
 #' Plot percentage of missing values for persons
 #'
 #' @param mv_p  list; return object of mv_person()
@@ -353,6 +363,8 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
+#' @param missing_by_design  integer; user defined missing value for missing by
+#' design
 #' @param path  string; defines path to folder where X shall be saved
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
@@ -382,10 +394,14 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                           MD = "items missing by design",
                           AZ = "missing items due to 'Angabe zurueckgesetzt'"
                       ),
+                      missing_by_design = -54,
                       path = here::here("Plots/Missing_Responses/by_person"),
                       show_all = TRUE, name_group = NULL, color = NULL,
                       name_grouping = 'test version', labels_legend = NULL,
                       verbose = TRUE, warn = TRUE, test = TRUE) {
+
+    # Missing by design
+    if(!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
 
     # Test data
     if (test) {

@@ -18,10 +18,10 @@
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
 #' @param mvs  named integer vector; contains user-defined missing values
-#' @param missing_by_design  integer; user defined missing value for missing by
-#' design
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
+#' @param missing_by_design  integer; user defined missing value for missing by
+#' design
 #' @param plots  logical; whether plots shall be created and saved to hard drive
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
@@ -105,6 +105,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
       vars = vars,
       select = select,
       mvs = mvs,
+      missing_by_design = missing_by_design,
       grouping = grouping,
       warn = warn,
       test = FALSE,
@@ -119,6 +120,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
         grouping = grouping,
         mvs = mvs,
         labels_mvs = labels_mvs,
+        missing_by_design = missing_by_design,
         show_all = show_all,
         verbose = verbose,
         color = color,
@@ -383,6 +385,8 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
 #' @param mvs  named integer vector; contains user-defined missing values
+#' @param missing_by_design  integer; user defined missing value for missing by
+#' design
 #' @param path  string; defines path to folder where table shall be saved
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param overwrite  logical; whether to overwrite existing file when saving table
@@ -396,11 +400,15 @@ mvi_analysis <- function(resp, vars, select, position, valid = NULL,
 mvi_table <- function(mv_i, vars, select, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, MD = -54, AZ = -21),
+                      missing_by_design = -54,
                       save = TRUE, path = here::here("Tables"),
                       overwrite = FALSE, name_group = NULL,
                       test = TRUE, warn = TRUE) {
 
-    # Test data
+  # Missing by design
+  if(!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
+
+  # Test data
     if (test) {
         scaling:::test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
         scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
@@ -464,6 +472,8 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
+#' @param missing_by_design  integer; user defined missing value for missing by
+#' design
 #' @param path  string; defines path to folder where plots shall be saved
 #' @param color  character scalar or vector; defines color(s) of the bar in plots
 #' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
@@ -493,10 +503,14 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
                         MD = "items missing by design",
                         AZ = "missing items due to 'Angabe zurueckgesetzt'"
                       ),
+                      missing_by_design = -54,
                       path = here::here("Plots/Missing_Responses/by_item"),
                       name_group = NULL, name_grouping = 'test version',
                       show_all = TRUE, labels_legend = NULL, color = NULL,
                       verbose = TRUE, warn = TRUE, test = TRUE) {
+
+  # Missing by design
+  if(!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
 
   # Test data
   if (test) {
