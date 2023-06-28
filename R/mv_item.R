@@ -543,12 +543,16 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
       ylim <- ceiling(max(y, na.rm = TRUE)/10)*10
 
       gg <- ggplot2::ggplot(
-        data = mv_i, mapping = ggplot2::aes(x = position, y = y, fill = color)
-      ) +
-        ggplot2::labs(
-          title = paste0(Hmisc::capitalize(labels_mvs[i]), " by item position"),
-          x = "Item position", y = "Percentage"
-        )
+              data = mv_i,
+              mapping = ggplot2::aes(x = position, y = y, fill = color)
+            ) +
+            ggplot2::scale_fill_manual(values = color) +
+            ggplot2::labs(
+              title = paste0(Hmisc::capitalize(labels_mvs[i]), " by item position"),
+              x = "Item position", y = "Percentage"
+            ) +
+            ggplot2::theme_bw() +
+            ggplot2::theme(legend.position = 'none')
 
     } else {
 
@@ -620,8 +624,8 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
       ggplot2::scale_x_continuous(
         breaks = seq(0, k, ifelse(k < 20, 1, floor(k/20)))
       ) +
-      ggplot2::theme_bw() +
-      ggplot2::theme(
+      if (!is.null(grouping)) ggplot2::theme_bw() +
+      if (!is.null(grouping)) ggplot2::theme(
         legend.justification = c(0, 1),
         legend.position = c(0.01, 0.99)
       )

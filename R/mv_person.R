@@ -135,7 +135,8 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
         mv_person$summary <- scaling:::mvp_table(
           mv_p = mv_person$mv_p,
           grouping = grouping,
-          mvs = mvs
+          mvs = mvs,
+          save = FALSE
         )
     }
 
@@ -436,14 +437,17 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
             ylim <- ceiling(max(mv$y, na.rm = TRUE)/10)*10
 
             gg <- ggplot2::ggplot(
-              data = mv,
-              mapping = ggplot2::aes(x = number, y = y, fill = color)
-            ) +
-                ggplot2::labs(
+                    data = mv,
+                    mapping = ggplot2::aes(x = number, y = y, fill = color)
+                  ) +
+                  ggplot2::scale_fill_manual(values = color) +
+                  ggplot2::labs(
                     title = paste0(Hmisc::capitalize(labels_mvs[i]), " by person"),
                     x = paste0("Number of ", labels_mvs[i]),
                     y = "Percentage"
-                )
+                  ) +
+                  ggplot2::theme_bw() +
+                  ggplot2::theme(legend.position = 'none')
 
         } else {
 
@@ -462,27 +466,23 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
 
             # create plot
             gg <- ggplot2::ggplot(
-                data = mv_wide,
-                mapping = ggplot2::aes(
-                  x = number,
-                  y = MV,
-                  fill = group
-                )
-            ) +
-                ggplot2::labs(
+                    data = mv_wide,
+                    mapping = ggplot2::aes(x = number, y = MV, fill = group)
+                  ) +
+                  ggplot2::labs(
                     title = paste0(
                       Hmisc::capitalize(labels_mvs[i]),
                       " by person and ",
                       name_grouping
                     ),
                     x = paste0("Number of ", labels_mvs[i]), y = "Percentage"
-                ) +
-                if (is.null(labels_legend)) {
-                   ggplot2::scale_fill_manual(
-                     name = Hmisc::capitalize(name_grouping),
-                     values = color
-                   )
-                } else {
+                  ) +
+                  if (is.null(labels_legend)) {
+                    ggplot2::scale_fill_manual(
+                      name = Hmisc::capitalize(name_grouping),
+                      values = color
+                    )
+                  } else {
                     if (length(labels_legend) != length(groups)) {
                         warning("Number of provided legend labels does not ",
                                 "correspond to number of groups. ",
@@ -498,7 +498,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                           values = color
                         )
                     }
-                }
+                  }
         }
 
         gg <- gg +
@@ -511,11 +511,11 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
             ggplot2::scale_x_continuous(
               breaks = seq(0, end, ifelse(end > 10, 2, 1))
             ) +
-            ggplot2::theme_bw() +
-            ggplot2::theme(
-              legend.justification = c(1, 1),
-              legend.position = c(0.99, 0.99)
-            )
+          if (!is.null(grouping)) ggplot2::theme_bw() +
+          if (!is.null(grouping)) ggplot2::theme(
+            legend.justification = c(1, 1),
+            legend.position = c(0.99, 0.99)
+          )
 
         # save plot
         ggplot2::ggsave(
