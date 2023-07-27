@@ -160,7 +160,7 @@ pc_scoring <- function(resp, poly_items, mvs = NULL) {
 #' @return data.frame resp with collapsed and original items
 
 collapse_response_categories <- function(resp, vars, select = 'poly',
-                                         per_cat = 200,save = FALSE,
+                                         per_cat = 200, save = FALSE,
                                          path_table = here::here("Tables")) {
 
   # Check whether variables are indeed contained in data.frames
@@ -195,14 +195,19 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
 
       if (length(collapse) > 0) {
 
+        log <- matrix(values, nrow = 1, dimnames = list("", values))
         while (length(collapse) > 0) {
 
           # for score of 0: left shift all values larger than 0
+          log <- rbind(log, NA)
           if (collapse_values[1] == 0) {
 
             j <- which(response > 0)
 
             # for highest score: left shift current value
+            log[nrow(log), ] <-
+              c(log[nrow(log) - 1, log[nrow(log) - 1, ] == 0],
+                log[nrow(log) - 1, log[nrow(log) - 1, ] > 0] - 1)
           } else if (collapse_values[1] == max(response, na.rm = TRUE)) {
 
             j <- which(response == max(response, na.rm = TRUE))
@@ -210,6 +215,9 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
             # for scores between lowest and highest score, if the next score has
             #  a smaller frequency than the previous score:
             #  left shift all values greater than the current value
+            log[nrow(log), ] <-
+              c(log[nrow(log) - 1, log[nrow(log) - 1, ] != max(log[nrow(log) - 1, ])],
+                log[nrow(log) - 1, log[nrow(log) - 1, ] == max(log[nrow(log) - 1, ])] - 1)
           } else if (tab[collapse[1] - 1] > tab[collapse[1] + 1]) {
 
             j <- which(response > collapse_values[1])
@@ -218,10 +226,16 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
             #  a smaller frequency than the next score:
             #  left shift the current value and all values greater than the
             #  current value
+            log[nrow(log), ] <-
+              c(log[nrow(log) - 1, log[nrow(log) - 1, ] <= collapse_values[1]],
+                log[nrow(log) - 1, log[nrow(log) - 1, ] > collapse_values[1]] - 1)
           } else if (tab[collapse[1] - 1] <= tab[collapse[1] + 1]) {
 
             j <- which(response >= collapse_values[1])
 
+            log[nrow(log), ] <-
+              c(log[nrow(log) - 1, log[nrow(log) - 1, ] < collapse_values[1]],
+                log[nrow(log) - 1, log[nrow(log) - 1, ] >= collapse_values[1]] - 1)
           }
 
           response[j] <- response[j] - 1
@@ -236,15 +250,17 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
           collapse <- which(tab < per_cat)
           collapse_values <- as.numeric(names(collapse))
 
-          if (length(tab) <= 1) break
+          if (length(tab) <= 1)
+            break
         }
 
         if (length(collapse) == 0 & length(values) >= 2) {
 
           resp[ , paste0(item, "_collapsed")] <- response
-          collapsed_items <- c(collapsed_items, item)
-
-        } else {
+          collapsed_items <- rbind(collapsed_items,
+                                   c(item, paste0(log[1, ], "=", log[nrow(log),], collapse = ", ")))
+        }
+        else {
 
           problematic_items <- c(problematic_items, item)
 
@@ -254,10 +270,10 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
   }
 
   # Which items have been collapsed?
-  item_names <- tibble::tibble(
-    original_item = collapsed_items,
-    collapsed_item = paste0(collapsed_items, "_collapsed")
-  )
+  colnames(collapsed_items) <- c("Item", "Scoring")
+  item_names <- tibble::tibble(original_item = collapsed_items[, 1],
+                               scoring = collapsed_items[, 2],
+                               collapsed_item = paste0(collapsed_items[, 1], "_collapsed"))
 
   # Print results
   if (!is.null(problematic_items)) {
@@ -282,13 +298,14 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
 
   # Save results
   if (save) {
-    save_table(results = list(collapsed = item_names,
-                              dichotomous = dichotomous_items,
-                              problematic = problematic_items),
-               filename = "collapsed_items.xlsx",
-               path = path_table,
-               overwrite = TRUE,
-               show_rownames = TRUE)
+
+    scaling:::save_table(results = list(collapsed = item_names,
+                                        dichotomous = dichotomous_items,
+                                        problematic = problematic_items),
+                         filename = "collapsed_items.xlsx",
+                         path = path_table,
+                         overwrite = TRUE,
+                         show_rownames = FALSE)
   }
 
   return(resp)
