@@ -502,12 +502,30 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
     B[, , 1] <- B[, , 1] * v[[2]]
   }
 
+  # Match variable names
+  # It seems the estimated item difficulties can be order differently,
+  # therefore we match the fixed xsi to the xsi in the present estimation
+  xsi_arg <-  # present model
+    TAM::tam.mml(
+      resp = resp2,
+      A = A,
+      B = B,
+      verbose = FALSE,
+      control = list(maxiter = 1)
+    )$xsi.fixed.estimated
+  rownames(xsi_fixed) <- gsub("_step", ":step", rownames(xsi_fixed))
+  if (any(!rownames(xsi_fixed) %in% rownames(xsi_arg)))
+    stop("Item parameters not found!")
+  xsi_fixed2 <- cbind(xsi_arg[rownames(xsi_fixed), 1],  # reorder xsi
+                      xsi_fixed[rownames(xsi_fixed), 2])
+
+
   # Fit model
   mod <- TAM::tam.mml(
     resp = resp2,
     A = A,
     B = B,
-    xsi.fixed = xsi_fixed,
+    xsi.fixed = xsi_fixed2,
     verbose = FALSE,
     pid = pid,
     control = control_tam,
@@ -522,7 +540,8 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
       mod, convM = control_wle$convM,
       Msteps = control_wle$Msteps,
       progress = FALSE
-  )[, c("pid", "theta", "error")]
+  )
+  wles <- data.frame(ID_t = wles$pid, wle = wles$theta, se = wles$error)
   names(wles) <- c("ID_t", paste0(wle_name, c("_sc1", "_sc2")))
 
   # Return results
