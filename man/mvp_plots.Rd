@@ -15,9 +15,11 @@ mvp_plots(
     "missing items due to test abortion", UM = "unspecific missing items", ND =
     "not determinable items", MD = "items missing by design", AZ =
     "missing items due to 'Angabe zurueckgesetzt'"),
+  missing_by_design = -54,
   path = here::here("Plots/Missing_Responses/by_person"),
   show_all = TRUE,
   name_group = NULL,
+  color = NULL,
   name_grouping = "test version",
   labels_legend = NULL,
   verbose = TRUE,
@@ -44,12 +46,17 @@ an item}
 \item{labels_mvs}{named character vector; contains labels for user-defined
 missing values to use them in plot titles and printed results}
 
+\item{missing_by_design}{integer; user defined missing value for missing by
+design}
+
 \item{path}{string; defines path to folder where X shall be saved}
 
 \item{show_all}{logical; whether whole sample shall be included as a "group"
 (only applicable when grouping exists)}
 
 \item{name_group}{string; defines name of group used in analysis (e.g. 'settingA')}
+
+\item{color}{character scalar or vector; defines color(s) of the bar in plots}
 
 \item{name_grouping}{string; name of the grouping variable (e.g. test version)
 for title and legend of plots (only needed when grouping exists)}

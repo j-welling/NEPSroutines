@@ -15,11 +15,13 @@ mvi_plots(
     "missing items due to test abortion", UM = "unspecific missing items", ND =
     "not determinable items", MD = "items missing by design", AZ =
     "missing items due to 'Angabe zurueckgesetzt'"),
+  missing_by_design = -54,
   path = here::here("Plots/Missing_Responses/by_item"),
   name_group = NULL,
   name_grouping = "test version",
   show_all = TRUE,
   labels_legend = NULL,
+  color = NULL,
   verbose = TRUE,
   warn = TRUE,
   test = TRUE
@@ -44,6 +46,9 @@ an item}
 \item{labels_mvs}{named character vector; contains labels for user-defined
 missing values to use them in plot titles and printed results}
 
+\item{missing_by_design}{integer; user defined missing value for missing by
+design}
+
 \item{path}{string; defines path to folder where plots shall be saved}
 
 \item{name_group}{string; defines name of group used in analysis (e.g. 'settingA')}
@@ -55,6 +60,8 @@ for title and legend of plots (only needed when grouping exists)}
 (only applicable when grouping exists)}
 
 \item{labels_legend}{character vector; contains legend labels}
+
+\item{color}{character scalar or vector; defines color(s) of the bar in plots}
 
 \item{verbose}{logical; whether to print processing information to console}
 

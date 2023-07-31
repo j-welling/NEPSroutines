@@ -10,6 +10,7 @@ mvi_table(
   select,
   grouping = NULL,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21),
+  missing_by_design = -54,
   save = TRUE,
   path = here::here("Tables"),
   overwrite = FALSE,
@@ -33,6 +34,9 @@ variable in resp and vars that indicates to which group belongs a person or
 an item}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
+
+\item{missing_by_design}{integer; user defined missing value for missing by
+design}
 
 \item{save}{logical; whether results shall be saved to hard drive}
 

@@ -21,6 +21,8 @@ dim_summary(
 
 \item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 
+\item{overwrite}{logical; whether to overwrite existing file when saving table}
+
 \item{path}{string; defines path to folder where table shall be saved}
 
 \item{digits}{integer; number of decimals for rounding}

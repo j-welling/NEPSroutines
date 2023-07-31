@@ -10,9 +10,10 @@ create_suf(
   select,
   competence,
   scores = NULL,
-  score_name = NULL,
   mvs = NULL,
+  score_name = NULL,
   items_labels = NULL,
+  suf_name = "suf",
   name_group = NULL,
   path = here::here("suf"),
   save = TRUE,
@@ -42,13 +43,15 @@ data}
 errors) as variables and persons as rows; additionally includes ID_t as a
 person identifier; return object of functions c}
 
+\item{mvs}{named integer vector; contains user-defined missing values}
+
 \item{score_name}{character; name of the scores -- WITHOUT extension (e.g.,
 reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)}
 
-\item{mvs}{named integer vector; contains user-defined missing values}
-
 \item{items_labels}{vector; named vector for each item used for labelling
 the data}
+
+\item{suf_name}{character; name of suf (defaults to 'suf')}
 
 \item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 

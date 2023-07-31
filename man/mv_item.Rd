@@ -29,6 +29,7 @@ mv_item(
   name_grouping = "test version",
   overwrite = FALSE,
   name_group = NULL,
+  color = NULL,
   digits = 3,
   warn = TRUE,
   verbose = TRUE,
@@ -90,6 +91,8 @@ for title and legend of plots (only needed when grouping exists)}
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 
 \item{name_group}{string; defines name of group used in analysis (e.g. 'settingA')}
+
+\item{color}{character scalar or vector; defines color(s) of the bar in plots}
 
 \item{digits}{integer; number of decimals for rounding}
 

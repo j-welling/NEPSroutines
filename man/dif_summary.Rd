@@ -6,6 +6,7 @@
 \usage{
 dif_summary(
   diflist,
+  vars,
   print = TRUE,
   save = TRUE,
   path = here::here("Tables"),
@@ -17,6 +18,9 @@ dif_summary(
 }
 \arguments{
 \item{diflist}{list; return object of dif_model(); with main and dif model}
+
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'item' containing item names}
 
 \item{print}{logical; whether results shall be printed to console}
 

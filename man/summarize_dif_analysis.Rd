@@ -7,6 +7,7 @@
 summarize_dif_analysis(
   dif_models,
   dif_vars,
+  vars,
   dif_threshold = 0.5,
   print = TRUE,
   save = TRUE,
@@ -22,6 +23,9 @@ summarize_dif_analysis(
 
 \item{dif_vars}{character vector; contains the variable names to be tested
 for DIF (e.g., "gender")}
+
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'item' containing item names}
 
 \item{dif_threshold}{numeric scalar; indicates absolute threshold of
 problematic DIF (defaults to 0.5)}

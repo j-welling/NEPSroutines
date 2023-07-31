@@ -17,6 +17,7 @@ mv_person(
     "not determinable items", MD = "items missing by design", AZ =
     "missing items due to 'Angabe zurueckgesetzt'"),
   missing_by_design = -54,
+  color = NULL,
   plots = FALSE,
   print = TRUE,
   save = TRUE,
@@ -60,6 +61,8 @@ missing values to use them in plot titles and printed results}
 
 \item{missing_by_design}{integer; user defined missing value for missing by
 design}
+
+\item{color}{character scalar or vector; defines color(s) of the bar in plots}
 
 \item{plots}{logical; whether plots shall be created and saved to hard drive}
 

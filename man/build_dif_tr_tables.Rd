@@ -6,15 +6,20 @@
 \usage{
 build_dif_tr_tables(
   dif_summaries,
+  vars,
   save = TRUE,
   overwrite = FALSE,
   path = here::here("Tables"),
+  digits = 3,
   name_group = NULL
 )
 }
 \arguments{
 \item{dif_summaries}{named list of dif_summary() return objects; the list
 elements must be named after their DIF variable}
+
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'item' containing item names}
 
 \item{save}{logical; whether results shall be saved to hard drive}
 
@@ -23,6 +28,8 @@ elements must be named after their DIF variable}
 \item{path}{string; indicates the folder location where the summaries
 are stored on the hard drive; please note that the path is relative to the
 current working path set by here::i_am()}
+
+\item{digits}{integer; number of decimals for rounding}
 
 \item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 }
