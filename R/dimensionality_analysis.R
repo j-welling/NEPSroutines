@@ -235,6 +235,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
 #' @param save  logical; whether table shall be saved to hard drive
 #' @param path  string; defines path to folder where table shall be saved
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
+#' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
 #'
 #' @return list with summary of results:
