@@ -90,7 +90,6 @@ mv_item <- function(resp, vars, select, valid = NULL,
         valid = valid,
         position = position,
         grouping = grouping,
-        show_all = show_all,
         mvs = mvs,
         missing_by_design = missing_by_design,
         digits = digits,
@@ -185,8 +184,6 @@ mv_item <- function(resp, vars, select, valid = NULL,
 #' @param grouping  character vector; contains for each group a name of a logical
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
-#' @param show_all  logical; whether whole sample shall be included as a "group"
-#' (only applicable when grouping exists)
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param missing_by_design  integer; user defined missing value for missing by
 #' design
@@ -203,8 +200,8 @@ mv_item <- function(resp, vars, select, valid = NULL,
 #' @importFrom stats median sd na.omit
 #' @export
 
-mvi_analysis <- function(resp, vars, select, position, valid = NULL,
-                         grouping = NULL, show_all = TRUE,
+mvi_analysis <- function(resp, vars, select, position,
+                         valid = NULL, grouping = NULL,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, MD = -54, AZ = -21),
                          missing_by_design = -54,
@@ -804,7 +801,8 @@ create_mvlist <- function(item, position, responses, mvs, digits = 3) {
     mvlist <- merge(mvlist, results, by = 'item')
 
     # Order dataframe
-    mvlist[mvlist$position, ] <- mvlist # dplyr::arrange() funktioniert nicht
+    #mvlist[mvlist$position, ] <- mvlist # dplyr::arrange() funktioniert nicht
+    mvlist <- mvlist[order(mvlist$position, mvlist$item), ]
 
     # Return list
     return(mvlist)
