@@ -558,3 +558,53 @@ create_name <- function(start, name_group = NULL, end = NULL, sep = "_") {
 
     return(name)
 }
+
+#' Match item parameters by item names
+#' @param xsi_fixed named numerical vector; contains fixed item difficulties as
+#'   elements and item names as names of elements
+#' @param resp data.frame (containing item responses) as passed to TAM functions
+#' @param irtmodel string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
+#'   "GPCM" for GPCM analysis
+#' @param include_steps logical; whether step parameters shall be included
+#' @param Q Q matrix as passed to TAM functions
+#' @param A A array as passed to TAM functions
+#' @param B B array as passed to TAM functions
+#'
+#' @returns xsi_fixed with correct order
+#' @noRd
+order_xsi_fixed <- function(xsi_fixed, resp, irtmodel,
+                           include_steps = TRUE, Q = NULL, A = NULL, B = NULL) {
+
+  if (irtmodel %in% c("1PL", "PCM2")) {
+    xsi_arg <- TAM::tam.mml(
+      resp = resp,
+      Q = Q,
+      A = A,
+      B = B,
+      irtmodel = irtmodel,
+      verbose = FALSE,
+      control = list(maxiter = 1)
+    )$xsi.fixed.estimated
+  } else if (irtmodel %in% c("2PL", "GPCM")) {
+    xsi_arg <- TAM::tam.mml.2pl(
+      resp = resp,
+      Q = Q,
+      A = A,
+      B = B,
+      irtmodel = irtmodel,
+      verbose = FALSE,
+      control = list(maxiter = 1)
+    )$xsi.fixed.estimated
+  }
+
+  if (!include_steps) names(xsi_fixed) <- gsub("_step", ":step", names(xsi_fixed))
+
+  if (any(!names(xsi_fixed) %in% rownames(xsi_arg)))
+    stop(paste0("Items in xsi_fixed do not match items in ", irtmodel, " model!"))
+
+  xsi_new <- cbind(
+    xsi_arg[names(xsi_fixed), 1], xsi_fixed[names(xsi_fixed)] # reorder xsi
+  )
+
+  return(xsi_new)
+}
