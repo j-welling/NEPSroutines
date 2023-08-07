@@ -50,7 +50,7 @@
 #' (as return object of irt_analysis()) as list elements.
 #' @export
 
-grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
+grouped_irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
                                  missing_by_design = -54, scoring = NULL,
                                  plots = FALSE, save = TRUE, print = TRUE,
                                  return = FALSE, overwrite = FALSE,
@@ -62,8 +62,8 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
                                  pweights = NULL, control_tam = NULL, control_wle = NULL) {
 
     # Test data
-    scaling:::check_logicals(vars, "vars", c(groups, "dich"), warn = warn)
-    scaling:::check_logicals(resp, "resp", c(valid, names(groups)), warn = warn)
+    scaling:::check_logicals(vars, "vars", c(select, "dich"), warn = warn)
+    scaling:::check_logicals(resp, "resp", c(valid, names(select)), warn = warn)
     if (!is.null(scoring))
         scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
     if (!is.null(pweights))
@@ -75,20 +75,19 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
     i <- 1
 
     # Conduct irt_analysis for each group
-    for (g in names(groups)) {
+    for (g in names(select)) {
 
-        select <- groups[[g]]
-        scaling:::check_items(vars$item[vars[[select]]])
-        scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+        scaling:::check_items(vars$item[vars[[ select[[g]] ]] ])
+        scaling:::check_numerics(resp, "resp", vars$item[vars[[ select[[g]] ]] ])
 
         message(toupper(paste0("\n\n\n(", i, ") irt analysis (",
-                               ifelse(is_poly(resp, vars, select), 'poly', 'dich'),
+                               ifelse(is_poly(resp, vars, select[[g]]), 'poly', 'dich'),
                                ") for group '", g, "':\n")))
 
         irt_groups[[g]] <- scaling:::irt_analysis(
           resp = resp[resp[[g]], ],
           vars = vars,
-          select = select,
+          select = select[[g]],
           valid = valid,
           scoring = scoring,
           mvs = mvs,
