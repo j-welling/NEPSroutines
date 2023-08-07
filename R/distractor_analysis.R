@@ -120,7 +120,7 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
 #' @param select_raw string; defines name of logical variable in vars that
 #' indicates all raw items that shall be used for the distractor analysis
 #' @param select_score string; defines name of logical variable in vars that
-#' indicates all items that shall be used to caculate total score
+#' indicates all items that shall be used to calculate total score
 #' @param correct string; defines name of variable in vars that contains the
 #' correct responses to the items
 #' @param save  logical; whether results shall be saved to hard drive
