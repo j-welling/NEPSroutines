@@ -1,7 +1,5 @@
 #' IRT analyses for several groups
 #'
-#' @param groups named character vector; contains name of item selection
-#'   variable of each group (e.g. easy = 'easy_final')
 #' @param resp  data.frame; contains item responses with items as variables and
 #'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
@@ -10,6 +8,9 @@
 #' @param vars  data.frame; contains information about items with items as rows;
 #'   includes variable 'item' containing item names; additionally includes all
 #'   variables that are further defined in the function arguments
+#' @param select list; contains name of item selection variable of each group as
+#'   elements and group name as in resp and vars as element names
+#'   (e.g. easy = 'easy_final')
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
 #' @param mvs  named integer vector; contains user-defined missing values
@@ -18,10 +19,18 @@
 #' @param scoring  string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
-#' @param xsi.fixed matrix; contains fixed (linked) item parameters; optional
-#' @param control_tam list; control argument as passed to tam.mml-functions
-#' @param control_wle list; can contain Msteps and/or convM as to pass to tam.wle()
-#'    as elements of the list
+#' @param xsi_fixed_1p list; may contain argument xsi_fixed_1p from irt_analysis()
+#'   for each group as elements and group names as names of elements; may be NULL
+#'   or contain xsi_fixed only for some groups
+#' @param xsi_fixed_1p list; may contain argument xsi_fixed_2p from irt_analysis()
+#'   for each group as elements and group names as names of elements; may be NULL
+#'   or contain xsi_fixed only for some groups
+#' @param control_tam list; may contain argument control_tam from irt_analysis()
+#'   for each group as elements and group names as names of elements; may be NULL
+#'   or contain xsi_fixed only for some groups
+#' @param control_wle list; may contain argument control_wle from irt_analysis()
+#'   for each group as elements and group names as names of elements; may be NULL
+#'   or contain xsi_fixed only for some groups
 #' @param pweights character; defines name of numerical variable in resp that
 #' contains person weights as passed to TAM-function
 #' @param plots  logical; whether plots shall be created and saved to hard drive
@@ -49,8 +58,8 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
                                  path_table = here::here("Tables"),
                                  path_results = here::here("Results"),
                                  digits = 3, verbose = FALSE, warn = TRUE,
-                                 xsi.fixed = NULL, pweights = NULL,
-                                 control_tam = NULL, control_wle = NULL) {
+                                 xsi_fixed_1p = NULL, xsi_fixed_2p = NULL,
+                                 pweights = NULL, control_tam = NULL, control_wle = NULL) {
 
     # Test data
     scaling:::check_logicals(vars, "vars", c(groups, "dich"), warn = warn)
@@ -96,10 +105,12 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
           name_group = g,
           warn = FALSE,
           test = FALSE,
-          control_tam = control_tam,
-          control_wle = control_wle,
+          control_tam = control_tam[[g]],
+          control_wle = control_wle[[g]],
           pweights = pweights,
-          xsi.fixed = xsi.fixed
+          xsi_fixed_1p = xsi_fixed_1p[[g]],
+          xsi_fixed_2p = xsi_fixed_2p[[g]]
+
         )
 
         i <- i + 1
@@ -132,7 +143,10 @@ grouped_irt_analysis <- function(groups, resp, vars, valid = NULL, mvs = NULL,
 #' @param scoring  string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
-#' @param xsi.fixed matrix; contains fixed (linked) item parameters; optional
+#' @param xsi_fixed_1p named numerical vector; contains fixed item difficulties
+#' for one parameter model as elements and item names as names of elements
+#' @param xsi_fixed_2p named numerical vector; contains fixed item difficulties
+#' for two parameter model as elements and item names as names of elements
 #' @param control_tam list; control argument as passed to tam.mml-functions
 #' @param control_wle list; can contain Msteps and/or convM as to pass to tam.wle()
 #'    as elements of the list
@@ -170,7 +184,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
                          path_results = here::here("Results"),
                          overwrite = FALSE, digits = 3, name_group = NULL,
                          verbose = FALSE, warn = TRUE, test = TRUE,
-                         xsi.fixed = NULL, pweights = NULL,
+                         xsi_fixed_1p = NULL, xsi_fixed_2p = NULL, pweights = NULL,
                          control_tam = NULL, control_wle = NULL) {
 
     # Test data
@@ -207,7 +221,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
             control_tam = control_tam,
             control_wle = control_wle,
             pweights = pweights,
-            xsi.fixed = xsi.fixed,
+            xsi_fixed = xsi_fixed_1p,
             verbose = verbose,
             save = FALSE,
             warn = FALSE,
@@ -224,7 +238,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
             control_tam = control_tam,
             control_wle = control_wle,
             pweights = pweights,
-            xsi.fixed = xsi.fixed,
+            xsi_fixed = xsi_fixed_2p,
             verbose = verbose,
             save = FALSE,
             warn = FALSE,
@@ -244,7 +258,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
           control_tam = control_tam,
           control_wle = control_wle,
           pweights = pweights,
-          xsi.fixed = xsi.fixed,
+          xsi_fixed = xsi_fixed_1p,
           verbose = verbose,
           save = FALSE,
           warn = FALSE,
@@ -262,7 +276,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
           control_tam = control_tam,
           control_wle = control_wle,
           pweights = pweights,
-          xsi.fixed = xsi.fixed,
+          xsi_fixed = xsi_fixed_2p,
           verbose = verbose,
           save = FALSE,
           warn = FALSE,
@@ -378,7 +392,8 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 #' @param scoring  string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
-#' @param xsi.fixed matrix; contains fixed (linked) item parameters; optional
+#' @param xsi_fixed named numerical vector; contains fixed item difficulties as
+#'   elements and item names as names of elements
 #' @param control_tam list; control argument as passed to tam.mml-functions
 #' @param control_wle list; can contain Msteps and/or convM as to pass to tam.wle()
 #'    as elements of the list
@@ -404,7 +419,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
                       scoring = NULL, verbose = FALSE, save = TRUE,
                       path = here::here("Results"), name_group = NULL,
-                      xsi.fixed = NULL, pweights = NULL,
+                      xsi_fixed = NULL, pweights = NULL,
                       control_tam = NULL, control_wle = NULL,
                       warn = TRUE, test = TRUE) {
 
@@ -423,8 +438,8 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
 
   # Check if input is correct
   if (!irtmodel %in% c("1PL", "2PL", "GPCM", "PCM2")) {
-    stop("Invalid irtmodel. Please provide one of the following: '1PL',
-         '2PL', 'PCM2', 'GPCM'.")
+    stop("Invalid irtmodel. Please provide one of the following:
+          '1PL', '2PL', 'PCM2', 'GPCM'.")
   }
 
   # Select only valid cases
@@ -460,22 +475,36 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   # IRT model
   if (irtmodel %in% c("1PL", "PCM2")) {
 
+    # Match item parameters by item name
+    if (!is.null(xsi_fixed))
+      xsi_fixed <- scaling:::order_xsi_fixed(xsi_fixed, resp, irtmodel = irtmodel, Q = Q)
+
+    # Calculate model
     mod <- TAM::tam.mml(
       resp = resp,
       irtmodel = irtmodel,
       Q = Q,
       pid = pid,
       verbose = verbose,
-      xsi.fixed = xsi.fixed,
+      xsi.fixed = xsi_fixed,
       control = control_tam,
       pweights = pws
     )
 
   } else if (irtmodel %in% c("2PL", "GPCM")) {
 
+    # Match item parameters by item name
+    if (!is.null(xsi_fixed))
+      xsi_fixed <- scaling:::order_xsi_fixed(xsi_fixed, resp, irtmodel = irtmodel, Q = Q)
+
+    # Calculate model
     mod <- TAM::tam.mml.2pl(
-      resp = resp, irtmodel = irtmodel, Q = Q, pid = pid,
-      verbose = verbose, xsi.fixed = xsi.fixed,
+      resp = resp,
+      irtmodel = irtmodel,
+      Q = Q,
+      pid = pid,
+      verbose = verbose,
+      xsi.fixed = xsi_fixed,
       control = control_tam,
       pweights = pws
     )

@@ -13,8 +13,8 @@
 #'   Rasch model
 #' @param score_name character; name of the scores -- WITHOUT extension (e.g.,
 #'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
-#' @param xsi_fixed matrix; fixed parameter estimates of final IRT scaling as
-#'   returned by tam.mml()
+#' @param xsi_fixed named numerical vector; contains fixed item difficulties as
+#'   elements and item names as names of elements
 #' @param facet character vector; contains the variable name indicating the
 #'   test rotation
 #' @param select  string; defines name of logical variable in vars that indicates
@@ -199,7 +199,7 @@ create_scores <- function(resp, vars, select, scoring = NULL,
     scaling:::check_pid(resp$ID_t)
 
     if (is.null(facet) | (!is.null(facet) & is.null(xsi_fixed))) {
-      fit <- scaling:::irt_analysis(
+      fit <- scaling:::irt_analysis( # hier könnte man irt_model() anstatt irt_analysis() verwenden --> spart Berechnungszeit
         resp = resp,
         vars = vars,
         select = select,
@@ -207,7 +207,7 @@ create_scores <- function(resp, vars, select, scoring = NULL,
         mvs = mvs,
         missing_by_design = missing_by_design,
         scoring = scoring,
-        xsi.fixed = xsi_fixed,
+        xsi_fixed_1p = xsi_fixed,
         verbose = FALSE,
         warn = warn,
         return = TRUE,
@@ -431,8 +431,8 @@ estimate_sum_scores <- function(resp,
 #'   (in)valid cases
 #' @param facet character vector; contains the variable name indicating the
 #'   test rotation
-#' @param xsi_fixed matrix; fixed parameter estimates of final IRT scaling as
-#'   returned by tam.mml.mfr()
+#' @param xsi_fixed named numerical vector; contains fixed item difficulties as
+#'   elements and item names as names of elements
 #' @param scoring  string; defines name of numerical variable in vars that
 #'   contains the scoring factor to be applied to loading matrix; can be NULL for
 #'   Rasch model
@@ -485,7 +485,7 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
 
   # Conduct analyses
   frmA <- as.formula(paste0("~ item + ",
-                            ifelse(irt_type == "poly", "item*step +", ""),
+                            ifelse(irt_type == "poly", " item*step + ", ""),
                             names(facet)))
 
   # Design matrix for model
@@ -502,30 +502,17 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
     B[, , 1] <- B[, , 1] * v[[2]]
   }
 
-  # Match variable names
-  # It seems the estimated item difficulties can be order differently,
-  # therefore we match the fixed xsi to the xsi in the present estimation
-  xsi_arg <-  # present model
-    TAM::tam.mml(
-      resp = resp2,
-      A = A,
-      B = B,
-      verbose = FALSE,
-      control = list(maxiter = 1)
-    )$xsi.fixed.estimated
-  rownames(xsi_fixed) <- gsub("_step", ":step", rownames(xsi_fixed))
-  if (any(!rownames(xsi_fixed) %in% rownames(xsi_arg)))
-    stop("Item parameters not found!")
-  xsi_fixed2 <- cbind(xsi_arg[rownames(xsi_fixed), 1],  # reorder xsi
-                      xsi_fixed[rownames(xsi_fixed), 2])
-
+  # Match item parameters by item name
+  xsi_fixed <- scaling:::order_xsi_fixed(
+    xsi_fixed, resp2, irtmodel = '1PL', include_steps = FALSE, A = A, B = B
+  )
 
   # Fit model
   mod <- TAM::tam.mml(
     resp = resp2,
     A = A,
     B = B,
-    xsi.fixed = xsi_fixed2,
+    xsi.fixed = xsi_fixed,
     verbose = FALSE,
     pid = pid,
     control = control_tam,
