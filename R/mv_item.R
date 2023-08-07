@@ -801,7 +801,6 @@ create_mvlist <- function(item, position, responses, mvs, digits = 3) {
     mvlist <- merge(mvlist, results, by = 'item')
 
     # Order dataframe
-    #mvlist[mvlist$position, ] <- mvlist # dplyr::arrange() funktioniert nicht
     mvlist <- mvlist[order(mvlist$position, mvlist$item), ]
 
     # Return list
