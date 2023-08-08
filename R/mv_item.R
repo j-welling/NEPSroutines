@@ -714,6 +714,7 @@ print_mvi_results <- function(mv_i,
             }
         }
     }
+    message("\n\n")
 }
 
 

@@ -322,6 +322,6 @@ print_dis_summary <- function(dist_sum) {
     if (length(problematic_distractors) >= 1) {
       message("\nItems with problematic item-total correlations for ",
               "distractors (r > 0.05): \n",
-              paste0(problematic_distractors, collapse = ", "), "\n")
+              paste0(problematic_distractors, collapse = ", "), "\n\n")
     }
 }

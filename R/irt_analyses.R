@@ -1091,5 +1091,5 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
           " (", ifelse(length(thresh_max_item) > 1, "items ", "item "),
           paste(thresh_max_item, collapse = ", "),
           ") with an average of ", thresh_mean, " (SD = ", thresh_sd,
-          "), and a median of ", thresh_median, ".\n")
+          "), and a median of ", thresh_median, ".\n\n")
 }

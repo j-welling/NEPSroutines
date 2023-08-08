@@ -281,8 +281,10 @@ dim_summary <- function(dimensionality, save = FALSE, name_group = NULL,
 #' @param dimsum return object of dim_summary()
 #' @export
 print_dim_summary <- function(dimsum) {
+  message("\nRESULTS:\n")
   for (nms in names(dimsum)) {
     print(nms)
     print(dimsum[[nms]])
   }
+  message("\n\n")
 }

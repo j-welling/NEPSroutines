@@ -665,4 +665,6 @@ print_mvp_results <- function(mv_p) {
             print(mv_p[[group]]$summary)
         }
     }
+
+  message("\n\n")
 }
