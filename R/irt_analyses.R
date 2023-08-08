@@ -22,7 +22,7 @@
 #' @param xsi_fixed_1p list; may contain argument xsi_fixed_1p from irt_analysis()
 #'   for each group as elements and group names as names of elements; may be NULL
 #'   or contain xsi_fixed only for some groups
-#' @param xsi_fixed_1p list; may contain argument xsi_fixed_2p from irt_analysis()
+#' @param xsi_fixed_2p list; may contain argument xsi_fixed_2p from irt_analysis()
 #'   for each group as elements and group names as names of elements; may be NULL
 #'   or contain xsi_fixed only for some groups
 #' @param control_tam list; may contain argument control_tam from irt_analysis()

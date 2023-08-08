@@ -16,7 +16,7 @@ irt_model(
   save = TRUE,
   path = here::here("Results"),
   name_group = NULL,
-  xsi.fixed = NULL,
+  xsi_fixed = NULL,
   pweights = NULL,
   control_tam = NULL,
   control_wle = NULL,
@@ -58,7 +58,8 @@ Rasch model}
 
 \item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 
-\item{xsi.fixed}{matrix; contains fixed (linked) item parameters; optional}
+\item{xsi_fixed}{named numerical vector; contains fixed item difficulties as
+elements and item names as names of elements}
 
 \item{pweights}{character; defines name of numerical variable in resp that
 contains person weights as passed to TAM-function}

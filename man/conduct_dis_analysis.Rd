@@ -37,7 +37,7 @@ that are further defined in the function arguments}
 indicates all raw items that shall be used for the distractor analysis}
 
 \item{select_score}{string; defines name of logical variable in vars that
-indicates all items that shall be used to caculate total score}
+indicates all items that shall be used to calculate total score}
 
 \item{correct}{string; defines name of variable in vars that contains the
 correct responses to the items}

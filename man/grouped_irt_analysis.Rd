@@ -5,9 +5,9 @@
 \title{IRT analyses for several groups}
 \usage{
 grouped_irt_analysis(
-  groups,
   resp,
   vars,
+  select,
   valid = NULL,
   mvs = NULL,
   missing_by_design = -54,
@@ -23,16 +23,14 @@ grouped_irt_analysis(
   digits = 3,
   verbose = FALSE,
   warn = TRUE,
-  xsi.fixed = NULL,
+  xsi_fixed_1p = NULL,
+  xsi_fixed_2p = NULL,
   pweights = NULL,
   control_tam = NULL,
   control_wle = NULL
 )
 }
 \arguments{
-\item{groups}{named character vector; contains name of item selection
-variable of each group (e.g. easy = 'easy_final')}
-
 \item{resp}{data.frame; contains item responses with items as variables and
 persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
 polytomous responses with k categories; missing values (default -999 to -1)
@@ -42,6 +40,10 @@ and all variables that are further defined in the function arguments}
 \item{vars}{data.frame; contains information about items with items as rows;
 includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
+
+\item{select}{list; contains name of item selection variable of each group as
+elements and group name as in resp and vars as element names
+(e.g. easy = 'easy_final')}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
@@ -78,15 +80,24 @@ Rasch model}
 \item{warn}{logical; whether to print warnings (should be set to TRUE to
 avoid problems with the data structure)}
 
-\item{xsi.fixed}{matrix; contains fixed (linked) item parameters; optional}
+\item{xsi_fixed_1p}{list; may contain argument xsi_fixed_1p from irt_analysis()
+for each group as elements and group names as names of elements; may be NULL
+or contain xsi_fixed only for some groups}
+
+\item{xsi_fixed_2p}{list; may contain argument xsi_fixed_2p from irt_analysis()
+for each group as elements and group names as names of elements; may be NULL
+or contain xsi_fixed only for some groups}
 
 \item{pweights}{character; defines name of numerical variable in resp that
 contains person weights as passed to TAM-function}
 
-\item{control_tam}{list; control argument as passed to tam.mml-functions}
+\item{control_tam}{list; may contain argument control_tam from irt_analysis()
+for each group as elements and group names as names of elements; may be NULL
+or contain xsi_fixed only for some groups}
 
-\item{control_wle}{list; can contain Msteps and/or convM as to pass to tam.wle()
-as elements of the list}
+\item{control_wle}{list; may contain argument control_wle from irt_analysis()
+for each group as elements and group names as names of elements; may be NULL
+or contain xsi_fixed only for some groups}
 }
 \value{
 (if return = TRUE) list with a list for each group with all results

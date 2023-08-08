@@ -58,8 +58,8 @@ reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)}
 \item{num_cat}{string; defines name of numeric variable in vars that indicates
 the maximum number of response options for the items}
 
-\item{xsi_fixed}{matrix; fixed parameter estimates of final IRT scaling as
-returned by tam.mml()}
+\item{xsi_fixed}{named numerical vector; contains fixed item difficulties as
+elements and item names as names of elements}
 
 \item{facet}{character vector; contains the variable name indicating the
 test rotation}

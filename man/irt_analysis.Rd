@@ -25,7 +25,8 @@ irt_analysis(
   verbose = FALSE,
   warn = TRUE,
   test = TRUE,
-  xsi.fixed = NULL,
+  xsi_fixed_1p = NULL,
+  xsi_fixed_2p = NULL,
   pweights = NULL,
   control_tam = NULL,
   control_wle = NULL
@@ -84,7 +85,11 @@ avoid problems with the data structure)}
 
 \item{test}{logical; whether to test data structure (should be set to TRUE)}
 
-\item{xsi.fixed}{matrix; contains fixed (linked) item parameters; optional}
+\item{xsi_fixed_1p}{named numerical vector; contains fixed item difficulties
+for one parameter model as elements and item names as names of elements}
+
+\item{xsi_fixed_2p}{named numerical vector; contains fixed item difficulties
+for two parameter model as elements and item names as names of elements}
 
 \item{pweights}{character; defines name of numerical variable in resp that
 contains person weights as passed to TAM-function}

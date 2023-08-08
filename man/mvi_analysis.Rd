@@ -11,7 +11,6 @@ mvi_analysis(
   position,
   valid = NULL,
   grouping = NULL,
-  show_all = TRUE,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21),
   missing_by_design = -54,
   path = here::here("Results"),
@@ -45,9 +44,6 @@ groups (as in "grouping") as names of elements and names of variables as element
 \item{grouping}{character vector; contains for each group a name of a logical
 variable in resp and vars that indicates to which group belongs a person or
 an item}
-
-\item{show_all}{logical; whether whole sample shall be included as a "group"
-(only applicable when grouping exists)}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
 
