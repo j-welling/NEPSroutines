@@ -1,43 +1,42 @@
-Package: scaling
 Type: Package
+Package: scaling
 Title: Implementing the NEPS Scaling Guidelines
 Version: 1.1.1
 Authors@R: c(
-    person("Jana", "Welling", email = "jana.welling@lifbi.de", 
-           role = c("cre", "aut")),
-    person("Anna", "Scharl", email = "anna.scharl@lifbi.de", 
-           role = c("aut")),
-    person("Tanja", "Kutscher", email = "tanja.kutscher@lifbi.de", 
-           role = c("aut")),
-    person("Timo", "Gnambs", email = "timo.gnambs@lifbi.de", 
-           role = c("aut")),
-    person("Christian", "Diegel", email = "christian-richard.diegel@hk.lifbi.de", 
-           role = c("aut"))
-    )
-Description: This package contains a collection of functions for the scaling 
-    of NEPS competence data. It is based on standardized scaling scripts and 
-    comprises 1PL and 2PL analyses for binary and polytomous data, descriptives, missing values,
-    distractor, dimensionality and DIF analyses as well as scores and SUF creation.
-    Additionally it provides functions for data preparation and data checks.
-    Next to providing functions for analysis, the package may also include 
-    functionalities for progress reports in the future.
-Depends:
-    TAM,
-    dplyr,
-    here,
-    ggplot2,
-    tidyr,
-    tidyselect,
-    openxlsx,
-    magrittr,
-    rlang,
-    psych,
-    Hmisc,
-    haven,
-    sfsmisc,
-    colorspace,
-    tibble
+    person("Jana", "Welling", , "jana.welling@lifbi.de", role = c("cre", "aut")),
+    person("Anna", "Scharl", role = "aut"),
+    person("Tanja", "Kutscher", , "tanja.kutscher@lifbi.de", role = "aut"),
+    person("Timo", "Gnambs", , "timo.gnambs@lifbi.de", role = "aut"),
+    person("Christian", "Diegel", role = "ctb")
+  )
+Description: This package contains a collection of functions for the
+    scaling of NEPS competence data. It is based on standardized scaling
+    scripts and comprises 1PL and 2PL analyses for binary and polytomous
+    data, descriptives, missing values, distractor, dimensionality and DIF
+    analyses as well as scores and SUF creation.  Additionally it provides
+    functions for data preparation and data checks.  Next to providing
+    functions for analysis, the package may also include functionalities
+    for progress reports in the future.
 License: GPL-2
+Imports:
+    colorspace,
+    dplyr,
+    ggplot2,
+    graphics,
+    grDevices,
+    haven,
+    here,
+    Hmisc,
+    magrittr,
+    openxlsx,
+    psych,
+    rlang,
+    sfsmisc,
+    stats,
+    TAM,
+    tibble,
+    tidyr,
+    tidyselect
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
