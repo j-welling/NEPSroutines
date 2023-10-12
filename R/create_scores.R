@@ -228,7 +228,10 @@ create_scores <- function(resp, vars, select, scoring = NULL,
     }
 
     if (!is.null(facet)) {
-      if (is.null(xsi_fixed)) xsi_fixed <- fit$mod$xsi.fixed.estimated
+      if (is.null(xsi_fixed)) {
+          xsi_fixed <- fit$mod$xsi$xsi
+          names(xsi_fixed) <- row.names(fit$mod$xsi)
+      }
       wles <- scaling:::estimate_rotated_wles(
         resp = resp,
         vars = vars,
