@@ -40,6 +40,8 @@
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param path_plots  string; defines path to folder where plots shall be saved
+#' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
+#'                       for items with collapsed categories
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
 #' @param verbose  logical; whether to print processing information to console
@@ -57,6 +59,7 @@ grouped_irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
                                  path_plots = here::here("Plots"),
                                  path_table = here::here("Tables"),
                                  path_results = here::here("Results"),
+                                 suf_item_names = FALSE,
                                  digits = 3, verbose = FALSE, warn = TRUE,
                                  xsi_fixed_1p = NULL, xsi_fixed_2p = NULL,
                                  pweights = NULL, control_tam = NULL, control_wle = NULL) {
@@ -99,6 +102,7 @@ grouped_irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
           path_results = path_results,
           path_table = path_table,
           path_plots = path_plots,
+          suf_item_names = suf_item_names,
           overwrite = overwrite,
           digits = digits,
           name_group = g,
@@ -109,7 +113,6 @@ grouped_irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
           pweights = pweights,
           xsi_fixed_1p = xsi_fixed_1p[[g]],
           xsi_fixed_2p = xsi_fixed_2p[[g]]
-
         )
 
         i <- i + 1
@@ -158,6 +161,8 @@ grouped_irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param path_plots  string; defines path to folder where plots shall be saved
+#' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
+#'                       for items with collapsed categories
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
@@ -181,6 +186,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
                          path_plots = here::here("Plots"),
                          path_table = here::here("Tables"),
                          path_results = here::here("Results"),
+                         suf_item_names = FALSE,
                          overwrite = FALSE, digits = 3, name_group = NULL,
                          verbose = FALSE, warn = TRUE, test = TRUE,
                          xsi_fixed_1p = NULL, xsi_fixed_2p = NULL, pweights = NULL,
@@ -309,6 +315,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
       valid = valid,
       mvs = mvs,
       missing_by_design = missing_by_design,
+      suf_item_names = suf_item_names,
       digits = digits,
       save = FALSE,
       test = FALSE
@@ -325,6 +332,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
     if (irt_type == 'poly') {
       irt$steps <- scaling:::steps_analysis(
         pcm_model = irt$model.pcm,
+        suf_item_names = suf_item_names,
         digits = digits,
         save = FALSE
       )
@@ -354,8 +362,21 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
   if (save) {
       name <- scaling:::create_name(paste0("irt_", irt_type), name_group)
       irt_summary <- irt[-c(1:2)]
-
       scaling:::save_results(irt, filename = paste0(name, ".rds"), path = path_results)
+
+      if(suf_item_names) {
+         irt_summary[["summary"]][["Item"]] <- scaling:::create_suf_names(
+           vars_name = irt_summary[["summary"]][["Item"]])
+
+        if(length(irt_summary[["steps"]]) > 0) {
+          irt_summary[["steps"]][["item"]] <- row.names(irt_summary[["steps"]])
+          irt_summary[["steps"]] <- select(irt_summary[["steps"]], item, everything())
+          rownames(irt_summary[["steps"]]) <- NULL
+          irt_summary[["steps"]][["item"]] <- scaling:::create_suf_names(
+            vars_name = irt_summary[["steps"]][["item"]])
+        }
+      }
+
       scaling:::save_table(
         irt_summary,
         filename = paste0(name, ".xlsx"),
@@ -475,8 +496,10 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   if (irtmodel %in% c("1PL", "PCM2")) {
 
     # Match item parameters by item name
-    if (!is.null(xsi_fixed))
-      xsi_fixed <- scaling:::order_xsi_fixed(xsi_fixed, resp, irtmodel = irtmodel, Q = Q)
+    if (!is.null(xsi_fixed)) {
+      xsi_fixed <-
+          scaling:::order_xsi_fixed(xsi_fixed, resp, irtmodel = irtmodel, Q = Q)
+    }
 
     # Calculate model
     mod <- TAM::tam.mml(
@@ -672,6 +695,8 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 #' @param disc  list; return object of irt_model(); two parameter model
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where table shall be saved
+#' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
+#'                       for items with collapsed categories
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param digits  integer; number of decimals for rounding
 #' @param overwrite  logical; whether to overwrite existing file when saving table
@@ -686,7 +711,9 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
                         missing_by_design = -54,
                         results, disc = NULL, save = TRUE,
-                        path = here::here("Tables"), name_group = NULL,
+                        path = here::here("Tables"),
+                        suf_item_names = FALSE,
+                        name_group = NULL,
                         digits = 3, overwrite = FALSE, warn = TRUE, test = TRUE) {
 
   # test data data
@@ -776,6 +803,13 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   # Save table
   if (save) {
     name <- scaling:::create_name(results$irtmodel, name_group, ".xlsx")
+
+    if(suf_item_names) {
+       pars_formatted[["Item"]] <- scaling:::create_suf_names(
+         vars_name = pars_formatted[["Item"]])
+
+    }
+
     scaling:::save_table(
       pars_formatted,
       filename = name,
@@ -872,6 +906,8 @@ irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
 #' @param pcm_model  list; return object of irt_model(); PCM analysis
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where table shall be saved
+#' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
+#'                       for items with collapsed categories
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param digits  integer; number of decimals for rounding
 #' @param overwrite  logical; whether to overwrite existing file when saving table
@@ -880,7 +916,9 @@ irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
 #' @export
 
 steps_analysis <- function(pcm_model, digits = 3, save = TRUE, overwrite = FALSE,
-                           path = here::here("Tables"), name_group = NULL) {
+                           path = here::here("Tables"),
+                           suf_item_names = FALSE,
+                           name_group = NULL) {
 
   # step parameters
   step <- round(pcm_model$mod$xsi[, c("xsi", "se.xsi")], digits)
@@ -915,6 +953,14 @@ steps_analysis <- function(pcm_model, digits = 3, save = TRUE, overwrite = FALSE
   # Save table as Excel sheet
   if (save) {
     name <- scaling:::create_name("steps_analysis", name_group, ".xlsx")
+
+    if(suf_item_names && length(steps) > 0) {
+        steps[["item"]] <- row.names(steps)
+        steps <- select(steps, item, everything())
+        rownames(steps) <- NULL
+        steps[["item"]] <- scaling:::create_suf_names(vars_name = steps[["item"]])
+      }
+
     scaling:::save_table(
       steps,
       filename = name,
