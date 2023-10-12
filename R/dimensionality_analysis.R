@@ -193,7 +193,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
     for (d in dim) {
 
       # Create Q matrix
-      v <- as.double(vars[vars[[select]], d])
+      v <- c(t(vars[vars[[select]], d]))
       dimensions <- sort(unique(v))
       Q <- matrix(0, nrow = length(v), ncol = length(dimensions))
       for (i in dimensions) {
