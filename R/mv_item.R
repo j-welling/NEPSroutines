@@ -29,6 +29,8 @@
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param path_plots  string; defines path to folder where plots shall be saved
+#' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
+#'                       for items with collapsed categories
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
 #' @param color  character scalar or vector; defines color(s) of the bar in plots
@@ -67,6 +69,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
                     path_results = here::here("Results"),
                     path_table = here::here("Tables"),
                     path_plots = here::here("Plots/Missing_Responses/by_item"),
+                    suf_item_names = FALSE,
                     show_all = TRUE, name_grouping = 'test version',
                     overwrite = FALSE, name_group = NULL, color = NULL,
                     digits = 3, warn = TRUE, verbose = TRUE,
@@ -106,6 +109,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
       mvs = mvs,
       missing_by_design = missing_by_design,
       grouping = grouping,
+      suf_item_names = suf_item_names,
       warn = warn,
       test = FALSE,
       save = FALSE
@@ -139,6 +143,12 @@ mv_item <- function(resp, vars, select, valid = NULL,
             filename = paste0(name, ".rds"),
             path = path_results
         )
+
+        if (suf_item_names) {
+            mv_item[["summary_table"]][["list"]][["item"]] <- scaling:::create_suf_names(
+               vars_name = mv_item[["summary_table"]][["list"]][["item"]])
+        }
+
         scaling:::save_table(
           mv_item$summary_table,
           overwrite = overwrite,
@@ -236,6 +246,7 @@ mvi_analysis <- function(resp, vars, select, position,
 
     # Prepare data
     vars_c <- vars[vars[[select]], ]
+###    vars_c$item <- scaling:::create_suf_names(vars_name = vars_c)
     resp <- scaling:::only_valid(resp, valid = valid)
     resp_c <- scaling:::prepare_resp(
         resp,
@@ -244,6 +255,7 @@ mvi_analysis <- function(resp, vars, select, position,
         warn = warn,
         zap_labels = FALSE
     )
+ ###   names(resp_c) <- scaling:::create_suf_names(resp_name = resp_c)
 
     # NAs are not acknowledged in mvs-argument
     if (warn & any(resp_c %in% NA)) {
@@ -385,6 +397,8 @@ mvi_analysis <- function(resp, vars, select, position,
 #' @param missing_by_design  integer; user defined missing value for missing by
 #' design
 #' @param path  string; defines path to folder where table shall be saved
+#' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
+#'                       for items with collapsed categories
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param overwrite  logical; whether to overwrite existing file when saving table
 #' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
@@ -399,11 +413,12 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
                               UM = -90, ND = -55, MD = -54, AZ = -21),
                       missing_by_design = -54,
                       save = TRUE, path = here::here("Tables"),
+                      suf_item_names = FALSE,
                       overwrite = FALSE, name_group = NULL,
                       test = TRUE, warn = TRUE) {
 
   # Missing by design
-  if(!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
+  if (!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
 
   # Test data
     if (test) {
@@ -422,6 +437,7 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
 
         results <- list()
         results$list <- data.frame(item = vars$item[vars[[select]]])
+  ###      results$list$item <- scaling:::create_suf_names(vars_name=results$list)
         results$summary_all <- mv_i$summary$all
 
         for (g in grouping) {
@@ -437,6 +453,12 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
     # Save table
     if (save) {
         name <- scaling:::create_name("mv_item", name_group, ".xlsx")
+
+        if (suf_item_names) {
+            results[["list"]][["item"]] <- scaling:::create_suf_names(
+              vars_name = results[["list"]][["item"]])
+        }
+
         scaling:::save_table(
           results,
           filename = name,
