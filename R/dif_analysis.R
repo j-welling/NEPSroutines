@@ -33,6 +33,8 @@
 #' @param return  logical; whether results shall be returned
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
+#' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
+#'                       for items with collapsed categories
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
@@ -63,6 +65,7 @@ dif_analysis <- function(resp,
                          pweights = NULL,
                          path_results = here::here('Results'),
                          path_table = here::here('Tables'),
+                         suf_item_names = FALSE,
                          name_group = NULL,
                          verbose = FALSE,
                          warn = TRUE,
@@ -129,6 +132,7 @@ dif_analysis <- function(resp,
         save = save,
         name_group = name_group,
         path = path_table,
+        suf_item_names = suf_item_names,
         overwrite = overwrite,
         digits = digits
     )
@@ -402,7 +406,7 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     scaling:::check_numerics(resp, "resp", check_invalid = TRUE)
 
     # Identify IRT type
-    irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
+    irt_type <- ifelse(scaling:::is_poly(resp, vars, select), 'poly', 'dich')
 
     # Prepare DIF analysis
     tmp_formula <- paste("~ item +", ifelse(irt_type == 'poly', "item * step +", ""))
@@ -667,7 +671,8 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
 
 dif_summary <- function(diflist, vars, print = TRUE, save = TRUE,
                         path = here::here('Tables'), dif_threshold = 0.5,
-                        overwrite = FALSE, name_group = NUL, digits = 3L) {
+                        suf_item_names = FALSE,
+                        overwrite = FALSE, name_group = NULL, digits = 3L) {
     # information criteria for DIF and main model
     # main effects of main and DIF model + standardized
     # DIF per item + standard error + meht p-values
@@ -886,6 +891,8 @@ difsum <- function(obj, dif_var, vars, groups = 1, digits = 3) {
 #' @param path string; indicates the folder location where the summaries
 #' are stored on the hard drive; please note that the path is relative to the
 #' current working path set by here::i_am()
+#' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
+#'                       for items with collapsed categories
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
@@ -895,7 +902,9 @@ difsum <- function(obj, dif_var, vars, groups = 1, digits = 3) {
 
 build_dif_tr_tables <- function(dif_summaries, vars,
                                 save = TRUE, overwrite = FALSE,
-                                path = here::here('Tables'), digits = 3,
+                                path = here::here('Tables'),
+                                suf_item_names = FALSE,
+                                digits = 3,
                                 name_group = NULL) {
 
     dif_vars <- names(dif_summaries)
@@ -957,6 +966,12 @@ build_dif_tr_tables <- function(dif_summaries, vars,
         name <- scaling:::create_name(
             paste0("dif_", irt_type, "_TR"), name_group, ".xlsx"
         )
+
+        if(suf_item_names) {
+           dif_tr_tables[["estimates"]][["item"]] <- scaling:::create_suf_names(
+             vars_name = dif_tr_tables[["estimates"]][["item"]])
+        }
+
         scaling:::save_table(
             dif_tr_tables,
             filename = name,
