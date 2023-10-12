@@ -575,6 +575,7 @@ create_name <- function(start, name_group = NULL, end = NULL, sep = "_") {
 order_xsi_fixed <- function(xsi_fixed, resp, irtmodel,
                            include_steps = TRUE, Q = NULL, A = NULL, B = NULL) {
 
+
   if (irtmodel %in% c("1PL", "PCM2")) {
     xsi_arg <- TAM::tam.mml(
       resp = resp,
@@ -608,3 +609,43 @@ order_xsi_fixed <- function(xsi_fixed, resp, irtmodel,
 
   return(xsi_new)
 }
+
+
+
+
+#' Create names for output as used in suf (this concerns the variables with collapsed categories)
+#' @param vars_name  string; defines name of dataset vars
+#' @param resp_name string; defines name of dataset resp
+#' @noRd
+create_suf_names <- function(vars_name = NULL, resp_name = NULL) {
+
+  if(!is.null(vars_name) && !is.null(resp_name) ) {
+    stop("Please define either the  variable information dataset (e.g., vars)
+         or the respondent responses dataset (e.g., resp), not both at the same time.")
+  }
+
+  if (!is.null(vars_name)) {
+
+    if(is.data.frame(vars_name)) {
+      for (item in seq_along(vars_name$item)) {
+        vars_name$item[[item]] <- gsub("_collapsed", "",vars_name$item[[item]])
+      }
+      return(vars_name$item)
+
+    } else {
+      for (item in seq_along(vars_name)) {
+        vars_name[[item]] <- gsub("_collapsed", "",vars_name[[item]])
+      }
+      return(vars_name)
+    }
+  }
+
+  if (!is.null(resp_name)) {
+    for (name in seq_along(names(resp_name))) {
+      names(resp_name)[[name]] <- gsub("_collapsed", "",names(resp_name)[[name]])
+    }
+    return(names(resp_name))
+  }
+
+}
+
