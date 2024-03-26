@@ -1,3 +1,5 @@
+# test
+
 #' Dichotomous scoring of MC items
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
