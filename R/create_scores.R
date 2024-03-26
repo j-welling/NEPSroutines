@@ -488,7 +488,7 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
 
   # Conduct analyses
   frmA <- as.formula(paste0("~ item + ",
-                            ifelse(irt_type == "poly", " item*step + ", ""),
+                            ifelse(irt_type == "poly", " item:step + ", ""),
                             names(facet)))
 
   # Design matrix for model
