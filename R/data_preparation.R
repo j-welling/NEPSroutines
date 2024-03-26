@@ -299,13 +299,17 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
   # Save results
   if (save) {
 
-    scaling:::save_table(results = list(collapsed = item_names,
-                                        dichotomous = dichotomous_items,
-                                        problematic = problematic_items),
-                         filename = "collapsed_items.xlsx",
-                         path = path_table,
-                         overwrite = TRUE,
-                         show_rownames = FALSE)
+    scaling:::save_table(
+        results = list(
+            collapsed = item_names,
+            dichotomous = dichotomous_items,
+            problematic = problematic_items
+        ),
+        filename = "collapsed_items.xlsx",
+        path = path_table,
+        overwrite = TRUE,
+        show_rownames = FALSE
+    )
   }
 
   return(resp)
