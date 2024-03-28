@@ -2,4 +2,5 @@
 ^\.Rproj\.user$
 .gitignore
 ^\.git$
-
+^\documentation$
+^\testscripts$
