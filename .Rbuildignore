@@ -4,3 +4,4 @@
 ^\.git$
 ^\documentation$
 ^\testscripts$
+^\build$
