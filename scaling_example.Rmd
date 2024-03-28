@@ -1,0 +1,370 @@
+
+---
+title: "Beispielskript B129"
+author: "Jana Welling"
+date: "`r Sys.time()`"
+output:
+    html_document:
+        toc: true
+        number_sections: true
+        toc_float: true
+        theme: readable
+        highlight: tango
+        df_print: paged
+        code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+
+# Preparation of R and data
+
+## Load data
+
+```{r load-data, warning = FALSE, message = FALSE, comment = NA, results = 'hide'}
+here::i_am('scaling_b129.Rmd')
+rm(list = ls())
+load(here::here('b129.Rdata'))
+```
+
+## Load scaling package
+
+```{r load-scaling, warning = FALSE, message = FALSE, comment = NA, results = 'hide', eval = FALSE}
+path_project <- # here define path to project (as string, ending with '/')
+scaling_package <- # here define name of newest version of scaling package (as string)
+install.packages(paste0(path_project, scaling_package), type='source', repos=NULL)
+library('scaling')
+```
+
+# Sample and booklet descriptives
+
+```{r descriptives}
+# Sample size by (in)valid cases
+scaling::n_valid(resp = resp, valid = 'valid')
+
+# Sample size by test version
+scaling::sample_by_group(
+  resp = resp,
+  grouping_variable = 'difficulty',
+  labels = c('EasyTestlet' = 0, 'DifficultTestlet' = 1),
+  save = TRUE,
+  overwrite = TRUE,
+  path = 'Tables'
+)
+
+# Descriptives (mean, sd, etc.) of continuous variables
+scaling::desc_con(resp = resp, desc = 'age', valid = 'valid')
+
+# Descriptives (attributes, frequency) of nominal sociodemographic variables
+sdv = c('sex', 'attendsGymnasium', 'migration', 'books')
+scaling::desc_nom(resp = resp, desc = sdv, valid = 'valid')
+scaling::show_attributes(resp = resp, desc = sdv)
+rm(sdv)
+
+# Descriptives (attributes, frequency) of nominal booklet variables
+scaling::desc_nom(resp = resp, desc = 'difficulty', valid = 'valid')
+scaling::show_attributes(resp = resp, desc = c('difficulty'))
+
+# Item type by test version
+scaling::props_by_group(
+  vars = vars,
+  select = 'mixed',
+  grouping = c('easy', 'difficult'),
+  properties = c('text_type', 'kog_type', 'type'),
+  labels = list(
+    text_type = c(
+      Advertising = 1,
+      Information = 2,
+      Instruction = 3,
+      Literary = 4,
+      Commenting= 5
+      ),
+    kog_type = c(
+      Finding_information = 1,
+      Drawing_conclusions = 2,
+      Reflecting = 3
+      )
+    ),
+  save = TRUE,
+  overwrite = TRUE,
+  path = 'Tables'
+)
+```
+
+
+# Missing responses analyses
+
+## Missing responses by person
+
+```{r missing responses by person}
+scaling::mv_person(
+  resp = resp,
+  vars = vars,
+  select = 'mixed',
+  valid = 'valid',
+  grouping = c('easy', 'difficult'),
+  mvs = mvs,
+  labels_mvs = labels_mvs,
+  missing_by_design = -54, 
+  plots = TRUE,
+  print = TRUE,
+  save = TRUE,
+  return = FALSE,
+  path_results = 'Results',
+  path_table = 'Tables',
+  path_plots = 'Plots/Missing_Responses/by_person',
+  show_all = TRUE,
+  overwrite = TRUE,
+  warn = TRUE,
+  verbose = FALSE
+)
+```
+
+## Missing responses by item
+
+```{r missing responses by item}
+scaling::mv_item(
+  resp = resp,
+  vars = vars,
+  select = 'mixed',
+  valid = 'valid',
+  mvs = mvs,
+  labels_mvs = labels_mvs,
+  missing_by_design = -54, 
+  grouping = c('easy', 'difficult'),
+  position = c(easy = 'position_easy_mixed', difficult = 'position_difficult_mixed'),
+  plots = TRUE,
+  print = TRUE,
+  save = TRUE,
+  return = FALSE,
+  path_results = 'Results',
+  path_table = 'Tables',
+  path_plots = 'Plots/Missing_Responses/by_item',
+  show_all = TRUE,
+  overwrite = TRUE,
+  warn = TRUE,
+  verbose = FALSE
+)
+```
+
+# IRT analyses
+
+## For all items
+
+```{r single IRT analysis, eval = FALSE}
+# Rasch and 2PL
+scaling::irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = 'dich',
+  valid = 'valid',
+  missing_by_design = -54, 
+  scoring = NULL,
+  plots = TRUE,
+  save = TRUE,
+  print = TRUE,
+  return = FALSE,
+  path_results = 'Results',
+  path_table = 'Tables',
+  path_plots = 'Plots',
+  overwrite = TRUE,
+  verbose = FALSE,
+  name_group = 'all'
+)
+
+# PCM and GPCM
+scaling::irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = 'mixed',
+  valid = 'valid',
+  scoring = 'scoring',
+  missing_by_design = -54, 
+  plots = TRUE,
+  save = TRUE,
+  print = TRUE,
+  return = FALSE,
+  path_results = 'Results',
+  path_table = 'Tables',
+  path_plots = 'Plots',
+  overwrite = TRUE,
+  verbose = FALSE,
+  name_group = 'all'
+)
+```
+
+## For different test versions
+
+```{r grouped IRT analysis}
+# Rasch and 2PL
+scaling::grouped_irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = c(easy = 'dich_easy', difficult = 'dich_difficult', common = 'dich_common'),
+  valid = 'valid',
+  missing_by_design = -54, 
+  save = TRUE,
+  print = TRUE,
+  plots = TRUE,
+  return = FALSE,
+  overwrite = TRUE,
+  path_results = 'Results',
+  path_table = 'Tables',
+  path_plots = 'Plots',
+  verbose = FALSE
+)
+
+# PCM and GPCM
+scaling::grouped_irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = c(easy = 'mixed_easy', difficult = 'mixed_difficult', common = 'mixed_common'),
+  valid = 'valid',
+  scoring = 'scoring',
+  missing_by_design = -54, 
+  save = TRUE,
+  print = TRUE,
+  plots = TRUE,
+  return = FALSE,
+  overwrite = TRUE,
+  path_results = 'Results',
+  path_table = 'Tables',
+  path_plots = 'Plots',
+  verbose = FALSE
+)
+```
+
+
+# DIF analysis
+
+```{r dif analysis}
+# For Rasch
+scaling::dif_analysis(
+  resp = resp,
+  vars = vars,
+  select = c('dich_common', 'dich', 'dich'),
+  valid = 'valid',
+  dif_vars = c('difficulty', 'sex', 'migration'),
+  overwrite = TRUE,
+  print = TRUE,
+  save = TRUE,
+  return = FALSE,
+  path_table = 'Tables',
+  path_results = 'Results',
+  verbose = FALSE
+)
+
+# For PCM
+scaling::dif_analysis(
+  resp = resp,
+  vars = vars,
+  select = c('mixed_common', 'mixed', 'mixed'),
+  valid = 'valid',
+  dif_vars = c('difficulty', 'sex', 'migration'),
+  scoring = 'scoring',
+  overwrite = TRUE,
+  print = TRUE,
+  save = TRUE,
+  return = FALSE,
+  path_table = 'Tables',
+  path_results = 'Results',
+  verbose = FALSE
+)
+```
+
+
+# Distractor analysis
+
+```{r distractor analysis}
+scaling::dis_analysis(
+  resp = resp,
+  vars = vars,
+  valid = 'valid',
+  select_raw = 'distan',
+  print = TRUE,
+  save = TRUE,
+  overwrite = TRUE,
+  path_results = 'Results',
+  path_table = 'Tables'
+)
+```
+
+
+# Dimension analysis
+
+```{r dimensionality analysis}
+scaling::dim_analysis(
+  resp = resp,
+  vars = vars,
+  select = 'mixed',
+  valid = 'valid',
+  scoring = 'scoring',
+  irtmodel = 'PCM2',
+  dim = c('kog_type', 'text_type'),
+  return = TRUE,
+  save = TRUE,
+  print = TRUE,
+  path_table = 'Tables', 
+  path_results = 'Results',
+  overwrite = TRUE,
+  verbose = FALSE
+)
+```
+
+
+# Linking
+
+Linking is not yet implemented in this package version. 
+
+
+# Create scores
+
+The function create_scores() gives an error for this data in this package version.
+
+```{r scores}
+# scores <- scaling::create_scores(
+#   resp = resp,
+#   vars = vars,
+#   scoring = 'scoring',
+#   score_name = 'reg7',
+#   facet = 'difficulty',
+#   select = 'mixed',
+#   valid = 'valid',
+#   missing_by_design = -54,
+#   wle = TRUE,
+#   sum_score = TRUE,
+#   sum_select = 'suf',
+#   num_cat = 'num_cat',
+#   path_results = 'Results',
+#   return = TRUE,
+#   save = TRUE
+# )
+```
+
+
+# Create SUF
+
+```{r suf}
+scaling::suf <- scaling::create_suf(
+  resp = resp,
+  vars = vars,
+  select = 'suf',
+  competence = 'reading',
+  scores = scores,
+  score_name = 'reg7',
+  mvs = NULL,
+  items_labels = NULL,
+  path = 'SUF',
+  save = TRUE,
+  return = FALSE,
+  warn = TRUE
+)
+
+rm(scores)
+```
+
+
+# Session
+
+```{r session-info}
+sessionInfo()
+```
