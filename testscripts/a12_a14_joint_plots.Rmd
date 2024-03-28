@@ -1,0 +1,153 @@
+
+---
+title: 'Test script for scaling package with example data from A12 (Grammar)'
+author: 'Jana Welling'
+date: '`r Sys.time()`'
+output:
+    html_document:
+    toc: true
+number_sections: true
+toc_float: true
+theme: readable
+highlight: tango
+df_print: paged
+code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+
+# Preparation of R and data
+
+## Prepare R
+
+```{r preparation, warning = FALSE, message = FALSE, comment = NA, results = 'hide'}
+
+#' ** Clear working space**
+rm(list = ls())
+
+#' **Load packages**
+library('here')
+library('dplyr')
+library('haven')
+
+#' **Load scaling package**
+pkgload::load_all(here::here('scaling'))
+```
+
+## Prepare data
+
+```{r data, warning = FALSE, message = FALSE, comment = NA, results = 'hide'}
+# Load and prepare A12 data
+load(here::here('Test/A12/Version 1.1.0/Data/data.Rdata'))
+resp[['kindergarten']] <- TRUE
+resp[['first grade']] <- FALSE
+vars[['kindergarten']] <- TRUE
+vars[['first grade']] <- FALSE
+resp_A12 <- resp
+vars_A12 <- rename(vars, position_A12 = 'position_new_set')
+vars_A12 <- rename(vars, position_A12 = 'position_new_set')
+
+# Load and prepare A4 data
+load(here::here('Test/A14/Version 1.1.0/Data/data.Rdata'))
+resp[['first grade']] <- TRUE
+resp[['kindergarten']] <- FALSE
+vars[['first grade']] <- TRUE
+vars[['kindergarten']] <- FALSE
+resp_A14 <- resp
+vars_A14 <- rename(vars, position_A14 = 'position_new_set')
+
+# Delete variables to avoid confusion
+rm(resp, vars, mvs, labels_mvs)
+
+# Join A12 and A14 data
+resp <- full_join(resp_A12, resp_A14)
+vars <- full_join(vars_A12, vars_A14)
+mvs = c(OM = -97, NV = -95)
+labels_mvs = c(
+  ALL = 'total missing responses',
+  OM = 'omitted items',
+  NV = 'invalid responses'
+)
+
+# Save data
+check_folder(here::here('Test/TR_Grammatik/Version 1.1.0'))
+save(
+  resp, vars, mvs, labels_mvs,
+  file = here::here('Test/TR_Grammatik/Version 1.1.0/data.Rdata')
+)
+
+# Delete variables
+rm(list = ls())
+```
+
+## Load data
+
+```{r load-data, warning = FALSE, message = FALSE, comment = NA, results = 'hide'}
+rm(list = ls())
+load(here::here('Test/TR_Grammatik/Version 1.1.0/data.Rdata'))
+```
+
+
+# Missing responses analyses (by person)
+
+```{r missing responses by person}
+# Wichtig: Man darf die Analysen nicht nur mit einem Teil der mvs durchführen, denn sonst sind die total missing responses inkorrekt!!
+scaling::mv_person(
+  resp = resp,
+  vars = vars,
+  select = 'new_set',
+  valid = 'valid_new_set',
+  mvs = mvs,
+  labels_mvs = labels_mvs,
+  overwrite = TRUE,
+  grouping = c('kindergarten', 'first grade'),
+  plots = TRUE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = here::here('Test/TR_Grammatik/Version 1.1.0/Results'),
+  path_table = here::here('Test/TR_Grammatik/Version 1.1.0/Tables'),
+  path_plots = here::here('Test/TR_Grammatik/Version 1.1.0/Plots/Missing_Responses/by_person'),
+  digits = 2,
+  warn = TRUE,
+  verbose = TRUE,
+  name_grouping = 'time of measurement'
+)
+```
+
+
+# Missing responses analyses (by item)
+
+```{r missing responses by item}
+# Wichtig: Man darf die Analysen nicht nur mit einem Teil der mvs durchführen, denn sonst sind die total missing responses inkorrekt!!
+vars$position_new_set <- ifelse(vars$new_set, vars$position_old_set, NA)
+scaling::mv_item(
+  resp = resp,
+  vars = vars,
+  select = 'new_set',
+  valid = 'valid_new_set',
+  mvs = mvs,
+  labels_mvs = labels_mvs,
+  grouping = c('kindergarten', 'first grade'),
+  position = 'position_new_set',
+  plots = TRUE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = here::here('Test/TR_Grammatik/Version 1.1.0/Results'),
+  path_table = here::here('Test/TR_Grammatik/Version 1.1.0/Tables'),
+  path_plots = here::here('Test/TR_Grammatik/Version 1.1.0/Plots/Missing_Responses/by_item'),
+  digits = 2,
+  warn = TRUE,
+  verbose = TRUE,
+  overwrite = TRUE,
+  name_grouping = 'time of measurement'
+)
+```
+
+
+# Session
+
+```{r session-info}
+sessionInfo()
+```

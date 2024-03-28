@@ -1,0 +1,146 @@
+
+---
+title: "Test script for scaling package with example data from A14 (Grammar)"
+author: "Jana Welling"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+    theme: readable
+    highlight: tango
+    df_print: paged
+    code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+  
+# Preparation of R and data
+  
+## Prepare R
+  
+```{r preparation, warning = FALSE, message = FALSE, comment = NA, results = 'hide'}
+
+#' ** Clear working space**
+rm(list = ls())
+
+#' **Load packages**
+library('here')
+library('dplyr')
+library('haven')
+
+#' **Load scaling package**
+suppressMessages(
+  pkgload::load_all(here::here('scaling'))
+  #pkgload::load_all('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/scaling')
+)
+
+```
+
+## Prepare data
+
+```{r data, warning = FALSE, message = FALSE, comment = NA, results = 'hide', eval = FALSE}
+# Load example data
+load(here::here('Test/A14/Raw_data/A14_GR_new.Rdata'))
+resp <- A14_GR_new
+rm(A14_GR_new, items)
+
+vars_old <- openxlsx::read.xlsx(here::here('Test/A14/Raw_data/Itempositionen.xlsx'))
+vars_old <- na.omit(select(vars_old, item = 'A14_Item',
+                           position_old_set = 'A14_Position'))
+
+# Adjust example data
+vars_old$raw <- FALSE
+vars_old$dich <- TRUE
+vars_old$poly <- FALSE
+vars_old$old_set <- TRUE
+vars_old$new_set <- ifelse(
+  vars_old$item %in% c('grg1o113_c', 'grg1o214_c', 'grg1o315_c', 'grg1o416_c',
+                       'grg1r125_c', 'grg1r226_c', 'grg1r327_c', 'grg1r428_c'),
+  FALSE, TRUE
+)
+vars_old$scoring <- 1
+vars_old$num_cat <- 1
+
+new_items <- c('grg1o000s_c','grg1r000s_c')
+vars_new <- data.frame(
+  item = new_items,
+  position_old_set = c(13, 25),
+  raw = FALSE,
+  dich = FALSE,
+  poly = TRUE,
+  old_set = FALSE,
+  new_set = TRUE,
+  scoring = 0.5,
+  num_cat = 4
+)
+vars <- rbind(vars_old, vars_new)
+row.names(vars) <- seq_along(vars$item)
+vars <- pos_new(vars, select = 'new_set', position = 'position_old_set')
+
+# Define existing user defined missing values
+table(unlist(resp[ , vars$item]))
+mvs <- c(OM = -97, NV = -95, TA = -91, ND = -55)
+labels_mvs <- c(
+  ALL = 'total missing responses',
+  OM = 'omitted items',
+  NV = 'invalid responses',
+  TA = 'missing responses due to test abortion',
+  ND = 'not determinable missing responses'
+)
+
+# Create variable indicating (in)valid cases
+resp$valid_old_set <- min_val(resp = resp, vars = vars, select = 'old_set', invalid = mvs)
+resp$valid_new_set <- min_val(resp = resp, vars = vars, select = 'new_set', invalid = mvs)
+
+# Save example data
+check_folder('Test/A14/Version 1.1.0/Data')
+save(resp, vars, mvs, labels_mvs, #mvs_link, resp_previous, 
+     file = ('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Data/data.Rdata'))
+
+# Delete variables
+rm(list = ls())
+```
+
+## Prepare linking data
+```{r data}
+# Load data
+load(here::here('Test/A14/Version 1.1.0/Data/data.Rdata'))
+resp_A14 <- resp
+vars_A14 <- vars
+mvs_A14 <- mvs
+
+load(here::here('Test/A12/Version 1.1.0/Data/data.Rdata'))
+resp_A12 <- resp
+vars_A12 <- vars
+mvs_A12 <- mvs
+
+mvs_link <- unique(c(mvs_A12, mvs_A14))
+rm(resp, vars, mvs_A12, mvs_A14, labels_mvs)
+
+# Link items
+common <- openxlsx::read.xlsx('C:/Users/ba4eb5/Desktop/Skalierung/Grammatik/Itempositionen.xlsx')
+common <- na.omit(dplyr::select(common, A12_Item, A14_Item))
+
+# Exclude items with poor fit at one of the assessments
+A12_excl <- 'grk1u248_c'
+common <- common[!(common$A12_Item %in% A12_excl), ]
+
+A14_excl <- c('grg1o113_c', 'grg1o416_c', 'grg1r226_c', 'grg1r327_c')
+common <- common[!(common$A14_Item %in% A14_excl), ]
+
+rm(A12_excl, A14_excl)
+
+# Add linking information
+vars_A14$link <- ifelse(vars_A14$item %in% common$A14_Item, TRUE, FALSE)
+vars_A12$link <- ifelse(vars_A12$item %in% common$A12_Item, TRUE, FALSE)
+
+# Save data
+check_folder('Test/A14/Version 1.1.0/Data')
+save(resp_A12, resp_A14, vars_A12, vars_A14, mvs_link, common,
+     file = ('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Data/link_data.Rdata'))
+
+# Delete variables
+rm(list = ls())
+```

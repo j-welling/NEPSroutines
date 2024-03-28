@@ -1,0 +1,811 @@
+
+---
+title: "Test script B129"
+author: "Jana Welling"
+date: "`r Sys.time()`"
+output:
+  html_document:
+  toc: true
+  number_sections: true
+  toc_float: true
+  theme: readable
+  highlight: tango
+  df_print: paged
+  code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+  
+# Preparation of R and data
+  
+## Set working directory
+```{r working directory}
+setwd('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket')
+```
+
+## Load data
+
+```{r load-data, warning = FALSE, message = FALSE, comment = NA, results = 'hide'}
+rm(list = ls())
+load(here::here('Test/B129/Version 1.1.0/Data/data.Rdata'))
+#load('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Data/data.Rdata')
+```
+
+## Load scaling package
+
+```{r load-scaling, warning = FALSE, message = FALSE, comment = NA, results = 'hide', eval = FALSE}
+pkgload::load_all(here::here('scaling'))
+#pkgload::load_all('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/scaling')
+```
+
+# Debugging
+
+```{r 'debugging', eval = FALSE}
+# Hier könnte DEIN Debugging stehen :)
+```
+
+# Missing responses analyses
+
+## Missing responses by person
+
+### Separate functions
+
+```{r missing responses by person with separate functions}
+?scaling::mvp_analysis
+mv_p <- scaling::mvp_analysis(
+  resp = resp,
+  vars = vars,
+  select = 'mixed',
+  valid = 'valid',
+  grouping = c('easy', 'difficult'),
+  mvs = mvs,
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results'
+)
+
+?scaling::mvp_plots
+scaling::mvp_plots(
+  mv_p = mv_p,
+  vars = vars,
+  select = 'mixed',
+  grouping = c('easy', 'difficult'),
+  mvs = mvs,
+  labels_mvs = labels_mvs,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots/Missing_Responses/by_person',
+  show_all = TRUE,
+  #show_all = FALSE,
+  name_grouping = 'test difficulty'#,
+  #labels_legend = c('A', 'B', 'C')
+)
+
+?scaling::mvp_table
+scaling::mvp_table(
+  mv_p = mv_p,
+  grouping = c('easy', 'difficult'),
+  mvs = mvs,
+  save = FALSE,
+  overwrite = TRUE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+)
+
+?scaling::print_mvp_results
+scaling::print_mvp_results(mv_p)
+
+rm(mv_p)
+```
+
+### Overaching functions
+
+```{r missing responses by person}
+scaling::mv_person(
+  resp = resp,
+  vars = vars,
+  select = 'mixed',
+  valid = 'valid',
+  grouping = c('easy', 'difficult'),
+  mvs = mvs,
+  labels_mvs = labels_mvs,
+  plots = FALSE,
+  print = TRUE,
+  save = FALSE,
+  return = FALSE,
+  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots/Missing_Responses/by_person',
+  show_all = TRUE,
+  overwrite = TRUE,
+  warn = TRUE,
+  verbose = TRUE
+)
+```
+
+## Missing responses by item
+
+### Separate functions
+
+```{r missing responses by item with separate functions}
+?scaling::mvi_analysis
+mv_i <- scaling::mvi_analysis(
+  resp = resp,
+  vars = vars,
+  select = 'mixed',
+  valid = 'valid',
+  grouping = c('easy', 'difficult'),
+  position = c(easy = 'position_easy_mixed', difficult = 'position_difficult_mixed'),
+  #position = 'position_mixed',
+  mvs = mvs,
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results'
+)
+
+?scaling::mvi_plots
+mvi_plots(
+  mv_i = mv_i,
+  vars = vars,
+  select = 'mixed',
+  grouping = c('easy', 'difficult'),
+  mvs = mvs,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots/Missing_Responses/by_item',
+  show_all = TRUE,
+  #show_all = FALSE,
+  name_grouping = 'test difficulty'#,
+  #labels_legend = c('A', 'B', 'C')
+)
+
+?scaling::mvi_table
+scaling::mvi_table(
+  mv_i = mv_i,
+  vars = vars,
+  select = 'mixed',
+  grouping = c('easy', 'difficult'),
+  mvs = mvs,
+  save = FALSE,
+  overwrite = TRUE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+)
+
+?scaling::print_mvi_results
+scaling::print_mvi_results(mv_i, labels_mvs = labels_mvs, name_grouping = 'test version')
+
+rm(mv_i)
+```
+
+### Overaching functions
+
+
+```{r missing responses by item}
+scaling::mv_item(
+  resp = resp,
+  vars = vars,
+  select = 'mixed',
+  valid = 'valid',
+  mvs = mvs[c(3, 1, 2, 4)],
+  labels_mvs = labels_mvs,
+  grouping = c('easy', 'difficult'),
+  position = c(easy = 'position_easy_mixed', difficult = 'position_difficult_mixed'),
+  plots = FALSE,
+  print = TRUE,
+  save = FALSE,
+  return = FALSE,
+  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots/Missing_Responses/by_item',
+  show_all = TRUE,
+  overwrite = TRUE,
+  warn = TRUE,
+  verbose = TRUE
+)
+```
+
+# IRT analyses
+
+## For all items
+
+### Separate functions
+
+```{r single IRT analysis with separate functions, eval = FALSE}
+# Rasch and 2PL
+?scaling::irt_model
+rasch <- scaling::irt_model(
+  resp = resp,
+  vars = vars,
+  select = 'dich',
+  valid = 'valid',
+  irtmodel = '1PL',
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  name_group = 'all',
+  pweights = NULL,
+  #pweights = 'difficulty',
+  control_tam = NULL,
+  #control_tam = list(Msteps = 10, convM = 0.1), # wenn man snodes verändert, wird eine Fehlermeldung ausgegeben
+  control_wle = NULL
+  #control_wle = list(Msteps = 10, convM = 0.1)
+)
+
+irt.2pl <- scaling::irt_model(
+  resp = resp,
+  vars = vars,
+  select = 'dich',
+  valid = 'valid',
+  irtmodel = '2PL',
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  name_group = 'all',
+  pweights = NULL,
+  #pweights = 'difficulty',
+  control_tam = NULL,
+  #control_tam = list(Msteps = 10, convM = 0.1), # wenn man snodes verändert, funktioniert das Ganze nicht mehr
+  control_wle = NULL
+  #control_wle = list(Msteps = 10, convM = 0.1)
+)
+
+?scaling::icc_plots
+scaling::icc_plots(
+  model = rasch,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots',
+  name_group = 'all'
+)
+
+?scaling::wright_map
+scaling::wright_map(
+  model = rasch,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots',
+  name_group = 'all'
+)
+
+?scaling::irt_summary()
+rasch_sum <- scaling::irt_summary(
+  resp = resp,
+  vars = vars,
+  valid = 'valid',
+  results = rasch,
+  disc = irt.2pl,
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  name_group = 'all',
+  overwrite = TRUE
+)
+
+?scaling::irt_model_fit()
+scaling::irt_model_fit(
+  model_1p = rasch,
+  model_2p = irt.2pl,
+  overwrite = TRUE,
+  save = TRUE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  name_group = 'all'
+)
+
+?scaling::print_irt_summary
+scaling::print_irt_summary(
+  model = rasch,
+  irt_sum = rasch_sum
+)
+
+rm(rasch, irt.2pl, rasch_sum)
+
+# PCM and GPCM
+?scaling::irt_model
+pcm <- scaling::irt_model(
+  resp = resp,
+  vars = vars,
+  select = 'dich',
+  valid = 'valid',
+  irtmodel = 'PCM2',
+  scoring = 'irt_scoring',
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  name_group = 'all',
+  pweights = NULL,
+  #pweights = 'difficulty',
+  control_tam = NULL,
+  #control_tam = list(Msteps = 10, convM = 0.1), # wenn man snodes verändert, wird eine Fehlermeldung ausgegeben
+  control_wle = NULL
+  #control_wle = list(Msteps = 10, convM = 0.1)
+)
+
+gpcm <- scaling::irt_model(
+  resp = resp,
+  vars = vars,
+  select = 'dich',
+  valid = 'valid',
+  irtmodel = 'GPCM',
+  scoring = 'irt_scoring',
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  name_group = 'all',
+  pweights = NULL,
+  #pweights = 'difficulty',
+  control_tam = NULL,
+  #control_tam = list(Msteps = 10, convM = 0.1), # wenn man snodes verändert, funktioniert das Ganze nicht mehr
+  control_wle = NULL
+  #control_wle = list(Msteps = 10, convM = 0.1)
+)
+
+?scaling::icc_plots
+scaling::icc_plots(
+  model = pcm,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots',
+  name_group = 'all'
+)
+
+?scaling::wright_map
+scaling::wright_map(
+  model = pcm,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots',
+  name_group = 'all'
+)
+
+?scaling::irt_summary()
+pcm_sum <- scaling::irt_summary(
+  resp = resp,
+  vars = vars,
+  valid = 'valid',
+  results = pcm,
+  disc = gpcm,
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  name_group = 'all',
+  overwrite = TRUE
+)
+
+?scaling::irt_model_fit()
+scaling::irt_model_fit(
+  model_1p = pcm,
+  model_2p = gpcm,
+  overwrite = FALSE,
+  save = TRUE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  name_group = 'all'
+)
+
+?scaling::print_irt_summary
+scaling::print_irt_summary(
+  model = pcm,
+  irt_sum = pcm_sum
+)
+
+rm(pcm, gpcm, pcm_sum)
+```
+
+### Overaching functions
+
+```{r single IRT analysis, eval = FALSE}
+# Rasch and 2PL
+scaling::irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = 'dich',
+  valid = 'valid',
+  scoring = NULL,
+  plots = FALSE,
+  save = FALSE,
+  print = TRUE,
+  return = FALSE,
+  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots',
+  overwrite = TRUE,
+  verbose = FALSE,
+  name_group = 'all'
+)
+
+# PCM and GPCM
+scaling::irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = 'mixed',
+  valid = 'valid',
+  scoring = 'irt_scoring',
+  plots = FALSE,
+  save = FALSE,
+  print = TRUE,
+  return = FALSE,
+  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots',
+  overwrite = TRUE,
+  verbose = FALSE,
+  name_group = 'all'
+)
+```
+
+
+## For different test versions
+
+```{r grouped IRT analysis}
+# Rasch and 2PL
+scaling::grouped_irt_analysis(
+  groups = c(easy = 'dich_easy', difficult = 'dich_difficult', common = 'dich_common'),
+  resp = resp,
+  vars = vars,
+  valid = 'valid',
+  save = FALSE,
+  print = TRUE,
+  plots = FALSE,
+  return = FALSE,
+  overwrite = TRUE,
+  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots'
+)
+
+# PCM and GPCM
+scaling::grouped_irt_analysis(
+  groups = c(easy = 'mixed_easy', difficult = 'mixed_difficult', common = 'mixed_common'),
+  resp = resp,
+  vars = vars,
+  valid = 'valid',
+  scoring = 'irt_scoring',
+  save = FALSE,
+  print = TRUE,
+  plots = FALSE,
+  return = FALSE,
+  overwrite = TRUE,
+  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots'
+)
+```
+
+
+# DIF analysis
+
+## Separate functions
+
+```{r dif analysis with separate functions}
+# For Rasch
+
+## One DIF variable
+?scaling::dif_model
+dif_sex <- scaling::dif_model(
+  resp = resp,
+  vars = vars,
+  select = 'dich',
+  valid = 'valid',
+  dif_var = 'sex',
+  scoring = 'irt_scoring',
+  include_mv = 200,
+  control = NULL,
+  #control = list(Msteps = 10, convM = 0.1),
+  pweights = NULL,
+  #pweights = 'difficulty',
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  name_group = 'all'
+)
+
+dif_diff <- scaling::dif_model(
+  resp = resp,
+  vars = vars,
+  select = 'dich_common',
+  valid = 'valid',
+  dif_var = 'difficulty',
+  scoring = 'irt_scoring',
+  include_mv = 200,
+  control = NULL,
+  #control = list(Msteps = 10, convM = 0.1),
+  pweights = NULL,
+  #pweights = 'difficulty',
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  name_group = 'all'
+)
+
+?scaling::dif_summary
+sex_sum <- scaling::dif_summary(
+  diflist = dif_sex,
+  vars = vars,
+  #dif_threshold = 0.2,
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  overwrite = TRUE,
+  name_group = 'all'
+)
+
+diff_sum <- scaling::dif_summary(
+  diflist = dif_diff,
+  vars = vars,
+  #dif_threshold = 0.2,
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  overwrite = TRUE,
+  name_group = 'all'
+)
+
+?scaling::build_dif_tr_tables
+scaling::build_dif_tr_tables(
+  dif_summaries = list(diff_sum = diff_sum,sex_sum = sex_sum),
+  vars = vars,
+  save = FALSE,
+  overwrite = TRUE,
+  name_group = 'all',
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+)
+
+?scaling::print_dif_summary
+scaling::print_dif_summary(
+  resp,
+  diflist = dif_sex,
+  res = sex_sum,
+  dif_threshold = 0.5
+)
+
+## Several DIF variables
+?scaling::conduct_dif_analysis
+dif_models <- scaling::conduct_dif_analysis(
+  resp = resp,
+  vars = vars,
+  select = c('dich_common', 'dich', 'dich'),
+  valid = 'valid',
+  dif_vars = c('difficulty', 'sex', 'migration'),
+  scoring = 'irt_scoring',
+  include_mv = 200,
+  #include_mv = 2,
+  control = NULL,
+  #control = list(Msteps = 10, convM = 0.1),
+  pweights = NULL,
+  #pweights = 'difficulty',
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  name_group = 'all'
+)
+
+?scaling::summarize_dif_analysis
+dif_summaries <- scaling::summarize_dif_analysis(
+  dif_models = dif_models,
+  dif_vars = c('difficulty', 'sex', 'migration'),
+  #dif_threshold = 0.2,
+  save = FALSE,
+  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  overwrite = TRUE,
+  name_group = 'all'
+)
+
+?scaling::build_dif_tr_tables
+scaling::build_dif_tr_tables(
+  dif_summaries = dif_summaries,
+  save = FALSE,
+  overwrite = TRUE,
+  name_group = 'all',
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+)
+
+rm(dif_sex, sex_sum, dif_models, dif_summaries)
+
+# For PCM
+
+## One DIF variable
+?scaling::dif_model
+dif_sex <- scaling::dif_model(
+  resp = resp,
+  vars = vars,
+  select = 'mixed',
+  valid = 'valid',
+  dif_var = 'sex',
+  scoring = 'irt_scoring',
+  include_mv = 200,
+  control = NULL,
+  #control = list(Msteps = 10, convM = 0.1),
+  pweights = NULL,
+  #pweights = 'difficulty',
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  name_group = 'all'
+)
+
+?scaling::dif_summary
+sex_sum <- scaling::dif_summary(
+  diflist = dif_sex,
+  #dif_threshold = 0.2,
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  overwrite = TRUE,
+  name_group = 'all'
+)
+
+?scaling::print_dif_summary
+scaling::print_dif_summary(
+  resp,
+  diflist = dif_sex,
+  res = sex_sum,
+  dif_threshold = 0.5
+)
+
+## Several DIF variables
+?scaling::conduct_dif_analysis
+dif_models <- scaling::conduct_dif_analysis(
+  resp = resp,
+  vars = vars,
+  select = c('mixed_common', 'mixed', 'mixed'),
+  valid = 'valid',
+  dif_vars = c('difficulty', 'sex', 'migration'),
+  scoring = 'irt_scoring',
+  include_mv = 200,
+  #include_mv = 2,
+  control = NULL,
+  #control = list(Msteps = 10, convM = 0.1),
+  pweights = NULL,
+  #pweights = 'difficulty',
+  save = FALSE,
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  name_group = 'all'
+)
+
+?scaling::summarize_dif_analysis
+dif_summaries <- scaling::summarize_dif_analysis(
+  dif_models = dif_models,
+  dif_vars = c('difficulty', 'sex', 'migration'),
+  #dif_threshold = 0.2,
+  save = FALSE,
+  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  overwrite = TRUE,
+  name_group = 'all'
+)
+
+?scaling::build_dif_tr_tables
+scaling::build_dif_tr_tables(
+  dif_summaries = dif_summaries,
+  save = FALSE,
+  overwrite = TRUE,
+  name_group = 'all',
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+)
+
+rm(dif_sex, sex_sum, dif_models, dif_summaries)
+```
+
+## Overarching functions
+
+```{r dif analysis}
+
+vars <- vars[c(171:172, 1:170), ]
+
+# For Rasch
+dif <- scaling::dif_analysis(
+  resp = resp,
+  vars = vars,
+  select = c('dich_common', 'dich', 'dich'),
+  valid = 'valid',
+  dif_vars = c('difficulty', 'sex', 'migration'),
+  scoring = 'irt_scoring',
+  overwrite = TRUE,
+  print = TRUE,
+  verbose = FALSE,
+  save = TRUE,
+  return = TRUE,
+  digits = 2,
+  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results'
+)
+
+# For PCM
+scaling::dif_analysis(
+  resp = resp,
+  vars = vars,
+  select = c('mixed_common', 'mixed', 'mixed'),
+  valid = 'valid',
+  dif_vars = c('difficulty', 'sex', 'migration'),
+  scoring = 'irt_scoring',
+  overwrite = TRUE,
+  print = TRUE,
+  verbose = FALSE,
+  save = FALSE,
+  return = FALSE,
+  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results'
+)
+```
+
+
+# Distractor analysis
+
+## Separate functions
+
+```{r distractor analysis with separate functions}
+?scaling::conduct_dis_analysis
+dis <- scaling::conduct_dis_analysis(
+  resp = resp,
+  vars = vars,
+  valid = 'valid',
+  select_raw = 'distan',
+  select_score = 'dich',
+  #select_score = 'mixed',
+  save = FALSE,
+  name_group = 'all',
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results'
+)
+
+?scaling::dis_summary
+dis_sum <- scaling::dis_summary(
+  dis,
+  save = FALSE,
+  overwrite = TRUE,
+  name_group = 'all',
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+)
+
+?scaling::print_dis_summary
+scaling::print_dis_summary(dis_sum)
+
+rm(dis, dis_sum)
+```
+
+## Overarching functions
+
+```{r distractor analysis}
+scaling::dis_analysis(
+  resp = resp,
+  vars = vars,
+  valid = 'valid',
+  select_raw = 'distan',
+  print = TRUE,
+  save = FALSE,
+  overwrite = TRUE,
+  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+)
+```
+
+
+# Dimension analysis
+
+## Separate functions
+
+```{r dimensionality analysis with separate functions}
+?scaling::conduct_dim_analysis
+dim <- scaling::conduct_dim_analysis(
+  resp = resp,
+  vars = vars,
+  select = 'mixed',
+  valid = 'valid',
+  scoring = 'dim_scoring',
+  dim = c('kog_type', 'text_type'),
+  irtmodel = 'PCM2',
+  maxiter = 10,
+  snodes = 5,
+  save = FALSE,
+  name_group = 'all',
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results'
+)
+
+?scaling::dim_summary
+dim_sum <- scaling::dim_summary(
+  dim,
+  save = FALSE,
+  overwrite = TRUE,
+  name_group = 'all',
+  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+)
+
+?scaling::print_dim_summary
+scaling::print_dim_summary(dim_sum)
+
+rm(dim, dim_sum)
+```
+
+## Overarching functions
+
+```{r dimensionality analysis}
+dim <- scaling::dim_analysis(
+  resp = resp,
+  vars = vars,
+  select = 'mixed',
+  valid = 'valid',
+  scoring = 'dim_scoring',
+  irtmodel = 'PCM2',
+  maxiter = 10,
+  snodes = 5,
+  verbose = FALSE,
+  return = TRUE,
+  save = FALSE,
+  print = TRUE,
+  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables', 
+  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  overwrite = TRUE,
+  dim = c('kog_type', 'text_type')
+)
+```

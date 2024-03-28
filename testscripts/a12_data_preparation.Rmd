@@ -1,0 +1,89 @@
+
+---
+title: "Test script for scaling package with example data from A14 (Grammar)"
+author: "Jana Welling"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+    theme: readable
+    highlight: tango
+    df_print: paged
+    code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+  
+# Preparation of R and data
+  
+## Prepare R
+  
+```{r preparation, warning = FALSE, message = FALSE, comment = NA, results = 'hide'}
+
+#' ** Clear working space**
+rm(list = ls())
+
+#' **Load packages**
+library('here')
+library('dplyr')
+library('haven')
+
+#' **Load scaling package**
+suppressMessages(
+  pkgload::load_all(here::here('scaling'))
+  #pkgload::load_all('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/scaling')
+)
+
+```
+
+## Prepare data
+
+```{r data, warning = FALSE, message = FALSE, comment = NA, results = 'hide', eval = FALSE}
+# Load example data
+load(here::here('Test/A12/Raw_data/A12_GR.Rdata'))
+resp <- A12_GR
+rm(A12_GR, items)
+
+vars <- read.xlsx(here::here('Test/A12/Raw_data/Itempositionen.xlsx'))
+vars <- na.omit(select(
+  vars,
+  item = 'A12_Item',
+  position_old_set = 'A12_Position'
+))
+
+# Adjust example data
+vars$raw <- FALSE
+vars$dich <- TRUE
+vars$poly <- FALSE
+vars$old_set <- TRUE
+vars$new_set <- ifelse(
+  vars$item %in% c('grk1h121_c', 'grk1u248_c'), FALSE, TRUE
+)
+vars$scoring <- 1
+vars$num_cat <- 1
+row.names(vars) <- seq_along(vars$item)
+vars <- pos_new(vars, select = 'new_set', position = 'position_old_set')
+
+# Define existing user defined missing values
+table(unlist(resp[ , vars$item]))
+mvs = c(OM = -97, NV = -95, NR = -94) # not-determinable missing responses aber nur bei invalid cases, deshalb nicht mit aufgenommen
+labels_mvs = c(
+  ALL = 'total missing responses',
+  OM = 'omitted items',
+  NV = 'invalid responses',
+  NR = 'not reached items'
+)
+
+# Create variable indicating (in)valid cases
+resp$valid_old_set <- min_val(resp = resp, vars = vars, select = 'old_set', invalid = mvs)
+resp$valid_new_set <- min_val(resp = resp, vars = vars, select = 'new_set', invalid = mvs)
+
+# Save example data
+check_folder(here::here('Test/A12/Version 1.1.0/Data'))
+save(resp, vars, mvs, labels_mvs, file = 'Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/Test/A12/Version 1.1.0/Data/data.Rdata')
+
+# Delete variables
+rm(list = ls())
+```

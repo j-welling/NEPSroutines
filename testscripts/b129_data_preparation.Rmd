@@ -1,0 +1,274 @@
+
+---
+title: "Data preparation with scaling package of example data from B129 (Reading)"
+author: "Jana Welling"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+    theme: readable
+    highlight: tango
+    df_print: paged
+    code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+  
+# Preparation of R and data
+  
+## Prepare R
+  
+```{r preparation, warning = FALSE, message = FALSE, comment = NA, results = 'hide'}
+
+#' ** Cleare working space** 
+rm(list = ls())
+
+#' **Load packages**
+library('here')
+library('dplyr')
+library('haven')
+
+#' **Set path**
+#here::i_am('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket')
+# Error [only if in file 'scaling']: filepath must be a file or a relative path, not an absolute path.
+
+#' **Load scaling package**
+pkgload::load_all(here::here('scaling'))
+```
+
+## Prepare data
+
+```{r data, warning = FALSE, message = FALSE, comment = NA, results = 'hide', eval = FALSE}
+# Load example data
+load(here::here('Test/B129/Raw_data/dat.Rdata'))
+load(here::here('Test/B129/Raw_data/items.RData'))
+load(here::here('Test/B129/Raw_data/item_info.RData'))
+
+resp <- dat
+vars_raw <- vars
+rm(dat, vars, items, m)
+
+# Adjust example data
+resp$difficult <- ifelse(resp$difficulty == 1, TRUE, FALSE)
+resp$easy <- ifelse(resp$difficulty == 1, FALSE, TRUE)
+
+vars_raw$scoring <- 1
+vars_scored <- vars_raw
+vars_scored$items <- vars_scored$items_scored
+vars_poly$items <- vars_poly$items_scored
+
+vars_raw$dich <- FALSE
+vars_raw$raw <- TRUE
+vars_raw$mixed <- FALSE
+vars_raw$link <- FALSE
+
+vars_scored$dich <- TRUE
+vars_scored$raw <- FALSE
+vars_scored$mixed <- ifelse(vars_scored$items %in% vars_poly$items, TRUE, FALSE)
+vars_scored$scoring <- ifelse(vars_scored$type == 'MC', 1, 0.5)
+vars_scored$link <- ifelse(vars_scored$items %in% vars_poly$items, TRUE, FALSE)
+
+vars_poly$dich <- FALSE
+vars_poly$raw <- FALSE
+vars_poly$mixed <- TRUE
+vars_poly$link <- TRUE
+
+vars <- rbind(vars_raw, vars_scored,
+              vars_poly[!vars_poly$items %in% vars_scored$items, ])
+vars <- dplyr::rename(vars, item = 'items')
+vars$item_scored <- vars$label <- vars$text <- vars$nr <- NULL
+vars$type <- replace(vars$type, vars$type == 'MCM', 'CMC')
+vars$positionEasy <- as.integer(vars$positionEasy)
+vars$positionDifficult <- as.integer(vars$positionDifficult)
+vars <- rename(vars, easy = 'easyTestlet', difficult = 'difficultTestlet', 
+               irt_scoring = 'scoring',
+               position_easy = 'positionEasy', 
+               position_diff = 'positionDifficult', 
+               position = 'positionTotal', kog_type = 'kogtype')
+vars$position_easy[vars$item %in% c('reg7033s_sc2g7_c_d', 
+                                    'reg7045s_sc2g7_c_d', 
+                                    'reg7024s_sc2g7_c_d')] <- NA
+vars$position_diff[vars$item %in% c('reg7033s_sc2g7_c', 
+                                    'reg7045s_sc2g7_c', 
+                                    'reg7024s_sc2g7_c')] <- NA
+vars <- pos_new(vars = vars, select = 'mixed', 
+                position = c(easy = 'position_easy',
+                             difficult = 'position_diff'))
+vars <- pos_new(vars = vars, select = 'mixed', 
+                position = 'position')
+vars$poly <- (!vars$dich & vars$mixed)
+vars$dim_scoring <- ifelse(vars$item %in% c('reg7013s_sc2g7_c',
+                                            'reg7015s_sc2g7_c',
+                                            'reg7026s_sc2g7_c',
+                                            'reg7045s_sc2g7_c',
+                                            'reg7045s_sc2g7_c_d',
+                                            'reg7024s_sc2g7_c',
+                                            'reg7024s_sc2g7_c_d',
+                                            'reg7033s_sc2g7_c',
+                                            'reg7033s_sc2g7_c_d',
+                                            'reg7051s_sc2g7_c',
+                                            'reg7053s_sc2g7_c',
+                                            'reg7063s_sc2g7_c',
+                                            'reg7066s_sc2g7_c',
+                                            'reg7071s_sc2g7_c',
+                                            'reg7075s_sc2g7_c'),
+                           1, vars$irt_scoring)
+vars$common <- vars$easy & vars$difficult
+vars$mixed_easy <- vars$mixed & vars$easy
+vars$mixed_difficult <- vars$mixed & vars$difficult
+vars$mixed_common <- vars$mixed & vars$common
+vars$dich_easy <- vars$dich & vars$easy
+vars$dich_difficult <- vars$dich & vars$difficult
+vars$dich_common <- vars$dich & vars$common
+vars$distan <- vars$raw & vars$type == 'MC'
+vars$suf <- vars$mixed
+vars$num_cat <- ifelse(vars$dich, 1, ifelse(vars$poly, 3, NA))
+vars$num_cat[vars$item %in% c(
+  'reg7016s_sc2g7_c',
+  'reg7033s_sc2g7_c',
+  'reg7033s_sc2g7_c_d',
+  'reg7066s_sc2g7_c',
+  'reg7075s_sc2g7_c'
+)] <- 4
+vars$num_cat[vars$item %in% 'reg7015s_sc2g7_c'] <- 2
+vars$num_cat[vars$item %in% 'reg7026s_sc2g7_c'] <- 5
+
+# reg7015s_sc2g7_c 2
+# reg7016s_sc2g7_c 4
+# reg7023s_sc2g7_c 3
+# reg7023s_sc2g7_c 3
+# reg7023s_sc2g7_c_d 3
+# reg7026s_sc2g7_c 5
+# reg7033s_sc2g7_c 4
+# reg7033s_sc2g7_c_d 4
+# reg7045s_sc2g7_c 3
+# reg7051s_sc2g7_c 3
+# reg7053s_sc2g7_c 3
+# reg7055s_sc2g7_c 3
+# reg7063s_sc2g7_c 3
+# reg7066s_sc2g7_c 4
+# reg7071s_sc2g7_c 3
+# reg7075s_sc2g7_c 4
+
+# Define existing user defined missing values
+table(unlist(resp[ , vars$item]))
+mvs = c(OM = -97, NV = -95, NR = -94, ND = -55, NAd = -54)
+labels_mvs = c(ALL = 'total missing items',
+               OM = 'omitted items',
+               NV = 'not valid items',
+               NR = 'not reached items',
+               ND = 'not determinable items',
+               NAd = 'not administered items')
+
+# Create variable indicating (in)valid cases
+resp$valid <- min_val(resp = resp, vars = vars, select = 'mixed', invalid = mvs)
+resp$common <- resp$easy | resp$difficult
+
+# Save example data
+check_folder('Test/B129/Version 1.1.0/Data')
+save(resp, vars, mvs, labels_mvs, 
+     file = here::here('Test/B129/Version 1.1.0/Data/data.Rdata'))
+
+# Delete variables
+rm(list = ls())
+```
+
+
+## Perpare link data
+```{r link data}
+# Load data of current measurement wave
+load(here::here('Test/B129/Version 1.1.0/Data/data.Rdata'))
+resp_curr <- resp
+vars_curr <- vars
+mvs_curr <- mvs
+rm(resp, vars, labels_mvs, mvs)
+
+# Load data of previous measurement wave
+load(here::here('Test/B129/Raw_data/link_data_with_mode_effect.Rdata'))
+resp_link <- link_data$link_study
+resp_prev <- haven::read_sav(here::here('Test/B129/Raw_data/SC2_xTargetCompetencies_D_8-0-1.sav'),
+                             user_na = FALSE)
+rm(vars_poly, link_data)
+
+# Prepare vars
+vars_prev <- dplyr::select(vars_prev, item = items_scored, scoring)
+vars_prev$link <- TRUE
+
+vars_curr <- dplyr::select(vars_curr, item, scoring = irt_scoring, link)
+vars_curr$link[which(vars_curr$item == 'reg7026s_sc2g7_c')] <- FALSE
+vars_curr <- vars_curr[vars_curr$link, ]
+
+vars_link <- rbind(vars_prev, vars_curr)
+
+# Prepare resp
+resp_prev <- filter(resp_prev, !is.na(resp_prev$reg4_sc1) & resp_prev$ID_t %in% resp_curr$ID_t) %>%
+  select(ID_t, starts_with('reg')) %>%
+  mutate(
+    # reg5012s_sc2g4_c = recode(as.numeric(reg5012s_sc2g4_c), 
+    #                           `0` = 0, `1` = 0, `2` = 0, `3` = 0, `4` = 0, 
+    #                           `5` = 0, `6` = 1, `7` = 2, .default = NA_real_),
+    reg5016s_sc2g4_c = dplyr::recode(as.numeric(reg5016s_sc2g4_c),
+                                     `0` = 0, `1` = 1, `2` = 2, `3` = 3, `4` = 4, 
+                                     `5` = 5, `6` = 5, .default = NA_real_),
+    # reg5026s_sc2g4_c = recode(as.numeric(reg5026s_sc2g4_c), 
+    #                           `0` = 0, `1` = 0, `2` = 0, `3` = 0, `4` = 0, 
+    #                           `5` = 0, `6` = 0, `7` = 1, .default = NA_real_),
+    reg5052s_sc2g4_c = dplyr::recode(as.numeric(reg5052s_sc2g4_c),
+                                     `0` = 0, `1` = 1, `2` = 2, `3` = 3, `4` = 3, 
+                                     .default = NA_real_),
+    reg5055s_sc2g4_c = dplyr::recode(as.numeric(reg5055s_sc2g4_c),
+                                     `0` = 0, `1` = 1, `2` = 2, `3` = 3, `4` = 3, 
+                                     .default = NA_real_)
+  )
+  
+resp_prev$valid <- min_val(
+    resp = resp_prev,
+    vars = vars_prev,
+    select = 'link'
+  )
+
+resp_link$valid <- min_val(
+  resp = resp_link,
+  vars = vars_link,
+  select = 'link'
+)
+
+# Missing values
+table(unlist(resp_curr[ , vars_curr$item]))
+table(unlist(resp_prev[ , vars_prev$item]))
+table(unlist(resp_link[ , vars_link$item]))
+
+mvs_link <- mvs_curr
+rm(mvs_curr)
+
+# Save linking data
+save(resp_curr, resp_prev, resp_link, vars_curr, vars_prev, vars_link, mvs_link,
+     file = here::here('Test/B129/Version 1.1.0/Data/link_data.Rdata'))
+
+# Delete variables
+rm(list = ls())
+
+```
+
+## Prepare example data
+```{r example data}
+# Load data
+load(here::here('Test/B129/Version 1.1.0/Data/data.Rdata'))
+
+# Variables in vars
+names(vars)
+vars <- dplyr::rename(vars, scoring = 'irt_scoring', position_difficult = 'position_diff')
+vars$dim_scoring <- NULL
+
+# Variables in resp
+names(resp)
+resp$ID_t_infas <- NULL
+
+# Save data
+save(
+  resp, vars, mvs, labels_mvs,
+  file = here::here('Test/B129/Version 1.1.0/Data/b129.Rdata')
+)
+```
