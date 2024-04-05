@@ -11,7 +11,7 @@
 #' @param select  character; indicates the logical variable in vars which
 #'   contains the item names designated for the SUF (original scored items
 #'   before the first IRT analyses)
-#' @param competence  character; name of tested competence for labelling the
+#' @param competence  character; name of tested competence for labeling the
 #'   data
 #' @param scores  data.frame; contains test scores (potentially with standard
 #'   errors) as variables and persons as rows; additionally includes ID_t as a
@@ -19,7 +19,7 @@
 #' @param score_name  character; name of the scores -- WITHOUT extension (e.g.,
 #'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
 #' @param mvs  named integer vector; contains user-defined missing values
-#' @param items_labels  vector; named vector for each item used for labelling
+#' @param items_labels  vector; named vector for each item used for labeling
 #'   the data
 #' @param suf_name character; name of suf (defaults to 'suf')
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
@@ -110,19 +110,22 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
   }
 
   # Label for ID_t
-  attr(suf$ID_t, "label") <- "Unique person identifier"
+  attr(suf$ID_t, "label") <- "Target-ID"
 
   # Set missing values
   if (is.null(mvs)) {
-    mvs <- c("omitted" = -97,
-             "not valid" = -95,
-             "not reached" = -94,
-             "test aborted" = -91,
-             "unspecific missing" = -90,
-             "not participated" = -56,
-             "not determinable" = -55,
-             "not administered" = -54,
-             "reset response" = -21)
+    mvs <- c("filterbedingt fehlend" = -99,
+             "Angabe verweigert" = -97,
+             "unplausibler Wert" = -95,
+             "nicht erreicht" = -94,
+             "Befragung abgebrochen" = -91,
+             "nicht spezifisch fehlend" = -90,
+             "nicht teilgenommen" = -56,
+             "nicht ermittelbar" = -55,
+             "designbedingt fehlend" = -54,
+             "Abwesenheit am Testtag" = -22,
+             "L1-Test nicht administriert (keine Sprachkenntnis)" = -21,
+             "L1-Test nicht administriert (Ergebnis Screening)" = -20)
   }
 
   # Label items
@@ -140,7 +143,7 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
         haven::labelled_spss(
           suf[[i]],
           label = lbl,
-          labels = c("incorrect" = 0, "correct" = 1, mvs)
+          labels = c("nicht gelöst" = 0, "gelöst" = 1, mvs)
         )
 
     # Polytomous items
@@ -151,7 +154,7 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
       vallbl <-
         setNames(
           object = seq(0, maxK),
-          nm = paste0(seq(0, maxK), " correct of ", maxK)
+          nm = paste0(seq(0, maxK), " von ", maxK, " Punkten")
         )
 
       # Label item
@@ -173,23 +176,47 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
 
     # Set label based on suffix of variable name
     type <- substring(i, regexpr("(_sc[1-9])(a|b|u)?$", i))
+    domain <- switch(competence,
+                     "Frühe Lesekompetenz"              = "Frühes Lesen",
+                     "Orthografie"                      = "Orthografie",
+                     "Grammatik"                        = "Grammatik",
+                     "Hörverstehen in Russisch"         = "Russisch",
+                     "Hörverstehen in Türkisch"         = "Türkisch",
+                     "Wortschatz"                      = "Wortschatz",
+                     "Lesekompetenz"                    = "Lesen",
+                     "Mathematische Kompetenz"          = "Mathematik",
+                     "Naturwissenschaftliche Kompetenz" = "Naturwissenschaften",
+                     "ICT Kompetenz"                    = "ICT",
+                     "Lesekompetenz in Englisch"        = "Englisch"
+    )
     lbl <- switch(type,
-                  "_sc1" = "Cross-sectional WLE",
-                  "_sc2" = "Standard error of cross-sectional WLE",
-                  "_sc1u" = "Longitudinal WLE",
-                  "_sc2u" = "Standard error of longitudinal WLE",
-                  "_sc3" = "Sum score",
-                  "_sc3b" = "Sum score",
-                  "_sc5" = "Procedural meta-cognition (Difference score)",
-                  "_sc6" = "Procedural meta-cognition (Proportion correct score)"
-                )
+                  "_sc1" = "WLE (korrigiert)",
+                  "_sc2" = "Standardfehler des WLE (korrigiert)",
+                  "_sc1a" = "WLE (korrigiert)",
+                  "_sc2a" = "Standardfehler des WLE (korrigiert)",
+                  "_sc1b" = "WLE (korrigiert)",
+                  "_sc2b" = "Standardfehler des WLE (korrigiert)",
+                  "_sc1u" = "WLE (unkorrigiert)",
+                  "_sc2u" = "Standardfehler des WLE (unkorrigiert)",
+                  "_sc3" = "Summe",
+                  "_sc3a" = "Summe",
+                  "_sc3b" = "Summe",
+                  "_sc4" = "Mittelwert",
+                  "_sc5" = paste0("Prozedurale Metakognition (", domain, "): Differenzmaß"),
+                  "_sc6" = paste0("Prozedurale Metakognition (", domain, "): Anteil korrekt"),
+                  "_sc5a" = paste0("Prozedurale Metakognition (", domain, "): Differenzmaß für statische Items"),
+                  "_sc6a" = paste0("Prozedurale Metakognition (", domain, "): Anteil korrekt für statische Items"),
+                  "_sc5b" = paste0("Prozedurale Metakognition (", domain, "): Differenzmaß für interaktive Items"),
+                  "_sc6b" = paste0("Prozedurale Metakognition (", domain, "): Anteil korrekt für interaktive Items"),
+                  "_sc7" = "Person in L1-Zielpopulation"
+    )
     if (is.null(lbl)) next
 
     # Set score label
     suf[[paste0(score_name, type)]] <-
       haven::labelled_spss(
         suf[[i]],
-        label = paste0(Hmisc::capitalize(competence), ": ", lbl),
+        label = lbl,
         labels = mvs
       )
 
