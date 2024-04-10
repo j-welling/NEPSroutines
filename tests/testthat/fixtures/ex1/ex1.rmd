@@ -155,6 +155,7 @@ scaling::dif_analysis(
   valid = "valid",
   dif_vars = c("sex", "mig"),
   scoring = "scoring",
+  include_mv = 150,
   mvs = mvs,
   overwrite = TRUE,
   verbose = FALSE,
