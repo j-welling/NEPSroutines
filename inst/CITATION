@@ -1,0 +1,38 @@
+
+author_list <- c(
+  utils::person(given = "Jana", family = "Welling"),
+  utils::person(given = "Anna", family = "Scharl"),
+  utils::person(given = "Tanja", family = "Kutscher"),
+  utils::person(given = "Timo", family = "Gnambs")
+)
+year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date, perl = TRUE)
+vers <- paste("R package version", meta$Version)
+pkg_name <- meta$Package
+pkg_title <- meta$Title
+
+
+#*******************************************
+# automatic generation of citation key
+
+citHeader( paste0( "To cite the '", pkg , "' package use:") )
+
+bibentry(
+  key = paste0(pkg_name, "_", meta$Version),
+  bibtype = "Manual",
+  title = paste0( pkg_name, ": " , pkg_title),
+  author = c(author_list),
+  year = year,
+  note = vers,
+  url =  paste0("https://CRAN.R-project.org/package=", pkg) ,
+  textVersion =
+    paste0(
+      paste(
+        sapply(person_list1, \(x) x$given), ", ",
+        sapply(person_list1, \(x) paste0(substr(x$given, 1, 1), ".")),
+        collapse = ", ", sep = ""
+      ),
+      " (", year, "). ",
+      pkg_name, ": ", pkg_title ,
+      " (Version ", vers, ") [Computer software]."
+    )
+
