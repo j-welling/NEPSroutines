@@ -1,0 +1,316 @@
+---
+title: "Scaling of NEPS example data ex2"
+author: "Timo Gnambs"
+date: "2024-04-10 13:18:00"
+date-modified: now
+date-format: "YYYY-MM-DD HH:mm:ss"
+title-block-banner: true
+format:
+  html:
+    toc: true
+    number-sections: true
+    embed-resources: true
+    anchor-sections: false
+    link-external-icon: true
+    link-external-newwindow: true
+    code-link: true
+    highlight-style: tango
+    code-fold: show
+    code-tools: true
+    df-print: paged
+---
+
+# R setup
+
+```{r basic setup, message = FALSE}
+
+# Clear work space
+rm(list = ls())
+
+# Load packages
+library(scaling)
+library(rlang)
+
+# Turn off warnings
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+
+# Load example data
+load("../../../../data/ex2.rda")
+resp <- ex2$resp
+vars <- ex2$vars
+
+# Set missing codes
+mvs <- c(OM = -97, NV = -95, NR = -94)
+labels_mvs <- c(
+  ALL = 'total missing responses',
+  OM = 'omitted items',
+  NV = 'invalid responses',
+  NR = 'not reached items'
+)
+
+```
+
+# Sample descriptives
+
+```{r descriptives}
+
+# Sample size with only valid cases
+scaling::n_valid(resp, valid = "valid")
+
+# Descriptives for nominal variables
+scaling::desc_nom(resp, desc = c("sex", "mig", "school"), valid = "valid")
+scaling::show_attributes(resp, desc = c("sex", "mig", "school"))
+
+```
+
+# Missing responses
+
+## By person
+
+```{r missing responses by person}
+
+scaling::mv_person(
+  resp = resp,
+  vars = vars,
+  select = "mixed",
+  valid = "valid",
+  mvs = mvs,
+  labels_mvs = labels_mvs,
+  overwrite = TRUE,
+  plots = TRUE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables",
+  path_plots = "plots/missing/by_person",
+  digits = 2,
+  warn = TRUE,
+  verbose = FALSE
+)
+
+```
+
+## By item
+
+```{r missing responses by item}
+
+scaling::mv_item(
+  resp = resp,
+  vars = vars,
+  select = "mixed",
+  valid = "valid",
+  position = "pos",
+  mvs = mvs,
+  labels_mvs = labels_mvs,
+  overwrite = TRUE,
+  plots = TRUE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables",
+  path_plots = "plots/missing/by_item",
+  digits = 2,
+  warn = TRUE,
+  verbose = FALSE
+)
+
+```
+
+# IRT analyses
+
+## Dichotomous
+
+```{r IRT analysis for dichotomous items}
+
+scaling::irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = "dich",
+  valid = "valid",
+  mvs = mvs,
+  scoring = "scoring",
+  plots = TRUE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables",
+  path_plots = paste0(getwd(), "/plots"),
+  overwrite = TRUE,
+  digits = 2,
+  verbose = FALSE
+)
+
+```
+
+## Polytomous
+
+```{r IRT analysis for polytomous items}
+
+scaling::irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = "mixed",
+  valid = "valid",
+  mvs = mvs,
+  scoring = "scoring",
+  plots = TRUE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables",
+  path_plots = paste0(getwd(), "/plots"),
+  overwrite = TRUE,
+  digits = 2,
+  verbose = FALSE
+)
+
+```
+
+# DIF analysis
+
+```{r dif analysis for PCM}
+
+scaling::dif_analysis(
+  resp = resp,
+  vars = vars,
+  select = "mixed",
+  valid = "valid",
+  dif_vars = c("sex", "mig"),
+  scoring = "scoring",
+  mvs = mvs,
+  overwrite = TRUE,
+  verbose = FALSE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables"
+)
+
+```
+
+# Dimensionality
+
+```{r dimensionality analysis}
+
+vars$content <- as.numeric(factor(vars$content))
+scaling::dim_analysis(
+  resp = resp,
+  vars = vars,
+  select = "mixed",
+  valid = "valid",
+  scoring = "scoring",
+  mvs = mvs,
+  dim = "content",
+  snodes = 5000,
+  return = FALSE,
+  save = TRUE,
+  print = FALSE,
+  path_results = paste0(getwd(), "/results"), 
+  path_table = "tables",
+  overwrite = TRUE,
+  verbose = FALSE
+)
+
+```
+
+# Distractor analysis
+
+```{r distractor analysis}
+
+scaling::dis_analysis(
+  resp = resp,
+  vars = vars,
+  valid = "valid",
+  select_raw = "raw",
+  correct = "correct",
+  mvs = mvs,
+  print = FALSE,
+  save = TRUE,
+  overwrite = TRUE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables"
+)
+
+```
+
+# Create SUF
+
+```{r create suf}
+
+scores <- scaling::create_scores(
+  resp = resp,
+  vars = vars,
+  score_name = "mag12",
+  select = "mixed",
+  valid = "valid",
+  mvs = mvs,
+  sum_select = "dich",
+  scoring = "scoring",
+  #facet = "rotation", # does not work in current version of scaling
+  wle = TRUE,
+  sum_score = TRUE,
+  metap = FALSE,
+  return = TRUE,
+  save = TRUE,
+  path_results = paste0(getwd(), "/results")
+)
+
+scaling::create_suf(
+  resp = resp,
+  vars = vars,
+  select = "mixed",
+  competence = 'Mathematical competences',
+  scores = scores,
+  score_name = 'mag12',
+  return = FALSE,
+  path = paste0(getwd(), "/results")
+)
+rm(scores)
+
+```
+
+# Hash table
+
+```{r hash files}
+
+# Create hash for results and table files
+hashvec <- c()
+dirvec <- c(base::dir("results", full.names = TRUE),
+            base::dir("tables", full.names = TRUE))
+for (i in dirvec)
+  hashvec <- c(hashvec, rlang::hash(i))
+names(hashvec) <- base::basename(dirvec)
+
+# Plots for missing by person
+filelist <- base::dir("plots/missing/by_person", full.names = TRUE)
+hashvec <- c(hashvec, mv_person.plot = rlang::hash(rlang::hash_file(filelist)))
+
+# Plots for missing by item
+filelist <- base::dir("plots/missing/by_item", full.names = TRUE)
+hashvec <- c(hashvec, mv_item.plot = rlang::hash(rlang::hash_file(filelist)))
+
+# Plots for ICCs
+filelist <- base::dir("plots/ICCs", full.names = TRUE, recursive = TRUE)
+hashvec <- c(hashvec, iccs.plot = rlang::hash(rlang::hash_file(filelist)))
+
+# Plots for Wright maps
+filelist <- base::dir("plots/Wright_maps", full.names = TRUE)
+hashvec <- c(hashvec, wmaps.plot = rlang::hash(rlang::hash_file(filelist)))
+
+# Save hash vector
+saveRDS(hashvec, "ex2hash.rds")
+
+```
+
+# Software
+
+```{r session-info}
+
+sessionInfo()
+
+```
