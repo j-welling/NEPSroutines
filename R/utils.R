@@ -649,3 +649,21 @@ create_suf_names <- function(vars_name = NULL, resp_name = NULL) {
 
 }
 
+
+
+#' Rounding with proper formatting for NEPS Survey Papers
+#'
+#' @param x numeric vector; the numbers to be formatted
+#' @param digits integer vector; the number of decimal places for rounding
+#' @param d0 logical vector; remove leading zeros (TRUE) or keep them (FALSE)
+#' @returns character vector; the formatted numbers
+#' @export
+rnd <- function(x, digits = 2, d0 = FALSE) {
+
+  x <- base::formatC(x, digits = digits[1], format = "f", big.mark = ",")
+  if (d0[1])
+    x <- base::sub("^0+\\.", ".", x)
+  return(x)
+
+}
+
