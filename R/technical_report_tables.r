@@ -231,7 +231,11 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
                                   instruction = "Instruction text",
                                   advertising = "Advertising text",
                                   commenting = "Commenting or argumenting text",
-                                  literary = "Literary text")) {
+                                  literary = "Literary text",
+                                  change = "Change and relationship",
+                                  data = "Data and chance",
+                                  units = "Units and measuring",
+                                  space = "Space and shape")) {
 
   # Select variables
   cols <- c("item", facets)
@@ -241,8 +245,11 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
   tab <- tab[order(tab[, 1]), ]
 
   # Rename variables and formats
-  for (i in seq_along(facets))
-    tab[[facets[i]]] <- lbl[as.character(tab[[facets[i]]])]
+  for (i in seq_along(facets)) {
+    l <- lbl[as.character(tab[[facets[i]]])]
+    l[is.na(l)] <- as.character(tab[[facets[i]]])[is.na(l)]
+    tab[[facets[i]]] <- l
+  }
   if (is.null(names(facets))) names(facets) <- facets
   col_names <- c("Pos.", "Item", names(facets))
   if (is.null(position)) col_names <- "No."
@@ -271,7 +278,7 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' @export
 TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
                    size = 12, width = NULL,
-                   excl = c("...1", "N_administered", "ND", "ALL")) {
+                   excl = c("N_administered", "ND", "ALL")) {
 
   # Result table
   if (is.list(obj) & "list" %in% names(obj))
@@ -286,7 +293,8 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
 
   # Exclude columns
   if (!is.null(excl)) {
-    tab <- tab[, !grepl(paste(excl, collapse = "|"), colnames(tab))]
+    regexp <- paste0("^$|", paste(excl, collapse = "|"))
+    tab <- tab[, !grepl(regexp, colnames(tab))]
   }
 
   # Remove empty rows
@@ -496,7 +504,7 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1) {
   note <- paste0("The last step parameter for each item is not ",
                  "estimated and has, thus, no standard error ",
                  "because it is a constrained parameter for ",
-                 "model identification.")
+                 "model identification. ")
   if (!is.null(footnote))
     note <- list(note, footnote)
 
@@ -518,7 +526,7 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1) {
 #' @param model The model name, typically `uni` for the unidimensional
 #' reference model and the name of the facet variable.
 #' @param rownames A vector of labels for the rows.
-#' @param colnames A vector of lables for the columns.
+#' @param colnames A vector of labels for the columns.
 #' @param width The column widths; if a single value is given, it refers to the
 #' first column; otherwise the number of values must correspond to the number of
 #' columns in `obj`.
@@ -563,9 +571,9 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
   # Footnote
   note <- paste0("Variances of the dimensions are given in the ",
                  "diagonal; correlations are given in the ",
-                 "off-diagonal.")
+                 "off-diagonal. ")
   if (!is.null(footnote))
-    note <- list(note, list(footnote))
+    note <- list(note, footnote)
 
   # Create flextable
   if (length(width) == 1) width <- c(width, rep(0.6, ncol(tab) - 1))
@@ -608,7 +616,7 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
   }
 
   # Rename variables
-  lbl <- trimws(gsub("[0-9\\-]", "", colnames(tab)))
+  lbl <- trimws(gsub("[\\.0-9\\-]", "", colnames(tab)))
   vals <- rep("", length(lbl))
   vals[lbl == "sex"] <- "men vs. women"
   vals[lbl == "mig"] <- "without vs. with"
@@ -638,7 +646,7 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
                         "with standardized differences (Cohen’s ")
   )
   note <- append(note, list(flextable::as_i("d")))
-  note <- append(note, ") in parentheses.")
+  note <- append(note, ") in parentheses. ")
   if (!is.null(footnote))
     note <- append(note, list(footnote))
 
@@ -697,7 +705,7 @@ TblDifFit <-function(obj, footnote = NULL, excl = NULL, label = NULL,
   # Create footnote
   note <-
     paste0("The best-fitting model according to each information ",
-           "criterion is underlined.")
+           "criterion is underlined. ")
   if (!is.null(footnote))
     note <- append(note, list(footnote))
 
