@@ -1,0 +1,234 @@
+
+test_that("import single sheet works", {
+
+  tbl <- try({
+    Import(path = test_path("fixtures/ex1/tables"),
+           filename = "mv_item.xlsx",
+           sheet = "list")
+  }, silent = TRUE)
+  expect_false(inherits(tbl, "try-error"))
+  expect_true(is.data.frame(tbl))
+  expect_equal(dim(tbl), c(15, 9))
+
+})
+
+
+test_that("import all sheets works", {
+
+  tbl <- try({
+    Import(path = test_path("fixtures/ex1/tables"),
+           filename = "mv_item.xlsx")
+  }, silent = TRUE)
+  expect_false(inherits(tbl, "try_error"))
+  expect_length(tbl, 2)
+  expect_contains(names(tbl), c("list", "summary"))
+  expect_equal(dim(tbl$list), c(15, 9))
+
+})
+
+
+test_that("import using regular expression works", {
+
+  tbl <- try({
+    Import(path = test_path("fixtures/ex1/tables"),
+           regexp = "^mv_",
+           rename = c("mv_item" = "mvi", "mv_person" = "mvp"))
+  }, silent = TRUE)
+  expect_false(inherits(tbl, "try_error"))
+  expect_length(tbl, 2)
+  expect_contains(names(tbl), c("mvi", "mvp"))
+
+})
+
+
+test_that("get item property works", {
+
+  data("ex1")
+
+  expect_equal(
+    GetProp(ex1$vars, select = "dich", prop = "type", val = "MC", item = FALSE),
+    15
+  )
+  expect_equal(
+    GetProp(ex1$vars, select = "dich", prop = "type", val = "CMC", item = FALSE),
+    0
+  )
+  expect_contains(
+    GetProp(ex1$vars, select = "dich", prop = "pos", val = c(3:5), item = TRUE),
+    c("grk10003_c", "grk10004_c", "grk10005_c")
+  )
+
+})
+
+
+test_that("get missing values by item works", {
+
+  tbl <- try({
+    Import(path = test_path("fixtures/ex1/tables"),
+           filename = "mv_item.xlsx",
+           sheet = "summary")
+  })
+
+  expect_equal(GetMvi(tbl, type = "OM", stat = "Mean"), "3")
+  expect_equal(GetMvi(tbl, type = "ALL", stat = "Median", digits = 1), "8.5")
+
+})
+
+
+test_that("get missing values by person works", {
+
+  tbl <- try({
+    Import(path = test_path("fixtures/ex1/tables"),
+           filename = "mv_person.xlsx")
+  })
+
+  expect_equal(GetMvp(tbl, type = "OM", value = "=2"), "5")
+  expect_equal(GetMvp(tbl, type = "NR", value = "<2", digits = 1), "55.6")
+
+})
+
+
+test_that("summarize item parameters works", {
+
+  tbl <- try({
+    Import(path = test_path("fixtures/ex1/tables"),
+           filename = "irt_dich.xlsx")
+  })
+
+  expect_equal(GetPars(tbl, type = "xsi", stat = mean), "-0.07")
+  expect_equal(GetPars(tbl, type = "WMNSQ", stat = ">1"), "5")
+  expect_equal(GetPars(tbl, type = "N_valid", stat = ">500&<700"), "2")
+  expect_equal(
+    GetPars(tbl, type = "t", stat = min, excl = "<.5", digits = 1),
+    "0.5"
+  )
+  expect_equal(
+    GetPars(tbl, type = "N_valid", stat = "<600", item = TRUE),
+    "grk10014_c, grk10015_c"
+  )
+
+})
+
+
+test_that("summarize category thresholds works", {
+
+  obj <- readRDS(test_path("fixtures/ex1/results/irt_dich.rds"))
+
+  expect_equal(GetCat(obj, stat = median), "-0.11")
+  expect_equal(GetCat(obj, stat = min, item = TRUE), "grk10001_c")
+
+})
+
+
+test_that("get population variance works", {
+
+  obj <- readRDS(test_path("fixtures/ex1/results/irt_dich.rds"))
+
+  expect_equal(GetVar(obj), "1.46")
+
+})
+
+
+test_that("get reliablity works", {
+
+  obj <- readRDS(test_path("fixtures/ex1/results/irt_dich.rds"))
+
+  expect_equal(GetRel(obj), "0.73")
+  expect_equal(GetRel(obj, WLE = TRUE, digits = 1), "0.7")
+
+})
+
+
+test_that("summarize distractors works", {
+
+  tbl <- try({
+    Import(path = test_path("fixtures/ex1/tables"),
+           filename = "distractors_summary.xlsx")
+  })
+
+  expect_equal(GetDist(tbl, stat = mean, digits = 3), "-0.168")
+  expect_equal(GetDist(tbl, stat = median, correct = TRUE), "0.40")
+  expect_equal(GetDist(tbl,stat = max, item = TRUE), "grk10014_c")
+
+})
+
+
+test_that("get model fit works", {
+
+  tbl <- try({
+    Import(path = test_path("fixtures/ex1/tables"),
+           filename = "irt_dich.xlsx")
+  })
+
+  expect_equal(GetFit(tbl, type = "AIC"), "13,686")
+  expect_equal(GetFit(tbl, type = "Npars", GPCM = TRUE), "30")
+
+})
+
+
+test_that("get model fit for dimensionality analyses works", {
+
+  skip("File to large for automated tests.")
+
+  tbl <- try({
+    Import(path = test_path("fixtures/ex1/tables"),
+           filename = "dimensionality.xlsx")
+  })
+
+  expect_equal(GetDimFit(tbl, model = "uni", type = "AIC"), "39,117")
+  expect_equal(GetDimFit(tbl, model = "dim", type = "Npars"), "35")
+
+})
+
+
+test_that("summarize latent correlations works", {
+
+  tbl <- try({
+    Import(path = test_path("fixtures/ex2/tables"),
+           filename = "dimensionality.xlsx")
+  })
+
+  expect_equal(GetDim(tbl, model = "content", stat = median), ".72")
+  expect_equal(GetDim(tbl, model = "uni", var = TRUE, digits = 1), "1.5")
+
+})
+
+
+test_that("summarize DIF works", {
+
+  tbl1 <- try({
+    Import(path = test_path("fixtures/ex1/tables"),
+           filename = "dif_dich_sex.xlsx")
+  })
+  tbl2 <- try({
+    Import(path = test_path("fixtures/ex1/tables"),
+           filename = "dif_dich_mig.xlsx")
+  })
+
+  expect_equal(GetDif(tbl1, n = 1), "509")
+  expect_equal(GetDif(tbl2, main = "std", group = "1-3"), "0.46")
+  expect_equal(GetDif(tbl2, main = "ustd"), "0.76")
+  expect_equal(GetDif(tbl2, main = "ustd", model = "main"), "0.73")
+  expect_equal(GetDif(tbl1, dif = median), "0.07")
+  expect_equal(GetDif(tbl2, dif = max), "0.60")
+  expect_equal(GetDif(tbl2, dif = max, item = TRUE), "grk10005_c")
+  expect_equal(GetDif(tbl1, dif = "<-0.1", signed = TRUE), "3")
+  expect_equal(GetDif(tbl1, dif = ">0.10&<0.15"), "3")
+  expect_equal(GetDif(tbl1, dif = ">0.25", item  = TRUE), "grk10012_c")
+
+})
+
+
+test_that("get model fit for DIF analyses works", {
+
+  tbl <- try({
+    Import(path = test_path("fixtures/ex1/tables"),
+           filename = "dif_dich_sex.xlsx")
+  })
+
+  expect_equal(GetDifFit(tbl, type = "BIC"), "13,842")
+  expect_equal(GetDifFit(tbl, type = "AIC", dif = FALSE), "13,667")
+
+})
+
+
