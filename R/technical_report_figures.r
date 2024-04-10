@@ -11,14 +11,15 @@
 #' @param crop A string indicating how to crop the image in the format
 #' "<width>x<height>{+-}<xoffset>{+-}<yoffset>"
 #' (see http://www.imagemagick.org/Magick++/Geometry.html)
-#' @param note An additional note to be displayed below the figure.
+#' @param dpi The dots per inch.
+#' @param footnote An optional note to be displayed below the figure.
 #' @param note.offset The height of the additional field below  the original
 #' image that will include the note.
 #' @param note.bgcol The background color of the note field.
 #' @param note.col The font color of the note.
 #' @param note.x The left position of the note.
 #' @param note.y The top position of the note.
-#' @param note.size The foont size of teh note.
+#' @param note.size The font size of the note.
 #' @returns An image.
 #' @export
 Fig <- function(file, width = NULL, height = NULL, crop = NULL, dpi = 96,

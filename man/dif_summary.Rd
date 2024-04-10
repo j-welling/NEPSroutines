@@ -11,8 +11,9 @@ dif_summary(
   save = TRUE,
   path = here::here("Tables"),
   dif_threshold = 0.5,
+  suf_item_names = FALSE,
   overwrite = FALSE,
-  name_group = NUL,
+  name_group = NULL,
   digits = 3L
 )
 }

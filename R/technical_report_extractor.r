@@ -96,13 +96,14 @@ Import <- function(path, filename = NULL, sheet = NULL, regexp = NULL,
 
 #' Determine the number of items with a given item property
 #'
+#' @param obj A data frame with item characteristics.
 #' @param prop A variable name in `vars` identifying the item property such
 #' as response format, text function, or cognitive function (default: `type`).
 #' @param val The values of `prop` to count.
 #' @param item A logical to return the item names (`TRUE`) or the numeric
 #' values (`FALSE`).
 #' @returns The number of items or the item names.
-#' @InheritParms irt_analysis
+#' @inheritParams irt_analysis
 #' @export
 GetProp <- function(obj, select, prop = "type", val = c("CMC", "MA"),
                     item = FALSE) {
@@ -169,7 +170,7 @@ GetMvp <- function(obj, type, value, digits = 0) {
   }
   if (operator == "=") operator <- paste0(operator, "=")
   n <- as.numeric(obj[[type]]$`Number.of.missing.responses`)
-  out <- sum(obj[[type]]$Percentage[getFunction(operator)(n, value)])
+  out <- sum(obj[[type]]$Percentage[methods::getFunction(operator)(n, value)])
   return(rnd(out, digits = digits))
 
 }
@@ -230,13 +231,13 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
     # combine conditions to select data
     for (i in seq_along(operators)) {
       if (i == 1) {
-        boolvec <- getFunction(operators[i])(tab[, type], values[i])
+        boolvec <- methods::getFunction(operators[i])(tab[, type], values[i])
       } else {
         expr <-
           call(
             logicals[i - 1],
             boolvec,
-            getFunction(operators[i])(tab[, type], values[i])
+            methods::getFunction(operators[i])(tab[, type], values[i])
           )
         boolvec <- eval(expr)
       }
@@ -277,13 +278,13 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
     stat <- \(x, na.rm, item = FALSE) {
       for (i in seq_along(operators)) {
         if (i == 1) {
-          boolvec <- getFunction(operators[i])(x, values[i])
+          boolvec <- methods::getFunction(operators[i])(x, values[i])
         } else {
           expr <-
             call(
               logicals[i - 1],
               boolvec,
-              getFunction(operators[i])(x, values[i])
+              methods::getFunction(operators[i])(x, values[i])
             )
           boolvec<- eval(expr)
         }
@@ -588,13 +589,13 @@ GetDif <- function(obj, n = NULL, main = NULL, dif = NULL,
     stat <- \(x, na.rm, item = FALSE) {
       for (i in seq_along(operators)) {
         if (i == 1) {
-          boolvec <- getFunction(operators[i])(x, values[i])
+          boolvec <- methods::getFunction(operators[i])(x, values[i])
         } else {
           expr <-
             call(
               logicals[i - 1],
               boolvec,
-              getFunction(operators[i])(x, values[i])
+              methods::getFunction(operators[i])(x, values[i])
             )
           boolvec<- eval(expr)
         }

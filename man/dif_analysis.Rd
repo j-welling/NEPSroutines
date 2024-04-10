@@ -21,6 +21,7 @@ dif_analysis(
   pweights = NULL,
   path_results = here::here("Results"),
   path_table = here::here("Tables"),
+  suf_item_names = FALSE,
   name_group = NULL,
   verbose = FALSE,
   warn = TRUE,
@@ -75,6 +76,9 @@ contains person weights as passed to TAM-function}
 \item{path_results}{string; defines path to folder where results shall be saved}
 
 \item{path_table}{string; defines path to folder where tables shall be saved}
+
+\item{suf_item_names}{logical; whether to output SUF item names in the .xlsx file
+for items with collapsed categories}
 
 \item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 

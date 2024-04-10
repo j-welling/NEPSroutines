@@ -13,6 +13,7 @@ mvi_table(
   missing_by_design = -54,
   save = TRUE,
   path = here::here("Tables"),
+  suf_item_names = FALSE,
   overwrite = FALSE,
   name_group = NULL,
   test = TRUE,
@@ -41,6 +42,9 @@ design}
 \item{save}{logical; whether results shall be saved to hard drive}
 
 \item{path}{string; defines path to folder where table shall be saved}
+
+\item{suf_item_names}{logical; whether to output SUF item names in the .xlsx file
+for items with collapsed categories}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 

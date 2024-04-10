@@ -515,6 +515,8 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1) {
 #'
 #' @param obj A data frame with sheets from "dimensionality.xlsx"
 #' created by [scaling::dim_analysis()].
+#' @param model The model name, typically `uni` for the unidimensional
+#' reference model and the name of the facet variable.
 #' @param rownames A vector of labels for the rows.
 #' @param colnames A vector of lables for the columns.
 #' @param width The column widths; if a single value is given, it refers to the
@@ -535,7 +537,7 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
   tab <- matrix("", nrow = nrow(obj), ncol = ncol(obj))
   for (i in seq(1, nrow(obj))) {
     for (j in seq(1, i)) {
-      tab[i, j] <- rnd(obj[i, j], digits = 2, drop0leading = TRUE)
+      tab[i, j] <- rnd(obj[i, j], digits = 2, d0 = TRUE)
     }
   }
   tab <- as.data.frame(tab)

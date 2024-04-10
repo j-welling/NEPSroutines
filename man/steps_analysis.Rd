@@ -10,6 +10,7 @@ steps_analysis(
   save = TRUE,
   overwrite = FALSE,
   path = here::here("Tables"),
+  suf_item_names = FALSE,
   name_group = NULL
 )
 }
@@ -23,6 +24,9 @@ steps_analysis(
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 
 \item{path}{string; defines path to folder where table shall be saved}
+
+\item{suf_item_names}{logical; whether to output SUF item names in the .xlsx file
+for items with collapsed categories}
 
 \item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 }
