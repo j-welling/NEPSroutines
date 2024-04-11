@@ -175,20 +175,35 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
   for (i in scores) {
 
     # Set label based on suffix of variable name
-    type <- substring(i, regexpr("(_sc[1-9])(a|b|u)?$", i))
-    domain <- switch(competence,
-                     "Frühe Lesekompetenz"              = "Frühes Lesen",
-                     "Orthografie"                      = "Orthografie",
-                     "Grammatik"                        = "Grammatik",
-                     "Hörverstehen in Russisch"         = "Russisch",
-                     "Hörverstehen in Türkisch"         = "Türkisch",
-                     "Wortschatz"                       = "Wortschatz",
-                     "Lesekompetenz"                    = "Lesen",
-                     "Mathematische Kompetenz"          = "Mathematik",
-                     "Naturwissenschaftliche Kompetenz" = "Naturwissenschaften",
-                     "ICT Kompetenz"                    = "ICT",
-                     "Lesekompetenz in Englisch"        = "Englisch"
-    )
+      type <- substring(i, regexpr("(_sc[1-9])(a|b|u|a_pb|b_pb|a_cb|b_cb|a_wb|b_wb)?$|pr_sc3|cs_sc8|bs_sc9|cs_sc9", i))
+      domain <- switch(paste0(Hmisc::capitalize(competence)),
+                       "Frühe Lesekompetenz"              = "Frühes Lesen",
+                       "Orthografie"                      = "Orthografie",
+                       "Grammatik"                        = "Grammatik",
+                       "Hörverstehen"                     = "Hören",
+                       "Hörverstehen in Russisch"         = "Russisch",
+                       "Hörverstehen in Türkisch"         = "Türkisch",
+                       "Wortschatz"                       = "Wortschatz",
+                       "Lesekompetenz"                    = "Lesen",
+                       "Mathematische Kompetenz"          = "Mathematik",
+                       "Naturwissenschaftliche Kompetenz" = "Naturwissenschaften",
+                       "ICT Kompetenz"                    = "ICT",
+                       "Lesekompetenz in Englisch"        = "Englisch"
+      )
+
+      if ((type == "_sc5" || type ==  "_sc6" ||
+           type ==  "_sc5a" || type == "_sc5b" ||
+           type == "_sc6a" || type ==  "_sc6b")
+          && is.null(domain)) {
+          warning("Check the spelling of the competence domain in the 'competence' argument
+                    to get the correct label for the Procedural Metacognition scores.
+                Choose the correct spelling from the list below:
+                'Frühe Lesekompetenz', 'Lesekompetenz', 'Mathematische Kompetenz',
+                'Naturwissenschaftliche Kompetenz', 'ICT Kompetenz', 'Orthografie',
+                'Grammatik', 'Hörverstehen', 'Hörverstehen in Russisch', 'Hörverstehen in Türkisch',
+                'Wortschatz', 'Lesekompetenz in Englisch'.")
+      }
+
     lbl <- switch(type,
                   "_sc1"  = paste0(Hmisc::capitalize(competence), ": ", "WLE (korrigiert)"),
                   "_sc2"  = paste0(Hmisc::capitalize(competence), ": ", "Standardfehler des WLE (korrigiert)"),
@@ -201,15 +216,28 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
                   "_sc3"  = paste0(Hmisc::capitalize(competence), ": ", "Summe"),
                   "_sc3a" = paste0(Hmisc::capitalize(competence), ": ", "Summe"),
                   "_sc3b" = paste0(Hmisc::capitalize(competence), ": ", "Summe"),
+                  "pr_sc3" = paste0(Hmisc::capitalize(competence), ": ", "Anzahal administrierter Übungsitems"),
                   "_sc4"  = paste0(Hmisc::capitalize(competence), ": ", "Mittelwert"),
                   "_sc5"  = paste0("Prozedurale Metakognition (", domain, "): Differenzmaß"),
                   "_sc6"  = paste0("Prozedurale Metakognition (", domain, "): Anteil korrekt"),
+                  "_sc5a_pb" = paste0(Hmisc::capitalize(competence), ": ", "Summe (papierbasiert)"),
+                  "_sc5b_pb" = paste0(Hmisc::capitalize(competence), ": ", "Summe (papierbasiert)"),
+                  "_sc5a_cb" = paste0(Hmisc::capitalize(competence), ": ", "Summe (computerbasiert)"),
+                  "_sc5a_cb" = paste0(Hmisc::capitalize(competence), ": ", "Summe (computerbasiert)"),
+                  "_sc5a_wb" = paste0(Hmisc::capitalize(competence), ": ", "Summe (internetbasiert)"),
+                  "_sc5a_wb" = paste0(Hmisc::capitalize(competence), ": ", "Summe (internetbasiert)"),
                   "_sc5a" = paste0("Prozedurale Metakognition (", domain, "): Differenzmaß für statische Items"),
                   "_sc6a" = paste0("Prozedurale Metakognition (", domain, "): Anteil korrekt für statische Items"),
                   "_sc5b" = paste0("Prozedurale Metakognition (", domain, "): Differenzmaß für interaktive Items"),
                   "_sc6b" = paste0("Prozedurale Metakognition (", domain, "): Anteil korrekt für interaktive Items"),
-                  "_sc7"  = paste0(Hmisc::capitalize(competence), ": ", "Person in L1-Zielpopulation")
-    )
+                  "_sc7"  = paste0(Hmisc::capitalize(competence), ": ", "Person in L1-Zielpopulation"),
+                  "_sc8"  = paste0(Hmisc::capitalize(competence), ": ", "Testabbruch"),
+                  "_sc9"  = paste0(Hmisc::capitalize(competence), ": ", "Anzahl administrierter Übungsitems"),
+                  "cs_sc8"  = paste0(Hmisc::capitalize(competence), ": ", "Deckenset"),
+                  "bs_sc9"  = paste0(Hmisc::capitalize(competence), ": ", "Bodenset"),
+                  "cs_sc9"  = paste0(Hmisc::capitalize(competence), ": ", "Deckenset")
+                  )
+
     if (is.null(lbl)) next
 
     # Set score label
