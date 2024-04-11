@@ -168,7 +168,11 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
                                      instruction = "Instruction text",
                                      advertising = "Advertising text",
                                      commenting = "Commenting or argumenting text",
-                                     literary = "Literary text")) {
+                                     literary = "Literary text",
+                                     change = "Change and relationship",
+                                     data = "Data and chance",
+                                     units = "Units and measuring",
+                                     space = "Space and shape")) {
 
     # Create frequency table
     freq_groups <- NULL
