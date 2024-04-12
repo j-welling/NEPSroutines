@@ -232,7 +232,7 @@ create_scores <- function(resp, vars, select, scoring = NULL,
           xsi_fixed <- fit$mod$xsi$xsi
           names(xsi_fixed) <- row.names(fit$mod$xsi)
       }
-      wles <- scaling:::estimate_rotated_wles(
+      mod_wles <- scaling:::estimate_rotated_wles(
         resp = resp,
         vars = vars,
         select = select,
@@ -245,6 +245,7 @@ create_scores <- function(resp, vars, select, scoring = NULL,
         control_tam = control_tam,
         pweights = pweights
       )
+        wles <- mod_wles[[2]]
     } else {
       wles <- as.data.frame(fit$wle[, c("pid", "theta", "error")])
       names(wles) <- c("ID_t", paste0(score_name, c("_sc1", "_sc2")))
@@ -329,11 +330,40 @@ create_scores <- function(resp, vars, select, scoring = NULL,
   scores <- data.frame(wles) # !!delete this line when linking is implemeted!!
   # scores <- list(wle = wles, linking = linked_scores) # commented out because linking is not yet implemented
 
+  # Create objects that obtain item parameters and TAM model used to estimate wles
+  if (is.null(facet)) {
+      itemParamModel_wles <- fit$mod
+      itemParam_wles <- fit$mod$xsi["xsi"]
+  }
+
+  if (!is.null(facet)) {
+      itemParamModel_wles.position <- mod_wles[[1]]
+      itemParam_wles.position <- itemParamModel_wles.position$xsi["xsi"]
+  }
+
   # Save results
   if (save) {
       name <- scaling:::create_name("scores", name_group, ".rds")
       scaling:::save_results(scores, filename = name, path = path_results)
-  }
+
+      # Save item parameters and TAM model used to estimate wles
+      if (is.null(facet)) {
+          name <- scaling:::create_name("itemParamModel_wles", name_group, ".rds")
+          scaling:::save_results(itemParamModel_wles, filename = name, path = path_results)
+
+          name <- scaling:::create_name("itemParam_wles", name_group, ".xlsx")
+          scaling:::save_table(itemParam_wles, filename = name, path = path_results)
+      }
+      if (!is.null(facet)) {
+          name <- scaling:::create_name("itemParamModel_wles.position", name_group, ".rds")
+          scaling:::save_results(itemParamModel_wles.position, filename = name, path = path_results)
+
+          name <- scaling:::create_name("itemParam_wles.position", name_group, ".xlsx")
+          scaling:::save_table(itemParam_wles.position, filename = name, path = path_results)
+      }
+
+      }
+
 
   # Return results
   if(return) return(scores)
@@ -534,8 +564,10 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
   wles <- data.frame(ID_t = wles$pid, wle = wles$theta, se = wles$error)
   names(wles) <- c("ID_t", paste0(wle_name, c("_sc1", "_sc2")))
 
+  wles_mod <- list(mod, wles)
+
   # Return results
-  return(wles)
+  return(wles_mod)
 }
 
 #' Create meta competence scores
