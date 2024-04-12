@@ -1,0 +1,15 @@
+
+
+% Head- and footline
+\usepackage[headsepline, footsepline]{scrlayer-scrpage}
+\ihead{$authorsforhead$\\}
+\ifoot{$bibdata.series$\ No.~$bibdata.number$, $bibdata.year$}
+\ofoot{Page~\thepage}
+\cfoot{}
+
+% Head- and footline on titlepage
+\newpairofpagestyles{titlepage}{
+  \ihead{}
+  \KOMAoptions{headsepline=false}
+  \ifoot{$bibdata.series$\ No.~$bibdata.number$, $bibdata.year$}
+}

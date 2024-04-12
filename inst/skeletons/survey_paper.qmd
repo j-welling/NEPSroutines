@@ -1,0 +1,508 @@
+---
+title: "NEPS technical report for {{domain}}: scaling results of starting cohort {{sc}} for wave {{wave}}"
+author: 
+  - name: Firstname Lastname
+    affiliations: Leibniz Institute for Educational Trajectories
+    orcid: 0000-0000-0000-0000
+    email: "firstname.lastname@lifbi.de"
+format: neps-paper-pdf
+editor: visual
+bibliography: "survey_paper.bib"
+---
+
+```{r}
+#| output: false
+
+# Clear work space
+rm(list = ls())
+
+# Load packages
+library(scaling)
+
+# Path to scaling results
+path <- ""
+
+# Load response data and variable definitions
+load(paste0(path, "data/data.R"))
+
+# Load scaling results
+mvi <- Import(paste0(path, "tables/"), "mv_item.xlsx")
+mvp <- Import(paste0(path, "tables/"), "mv_person.xlsx")
+pars <- Import(paste0(path, "tables/"), "irt_poly.xlsx")
+cat <- readRDS(paste0(path, "results/irt_poly.rds"))
+dist <- Import(paste0(path, "tables/"), "distractors_summary.xlsx")
+dim <- Import(paste0(path, "tables/"), "dimensionality.xlsx")
+dif <- Import(paste0(path, "tables/"), regexp = "^dif_poly_([^_]+)")
+
+```
+
+# Acknowledgements
+
+This report is an extension to *NEPS Working Paper 15* [@Pohl2012b] that presents the scaling results for {{domain}} in Wave {{wave}} of Starting Cohort {{sc}}. Therefore, various parts of this report (e.g., regarding the introduction and the analytic strategy) are reproduced verbatim to facilitate the understanding of the presented results.
+
+# Abstract
+
+The National Educational Panel Study (NEPS) examines the development of competencies across the lifespan. Therefore, the NEPS develops tests to assess different domains of competence in different age cohorts. To evaluate the quality of these competence tests, several analyses based on item response theory are conducted. This paper describes the data and scaling procedures for a test of {{domain}} competence that was administered in Wave {{wave}} of Starting Cohort {{sc}}. The {{domain}} test consisted of `r sum(vars$mixed)` items representing different {{ifre}}cognitive requirements and text types,{{/ifre}}{{ifma}}content areas{{/ifma}} and using different response formats. The test was administered to `r rnd(nrow(data), 0)` participants (`r rnd(mean(data$sex %in% 1) * 100, 0)`% girls). A partial credit model was used to scale the data. Item fit statistics, differential item functioning, Rasch-homogeneity, test dimensionality, and local item independence were evaluated to ensure the quality of the test. The analyses showed that the items had good item fit and negligible differential item functioning across different subgroups. In addition, the test showed a high reliability and the different {{ifre}}cognitive requirements{{/ifre}}{{ifma}}{{/ifma}} supported a unidimensional construct. Limitations of the test included many items that were not reached by test takers due to time constraints, few items targeted at a higher {{domain}} ability, and some evidence of multidimensionality{{ifre}} based on text types{{/ifre}}. Overall, however, the test had good psychometric properties that allowed the estimation of reliable {{domain}} competence scores. In addition to the scaling results, this report also describes the data available in the scientific use file and presents the R syntax for scaling the data.
+
+**Keywords**
+
+item response theory, scaling, {{domain}} competence, scientific use file
+
+# Introduction
+
+The National Educational Panel Study (NEPS)[^1] measures different competencies coherently across the lifespan. These include, among others, reading competence, mathematical competence, and domain-general cognitive functioning. An overview of the competencies measured in the NEPS is given by @Weinert2011 and @Fuss2021. Most of the administered competence tests are developed specifically for use in the NEPS and are therefore routinely evaluated using psychometric models based on item response theory [IRT, see @Pohl2012a].
+
+[^1]: <https://www.neps-data.de>
+
+This report presents the results of these analyses for a test of {{domain}} competence that was administered in Wave {{wave}} of Starting Cohort {{sc}} ({{scname}}). The following sections first introduce the main concepts of the administered test and the test design. Then, the competence data are described. Then, the results of various psychometric analyses are reported that were conducted to estimate competence scores and to check the quality of the test. Finally, an overview of the data that are available for public use in the scientific use file (SUF) is given.
+
+The analyses summarized in this report are based on the data available at some point prior to the public data release. Due to ongoing data protection and data cleansing issues, the data in the SUF may differ slightly from the data used for the analyses in this report. However, pronounced differences in the presented results are not expected for the final data available in the SUF.
+
+# Testing {{Domain}} Competence
+
+The framework and test development for the {{domain}} competence test are described in @Weinert2011{{ifre}} and @Gehrer2013a{{/ifre}}{{ifma}}@Neumann2013, and @Ehmke2009{{/ifma}}. In the following, several aspects of the reading test are described that are important for understanding the scaling results presented in this report.
+
+## Conceptual Framework {#sec-framework}
+
+{{ifre}}The reading test administered included five texts and five sets of items referring to these texts. Each of these texts represented one text type, namely, a) information, b) commenting or argumenting, c) literary, d) instruction, and e) advertising. The reading test also assessed three cognitive requirements. These were a) finding information in the text, b) drawing text-related conclusions, and c) reflecting and assessing. The cognitive requirements did not depend on the text type, but each cognitive requirement was usually assessed within each text type. A detailed description of the framework can be found in @Gehrer2013a and @Weinert2011.{{/ifre}}
+{{ifma}}The mathematical test administered presented respondents with a certain situation followed by one or two tasks related to it. Each of the items belonged to one of the following content areas:
+* quantity, 
+* space and shape, 
+* change and relationships, or 
+* data and chance. 
+Each item was constructed in such a way to primarily address a specific content area. The framework also describes, as a second and independent dimension, six cognitive components required for solving the tasks. These components were distributed across the items.{{/ifma}}
+
+## Item Format
+
+The {{domain}} competence test included three types of response formats, namely, simple multiple choice (MC) items, complex multiple choice (CMC) items, and {{ifre}}matching (MA) items{{/ifre}}{{ifma}}items with short constructed response (SR){{/ifma}}. MC items had four response options, of which one option represented a correct solution, whereas the other three were distractors (i.e., they were incorrect). CMC items presented a number of subtasks with two response options.{{ifre}} MA items required the respondents to match a number of responses to a given set of statements. MA items were usually used to assign headings to paragraphs of a text.{{/ifre}} The number of subtasks within CMC{{ifre}} and MA{{/ifre}} items varied from four to eight.{{ifma}} SCR items required the test taker to write down an answer into an empty box.{{/ifma}} Examples of the different response formats are given in Pohl and Carstensen [-@Pohl2012a].
+
+The {{domain}} test included `r sum(vars$mixed)` items. As shown in @tbl-itemtype, most of these were MC items, while more complex item types such as CMC{{ifre}} and MA{{/ifre}} items were less common. {{ifre}}@tbl-texttypes and @tbl-cogfun show the distribution of the items across the two dimensions of the assessment framework, that is, the five text types and the three cognitive requirements (see @sec-framework). The text types and cognitive requirements were approximately equally distributed across the administered items.{{/ifre}}{{ifma}}@tbl-content shows the distribution of the items across the dimensions of the assessment framework, that is, the four content areas (see @sec-framework). The content areas were approximately equally distributed across the administered items.{{/ifma}} The allocation of each item to these dimensions is provided in Appendix A.
+
+```{r}
+#| tbl-cap: "Number of Items by Response Formats"
+#| label: tbl-itemtype
+
+TblItemProps(
+  vars = vars, 
+  select = c("Number of items" = "mixed"),
+  prop = "type",
+  propname = "Response format"
+)
+```
+
+{{ifre}}
+```{r}
+#| tbl-cap: "Number of Items by Text Types"
+#| label: tbl-texttypes
+
+TblItemProps(
+  vars = vars, 
+  select = c("Number of items" = "mixed"),
+  prop = "texttype",
+  propname = "Text types"
+)
+
+```
+
+```{r}
+#| tbl-cap: "Number of Items by Cognitive Requirements"
+#| label: tbl-cogfun
+
+TblItemProps(
+  vars = vardef, 
+  select = c("Number of items" = "mixed"),
+  prop = "cogfun",
+  propname = "Cognitive requirement"
+)
+
+```
+{{/ifre}}
+{{ifma}}
+```{r}
+#| tbl-cap: "Number of Items by Content Areas"
+#| label: tbl-content
+
+TblItemProps(
+  vars = vars, 
+  select = c("Number of items" = "mixed"),
+  prop = "content",
+  propname = "Content areas"
+)
+
+```
+{{/ifma}}
+
+## Study Design {#sec-design}
+
+The study was conducted in small groups at the respective schools of the students. The tests were presented on paper by trained test administrators. The study assessed different competence domains. These included reading and mathematical competence. In order to control for test position effects, the two tests were assigned to test takers in different order. Half of the participants were given a booklet that included the reading test followed by the mathematics test, while the other half were given the two tests in reverse order. The allocation of the two booklets was randomized. There was no multi-matrix design with respect to the order of the items within the test. All respondents received the test items in the same order. A comprehensive description of the study design is available on the NEPS website[^2].
+
+[^2]: <https://www.neps-data.de>
+
+# Sample
+
+A total of `r rnd(nrow(data), 0)` participants (`r rnd(mean(data$sex %in% 1) * 100, 0)`% girls) were administered the {{domain}} competence test. A random subsample of `r rnd(sum(data$rotation == 0), 0)` participants was given the reading test before working on the mathematics test, while `r rnd(sum(data$rotation == 1), 0)` participants worked on the two tests in the reverse order. However, `r sum(!data$valid)` participants had less than three valid responses to the test items. Because no reliable competence scores can be estimated from such a small number of responses, these cases were excluded from the psychometric analyses [see @Pohl2012a]. Therefore, the analyses presented in this report are based on `r rnd(sum(data$valid), 0)` respondents.
+
+# Psychometric Analyses
+
+## Missing Responses
+
+Competence data contain different types of missing responses. These are missing responses due to a) invalid responses, b) omitted items, c) items that test takers did not reach, and, finally, d) multiple types of missing responses within CMC{{ifre}} and MA{{/ifre}} items that are not determined.
+
+Invalid responses occurred, for example, when two response options were selected in MC items although only one was required or when numbers or letters that were not within the range of valid responses were given as a response. Omitted items occurred when respondents skipped some items. Due to time constraints or lack of motivation, not all participants completed the test within the allotted time. All missing responses after the last valid response were coded as not reached. Because CMC{{ifre}} and MA{{/ifre}} items were aggregated from several subtasks, different types of missing responses or a mixture of valid and missing responses could be found. A CMC{{ifre}} or MA{{/ifre}} item was coded as missing if at least one subtask contained a missing response. If there was only one type of missing response, the item was coded according to the type of missing response. If the subtasks contained different types of missing responses, the item was coded as a not-determinable missing response.
+
+Missing responses provide information about how well the test worked (e.g., time limits, understanding of instructions, dealing with different response formats). Therefore, the occurrence of missing responses in the test was evaluated to get an idea of how well respondents coped with the test. Missing responses per item were examined to evaluate how well each of the items functioned.
+
+## Scaling Model
+
+Item and person parameters were estimated using a partial credit model [PCM, @Masters1982] with Gauss-Hermite quadrature (21 nodes). A detailed description of the scaling model can be found in Pohl and Carstensen [-@Pohl2012a]. CMC items consisted of a set of subtasks, which were aggregated into a polytomous variable for each item, indicating the number of correctly solved subtasks within that item. If at least one of the subtasks contained a missing response, the partial credit item was scored as missing. Response categories of polytomous items with few responses were collapsed in order to avoid possible estimation problems. This was usually done for the lower categories of polytomous items. Appendix B shows how response categories were collapsed for the different items.
+
+{{Domain}} competencies were estimated as weighted likelihood estimates [WLE, @Warm1989]. To estimate item and person parameters, a score of 0.5 points was applied to each category of the polytomous items, while simple multiple-choice items were scored dichotomously as 0 for an incorrect and 1 for a correct response. Studies on the scoring of different response formats are reported in Pohl and Carstensen [-@Pohl2012a] and @Haberkorn2016.
+
+Ability estimates for reading competence were estimated as weighted likelihood estimates [WLEs, @Warm1989] and can also be calculated as plausible values [see @Mislevy1991] using the R package *NEPSscaling*[^3] [@Scharl2020; @Scharl2022]. Person parameter estimation in the NEPS is described in more detail in Pohl and Carstensen [-@Pohl2012a], while the data available in the SUF are described in @sec-suf.
+
+[^3]: <https://www.neps-data.de/Data-Center/Overview-and-Assistance/Plausible-Values>
+
+## Checking the Quality of the Test
+
+The {{domain}} test was specifically constructed for administration in the NEPS. In order to ensure appropriate psychometric properties, the quality of the test was examined in several analyses.
+
+The MC items consisted of one correct response option and several distractors (i.e., incorrect response options). The quality of the distractors within the multiple-choice items was examined to evaluate whether the distractors were predominantly chosen by respondents with a lower ability rather than by those who gave a correct response. We therefore calculated the point-biserial correlation between selecting an incorrect response option for a given item and the total correct score for the remaining items. Negative correlations indicate good distractors, while correlations between .00 and .05 were considered acceptable and correlations above .05 were considered problematic distractors [@Pohl2012a].
+
+Before aggregating the subtasks of a CMC{{ifre}} and MA{{/ifre}} item into a polytomous variable, this approach was justified by preliminary psychometric analyses. For this purpose, the subtasks were analyzed together with the multiple-choice items in a @Rasch1960 model. The fit of the subtasks was evaluated based on the weighted mean square error (WMNSQ), the respective *t*-value, and the item characteristic curves. Only when the subtasks showed a satisfactory item fit, were they used to construct polytomous variables that were included in the final scaling model.
+
+After aggregating the subtasks into polytomous variables, the fit of the dichotomous and polytomous items to the PCM [@Masters1982] was evaluated using the WMNSQ statistic, the respective *t*-value, and the item characteristic curves [see @Pohl2012a]. Items with a WMNSQ \> 1.15 (*t*-value \> \|6\|) were considered to have a noticeable item misfit, and items with a WMNSQ \> 1.20 (*t*-value \> \|8\|) were considered to have a considerable item misfit and their performance was investigated further. Correlations of the item score with the corrected total score greater than .30 were considered as good, those greater than .20 as acceptable, and those less than .20 as problematic. The overall judgment of item fit was based on all fit indicators.
+
+The {{domain}} competence test should measure the same construct for all respondents. If some items favored certain subgroups (e.g., they were easier for boys than for girls), measurement invariance would be violated and a comparison of competence scores between these subgroups (e.g., boys and girls) would be biased. In the present study, differential item functioning (DIF) was investigated for the variables sex, the number of books at home (as a proxy for cultural status), migrant background, and test position (first versus second). DIF was examined using a multigroup item response model, in which the main effects of the subgroups as well as the differential effects of the subgroups on item difficulty were modeled. Based on experience with preliminary data, we considered absolute differences in estimated difficulties between the subgroups that were greater than 1 logit as very strong DIF, absolute differences between 0.6 and 1 as considerable and worthy of further investigation, differences between 0.4 and 0.6 as small but not severe, and differences less than 0.4 as negligible DIF. In addition, measurement invariance was examined by comparing the fit of a model that acknowledged DIF to a model that included only main effects and no DIF.
+
+The {{domain}} test was scaled using the PCM [@Masters1982] because it preserves the weighting of the different aspects of the framework as intended by the test developers [@Pohl2012a]. Nevertheless, Rasch-homogeneity is an assumption that may not hold for empirical data. To test the assumption of equal item discrimination parameters, a generalized partial credit model [GPCM, @Muraki1992] was also fitted to the data and compared to the PCM.
+
+The dimensionality of the test was evaluated by examining the residuals of the PCM. Approximately zero-order correlations, as indicated by Yen's [-@Yen1984] *Q*~3~, suggest unidimensionality. Because the *Q*~3~ tends to be slightly negative in case of locally independent items, we report the corrected *Q*~3~, which has an expected value of 0. According to @Yen1993, values of *Q*~3~ falling below .20 indicate essential unidimensionality. In addition, we estimated two multidimensional models using quasi-Monte Carlo integration (with 2,000 nodes) that specified different subdimensions based on the different construction rationales for the test (see @sec-framework), that is, a model with {{ifre}}three subdimensions representing the three cognitive requirements and a model with five subdimensions based on the different text types{{/ifre}}{{ifma}}three subdimensions representing the three content areas{{/ifma}} (see Appendix A). The correlations between the subdimensions and the differences in model fit between the unidimensional and multidimensional models were used to evaluate the unidimensionality of the test.
+
+## Software
+
+The item response models were estimated with the *TAM* package version 4.2-21 [@TAM4-2-21] in *R* version 4.3.3 [@R4-3-3].
+
+# Results
+
+## Missing Responses
+
+### Missing Responses per Person
+
+The number of invalid responses per person is shown in @fig-mis-nv. The number of invalid responses was rather low with `r GetMvp(mvp, "NV", "=0")`% of respondents having no invalid responses at all. Only about `r GetMvp(mvp, "NV", ">1")`% of respondents had more than one invalid response.
+
+```{r}
+#| fig-cap: "Number of Invalid Responses"
+#| label: fig-mis-nv
+#| 
+
+FigMv(paste0(
+  path, 
+  "plots/missing/by_person/Missing_responses_by_person (NV).png"
+))
+```
+
+@fig-mis-om illustrates the number of missing responses when respondents omitted items. The figure shows that a non-negligible number of items were omitted. Approximately `r GetMvp(mvp, "OM", "=0")`% of respondents had no omitted items, while `r GetMvp(mvp, "OM", "=1")`% exhibited a single omitted item. However, less than `r GetMvp(mvp, "OM", ">4")`% of respondents had five or more omitted items.
+
+```{r}
+#| fig-cap: "Number of Omitted Items"
+#| label: fig-mis-om
+#| 
+
+FigMv(paste0(
+  path, 
+  "plots/missing/by_person/Missing_responses_by_person (OM).png"
+))
+
+```
+
+Another source of missing responses is items that respondents did not reach because they aborted the test, for example, due to time constraints or lack of motivation. These missing values refer to items after the last valid response. As shown in @fig-mis-nr, only about `r GetMvp(mvp, "NR", "=0")`% of respondents did not abort the test and were administered all items. However, more than `r GetMvp(mvp, "NR", "<22")`% of the sample received at least 11 items and thus about a third of the total test.
+
+```{r}
+#| fig-cap: "Number of Not-Reached Items"
+#| label: fig-mis-nr
+#| 
+
+FigMv(paste0(
+  path, 
+  "plots/missing/by_person/Missing_responses_by_person (NR).png"
+))
+
+```
+
+For the aggregated polytomous variables, responses were coded as not determinable missing if the subtasks of the CMC{{ifre}} and MA{{/ifre}} items contained different types of missing responses. @fig-mis-nd shows the percentage of not-determinable missing responses in the test. Because not-determinable missing responses can only occur in CMC{{ifre}} and MA{{/ifre}} items, the maximum number of not-determinable missing responses was `r GetProp(vars, "mixed")` (see @tbl-itemtype). There was only a rather small number of not-determinable missing responses. About `r GetMvp(mvp, "ND", "=0")`% of the respondents did not have a single not determinable missing response.
+
+```{r}
+#| fig-cap: "Number of Not-Determinable Missing Responses"
+#| label: fig-mis-nd
+#| 
+
+FigMv(paste0(
+  path, 
+  "plots/missing/by_person/Missing_responses_by_person (ND).png"
+))
+
+```
+
+The total number of missing responses, aggregated across invalid, omitted, not reached, and not-determinable missing responses for each respondent, is shown in @fig-mis-all. Because most respondents did not reach the end of the test or omitted some items, the total number of missing values was substantial. The median number of missing responses was 9; only about `r GetMvp(mvp, "ALL", "=0")`% of the respondents had no missing response at all. Almost `r GetMvp(mvp, "ALL", ">5")`% of respondents had more than five missing responses, while `r GetMvp(mvp, "ALL", ">15")`% had missing responses for 16 or more items (i.e., almost half of the administered items).
+
+```{r}
+#| fig-cap: "Total Number of Missing Responses"
+#| label: fig-mis-all
+#| 
+
+FigMv(paste0(
+  path, 
+  "plots/missing/by_person/Missing_responses_by_person (ALL).png"
+))
+
+```
+
+Overall, there was a small amount of invalid and not-determinable missing responses, while the percentage of omitted items was reasonable. However, the total number of missing responses was rather large because many respondents did not reach the end of the test.
+
+### Missing Responses per Item
+
+@tbl-mis-item provides information on the occurrence of different types of missing responses per item. Overall, the number of respondents that omitted an item was acceptable. The percentage of omitted responses per item varied between `r GetMvi(mvi, "OM", "Min")`% and `r GetMvi(mvi, "OM", "Max")`% (*Mdn* = `r GetMvi(mvi, "OM", "Median")`%). In addition, most items had relatively few invalid responses. The percentage of invalid responses varied across items between `r GetMvi(mvi, "NV", "Min")`% and `r GetMvi(mvi, "NV", "Max")`% (*Mdn* = `r GetMvi(mvi, "NV", "Median")`%).
+
+```{r}
+#| tbl-cap: "Percentage of Missing Responses by Item"
+#| label: tbl-mis-item
+
+TblMvi(mvi)
+
+```
+
+In contrast, there was a substantial number of items that respondents did not reach. The percentage of missing responses because participants did not reach an item was *Mdn* = `r GetMvi(mvi, "NR", "Median")`%. The percentage of respondents not reaching an item increased with the position of the item in the test (see @fig-mis-position) up to `r GetMvi(mvi, "NR", "Max")`%. Because a relatively large number of items was not reached by respondents, the total number of missing responses per item was also quite large. These varied between `r GetMvi(mvi, "ALL", "Min")`% and `r GetMvi(mvi, "ALL", "Max")`% (*Mdn* = `r GetMvi(mvi, "ALL", "Median")`%).
+
+```{r}
+#| fig-cap: "Item Position not Reached"
+#| label: fig-mis-position
+#| 
+
+FigMv(paste0(
+  path, 
+  "plots/missing/by_item/Missing_responses_by_item (NR).png"
+))
+
+```
+
+## Parameter Estimates
+
+### Item Parameters
+
+The percentage of correct responses out of all valid responses for each multiple-choice item administered varied between `r GetPars(pars, "correct", min, 0)`% and `r GetPars(pars, "correct", max, 0)`% and was therefore quite high (see @tbl-parameters). Because there was a non-negligible amount of missing responses, these probabilities cannot be interpreted as an index of item difficulty.
+
+The estimated item difficulties (for dichotomous items) and location parameters (for polytomous items) are given in @tbl-parameters, while the corresponding step parameters for polytomous variables are summarized in @tbl-steps. Item difficulties and location parameters were estimated by constraining the mean of the ability distribution to zero. The estimated item difficulties ranged from `r GetPars(pars, "xsi", min)` (`r GetPars(pars, "xsi", min, TRUE)`) to `r GetPars(pars, "xsi", max)` (`r GetPars(pars, "xsi", max, TRUE)`) with a median of `r GetPars(pars, "xsi", median)`, thus covering a range of items that varied from easy to medium. However, none of the items exhibited large difficulties. The standard errors (*SE*) of the estimated parameters were rather small for most items (*SE* $\leq$ `r GetPars(pars, "SE", max)`).
+
+```{r}
+#| tbl-cap: "Item Parameters"
+#| label: tbl-parameters
+
+TblPars(pars)
+
+```
+
+```{r}
+#| tbl-cap: "Step Parameters (with Standard Errors) for Polytomous Items"
+#| label: tbl-steps
+
+TblSteps(pars)
+
+```
+
+### Test Targeting and Reliability
+
+Test targeting focuses on comparing the item difficulties with the person abilities (WLEs) to evaluate the appropriateness of the test for the specific target population. Because some items in the {{domain}} competence test were polytomous, we calculated Thurstonian thresholds for each response category [@Adam2023]. These indicate the location on the latent dimension where the probability of scoring above the threshold is 50%. This is similar to the item difficulties of dichotomous items. In @fig-test-targeting, the item difficulties of the {{domain}} competence items and the ability of the respondents are plotted on the same scale. The distribution of respondents’ estimated abilities is plotted on the left, while the distribution of the category thresholds is plotted on the right.
+
+```{r}
+#| fig-cap: "Test Targeting"
+#| label: fig-test-targeting
+#| 
+
+FigWrightMap(paste0(
+  path, 
+  "plots/Wright_Maps/Wright_map_for_PCM2.png"
+))
+
+```
+
+The category thresholds ranged from `r GetCat(cat, min)` (`r GetCat(cat, min, TRUE)`) to `r GetCat(cat, max)` (`r GetCat(cat, max, TRUE)`) and thus covered a rather wide range. The mean of the ability distribution was constrained to be zero. The variance was estimated to be `r GetVar(cat)`, which implies a good differentiation between respondents. The reliability of the test (EAP/PV reliability = `r GetRel(cat)`, WLE reliability = `r GetRel(cat, TRUE)`) was good. The median of the category threshold distribution was about `r GetCat(cat, median)` logits below the mean person ability distribution. Thus, although the items covered a wide range of the ability distribution, on average the items were too easy for the respondents. As a result, proficiency estimates in low to medium ability ranges were measured relatively accurately, while higher ability estimates had larger standard errors of measurement.
+
+## Quality of the test
+
+### Distractor Analyses
+
+To investigate how well the distractors of the multiple-choice items performed, point-biserial correlations were calculated between each incorrect response (distractor) and the respondents’ total correct scores for the remaining items. The median point-biserial correlation for the distractors fell at `r GetDist(dist, median)` (*Min* = `r GetDist(dist, min)`, *Max* = `r GetDist(dist, max)`). These results indicate that the distractors worked well.
+
+### Item Fit
+
+The evaluation of item fit was based on the final scaling model presented above. Overall, the item fit was satisfactory (see @tbl-parameters). There were `r GetPars(pars, "WMNSQ", ">1.20")` items (`r GetPars(pars, "WMNSQ", ">1.20", TRUE)`) with a WMSNQ greater than 1.20, while `r GetPars(pars, "WMNSQ", ">1.15&<1.20")` items (`r GetPars(pars, "WMNSQ", ">1.15&<1.20", TRUE)`) had a WMSNQ between 1.15 and 1.20. However, visual inspections of the empirical ICCs for these items did not reveal any pronounced deviation from the expected ICCs. For the remaining items, the WMNSQ values ranged from `r GetPars(pars, "WMNSQ", min, excl = ">1.15")` (`r GetPars(pars, "WMNSQ", min, TRUE, excl = ">1.15")`) to `r GetPars(pars, "WMNSQ", max, excl = ">1.15")` (`r GetPars(pars, "WMNSQ", max, TRUE, excl = ">1.15")`), with a median of `r GetPars(pars, "WMNSQ", median, excl = ">1.15")`. In addition, the correlations of the correct responses with the total rest scores varied between `r GetPars(pars, "rit", min)` (`r GetPars(pars, "rit", min, TRUE)`) and `r GetPars(pars, "rit", max)` (`r GetPars(pars, "rit", max, TRUE)`), with a median of `r GetPars(pars, "rit", median)`.
+
+### Differential Item Functioning {#sec-dif}
+
+DIF was used to evaluate whether the measurement models were comparable for different subgroups. For this purpose, DIF was examined for the variables sex, migrant background, number of books at home (as a proxy for cultural capital), and test position. A description of these variables can be found in Pohl and Carstensen [-@Pohl2012a]. The differences between the estimated item difficulties (on the logit scale) in the different groups are summarized in @tbl-dif. For example, the column "boys vs. girls" reports the differences in item difficulties between boys and girls; a positive value would indicate that the test was more difficult for boys, whereas a negative value would indicate that the item was less difficult for boys than for girls. In addition to examining DIF for each item, an overall test for DIF was performed by comparing models that allow for DIF with those that only estimate main effects. In @tbl-dif-fit, models including only main effects were compared with those additionally estimating DIF using Akaike's [-@Akaike1974] information criterion (AIC) and Bayesian information criterion [BIC, @Schwarz1978].
+
+[Sex]{.underline}: The sample included `r GetDif(dif$sex, n = 0)` boys and `r GetDif(dif$sex, n = 1)` girls. There were small sex differences in {{domain}} competence as indicated by the main effect of `r GetDif(dif$sex, main = "ustd")` logits (Cohen’s *d* = `r GetDif(dif$sex, main = "std")`) that reflected better {{domain}} competencies for girls than boys. One item (`r GetDif(dif$sex, dif = ">.60", item = TRUE)`) showed a DIF effect of more than 0.60 logits and was more difficult for girls than for boys. An overall test for DIF (see @tbl-dif-fit) also suggested a better fit for the model with DIF compared to a model that only estimated the main effect (but ignored potential DIF). Because an evaluation of the item content, did not suggest an explanation for the observed DIF in the item `r GetDif(dif$sex, dif = ">.60", item = TRUE)`, no sex-specific item effects were acknowledged in the scaling of the tests. These results suggest that for most items there was no pronounced DIF concerning sex that might have biased the parameter estimates.
+
+[Migrant background]{.underline}: There were `r GetDif(dif$mig, n = 1)` participants without a migrant background, `r GetDif(dif$mig, n = 2)` participants with a migrant background, and `r GetDif(dif$mig, n = 3)` participants with no information on their migrant background. All three groups were used to investigate DIF of migration. There was a considerable difference between the average performance of participants with and without a migrant background. Participants without a migrant background had a higher {{domain}} ability than participants with a migrant background (main effect = `r GetDif(dif$mig, main = "ustd", group = "1-2")` logits, Cohen’s *d* = `r GetDif(dif$mig, main = "std", group = "1-2")`). Respondents without information on their migrant background also differed from those with no migrant background (main effect = `r GetDif(dif$mig, main = "ustd", group = "1-3")` logits, Cohen’s *d* = `r GetDif(dif$mig, main = "std", group = "1-3")`) and those with a migrant background (main effect = `r GetDif(dif$mig, main = "ustd", group = "2-3")` logits, Cohen’s *d* = `r GetDif(dif$mig, main = "std", group = "2-3")`). There were `r GetDif(dif$mig, dif = ">.6", group = "1-2")` items with DIF greater than 0.60 between respondents with and without a migrant background. The largest difference in item difficulties between these groups was `r GetDif(dif$mig, dif = max, group = "1-2")` logits (`r GetDif(dif$mig, dif = max, group = "1-2", item = TRUE)`). Although this appears to be a rather large difference, it may be a consequence of the uncertainty in the estimation due to the small number of respondents with a migrant background. Accordingly, an overall test for DIF using the BIC (see @tbl-dif-fit) suggested a better fit for the main effect model that did not acknowledge DIF effects.
+
+::: landscape
+```{r}
+#| tbl-cap: "Differential Item Functioning"
+#| label: tbl-dif
+
+TblDif(
+  obj = dif$TR, 
+  colnames2 = c("sex 0-1" = "girls vs. boys",
+                "mig 1-3" = "with vs. na",
+                "mig 2-3" = "without vs. na",
+                "rotation 0-1" = "first vs. second")
+)
+
+```
+:::
+
+[Number of books]{.underline}: The number of books at home was used as a proxy for cultural capital. There were `r GetDif(dif$books, n = 1)` participants with up to 100 books at home, `r GetDif(dif$books, n = 2)` participants with more than 100 books at home, and `r GetDif(dif$books, n = 3)` participants with no information on the number of books at home. There were considerable average differences between the three groups. Participants with up to 100 books at home performed on average `r GetDif(dif$books, main = "ustd", group = "1-2")` logits (Cohen’s *d* = `r GetDif(dif$books, main = "std", group = "1-2")`) lower in {{domain}} than participants with more than 100 books. The corresponding main effects for participants without information on this variable were `r GetDif(dif$books, main = "ustd", group = "1-3")` logits (Cohen’s *d* = `r GetDif(dif$books, main = "std", group = "1-3")`) and `r GetDif(dif$books, main = "std", group = "2-3")` logits (Cohen’s *d* = `r GetDif(dif$books, main = "std", group ="2-3")`), respectively. There was no considerable DIF comparing participants with many or few books at home (largest DIF = `r GetDif(dif$books, dif = max, group = "1-2")` logits). Comparing the group with no information about the number of books at home with the two groups with information, DIF was up to `r GetDif(dif$books, dif = max, group = c("1-3", "2-3"))` logits and thus negligible. Consistent with these results, the overall test for DIF using the BIC (see @tbl-dif-fit) favored the model without DIF.
+
+[Test position]{.underline}: The {{domain}} competence test was administered in two different positions (see @sec-design for the design of the study). There were `r GetDif(dif$rotation, n = 0)` respondents who received the reading test before the mathematics test and `r GetDif(dif$rotation, n = 1)` respondents who received the reading test after the mathematics test. Participants were randomly assigned to one of the two groups. DIF for the position of the test can occur, for example, if there are differential fatigue effects for certain items. The results show a small average effect of item position. Respondents who received the reading test before the mathematics test performed on average `r GetDif(dif$rotation, main = "ustd")` logits (Cohen’s *d* = `r GetDif(dif$rotation, main = "std")`) better than respondents who received the reading test after the mathematics test. This main effect, however, does not indicate a threat to measurement invariance. Instead, it may be an indication of fatigue effects that are similar for all items. There was no noteworthy DIF due to the position of the test. The largest difference in item difficulty between the two groups was `r GetDif(dif$rotation, dif = max)` logits (`r GetDif(dif$rotation, dif = max, item = TRUE)`). Also, the overall test for DIF using the BIC (see @tbl-dif-fit) showed a better fit for the model that ignored potential DIF.
+
+```{r}
+#| tbl-cap: "Comparisons of Models with and without DIF"
+#| label: tbl-dif-fit
+
+TblDifFit(obj = dif$TR)
+
+```
+
+### Rasch-homogeneity
+
+An essential assumption of the @Rasch1960 model is that all item discrimination parameters are equal. To test this assumption, a generalized partial credit model [GPCM, @Muraki1992] was fitted to the data to estimate the discrimination parameters. The estimated discrimination parameters differed moderately between items (see @tbl-parameters). The median discrimination parameter fell at `r GetPars(pars, "Discr.", median)` (*Min* = `r GetPars(pars, "Discr.", min)`, *Max* = `r GetPars(pars, "Discr.", max)`). Model fit indices suggested a better model fit of the GPCM (AIC = `r GetFit(pars, "AIC", TRUE)`, BIC = `r GetFit(pars, "BIC", TRUE)`, number of parameters = `r GetFit(pars, "Npars", TRUE)`) compared to the PCM model (AIC = `r GetFit(pars, "AIC")`, BIC = `r GetFit(pars, "BIC")`, number of parameters = `r GetFt(pars, "Npars")`). However, an inspection of the respective item characteristic curves indicated an adequate fit of the PCM. Despite the empirical preference for the GPCM, the PCM is more in line with the theoretical concepts underlying the test construction [see @Pohl2012a]. For this reason, the PCM was chosen as our scaling model in order to preserve the item weightings as intended in the theoretical framework.
+
+### Dimensionality
+
+The dimensionality of the test was investigated by evaluating the correlations between the residuals of the PCM. The adjusted *Q*~3~ statistics (see @tbl-parameters) were quite low (*Mdn* = `r GetPars(pars, "aQ3", median)`) - the largest absolute residual correlation was `r GetPars(pars, "aQ3", max)` (`r GetPars(pars, "aQ3", max, item = TRUE)`). Overall, these results indicate an essentially unidimensional test.
+
+The dimensionality of the test was also examined by specifying {{ifre}}two multi-dimensional models based on the three cognitive requirements or the five text types{{/ifre}}{{ifma}}a multi-dimensional model based on the three content areas{{/ifma}} (see @sec-framework). Each item was assigned to one of {{ifre}}three or five{{/ifre}}{{ifma}}three{{/ifma}} latent factors (between-item multidimensionality). The multidimensional models were estimated using Quasi Monte Carlo method with 5,000 nodes.
+
+{{ifre}}
+```{r}
+#| tbl-cap: "Results of three-dimensional scaling for cognitive functions"
+#| label: tbl-dim-cogfun
+
+TblDim(obj = dim, model = "cogfun",
+       rownames = c("Finding information in the text",
+                    "Drawing text-related conclusions",
+                    "Reflecting and assessing"))
+
+```
+{{/ifre}}
+{{ifma}}
+```{r}
+#| tbl-cap: "Results of four-dimensional scaling for content areas"
+#| label: tbl-dim-content
+
+TblDim(obj = dim, model = "content",
+       rownames = c("Change and relationship",
+                    "Data and chance",
+                    "Units and measuring",
+                    "Space and shape"))
+
+```
+{{/ifma}}
+
+The variances and correlations of the {{ifre}}three dimensions reflecting the cognitive requirements are summarized in @tbl-dim-cogfun{{/ifre}}{{ifma}}three dimensions reflecting the content areas are summarized in @tbl-dim-content{{/ifma}}. All dimensions exhibited substantial variances. As expected, the correlations between the {{ifre}}three cognitive requirements were rather high, ranging between `r GetDim(dim, "cogfun", min)` and `r GetDim(dim, "cogfun", max)`{{/ifre}}{{ifma}}four content areas were rather high, ranging between `r GetDim(dim, "content", min)` and `r GetDim(dim, "content", max)`{{/ifma}}. Because they were close to or above *r* = .95, these correlations suggest an essential unidimensionality of the test [see @Carstensen2013]. Although the correlations were large, the {{ifre}}three-dimensional model did fit the data better (AIC = `r GetDimFit(dim, "cogfun", "AIC")`, BIC = `r GetDimFit(dim, "cogfun", "BIC")`, number of parameters = `r GetDimFit(dim, "cogfun", "Npars")`){{/ifre}}{{ifma}}four-dimensional model did fit the data better (AIC = `r GetDimFit(dim, "content", "AIC")`, BIC = `r GetDimFit(dim, "content", "BIC")`, number of parameters = `r GetDimFit(dim, "content", "Npars")`){{/ifma}} than the unidimensional model (AIC = `r GetDimFit(dim, "uni", "AIC")`, BIC = `r GetDimFit(dim, "uni", "BIC")`, number of parameters = `r GetDimFit(dim, "uni", "Npars")`). The results suggest that the {{ifre}}three cognitive requirements{{/ifre}}{{ifma}}four content areas{{/ifma}} do not measure different constructs but rather represent an essentially unidimensional construct.
+
+{{ifre}}
+The variances and correlations of the five dimensions reflecting the text types are summarized in @tbl-dim-txttyp. All dimensions exhibited substantial variances. The correlations between the five dimensions were between `r GetDim(dim, "txttyp", min)` and `r GetDim(dim, "txttyp", max)`. The lowest correlations were found between Dimension 2 (instruction text) and Dimensions 1 (information text) and 4 (commenting text). However, all correlations were notably smaller than .95 [see @Carstensen2013], indicating that the texts formed subdimensions. The five-dimensional model also exhibited a better fit to the data (AIC = `r GetDimFit(dim, "txttyp", "AIC")`, BIC = `r GetDimFit(dim, "txttyp", "BIC")`, number of parameters = `r GetDimFit(dim, "txttyp", "Npars")`) than the unidimensional model. Because the text types are perfectly confounded with the texts, that is, there is a single text for each text type, local item dependence (LID) occurs. The correlations reported in @tbl-dim-txttyp are therefore due to multidimensionality based on text types as well as local item dependence. In the present study, it is not possible to disentangle these two sources. However, in pilot studies [@Gehrer2013a], a larger number of texts were presented to the respondents, thus, allowing the impact of text types to be investigated independently of LID. The correlations estimated in the pilot study ranged from .78 to .91. Although a different scaling model was used in this paper, the results can give an idea of the impact of the text types (unconfounded with LID) on the dimensionality of the test. As the correlations found in @Gehrer2013a also differed from .95, it can be concluded that text types form subdimensions of reading competence. In addition, comparing these correlations with those found in the present study (see @tbl-dim-txttyp), which confounded the impact of text types and LID, allows for evaluating the impact of LID. The correlations found in the present study were similar (between `r GetDim(dim, "txttyp", min)` and `r GetDim(dim, "txttyp", max)`) to those found in Gehrer et al. (between .78 and .91), indicating that there is little local item dependence. Based on theoretical considerations, @Gehrer2013a argued for a unidimensional construct.
+
+```{r}
+#| tbl-cap: "Results of five-dimensional scaling for text types"
+#| label: tbl-dim-txttyp
+
+TblDim(obj = dim, 
+       model = "txttyp",
+       rownames = c("Information text",
+                    "Instruction text",
+                    "Advertising text",
+                    "Commenting or argumenting text",
+                    "Literary text"))
+
+```
+{{/ifre}}
+
+These results suggest that the {{ifre}}three cognitive requirements and five text types{{/ifre}}{{ifma}}four content areas{{/ifma}} measure a common construct. However, the test is not entirely unidimensional. Because the {{domain}} competence test was constructed to measure a single dimension, a unidimensional competence score was estimated.
+
+# Discussion
+
+The analyses in the previous sections provided information on the quality of the {{domain}} competence test that was administered in Starting Cohort {{sc}} of the NEPS. Different types of missing responses were examined, item fit statistics and item characteristic curves were evaluated, and item discriminations were investigated. Further quality inspections were conducted by examining differential item functioning and testing Rasch-homogeneity. Several criteria indicated a good fit of the items and measurement invariance across different subgroups. However, the number of missing values was high because many respondents did not reach the end of the test. This suggests that the test may have been too long for the given testing time. However, apart from the items that were not reached, other types of missing responses were quite small.
+
+The test was better targeted at low- to medium-ability respondents and better covered the lower ability spectrum. Few items were available that could adequately discriminate between high-ability respondents. As a result, ability estimates were more accurate for low-performing respondents as compared to high-performing respondents. Overall, however, the test had a good reliability and discriminated well between respondents.{{ifma}} Furthermore, the unidimensionality of the test could be confirmed for the different content areas.{{/ifma}}
+
+{{ifre}}The unidimensionality of the test could be confirmed for the different cognitive requirements, while the different texts induced some multidimensionality. Nevertheless, @Gehrer2013a argued that a balanced assessment of reading competence can only be achieved by a heterogeneity of texts and thus provided theoretical arguments for a unidimensional measure of reading competence.{{/ifre}}
+
+In conclusion, the test had satisfactory psychometric properties that allowed the estimation of a unidimensional {{domain}} competence score for the participants.
+
+# Data in the Scientific Use Files {#sec-suf}
+
+## Naming Conventions
+
+The SUF for the starting cohort contains `r sum(vars$mixed)` items, of which `r sum(vars$mixed & vardef$dich)` were scored dichotomously (multiple-choice items) with 0 indicating an incorrect response and 1 indicating a correct response. The remaining items were scored as polytomous variables (complex multiple choice and matching items) that are marked with a ‘s_c’ at the end of the variable names. Further details on the naming conventions of the variables can be found in @Fuss2021.
+
+## Linking of the Competence Tests
+
+...
+
+## {{Domain}} Competence Scores
+
+In the SUF, manifest reading competence scores are provided in the form of WLEs ({{ifre}}re{{/ifre}}{{ifma}}ma{{/ifma}}g5_sc1) including their respective standard errors ({{ifre}}re{{/ifre}}{{ifma}}ma{{/ifma}}g5_sc2). The WLE scores were also corrected for the position of the {{domain}} test within the test battery. As a result, the WLE scores in Starting Cohort {{sc}} are linked to the scale Wave 1 of Starting Cohort {{sc}}, thus allowing comparisons between grades.
+
+The R syntax for estimating the WLEs is provided in Appendix B. In the IRT scaling model, all polytomous variables were scored as 0.5 for each category. No WLEs were estimated for respondents who did not participate in the {{domain}} competence test or who did not provide enough valid responses. The value of the WLE and the corresponding standard error for these persons are denoted as not-determinable missing values. Alternatively, users interested in examining latent relationships can either include the measurement model in their analyses or estimate plausible values. Plausible values for the {{domain}} competence test can be estimated using the R package *NEPSscaling*[^2] [@Scharl2020; @Scharl2022].
+
+[^2]: <https://www.neps-data.de/Data-Center/Overview-and-Assistance/Plausible-Values>
+
+{{< pagebreak >}}
+
+# References {.unnumbered}
+
+::: {#refs}
+:::
+
+{{< pagebreak >}}
+
+{{ifre}}
+# Appendix A: Cognitive Requirements and Text Types {.unnumbered}
+
+```{r}
+
+TblItemFacets(
+  vars = vars, 
+  select = "mixed",
+  facets = c("Cognitive requirements" = "cogfun", "Text types" = "txttyp"),
+  position = "pos"
+)
+
+```
+{{/ifre}}
+{{ifma}}
+# Appendix A: Conent areas {.unnumbered}
+
+```{r}
+
+TblItemFacets(
+  vars = vars, 
+  select = "mixed",
+  facets = c("Content areas" = "content"),
+  position = "pos"
+)
+
+```
+{{/ifma}}
+
+{{< pagebreak >}}
+
+# Appendix B: R Syntax for Estimating WLEs {.unnumbered}
+
+```{r}
+
+TblCode(vars, select = "mixed")
+
+```
