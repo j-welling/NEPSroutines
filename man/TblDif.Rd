@@ -40,7 +40,7 @@ first line of the table heading.}
 \item{colnames2}{A vector of groups for the DIF variables included in the
 second line for the table heading.}
 
-\item{width}{The  widths of the columns; if a single values is given, it
+\item{width}{The widths of the columns; if a single values is given, it
 corresponds to the first column; otherwise the number of values must
 correspond to the number of columns in `obj`.}
 

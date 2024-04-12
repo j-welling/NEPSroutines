@@ -11,6 +11,7 @@
 #' @param sc The number of the starting cohort.
 #' @param domain A two letter abbreviation for the competence domain.
 #' @param study The number of the study.
+#' @param wave The number of the study wave.
 #' @returns Returns `NULL`, invisibly.
 #' @export
 Setup <- function(path = getwd(), ask = TRUE, sc = 0, domain = "re",

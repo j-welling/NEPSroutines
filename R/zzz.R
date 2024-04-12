@@ -1,6 +1,7 @@
 #'
 #' Run when loading the package
 #'
+#'@noRd
 .onLoad <- function(libname, pkgname) {
 
     # Default settings for tables in technical reports

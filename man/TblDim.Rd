@@ -23,7 +23,7 @@ reference model and the name of the facet variable.}
 
 \item{rownames}{A vector of labels for the rows.}
 
-\item{colnames}{A vector of lables for the columns.}
+\item{colnames}{A vector of labels for the columns.}
 
 \item{footnote}{A table note.}
 
@@ -34,7 +34,7 @@ first column; otherwise the number of values must correspond to the number of
 columns in `obj`.}
 }
 \value{
-A flextable
+A flextable.
 }
 \description{
 Create correlation table for multi-dimensional models

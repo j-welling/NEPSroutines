@@ -36,7 +36,7 @@ or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
 
 \item{size}{The general font size.}
 
-\item{width}{The  widths of the columns; if a single values is given, it
+\item{width}{The widths of the columns; if a single values is given, it
 corresponds to the first column; otherwise the number of values must
 correspond to the number of columns in `obj`.}
 }

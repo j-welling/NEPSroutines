@@ -16,7 +16,8 @@ TblItemFacets(
     "Drawing text-related conclusions", reflecting = "Reflecting and assessing",
     information = "Information text", instruction = "Instruction text", advertising =
     "Advertising text", commenting = "Commenting or argumenting text", literary =
-    "Literary text")
+    "Literary text", change = "Change and relationship", data = "Data and chance", units
+    = "Units and measuring", space = "Space and shape")
 )
 }
 \arguments{
