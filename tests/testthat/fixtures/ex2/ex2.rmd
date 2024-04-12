@@ -179,7 +179,7 @@ scaling::dif_analysis(
   vars = vars,
   select = "mixed",
   valid = "valid",
-  dif_vars = c("sex", "mig"),
+  dif_vars = c("sex", "mig", "rotation"),
   scoring = "scoring",
   mvs = mvs,
   overwrite = TRUE,
