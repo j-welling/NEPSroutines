@@ -534,7 +534,7 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1) {
 #' @param width The column widths; if a single value is given, it refers to the
 #' first column; otherwise the number of values must correspond to the number of
 #' columns in `obj`.
-#' @return            A flextable
+#' @return A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
 #' @export
@@ -598,7 +598,7 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 #' first line of the table heading.
 #' @param colnames2 A vector of groups for the DIF variables included in the
 #' second line for the table heading.
-#' @param width The  widths of the columns; if a single values is given, it
+#' @param width The widths of the columns; if a single values is given, it
 #' corresponds to the first column; otherwise the number of values must
 #' correspond to the number of columns in `obj`.
 #' @return A flextable.
@@ -647,7 +647,7 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
   note <- list()
   note <- append(note,
                  paste0("Raw differences between item difficulties (in logits) ",
-                        "with standardized differences (Cohen’s ")
+                        "with standardized differences (Cohen's ")
   )
   note <- append(note, list(flextable::as_i("d")))
   note <- append(note, ") in parentheses. ")

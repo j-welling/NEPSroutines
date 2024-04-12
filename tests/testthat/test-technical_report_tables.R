@@ -98,7 +98,7 @@ test_that("create table for dif works", {
   })
   expect_false(inherits(tbl, "try-error"))
   expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "8e800d5b05f4bd7f839c5b4b559afa87")
+  expect_equal(rlang::hash(tbl), "2ac6c959b8b8266ac323ebf048459a45")
 
 })
 
