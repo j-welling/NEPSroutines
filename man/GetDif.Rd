@@ -69,3 +69,60 @@ The calculated DIF statistics or a vector of item names.
 \description{
 Get values from DIF analyses
 }
+\examples{
+data("ex1")
+
+# DIF analyses
+tmpdir <- tempdir()
+scaling::dif_analysis(
+ resp = ex1$resp,
+ vars = ex1$vars,
+ select = "dich",
+ valid = "valid",
+ dif_vars = c("sex", "mig"),
+ include_mv = 100,
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ verbose = FALSE,
+ warn = FALSE
+)
+
+# Import results of DIF analyses
+dif <- Import(tmpdir, regexp = "^dif_dich_([^_]+\\\\.xlsx)")
+
+# Sample size for men (coded as 0)
+scaling::GetDif(dif$sex, n = 0)
+
+# Standardized main effect in the DIF model for sex
+scaling::GetDif(dif$sex, main = "std", model = "dif2)
+
+# Unstandardized main effect in the main effect model for mig
+# for the comparison of migrants (coded 1) and the missing group (coded 3)
+scaling::GetDif(dif$mig, main = "ustd", group = "1-3", model = "main)
+
+# Median of the unsigned (absolute) DIF effects for sex
+scaling::GetDif(dif$sex, dif = median)
+
+# Largest signed DIF effects for mig for the comparision of migrants
+# (coded 1) and non-migrants (coded 2)
+scaling::GetDif(dif$mig, dif = max, signed = TRUE, group = "1-2")
+
+# Number of unsigned (absolute) DIF effects for mig greater than .4
+# across all groups
+scaling::GetDif(dif$mig, dif = ">.4")
+
+# Items with signed DIF effects for mig greater than .4
+# across all groups
+scaling::GetDif(dif$mig, dif = ">.4", signed = TRUE, item = TRUE)
+
+# Clean up generated files
+file.remove(paste0(tmpdir, "/dif_dich_sex.xlsx"))
+file.remove(paste0(tmpdir, "/dif_dich_mig.xlsx"))
+file.remove(paste0(tmpdir, "/dif_dich_TR.xlsx"))
+file.remove(paste0(tmpdir, "/dif_dich_models.rds"))
+file.remove(paste0(tmpdir, "/dif_dich_summaries.rds"))
+}

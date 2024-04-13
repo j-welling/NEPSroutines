@@ -23,3 +23,37 @@ The calculated statistic or a vector of item names.
 \description{
 Summarize category thresholds
 }
+\examples{
+data("ex2")
+
+# IRT analyses
+tmpdir <- tempdir()
+scaling::irt_analysis(
+ resp = ex2$resp,
+ vars = ex2$vars,
+ select = "mixed",
+ valid = "valid",
+ plots = FALSE,
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ warn = FALSE,
+ verbose = FALSE,
+)
+
+# Import results of IRT analyses
+irt <- readRDS(paste0(tmpdir, "/irt_poly.rds"))
+
+# Largest category threshold
+scaling::GetCat(irt, max)
+
+# Item with the largest category threshold
+scaling::GetCat(irt, max, item = TRUE)
+
+# Clean up generated files
+file.remove(paste0(tmpdir, "/irt_poly.xlsx"))
+file.remove(paste0(tmpdir, "/irt_poly.rds"))
+}

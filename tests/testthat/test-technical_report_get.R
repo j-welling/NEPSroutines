@@ -185,8 +185,8 @@ test_that("get model fit for DIF analyses works", {
            filename = "dif_dich_sex.xlsx")
   })
 
-  expect_equal(GetDifFit(tbl, type = "BIC"), "13,842")
-  expect_equal(GetDifFit(tbl, type = "AIC", dif = FALSE), "13,667")
+  expect_equal(GetDifFit(tbl, difvar = "sex", type = "BIC"), "13,842")
+  expect_equal(GetDifFit(tbl, difvar = "sex", type = "AIC", model = "main"), "13,667")
 
 })
 

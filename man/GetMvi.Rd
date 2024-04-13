@@ -28,3 +28,38 @@ A number with the calculated statistic.
 \description{
 Calculate statistics for missing values by item
 }
+\examples{
+data("ex1")
+
+# Missing analyses by item
+tmpdir <- tempdir()
+scaling::mv_item(
+ resp = ex1$resp,
+ vars = ex1$vars,
+ select = "dich",
+ valid = "valid",
+ pos = "pos",
+ plots = FALSE,
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ warn = FALSE,
+ verbose = FALSE,
+)
+
+# Import results of missing analyses
+mvi <- scaling::Import(tmpdir, "/mv_item.xlsx")
+
+# Largest percentage of invalid responses
+scaling::GetMvi(mvi, "NV", "Max")
+
+# Median percentage of missing values with two decimals
+scaling::GetMvi(mvi, "ALL", "Median", digits = 2)
+
+# Clean up generated files
+file.remove(paste0(tmpdir, "/mv_item.xlsx"))
+file.remove(paste0(tmpdir, "/mv_item.rds"))
+}

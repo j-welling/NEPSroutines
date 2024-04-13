@@ -38,3 +38,42 @@ item names.
 \description{
 Summarize item parameters
 }
+\examples{
+data("ex1")
+
+# IRT analyses
+tmpdir <- tempdir()
+scaling::irt_analysis(
+ resp = ex1$resp,
+ vars = ex1$vars,
+ select = "dich",
+ valid = "valid",
+ plots = FALSE,
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ warn = FALSE,
+ verbose = FALSE,
+)
+
+# Import results of IRT analyses
+pars <- scaling::Import(tmpdir, "/irt_dich.xlsx")
+
+# Smallest percentage of correct responses
+scaling::GetPars(pars, "correct", min)
+
+# Most difficult item
+scaling::GetPars(pars, "xsi", max, item = TRUE)
+
+# Items with a difficulty smaller than -2
+scaling::GetPars(pars, "xsi", "<-2", item = TRUE)
+
+# Largest WMNSQ between 1 and 1.2
+scaling::GetPars(pars, "WMNSQ", max, excl = "<1|>1.2")
+# Clean up generated files
+file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
+file.remove(paste0(tmpdir, "/irt_dich.rds"))
+}

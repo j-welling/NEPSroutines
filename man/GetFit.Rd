@@ -23,3 +23,37 @@ The model fit statistic.
 \description{
 Get model fit
 }
+\examples{
+data("ex1")
+
+# IRT analyses
+tmpdir <- tempdir()
+scaling::irt_analysis(
+ resp = ex1$resp,
+ vars = ex1$vars,
+ select = "dich",
+ valid = "valid",
+ plots = FALSE,
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ warn = FALSE,
+ verbose = FALSE,
+)
+
+# Import results of IRT analyses
+pars <- Import(tmpdir, "irt_dich.xlsx")
+
+# BIC for the Rasch model
+scaling::GetFit(pars, "BIC")
+
+# Number of parameters in the 2PL
+scaling::GetFit(pars, "Npars", GPCM = TRUE)
+
+# Clean up generated files
+file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
+file.remove(paste0(tmpdir, "/ir.rds"))
+}

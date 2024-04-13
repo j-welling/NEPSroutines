@@ -21,3 +21,37 @@ The reliability.
 \description{
 Get reliability
 }
+\examples{
+data("ex1")
+
+# IRT analyses
+tmpdir <- tempdir()
+scaling::irt_analysis(
+ resp = ex1$resp,
+ vars = ex1$vars,
+ select = "dich",
+ valid = "valid",
+ plots = FALSE,
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ warn = FALSE,
+ verbose = FALSE,
+)
+
+# Import results of IRT analyses
+irt <- readRDS(paste0(tmpdir, "/irt_dich.rds"))
+
+# EAP reliability
+scaling::GetRel(irt)
+
+# WLE reliability
+scaling::GetRel(irt, TRUE)
+
+# Clean up generated files
+file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
+file.remove(paste0(tmpdir, "/irt_dich.rds"))
+}

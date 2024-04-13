@@ -14,6 +14,15 @@
 #' @returns The number of items or the item names.
 #' @inheritParams irt_analysis
 #' @export
+#' @examples
+#' data("ex2")
+#'
+#' # Number of CMC items
+#' scaling::GetProp(ex2$vars, select = "mixed", prop = "type", val = "CMC")
+#'
+#' # Names of CMC items
+#' scaling::GetProp(ex2$vars, select = "mixed", prop = "type", val = "CMC",
+#'                  item = TRUE)
 GetProp <- function(obj, select, prop = "type", val = c("CMC", "MA"),
                     item = FALSE) {
 
@@ -39,6 +48,40 @@ GetProp <- function(obj, select, prop = "type", val = c("CMC", "MA"),
 #' @param digits A number for rounding.
 #' @returns A number with the calculated statistic.
 #' @export
+#' @examples
+#' data("ex1")
+#'
+#' # Missing analyses by item
+#' tmpdir <- tempdir()
+#' scaling::mv_item(
+#'  resp = ex1$resp,
+#'  vars = ex1$vars,
+#'  select = "dich",
+#'  valid = "valid",
+#'  pos = "pos",
+#'  plots = FALSE,
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  warn = FALSE,
+#'  verbose = FALSE,
+#' )
+#'
+#' # Import results of missing analyses
+#' mvi <- scaling::Import(tmpdir, "/mv_item.xlsx")
+#'
+#' # Largest percentage of invalid responses
+#' scaling::GetMvi(mvi, "NV", "Max")
+#'
+#' # Median percentage of missing values with two decimals
+#' scaling::GetMvi(mvi, "ALL", "Median", digits = 2)
+#'
+#' # Clean up generated files
+#' file.remove(paste0(tmpdir, "/mv_item.xlsx"))
+#' file.remove(paste0(tmpdir, "/mv_item.rds"))
 GetMvi <- function(obj, type, stat, digits = 0) {
 
   if (is.list(obj) & "summary" %in% names(obj))
@@ -68,6 +111,39 @@ GetMVI <- GetMvi
 #' @param digits A number for rounding.
 #' @returns The calculated percentage.
 #' @export
+#' @examples
+#' data("ex1")
+#'
+#' # Missing analyses by person
+#' tmpdir <- tempdir()
+#' scaling::mv_person(
+#'  resp = ex1$resp,
+#'  vars = ex1$vars,
+#'  select = "dich",
+#'  valid = "valid",
+#'  plots = FALSE,
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  warn = FALSE,
+#'  verbose = FALSE,
+#' )
+#'
+#' # Import results of missing analyses
+#' mvp <- scaling::Import(tmpdir, "/mv_person.xlsx")
+#'
+#' # Percentage of respondents with 0 invalid responses
+#' scaling::GetMvp(mvp, "NV", "=0")
+#'
+#' # Percentage of respondents with more than 5 missing responses with one decimal
+#' scaling::GetMvp(mvp, "ALL", ">5", digits = 1)
+#'
+#' # Clean up generated files
+#' file.remove(paste0(tmpdir, "/mv_person.xlsx"))
+#' file.remove(paste0(tmpdir, "/mv_person.rds"))
 GetMvp <- function(obj, type, value, digits = 0) {
 
   type <- as.character(type[1])
@@ -111,6 +187,45 @@ GetMVP <- GetMvp
 #' @returns A number with the calculated statistic or character vector with
 #' item names.
 #' @export
+#' @examples
+#' data("ex1")
+#'
+#' # IRT analyses
+#' tmpdir <- tempdir()
+#' scaling::irt_analysis(
+#'  resp = ex1$resp,
+#'  vars = ex1$vars,
+#'  select = "dich",
+#'  valid = "valid",
+#'  plots = FALSE,
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  warn = FALSE,
+#'  verbose = FALSE,
+#' )
+#'
+#' # Import results of IRT analyses
+#' pars <- scaling::Import(tmpdir, "/irt_dich.xlsx")
+#'
+#' # Smallest percentage of correct responses
+#' scaling::GetPars(pars, "correct", min)
+#'
+#' # Most difficult item
+#' scaling::GetPars(pars, "xsi", max, item = TRUE)
+#'
+#' # Items with a difficulty smaller than -2
+#' scaling::GetPars(pars, "xsi", "<-2", item = TRUE)
+#'
+#' # Largest WMNSQ between 1 and 1.2
+#' scaling::GetPars(pars, "WMNSQ", max, excl = "<1|>1.2")
+
+#' # Clean up generated files
+#' file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
+#' file.remove(paste0(tmpdir, "/irt_dich.rds"))
 GetPars <- function(obj, type, stat = median, item = FALSE,
                     excl = NULL, digits = 2) {
 
@@ -231,6 +346,39 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
 #' @param digits A number for rounding.
 #' @returns The calculated statistic or a vector of item names.
 #' @export
+#' @examples
+#' data("ex2")
+#'
+#' # IRT analyses
+#' tmpdir <- tempdir()
+#' scaling::irt_analysis(
+#'  resp = ex2$resp,
+#'  vars = ex2$vars,
+#'  select = "mixed",
+#'  valid = "valid",
+#'  plots = FALSE,
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  warn = FALSE,
+#'  verbose = FALSE,
+#' )
+#'
+#' # Import results of IRT analyses
+#' irt <- readRDS(paste0(tmpdir, "/irt_poly.rds"))
+#'
+#' # Largest category threshold
+#' scaling::GetCat(irt, max)
+#'
+#' # Item with the largest category threshold
+#' scaling::GetCat(irt, max, item = TRUE)
+#'
+#' # Clean up generated files
+#' file.remove(paste0(tmpdir, "/irt_poly.xlsx"))
+#' file.remove(paste0(tmpdir, "/irt_poly.rds"))
 GetCat <- function(obj, stat = median, item = FALSE, digits = 2) {
 
   # Normalize arguments
@@ -259,6 +407,36 @@ GetCat <- function(obj, stat = median, item = FALSE, digits = 2) {
 #' @param digits A number for rounding.
 #' @returns The population variance.
 #' @export
+#' @examples
+#' data("ex1")
+#'
+#' # IRT analyses
+#' tmpdir <- tempdir()
+#' scaling::irt_analysis(
+#'  resp = ex1$resp,
+#'  vars = ex1$vars,
+#'  select = "dich",
+#'  valid = "valid",
+#'  plots = FALSE,
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  warn = FALSE,
+#'  verbose = FALSE,
+#' )
+#'
+#' # Import results of IRT analyses
+#' irt <- readRDS(paste0(tmpdir, "/irt_dich.rds"))
+#'
+#' # Population variance
+#' scaling::GetVar(irt)
+#'
+#' # Clean up generated files
+#' file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
+#' file.remove(paste0(tmpdir, "/irt_dich.rds"))
 GetVar <- function(obj, digits = 2) {
 
   digits <- as.integer(digits[1])
@@ -278,6 +456,39 @@ GetVar <- function(obj, digits = 2) {
 #' @param digits A number for rounding.
 #' @returns The reliability.
 #' @export
+#' @examples
+#' data("ex1")
+#'
+#' # IRT analyses
+#' tmpdir <- tempdir()
+#' scaling::irt_analysis(
+#'  resp = ex1$resp,
+#'  vars = ex1$vars,
+#'  select = "dich",
+#'  valid = "valid",
+#'  plots = FALSE,
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  warn = FALSE,
+#'  verbose = FALSE,
+#' )
+#'
+#' # Import results of IRT analyses
+#' irt <- readRDS(paste0(tmpdir, "/irt_dich.rds"))
+#'
+#' # EAP reliability
+#' scaling::GetRel(irt)
+#'
+#' # WLE reliability
+#' scaling::GetRel(irt, TRUE)
+#'
+#' # Clean up generated files
+#' file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
+#' file.remove(paste0(tmpdir, "/irt_dich.rds"))
 GetRel <- function(obj, WLE = FALSE, digits = 2) {
 
   digits <- as.integer(digits[1])
@@ -305,6 +516,42 @@ GetRel <- function(obj, WLE = FALSE, digits = 2) {
 #' @param digits A number for rounding.
 #' @returns The calculated statistic or a vector of item names.
 #' @export
+#' @examples
+#' data("ex2")
+#'
+#' # Distractor analyses
+#' tmpdir <- tempdir()
+#' scaling::dis_analysis(
+#'  resp = ex1$resp,
+#'  vars = ex1$vars,
+#'  select_raw = "raw",
+#'  correct = "correct",
+#'  valid = "valid",
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  warn = FALSE
+#' )
+#'
+#' # Import results of distractor analyses
+#' dist <- Import(tmpdir, "distractors_summary.xlsx")
+#'
+#' # Median total-rest correlations for the distractors
+#' scaling::GetDist(dist, median)
+#'
+#' # Smallest total-rest correlations for the correct responses
+#' scaling::GetDist(dist, min, correct = TRUE)
+#'
+#' # Item with the largest total-rest correlations for the distractors
+#' scaling::GetDist(dist, max, item = TRUE)
+#'
+#' # Clean up generated files
+#' file.remove(paste0(tmpdir, "/distractors_summary.xlsx"))
+#' file.remove(paste0(tmpdir, "/distractors_items.xlsx"))
+#' file.remove(paste0(tmpdir, "/distractors.rds"))
 GetDist <- function(obj, stat = median, correct = FALSE, item = FALSE,
                     digits = 2) {
 
@@ -337,6 +584,39 @@ GetDist <- function(obj, stat = median, correct = FALSE, item = FALSE,
 #' @param digits A number for rounding.
 #' @returns The model fit statistic.
 #' @export
+#' @examples
+#' data("ex1")
+#'
+#' # IRT analyses
+#' tmpdir <- tempdir()
+#' scaling::irt_analysis(
+#'  resp = ex1$resp,
+#'  vars = ex1$vars,
+#'  select = "dich",
+#'  valid = "valid",
+#'  plots = FALSE,
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  warn = FALSE,
+#'  verbose = FALSE,
+#' )
+#'
+#' # Import results of IRT analyses
+#' pars <- Import(tmpdir, "irt_dich.xlsx")
+#'
+#' # BIC for the Rasch model
+#' scaling::GetFit(pars, "BIC")
+#'
+#' # Number of parameters in the 2PL
+#' scaling::GetFit(pars, "Npars", GPCM = TRUE)
+#'
+#' # Clean up generated files
+#' file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
+#' file.remove(paste0(tmpdir, "/ir.rds"))
 GetFit <- function(obj, type, GPCM = FALSE, digits = 2) {
 
   type <- as.character(type[1])
@@ -361,6 +641,40 @@ GetFit <- function(obj, type, GPCM = FALSE, digits = 2) {
 #' is typically one of Npars, loglik, AIC, or BIC.
 #' @returns The model fit statistic.
 #' @export
+#' @examples
+#' data("ex2")
+#'
+#' # Dimensionality analyses
+#' tmpdir <- tempdir()
+#' ex2$vars$content <- as.numeric(ex2$vars$content)
+#' scaling::dim_analysis(
+#'  resp = ex2$resp,
+#'  vars = ex2$vars,
+#'  select = "mixed",
+#'  valid = "valid",
+#'  dim = "content",
+#'  snodes = 5,# only for speed; model will not converge!
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  verbose = FALSE,
+#' )
+#'
+#' # Import results of dimensionality analyses
+#' dim <- Import(tmpdir, "/dimensionality.xlsx")
+#'
+#' # AIC for multidimensonal model for variable content
+#' scaling::GetDimFit(dim, "content", "AIC")
+#'
+#' # BIC for unidimensional model
+#' scaling::GetDimFit(dim, "uni", "BIC")
+#'
+#' # Clean up generated files
+#' file.remove(paste0(tmpdir, "/dimensionality.xlsx"))
+#' file.remove(paste0(tmpdir, "/dimensionality.rds"))
 GetDimFit <- function(obj, model, type) {
 
   model <- as.character(model[1])
@@ -382,6 +696,42 @@ GetDimFit <- function(obj, model, type) {
 #' @param digits A number for rounding.
 #' @returns A numeric or character vector
 #' @export
+#' @examples
+#' data("ex2")
+#'
+#' # Dimensionality analyses
+#' tmpdir <- tempdir()
+#' ex2$vars$content <- as.numeric(ex2$vars$content)
+#' scaling::dim_analysis(
+#'  resp = ex2$resp,
+#'  vars = ex2$vars,
+#'  select = "mixed",
+#'  valid = "valid",
+#'  dim = "content",
+#'  snodes = 5,# only for speed; model will not converge!
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  verbose = FALSE,
+#' )
+#'
+#' # Import results of dimensionality analyses
+#' dim <- Import(tmpdir, "/dimensionality.xlsx")
+#'
+#' # Median correlation between factors for variable content
+#' #   Note: not meaningful here because the model did not converge
+#' scaling::GetDim(dim, "content", median)
+#'
+#' # Largest variance of the dimensions for variable content
+#' #   Note: not meaningful here because the model did not converge
+#' scaling::GetDim(dim, "content", max, var = TRUE)
+#'
+#' # Clean up generated files
+#' file.remove(paste0(tmpdir, "/dimensionality.xlsx"))
+#' file.remove(paste0(tmpdir, "/dimensionality.rds"))
 GetDim <- function(obj, model = "dim", stat = median, var = FALSE,
                    digits = 2) {
 
@@ -428,6 +778,62 @@ GetDim <- function(obj, model = "dim", stat = median, var = FALSE,
 #' @param digits A number for rounding.
 #' @returns The calculated DIF statistics or a vector of item names.
 #' @export
+#' @examples
+#' data("ex1")
+#'
+#' # DIF analyses
+#' tmpdir <- tempdir()
+#' scaling::dif_analysis(
+#'  resp = ex1$resp,
+#'  vars = ex1$vars,
+#'  select = "dich",
+#'  valid = "valid",
+#'  dif_vars = c("sex", "mig"),
+#'  include_mv = 100,
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  verbose = FALSE,
+#'  warn = FALSE
+#' )
+#'
+#' # Import results of DIF analyses
+#' dif <- Import(tmpdir, regexp = "^dif_dich_([^_]+\\.xlsx)")
+#'
+#' # Sample size for men (coded as 0)
+#' scaling::GetDif(dif$sex, n = 0)
+#'
+#' # Standardized main effect in the DIF model for sex
+#' scaling::GetDif(dif$sex, main = "std", model = "dif2)
+#'
+#' # Unstandardized main effect in the main effect model for mig
+#' # for the comparison of migrants (coded 1) and the missing group (coded 3)
+#' scaling::GetDif(dif$mig, main = "ustd", group = "1-3", model = "main)
+#'
+#' # Median of the unsigned (absolute) DIF effects for sex
+#' scaling::GetDif(dif$sex, dif = median)
+#'
+#' # Largest signed DIF effects for mig for the comparision of migrants
+#' # (coded 1) and non-migrants (coded 2)
+#' scaling::GetDif(dif$mig, dif = max, signed = TRUE, group = "1-2")
+#'
+#' # Number of unsigned (absolute) DIF effects for mig greater than .4
+#' # across all groups
+#' scaling::GetDif(dif$mig, dif = ">.4")
+#'
+#' # Items with signed DIF effects for mig greater than .4
+#' # across all groups
+#' scaling::GetDif(dif$mig, dif = ">.4", signed = TRUE, item = TRUE)
+#'
+#' # Clean up generated files
+#' file.remove(paste0(tmpdir, "/dif_dich_sex.xlsx"))
+#' file.remove(paste0(tmpdir, "/dif_dich_mig.xlsx"))
+#' file.remove(paste0(tmpdir, "/dif_dich_TR.xlsx"))
+#' file.remove(paste0(tmpdir, "/dif_dich_models.rds"))
+#' file.remove(paste0(tmpdir, "/dif_dich_summaries.rds"))
 GetDif <- function(obj, n = NULL, main = NULL, dif = NULL,
                    item = FALSE, group = NULL, model = "dif",
                    signed = FALSE, digits = 2) {
@@ -549,19 +955,59 @@ GetDIF <- GetDif
 
 #' Get model fit for DIF analyses
 #'
-#' @param obj A data frame with sheets from "dif_dich.xlsx" or "dif_poly.xlsx"
-#' created by [scaling::dif_analysis()].
+#' @param obj A data frame with sheets from "dif_dich_TR.xlsx" or
+#' "dif_poly_TR.xlsx" created by [scaling::dif_analysis()].
+#' @param difvar The DIF variable.
 #' @param type The model fit statistic corresponding to the column name in `obj`
-#' @param dif A logical to return the fit of the DIF model (`TRUE`) instead of
-#' the main effect model (`FALSE`).
+#' @param model The name of the model for which the main effects should be
+#' returned, one of `dif` or `main`.
 #' @returns The model fit statistic.
 #' @export
-GetDifFit <- function(obj, type, dif = TRUE) {
+#' @examples
+#' data("ex1")
+#'
+#' # DIF analyses
+#' tmpdir <- tempdir()
+#' scaling::dif_analysis(
+#'  resp = ex1$resp,
+#'  vars = ex1$vars,
+#'  select = "dich",
+#'  valid = "valid",
+#'  dif_vars = c("sex", "mig"),
+#'  include_mv = 100,
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  verbose = FALSE,
+#'  warn = FALSE
+#' )
+#'
+#' # Import results of DIF analyses
+#' dif <- Import(tmpdir, "dif_dich_TR.xlsx")
+#'
+#' # AIC for the variable sex in the DIF model
+#' scaling::GetDifFit(dif, "sex", "AIC")
+#'
+#' # BIC for the variable mig in the main effect model
+#' scaling::GetDifFit(dif, "mig", "BIC", model = "main")
+#'
+#' # Clean up generated files
+#' file.remove(paste0(tmpdir, "/dif_dich_sex.xlsx"))
+#' file.remove(paste0(tmpdir, "/dif_dich_mig.xlsx"))
+#' file.remove(paste0(tmpdir, "/dif_dich_TR.xlsx"))
+#' file.remove(paste0(tmpdir, "/dif_dich_models.rds"))
+#' file.remove(paste0(tmpdir, "/dif_dich_summaries.rds"))
+GetDifFit <- function(obj, difvar, type, model = "dif") {
 
+  difvar <- as.character(difvar[1])
   type <- as.character(type[1])
-  dif <- as.logical(dif[1])
+  model <- ifelse(model[1] == "dif", "DIF", "Main effect")
   tab <- as.data.frame(obj$gof)
-  return(rnd(tab[ifelse(dif, 2, 1), type], digits = 0))
+  out <- tab[tab$`DIF.variable` == difvar & tab$Model == model, type]
+  return(rnd(out, digits = 0))
 
 }
 

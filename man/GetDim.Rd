@@ -25,3 +25,40 @@ A numeric or character vector
 \description{
 Summarize the latent correlations in multi-dimensional models
 }
+\examples{
+data("ex2")
+
+# Dimensionality analyses
+tmpdir <- tempdir()
+ex2$vars$content <- as.numeric(ex2$vars$content)
+scaling::dim_analysis(
+ resp = ex2$resp,
+ vars = ex2$vars,
+ select = "mixed",
+ valid = "valid",
+ dim = "content",
+ snodes = 5,# only for speed; model will not converge!
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ verbose = FALSE,
+)
+
+# Import results of dimensionality analyses
+dim <- Import(tmpdir, "/dimensionality.xlsx")
+
+# Median correlation between factors for variable content
+#   Note: not meaningful here because the model did not converge
+scaling::GetDim(dim, "content", median)
+
+# Largest variance of the dimensions for variable content
+#   Note: not meaningful here because the model did not converge
+scaling::GetDim(dim, "content", max, var = TRUE)
+
+# Clean up generated files
+file.remove(paste0(tmpdir, "/dimensionality.xlsx"))
+file.remove(paste0(tmpdir, "/dimensionality.rds"))
+}

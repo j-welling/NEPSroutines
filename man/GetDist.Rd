@@ -26,3 +26,40 @@ The calculated statistic or a vector of item names.
 \description{
 Summarize distractor analyses
 }
+\examples{
+data("ex2")
+
+# Distractor analyses
+tmpdir <- tempdir()
+scaling::dis_analysis(
+ resp = ex1$resp,
+ vars = ex1$vars,
+ select_raw = "raw",
+ correct = "correct",
+ valid = "valid",
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ warn = FALSE
+)
+
+# Import results of distractor analyses
+dist <- Import(tmpdir, "distractors_summary.xlsx")
+
+# Median total-rest correlations for the distractors
+scaling::GetDist(dist, median)
+
+# Smallest total-rest correlations for the correct responses
+scaling::GetDist(dist, min, correct = TRUE)
+
+# Item with the largest total-rest correlations for the distractors
+scaling::GetDist(dist, max, item = TRUE)
+
+# Clean up generated files
+file.remove(paste0(tmpdir, "/distractors_summary.xlsx"))
+file.remove(paste0(tmpdir, "/distractors_items.xlsx"))
+file.remove(paste0(tmpdir, "/distractors.rds"))
+}

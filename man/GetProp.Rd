@@ -26,3 +26,13 @@ The number of items or the item names.
 \description{
 Determine the number of items with a given item property
 }
+\examples{
+data("ex2")
+
+# Number of CMC items
+scaling::GetProp(ex2$vars, select = "mixed", prop = "type", val = "CMC")
+
+# Names of CMC items
+scaling::GetProp(ex2$vars, select = "mixed", prop = "type", val = "CMC",
+                 item = TRUE)
+}

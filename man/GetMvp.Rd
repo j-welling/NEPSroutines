@@ -29,3 +29,37 @@ The calculated percentage.
 \description{
 Calculate percentage of missing values by person
 }
+\examples{
+data("ex1")
+
+# Missing analyses by person
+tmpdir <- tempdir()
+scaling::mv_person(
+ resp = ex1$resp,
+ vars = ex1$vars,
+ select = "dich",
+ valid = "valid",
+ plots = FALSE,
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ warn = FALSE,
+ verbose = FALSE,
+)
+
+# Import results of missing analyses
+mvp <- scaling::Import(tmpdir, "/mv_person.xlsx")
+
+# Percentage of respondents with 0 invalid responses
+scaling::GetMvp(mvp, "NV", "=0")
+
+# Percentage of respondents with more than 5 missing responses with one decimal
+scaling::GetMvp(mvp, "ALL", ">5", digits = 1)
+
+# Clean up generated files
+file.remove(paste0(tmpdir, "/mv_person.xlsx"))
+file.remove(paste0(tmpdir, "/mv_person.rds"))
+}
