@@ -1,0 +1,209 @@
+---
+title: "Semi-automated technical reports with scaling"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    toc: true
+    number_sections: no
+  bookdown::pdf_document2:
+    toc: true
+    number_sections: no
+vignette: >
+  %\VignetteIndexEntry{Semi-automated technical reports with scaling}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r, include = FALSE}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+```
+
+```{r packages, echo = FALSE, message = FALSE}
+
+library(scaling)
+
+```
+
+\newpage
+
+Technical reports for competence data in the [NEPS](https://neps-data.de) that were scaled with `scaling` can be created using a [Quarto](https://quarto.org) extension and associated functions provided in the package. Although these do not allow the creation of fully automated reports, they are designed to require minimal modifications. All information provided in the various files created by `scaling` can be extracted by dedicated functions to avoid having to manually copy results into the report or having to manually create tables. The final technical report can be exported as pdf or word file in the style of NEPS Survey Papers. The following sections outline the basic steps for the creation of semi-automated technical reports.
+
+# Prerequisites
+
+The technical reports are created with a [Quarto](https://quarto.org) extension which represents an enhanced version of [R Markdown](https://rmarkdown.rstudio.com). Therefore, Quarto must be installed from <https://quarto.org/docs/get-started/>. After installing Quarto, [Rstudio](https://posit.co/products/open-source/rstudio/) automatically recognizes Quarto files (ending with `.qmd`) and allows editing them very similar to [R Markdown](https://rmarkdown.rstudio.com).
+
+The generation of technical reports relies on the `flextable` and `magick` packages which must be installed before creating the reports.
+
+# Setting up the Report
+
+To render a Quarto file in the style of NEPS Survey Papers a dedicated extension is required which must be placed in the folder `_extensions`. The Quarto extension and a Quarto template for the technical report are provided as part of `scaling` and can be installed using `scaling::Setup()`. The function expects a full path to a folder for the technical report as argument. The following code will copy the Quarto extension and Quarto template into the folder `C:/Documents/example_tr`.
+
+``` r
+scaling::Setup("C:/Documents/example_tr")
+```
+
+Before copying the relevant files `scaling::Setup()` will ask for some information in the R console about the NEPS study and the competence domain. This information is used to set the file name for the Quarto template and configure its content for the specific domain (e.g., refer to the correct domain within the technical report). Currently, the function is only designed for reading and mathematical competence. For other domains, the template for reading competence should be used and adapted accordingly.
+
+After running `scaling::Setup()` the specified folder includes the Quarto extension for NEPS survey papers (in the folder `_extensions`), a Quarto file with the content of the technical report (ending in `.qmd`), and a bibtex file with literature cited in the technical report (ending in `.bib`). Although the Quarto and bibtex file can be edited in any text editor, it is recommended to use [Rstudio](https://posit.co/download/rstudio-desktop/) which provides several features supporting the work with [R Markdown](https://rmarkdown.rstudio.com).
+
+**Note that `scaling::Setup()` will overwrite any existing files in the specified folder without warning! Therefore, it is recommended to set up a new technical report in an empty folder.**
+
+The convenience function `scaling::Update()` allows updating a Quarto extension that has already been copied to a local folder. It expects a full path to a folder with an *existing* technical report as argument and replaces the Quarto extension in `_extensions`. No other files will be affected. So it is safe to run the function on a folder with an existing technical report. The primary use of the function is to update the Quarto extension for an existing report if a new release of `scaling` provides a modified version of the extension.
+
+# Structure of Reports
+
+The Quarto file with the technical report (ending in `.qmd`) is basically an [R Markdown](https://rmarkdown.rstudio.com) file with an extended YAML header and special sections for the abstract and acknowledgements. Furthermore, it includes an R block at the beginning of the document that loads the relevant results created by `scaling`.
+
+## YAML Header
+
+The header sets general information about the technical report that is primarily used on the title page of the NEPS Survey Paper:
+
+```         
+---
+title: "NEPS technical report for reading: scaling results of starting cohort 8 for wave 1"
+author: 
+  - name: Firstname Lastname
+    affiliations: Leibniz Institute for Educational Trajectories
+    orcid: 0000-0000-0000-0000
+    email: "firstname.lastname@lifbi.de"
+format: neps-paper-pdf
+bibliography: "TR_A104_SC8_W1_RE.bib"
+---
+```
+
+### `title` Setting
+
+The `title` specifies the title of the technical report and often does not need any modifications because it has been set using `scaling::Setup()`. The `title` should be set in lowercase; otherwise the citation on the first page of the technical report is not correctly formatted.
+
+### `authors` Setting
+
+The `authors` setting specifies the authors of the technical report. For each author up to four lines can be used to set the first- and lastname (`name`), the affiliation (`affiliations`), the [ORCID](https://orcid.org/) (`orcid`), and email address (`email`). Only `name` is required for each author, while the other attributes can be omitted.
+
+For multiple authors, the block (including `name`, `affiliations`, `orcid`, and `email`) beginning with `-` needs to be duplicated. It is important to keep the leading spaces in each line as shown in the example above.
+
+The first page of the NEPS Survey Paper lists *all* email addresses found in the `authors` setting under **E-mail address of the lead author**. If only the email address of a specific author should be listed, only this email address should be set in the `authors` setting, while the setting should remain empty for the other authors.
+
+For the rare case that multiple affiliations are available for a specific authors, these should be listed on new lines beginning with `-`. Then, automatic superscipts are generated to distinguish between the different affiliations on the title page of the technical report. The following example gives the settings for two authors, with the second author having two affiliations, one of which is shared with the first author.
+
+```         
+author: 
+  - name: Firstname Lastname
+    affiliations: Leibniz Institute for Educational Trajectories
+    orcid: 0000-0000-0000-0000
+    email: "firstname.lastname@lifbi.de"
+  - name: Another Person
+    affiliations: 
+    - Leibniz Institute for Educational Trajectories
+    - Somwhere else
+```
+
+### `format` Setting
+
+The `format` setting sets the Quarto extension for NEPS Survey Papers. The default setting `neps-paper-pdf` creates a pdf version of the technical report, while `neps-paper-docx` renders a word document. Generally, the pdf version is recommended for the final technical report because it more closely follows the style of NEPS Survey Papers. In contrast, the word version often exhibits minor formatting issues. However, the content of the pdf and word versions are identical.
+
+### `bibliography` Setting
+
+The `bibliography` setting specifies the name of the bibtex file with the cited references. Typically, it needs no modification because it has been set using `scaling::Setup()` .
+
+## R Block
+
+Because the Quarto document is an extended R Markdown file, R code can be included to display dynamic information (i.e., the scaling results). The first R block after the YAML header is used to load the respective scaling results that can be used in later sections of the document.
+
+``` r
+# Path to scaling results
+path <- ""
+
+# Load response data and variable definitions
+load(paste0(path, "data/data.R"))
+
+# Load scaling results
+mvi <- Import(paste0(path, "tables/"), "mv_item.xlsx")
+mvp <- Import(paste0(path, "tables/"), "mv_person.xlsx")
+pars <- Import(paste0(path, "tables/"), "irt_poly.xlsx")
+irt <- readRDS(paste0(path, "results/irt_poly.rds"))
+dist <- Import(paste0(path, "tables/"), "distractors_summary.xlsx")
+dim <- Import(paste0(path, "tables/"), "dimensionality.xlsx")
+dif <- Import(paste0(path, "tables/"), regexp = "^dif_poly_([^_]+)")
+```
+
+This block requires some modifications to identify the scaling results for the technical report. First, the `path` object needs to define the (absolute or relative) path to the folder containing the scaling results obtained with `scaling`. It should point to the top folder containing the `.rpoj` file.
+
+Then, the raw data including the variables to describe the sample (i.e., `sex`, `rotation`, `valid`) and the variable definition file need to be imported. Because these are non-standard files that are used but not created by `scaling`, there is no standard way to import them. After running `load(paste0(path, "data/data.R"))` or an appropriately adapted code, the environment should include an object `data` with a data frame including the data with sample information and an object `vars` with a data frame of the item characteristics.
+
+The remaining lines of the R block import the relevant `scaling` results. For simple analyses that create only the specified files no modifications are required. However, more complex analyses that, for example, include different booklets or different subsamples (e.g., from regular and special schools), the results might be more complex and located in different files. In this case, these files have to be imported by adapting the respective lines. The precise object names holding the imported results are not important, as long as they are correctly referenced in the remainder of the document.
+
+**Please note that only data that is imported here is available in the rest of the document to display the scaling results.**
+
+## Abstract and Acknowledgements
+
+The sections with a heading formatted as `Header 1` called *Abstract* or *Acknowledgements* will be rendered as an abstract on a separate page or acknowledgements on the first page of the technical report. Although it does not matter where in the document these sections are placed, it is recommended to keep them at the beginning. If no acknowledgements are required, the section can be removed.
+
+Alternatively, it is also possible to extend the YAML header with the settings `abstract` or `acknowledgements` to define the respective sections there. Generally, the first approach using dedicated sections in the document is preferred because it allows using R code in the abstract to display dynamic information such as the sample size of the study.
+
+# Writing the Report
+
+The technical report is written as a [R Markdown](https://rmarkdown.rstudio.com) file with the typical [formatting options](https://bookdown.org/yihui/rmarkdown/markdown-syntax.html). Additionally, `scaling` provides several functions to extract scaling results from the imported data and generating tables. The functions used for generating the technical report start with capital letters (e.g., `GetPars()`) to distinguish them from functions that are used for scaling the data.
+
+The package includes three groups of functions that allow extracting specific information such as the largest item difficulty, displaying tables with scaling results such as a table with item parameters, and displaying figures created with `scaling`. Their typical use is shown in the Quarto document created by `scaling::Setup()`.
+
+## Extracting Information
+
+Functions that allow extracting specific information from the scaling results start with the prefix **Get**. The most important functions are described in Table \@ref(tab:funget), while details on their basic use are available in the help files associated with each function.
+
+| Function      | Description                                                   |
+|-------------------------|-----------------------------------------------|
+| `GetProp()`   | Determine the number of items with a given item property      |
+| `GetMvi()`    | Calculate statistics for missing values by item               |
+| `GetMvp()`    | Calculate percentage of missing values by person              |
+| `GetPars()`   | Summarize item parameters                                     |
+| `GetCat()`    | Summarize category thresholds                                 |
+| `GetVar()`    | Get variance of latent proficiency distribution               |
+| `GetRel()`    | Get reliability                                               |
+| `GetDist()`   | Summarize distractor analyses                                 |
+| `GetFit()`    | Get model fit for IRT analyses                                |
+| `GetDim()`    | Summarize the latent correlations in multi-dimensional models |
+| `GetDimFit()` | Get model fit for dimensionality analyses                     |
+| `GetDif()`    | Get values from DIF analyses                                  |
+| `GetDifFit()` | Get model fit for DIF analyses                                |
+
+: (#tab:funget) Functions to extract information
+
+## Generating Tables
+
+Functions that allow generating tables from the scaling results start with the prefix **Tbl**. The most important functions are described in Table \@ref(tab:funtbl), while details on their basic use are available in the help files associated with each function.
+
+| Function          | Description                                                 |
+|-------------------------|-----------------------------------------------|
+| `TblItemProps()`  | Create a table with item properties                         |
+| `TblItemFacets()` | Create a table with facets (e.g., text types) for each item |
+| `TblMvi()`        | Create a table for missing responses by item                |
+| `TblPars()`       | Create a table with item parameters                         |
+| `TblSteps()`      | Create a table with step parameters                         |
+| `TblDim()`        | Create a correlation table for multi-dimensional models     |
+| `TblDif()`        | Create a table for DIF analyses                             |
+| `TblDifFit()`     | Create a table with fit statistics for DIF analyses         |
+| `TblCode()`       | Create a table with the analysis code                       |
+| `Tbl()`           | Create a generic table                                      |
+
+: (#tab:funtbl) Functions to generate tables
+
+Tables are created with the `flextable` package. Therefore, each function in Table \@ref(tab:funtbl) returns a `flextable::flextable()` object that can be further manipulated (e.g., to add additional formatting styles) before printing the resulting table.
+
+## Displaying Figures
+
+Functions that allow displaying figures generated by `scaling` start with the prefix **Fig**. The most important functions are described in Table \@ref(tab:funfig), while details on their basic use are available in the help files associated with each function.
+
+| Function         | Description                                    |
+|------------------|------------------------------------------------|
+| `FigMv()`        | Crop plot for missing values to remove title   |
+| `FigWrightMap()` | Crop plot with Wright map and include footnote |
+| `Fig()`          | Generic function to display figures            |
+
+: (#tab:funfig) Functions to display figures
+
+Figures are manipulated with the `magick` package. Because some figures created by `scaling` have superfluous white space, these are cropped to remove the white space. Furthermore, it is difficult to attach notes to figures using R Markdown. Therefore, notes are added to the figure itself by creating a new figure including the original figure and the note.
