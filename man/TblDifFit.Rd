@@ -26,11 +26,11 @@ TblDIFFit(
 \arguments{
 \item{obj}{A list with data frames with sheets from "dif_poly_TR.xlsx"
 or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
-[scaling::dif_analysis()].}
+[dif_analysis()].}
 
 \item{footnote}{A table note.}
 
-\item{excl}{A vector of column names to exclude.}
+\item{excl}{A vector of DIF variables that should be excluded.}
 
 \item{label}{A vector of names for the DIF variables.}
 
@@ -45,4 +45,36 @@ A flextable.
 }
 \description{
 Create table with fit statistics for DIF analyses
+}
+\examples{
+\dontrun{
+data(ex1)
+
+# DIF analyses
+dif_analysis(
+ resp = ex1$resp,
+ vars = ex1$vars,
+ select = "dich",
+ valid = "valid",
+ dif_vars = c("sex", "mig"),
+ include_mv = 100,
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ verbose = FALSE,
+ warn = FALSE
+)
+
+# Import results of DIF analyses
+dif <- Import(tmpdir, regexp = "^dif_dich_([^_]+\\\\.xlsx)")
+
+# Default DIF fit table
+TblDifFit(dif$TR)
+
+# Excluding results for sex, but with a new label for mig
+TblDifFit(dif$TR, excl= "sex", label = c("mig" = "Migrant background"))
+}
 }

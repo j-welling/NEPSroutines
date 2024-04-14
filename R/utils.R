@@ -662,7 +662,7 @@ rnd <- function(x, digits = 2, d0 = FALSE) {
 
   x <- base::formatC(x, digits = digits[1], format = "f", big.mark = ",")
   if (d0[1])
-    x <- base::sub("^0+\\.", ".", x)
+    x <- base::sub("^(-?)0+\\.", "\\1.", x)
   return(x)
 
 }

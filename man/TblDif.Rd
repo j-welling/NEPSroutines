@@ -12,7 +12,8 @@ TblDif(
   colnames1 = NULL,
   colnames2 = NULL,
   width = 1.4,
-  size = 10
+  size = 10,
+  digits = 2
 )
 
 TblDIF(
@@ -22,33 +23,71 @@ TblDIF(
   colnames1 = NULL,
   colnames2 = NULL,
   width = 1.4,
-  size = 10
+  size = 10,
+  digits = 2
 )
 }
 \arguments{
 \item{obj}{A list with data frames with sheets from "dif_poly_TR.xlsx"
 or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
-[scaling::dif_analysis()].}
+[dif_analysis()].}
 
 \item{footnote}{A table note.}
 
 \item{excl}{A vector of column names to exclude.}
 
-\item{colnames1}{A vector of names for the DIF variables included in the
-first line of the table heading.}
+\item{colnames1}{A named vector of names for the DIF variables included in
+the first line of the table heading; the names indicate the group name in
+`obj`, while the values give th new headings.}
 
-\item{colnames2}{A vector of groups for the DIF variables included in the
-second line for the table heading.}
+\item{colnames2}{A named vector of groups for the DIF variables included in
+the second line for the table heading; the names indicate the group name in
+`obj`, while the values give the new headings.}
 
 \item{width}{The widths of the columns; if a single values is given, it
 corresponds to the first column; otherwise the number of values must
 correspond to the number of columns in `obj`.}
 
 \item{size}{The general font size.}
+
+\item{digits}{A number for rounding.}
 }
 \value{
 A flextable.
 }
 \description{
 Create table for DIF analyses
+}
+\examples{
+\dontrun{
+data(ex1)
+
+# DIF analyses
+dif_analysis(
+ resp = ex1$resp,
+ vars = ex1$vars,
+ select = "dich",
+ valid = "valid",
+ dif_vars = c("sex", "mig"),
+ include_mv = 100,
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ verbose = FALSE,
+ warn = FALSE
+)
+
+# Import results of DIF analyses
+dif <- Import(tmpdir, regexp = "^dif_dich_([^_]+\\\\.xlsx)")
+
+# Default DIF table
+TblDif(dif$TR, colnames2 = c("mig.1-3" = "without vs. missing",
+                             "mig.2-3" = "with vs. missing"))
+
+# Excluding missing group for mig
+TblDif(dif$TR, excl= c("mig.1-2", "mig.1-3"))
+}
 }

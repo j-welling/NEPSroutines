@@ -153,6 +153,32 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
 #' @inheritParams Tbl
 #' @inheritParams collapse_response_categories
 #' @export
+#' @examples
+#' \dontrun{
+#' data(ex2)
+#' data(ex3)
+#'
+#' # Table with content areas for a single group
+#' TblItemProps(
+#'   ex2$vars,
+#'   select = c("Number of items" = "mixed"),
+#'   prop = "content",
+#'   propname = "Content area"
+#' )
+#'
+#' # Number of response format for three booklets with a footnote
+#' ex3$vars$mixed1 <- ex3$vars$mixed & ex3$vars$booklet1
+#' ex3$vars$mixed2 <- ex3$vars$mixed & ex3$vars$booklet2
+#' ex3$vars$mixed3 <- ex3$vars$mixed & ex3$vars$booklet3
+#' TblItemProps(
+#'   ex3$vars,
+#'   select = c("Booklet 1" = "mixed1", "Booklet 2" = "mixed2",
+#'              "Booklet 3" = "mixed3"),
+#'   prop = "type",
+#'   propname = "Response format",
+#'   footnote = "The study administered three difficulty-tiered booklets."
+#' )
+#' }
 TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
                          na.rm = TRUE, size = 12, width = NULL,
                          formats = c(MC  = "Simple multiple-choice items",
@@ -204,8 +230,8 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
     freq_groups <- rbind(freq_groups, c("Total number of items", sums))
 
     # Create flextable
-    ft <- Tbl(freq_groups, align = c("left", "center"),
-              hline = nrow(freq_groups) - 1,
+    ft <- Tbl(freq_groups, align = c("left", rep("center", length(select))),
+              hline = nrow(freq_groups) - 1, footnote = footnote,
               size = size, width = width)
     return (ft)
 
@@ -226,6 +252,26 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
 #' @inheritParams Tbl
 #' @inheritParams collapse_response_categories
 #' @export
+#' @examples
+#' \dontrun{
+#' data(ex2)
+#'
+#' # Table with content areas
+#' TblItemFacets(
+#'   ex2$vars,
+#'   select = "mixed",
+#'   facets = c("Content area" = "content")
+#' )
+#'
+#' # Table with content areas, response formats, and item position
+#' TblItemFacets(
+#'   ex2$vars,
+#'   select = "mixed",
+#'   facets = c("Content area" = "content", "Response format" = "type"),
+#'   position = "pos",
+#'   footnote = "MC = simple multiple-choice, CMC = complex multiple-choice"
+#' )
+#' }
 TblItemFacets <- function(vars, select, facets, position = NULL,
                           footnote = NULL, size = 12, width = 1.9,
                           lbl = c(finding = "Finding information in the text",
@@ -255,8 +301,7 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
     tab[[facets[i]]] <- l
   }
   if (is.null(names(facets))) names(facets) <- facets
-  col_names <- c("Pos.", "Item", names(facets))
-  if (is.null(position)) col_names <- "No."
+  col_names <- c(ifelse(is.null(position), "No.", "Pos."), "Item", names(facets))
   colnames(tab) <- col_names
 
   # Create flextable
@@ -272,7 +317,7 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #'
 #' @param obj A list with data frames with sheets from "mv_item.xlsx"
 #' or a data frame with sheet "summary" from "mv_item.xlsx" created by
-#' [scaling::mv_item()].
+#' [mv_item()].
 #' @param select An optional name of a specific group to select.
 #' @param footnote An optional table note.
 #' @param sort A column name to indicate by which column to sort.
@@ -280,6 +325,40 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @export
+#' @examples
+#' \dontrun{
+#' data(ex1)
+#'
+#' # Missing analyses by item
+#' tmpdir <- tempdir()
+#' mv_item(
+#'  resp = ex1$resp,
+#'  vars = ex1$vars,
+#'  select = "dich",
+#'  valid = "valid",
+#'  mvs = c(OM = -97, NV = -95, NR = -94),
+#'  pos = "pos",
+#'  plots = FALSE,
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  warn = FALSE,
+#'  verbose = FALSE,
+#' )
+#'
+#' # Import results of missing analyses
+#' mvi <- Import(tmpdir, "/mv_item.xlsx")
+#'
+#' # Table with default columns
+#' TblMvi(mvi)
+#'
+#' # Table with all missing responses and total number of respondents sorted
+#' #  by number of valid responses
+#' TblMvi(mvi, excl = NULL, sort = "N_valid")
+#' }
 TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
                    size = 12, width = NULL,
                    excl = c("N_administered", "ND", "ALL")) {
@@ -296,10 +375,9 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
   }
 
   # Exclude columns
-  if (!is.null(excl)) {
-    regexp <- paste0("^$|", paste(excl, collapse = "|"))
-    tab <- tab[, !grepl(regexp, colnames(tab))]
-  }
+  regexp <-"^$"
+  if (!is.null(excl)) regexp <- paste0(regexp, "|", paste(excl, collapse = "|"))
+  tab <- tab[, !grepl(regexp, colnames(tab))]
 
   # Remove empty rows
   tab <- tab[!(rowSums(!is.na(tab)) == 1), ]
@@ -316,6 +394,7 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
   lbl <- colnames(tab)
   lbl[lbl == "item"] <- "Item"
   lbl[lbl == "position"] <- "Pos."
+  lbl[lbl == "N_administered"] <- "Total"
   lbl[lbl == "N_valid"] <- "N"
   colnames(tab) <- lbl
 
@@ -323,6 +402,9 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
   note <- list()
   if ("Pos." %in% colnames(tab))
     note <- append(note, "Pos. = Item position within the test. ")
+  if ("Total" %in% colnames(tab)) {
+    note <- append(note, "Total = Number of persons the item was administered. ")
+  }
   if ("N" %in% colnames(tab)) {
     note <- append(note,
                    list(flextable::as_chunk(
@@ -346,6 +428,22 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
     note <- append(note,
                    "ND = Percentage of not determinable responses. "
     )
+  if ("TA" %in% colnames(tab))
+    note <- append(note,
+                   "TA = Percentage of missing due to test abortion. "
+    )
+  if ("UM" %in% colnames(tab))
+    note <- append(note,
+                   "UM = Percentage of unspecific missing responses. "
+    )
+  if ("MD" %in% colnames(tab))
+    note <- append(note,
+                   "MD = Percentage of responses missing by design. "
+    )
+  if ("AZ" %in% colnames(tab))
+    note <- append(note,
+                   "AZ = Percentage of reset responses. "
+    )
   if ("ALL" %in% colnames(tab))
     note <- append(note,
                    "ALL = Percentage of all types of missing responses. "
@@ -357,6 +455,8 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
   ft <- Tbl(tab, footnote = note, size = size, width = width)
   if ("Pos." %in% colnames(tab))
     ft <- flextable::colformat_double(ft, j = "Pos.", digits = 0)
+  if ("Total" %in% colnames(tab))
+    ft <- flextable::colformat_double(ft, j = "Total", digits = 0)
   if ("N" %in% colnames(tab)) {
     ft <- flextable::italic(ft, j = "N", italic = TRUE, part = "header")
     ft <- flextable::colformat_double(ft, j = "N", digits = 0)
@@ -373,11 +473,43 @@ TblMVI <- TblMvi
 #'
 #' @param obj A list with data frames with sheets from "irt_poly.xlsx"
 #' or a data frame with sheet "summary" from "irt_poly.xlsx" created by
-#' [scaling::irt_analysis()].
+#' [irt_analysis()].
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
 #' @export
+#' @examples
+#' \dontrun{
+#' data(ex1)
+#'
+#' # IRT analyses
+#' tmpdir <- tempdir()
+#' irt_analysis(
+#'  resp = ex1$resp,
+#'  vars = ex1$vars,
+#'  select = "dich",
+#'  valid = "valid",
+#'  plots = FALSE,
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  warn = FALSE,
+#'  verbose = FALSE,
+#' )
+#'
+#' # Import results of IRT analyses
+#' pars <- Import(tmpdir, "/irt_dich.xlsx")
+#'
+#' # Default parameter table
+#' TblPars(pars)
+#'
+#' # Parameter table including number of respondents the item was adminstered
+#' # and a footnote
+#' TblPars(pars, excl = NULL, footnote = "Nothing to report.")
+#' }
 TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
                     size = 10, width = 0.5) {
 
@@ -395,18 +527,21 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
   lbl <- colnames(tab)
   lbl[1] <- "Nr."
   lbl[lbl == "correct"] <- "Percentage\n correct"
+  lbl[lbl == "N_administered"] <- "Total"
   lbl[lbl == "N_valid"] <- "N"
   lbl[lbl == "xsi"] <- "Difficulty"
   colnames(tab) <- lbl
 
   # Create footnote
   note <- list()
+  if ("Total" %in% colnames(tab))
+    note <- append(note, "Total = Number of respondents the item was administered. ")
   if ("N" %in% colnames(tab)) {
-    note <- list(flextable::as_i("N"))
+    note <- append(note, list(flextable::as_i("N")))
     note <- append(note, " = Number of observed responses. ")
   }
   if ("Difficulty" %in% colnames(tab))
-    note <- append(note, "Difficulty =  Item difficulty / location. ")
+    note <- append(note, "Difficulty = Item difficulty / location. ")
   if ("SE" %in% colnames(tab)) {
     note <- append(note, list(flextable::as_i("SE")))
     note <- append(note,
@@ -455,6 +590,8 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
   }
   if ("Item" %in% colnames(tab))
     ft <- flextable::width(ft, j = "Item", width = max(nchar(tab$Item)) * .075)
+  if ("Total" %in% colnames(tab))
+    ft <- flextable::colformat_double(ft, j = "Total", digits = 0)
   if ("N" %in% colnames(tab)) {
     ft <- flextable::italic(ft, j = "N", italic = TRUE, part = "header")
     ft <- flextable::colformat_double(ft, j = "N", digits = 0)
@@ -489,12 +626,44 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
 #' Create table with step parameters
 #'
 #' @param obj A list with data frames with sheets from "irt_poly.xlsx"
-#' or sheet "steps" from "irt_poly.xlsx" created by [scaling::irt_analysis()].
+#' or sheet "steps" from "irt_poly.xlsx" created by [irt_analysis()].
+#' @param digits A number for rounding.
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
 #' @export
-TblSteps <- function(obj, footnote = NULL, size = 10, width = 1) {
+#' @examples
+#' \dontrun{
+#' data(ex2)
+#'
+#' # IRT analyses
+#' tmpdir <- tempdir()
+#' irt_analysis(
+#'  resp = ex2$resp,
+#'  vars = ex2$vars,
+#'  select = "mixed",
+#'  valid = "valid",
+#'  plots = FALSE,
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  warn = FALSE,
+#'  verbose = FALSE,
+#' )
+#'
+#' # Import results of IRT analyses
+#' pars <- Import(tmpdir, "/irt_poly.xlsx")
+#'
+#' # Default parameter table
+#' TblSteps(pars)
+#'
+#' # Parameter table with larger font size and footnote
+#' TblSteps(pars, size = 12, footnote = "Nothing to note.")
+#' }
+TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2) {
 
   # Result table
   if (is.list(obj) & "steps" %in% names(obj))
@@ -503,6 +672,22 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1) {
 
   # Rename variables
   colnames(tab) <- c("Item", paste0("Step ", seq(1, ncol(tab) - 1)))
+
+  # Rounding
+  for (i in seq_along(tab)[-1]) {
+    for (j in seq_along(tab[[i]])) {
+      thr <- regmatches(tab[j, i], regexpr("^\\-?\\d\\.\\d+", tab[j, i]))
+      se <- regmatches(tab[j, i], regexpr("(?<=\\()\\d\\.\\d+", tab[j, i],
+                       perl = TRUE))
+      step <- NA
+      if (length(thr == 1L)) {
+        step <- rnd(as.numeric(thr), digits = digits)
+        if (length(se) == 1L)
+          step <- paste0(step, " (", rnd(as.numeric(se), digits = digits), ")")
+      }
+      tab[j, i] <- step
+    }
+  }
 
   # Footnote
   note <- paste0("The last step parameter for each item is not ",
@@ -526,7 +711,7 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1) {
 #' Create correlation table for multi-dimensional models
 #'
 #' @param obj A data frame with sheets from "dimensionality.xlsx"
-#' created by [scaling::dim_analysis()].
+#' created by [dim_analysis()].
 #' @param model The model name, typically `uni` for the unidimensional
 #' reference model and the name of the facet variable.
 #' @param rownames A vector of labels for the rows.
@@ -538,6 +723,39 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1) {
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
 #' @export
+#' @examples
+#' \dontrun{
+#' data(ex2)
+#'
+#' # Dimensionality analyses
+#' tmpdir <- tempdir()
+#' ex2$vars$content <- as.numeric(ex2$vars$content)
+#' dim_analysis(
+#'  resp = ex2$resp,
+#'  vars = ex2$vars,
+#'  select = "mixed",
+#'  valid = "valid",
+#'  dim = "content",
+#'  snodes = 5,# only for speed; model will not converge!
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  verbose = FALSE,
+#' )
+#'
+#' # Import results of dimensionality analyses
+#' dim <- Import(tmpdir, "/dimensionality.xlsx")
+#'
+#' # Default correlation table
+#' TblDim(dim, "content")
+#'
+#' # Correlation table with labels
+#' TblDim(dim, "content",
+#'        rownames = c("Units", "Change", "Space", "Data"))
+#' }
 TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
                    footnote = NULL, size = 12, width = 3) {
 
@@ -549,7 +767,7 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
   tab <- matrix("", nrow = nrow(obj), ncol = ncol(obj))
   for (i in seq(1, nrow(obj))) {
     for (j in seq(1, i)) {
-      tab[i, j] <- rnd(obj[i, j], digits = 2, d0 = TRUE)
+      tab[i, j] <- rnd(obj[i, j], digits = 2, d0 = i != j)
     }
   }
   tab <- as.data.frame(tab)
@@ -561,7 +779,7 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
   }
   if (is.null(rownames)) {
     rownames <- paste0("Dim ", seq(1, nrow(tab)))
-  } else {
+  } else if (is.null(colnames)) {
     rownames <- paste0(paste0("Dim ", seq(1, nrow(tab))), ": ", rownames)
   }
   if (!is.null(colnames) & length(colnames) != ncol(tab)) {
@@ -593,21 +811,56 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 #'
 #' @param obj A list with data frames with sheets from "dif_poly_TR.xlsx"
 #' or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
-#' [scaling::dif_analysis()].
-#' @param colnames1 A vector of names for the DIF variables included in the
-#' first line of the table heading.
-#' @param colnames2 A vector of groups for the DIF variables included in the
-#' second line for the table heading.
+#' [dif_analysis()].
+#' @param colnames1 A named vector of names for the DIF variables included in
+#' the first line of the table heading; the names indicate the group name in
+#' `obj`, while the values give th new headings.
+#' @param colnames2 A named vector of groups for the DIF variables included in
+#' the second line for the table heading; the names indicate the group name in
+#' `obj`, while the values give the new headings.
 #' @param width The widths of the columns; if a single values is given, it
 #' corresponds to the first column; otherwise the number of values must
 #' correspond to the number of columns in `obj`.
+#' @param digits A number for rounding.
 #' @return A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
 #' @export
+#' @examples
+#' \dontrun{
+#' data(ex1)
+#'
+#' # DIF analyses
+#' dif_analysis(
+#'  resp = ex1$resp,
+#'  vars = ex1$vars,
+#'  select = "dich",
+#'  valid = "valid",
+#'  dif_vars = c("sex", "mig"),
+#'  include_mv = 100,
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  verbose = FALSE,
+#'  warn = FALSE
+#' )
+#'
+#' # Import results of DIF analyses
+#' dif <- Import(tmpdir, regexp = "^dif_dich_([^_]+\\.xlsx)")
+#'
+#' # Default DIF table
+#' TblDif(dif$TR, colnames2 = c("mig.1-3" = "without vs. missing",
+#'                              "mig.2-3" = "with vs. missing"))
+#'
+#' # Excluding missing group for mig
+#' TblDif(dif$TR, excl= c("mig.1-2", "mig.1-3"))
+#' }
 TblDif <- function(obj, footnote = NULL, excl = NULL,
                    colnames1 = NULL, colnames2 = NULL,
-                   width = 1.4, size = 10) {
+                   width = 1.4, size = 10, digits = 2) {
 
   # Result table
   if (is.list(obj) & "estimates" %in% names(obj))
@@ -643,6 +896,22 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
   tab[nrow(tab), 1] <- gsub(" \\(", "\n (", tab[nrow(tab), 1])
   tab[nrow(tab) - 1, 1] <- gsub(" \\(", "\n (", tab[nrow(tab) - 1, 1])
 
+  # Rounding
+  for (i in seq_along(tab)[-1]) {
+    for (j in seq_along(tab[[i]])) {
+      ustd <- regmatches(tab[j, i], regexpr("^(-|\\s)?\\d\\.\\d+", tab[j, i]))
+      std <- regmatches(tab[j, i], regexpr("(?<=\\()(-|\\s)?\\d\\.\\d+",
+                                           tab[j, i], perl = TRUE))
+      dif <- NA
+      if (length(ustd == 1L)) {
+        dif <- rnd(as.numeric(ustd), digits = digits)
+        if (length(std) == 1L)
+          dif <- paste0(dif, " (", rnd(as.numeric(std), digits = digits), ")")
+      }
+      tab[j, i] <- dif
+    }
+  }
+
   # Create footnote
   note <- list()
   note <- append(note,
@@ -675,10 +944,42 @@ TblDIF <- TblDif
 
 #' Create table with fit statistics for DIF analyses
 #'
+#' @param excl A vector of DIF variables that should be excluded.
 #' @param label A vector of names for the DIF variables.
 #' @return A flextable.
 #' @inheritParams TblDif
 #' @export
+#' @examples
+#' \dontrun{
+#' data(ex1)
+#'
+#' # DIF analyses
+#' dif_analysis(
+#'  resp = ex1$resp,
+#'  vars = ex1$vars,
+#'  select = "dich",
+#'  valid = "valid",
+#'  dif_vars = c("sex", "mig"),
+#'  include_mv = 100,
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  verbose = FALSE,
+#'  warn = FALSE
+#' )
+#'
+#' # Import results of DIF analyses
+#' dif <- Import(tmpdir, regexp = "^dif_dich_([^_]+\\.xlsx)")
+#'
+#' # Default DIF fit table
+#' TblDifFit(dif$TR)
+#'
+#' # Excluding results for sex, but with a new label for mig
+#' TblDifFit(dif$TR, excl= "sex", label = c("mig" = "Migrant background"))
+#' }
 TblDifFit <-function(obj, footnote = NULL, excl = NULL, label = NULL,
                      size = 12, width = 0.9) {
 
@@ -747,13 +1048,19 @@ TblDIFFit <- TblDifFit
 #' Create a table with the analysis code
 #'
 #' @param collapsed A data frame with the collapsed item categories generated
-#' by [scaling::collapse_response_categories()].
+#' by [collapse_response_categories()].
 #' @param tbl A logical to return the table (`TRUE`) instead of the code (`FALSE`).
 #' @param special A logical for special schools (`TRUE`) or regular schools
 #' (`FALSE`).
-#' @returns A flextable.
+#' @returns A `knitr::knit_child()` object or a vector.
 #' @inheritParams collapse_response_categories
 #' @export
+#' @examples
+#' \dontrun{
+#' data(ex2)
+#'
+#' TblCode(ex2$vars, "mixed", tbl = FALSE)
+#' }
 TblCode <- function(vars, select, collapsed = NULL, tbl = TRUE,
                     special = FALSE) {
 

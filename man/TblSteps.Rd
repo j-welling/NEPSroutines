@@ -4,11 +4,11 @@
 \alias{TblSteps}
 \title{Create table with step parameters}
 \usage{
-TblSteps(obj, footnote = NULL, size = 10, width = 1)
+TblSteps(obj, footnote = NULL, size = 10, width = 1, digits = 2)
 }
 \arguments{
 \item{obj}{A list with data frames with sheets from "irt_poly.xlsx"
-or sheet "steps" from "irt_poly.xlsx" created by [scaling::irt_analysis()].}
+or sheet "steps" from "irt_poly.xlsx" created by [irt_analysis()].}
 
 \item{footnote}{A table note.}
 
@@ -17,10 +17,44 @@ or sheet "steps" from "irt_poly.xlsx" created by [scaling::irt_analysis()].}
 \item{width}{The widths of the columns; if a single value is provided, it
 will be applied to all columns; otherwise the length must correspond to the
 number of columns in `obj`.}
+
+\item{digits}{A number for rounding.}
 }
 \value{
 A flextable.
 }
 \description{
 Create table with step parameters
+}
+\examples{
+\dontrun{
+data(ex2)
+
+# IRT analyses
+tmpdir <- tempdir()
+irt_analysis(
+ resp = ex2$resp,
+ vars = ex2$vars,
+ select = "mixed",
+ valid = "valid",
+ plots = FALSE,
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ warn = FALSE,
+ verbose = FALSE,
+)
+
+# Import results of IRT analyses
+pars <- Import(tmpdir, "/irt_poly.xlsx")
+
+# Default parameter table
+TblSteps(pars)
+
+# Parameter table with larger font size and footnote
+TblSteps(pars, size = 12, footnote = "Nothing to note.")
+}
 }

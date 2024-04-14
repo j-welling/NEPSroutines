@@ -28,7 +28,7 @@ TblMVI(
 \arguments{
 \item{obj}{A list with data frames with sheets from "mv_item.xlsx"
 or a data frame with sheet "summary" from "mv_item.xlsx" created by
-[scaling::mv_item()].}
+[mv_item()].}
 
 \item{select}{An optional name of a specific group to select.}
 
@@ -49,4 +49,39 @@ A flextable.
 }
 \description{
 Create a table for missing responses by item
+}
+\examples{
+\dontrun{
+data(ex1)
+
+# Missing analyses by item
+tmpdir <- tempdir()
+mv_item(
+ resp = ex1$resp,
+ vars = ex1$vars,
+ select = "dich",
+ valid = "valid",
+ mvs = c(OM = -97, NV = -95, NR = -94),
+ pos = "pos",
+ plots = FALSE,
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ warn = FALSE,
+ verbose = FALSE,
+)
+
+# Import results of missing analyses
+mvi <- Import(tmpdir, "/mv_item.xlsx")
+
+# Table with default columns
+TblMvi(mvi)
+
+# Table with all missing responses and total number of respondents sorted
+#  by number of valid responses
+TblMvi(mvi, excl = NULL, sort = "N_valid")
+}
 }

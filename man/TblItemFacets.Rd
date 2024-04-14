@@ -49,3 +49,24 @@ A flextable.
 \description{
 Create a table with facets for each item
 }
+\examples{
+\dontrun{
+data(ex2)
+
+# Table with content areas
+TblItemFacets(
+  ex2$vars,
+  select = "mixed",
+  facets = c("Content area" = "content")
+)
+
+# Table with content areas, response formats, and item position
+TblItemFacets(
+  ex2$vars,
+  select = "mixed",
+  facets = c("Content area" = "content", "Response format" = "type"),
+  position = "pos",
+  footnote = "MC = simple multiple-choice, CMC = complex multiple-choice"
+)
+}
+}

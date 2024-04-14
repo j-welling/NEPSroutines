@@ -8,7 +8,7 @@ test_that("import single sheet works", {
   }, silent = TRUE)
   expect_false(inherits(tbl, "try-error"))
   expect_true(is.data.frame(tbl))
-  expect_equal(dim(tbl), c(15, 9))
+  expect_equal(dim(tbl), c(15, 13))
 
 })
 
@@ -22,7 +22,7 @@ test_that("import all sheets works", {
   expect_false(inherits(tbl, "try_error"))
   expect_length(tbl, 2)
   expect_contains(names(tbl), c("list", "summary"))
-  expect_equal(dim(tbl$list), c(15, 9))
+  expect_equal(dim(tbl$list), c(15, 13))
 
 })
 

@@ -15,7 +15,7 @@ TblPars(
 \arguments{
 \item{obj}{A list with data frames with sheets from "irt_poly.xlsx"
 or a data frame with sheet "summary" from "irt_poly.xlsx" created by
-[scaling::irt_analysis()].}
+[irt_analysis()].}
 
 \item{footnote}{A table note.}
 
@@ -32,4 +32,37 @@ A flextable.
 }
 \description{
 Create table with item parameters
+}
+\examples{
+\dontrun{
+data(ex1)
+
+# IRT analyses
+tmpdir <- tempdir()
+irt_analysis(
+ resp = ex1$resp,
+ vars = ex1$vars,
+ select = "dich",
+ valid = "valid",
+ plots = FALSE,
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ warn = FALSE,
+ verbose = FALSE,
+)
+
+# Import results of IRT analyses
+pars <- Import(tmpdir, "/irt_dich.xlsx")
+
+# Default parameter table
+TblPars(pars)
+
+# Parameter table including number of respondents the item was adminstered
+# and a footnote
+TblPars(pars, excl = NULL, footnote = "Nothing to report.")
+}
 }

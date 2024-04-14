@@ -15,7 +15,7 @@ variables that are further defined in the function arguments}
 contains the item names of the polytomous items}
 
 \item{collapsed}{A data frame with the collapsed item categories generated
-by [scaling::collapse_response_categories()].}
+by [collapse_response_categories()].}
 
 \item{tbl}{A logical to return the table (`TRUE`) instead of the code (`FALSE`).}
 
@@ -23,8 +23,15 @@ by [scaling::collapse_response_categories()].}
 (`FALSE`).}
 }
 \value{
-A flextable.
+A `knitr::knit_child()` object or a vector.
 }
 \description{
 Create a table with the analysis code
+}
+\examples{
+\dontrun{
+data(ex2)
+
+TblCode(ex2$vars, "mixed", tbl = FALSE)
+}
 }

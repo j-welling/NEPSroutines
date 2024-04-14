@@ -3,6 +3,7 @@ test_that("create table with item properties works", {
 
   skip_if_not_installed("flextable")
   data("ex2")
+  data("ex3")
 
   tbl <- try({
     TblItemProps(vars = ex2$vars, select = "mixed", prop = "type",
@@ -11,6 +12,20 @@ test_that("create table with item properties works", {
   expect_false(inherits(tbl, "try-error"))
   expect_true(inherits(tbl, "flextable"))
   expect_equal(rlang::hash(tbl), "d2d32dd355e6e8b6c57d008b24e159c5")
+
+  tbl <- try({
+    ex3$vars$mixed1 <- ex3$vars$mixed & ex3$vars$booklet1
+    ex3$vars$mixed2 <- ex3$vars$mixed & ex3$vars$booklet2
+    ex3$vars$mixed3 <- ex3$vars$mixed & ex3$vars$booklet3
+    TblItemProps(vars = ex3$vars,
+                 select = c("Booklet 1" = "mixed1", "Booklet 2" = "mixed2",
+                            "Booklet 3" = "mixed3"),
+                 prop = "type",
+                 propname = "Response formats")
+  })
+  expect_false(inherits(tbl, "try-error"))
+  expect_true(inherits(tbl, "flextable"))
+  expect_equal(rlang::hash(tbl), "9967500c8157d9966882dc8f738be307")
 
 })
 
@@ -22,12 +37,22 @@ test_that("create table with item facets works", {
 
   tbl <- try({
     TblItemFacets(vars = ex2$vars, select = "mixed",
-                  facets = c("Content area" = "content"),
-                  position = "pos")
+                  facets = c("Content area" = "content"))
   })
   expect_false(inherits(tbl, "try-error"))
   expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "c12fc5b0b40bf323562e49f1e9e8faa7")
+  expect_equal(rlang::hash(tbl), "48aeb0e742ee85d4c77ea1408ae507cf")
+
+  tbl <- try({
+    TblItemFacets(vars = ex2$vars, select = "mixed",
+                  facets = c("Content area" = "content",
+                             "Response formats" = "type"),
+                  position = "pos",
+                  footnote = "MC = simple multiple-choice, CMC = complex multiple-choice")
+  })
+  expect_false(inherits(tbl, "try-error"))
+  expect_true(inherits(tbl, "flextable"))
+  expect_equal(rlang::hash(tbl), "a5b9d782fcfe198aac7439511572edd6")
 
 })
 
@@ -35,13 +60,17 @@ test_that("create table with item facets works", {
 test_that("create table for missing values by item works", {
 
   skip_if_not_installed("flextable")
-  tbl <- try({
-    tab <- Import(test_path("fixtures/ex1/tables"), "mv_item.xlsx")
-    TblMvi(tab, footnote = "Nothing of note happend.")
-  })
+
+  tab <- try({ Import(test_path("fixtures/ex1/tables"), "mv_item.xlsx") })
+  tbl <- try({ TblMvi(tab, footnote = "Nothing of note happend.") })
   expect_false(inherits(tbl, "try-error"))
   expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "61e85e57564ff9e836a01a23be197f8b")
+  expect_equal(rlang::hash(tbl), "4e44550165cc314ef380ea18560deb7b")
+
+  tbl <- try({ TblMvi(tab, excl = "", sort = "N_valid") })
+  expect_false(inherits(tbl, "try-error"))
+  expect_true(inherits(tbl, "flextable"))
+  expect_equal(rlang::hash(tbl), "ac52a5881325307b9b7262675c34e1c8")
 
 })
 
@@ -55,7 +84,7 @@ test_that("create table for item parameters works", {
   })
   expect_false(inherits(tbl, "try-error"))
   expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "8c5cbfb62a25fe833b0227eb27d897ad")
+  expect_equal(rlang::hash(tbl), "d68ecd341b8c2c2364c25997de0461f1")
 
 })
 
@@ -69,7 +98,7 @@ test_that("create table for step parameters works", {
   })
   expect_false(inherits(tbl, "try-error"))
   expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "2813e6300c376a597ca9e7bf81496d69")
+  expect_equal(rlang::hash(tbl), "39fae38efbf2c4a09985f23fa4d59335")
 
 })
 
@@ -92,13 +121,24 @@ test_that("create table for facet correlations works", {
 test_that("create table for dif works", {
 
   skip_if_not_installed("flextable")
+
   tbl <- try({
     tab <- Import(test_path("fixtures/ex1/tables"), "dif_dich_TR.xlsx")
-    TblDif(tab, footnote = "Nothing to note.")
+    TblDif(tab, footnote = "Nothing to note.",
+           colnames2 = c("mig.1-3" = "without vs. missing",
+                         "mig.2-3" = "with vs. missing"))
   })
   expect_false(inherits(tbl, "try-error"))
   expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "2ac6c959b8b8266ac323ebf048459a45")
+  expect_equal(rlang::hash(tbl), "2700025522a8132ad26759bf2b4979db")
+
+  tbl <- try({
+    tab <- Import(test_path("fixtures/ex1/tables"), "dif_dich_TR.xlsx")
+    TblDif(tab, excl = c("mig.1-3", "mig.2-3"), size = 12)
+  })
+  expect_false(inherits(tbl, "try-error"))
+  expect_true(inherits(tbl, "flextable"))
+  expect_equal(rlang::hash(tbl), "6c30e6c607a8ba71af8abbceab64a642")
 
 })
 
@@ -106,6 +146,7 @@ test_that("create table for dif works", {
 test_that("create table for dif model fit works", {
 
   skip_if_not_installed("flextable")
+
   tbl <- try({
     tab <- Import(test_path("fixtures/ex1/tables"), "dif_dich_TR.xlsx")
     TblDifFit(tab, footnote = "Nothing to note.")
@@ -113,6 +154,14 @@ test_that("create table for dif model fit works", {
   expect_false(inherits(tbl, "try-error"))
   expect_true(inherits(tbl, "flextable"))
   expect_equal(rlang::hash(tbl), "e33303258c01b59166e5ed3bd83af00a")
+
+  tbl <- try({
+    tab <- Import(test_path("fixtures/ex1/tables"), "dif_dich_TR.xlsx")
+    TblDifFit(tab, excl = "sex", label = c("mig" = "Migrant background"))
+  })
+  expect_false(inherits(tbl, "try-error"))
+  expect_true(inherits(tbl, "flextable"))
+  expect_equal(rlang::hash(tbl), "2a6f0c7c34fb090331110074937bf926")
 
 })
 

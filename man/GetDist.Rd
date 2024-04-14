@@ -8,7 +8,7 @@ GetDist(obj, stat = median, correct = FALSE, item = FALSE, digits = 2)
 }
 \arguments{
 \item{obj}{A data frame with sheets from "distractors_summary.xlsx"
-created by [scaling::dis_analysis()].}
+created by [dis_analysis()].}
 
 \item{stat}{A function used to summarize the distractor correlations.}
 
@@ -31,7 +31,7 @@ data("ex2")
 
 # Distractor analyses
 tmpdir <- tempdir()
-scaling::dis_analysis(
+dis_analysis(
  resp = ex1$resp,
  vars = ex1$vars,
  select_raw = "raw",
@@ -50,13 +50,13 @@ scaling::dis_analysis(
 dist <- Import(tmpdir, "distractors_summary.xlsx")
 
 # Median total-rest correlations for the distractors
-scaling::GetDist(dist, median)
+GetDist(dist, median)
 
 # Smallest total-rest correlations for the correct responses
-scaling::GetDist(dist, min, correct = TRUE)
+GetDist(dist, min, correct = TRUE)
 
 # Item with the largest total-rest correlations for the distractors
-scaling::GetDist(dist, max, item = TRUE)
+GetDist(dist, max, item = TRUE)
 
 # Clean up generated files
 file.remove(paste0(tmpdir, "/distractors_summary.xlsx"))

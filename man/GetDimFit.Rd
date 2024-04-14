@@ -8,7 +8,7 @@ GetDimFit(obj, model, type)
 }
 \arguments{
 \item{obj}{A data frame with sheets from "dimensionality.xlsx"
-created by [scaling::dim_analysis()].}
+created by [dim_analysis()].}
 
 \item{model}{A column name identifying the model in `obj` which is typically
 one of uni or dim.}
@@ -28,7 +28,7 @@ data("ex2")
 # Dimensionality analyses
 tmpdir <- tempdir()
 ex2$vars$content <- as.numeric(ex2$vars$content)
-scaling::dim_analysis(
+dim_analysis(
  resp = ex2$resp,
  vars = ex2$vars,
  select = "mixed",
@@ -48,10 +48,10 @@ scaling::dim_analysis(
 dim <- Import(tmpdir, "/dimensionality.xlsx")
 
 # AIC for multidimensonal model for variable content
-scaling::GetDimFit(dim, "content", "AIC")
+GetDimFit(dim, "content", "AIC")
 
 # BIC for unidimensional model
-scaling::GetDimFit(dim, "uni", "BIC")
+GetDimFit(dim, "uni", "BIC")
 
 # Clean up generated files
 file.remove(paste0(tmpdir, "/dimensionality.xlsx"))

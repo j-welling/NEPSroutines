@@ -8,7 +8,7 @@ GetPars(obj, type, stat = median, item = FALSE, excl = NULL, digits = 2)
 }
 \arguments{
 \item{obj}{A data frame with sheets from "irt_dich.xlsx" or "irt_poly.xlsx"
-created by [scaling::irt_analysis()].}
+created by [irt_analysis()].}
 
 \item{type}{A column name in `obj` identifying an item statistic.}
 
@@ -43,7 +43,7 @@ data("ex1")
 
 # IRT analyses
 tmpdir <- tempdir()
-scaling::irt_analysis(
+irt_analysis(
  resp = ex1$resp,
  vars = ex1$vars,
  select = "dich",
@@ -60,19 +60,19 @@ scaling::irt_analysis(
 )
 
 # Import results of IRT analyses
-pars <- scaling::Import(tmpdir, "/irt_dich.xlsx")
+pars <- Import(tmpdir, "/irt_dich.xlsx")
 
 # Smallest percentage of correct responses
-scaling::GetPars(pars, "correct", min)
+GetPars(pars, "correct", min)
 
 # Most difficult item
-scaling::GetPars(pars, "xsi", max, item = TRUE)
+GetPars(pars, "xsi", max, item = TRUE)
 
 # Items with a difficulty smaller than -2
-scaling::GetPars(pars, "xsi", "<-2", item = TRUE)
+GetPars(pars, "xsi", "<-2", item = TRUE)
 
 # Largest WMNSQ between 1 and 1.2
-scaling::GetPars(pars, "WMNSQ", max, excl = "<1|>1.2")
+GetPars(pars, "WMNSQ", max, excl = "<1|>1.2")
 # Clean up generated files
 file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
 file.remove(paste0(tmpdir, "/irt_dich.rds"))

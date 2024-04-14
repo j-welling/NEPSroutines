@@ -88,7 +88,7 @@ For multiple authors, the block (including `name`, `affiliations`, `orcid`, and 
 
 The first page of the NEPS Survey Paper lists *all* email addresses found in the `authors` setting under **E-mail address of the lead author**. If only the email address of a specific author should be listed, only this email address should be set in the `authors` setting, while the setting should remain empty for the other authors.
 
-For the rare case that multiple affiliations are available for a specific authors, these should be listed on new lines beginning with `-`. Then, automatic superscipts are generated to distinguish between the different affiliations on the title page of the technical report. The following example gives the settings for two authors, with the second author having two affiliations, one of which is shared with the first author.
+For the rare case that multiple affiliations are available for a specific author, these should be listed on new lines beginning with `-`. Then, automatic superscipts are generated to distinguish between the different affiliations on the title page of the technical report. The following example gives the settings for two authors, with the second author having two affiliations, one of which is shared with the first author.
 
 ```         
 author: 
@@ -119,7 +119,7 @@ Because the Quarto document is an extended R Markdown file, R code can be includ
 path <- ""
 
 # Load response data and variable definitions
-load(paste0(path, "data/data.R"))
+load(paste0(path, "data/data.Rdata"))
 
 # Load scaling results
 mvi <- Import(paste0(path, "tables/"), "mv_item.xlsx")
@@ -133,7 +133,7 @@ dif <- Import(paste0(path, "tables/"), regexp = "^dif_poly_([^_]+)")
 
 This block requires some modifications to identify the scaling results for the technical report. First, the `path` object needs to define the (absolute or relative) path to the folder containing the scaling results obtained with `scaling`. It should point to the top folder containing the `.rpoj` file.
 
-Then, the raw data including the variables to describe the sample (i.e., `sex`, `rotation`, `valid`) and the variable definition file need to be imported. Because these are non-standard files that are used but not created by `scaling`, there is no standard way to import them. After running `load(paste0(path, "data/data.R"))` or an appropriately adapted code, the environment should include an object `data` with a data frame including the data with sample information and an object `vars` with a data frame of the item characteristics.
+Then, the raw data including the variables to describe the sample (i.e., `sex`, `rotation`, `valid`) and the variable definition file need to be imported. Because these are non-standard files that are used but not created by `scaling`, there is no standard way to import them. After running `load(paste0(path, "data/data.Rdata"))` or an appropriately adapted code, the environment should include an object `data` with a data frame including the data with sample information and an object `vars` with a data frame of the item characteristics.
 
 The remaining lines of the R block import the relevant `scaling` results. For simple analyses that create only the specified files no modifications are required. However, more complex analyses that, for example, include different booklets or different subsamples (e.g., from regular and special schools), the results might be more complex and located in different files. In this case, these files have to be imported by adapting the respective lines. The precise object names holding the imported results are not important, as long as they are correctly referenced in the remainder of the document.
 

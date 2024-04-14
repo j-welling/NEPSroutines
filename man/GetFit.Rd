@@ -8,7 +8,7 @@ GetFit(obj, type, GPCM = FALSE, digits = 2)
 }
 \arguments{
 \item{obj}{A data frame with sheets from "irt_dich.xlsx" or "irt_poly.xlsx"
-created by [scaling::irt_analysis()].}
+created by [irt_analysis()].}
 
 \item{type}{A column name in `obj` identifying the model fit statistic.}
 
@@ -28,7 +28,7 @@ data("ex1")
 
 # IRT analyses
 tmpdir <- tempdir()
-scaling::irt_analysis(
+irt_analysis(
  resp = ex1$resp,
  vars = ex1$vars,
  select = "dich",
@@ -48,10 +48,10 @@ scaling::irt_analysis(
 pars <- Import(tmpdir, "irt_dich.xlsx")
 
 # BIC for the Rasch model
-scaling::GetFit(pars, "BIC")
+GetFit(pars, "BIC")
 
 # Number of parameters in the 2PL
-scaling::GetFit(pars, "Npars", GPCM = TRUE)
+GetFit(pars, "Npars", GPCM = TRUE)
 
 # Clean up generated files
 file.remove(paste0(tmpdir, "/irt_dich.xlsx"))

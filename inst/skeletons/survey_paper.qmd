@@ -22,7 +22,7 @@ library(scaling)
 path <- ""
 
 # Load response data and variable definitions
-load(paste0(path, "data/data.R"))
+load(paste0(path, "data/data.Rdata"))
 
 # Load scaling results
 mvi <- Import(paste0(path, "tables/"), "mv_item.xlsx")

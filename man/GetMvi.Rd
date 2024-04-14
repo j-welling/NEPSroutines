@@ -12,7 +12,7 @@ GetMVI(obj, type, stat, digits = 0)
 \arguments{
 \item{obj}{A list with data frames with sheets from "mv_item.xlsx"
 or a single data frame with the sheet "summary" from "mv_item.xlsx" created
-by [scaling::mv_item()].}
+by [mv_item()].}
 
 \item{type}{The type of missing values identifying the row in `obj` which is
 typcially one of OM, NR, NV, ND, or ALL.}
@@ -33,7 +33,7 @@ data("ex1")
 
 # Missing analyses by item
 tmpdir <- tempdir()
-scaling::mv_item(
+mv_item(
  resp = ex1$resp,
  vars = ex1$vars,
  select = "dich",
@@ -51,13 +51,13 @@ scaling::mv_item(
 )
 
 # Import results of missing analyses
-mvi <- scaling::Import(tmpdir, "/mv_item.xlsx")
+mvi <- Import(tmpdir, "/mv_item.xlsx")
 
 # Largest percentage of invalid responses
-scaling::GetMvi(mvi, "NV", "Max")
+GetMvi(mvi, "NV", "Max")
 
 # Median percentage of missing values with two decimals
-scaling::GetMvi(mvi, "ALL", "Median", digits = 2)
+GetMvi(mvi, "ALL", "Median", digits = 2)
 
 # Clean up generated files
 file.remove(paste0(tmpdir, "/mv_item.xlsx"))

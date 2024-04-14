@@ -11,7 +11,7 @@ GetDIFFit(obj, difvar, type, model = "dif")
 }
 \arguments{
 \item{obj}{A data frame with sheets from "dif_dich_TR.xlsx" or
-"dif_poly_TR.xlsx" created by [scaling::dif_analysis()].}
+"dif_poly_TR.xlsx" created by [dif_analysis()].}
 
 \item{difvar}{The DIF variable.}
 
@@ -31,7 +31,7 @@ data("ex1")
 
 # DIF analyses
 tmpdir <- tempdir()
-scaling::dif_analysis(
+dif_analysis(
  resp = ex1$resp,
  vars = ex1$vars,
  select = "dich",
@@ -52,10 +52,10 @@ scaling::dif_analysis(
 dif <- Import(tmpdir, "dif_dich_TR.xlsx")
 
 # AIC for the variable sex in the DIF model
-scaling::GetDifFit(dif, "sex", "AIC")
+GetDifFit(dif, "sex", "AIC")
 
 # BIC for the variable mig in the main effect model
-scaling::GetDifFit(dif, "mig", "BIC", model = "main")
+GetDifFit(dif, "mig", "BIC", model = "main")
 
 # Clean up generated files
 file.remove(paste0(tmpdir, "/dif_dich_sex.xlsx"))

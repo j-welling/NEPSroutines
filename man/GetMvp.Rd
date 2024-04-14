@@ -11,7 +11,7 @@ GetMVP(obj, type, value, digits = 0)
 }
 \arguments{
 \item{obj}{A list with data frames with sheets from "mv_person.xlsx"
-created by [scaling::mv_person()].}
+created by [mv_person()].}
 
 \item{type}{The type of missing value which is typically one of
 OM, NR, NV, ND, or ALL.}
@@ -34,7 +34,7 @@ data("ex1")
 
 # Missing analyses by person
 tmpdir <- tempdir()
-scaling::mv_person(
+mv_person(
  resp = ex1$resp,
  vars = ex1$vars,
  select = "dich",
@@ -51,13 +51,13 @@ scaling::mv_person(
 )
 
 # Import results of missing analyses
-mvp <- scaling::Import(tmpdir, "/mv_person.xlsx")
+mvp <- Import(tmpdir, "/mv_person.xlsx")
 
 # Percentage of respondents with 0 invalid responses
-scaling::GetMvp(mvp, "NV", "=0")
+GetMvp(mvp, "NV", "=0")
 
 # Percentage of respondents with more than 5 missing responses with one decimal
-scaling::GetMvp(mvp, "ALL", ">5", digits = 1)
+GetMvp(mvp, "ALL", ">5", digits = 1)
 
 # Clean up generated files
 file.remove(paste0(tmpdir, "/mv_person.xlsx"))

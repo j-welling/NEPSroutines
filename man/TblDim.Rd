@@ -16,7 +16,7 @@ TblDim(
 }
 \arguments{
 \item{obj}{A data frame with sheets from "dimensionality.xlsx"
-created by [scaling::dim_analysis()].}
+created by [dim_analysis()].}
 
 \item{model}{The model name, typically `uni` for the unidimensional
 reference model and the name of the facet variable.}
@@ -38,4 +38,38 @@ A flextable.
 }
 \description{
 Create correlation table for multi-dimensional models
+}
+\examples{
+\dontrun{
+data(ex2)
+
+# Dimensionality analyses
+tmpdir <- tempdir()
+ex2$vars$content <- as.numeric(ex2$vars$content)
+dim_analysis(
+ resp = ex2$resp,
+ vars = ex2$vars,
+ select = "mixed",
+ valid = "valid",
+ dim = "content",
+ snodes = 5,# only for speed; model will not converge!
+ print = FALSE,
+ save = TRUE,
+ return = FALSE,
+ path_results = tmpdir,
+ path_table = tmpdir,
+ overwrite = TRUE,
+ verbose = FALSE,
+)
+
+# Import results of dimensionality analyses
+dim <- Import(tmpdir, "/dimensionality.xlsx")
+
+# Default correlation table
+TblDim(dim, "content")
+
+# Correlation table with labels
+TblDim(dim, "content",
+       rownames = c("Units", "Change", "Space", "Data"))
+}
 }

@@ -8,7 +8,7 @@ GetDim(obj, model = "dim", stat = median, var = FALSE, digits = 2)
 }
 \arguments{
 \item{obj}{A data frame with sheets from "dimensionality.xlsx"
-created by [scaling::dim_analysis()].}
+created by [dim_analysis()].}
 
 \item{model}{A model name which is typically one of uni or dim.}
 
@@ -31,7 +31,7 @@ data("ex2")
 # Dimensionality analyses
 tmpdir <- tempdir()
 ex2$vars$content <- as.numeric(ex2$vars$content)
-scaling::dim_analysis(
+dim_analysis(
  resp = ex2$resp,
  vars = ex2$vars,
  select = "mixed",
@@ -52,11 +52,11 @@ dim <- Import(tmpdir, "/dimensionality.xlsx")
 
 # Median correlation between factors for variable content
 #   Note: not meaningful here because the model did not converge
-scaling::GetDim(dim, "content", median)
+GetDim(dim, "content", median)
 
 # Largest variance of the dimensions for variable content
 #   Note: not meaningful here because the model did not converge
-scaling::GetDim(dim, "content", max, var = TRUE)
+GetDim(dim, "content", max, var = TRUE)
 
 # Clean up generated files
 file.remove(paste0(tmpdir, "/dimensionality.xlsx"))

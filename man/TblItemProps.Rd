@@ -57,3 +57,30 @@ A flextable.
 \description{
 Create a table with item properties
 }
+\examples{
+\dontrun{
+data(ex2)
+data(ex3)
+
+# Table with content areas for a single group
+TblItemProps(
+  ex2$vars,
+  select = c("Number of items" = "mixed"),
+  prop = "content",
+  propname = "Content area"
+)
+
+# Number of response format for three booklets with a footnote
+ex3$vars$mixed1 <- ex3$vars$mixed & ex3$vars$booklet1
+ex3$vars$mixed2 <- ex3$vars$mixed & ex3$vars$booklet2
+ex3$vars$mixed3 <- ex3$vars$mixed & ex3$vars$booklet3
+TblItemProps(
+  ex3$vars,
+  select = c("Booklet 1" = "mixed1", "Booklet 2" = "mixed2",
+             "Booklet 3" = "mixed3"),
+  prop = "type",
+  propname = "Response format",
+  footnote = "The study administered three difficulty-tiered booklets."
+)
+}
+}

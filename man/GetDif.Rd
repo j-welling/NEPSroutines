@@ -31,7 +31,7 @@ GetDIF(
 }
 \arguments{
 \item{obj}{A data frame with sheets from "dif_dich_XXX.xlsx" or
-"dif_poly_XXX.xlsx" created by [scaling::dif_analysis()].}
+"dif_poly_XXX.xlsx" created by [dif_analysis()].}
 
 \item{n}{A group name to return the sample size of this group
 (corresponds to the values in column "number" of sheet "facet").}
@@ -74,7 +74,7 @@ data("ex1")
 
 # DIF analyses
 tmpdir <- tempdir()
-scaling::dif_analysis(
+dif_analysis(
  resp = ex1$resp,
  vars = ex1$vars,
  select = "dich",
@@ -95,29 +95,29 @@ scaling::dif_analysis(
 dif <- Import(tmpdir, regexp = "^dif_dich_([^_]+\\\\.xlsx)")
 
 # Sample size for men (coded as 0)
-scaling::GetDif(dif$sex, n = 0)
+GetDif(dif$sex, n = 0)
 
 # Standardized main effect in the DIF model for sex
-scaling::GetDif(dif$sex, main = "std", model = "dif2)
+GetDif(dif$sex, main = "std", model = "dif")
 
 # Unstandardized main effect in the main effect model for mig
 # for the comparison of migrants (coded 1) and the missing group (coded 3)
-scaling::GetDif(dif$mig, main = "ustd", group = "1-3", model = "main)
+GetDif(dif$mig, main = "ustd", group = "1-3", model = "main")
 
 # Median of the unsigned (absolute) DIF effects for sex
-scaling::GetDif(dif$sex, dif = median)
+GetDif(dif$sex, dif = median)
 
 # Largest signed DIF effects for mig for the comparision of migrants
 # (coded 1) and non-migrants (coded 2)
-scaling::GetDif(dif$mig, dif = max, signed = TRUE, group = "1-2")
+GetDif(dif$mig, dif = max, signed = TRUE, group = "1-2")
 
 # Number of unsigned (absolute) DIF effects for mig greater than .4
 # across all groups
-scaling::GetDif(dif$mig, dif = ">.4")
+GetDif(dif$mig, dif = ">.4")
 
 # Items with signed DIF effects for mig greater than .4
 # across all groups
-scaling::GetDif(dif$mig, dif = ">.4", signed = TRUE, item = TRUE)
+GetDif(dif$mig, dif = ">.4", signed = TRUE, item = TRUE)
 
 # Clean up generated files
 file.remove(paste0(tmpdir, "/dif_dich_sex.xlsx"))
