@@ -535,7 +535,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
 
         # save plot
         ggplot2::ggsave(
-            filename = paste0("Missing_responses_by_person (", i,").png"),
+            filename = paste0("Missing_responses_by_person_", i,".png"),
             plot = gg, path = path_, width = 2000, height = 1200, units = "px",
             dpi = 300
         )

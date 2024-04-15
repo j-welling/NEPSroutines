@@ -686,7 +686,7 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL, position,
 
     # save plot
     ggplot2::ggsave(
-      filename = paste0("Missing_responses_by_item (", i,").png"),
+      filename = paste0("Missing_responses_by_item_", i,".png"),
       plot = gg, path = path_, width = 2000, height = 1200, units = "px",
       dpi = 300
     )
