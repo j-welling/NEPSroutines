@@ -32,7 +32,7 @@
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param path_plots  string; defines path to folder where plots shall be saved
 #' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
-#'                       for items with collapsed categories
+#'  for items with collapsed categories
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
 #' @param color  character scalar or vector; defines color(s) of the bar in plots
@@ -417,7 +417,7 @@ mvi_analysis <- function(resp, vars, select, position,
 #' design
 #' @param path  string; defines path to folder where table shall be saved
 #' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
-#'                       for items with collapsed categories
+#'  for items with collapsed categories
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param overwrite  logical; whether to overwrite existing file when saving table
 #' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
