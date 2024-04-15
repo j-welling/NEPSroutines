@@ -161,7 +161,7 @@ pc_scoring <- function(resp, poly_items, mvs = NULL) {
 
 collapse_response_categories <- function(resp, vars, select = 'poly',
                                          per_cat = 200, save = FALSE,
-                                         path_table = here::here("Tables")) {
+                                         path_table = "Tables") {
 
   # Check whether variables are indeed contained in data.frames
   scaling:::check_logicals(vars, "vars", select, warn = TRUE)
