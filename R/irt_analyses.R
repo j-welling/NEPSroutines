@@ -540,7 +540,7 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   fit <- TAM::msq.itemfit(mod)$itemfit[, c("item", "Infit", "Infit_t", "Infit_p")]
 
   # Item parameters and standard errors
-  x <- capture.output(pars <- TAM::tam.se(mod))
+  x <- capture.output(pars <- suppressWarnings(TAM::tam.se(mod)))
   pars <- dplyr::left_join(pars$xsi, pars$B, by = "item")
   names(pars) <- c("Item", "xsi", "se(xsi)", "alpha", "se(alpha)")
 
