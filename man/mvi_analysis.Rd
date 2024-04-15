@@ -11,6 +11,7 @@ mvi_analysis(
   position,
   valid = NULL,
   grouping = NULL,
+  stages = NULL,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21),
   missing_by_design = -54,
   path = here::here("Results"),
@@ -44,6 +45,9 @@ groups (as in "grouping") as names of elements and names of variables as element
 \item{grouping}{character vector; contains for each group a name of a logical
 variable in resp and vars that indicates to which group belongs a person or
 an item}
+
+\item{stages}{character vector; contains names of stage variables in resp and vars,
+only applicable in multistage tests (otherwise NULL)}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
 

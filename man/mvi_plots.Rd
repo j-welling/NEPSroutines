@@ -9,6 +9,7 @@ mvi_plots(
   vars,
   select,
   grouping = NULL,
+  position,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21),
   labels_mvs = c(ALL = "total missing items", OM = "omitted items", NV =
     "not valid items", NR = "not reached items", TA =

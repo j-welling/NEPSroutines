@@ -1,0 +1,76 @@
+
+\begin{titlepage}
+\thispagestyle{titlepage}
+
+\begin{center}
+\vspace{72pt}
+\begin{doublespace}
+\fontsize{18pt}{0}
+\textbf{$title$}\\
+\end{doublespace}
+\vspace{30pt}
+\textit{
+    \fontsize{14pt}{0}\selectfont
+    $for(authors)$
+    $authors.name.literal$$authors.affiliationid$$if(authors.orcid)$\ \orcid{$authors.orcid$}$authors.authorsep$$else$$authors.authorsep$$endif$
+    $endfor$
+}
+\\ \vspace{12pt}
+\textit{
+    \fontsize{14pt}{0}\selectfont
+    $for(affiliations)$
+    $affiliations.affiliationid$$affiliations.name$\\ \vspace{5pt}
+    $endfor$
+}
+\vspace{36pt}
+\end{center}
+\vspace{48pt}
+\begin{flushleft}
+$if(email)$
+\textbf{E-mail address of the lead author:}\\
+\vspace{6pt}
+$email$ \\
+\vspace{12pt}
+$endif$
+$if(bibdata.authors)$
+\textbf{Bibliographic data:}\\
+\vspace{6pt} % edit
+\begin{spacing}{$linestretch$}
+$bibdata.authors$~($bibdata.year$). \textit{$bibdata.title$} ($bibdata.series$\ No.~$bibdata.number$). $bibdata.institution$.$if(bibdata.doi)$\ $bibdata.doi$$endif$$if(bibdata.url)$\ \url{$bibdata.url$}$endif$
+\end{spacing}
+$endif$
+\end{flushleft}
+
+\vfill
+
+$if(acknowledgements)$
+\begin{spacing}{$linestretch$}
+\textbf{Acknowledgements}.
+$acknowledgements$
+\end{spacing}
+$endif$
+\end{titlepage}
+
+
+$if(abstract)$
+\newpage
+\pagestyle{scrheadings}
+\begin{doublespace}
+\fontsize{18pt}{0}
+\textbf{$title$}\\
+\end{doublespace}
+
+\begin{spacing}{$linestretch$}
+\textbf{Abstract}
+
+$abstract$
+$if(keywords)$
+
+\textbf{Keywords}
+
+$keywords$
+$endif$
+\end{spacing}
+$endif$
+
+\newpage

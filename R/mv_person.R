@@ -70,7 +70,9 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
                       digits = 3, warn = TRUE, verbose = TRUE) {
 
     # Test data
-    scaling:::check_logicals(resp, "resp", c(valid, grouping), warn = warn)
+    scaling:::check_logicals(resp, "resp", valid, warn = warn)
+    scaling:::check_logicals(scaling:::only_valid(resp, valid = valid), "resp",
+                             grouping, warn = warn)
     scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
     scaling:::check_items(vars$item[vars[[select]]])
     scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])

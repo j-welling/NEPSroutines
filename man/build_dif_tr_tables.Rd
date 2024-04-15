@@ -10,6 +10,7 @@ build_dif_tr_tables(
   save = TRUE,
   overwrite = FALSE,
   path = here::here("Tables"),
+  suf_item_names = FALSE,
   digits = 3,
   name_group = NULL
 )
@@ -28,6 +29,9 @@ includes variable 'item' containing item names}
 \item{path}{string; indicates the folder location where the summaries
 are stored on the hard drive; please note that the path is relative to the
 current working path set by here::i_am()}
+
+\item{suf_item_names}{logical; whether to output SUF item names in the .xlsx file
+for items with collapsed categories}
 
 \item{digits}{integer; number of decimals for rounding}
 

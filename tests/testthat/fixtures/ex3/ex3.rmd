@@ -1,0 +1,397 @@
+---
+title: "Scaling of NEPS example data ex3"
+author: "Timo Gnambs"
+date: "2024-04-09 14:05:00"
+date-modified: now
+date-format: "YYYY-MM-DD HH:mm:ss"
+title-block-banner: true
+format:
+  html:
+    toc: true
+    number-sections: true
+    embed-resources: true
+    anchor-sections: false
+    link-external-icon: true
+    link-external-newwindow: true
+    code-link: true
+    highlight-style: tango
+    code-fold: show
+    code-tools: true
+    df-print: paged
+---
+
+# R setup
+
+```{r basic setup, message = FALSE}
+
+# Clear work space
+rm(list = ls())
+
+# Load packages
+library(scaling)
+library(rlang)
+
+# Turn of warnings
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+
+# Load example data
+load("../../../../data/ex3.rda")
+resp <- ex3$resp
+vars <- ex3$vars
+
+# Set missing codes
+mvs <- c(OM = -97, NV = -95, NR = -94, ND = -55, NAd = -54)
+labels_mvs <- c(
+  ALL = 'total missing responses',
+  OM = 'omitted items',
+  NV = 'invalid responses',
+  NR = 'not reached items',
+  ND = 'not determinable items',
+  NAd = 'not administered items'
+)
+
+```
+
+# Sample descriptives
+
+```{r descriptives}
+
+# Sample size with only valid cases
+scaling::n_valid(resp, valid = "valid")
+
+# Sample size by test version
+scaling::sample_by_group(
+  resp = resp,
+  grouping_variable = "booklet",
+  labels = c("missing" = -56, "easy" = 1, "medium" = 2, "difficult" = 3),
+  save = TRUE,
+  overwrite = TRUE,
+  path = "tables"
+)
+
+# Descriptives for nominal variables
+scaling::desc_nom(resp, desc = c("sex", "mig", "rotation"), valid = "valid")
+scaling::show_attributes(resp, desc = c("sex", "mig", "rotation"))
+
+# Item type by test version
+scaling::props_by_group(
+  vars = vars,
+  select = "mixed",
+  grouping = c("booklet1", "booklet2", "booklet3"),
+  properties = c("texttype", "type"),
+  save = TRUE,
+  overwrite = TRUE,
+  path = "tables"
+)
+
+```
+
+# Missing responses
+
+## By person
+
+```{r missing responses by person}
+
+scaling::mv_person(
+  resp = resp,
+  vars = vars,
+  select = "dich",
+  valid = "valid",
+  grouping = c("booklet1", "booklet2", "booklet3"),
+  mvs = mvs,
+  labels_mvs = labels_mvs,
+  name_grouping = "Booklet",
+  labels_legend = c("1", "2", "3"),
+  show_all = FALSE,
+  overwrite = TRUE,
+  plots = TRUE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables",
+  path_plots = "plots/missing/by_person",
+  digits = 2,
+  warn = FALSE,
+  verbose = FALSE
+)
+
+```
+
+## By item
+
+```{r missing responses by item}
+
+scaling::mv_item(
+  resp = resp,
+  vars = vars,
+  select = "mixed",
+  valid = "valid",
+  grouping = c("booklet1", "booklet2", "booklet3"),
+  position = c(booklet1 = "pos1", booklet2 = "pos2", booklet3 = "pos3"),
+  mvs = mvs,
+  labels_mvs = labels_mvs,
+  name_grouping = "Booklet",
+  labels_legend = c("1", "2", "3"),
+  show_all = FALSE,
+  overwrite = TRUE,
+  plots = TRUE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables",
+  path_plots = "plots/missing/by_item",
+  digits = 2,
+  warn = FALSE,
+  verbose = FALSE
+)
+
+```
+
+# IRT analyses
+
+## Dichotomous
+
+```{r IRT analysis for dichotomous items}
+
+# by booklet
+vars$dich1 <- vars$dich & vars$booklet1
+vars$dich2 <- vars$dich & vars$booklet2
+vars$dich3 <- vars$dich & vars$booklet3
+scaling::grouped_irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = c(booklet1 = "dich1", booklet2 = "dich2", booklet3 = "dich3"),
+  valid = "valid",
+  mvs = mvs,
+  scoring = "scoring",
+  plots = TRUE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables",
+  path_plots = paste0(getwd(), "/plots"),
+  overwrite = TRUE,
+  digits = 2,
+  verbose = FALSE
+)
+
+# combined
+scaling::irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = "dich",
+  valid = "valid",
+  mvs = mvs,
+  scoring = "scoring",
+  plots = TRUE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables",
+  path_plots = paste0(getwd(), "/plots"),
+  overwrite = TRUE,
+  digits = 2,
+  verbose = FALSE,
+  name_group = "all"
+)
+
+```
+
+## Polytomous
+
+```{r IRT analysis for polytomous items}
+
+# by booklet
+vars$mixed1 <- vars$mixed & vars$booklet1
+vars$mixed2 <- vars$mixed & vars$booklet2
+vars$mixed3 <- vars$mixed & vars$booklet3
+scaling::grouped_irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = c(booklet1 = "mixed1", booklet2 = "mixed2", booklet3 = "mixed3"),
+  valid = "valid",
+  mvs = mvs,
+  scoring = "scoring",
+  plots = TRUE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables",
+  path_plots = paste0(getwd(), "/plots"),
+  overwrite = TRUE,
+  digits = 2,
+  verbose = FALSE
+)
+
+# combined
+scaling::irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = "mixed",
+  valid = "valid",
+  mvs = mvs,
+  scoring = "scoring",
+  plots = TRUE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables",
+  path_plots = paste0(getwd(), "/plots"),
+  overwrite = TRUE,
+  digits = 2,
+  verbose = FALSE,
+  name_group = "all"
+)
+
+```
+
+# DIF analysis
+
+```{r dif analysis for Rasch}
+
+scaling::dif_analysis(
+  resp = resp,
+  vars = vars,
+  select = "dich",
+  valid = "valid",
+  dif_vars = c("sex", "mig"),
+  scoring = "scoring",
+  mvs = mvs,
+  overwrite = TRUE,
+  verbose = FALSE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables",
+  warn = FALSE
+)
+
+```
+
+```{r dif analysis for PCM}
+
+vars$mixed_common <- vars$mixed & vars$booklet1 & vars$booklet2 & vars$booklet3
+scaling::dif_analysis(
+  resp = resp,
+  vars = vars,
+  select = c("mixed", "mixed", "mixed_common"),
+  valid = "valid",
+  dif_vars = c("sex", "mig", "booklet"),
+  scoring = "scoring",
+  mvs = mvs,
+  overwrite = TRUE,
+  verbose = FALSE,
+  save = TRUE,
+  print = FALSE,
+  return = FALSE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables",
+  warn = FALSE
+)
+
+```
+
+# Distractor analysis
+
+```{r distractor analysis}
+
+scaling::dis_analysis(
+  resp = resp,
+  vars = vars,
+  valid = "valid",
+  select_raw = "raw",
+  correct = "correct",
+  mvs = mvs,
+  print = FALSE,
+  save = TRUE,
+  overwrite = TRUE,
+  path_results = paste0(getwd(), "/results"),
+  path_table = "tables"
+)
+
+```
+
+# Create SUF
+
+```{r create suf}
+
+scores <- scaling::create_scores(
+  resp = resp,
+  vars = vars,
+  score_name = "reg7",
+  select = "mixed",
+  valid = "valid",
+  scoring = "scoring",
+  #facet = "rotation", # does not work in current version of scaling
+  num_cat = "num_cat",
+  mvs = mvs,
+  sum_select = "dich",
+  wle = TRUE,
+  sum_score = TRUE,
+  metap = FALSE,
+  return = TRUE,
+  save = TRUE,
+  path_results = paste0(getwd(), "/results")
+)
+
+scaling::create_suf(
+  resp = resp,
+  vars = vars,
+  select = "mixed",
+  competence = 'Reading competence',
+  scores = scores,
+  score_name = 'reg7',
+  return = FALSE,
+  path = paste0(getwd(), "/results")
+)
+rm(scores)
+
+```
+
+# Hash table
+
+```{r hash files}
+
+# Create hash for results and table files
+hashvec <- c()
+dirvec <- c(base::dir("results", full.names = TRUE),
+            base::dir("tables", full.names = TRUE))
+for (i in dirvec)
+  hashvec <- c(hashvec, rlang::hash(i))
+names(hashvec) <- base::basename(dirvec)
+
+# Plots for missing by person
+filelist <- base::dir("plots/missing/by_person", full.names = TRUE)
+hashvec <- c(hashvec, mv_person.plot = rlang::hash(rlang::hash_file(filelist)))
+
+# Plots for missing by item
+filelist <- base::dir("plots/missing/by_item", full.names = TRUE)
+hashvec <- c(hashvec, mv_item.plot = rlang::hash(rlang::hash_file(filelist)))
+
+# Plots for ICCs
+filelist <- base::dir("plots/ICCs", full.names = TRUE, recursive = TRUE)
+hashvec <- c(hashvec, iccs.plot = rlang::hash(rlang::hash_file(filelist)))
+
+# Plots for Wright maps
+filelist <- base::dir("plots/Wright_Maps", full.names = TRUE, recursive = TRUE)
+hashvec <- c(hashvec, wmaps.plot = rlang::hash(rlang::hash_file(filelist)))
+
+# Save hash vector
+saveRDS(hashvec, "ex3hash.rds")
+
+```
+
+# Software
+
+```{r session-info}
+
+sessionInfo()
+
+```
