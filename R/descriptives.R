@@ -212,7 +212,7 @@ show_attributes <- function(resp, desc) {
 #' @export
 
 sample_by_group <- function(resp, grouping_variable, labels = NULL, save = FALSE,
-                            overwrite = FALSE, path = here::here("Tables"),
+                            overwrite = FALSE, path = "Tables",
                             name_group = NULL) {
 
     # Check variable
@@ -281,7 +281,7 @@ sample_by_group <- function(resp, grouping_variable, labels = NULL, save = FALSE
 
 props_by_group <- function(vars, select, grouping, properties, labels = NULL,
                            name_grouping = 'version', save = FALSE,
-                           overwrite = FALSE, path = here::here("Tables"),
+                           overwrite = FALSE, path = "Tables",
                            name_group = NULL, warn = TRUE) {
 
     # Check variables

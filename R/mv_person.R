@@ -62,9 +62,9 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
                       ),
                       missing_by_design = -54, color = NULL,
                       plots = FALSE, print = TRUE, save = TRUE, return = FALSE,
-                      path_results = here::here("Results"),
-                      path_table = here::here("Tables"),
-                      path_plots = here::here("Plots/Missing_Responses/by_person"),
+                      path_results = "Results",
+                      path_table = "Tables",
+                      path_plots = "Plots/Missing_Responses/by_person",
                       show_all = TRUE, overwrite = FALSE, name_group = NULL,
                       name_grouping = 'test version', labels_legend = NULL,
                       digits = 3, warn = TRUE, verbose = TRUE) {
@@ -189,7 +189,7 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, MD = -54, AZ = -21),
                          missing_by_design = -54,
-                         save = TRUE, path = here::here("Results"),
+                         save = TRUE, path = "Results",
                          name_group = NULL, digits = 3, warn = TRUE, test = TRUE) {
 
     # Test data
@@ -289,7 +289,7 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, MD = -54, AZ = -21),
                       missing_by_design = -54,
-                      save = TRUE, path = here::here("Tables"),
+                      save = TRUE, path = "Tables",
                       name_group = NULL, test = TRUE) {
 
   # Missing by design
@@ -379,7 +379,6 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
-#' @importFrom rlang .data
 #' @export
 
 mvp_plots <- function(mv_p, vars, select, grouping = NULL,
@@ -397,7 +396,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
                           AZ = "missing items due to 'Angabe zurueckgesetzt'"
                       ),
                       missing_by_design = -54,
-                      path = here::here("Plots/Missing_Responses/by_person"),
+                      path = "Plots/Missing_Responses/by_person",
                       show_all = TRUE, name_group = NULL, color = NULL,
                       name_grouping = 'test version', labels_legend = NULL,
                       verbose = TRUE, warn = TRUE, test = TRUE) {
@@ -537,7 +536,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
 
         # save plot
         ggplot2::ggsave(
-            filename = paste0("Missing_responses_by_person (", i,").png"),
+            filename = paste0("Missing_responses_by_person_", i,".png"),
             plot = gg, path = path_, width = 2000, height = 1200, units = "px",
             dpi = 300
         )
