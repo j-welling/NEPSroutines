@@ -19,6 +19,7 @@ irt_analysis(
   path_plots = here::here("Plots"),
   path_table = here::here("Tables"),
   path_results = here::here("Results"),
+  suf_item_names = FALSE,
   overwrite = FALSE,
   digits = 3,
   name_group = NULL,
@@ -71,6 +72,9 @@ Rasch model}
 \item{path_table}{string; defines path to folder where tables shall be saved}
 
 \item{path_results}{string; defines path to folder where results shall be saved}
+
+\item{suf_item_names}{logical; whether to output SUF item names in the .xlsx file
+for items with collapsed categories}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 

@@ -14,6 +14,7 @@ irt_summary(
   disc = NULL,
   save = TRUE,
   path = here::here("Tables"),
+  suf_item_names = FALSE,
   name_group = NULL,
   digits = 3,
   overwrite = FALSE,
@@ -48,6 +49,9 @@ design (is necessary for calculating N_administered)}
 \item{save}{logical; whether results shall be saved to hard drive}
 
 \item{path}{string; defines path to folder where table shall be saved}
+
+\item{suf_item_names}{logical; whether to output SUF item names in the .xlsx file
+for items with collapsed categories}
 
 \item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 

@@ -212,17 +212,15 @@ show_attributes <- function(resp, desc) {
 #' @export
 
 sample_by_group <- function(resp, grouping_variable, labels = NULL, save = FALSE,
-                            overwrite = FALSE, path = here::here("Tables"),
+                            overwrite = FALSE, path = "Tables",
                             name_group = NULL) {
 
     # Check variable
     scaling:::check_variables(resp, "resp", grouping_variable)
 
     # Create table with results
-    df <- as.data.frame.AsIs(table(resp[[grouping_variable]]))
-    df <- rbind(df,sum(df))
-    names(df) <- 'N'
-    rownames(df)[nrow(df)] <- c("Total")
+    df <- c(table(resp[[grouping_variable]]))
+    df <- c(df, Total = sum(df))
 
     # Add labels as row names
     if(!is.null(labels) | !is.null(attributes(resp[[grouping_variable]])$labels)) {
@@ -232,12 +230,10 @@ sample_by_group <- function(resp, grouping_variable, labels = NULL, save = FALSE
             labels
         )
         for (v in seq(nrow(df)-1)) {
-            rownames(df)[v] <- names(which(rownames(df)[v] == lbls))
+          l <- names(which(names(df)[v] == lbls))
+          if (length(l) > 0L) names(df)[v] <- l
         }
     }
-
-    # Convert results
-    res <- data.frame(t(df))
 
     # Save results
     if (save) {
@@ -247,7 +243,7 @@ sample_by_group <- function(resp, grouping_variable, labels = NULL, save = FALSE
             ".xlsx"
         )
         scaling:::save_table(
-            res,
+            as.data.frame(rbind(df)),
             filename = name,
             path = path,
             overwrite = overwrite,
@@ -256,7 +252,7 @@ sample_by_group <- function(resp, grouping_variable, labels = NULL, save = FALSE
     }
 
     # Return results
-    return(res)
+    return(df)
 }
 
 
@@ -285,7 +281,7 @@ sample_by_group <- function(resp, grouping_variable, labels = NULL, save = FALSE
 
 props_by_group <- function(vars, select, grouping, properties, labels = NULL,
                            name_grouping = 'version', save = FALSE,
-                           overwrite = FALSE, path = here::here("Tables"),
+                           overwrite = FALSE, path = "Tables",
                            name_group = NULL, warn = TRUE) {
 
     # Check variables

@@ -1,0 +1,37 @@
+
+author_list <- c(
+  utils::person(given = "Jana", family = "Welling"),
+  utils::person(given = "Anna", family = "Scharl"),
+  utils::person(given = "Tanja", family = "Kutscher"),
+  utils::person(given = "Timo", family = "Gnambs")
+)
+year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date, perl = TRUE)
+pkg_name <- meta$Package
+pkg_title <- meta$Title
+
+
+#*******************************************
+# automatic generation of citation key
+
+citHeader("To cite the scaling package use:")
+
+bibentry(
+  key = paste0(pkg_name, "_", meta$Version),
+  bibtype = "Manual",
+  title = paste0( pkg_name, ": " , pkg_title),
+  author = c(author_list),
+  year = year,
+  note = paste0("Package version ",meta$Version),
+  url =  "https://www.lifbi.de",
+  textVersion =
+    paste0(
+      paste(
+        sapply(author_list, \(x) x$given), ", ",
+        sapply(author_list, \(x) paste0(substr(x$given, 1, 1), ".")),
+        collapse = ", ", sep = ""
+      ),
+      " (", year, "). ",
+      pkg_name, ": ", pkg_title ,
+      " (Version ", meta$Version, ") [Computer software]."
+    )
+)

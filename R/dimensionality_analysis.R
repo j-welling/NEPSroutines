@@ -44,8 +44,8 @@ dim_analysis <- function(resp, vars, select, scoring = "scoring",
                          dim = NULL, valid = NULL, mvs = NULL,
                          irtmodel = "PCM2", maxiter = 10000, snodes = 5000,
                          return = FALSE, save = TRUE, print = TRUE,
-                         path_results = here::here('Results'),
-                         path_table = here::here('Tables'),
+                         path_results = 'Results',
+                         path_table = 'Tables',
                          name_group = NULL, overwrite = TRUE,
                          verbose = FALSE, digits = 3) {
 
@@ -134,7 +134,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
                                  valid = NULL, irtmodel, maxiter = 10000,
                                  snodes = 5000, mvs = NULL, verbose = FALSE,
                                  save = TRUE, name_group = NULL,
-                                 path = here::here('Results'),
+                                 path = 'Results',
                                  warn = TRUE, test = TRUE) {
   # Test data
   if (test) {
@@ -246,7 +246,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
 #' @export
 #'
 dim_summary <- function(dimensionality, save = FALSE, name_group = NULL,
-                        overwrite = FALSE, path = here::here("Tables"),
+                        overwrite = FALSE, path = 'Tables',
                         digits = 3) {
 
   dim <- names(dimensionality)

@@ -11,6 +11,7 @@ mv_item(
   valid = NULL,
   position = NULL,
   grouping = NULL,
+  stages = NULL,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21),
   labels_mvs = c(ALL = "total missing items", OM = "omitted items", NV =
     "not valid items", NR = "not reached items", TA =
@@ -25,6 +26,7 @@ mv_item(
   path_results = here::here("Results"),
   path_table = here::here("Tables"),
   path_plots = here::here("Plots/Missing_Responses/by_item"),
+  suf_item_names = FALSE,
   show_all = TRUE,
   name_grouping = "test version",
   overwrite = FALSE,
@@ -60,6 +62,9 @@ groups (as in "grouping") as names of elements and names of variables as element
 variable in resp and vars that indicates to which group belongs a person or
 an item}
 
+\item{stages}{character vector; contains names of stage variables in resp and vars,
+only applicable in multistage tests (otherwise NULL)}
+
 \item{mvs}{named integer vector; contains user-defined missing values}
 
 \item{labels_mvs}{named character vector; contains labels for user-defined
@@ -81,6 +86,9 @@ design}
 \item{path_table}{string; defines path to folder where tables shall be saved}
 
 \item{path_plots}{string; defines path to folder where plots shall be saved}
+
+\item{suf_item_names}{logical; whether to output SUF item names in the .xlsx file
+for items with collapsed categories}
 
 \item{show_all}{logical; whether whole sample shall be included as a "group"
 (only applicable when grouping exists)}

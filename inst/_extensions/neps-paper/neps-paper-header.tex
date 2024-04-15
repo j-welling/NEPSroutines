@@ -1,0 +1,77 @@
+% TODO: Add custom LaTeX header directives here
+
+%%%%%%%%%%% Load additional packages %%%%%%%%%%%
+
+\usepackage{academicons}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage{titlecaps}
+\usepackage[format=plain,indention=0cm,justification=raggedright,
+            belowskip=8pt,aboveskip=0pt,labelsep=newline,textfont=it,
+            labelfont=bf,singlelinecheck=false]{caption}
+%\usepackage{lscape}
+\usepackage{typearea}
+
+%%%%%%%%%%% Colors for LIfBi %%%%%%%%%%%
+
+\definecolor{black}{RGB}{0, 0, 0}
+\definecolor{magenta}{RGB}{230, 0, 126}
+\definecolor{cyan}{RGB}{0, 159, 227}
+
+\definecolor{cyan50}{RGB}{131, 208, 245}
+\definecolor{cyan20}{RGB}{212, 237, 252}
+
+\definecolor{black80}{RGB}{87, 87, 87}
+\definecolor{black60}{RGB}{135, 135, 135}
+\definecolor{black40}{RGB}{178, 178, 178}
+\definecolor{black20}{RGB}{218, 218, 218}
+\definecolor{black10}{RGB}{237, 237, 237}
+
+%%%%%%%%%%% Colors for NEPS %%%%%%%%%%%
+
+\definecolor{darkblue}{RGB}{10, 27, 95}
+\definecolor{lightblue}{RGB}{128, 196, 209}
+\definecolor{orange}{RGB}{254, 148, 47}
+
+%%%%%%%%%%% Set specific styles %%%%%%%%%%%
+
+\setkomafont{pagehead}{\fontsize{9pt}{0}\normalfont\rmfamily}
+\setkomafont{pagefoot}{\fontsize{9pt}{0}\normalfont\rmfamily}
+\setkomafont{section}{\fontsize{14pt}{0}\bfseries\rmfamily}
+\setkomafont{subsection}{\fontsize{14pt}{0}\bfseries\rmfamily}
+\setkomafont{subsubsection}{\fontsize{12pt}{0}\bfseries\rmfamily}
+\setkomafont{caption}{\fontsize{12pt}{0}\rmfamily\onehalfspacing}
+\setkomafont{captionlabel}{\fontsize{12pt}{0}\bfseries\rmfamily}
+%\captionsetup[table]{belowskip=8pt,labelsep=newline,labelfont=bf}
+\RedeclareSectionCommands[beforeskip=12pt,afterskip=8pt,indent=0pt]{section,subsection,subsubsection}
+
+\makeatletter
+\def\@seccntformat#1{\@ifundefined{#1@cntformat}%
+   {\csname the#1\endcsname\space}%    default
+   {\csname #1@cntformat\endcsname}}%  enable individual control
+\newcommand\section@cntformat{\thesection.\space}       % section-level
+\makeatother
+%\renewcommand\thesection{\arabic{section}}
+\renewcommand\thesubsection{\arabic{section}.\arabic{subsection}}
+
+%%%%%%%%%%% Own commands %%%%%%%%%%%
+
+\newcommand{\orcid}[1]{\href{https://orcid.org/#1}{\textcolor[HTML]{A6CE39}{\aiOrcid}}}
+%\newcommand{\blandscape}{\begin{landscape}}
+%\newcommand{\elandscape}{\end{landscape}}
+\newcommand{\blandscape}{
+  \newpage
+	\KOMAoptions{paper=landscape,pagesize}
+	\recalctypearea
+	\areaset{2.1\textwidth}{1.6\textheight}% adjust here: \areaset{<text body width>}{<text body height>}
+}
+\AtBeginDocument{\storeareas\normalpapersize}
+\newcommand{\elandscape}{\newpage\normalpapersize}
+	%\KOMAoptions{paper=portrait,pagesize}
+	%\recalctypearea
+	
+% Wiederverwendbarkeit von Fussnoten mittels \label
+\makeatletter
+\newcommand\footnoteref[1]{\protected@xdef\@thefnmark{\ref{#1}}\@footnotemark}
+\makeatother
+\setlength{\parskip}\medskipamount

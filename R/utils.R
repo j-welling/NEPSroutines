@@ -151,8 +151,7 @@ is_null_mvs_valid <- function(mvs = NA, valid = NA) {
 #' @param results table to be saved
 #' @param filename string; defines name of table file
 #' @param path string; indicates the folder location where the tables
-#' are stored on the hard drive; please note that the path is relative to the
-#' current working path set by here::i_am()
+#' are stored on the hard drive
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param show_rownames logical; whether to show rownames
 #'
@@ -184,9 +183,7 @@ save_table <- function(results, filename, path,
 #' @param results results to be saved
 #' @param filename string with name of results file
 #' @param path string; indicates the folder location where the tables
-#' are stored on the hard drive; please note that the path is relative to the
-#' current working path set by here::i_am()
-#'
+#' are stored on the hard drive
 #' @noRd
 
 save_results <- function(results, filename, path) {
@@ -196,16 +193,14 @@ save_results <- function(results, filename, path) {
     # Check and create directory for data
     scaling:::check_folder(path)
 
-    saveRDS(results, file = here::here(paste0(path, "/", filename)))
+    saveRDS(results, file = paste0(path, "/", filename))
   }
 }
 
 
 #' Check if folder exists and if not, create new one
 #'
-#' @param path    string; indicates the folder location that shall be checked;
-#' please note that the path is relative to the current working path set by
-#' here::i_am()
+#' @param path    string; indicates the folder location that shall be checked
 #'
 #' @export
 
@@ -649,3 +644,18 @@ create_suf_names <- function(vars_name = NULL, resp_name = NULL) {
 
 }
 
+#' Rounding with proper formatting for NEPS Survey Papers
+#'
+#' @param x numeric vector; the numbers to be formatted
+#' @param digits integer vector; the number of decimal places for rounding
+#' @param d0 logical vector; remove leading zeros (TRUE) or keep them (FALSE)
+#' @returns character vector; the formatted numbers
+#' @export
+rnd <- function(x, digits = 2, d0 = FALSE) {
+
+  x <- base::formatC(x, digits = digits[1], format = "f", big.mark = ",")
+  if (d0[1])
+    x <- base::sub("^(-?)0+\\.", "\\1.", x)
+  return(x)
+
+}

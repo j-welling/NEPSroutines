@@ -32,7 +32,7 @@
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param path_plots  string; defines path to folder where plots shall be saved
 #' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
-#'                       for items with collapsed categories
+#'  for items with collapsed categories
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
 #' @param color  character scalar or vector; defines color(s) of the bar in plots
@@ -68,9 +68,9 @@ mv_item <- function(resp, vars, select, valid = NULL,
                     ),
                     missing_by_design = -54,
                     plots = FALSE, print = TRUE, save = TRUE, return = FALSE,
-                    path_results = here::here("Results"),
-                    path_table = here::here("Tables"),
-                    path_plots = here::here("Plots/Missing_Responses/by_item"),
+                    path_results = "Results",
+                    path_table = "Tables",
+                    path_plots = "Plots/Missing_Responses/by_item",
                     suf_item_names = FALSE,
                     show_all = TRUE, name_grouping = 'test version',
                     overwrite = FALSE, name_group = NULL, color = NULL,
@@ -220,7 +220,7 @@ mvi_analysis <- function(resp, vars, select, position,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, MD = -54, AZ = -21),
                          missing_by_design = -54,
-                         path = here::here("Results"), save = TRUE,
+                         path = "Results", save = TRUE,
                          name_group = NULL, digits = 3, warn = TRUE, test = TRUE) {
 
     # Test data
@@ -350,7 +350,7 @@ mvi_analysis <- function(resp, vars, select, position,
 
             # Number of valid responses and position
             pos <- resp_p$position
-            resp_p <- dplyr::select(resp_p, -.data$position) %>% t() %>% data.frame()
+            resp_p <- data.frame(t(dplyr::select(resp_p, -.data$position)))
             mvlist$all <- data.frame(
               position = pos,
               N_administered = colSums(apply(resp_p, 2, function(x) !is.na(x))),
@@ -417,7 +417,7 @@ mvi_analysis <- function(resp, vars, select, position,
 #' design
 #' @param path  string; defines path to folder where table shall be saved
 #' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
-#'                       for items with collapsed categories
+#'  for items with collapsed categories
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param overwrite  logical; whether to overwrite existing file when saving table
 #' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
@@ -431,7 +431,7 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, MD = -54, AZ = -21),
                       missing_by_design = -54,
-                      save = TRUE, path = here::here("Tables"),
+                      save = TRUE, path = "Tables",
                       suf_item_names = FALSE,
                       overwrite = FALSE, name_group = NULL,
                       test = TRUE, warn = TRUE) {
@@ -542,7 +542,7 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL, position,
                         AZ = "missing items due to 'Angabe zurueckgesetzt'"
                       ),
                       missing_by_design = -54,
-                      path = here::here("Plots/Missing_Responses/by_item"),
+                      path = "Plots/Missing_Responses/by_item",
                       name_group = NULL, name_grouping = 'test version',
                       show_all = TRUE, labels_legend = NULL, color = NULL,
                       verbose = TRUE, warn = TRUE, test = TRUE) {
@@ -686,7 +686,7 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL, position,
 
     # save plot
     ggplot2::ggsave(
-      filename = paste0("Missing_responses_by_item (", i,").png"),
+      filename = paste0("Missing_responses_by_item_", i,".png"),
       plot = gg, path = path_, width = 2000, height = 1200, units = "px",
       dpi = 300
     )
