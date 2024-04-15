@@ -31,7 +31,7 @@
 #' @export
 create_suf <- function(resp, vars, select, competence, scores = NULL, mvs = NULL,
                        score_name = NULL, items_labels = NULL, suf_name = 'suf',
-                       name_group = NULL, path = here::here('suf'),
+                       name_group = NULL, path = 'suf',
                        save = TRUE, return = TRUE, warn = TRUE) {
 
   # Test data
@@ -267,7 +267,7 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
 #' @noRd
 save_suf <- function(suf, path, filename) {
 
-  scaling::check_folder(path = here::here(path))
+  scaling::check_folder(path = path)
   saveRDS(suf, file = paste0(path, "/", filename, ".rds"))
   haven::write_dta(suf, path = paste0(path, "/", filename, ".dta"))
   haven::write_sav(suf, path = paste0(path, "/", filename, ".sav"))
