@@ -696,7 +696,7 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where table shall be saved
 #' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
-#'                       for items with collapsed categories
+#'  for items with collapsed categories
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param digits  integer; number of decimals for rounding
 #' @param overwrite  logical; whether to overwrite existing file when saving table

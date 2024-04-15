@@ -33,9 +33,9 @@
 #' @param return  logical; whether results shall be returned
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param path_table  string; defines path to folder where tables shall be saved
-#' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
-#'                       for items with collapsed categories
 #' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
+#'  for items with collapsed categories
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param verbose  logical; whether to print processing information to console
@@ -671,7 +671,6 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
 
 dif_summary <- function(diflist, vars, print = TRUE, save = TRUE,
                         path = here::here('Tables'), dif_threshold = 0.5,
-                        suf_item_names = FALSE,
                         overwrite = FALSE, name_group = NULL, digits = 3L) {
     # information criteria for DIF and main model
     # main effects of main and DIF model + standardized
