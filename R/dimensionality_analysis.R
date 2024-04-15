@@ -197,7 +197,7 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
       dimensions <- sort(unique(v))
       Q <- matrix(0, nrow = length(v), ncol = length(dimensions))
       for (i in dimensions) {
-        Q[v == i, i] <- 1
+          Q[v == i, i] <- 1
       }
       Q <- Q * vars[[scoring]][vars[[select]]]
 
