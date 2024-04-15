@@ -123,8 +123,8 @@ create_scores <- function(resp, vars, select, scoring = NULL,
                           # anchors = NULL, longitudinal = TRUE,                # commented out because linking is not yet implemented
                           save = TRUE, return = FALSE, #print = TRUE,           # commented out because linking is not yet implemented
                           name_group = NULL, #overwrite = FALSE,                # commented out because linking is not yet implemented
-                          #path_table = here::here("Tables"),                   # commented out because linking is not yet implemented
-                          path_results = here::here("Results"),
+                          #path_table = "Tables",                   # commented out because linking is not yet implemented
+                          path_results = "Results",
                           #do_dim = TRUE, do_dif = TRUE,                        # commented out because linking is not yet implemented
                           #dif_threshold = .5, wid = NULL,                      # commented out because linking is not yet implemented
                           #snodes = 5000, maxiter = 10000,                      # commented out because linking is not yet implemented

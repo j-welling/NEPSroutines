@@ -63,8 +63,8 @@ dif_analysis <- function(resp,
                          include_mv = 200,
                          control = NULL,
                          pweights = NULL,
-                         path_results = here::here('Results'),
-                         path_table = here::here('Tables'),
+                         path_results = 'Results',
+                         path_table = 'Tables',
                          suf_item_names = FALSE,
                          name_group = NULL,
                          verbose = FALSE,
@@ -196,7 +196,7 @@ check_select <- function(select, dif_vars) {
 #' @export
 conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
                                  scoring = NULL, mvs = NULL, include_mv = 200,
-                                 path = here::here('Results'), save = TRUE,
+                                 path = 'Results', save = TRUE,
                                  name_group = NULL, control = NULL, pweights = NULL,
                                  verbose = FALSE, warn = TRUE, test = TRUE) {
 
@@ -282,8 +282,8 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 #' @export
 summarize_dif_analysis <- function(dif_models, dif_vars, vars, dif_threshold = 0.5,
                                    print = TRUE, save = TRUE, overwrite = FALSE,
-                                   path_results = here::here('Results'),
-                                   path_table = here::here('Tables'),
+                                   path_results = 'Results',
+                                   path_table = 'Tables',
                                    name_group = NULL, digits = 3) {
 
     dif_summaries <- list()
@@ -369,7 +369,7 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
                       valid = NULL, include_mv = 200,
                       mvs = NULL, verbose = FALSE, warn = TRUE, test = TRUE,
                       control = NULL, pweights = NULL, save = TRUE,
-                      path = here::here("Results"), name_group = NULL) {
+                      path = "Results", name_group = NULL) {
 
     # Test data
     if (test) {
@@ -670,7 +670,7 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
 #' @export
 
 dif_summary <- function(diflist, vars, print = TRUE, save = TRUE,
-                        path = here::here('Tables'), dif_threshold = 0.5,
+                        path = 'Tables', dif_threshold = 0.5,
                         suf_item_names = FALSE,
                         overwrite = FALSE, name_group = NULL, digits = 3L) {
     # information criteria for DIF and main model
@@ -889,8 +889,7 @@ difsum <- function(obj, dif_var, vars, groups = 1, digits = 3) {
 #' includes variable 'item' containing item names
 #' @param save logical; whether results shall be saved to hard drive
 #' @param path string; indicates the folder location where the summaries
-#' are stored on the hard drive; please note that the path is relative to the
-#' current working path set by here::i_am()
+#' are stored on the hard drive
 #' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
 #'                       for items with collapsed categories
 #' @param overwrite logical; whether to overwrite existing file when saving table
@@ -902,7 +901,7 @@ difsum <- function(obj, dif_var, vars, groups = 1, digits = 3) {
 
 build_dif_tr_tables <- function(dif_summaries, vars,
                                 save = TRUE, overwrite = FALSE,
-                                path = here::here('Tables'),
+                                path = 'Tables',
                                 suf_item_names = FALSE,
                                 digits = 3,
                                 name_group = NULL) {
