@@ -56,9 +56,9 @@ grouped_irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
                                  missing_by_design = -54, scoring = NULL,
                                  plots = FALSE, save = TRUE, print = TRUE,
                                  return = FALSE, overwrite = FALSE,
-                                 path_plots = here::here("Plots"),
-                                 path_table = here::here("Tables"),
-                                 path_results = here::here("Results"),
+                                 path_plots = "Plots",
+                                 path_table = "Tables",
+                                 path_results = "Results",
                                  suf_item_names = FALSE,
                                  digits = 3, verbose = FALSE, warn = TRUE,
                                  xsi_fixed_1p = NULL, xsi_fixed_2p = NULL,
@@ -183,9 +183,9 @@ grouped_irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
                          missing_by_design = -54, scoring = NULL,
                          plots = FALSE, save = TRUE, print = TRUE, return = FALSE,
-                         path_plots = here::here("Plots"),
-                         path_table = here::here("Tables"),
-                         path_results = here::here("Results"),
+                         path_plots = "Plots",
+                         path_table = "Tables",
+                         path_results = "Results",
                          suf_item_names = FALSE,
                          overwrite = FALSE, digits = 3, name_group = NULL,
                          verbose = FALSE, warn = TRUE, test = TRUE,
@@ -438,7 +438,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 
 irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
                       scoring = NULL, verbose = FALSE, save = TRUE,
-                      path = here::here("Results"), name_group = NULL,
+                      path = "Results", name_group = NULL,
                       xsi_fixed = NULL, pweights = NULL,
                       control_tam = NULL, control_wle = NULL,
                       warn = TRUE, test = TRUE) {
@@ -540,7 +540,7 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   fit <- TAM::msq.itemfit(mod)$itemfit[, c("item", "Infit", "Infit_t", "Infit_p")]
 
   # Item parameters and standard errors
-  x <- capture.output(pars <- TAM::tam.se(mod))
+  x <- capture.output(pars <- suppressWarnings(TAM::tam.se(mod)))
   pars <- dplyr::left_join(pars$xsi, pars$B, by = "item")
   names(pars) <- c("Item", "xsi", "se(xsi)", "alpha", "se(alpha)")
 
@@ -597,7 +597,7 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
 #'
 #' @export
 
-icc_plots <- function(model, path = here::here("Plots"), name_group = NULL) {
+icc_plots <- function(model, path = "Plots", name_group = NULL) {
 
   # Identify kind of irt model
   irtmodel <- model$irtmodel
@@ -610,11 +610,11 @@ icc_plots <- function(model, path = here::here("Plots"), name_group = NULL) {
   )
 
   # create directory for plots
-  scaling:::check_folder(path = here::here(path_))
+  scaling:::check_folder(path = path_)
 
   # ICC plots
   for (i in 1:model$mod$nitems) {
-    tiff(paste0(here::here(paste0(path_, "/item_")),
+    tiff(paste0(paste0(path_, "/item_"),
                 model$mod$item[i, 1],
                 ".tiff"),
         width = 800, height = 800, bg = "white",
@@ -639,7 +639,7 @@ icc_plots <- function(model, path = here::here("Plots"), name_group = NULL) {
 #' @importFrom graphics mtext text
 #' @export
 
-wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
+wright_map <- function(model, path = "Plots", name_group = NULL) {
 
   # Identify kind of irt model
   irtmodel <- model$irtmodel
@@ -651,10 +651,10 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
   path_ <- scaling:::create_name(paste0(path, "/Wright_Maps"), name_group, sep = "/")
 
   # Create directory for plots
-  scaling:::check_folder(path = here::here(path_))
+  scaling:::check_folder(path = path_)
 
   # Create Wright Map
-  png(here::here(paste0(path_, "/Wright_map_for_", irtmodel, ".png")),
+  png(paste0(path_, "/Wright_map_for_", irtmodel, ".png"),
       width = 800, height = 1300, bg = "white",
       res = 300, pointsize = 10)
   TAM::IRT.WrightMap(TAM::IRT.threshold(model$mod),
@@ -696,7 +696,7 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where table shall be saved
 #' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
-#'                       for items with collapsed categories
+#'  for items with collapsed categories
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param digits  integer; number of decimals for rounding
 #' @param overwrite  logical; whether to overwrite existing file when saving table
@@ -705,13 +705,12 @@ wright_map <- function(model, path = here::here("Plots"), name_group = NULL) {
 #'
 #' @return a data.frame (for TR) containing the item name, N, percentage correct,
 #'   item difficulty, SE, WMNSQ, t, rit, item discrimination, Q3.
-#' @importFrom rlang .data
 #' @export
 
 irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
                         missing_by_design = -54,
                         results, disc = NULL, save = TRUE,
-                        path = here::here("Tables"),
+                        path = "Tables",
                         suf_item_names = FALSE,
                         name_group = NULL,
                         digits = 3, overwrite = FALSE, warn = TRUE, test = TRUE) {
@@ -841,7 +840,7 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 #' @export
 
 irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
-                          path = here::here("Tables"), name_group = NULL) {
+                          path = "Tables", name_group = NULL) {
 
   mfit <- data.frame(
       N = rep(NA_integer_, 2),
@@ -916,7 +915,7 @@ irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
 #' @export
 
 steps_analysis <- function(pcm_model, digits = 3, save = TRUE, overwrite = FALSE,
-                           path = here::here("Tables"),
+                           path = "Tables",
                            suf_item_names = FALSE,
                            name_group = NULL) {
 

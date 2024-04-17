@@ -16,18 +16,16 @@
 #' @param select_raw string; defines name of logical variable in vars that
 #' indicates all raw items that shall be used for the distractor analysis
 #' @param select_score string; defines name of logical variable in vars that
-#' indicates all items that shall be used to caculate total score
+#' indicates all items that shall be used to calculate total score
 #' @param correct string; defines name of variable in vars that contains the
 #' correct responses to the items
 #' @param print  logical; whether results shall be printed to console
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param return  logical; whether results shall be returned
 #' @param path_results string; indicates the folder location where the summaries
-#' are stored on the hard drive; please note that the path is relative to the
-#' current working path set by here::i_am()
+#' are stored on the hard drive
 #' @param path_table string; indicates the folder location where the tables
-#' are stored on the hard drive; please note that the path is relative to the
-#' current working path set by here::i_am()
+#' are stored on the hard drive
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
@@ -46,8 +44,8 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
                          select_raw, select_score = 'dich',
                          correct = 'correct_response', name_group = NULL,
                          save = TRUE, print = TRUE, return = FALSE,
-                         path_results = here::here('Results'),
-                         path_table = here::here('Tables'),
+                         path_results = 'Results',
+                         path_table = 'Tables',
                          overwrite = FALSE, digits = 3, warn = TRUE) {
 
     # Create list for results
@@ -125,8 +123,7 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
 #' correct responses to the items
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; indicates the folder location where the results
-#' are stored on the hard drive; please note that the path is relative to the
-#' current working path set by here::i_am()
+#' are stored on the hard drive
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param digits  integer; number of decimals for rounding
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
@@ -139,7 +136,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
                                  select_raw, select_score = 'dich',
                                  correct = 'correct_response',
                                  mvs = NULL, save = TRUE, name_group = NULL,
-                                 path = here::here('Results'),
+                                 path = 'Results',
                                  digits = 3, warn = TRUE) {
     # Test data
     scaling::check_logicals(vars, "vars", c(select_raw, select_score), warn = warn)
@@ -225,8 +222,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
 #' @param digits  integer; number of decimals for rounding
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; indicates the folder location where the results
-#' are stored on the hard drive; please note that the path is relative to the
-#' current working path set by here::i_am()
+#' are stored on the hard drive
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #'
@@ -237,7 +233,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
 #'
 #' @export
 dis_summary <- function(distractors, digits = 3, save = TRUE, name_group = NULL,
-                        path = here::here('Tables'), overwrite = FALSE) {
+                        path = 'Tables', overwrite = FALSE) {
     # data.frames containing information for distractors and correct responses,
     # respectively
 
