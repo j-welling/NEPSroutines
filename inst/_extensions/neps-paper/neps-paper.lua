@@ -84,7 +84,7 @@ Pandoc = function(doc)
     meta.title = meta.title:walk {
         Str = function (s) return firstToUpper(s.text) end
     }
-    
+
     -- Authors and affiliation for title page
     local affiliationid = {}
     if meta.authors == nil then meta.authors = pandoc.MetaMap({}) end
@@ -99,7 +99,7 @@ Pandoc = function(doc)
             affiliationid = table.concat(affiliationid, ",")
             author.affiliationid = pandoc.Superscript(affiliationid)
         end
-        if #(meta.authors) > 2 and i < #(meta.authors) then 
+        if #(meta.authors) > 2 and i < #(meta.authors) then
             author.authorsep = ","
         end
         if #(meta.authors) > 1 and i + 1 == #(meta.authors) then
@@ -113,7 +113,7 @@ Pandoc = function(doc)
         end
     end
 
-    -- Author for head 
+    -- Author for head
     if meta.authorsforhead == nil then
         local authorsforhead, nauthors = "", #(meta.authors)
         if nauthors == 0 then
@@ -122,12 +122,12 @@ Pandoc = function(doc)
             authorsforhead = stringify(meta.authors[1].name.family)
         else
             for i, author in ipairs(meta.authors) do
-                if i == nauthors then 
-                    authorsforhead = authorsforhead .. "& " 
+                if i == nauthors then
+                    authorsforhead = authorsforhead .. "& "
                 end
                 authorsforhead = authorsforhead .. stringify(author.name.family)
-                if i < nauthors and nauthors > 2 then 
-                    authorsforhead = authorsforhead .. ", " 
+                if i < nauthors and nauthors > 2 then
+                    authorsforhead = authorsforhead .. ", "
                 end
             end
         end
@@ -162,20 +162,25 @@ Pandoc = function(doc)
 
     -- Set publication year
 
-    if meta.bibdata.year == nil then 
+    if meta.bibdata.year == nil then
         meta.bibdata.year = List:new{pandoc.Str(os.date("%Y"))}
     end
 
     -- Publication series
 
-    if meta.bibdata.series == nil then 
+    if meta.bibdata.series == nil then
         meta.bibdata.series = List:new{pandoc.Str "NEPS Survey Paper"}
     end
 
     -- Series number
 
-    if meta.bibdata.number == nil then 
-        meta.bibdata.number = List:new{pandoc.Str '0'} 
+    if meta.bibdata.number == nil then
+        meta.bibdata.number = List:new{pandoc.Str '0'}
+    end
+
+    -- DOI
+    if meta.bibdata.doi ~= nil then
+        meta.bibdata.doi = List:new{pandoc.Str("https://doi.org/" .. stringify(meta.bibdata.doi))}
     end
 
     -- Institution
@@ -193,11 +198,11 @@ Pandoc = function(doc)
             bibauthors:extend(List:new{pandoc.Str(getBibauthor(meta.authors[1]))})
         else
             for i, author in ipairs(meta.authors) do
-                if i == nauthors then 
+                if i == nauthors then
                     bibauthors:extend(List:new{pandoc.Str '& '})
                 end
                 bibauthors:extend(List:new{pandoc.Str(getBibauthor(author))})
-                if i < nauthors then 
+                if i < nauthors then
                     bibauthors:extend(List:new{pandoc.Str ', '})
                 end
             end
