@@ -3,7 +3,7 @@
 #' @param resp  data.frame with item responses
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
-#' @param warn  logical; whether to warn if no parameter 'valid' provided
+#' @param warn  logical; whether to warn if no argument 'valid' is provided
 #'
 #' @return resp without invalid cases.
 #' @export
@@ -11,7 +11,7 @@
 only_valid <- function(resp, valid = NULL, warn = TRUE) {
 
   if (!is.null(valid)) {
-      scaling:::check_logicals(resp, "resp", valid, warn = warn)
+      check_logicals(resp, "resp", valid, warn = warn)
       resp <- resp[resp[[valid]], ]
   } else if (warn) {
       warning("No variable with valid cases provided. ",
@@ -54,13 +54,13 @@ convert_mv <- function(resp, vars, select = NULL, mvs = NULL, warn = TRUE) {
   if (is.null(select)) {
       items <- names(resp)
   } else {
-      scaling:::check_logicals(vars, "vars", select)
+      check_logicals(vars, "vars", select)
       items <- vars$item[vars[[select]]]
-      scaling:::check_variables(resp, "resp", variables = items)
+      check_variables(resp, "resp", variables = items)
   }
 
   for (i in items) {
-    resp[[i]] <- replace(resp[[i]], resp[[i]] %in% mvs, NA)
+    resp[[i]] <- base::replace(resp[[i]], resp[[i]] %in% mvs, NA)
   }
 
   return(resp)
@@ -93,21 +93,23 @@ prepare_resp <- function(resp, vars = NULL, select = NULL,
                          warn = TRUE, zap_labels = TRUE) {
 
     # Use only valid cases
-    if (use_only_valid) resp <- scaling:::only_valid(
-      resp = resp,
-      valid = valid,
-      warn = warn
-    )
+    if (use_only_valid) {
+      resp <- only_valid(
+        resp = resp,
+        valid = valid,
+        warn = warn
+      )
+    }
 
     # Select only certain variables
     if (!is.null(select)) {
         if (is.null(vars)) {
-            stop("To create dataframe (resp) with only the indicated items ",
+            stop("To create a data frame (resp) with only the indicated items, ",
                  "please also provide vars.")
         } else {
-            scaling:::check_logicals(vars, "vars", select, warn = warn)
+            check_logicals(vars, "vars", select, warn = warn)
             items <- vars$item[vars[[select]]]
-            scaling:::check_variables(resp, "resp", variables = items)
+            check_variables(resp, "resp", variables = items)
             resp <- resp[ , items]
         }
     } else if (warn) {
@@ -116,7 +118,7 @@ prepare_resp <- function(resp, vars = NULL, select = NULL,
     }
 
     # Convert missing values to NA
-    if (convert) resp <- scaling:::convert_mv(resp = resp, mvs = mvs, warn = warn)
+    if (convert) resp <- convert_mv(resp = resp, mvs = mvs, warn = warn)
 
     # Zap labels of variables
     if (zap_labels) {
@@ -127,11 +129,12 @@ prepare_resp <- function(resp, vars = NULL, select = NULL,
     return(resp)
 }
 
+
 #' Warning message if mvs is not provided
 #'
 #' @param mvs named numeric vector; contains user defined missing values
 #' @param valid string; defines name of variable in resp indicating valid cases
-#'
+#' @returns NULL invisibly
 #' @noRd
 
 is_null_mvs_valid <- function(mvs = NA, valid = NA) {
@@ -144,6 +147,7 @@ is_null_mvs_valid <- function(mvs = NA, valid = NA) {
     warning("No variable with valid cases provided. ",
             "All cases are used for analysis.\n")
   }
+  return(invisible())
 }
 
 #' Save table
@@ -154,7 +158,7 @@ is_null_mvs_valid <- function(mvs = NA, valid = NA) {
 #' are stored on the hard drive
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param show_rownames logical; whether to show rownames
-#'
+#' @returns NULL invisibly
 #' @noRd
 
 save_table <- function(results, filename, path,
@@ -164,7 +168,7 @@ save_table <- function(results, filename, path,
   if (!is.null(filename)) {
 
     # Check and create directory for table
-    scaling:::check_folder(path)
+    check_folder(path)
 
     # Write table
     openxlsx::write.xlsx(
@@ -175,6 +179,8 @@ save_table <- function(results, filename, path,
         overwrite = overwrite
     )
   }
+
+  return(invisible())
 }
 
 
@@ -184,6 +190,7 @@ save_table <- function(results, filename, path,
 #' @param filename string with name of results file
 #' @param path string; indicates the folder location where the tables
 #' are stored on the hard drive
+#' @returns NULL invisibly
 #' @noRd
 
 save_results <- function(results, filename, path) {
@@ -191,17 +198,19 @@ save_results <- function(results, filename, path) {
   if (!is.null(filename)) {
 
     # Check and create directory for data
-    scaling:::check_folder(path)
+    check_folder(path)
 
     saveRDS(results, file = paste0(path, "/", filename))
   }
+  return(invisible())
+
 }
 
 
 #' Check if folder exists and if not, create new one
 #'
 #' @param path    string; indicates the folder location that shall be checked
-#'
+#' @returns NULL invisibly
 #' @export
 
 check_folder <- function(path) {
@@ -209,13 +218,14 @@ check_folder <- function(path) {
         dir.create(path, recursive = TRUE)
         warning("The location ", path, " did not exist. New folder created.\n")
     }
+  return(invisible())
 }
 
 
 #' Check pid for duplicates
 #'
 #' @param pid  character vector with person identifiers
-#'
+#' @returns NULL invisibly
 #' @export
 
 check_pid <- function(pid) {
@@ -226,13 +236,14 @@ check_pid <- function(pid) {
     if (any(is.na(pid))) {
         warning("There are missing values in the person identifiers.")
     }
+  return(invisible())
 }
 
 
 #' Check item names for duplicates
 #'
 #' @param items  character vector with item names
-#'
+#' @returns NULL invisibly
 #' @export
 
 check_items <- function(items) {
@@ -243,6 +254,7 @@ check_items <- function(items) {
     if (any(is.na(items))) {
         stop("There are missing values in the item names.")
     }
+  return(invisible())
 }
 
 
@@ -252,7 +264,7 @@ check_items <- function(items) {
 #' @param name_df  string; contains name of data.frame
 #' @param variables  character vector; contains names of variables that shall be
 #' checked for inclusion in df
-#'
+#' @returns NULL invisibly
 #' @export
 
 check_variables <- function(df, name_df, variables) {
@@ -266,6 +278,7 @@ check_variables <- function(df, name_df, variables) {
                   " name '", variables[not_included], "'. Please check again.\n"))
     }
   }
+  return(invisible())
 }
 
 
@@ -276,7 +289,7 @@ check_variables <- function(df, name_df, variables) {
 #' @param logicals  character vector; contains names of variables that shall be
 #' checked for correctness
 #' @param warn  logical; whether to warn if logicals include NA
-#'
+#' @returns NULL invisibly
 #' @export
 
 check_logicals <- function(df, name_df, logicals, warn = TRUE) {
@@ -284,7 +297,7 @@ check_logicals <- function(df, name_df, logicals, warn = TRUE) {
   if (!is.null(logicals)) {
 
     # Check whether variables are included in dataframe
-    scaling:::check_variables(df, name_df, logicals)
+    check_variables(df, name_df, logicals)
 
     no_logical <- sapply(df[ , logicals, drop = FALSE], function(x) !is.logical(x))
 
@@ -301,6 +314,8 @@ check_logicals <- function(df, name_df, logicals, warn = TRUE) {
                      "FALSE (e.g., NA). Please check again.\n"))
     }
   }
+
+  return(invisible())
 }
 
 
@@ -312,7 +327,7 @@ check_logicals <- function(df, name_df, logicals, warn = TRUE) {
 #' checked for correctness; if NULL, all items will be used
 #' @param check_invalid  logical; whether to check df for invalid values
 #' @param dich  logical; whether to check items for non-dichotomous values
-#'
+#' @returns NULL invisibly
 #' @export
 
 check_numerics <- function(df, name_df, numerics = NULL, check_invalid = FALSE,
@@ -321,7 +336,7 @@ check_numerics <- function(df, name_df, numerics = NULL, check_invalid = FALSE,
   if (is.null(numerics)) numerics <- names(df)
 
   # Check whether variables are included in dataframe
-  scaling:::check_variables(df, name_df, numerics)
+  check_variables(df, name_df, numerics)
 
   no_numeric <- sapply(df[ , numerics, drop = FALSE], function(x) !is.numeric(x))
 
@@ -331,10 +346,12 @@ check_numerics <- function(df, name_df, numerics = NULL, check_invalid = FALSE,
   }
 
   # Check whether variables contain invalid values
-  if (check_invalid) scaling:::check_invalid_values(df, name_df, items = numerics)
+  if (check_invalid) check_invalid_values(df, name_df, items = numerics)
 
   # Check whether variables are dichotomous
-  if (dich) scaling:::check_dich(df, name_df, dich_items = numerics)
+  if (dich) check_dich(df, name_df, dich_items = numerics)
+
+  return(invisible())
 }
 
 
@@ -344,7 +361,7 @@ check_numerics <- function(df, name_df, numerics = NULL, check_invalid = FALSE,
 #' @param name_df  string; contains name of df
 #' @param items  character vector; contains names of items to be checked;
 #' if NULL, all items will be used
-#'
+#' @returns NULL invisibly
 #' @noRd
 
 check_invalid_values <- function(df, name_df, items = NULL) {
@@ -357,6 +374,7 @@ check_invalid_values <- function(df, name_df, items = NULL) {
                 "user defined missing values in the vector mvs. Default is ",
                 "-999 to -1."))
   }
+  return(invisible())
 }
 
 
@@ -366,7 +384,7 @@ check_invalid_values <- function(df, name_df, items = NULL) {
 #' @param name_df  string; contains name of df
 #' @param dich_items  character vector; contains names of items to be checked;
 #' if NULL, all items will be used
-#'
+#' @returns NULL invisibly
 #' @noRd
 
 check_dich <- function(df, name_df, dich_items = NULL) {
@@ -381,6 +399,7 @@ check_dich <- function(df, name_df, dich_items = NULL) {
                 " contains values greater than 1, although specified as",
                 " dichotomous. Please check again.\n"))
   }
+  return(invisible())
 }
 
 
@@ -545,7 +564,7 @@ create_ifelse <- function(condition, a, b) {
 #' @noRd
 create_name <- function(start, name_group = NULL, end = NULL, sep = "_") {
 
-    name <- scaling:::create_ifelse(
+    name <- create_ifelse(
         is.null(name_group),
         paste0(start, end),
         paste0(start, sep, name_group, end)
@@ -615,7 +634,7 @@ order_xsi_fixed <- function(xsi_fixed, resp, irtmodel,
 create_suf_names <- function(vars_name = NULL, resp_name = NULL) {
 
   if(!is.null(vars_name) && !is.null(resp_name) ) {
-    stop("Please define either the  variable information dataset (e.g., vars)
+    stop("Please define either the variable information dataset (e.g., vars)
          or the respondent responses dataset (e.g., resp), not both at the same time.")
   }
 
@@ -651,6 +670,12 @@ create_suf_names <- function(vars_name = NULL, resp_name = NULL) {
 #' @param d0 logical vector; remove leading zeros (TRUE) or keep them (FALSE)
 #' @returns character vector; the formatted numbers
 #' @export
+#' @examples
+#' # Round with 2 decimals
+#' rnd(0.1459)
+#'
+#' # Round with 3 decimals and remove leading 0
+#' rnd(0.1459, digits = 3, d0 = TRUE)
 rnd <- function(x, digits = 2, d0 = FALSE) {
 
   x <- base::formatC(x, digits = digits[1], format = "f", big.mark = ",")
