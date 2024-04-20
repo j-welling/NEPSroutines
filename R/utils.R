@@ -663,6 +663,54 @@ create_suf_names <- function(vars_name = NULL, resp_name = NULL) {
 
 }
 
+
+#'
+#' Calculate basic descriptive statistics for variables
+#'
+#' @param x A data frame with variables to calculate the statistics for
+#' @param digits A number for rounding
+#' @returns A data frame with the calculated statistics for each variable
+#' @export
+#' @examples
+#' data <- data.frame(
+#'   sex = factor(sample(1:2, 10, replace = TRUE), labels = c("male", "female")),
+#'   age = round(runif(10, 20, 60)),
+#'   weight = round(c(runif(8, 50, 100), NA, NA))
+#' )
+#' describe(data)
+describe <- function(x, digits = 2) {
+
+  if (!is.data.frame(x)) x <- as.data.frame(x)
+
+  # Dummy coding of factors
+  for (i in names(x)) {
+    if (!is.factor(x[[i]])) next
+    d <- model.matrix(as.formula(paste0("~ -1 + ", i)), x)
+    names(d) <- paste0(i, levels(x[[i]]))
+    x[[i]] <- NULL
+    x <- cbind(x, d)
+  }
+
+  # Calculate statistics
+  stats <- t(apply(x, 2, \(v) {
+    c(n = sum(!is.na(v)),
+      mean = mean(v, na.rm = TRUE),
+      sd = sd(v, na.rm = TRUE),
+      median = median(v, na.rm = TRUE),
+      min = min(v, na.rm = TRUE),
+      max = max(v, na.rm = TRUE))
+  }))
+  if (ncol(x) == 1L) {
+    stats <- data.frame(t(stats))
+  } else {
+    stats <- as.data.frame(stats)
+  }
+  stats <- round(stats, digits = digits)
+
+  return(stats)
+
+}
+
 #' Rounding with proper formatting for NEPS Survey Papers
 #'
 #' @param x numeric vector; the numbers to be formatted
