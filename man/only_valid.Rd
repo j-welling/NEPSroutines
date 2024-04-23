@@ -12,7 +12,7 @@ only_valid(resp, valid = NULL, warn = TRUE)
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}
 
-\item{warn}{logical; whether to warn if no parameter 'valid' provided}
+\item{warn}{logical; whether to warn if no argument 'valid' is provided}
 }
 \value{
 resp without invalid cases.

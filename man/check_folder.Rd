@@ -7,9 +7,10 @@
 check_folder(path)
 }
 \arguments{
-\item{path}{string; indicates the folder location that shall be checked;
-please note that the path is relative to the current working path set by
-here::i_am()}
+\item{path}{string; indicates the folder location that shall be checked}
+}
+\value{
+NULL invisibly
 }
 \description{
 Check if folder exists and if not, create new one

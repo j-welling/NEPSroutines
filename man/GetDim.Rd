@@ -26,6 +26,7 @@ A numeric or character vector
 Summarize the latent correlations in multi-dimensional models
 }
 \examples{
+\dontrun{
 data("ex2")
 
 # Dimensionality analyses
@@ -61,4 +62,5 @@ GetDim(dim, "content", max, var = TRUE)
 # Clean up generated files
 file.remove(paste0(tmpdir, "/dimensionality.xlsx"))
 file.remove(paste0(tmpdir, "/dimensionality.rds"))
+}
 }

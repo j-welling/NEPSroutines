@@ -4,7 +4,14 @@
 \alias{dichotomous_scoring}
 \title{Dichotomous scoring of MC items}
 \usage{
-dichotomous_scoring(resp, vars, old_names, new_names = NULL, sep = ";")
+dichotomous_scoring(
+  resp,
+  vars,
+  old_names,
+  new_names = NULL,
+  correct = "correct_response",
+  sep = ";"
+)
 }
 \arguments{
 \item{resp}{data.frame; contains item responses with items as variables and
@@ -21,6 +28,9 @@ variables that are further defined in the function arguments}
 
 \item{new_names}{character vector; contains the names of the new items. Must
 be in same order as parameter "old_names"! (default is old name + "_c")}
+
+\item{correct}{string; defines name of variable in vars that contains the
+correct responses to the items}
 
 \item{sep}{string; defines type of punctuation used for separating several
 correct responses in the variable correct_response in vars (default is ";")}

@@ -350,6 +350,22 @@ test_that("create_suf_names() works", {
 })
 
 
+test_that("describe() works", {
+
+  data <- data.frame(
+    sex = factor(rep(1:2, 5), labels = c("male", "female")),
+    age = seq(10, 100, 10),
+    weight = c(seq(60, 90, 4), NA, NA)
+  )
+
+  expect_equal(dim(describe(data)), c(4, 6))
+  expect_contains(describe(data)$n, c(8, 10))
+  expect_equal(rownames(describe(data)),
+               c("age", "weight", "sexmale", "sexfemale"))
+
+})
+
+
 test_that("rnd() works", {
 
   expect_equal(rnd(0.1459, digits = 3), "0.146")

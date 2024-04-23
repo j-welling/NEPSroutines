@@ -10,7 +10,7 @@ sample_by_group(
   labels = NULL,
   save = FALSE,
   overwrite = FALSE,
-  path = here::here("Tables"),
+  path = "Tables",
   name_group = NULL
 )
 }

@@ -9,7 +9,7 @@ dis_summary(
   digits = 3,
   save = TRUE,
   name_group = NULL,
-  path = here::here("Tables"),
+  path = "Tables",
   overwrite = FALSE
 )
 }
@@ -24,8 +24,7 @@ data frames containing item-total correlations for each item)}
 \item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 
 \item{path}{string; indicates the folder location where the results
-are stored on the hard drive; please note that the path is relative to the
-current working path set by here::i_am()}
+are stored on the hard drive}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 }

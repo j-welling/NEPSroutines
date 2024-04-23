@@ -670,14 +670,6 @@ create_suf_names <- function(vars_name = NULL, resp_name = NULL) {
 #' @param x A data frame with variables to calculate the statistics for
 #' @param digits A number for rounding
 #' @returns A data frame with the calculated statistics for each variable
-#' @export
-#' @examples
-#' data <- data.frame(
-#'   sex = factor(sample(1:2, 10, replace = TRUE), labels = c("male", "female")),
-#'   age = round(runif(10, 20, 60)),
-#'   weight = round(c(runif(8, 50, 100), NA, NA))
-#' )
-#' describe(data)
 describe <- function(x, digits = 2) {
 
   if (!is.data.frame(x)) x <- as.data.frame(x)

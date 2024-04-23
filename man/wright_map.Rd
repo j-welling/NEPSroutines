@@ -4,7 +4,7 @@
 \alias{wright_map}
 \title{Wright maps}
 \usage{
-wright_map(model, path = here::here("Plots"), name_group = NULL)
+wright_map(model, path = "Plots", name_group = NULL)
 }
 \arguments{
 \item{model}{list; return object of irt_model()}

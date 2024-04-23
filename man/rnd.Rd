@@ -19,3 +19,10 @@ character vector; the formatted numbers
 \description{
 Rounding with proper formatting for NEPS Survey Papers
 }
+\examples{
+# Round with 2 decimals
+rnd(0.1459)
+
+# Round with 3 decimals and remove leading 0
+rnd(0.1459, digits = 3, d0 = TRUE)
+}

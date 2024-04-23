@@ -11,13 +11,15 @@ dis_analysis(
   mvs = NULL,
   select_raw,
   select_score = "dich",
+  use_wle = FALSE,
+  scoring = NULL,
   correct = "correct_response",
   name_group = NULL,
   save = TRUE,
   print = TRUE,
   return = FALSE,
-  path_results = here::here("Results"),
-  path_table = here::here("Tables"),
+  path_results = "Results",
+  path_table = "Tables",
   overwrite = FALSE,
   digits = 3,
   warn = TRUE
@@ -43,7 +45,12 @@ that are further defined in the function arguments}
 indicates all raw items that shall be used for the distractor analysis}
 
 \item{select_score}{string; defines name of logical variable in vars that
-indicates all items that shall be used to caculate total score}
+indicates all items that shall be used to calculate total score}
+
+\item{use_wle}{logical; use WLE instead of sum score for item-total
+correlations}
+
+\item{scoring}{string; defines name of scoring variable in vars}
 
 \item{correct}{string; defines name of variable in vars that contains the
 correct responses to the items}
@@ -57,12 +64,10 @@ correct responses to the items}
 \item{return}{logical; whether results shall be returned}
 
 \item{path_results}{string; indicates the folder location where the summaries
-are stored on the hard drive; please note that the path is relative to the
-current working path set by here::i_am()}
+are stored on the hard drive}
 
 \item{path_table}{string; indicates the folder location where the tables
-are stored on the hard drive; please note that the path is relative to the
-current working path set by here::i_am()}
+are stored on the hard drive}
 
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 

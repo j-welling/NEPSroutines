@@ -124,6 +124,9 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
 #' indicates all raw items that shall be used for the distractor analysis
 #' @param select_score string; defines name of logical variable in vars that
 #' indicates all items that shall be used to calculate total score
+#' @param use_wle logical; use WLE instead of sum score for item-total
+#' correlations
+#' @param scoring string; defines name of scoring variable in vars
 #' @param correct string; defines name of variable in vars that contains the
 #' correct responses to the items
 #' @param save  logical; whether results shall be saved to hard drive

@@ -30,7 +30,7 @@ create_scores(
   save = TRUE,
   return = FALSE,
   name_group = NULL,
-  path_results = here::here("Results"),
+  path_results = "Results",
   warn = TRUE
 )
 }

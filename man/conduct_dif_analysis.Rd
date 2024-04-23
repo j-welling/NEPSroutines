@@ -13,7 +13,7 @@ conduct_dif_analysis(
   scoring = NULL,
   mvs = NULL,
   include_mv = 200,
-  path = here::here("Results"),
+  path = "Results",
   save = TRUE,
   name_group = NULL,
   control = NULL,

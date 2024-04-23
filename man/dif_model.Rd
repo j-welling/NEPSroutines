@@ -19,7 +19,7 @@ dif_model(
   control = NULL,
   pweights = NULL,
   save = TRUE,
-  path = here::here("Results"),
+  path = "Results",
   name_group = NULL
 )
 }

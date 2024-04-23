@@ -14,6 +14,9 @@ check_variables(df, name_df, variables)
 \item{variables}{character vector; contains names of variables that shall be
 checked for inclusion in df}
 }
+\value{
+NULL invisibly
+}
 \description{
 Check variables in df for existence
 }
