@@ -272,7 +272,7 @@ sim.testlet <- function(N = 2000, I = 25, poly = 5, booklets = 1,
   }
 
   # Create omitted responses for all items
-  for (i in vars$item) {
+  for (i in vars$item[!vars$raw]) {
     f <- stats::runif(N) < control$omitted
     resp[[i]] <- ifelse(f, -97, resp[[i]])
     if (vars$dich[vars$item == i])
@@ -289,9 +289,6 @@ sim.testlet <- function(N = 2000, I = 25, poly = 5, booklets = 1,
     for (i in seq_len(N)) {
       if (reached[i] == I + 1) next
       resp[i, items[seq(reached[i], I)]] <- -94
-      items_raw <- gsub("_c", "", items[seq(reached[i], I)])
-      items_raw <- items_raw[items_raw %in% vars$item[vars$raw]]
-      resp[i, items_raw] <- -94
     }
   } else {
     for (j in seq_len(booklets)) {
@@ -305,9 +302,6 @@ sim.testlet <- function(N = 2000, I = 25, poly = 5, booklets = 1,
       for (i in seq_len(N)[Y$booklet == j]) {
         if (reached[i] == k + 1) next
         resp[i, items[seq(reached[i], k)]] <- -94
-        items_raw <- gsub("_c", "", items[seq(reached[i], k)])
-        items_raw <- items_raw[items_raw %in% vars$item[vars$raw]]
-        resp[i, items_raw] <- -94
       }
     }
   }
@@ -324,6 +318,11 @@ sim.testlet <- function(N = 2000, I = 25, poly = 5, booklets = 1,
   resp$valid <- TRUE
   resp$valid[sample(seq_len(N), control$not.participated)] <- FALSE
   resp[!resp$valid, grepl(paste0("^", control$varname), colnames(resp))] <- -56
+
+  # Copy missing values to raw scores
+  for (i in vars$item[vars$type == "MC" & !vars$raw]) {
+    resp[[gsub("_c", "", i)]][resp[[i]] < 0] <- resp[[i]][resp[[i]] < 0]
+  }
 
   # Missing values for DIF variable mig
   resp$mig[resp$valid] <-

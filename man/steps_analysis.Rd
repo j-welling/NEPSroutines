@@ -9,7 +9,7 @@ steps_analysis(
   digits = 3,
   save = TRUE,
   overwrite = FALSE,
-  path = here::here("Tables"),
+  path = "Tables",
   suf_item_names = FALSE,
   name_group = NULL
 )

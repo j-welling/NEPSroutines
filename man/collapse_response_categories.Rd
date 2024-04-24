@@ -10,7 +10,7 @@ collapse_response_categories(
   select = "poly",
   per_cat = 200,
   save = FALSE,
-  path_table = here::here("Tables")
+  path_table = "Tables"
 )
 }
 \arguments{

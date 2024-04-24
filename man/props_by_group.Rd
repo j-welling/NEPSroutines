@@ -13,7 +13,7 @@ props_by_group(
   name_grouping = "version",
   save = FALSE,
   overwrite = FALSE,
-  path = here::here("Tables"),
+  path = "Tables",
   name_group = NULL,
   warn = TRUE
 )

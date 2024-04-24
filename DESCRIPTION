@@ -12,12 +12,12 @@ Authors@R: c(
 Description: This package contains a collection of functions for the
     scaling of NEPS competence data. It provides standardized scaling
     routines for one- and two-parametric logistic models with binary and 
-    polytomous respones. It supports analyses of descriptive information, 
+    polytomous responses. It supports analyses of descriptive information, 
     missing values, distractors, dimensionality, and differential item
     functioning. Also, it can generate item and respondent scores 
     for the scientific use files in the NEPS. Additionally, several
     functions support general data preparation and consistency checks of the
-    data. Finally, the package includes a quarto extension and functionalities
+    data. Finally, the package includes a Quarto extension and functionalities
     for the creation of semi-automated technical reports.
 License: GPL-2
 Imports:
@@ -42,6 +42,7 @@ Suggests:
     officer (>= 0.6.5),
     magick (>= 2.8.3),
     testthat (>= 3.2.0),
+    withr,
     knitr,
     rmarkdown,
     bookdown

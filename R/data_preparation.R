@@ -11,19 +11,25 @@
 #' @param old_names  character vector; contains the names of the original items
 #' @param new_names  character vector; contains the names of the new items. Must
 #' be in same order as parameter "old_names"! (default is old name + "_c")
+#' @param correct string; defines name of variable in vars that contains the
+#' correct responses to the items
 #' @param sep string; defines type of punctuation used for separating several
 #' correct responses in the variable correct_response in vars (default is ";")
 #'
 #' @return resp with dichotomously scored MC items.
 #' @export
-dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL, sep = ";") {
+dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL,
+                                correct = 'correct_response', sep = ";") {
 
     # Check whether variables are indeed contained in data.frames
-    scaling:::check_variables(resp, "resp", old_names)
+    check_variables(resp, "resp", old_names)
+
+    # Check whether variable with correct responses is available
+    check_variables(vars, "vars", correct)
 
     # Check for duplicates
-    scaling:::check_items(old_names)
-    if(!is.null(new_names)) scaling:::check_items(new_names)
+    check_items(old_names)
+    if(!is.null(new_names)) check_items(new_names)
 
     # Create new names if no names are provided
     if (is.null(new_names)) {
@@ -38,11 +44,11 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL, sep = "
         } else if (is.factor(resp[[item]])) {
             resp[[item]] <- as.character(resp[[item]])
         }
-        correct <- strsplit(
-          as.character(vars$correct_response[vars$item == item]), sep
+        correct_resp <- base::strsplit(
+          as.character(vars[[correct]][vars$item == item]), sep
         )[[1]]
         resp[[new_names[i]]] <- ifelse(
-          resp[[item]] %in% correct, 1, ifelse(resp[[item]] < 0, resp[[item]], 0)
+          resp[[item]] %in% correct_resp, 1, ifelse(resp[[item]] < 0, resp[[item]], 0)
         )
         resp[[new_names[i]]] <- as.numeric(resp[[new_names[i]]])
     }
@@ -102,14 +108,15 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 #' polytomous item, name of the vector is the name of the polytomous item (e.g.
 #' poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))
 #' @param mvs  integer vector; contains user-defined missing values
+#' @param warn  logical; print warnings
 #'
 #' @return resp including unscored (raw) and scored items
 #' @export
 
-pc_scoring <- function(resp, poly_items, mvs = NULL) {
+pc_scoring <- function(resp, poly_items, mvs = NULL, warn = TRUE) {
 
     # Check whether variables are indeed contained in data.frames
-    scaling:::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
+    check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
 
     for (item in names(poly_items)) {
         subitems <- poly_items[[item]]
@@ -121,7 +128,8 @@ pc_scoring <- function(resp, poly_items, mvs = NULL) {
 
         if (is.null(mvs)) {
             mvs <- c(-99:-1)
-            warning("No missing values provided. c(-99:-1) used as default.")
+            if (isTRUE(warn))
+              warning("No missing values provided. c(-99:-1) used as default.")
         }
 
         for (mv in mvs) {

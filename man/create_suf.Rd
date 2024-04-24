@@ -15,7 +15,7 @@ create_suf(
   items_labels = NULL,
   suf_name = "suf",
   name_group = NULL,
-  path = here::here("suf"),
+  path = "suf",
   save = TRUE,
   return = TRUE,
   warn = TRUE
@@ -36,7 +36,7 @@ variables that are further defined in the function arguments}
 contains the item names designated for the SUF (original scored items
 before the first IRT analyses)}
 
-\item{competence}{character; name of tested competence for labelling the
+\item{competence}{character; name of tested competence for labeling the
 data}
 
 \item{scores}{data.frame; contains test scores (potentially with standard
@@ -48,7 +48,7 @@ person identifier; return object of functions c}
 \item{score_name}{character; name of the scores -- WITHOUT extension (e.g.,
 reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)}
 
-\item{items_labels}{vector; named vector for each item used for labelling
+\item{items_labels}{vector; named vector for each item used for labeling
 the data}
 
 \item{suf_name}{character; name of suf (defaults to 'suf')}

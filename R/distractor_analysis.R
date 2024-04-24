@@ -17,6 +17,9 @@
 #' indicates all raw items that shall be used for the distractor analysis
 #' @param select_score string; defines name of logical variable in vars that
 #' indicates all items that shall be used to calculate total score
+#' @param use_wle logical; use WLE instead of sum score for item-total
+#' correlations
+#' @param scoring string; defines name of scoring variable in vars
 #' @param correct string; defines name of variable in vars that contains the
 #' correct responses to the items
 #' @param print  logical; whether results shall be printed to console
@@ -36,12 +39,11 @@
 #'     for each possible response; correct response is marked with an *
 #'   summary: list with summary of results.
 #'
-#' @importFrom stats cor
-#' @importFrom rlang .data
 #' @export
 
 dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
                          select_raw, select_score = 'dich',
+                         use_wle = FALSE, scoring = NULL,
                          correct = 'correct_response', name_group = NULL,
                          save = TRUE, print = TRUE, return = FALSE,
                          path_results = 'Results',
@@ -51,8 +53,8 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
     # Create list for results
     distractors <- list()
 
-    # Conduct distratcor analysis
-    distractors$analysis <- scaling:::conduct_dis_analysis(
+    # Conduct distractor analysis
+    distractors$analysis <- conduct_dis_analysis(
       resp = resp,
       vars = vars,
       select_raw = select_raw,
@@ -60,36 +62,39 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
       correct = correct,
       valid = valid,
       mvs = mvs,
+      use_wle = use_wle,
+      scoring = scoring,
       warn = warn,
       save = FALSE
     )
 
-    distractors$summary <- scaling:::dis_summary(
+    distractors$summary <- dis_summary(
         distractors$analysis,
         digits = digits,
         save = FALSE
     )
 
     # Print results
-    if (print) scaling:::print_dis_summary(distractors$summary)
+    if (print) print_dis_summary(distractors$summary)
 
     # Save results
     if (save) {
-        name <- scaling:::create_name("distractors", name_group)
-        scaling:::save_results(
+        name <- create_name("distractors", name_group)
+        save_results(
             distractors,
             filename = paste0(name, ".rds"),
             path = path_results
         )
-        scaling:::save_table(
+        save_table(
             distractors$summary,
             overwrite = overwrite,
             filename = paste0(name, "_summary.xlsx"),
             path = path_table
         )
-        scaling:::save_table(
+        save_table(
             distractors$analysis,
             overwrite = overwrite,
+            show_rownames = FALSE,
             filename = paste0(name, "_items.xlsx"),
             path = path_table
         )
@@ -119,6 +124,9 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
 #' indicates all raw items that shall be used for the distractor analysis
 #' @param select_score string; defines name of logical variable in vars that
 #' indicates all items that shall be used to calculate total score
+#' @param use_wle logical; use WLE instead of sum score for item-total
+#' correlations
+#' @param scoring string; defines name of scoring variable in vars
 #' @param correct string; defines name of variable in vars that contains the
 #' correct responses to the items
 #' @param save  logical; whether results shall be saved to hard drive
@@ -134,24 +142,25 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
 
 conduct_dis_analysis <- function(resp, vars, valid = NULL,
                                  select_raw, select_score = 'dich',
+                                 use_wle = FALSE, scoring = NULL,
                                  correct = 'correct_response',
                                  mvs = NULL, save = TRUE, name_group = NULL,
                                  path = 'Results',
                                  digits = 3, warn = TRUE) {
     # Test data
-    scaling::check_logicals(vars, "vars", c(select_raw, select_score), warn = warn)
-    scaling::check_variables(vars, "vars", correct)
-    scaling::check_variables(resp, "resp", valid)
-    scaling::check_items(vars$item[vars[[select_raw]]])
-    scaling::check_items(vars$item[vars[[select_score]]])
+    check_logicals(vars, "vars", c(select_raw, select_score), warn = warn)
+    check_variables(vars, "vars", correct)
+    check_variables(resp, "resp", valid)
+    check_items(vars$item[vars[[select_raw]]])
+    check_items(vars$item[vars[[select_score]]])
 
-    if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
+    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 
     # prepare data
     raw_items <- vars$item[vars[[select_raw]]]
     items_for_score <- vars$item[vars[[select_score]]]
     vars$keep_items <- vars[[select_raw]] | vars[[select_score]]
-    resp <- scaling::prepare_resp(
+    resp <- prepare_resp(
       resp,
       vars,
       select = 'keep_items',
@@ -163,17 +172,40 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
     )
 
     # Check whether all items to be used for score generation are valid numerics
-    scaling::check_numerics(resp, "resp", items_for_score, check_invalid = TRUE)
+    check_numerics(resp, "resp", items_for_score, check_invalid = TRUE)
 
     # Sum score across all items
     resp$score <- rowMeans(resp[ , items_for_score], na.rm = TRUE)
+    k <- rowSums(!is.na(resp[ , items_for_score]))
+
+    if (use_wle) {
+      resp[[valid]] <- TRUE
+      irt_results <-
+        suppressWarnings({
+          scaling::irt_analysis(
+            resp = resp,
+            vars = vars,
+            select = select_score,
+            valid = valid,
+            mvs = mvs,
+            scoring = scoring,
+            plots = FALSE,
+            save = FALSE,
+            print = FALSE,
+            return = TRUE,
+            verbose = FALSE,
+            warn = FALSE
+          )
+        })
+      resp$score <- irt_results$model.pcm$wle$theta
+    }
 
     # Correlations with distractors (for unscored items)
     dis <- list()
 
     for (item in raw_items) {
 
-        # Create for each item a dataframe with row for each response option
+        # Create for each item a data frame with row for each response option
         dis[[item]] <- as.data.frame(
           table(resp[, item]),
           responseName = "N",
@@ -186,7 +218,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
         item_scored <- ifelse(
           resp[[item]] == vars[[correct]][vars$item == item], 1, 0
         )
-        cscore <- resp$score - item_scored / length(items_for_score)
+        cscore <- resp$score - item_scored / k
 
         # Correlation between each response option and corrected total score
         for (s in seq_len(nrow(dis[[item]]))) {
@@ -206,8 +238,8 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
 
     # Save results
     if (save) {
-        name <- scaling:::create_name("distractors", name_group, ".rds")
-        scaling:::save_results(dis, filename = name, path = path)
+        name <- create_name("distractors", name_group, ".rds")
+        save_results(dis, filename = name, path = path)
     }
 
     # Return results
@@ -242,25 +274,25 @@ dis_summary <- function(distractors, digits = 3, save = TRUE, name_group = NULL,
     num <- unlist(lapply(distractors, function(x) {x$N}))
     cor <- unlist(lapply(distractors, function(x) {x$rit}))
 
-    # Create two dataframes, one each for correct responses and distractors
+    # Create two data frames, one each for correct responses and distractors
     res <- data.frame(name = nam, N = num, corr = cor)
     sel <- substr(res$name, 1, 1) == "*"
 
     rc <- res[sel,]
     rd <- res[!sel,]
-    desc <- data.frame(
-      correct = round(unlist(psych::describe(rc[, 3])), digits),
-      distract = round(unlist(psych::describe(rd[, 3])), digits
+    desc <- describe(
+      cbind(correct = rc[, 3], distract = rd[, 3]),
+      digits = digits
     )
-    )[c(3:5, 8:9), ]
+    desc <- t(desc[, c("mean", "sd", "median", "min", "max")])
 
     # Create list with results
     results <- list(correct = rc, distractor = rd, descriptives = desc)
 
     # Save results
     if (save) {
-        name <- scaling:::create_name("distractors_summary", name_group, ".xlsx")
-        scaling:::save_table(results, overwrite = overwrite, filename = name, path = path)
+        name <- create_name("distractors_summary", name_group, ".xlsx")
+        save_table(results, overwrite = overwrite, filename = name, path = path)
     }
 
     # Return list with results
@@ -305,7 +337,7 @@ print_dis_summary <- function(dist_sum) {
             "\nMd. = ",  dist_med, " (", paste(dist_med_names, collapse = ", "),
             ")\n")
 
-    # Auffällige Distraktoren und korrekte Antworten anzeigen
+    # Show problematic distractors and correct responses
     problematic_correct_responses <- rownames(rc[which(rc$corr < 0.2),])
     problematic_distractors <- rownames(rd[which(rd$corr > 0.05),])
 

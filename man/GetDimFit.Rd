@@ -23,6 +23,7 @@ The model fit statistic.
 Get model fit for dimensionality analyses
 }
 \examples{
+\dontrun{
 data("ex2")
 
 # Dimensionality analyses
@@ -56,4 +57,5 @@ GetDimFit(dim, "uni", "BIC")
 # Clean up generated files
 file.remove(paste0(tmpdir, "/dimensionality.xlsx"))
 file.remove(paste0(tmpdir, "/dimensionality.rds"))
+}
 }

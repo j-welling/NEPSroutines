@@ -642,6 +642,7 @@ GetFit <- function(obj, type, GPCM = FALSE, digits = 2) {
 #' @returns The model fit statistic.
 #' @export
 #' @examples
+#' \dontrun{
 #' data("ex2")
 #'
 #' # Dimensionality analyses
@@ -675,6 +676,7 @@ GetFit <- function(obj, type, GPCM = FALSE, digits = 2) {
 #' # Clean up generated files
 #' file.remove(paste0(tmpdir, "/dimensionality.xlsx"))
 #' file.remove(paste0(tmpdir, "/dimensionality.rds"))
+#' }
 GetDimFit <- function(obj, model, type) {
 
   model <- as.character(model[1])
@@ -697,6 +699,7 @@ GetDimFit <- function(obj, model, type) {
 #' @returns A numeric or character vector
 #' @export
 #' @examples
+#' \dontrun{
 #' data("ex2")
 #'
 #' # Dimensionality analyses
@@ -732,6 +735,7 @@ GetDimFit <- function(obj, model, type) {
 #' # Clean up generated files
 #' file.remove(paste0(tmpdir, "/dimensionality.xlsx"))
 #' file.remove(paste0(tmpdir, "/dimensionality.rds"))
+#' }
 GetDim <- function(obj, model = "dim", stat = median, var = FALSE,
                    digits = 2) {
 

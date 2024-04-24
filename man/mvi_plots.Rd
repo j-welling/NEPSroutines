@@ -17,7 +17,7 @@ mvi_plots(
     "not determinable items", MD = "items missing by design", AZ =
     "missing items due to 'Angabe zurueckgesetzt'"),
   missing_by_design = -54,
-  path = here::here("Plots/Missing_Responses/by_item"),
+  path = "Plots/Missing_Responses/by_item",
   name_group = NULL,
   name_grouping = "test version",
   show_all = TRUE,

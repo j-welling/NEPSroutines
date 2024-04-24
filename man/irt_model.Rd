@@ -14,7 +14,7 @@ irt_model(
   scoring = NULL,
   verbose = FALSE,
   save = TRUE,
-  path = here::here("Results"),
+  path = "Results",
   name_group = NULL,
   xsi_fixed = NULL,
   pweights = NULL,

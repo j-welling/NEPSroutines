@@ -9,6 +9,9 @@ check_items(items)
 \arguments{
 \item{items}{character vector with item names}
 }
+\value{
+NULL invisibly
+}
 \description{
 Check item names for duplicates
 }

@@ -9,7 +9,7 @@ irt_model_fit(
   model_2p,
   overwrite = FALSE,
   save = TRUE,
-  path = here::here("Tables"),
+  path = "Tables",
   name_group = NULL
 )
 }

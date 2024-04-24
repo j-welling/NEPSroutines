@@ -10,11 +10,13 @@ conduct_dis_analysis(
   valid = NULL,
   select_raw,
   select_score = "dich",
+  use_wle = FALSE,
+  scoring = NULL,
   correct = "correct_response",
   mvs = NULL,
   save = TRUE,
   name_group = NULL,
-  path = here::here("Results"),
+  path = "Results",
   digits = 3,
   warn = TRUE
 )
@@ -39,6 +41,11 @@ indicates all raw items that shall be used for the distractor analysis}
 \item{select_score}{string; defines name of logical variable in vars that
 indicates all items that shall be used to calculate total score}
 
+\item{use_wle}{logical; use WLE instead of sum score for item-total
+correlations}
+
+\item{scoring}{string; defines name of scoring variable in vars}
+
 \item{correct}{string; defines name of variable in vars that contains the
 correct responses to the items}
 
@@ -49,8 +56,7 @@ correct responses to the items}
 \item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 
 \item{path}{string; indicates the folder location where the results
-are stored on the hard drive; please note that the path is relative to the
-current working path set by here::i_am()}
+are stored on the hard drive}
 
 \item{digits}{integer; number of decimals for rounding}
 

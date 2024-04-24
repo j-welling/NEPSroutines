@@ -12,7 +12,7 @@ mvi_table(
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21),
   missing_by_design = -54,
   save = TRUE,
-  path = here::here("Tables"),
+  path = "Tables",
   suf_item_names = FALSE,
   overwrite = FALSE,
   name_group = NULL,

@@ -9,7 +9,7 @@ dim_summary(
   save = FALSE,
   name_group = NULL,
   overwrite = FALSE,
-  path = here::here("Tables"),
+  path = "Tables",
   digits = 3
 )
 }

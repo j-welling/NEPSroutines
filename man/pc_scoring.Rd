@@ -4,7 +4,7 @@
 \alias{pc_scoring}
 \title{Score partial credit items}
 \usage{
-pc_scoring(resp, poly_items, mvs = NULL)
+pc_scoring(resp, poly_items, mvs = NULL, warn = TRUE)
 }
 \arguments{
 \item{resp}{data.frame; contains original item responses}
@@ -14,6 +14,8 @@ polytomous item, name of the vector is the name of the polytomous item (e.g.
 poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))}
 
 \item{mvs}{integer vector; contains user-defined missing values}
+
+\item{warn}{logical; print warnings}
 }
 \value{
 resp including unscored (raw) and scored items

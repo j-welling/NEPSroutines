@@ -24,6 +24,9 @@ checked for correctness; if NULL, all items will be used}
 
 \item{dich}{logical; whether to check items for non-dichotomous values}
 }
+\value{
+NULL invisibly
+}
 \description{
 Check numeric variable(s) for correctness
 }

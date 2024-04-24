@@ -16,6 +16,9 @@ checked for correctness}
 
 \item{warn}{logical; whether to warn if logicals include NA}
 }
+\value{
+NULL invisibly
+}
 \description{
 Check logical variable(s) for correctness
 }

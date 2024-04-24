@@ -9,7 +9,7 @@ build_dif_tr_tables(
   vars,
   save = TRUE,
   overwrite = FALSE,
-  path = here::here("Tables"),
+  path = "Tables",
   suf_item_names = FALSE,
   digits = 3,
   name_group = NULL
@@ -27,8 +27,7 @@ includes variable 'item' containing item names}
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 
 \item{path}{string; indicates the folder location where the summaries
-are stored on the hard drive; please note that the path is relative to the
-current working path set by here::i_am()}
+are stored on the hard drive}
 
 \item{suf_item_names}{logical; whether to output SUF item names in the .xlsx file
 for items with collapsed categories}

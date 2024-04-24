@@ -65,12 +65,12 @@ test_that("create table for missing values by item works", {
   tbl <- try({ TblMvi(tab, footnote = "Nothing of note happend.") })
   expect_false(inherits(tbl, "try-error"))
   expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "4e44550165cc314ef380ea18560deb7b")
+  expect_equal(rlang::hash(tbl), "4761e5a32f8f19ea22417ccf0b27d706")
 
   tbl <- try({ TblMvi(tab, excl = "", sort = "N_valid") })
   expect_false(inherits(tbl, "try-error"))
   expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "ac52a5881325307b9b7262675c34e1c8")
+  expect_equal(rlang::hash(tbl), "fe0837b96ed2e2400c8ddc613507e174")
 
 })
 
@@ -84,7 +84,7 @@ test_that("create table for item parameters works", {
   })
   expect_false(inherits(tbl, "try-error"))
   expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "d68ecd341b8c2c2364c25997de0461f1")
+  expect_equal(rlang::hash(tbl), "e7e7775f96f34e5d87660a9d7bd1e4be")
 
 })
 
@@ -98,7 +98,7 @@ test_that("create table for step parameters works", {
   })
   expect_false(inherits(tbl, "try-error"))
   expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "39fae38efbf2c4a09985f23fa4d59335")
+  expect_equal(rlang::hash(tbl), "fc421624eb958b6b3ca35b8b3c9290a6")
 
 })
 

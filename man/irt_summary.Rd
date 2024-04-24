@@ -13,7 +13,7 @@ irt_summary(
   results,
   disc = NULL,
   save = TRUE,
-  path = here::here("Tables"),
+  path = "Tables",
   suf_item_names = FALSE,
   name_group = NULL,
   digits = 3,
