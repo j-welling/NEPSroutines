@@ -71,6 +71,9 @@ author:
     affiliations: Leibniz Institute for Educational Trajectories
     orcid: 0000-0000-0000-0000
     email: "firstname.lastname@lifbi.de"
+bibdata:
+  number: 0
+  doi: 0000/0000
 format: neps-paper-pdf
 bibliography: "TR_A104_SC8_W1_RE.bib"
 ---
@@ -101,6 +104,10 @@ author:
     - Leibniz Institute for Educational Trajectories
     - Somwhere else
 ```
+
+### `bibdata` Setting
+
+The optional `bibdata` setting specifies some additional information about the NEPS Survey Report. The argument `number` sets the number of the paper, while the `doi` gives the DOI. Instead of the `doi` it is also possible to set an arbitrary link using `url`. Please note that each argument of the `bibdata` setting starts on a new line without a leading `-`.
 
 ### `format` Setting
 

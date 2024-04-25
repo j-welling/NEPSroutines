@@ -123,7 +123,8 @@ Pandoc = function(doc)
                   pandoc.Space(),
                   pandoc.Str(stringify(meta.bibdata.institution) .. ".")}
     if meta.bibdata.doi ~= nil then
-        ca:extend(List:new{pandoc.Space(), pandoc.Str("doi:" .. stringify(meta.bibdata.doi))})
+        --ca:extend(List:new{pandoc.Space(), pandoc.Str("doi:" .. stringify(meta.bibdata.doi))})
+        ca:extend(List:new{pandoc.Space(), pandoc.Link(stringify(meta.bibdata.doi), stringify(meta.bibdata.doi))})
     end
     if meta.bibdata.url ~= nil then
         ca:extend(List:new{pandoc.Space(), pandoc.Link(stringify(meta.bibdata.url), stringify(meta.bibdata.url))})

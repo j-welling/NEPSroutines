@@ -4,7 +4,7 @@
 \alias{icc_plots}
 \title{ICC plots}
 \usage{
-icc_plots(model, path = here::here("Plots"), name_group = NULL)
+icc_plots(model, path = "Plots", name_group = NULL)
 }
 \arguments{
 \item{model}{list; return object of irt_model()}

@@ -9,7 +9,7 @@ dif_summary(
   vars,
   print = TRUE,
   save = TRUE,
-  path = here::here("Tables"),
+  path = "Tables",
   dif_threshold = 0.5,
   suf_item_names = FALSE,
   overwrite = FALSE,

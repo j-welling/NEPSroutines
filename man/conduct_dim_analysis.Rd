@@ -18,7 +18,7 @@ conduct_dim_analysis(
   verbose = FALSE,
   save = TRUE,
   name_group = NULL,
-  path = here::here("Results"),
+  path = "Results",
   warn = TRUE,
   test = TRUE
 )

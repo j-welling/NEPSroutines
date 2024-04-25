@@ -12,8 +12,8 @@ summarize_dif_analysis(
   print = TRUE,
   save = TRUE,
   overwrite = FALSE,
-  path_results = here::here("Results"),
-  path_table = here::here("Tables"),
+  path_results = "Results",
+  path_table = "Tables",
   name_group = NULL,
   digits = 3
 )

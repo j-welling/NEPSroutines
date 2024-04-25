@@ -9,6 +9,9 @@ check_pid(pid)
 \arguments{
 \item{pid}{character vector with person identifiers}
 }
+\value{
+NULL invisibly
+}
 \description{
 Check pid for duplicates
 }
