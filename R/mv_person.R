@@ -46,7 +46,7 @@
 #'
 #' @export
 
-mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
+mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL, stages = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, MD = -54, AZ = -21),
                       labels_mvs = c(
@@ -90,6 +90,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
       vars = vars,
       select = select,
       valid = valid,
+      stages = stages,
       mvs = mvs,
       missing_by_design = missing_by_design,
       grouping = grouping,
@@ -185,7 +186,7 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL,
 #'
 #' @export
 
-mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
+mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL, stages = NULL,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, MD = -54, AZ = -21),
                          missing_by_design = -54,
@@ -225,7 +226,8 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
     if (is.null(grouping)) {
 
         # Determine percentage of missing values for each missing type
-        results <- scaling:::mvp_calc(responses = resp_c, mvs = mvs)
+        if (!is.null(stages)) stgs <- resp[,names(stages)]
+        results <- scaling:::mvp_calc(responses = resp_c, stages = stages, stgs = stgs, mvs = mvs)
         mv_p <- scaling:::mvp_summary(results, digits = digits)
 
     } else {
@@ -236,9 +238,10 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL,
         for (g in grouping) {
 
             resp_g <- resp_c[resp[[g]], vars$item[vars[[select]] & vars[[g]]]]
+            if (!is.null(stages)) stgs <- resp[resp[[g]],names(stages)]
 
             # Create dataframe with missing values per person and missing value type
-            results[[g]] <- scaling:::mvp_calc(responses = resp_g, mvs = mvs)
+            results[[g]] <- scaling:::mvp_calc(responses = resp_g, stages = stages, stgs = stgs, mvs = mvs)
             results$all <- rbind(results$all, results[[g]])
 
             # Calculate summaries
@@ -558,7 +561,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
 #' @return  data.frame with missing values per person and missing value type.
 #' @noRd
 
-mvp_calc <- function(responses, mvs) {
+mvp_calc <- function(responses, stages, stgs, mvs) {
 
     result <- data.frame(matrix(NA, nrow(responses), length(mvs) + 1))
     names(result) <- c(names(mvs), 'ALL')
@@ -566,6 +569,17 @@ mvp_calc <- function(responses, mvs) {
     # Determine percentage of missing values for each missing type
     for (i in names(mvs)) {
         result[[i]] <- rowSums(apply(responses, 2, function(x) x %in% mvs[[i]]))
+    }
+
+    # multistage
+    if (!is.null(stages) & "NR" %in% names(mvs)) {
+
+      for (stage in names(stages)) {
+
+        result$NR <- result$NR + ifelse(stgs[[stage]], 0, stages[[stage]])
+
+      }
+
     }
 
     # Percentage of total missing responses for each person
