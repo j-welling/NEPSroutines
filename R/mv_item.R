@@ -124,6 +124,7 @@ mv_item <- function(resp, vars, select, valid = NULL,
         vars = vars,
         select = select,
         grouping = grouping,
+        #position = position,
         mvs = mvs,
         labels_mvs = labels_mvs,
         missing_by_design = missing_by_design,
@@ -239,7 +240,7 @@ mvi_analysis <- function(resp, vars, select, position,
             stop("No grouping. Please provide only one position variable.\n")
         }
     } else {
-        if (length(position) == 1 & warn) {
+        if (length(position) == 1) {
             warning("Only one position variable provided. ",
                     "The items of each group are therefore set to the same positions.\n")
         } else {
@@ -287,6 +288,7 @@ mvi_analysis <- function(resp, vars, select, position,
             position = vars_c[[position]],
             responses = resp_c,
             stages = stages,
+            resp = resp,
             vars = vars_c,
             mvs = mvs,
             digits = digits
@@ -321,6 +323,7 @@ mvi_analysis <- function(resp, vars, select, position,
               position = na.omit(pos),
               responses = resp_g[, vars_g$item[!is.na(pos)]],
               stages = stages,
+              resp = resp[resp[[g]],],
               vars = vars_g,
               mvs = mvs,
               digits = digits
@@ -372,6 +375,7 @@ mvi_analysis <- function(resp, vars, select, position,
             position = vars_c[[position]],
             responses = resp_c[, vars_c$item],
             stages = stages,
+            resp = resp,
             vars = vars_c,
             mvs = mvs,
             digits = digits
@@ -614,7 +618,7 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL, position,
       for (g in groups) {
         mv_i[[g]] <- scaling:::mv_per_position(mv_i[[g]])
         mv_i[[g]][[g]] <- mv_i[[g]][[i]]
-        mv <- merge(mv, mv_i[[g]], by = 'position', all = TRUE)
+        mv <- merge(mv, mv_i[[g]][, c("position", g)], by = 'position', all = TRUE)
       }
 
       mv <- dplyr::filter(
@@ -622,8 +626,10 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL, position,
         !is.na(mv$position)
       )
 
-      mv_wide <- tidyr::gather(mv, key = "group", value = "MV",
-                               tidyselect::all_of(groups))
+      mv_wide <- tidyr::gather(
+        mv, key = "group", value = "MV", tidyselect::all_of(groups)
+      )
+      mv_wide$group <- factor(mv_wide$group, levels = groups)
       ylim <- ceiling(max(mv_wide$MV, na.rm = TRUE)/10)*10
 
       # create plot
@@ -838,11 +844,19 @@ mvi_calc <- function(responses, mvs, digits = 3) {
 
     # Determine percentage of missing values for each missing type
     for (i in names(mvs)) {
-        result[[i]] <- scaling:::mvi_perc(responses = responses, mvs = mvs[[i]], digits = digits)
+        result[[i]] <- scaling:::mvi_perc(
+          responses = responses,
+          mvs = mvs[[i]],
+          digits = digits
+        )
     }
 
     # Percentage of total missing responses for each item
-    result$ALL <- scaling:::mvi_perc(responses = responses, mvs = mvs, digits = digits)
+    result$ALL <- scaling:::mvi_perc(
+      responses = responses,
+      mvs = mvs,
+      digits = digits
+    )
 
     return(result)
 }
@@ -866,7 +880,16 @@ mvi_calc <- function(responses, mvs, digits = 3) {
 #' @return   list with results of missing values per item.
 #' @noRd
 
-create_mvlist <- function(item, position, responses, mvs, vars, stages = NULL, digits = 3) {
+create_mvlist <- function(
+    item,
+    position,
+    responses,
+    mvs,
+    resp,
+    vars,
+    stages = NULL,
+    digits = 3
+  ) {
 
     if (length(item) != length(position) |
           ncol(responses) != length(item) |
@@ -884,7 +907,7 @@ create_mvlist <- function(item, position, responses, mvs, vars, stages = NULL, d
     )
 
     # Merge with percentage of missing values for each missing type
-    results <- data.frame(mvi_calc(responses, mvs = mvs, digits = digits))
+    results <- data.frame(scaling:::mvi_calc(responses, mvs = mvs, digits = digits))
     results$item <- row.names(results)
     mvlist <- merge(mvlist, results, by = 'item')
     mvlist <- mvlist[order(mvlist$position, mvlist$item), ]
@@ -906,7 +929,10 @@ create_mvlist <- function(item, position, responses, mvs, vars, stages = NULL, d
 
         }
 
-        mvlist <- mvlist[order(mvlist$stage, mvlist$position, mvlist$item), c(1, 10, 2:9)]
+        mvlist <- mvlist[
+          order(mvlist$stage, mvlist$position, mvlist$item),
+          names(mvlist[c(1, length(mvlist), 2:(length(mvlist)-1))])
+        ]
     }
 
     # Return list
