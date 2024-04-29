@@ -395,12 +395,13 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     pid <- resp$ID_t
     scaling:::check_pid(pid)
     facets <- resp[, dif_var, drop = FALSE]
-    lbls_facet <- attributes(resp[[dif_var]])$label
+    lbls_facet <- attributes(resp[[dif_var]])$labels
     pws <- scaling:::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
 
     # Prepare resp by converting missing values and selecting only necessary variables
-    resp <- scaling:::prepare_resp(resp, vars = vars, select = select,
-                                   convert = TRUE, mvs = mvs, warn = FALSE)
+    resp <- scaling:::prepare_resp(
+      resp, vars = vars, select = select, convert = TRUE, mvs = mvs, warn = FALSE
+    )
 
     # Test resp
     scaling:::check_numerics(resp, "resp", check_invalid = TRUE)
@@ -423,11 +424,9 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
         if (warn) {
             warning(paste0(
                 sum(invalid, na.rm = TRUE),
-                " invalid values (< 0) were found",
-                " in the DIF variable ",
-                dif_var,
-                ". The corresponding cases were replaced",
-                " by NAs.\n")
+                " invalid values (< 0) were found in the DIF variable ",
+                dif_var, ". The corresponding cases were replaced by NAs.\n"
+              )
             )
         }
     }
@@ -445,15 +444,16 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
             fcts <- scaling:::create_facets_df(facets[[dif_var]], labels = lbls_facet)
 
             if (warn) {
-                warning(paste0(sum(mis), " missing values were found in the DIF variable ",
-                               dif_var, ". The corresponding cases have been excluded from the analysis.\n"))
+                warning(paste0(
+                  sum(mis), " missing values were found in the DIF variable ",
+                  dif_var, ". The corresponding cases have been excluded from the analysis.\n"
+                ))
             }
 
         } else {
 
             vals <- unique(facets[[dif_var]])
             max_val <- max(vals, na.rm = TRUE)
-            min_val <- min(vals, na.rm = TRUE)
             facets[mis, ] <- max_val + 1
 
             fcts <- scaling:::create_facets_df(
@@ -461,12 +461,6 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
                 labels = lbls_facet,
                 missings = TRUE
             )
-
-            # DIF analysis does not work with more than two groups when one group == 0
-            if (min_val == 0) {
-                facets <- facets + 1
-                fcts$number <- as.integer(fcts$number)
-            }
 
             if (warn) {
                 warning(paste0(sum(mis), " missing values were found in the DIF variable ",
@@ -479,8 +473,17 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
         fcts <- scaling:::create_facets_df(facets[[dif_var]], labels = lbls_facet)
     }
 
-    # DIF analysis
+    # DIF analysis does not work with more than two groups when one group == 0
+    vals <- unique(facets[[dif_var]])
 
+    if (length(vals) > 2 & min(vals, na.rm = TRUE) == 0) {
+
+      facets <- facets + 1
+      fcts$number <- as.integer(fcts$number)
+
+    }
+
+    # DIF analysis
 
     if (irt_type == 'poly') {
 
@@ -670,7 +673,7 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
 #' @export
 
 dif_summary <- function(diflist, vars, print = TRUE, save = TRUE,
-                        path = 'Tables', dif_threshold = 0.5, 
+                        path = 'Tables', dif_threshold = 0.5,
                         suf_item_names = FALSE,
                         overwrite = FALSE, name_group = NULL, digits = 3L) {
     # information criteria for DIF and main model
