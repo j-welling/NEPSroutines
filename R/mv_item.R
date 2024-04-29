@@ -225,35 +225,17 @@ mvi_analysis <- function(resp, vars, select, position,
                          name_group = NULL, digits = 3, warn = TRUE, test = TRUE) {
 
     # Test data
-    scaling:::check_numerics(vars, "vars", position, check_invalid = TRUE)
-
-    if (test) {
-        scaling:::check_logicals(resp, "resp", c(valid, grouping), warn = warn)
-        scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
-        scaling:::check_items(vars$item[vars[[select]]])
-        scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
-        if (warn) scaling:::is_null_mvs_valid(valid = valid)
-    }
-
-    if (is.null(grouping)) {
-        if (length(position) > 1) {
-            stop("No grouping. Please provide only one position variable.\n")
-        }
-    } else {
-        if (length(position) == 1) {
-            warning("Only one position variable provided. ",
-                    "The items of each group are therefore set to the same positions.\n")
-        } else {
-          if (length(position) != length(grouping)) {
-            stop("Position and grouping variables do not match. ",
-                 "Please provide either only one position variable (if positions of items do not differ between groups) ",
-                 "or matching position and grouping variables (if positions of items do differ between groups).\n")
-          } else if (!is.null(stages)) {
-            stop("Scaling package cannot account for multiple stages and multiple item positions at once. ",
-                "Please conduct missing values analysis manually.\n")
-          }
-        }
-    }
+    scaling:::test_mvi_analysis(
+      resp = resp,
+      vars = vars,
+      select = select,
+      valid = valid,
+      grouping = grouping,
+      position = position,
+      stages = stages,
+      warn = warn,
+      test = test
+    )
 
     # Prepare data
     vars_c <- vars[vars[[select]], ]
@@ -295,8 +277,10 @@ mvi_analysis <- function(resp, vars, select, position,
         )
 
         # Summary across items
-        n <- ifelse(is.null(stages), 2, 3)
-        mvsum <- scaling:::mvi_summary(mvlist[ , -c(1:n)], digits = digits)
+        mvsum <- scaling:::mvi_summary(
+          mvlist[ , -c(1:ifelse(is.null(stages), 2, 3))],
+          digits = digits
+        )
 
     } else {
 
@@ -330,30 +314,27 @@ mvi_analysis <- function(resp, vars, select, position,
             )
 
             # Summary across items
-            n <- ifelse(is.null(stages), 2, 3)
-            mvsum[[g]] <- scaling:::mvi_summary(mvlist[[g]][ , -c(1:n)], digits = digits)
+            mvsum[[g]] <- scaling:::mvi_summary(
+              mvlist[[g]][ , -c(1:ifelse(is.null(stages), 2, 3))],
+              digits = digits
+            )
         }
 
         if (length(position) > 1) { # This branch is only compatible with linear tests (see tests at function start)
 
             # Creating new dataframe with responses by position, not by item
-            resp_p <- data.frame(position = NA)
+            resp_p <- scaling:::resp_per_position(
+              resp = resp,
+              resp_c = resp_c,
+              vars_c = vars_c,
+              grouping = grouping,
+              position = position
+            )
 
-            for (g in grouping) {
-
-                r <- data.frame(t(resp_c[resp[[g]], ]))
-                r$item <- rownames(r)
-                r <- merge(r, vars_c[, c('item', position[g])], by = "item")
-                r <- dplyr::rename(r, position = as.character(position[g]))
-                r <- dplyr::select(r,-.data$item)
-                resp_p <- dplyr::full_join(resp_p, r, by = "position")
-            }
-
-            resp_p <- dplyr::arrange(resp_p[!is.na(resp_p$position), ], position)
-
-            # Number of valid responses and position
             pos <- resp_p$position
             resp_p <- data.frame(t(dplyr::select(resp_p, -.data$position)))
+
+            # Number of valid responses per position
             mvlist$all <- data.frame(
               position = pos,
               N_administered = colSums(apply(resp_p, 2, function(x) !is.na(x))),
@@ -361,8 +342,10 @@ mvi_analysis <- function(resp, vars, select, position,
             )
 
             # Determine percentage of missing values for each missing type
-            results <- data.frame(mvi_calc(resp_p, mvs = mvs, digits = digits))
-            mvlist$all <- cbind(mvlist$all, results)
+            mvlist$all <- cbind(
+              mvlist$all,
+              data.frame(scaling:::mvi_calc(resp_p, mvs = mvs, digits = digits))
+            )
 
             # Summary across items
             mvsum$all <- scaling:::mvi_summary(mvlist$all[ , -1], digits = digits)
@@ -382,8 +365,10 @@ mvi_analysis <- function(resp, vars, select, position,
           )
 
           # Summary across items
-          n <- ifelse(is.null(stages), 2, 3)
-          mvsum$all <- scaling:::mvi_summary(mvlist$all[ , -c(1:n)], digits = digits)
+          mvsum$all <- scaling:::mvi_summary(
+            mvlist$all[ , -c(1:ifelse(is.null(stages), 2, 3))],
+            digits = digits
+          )
         }
     }
 
@@ -400,6 +385,77 @@ mvi_analysis <- function(resp, vars, select, position,
     return(mv_i)
 }
 
+#' Test data for mvi_analysis()
+#'
+#' # Function arguments see mvi_analysis()
+#'
+#' @noRd
+
+test_mvi_analysis <- function(
+    resp, vars, select, valid, grouping, position, stages, warn, test
+    ) {
+
+  scaling:::check_numerics(vars, "vars", position, check_invalid = TRUE)
+
+  if (test) {
+    scaling:::check_logicals(resp, "resp", c(valid, grouping, stages), warn = warn)
+    scaling:::check_logicals(vars, "vars", c(select, grouping, stages), warn = warn)
+    scaling:::check_items(vars$item[vars[[select]]])
+    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+    if (warn) scaling:::is_null_mvs_valid(valid = valid)
+  }
+
+  if (is.null(grouping)) {
+    if (length(position) > 1) {
+      stop("No grouping. Please provide only one position variable.\n")
+    }
+  } else {
+    if (length(position) == 1) {
+      warning("Only one position variable provided. ",
+              "The items of each group are therefore set to the same positions.\n")
+    } else {
+      if (length(position) != length(grouping)) {
+        stop("Position and grouping variables do not match. ",
+             "Please provide either only one position variable (if positions of items do not differ between groups) ",
+             "or matching position and grouping variables (if positions of items do differ between groups).\n")
+      } else if (!is.null(stages)) {
+        stop("Scaling package cannot account for multiple stages and multiple item positions at once. ",
+             "Please conduct missing values analysis manually.\n")
+      }
+    }
+  }
+
+}
+
+#' Create dataframe with responses per position, not items
+#'
+#' @param resp  see mvi_analysis()
+#' @param position  see mvi_analysis()
+#' @param grouping  see mvi_analysis()
+#' @param resp_c  prepared resp
+#' @param vars_c  prepared vars
+#'
+#' @return dataframe with responses per position
+#' @noRd
+
+resp_per_position <- function(resp, resp_c, vars_c, grouping, position) {
+
+  resp_p <- data.frame(position = NA)
+
+  for (g in grouping) {
+
+    r <- data.frame(t(resp_c[resp[[g]], ]))
+    r$item <- rownames(r)
+    r <- merge(r, vars_c[, c('item', position[g])], by = "item")
+    r <- dplyr::rename(r, position = as.character(position[g]))
+    r <- dplyr::select(r,-.data$item)
+    resp_p <- dplyr::full_join(resp_p, r, by = "position")
+  }
+
+  resp_p <- dplyr::arrange(resp_p[!is.na(resp_p$position), ], position)
+
+  return(resp_p)
+}
 
 #' Write table of user defined missing values per item (and position)
 #'
@@ -531,7 +587,7 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
 #' @importFrom rlang .data
 #' @export
 
-mvi_plots <- function(mv_i, vars, select, grouping = NULL, position,
+mvi_plots <- function(mv_i, vars, select, grouping = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, MD = -54, AZ = -21),
                       labels_mvs = c(
@@ -569,20 +625,13 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL, position,
     max(sapply(grouping, function(x) {sum(vars[[select]] & vars[[x]])}), na.rm = TRUE)
   )
 
+  # Create groups vector
   if (!is.null(grouping))
     groups <- scaling:::create_ifelse(show_all, c(grouping, 'all'), grouping)
 
   # Check color argument
-  grps <- create_ifelse(is.null(grouping), 1, length(groups))
-
-  if (!is.null(color)) {
-    if (length(color) != grps) {
-      stop(paste0('The number of provided colors does not match the number ',
-                  'of groups (', grps, ').'))
-    }
-  } else {
-    color <- colorspace::sequential_hcl(grps)
-  }
+  grps <- scaling:::create_ifelse(is.null(grouping), 1, length(groups))
+  color <- scaling:::check_color(color = color, grps = grps)
 
   # Create directory for plots
   path_ <- scaling:::create_name(path, name_group, sep = "/")
@@ -613,23 +662,7 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL, position,
 
     } else {
 
-      mv <- data.frame(position = NA)
-
-      for (g in groups) {
-        mv_i[[g]] <- scaling:::mv_per_position(mv_i[[g]])
-        mv_i[[g]][[g]] <- mv_i[[g]][[i]]
-        mv <- merge(mv, mv_i[[g]][, c("position", g)], by = 'position', all = TRUE)
-      }
-
-      mv <- dplyr::filter(
-        dplyr::select(mv, c("position", tidyselect::all_of(groups))),
-        !is.na(mv$position)
-      )
-
-      mv_wide <- tidyr::gather(
-        mv, key = "group", value = "MV", tidyselect::all_of(groups)
-      )
-      mv_wide$group <- factor(mv_wide$group, levels = groups)
+      mv_wide <- scaling:::create_wide_df(mv_i, groups, i)
       ylim <- ceiling(max(mv_wide$MV, na.rm = TRUE)/10)*10
 
       # create plot
@@ -702,6 +735,62 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL, position,
   }
 }
 
+#' Check color argument and create new if null
+#'
+#' @param color  vector; includes colors for plot
+#' @param grps  character vector; includes groups for graph
+#'
+#' @return color argument
+#' @noRd
+
+check_color <- function(color, grps) {
+
+  if (!is.null(color)) {
+    if (length(color) != grps) {
+      stop(paste0('The number of provided colors does not match the number ',
+                  'of groups (', grps, ').'))
+    }
+  } else {
+    color <- colorspace::sequential_hcl(grps)
+  }
+
+  return(color)
+
+}
+
+#' Create dataframe in wide format for all groups
+#'
+#' @param mv_i  list with missing values as variables
+#' @param groups  character vector; includes names of groups for graph
+#' @param i string; name of missing value type for graph
+#'
+#' @return dataframe in wide format
+#' @noRd
+
+create_wide_df <- function(mv_i, groups, i) {
+
+  mv <- data.frame(position = NA)
+
+  for (g in groups) {
+    mv_i[[g]] <- scaling:::mv_per_position(mv_i[[g]])
+    mv_i[[g]][[g]] <- mv_i[[g]][[i]]
+    mv <- merge(mv, mv_i[[g]][, c("position", g)], by = 'position', all = TRUE)
+  }
+
+  mv <- dplyr::filter(
+    dplyr::select(mv, c("position", tidyselect::all_of(groups))),
+    !is.na(mv$position)
+  )
+
+  mv_wide <- tidyr::gather(
+    mv, key = "group", value = "MV", tidyselect::all_of(groups)
+  )
+
+  mv_wide$group <- factor(mv_wide$group, levels = groups)
+
+  return(mv_wide)
+}
+
 #' Create dataframe with missing values per position and not item
 #'
 #' @param mv_i  list with missing values as variables
@@ -764,8 +853,11 @@ print_mvi_results <- function(mv_i,
                                   AZ = "missing items due to 'Angabe zurueckgesetzt'"
                                   )) {
     if (is.data.frame(mv_i$list)) {
+
       n <- ifelse(is.null(mv_i$list$stage), 4, 5)
+
         for (lbl in names(mv_i$list[-c(1:n)])) {
+
             mv_min <- min(mv_i$list[[lbl]], na.rm = TRUE)
             mv_max <- max(mv_i$list[[lbl]], na.rm = TRUE)
             item_min <- mv_i$list$item[mv_i$list[[lbl]] == mv_min]
@@ -779,12 +871,18 @@ print_mvi_results <- function(mv_i,
                         paste0(" (", ifelse(length(item_max) > 1, "items ", "item "),
                                paste(item_max, collapse = ", "), ")")
                     }, ".")
+
         }
+
     } else {
+
         for (g in names(mv_i$list)[-length(names(mv_i$list))]) {
+
             n <- ifelse(is.null(mv_i$list[[g]]$stage), 4, 5)
             message("\n", Hmisc::capitalize(g), ":\n")
+
             for (lbl in names(mv_i$list[[g]][-c(1:n)])) {
+
                 mv_min <- min(mv_i$list[[g]][[lbl]], na.rm = TRUE)
                 mv_max <- max(mv_i$list[[g]][[lbl]], na.rm = TRUE)
                 item_min <- mv_i$list[[g]]$item[mv_i$list[[g]][[lbl]] == mv_min]
@@ -802,6 +900,7 @@ print_mvi_results <- function(mv_i,
             }
         }
     }
+
     message("\n\n")
 }
 
