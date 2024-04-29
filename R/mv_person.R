@@ -13,6 +13,9 @@
 #' @param grouping  character vector; contains for each group a name of a logical
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
+#' @param stages  named numeric vector; contains for each stage the number of
+#' items per stage as vector element and the name of the stage variable as name
+#' of the vector element (e.g., c(stage1 = 10, stage2 = 8))
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param missing_by_design  integer; user defined missing value for missing by
 #' design
@@ -46,7 +49,8 @@
 #'
 #' @export
 
-mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL, stages = NULL,
+mv_person <- function(resp, vars, select,
+                      valid = NULL, grouping = NULL, stages = NULL,
                       mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                               UM = -90, ND = -55, MD = -54, AZ = -21),
                       labels_mvs = c(
@@ -171,6 +175,9 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL, stages 
 #' @param grouping  character vector; contains for each group a name of a logical
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
+#' @param stages  named numeric vector; contains for each stage the number of
+#' items per stage as vector element and the name of the stage variable as name
+#' of the vector element (e.g., c(stage1 = 10, stage2 = 8))
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param missing_by_design  integer; user defined missing value for missing by
 #' design
@@ -186,7 +193,8 @@ mv_person <- function(resp, vars, select, valid = NULL, grouping = NULL, stages 
 #'
 #' @export
 
-mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL, stages = NULL,
+mvp_analysis <- function(resp, vars, select,
+                         valid = NULL, grouping = NULL, stages = NULL,
                          mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
                                  UM = -90, ND = -55, MD = -54, AZ = -21),
                          missing_by_design = -54,
@@ -227,7 +235,12 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL, stag
 
         # Determine percentage of missing values for each missing type
         if (!is.null(stages)) stgs <- resp[,names(stages)]
-        results <- scaling:::mvp_calc(responses = resp_c, stages = stages, stgs = stgs, mvs = mvs)
+        results <- scaling:::mvp_calc(
+          responses = resp_c,
+          stages = stages,
+          stgs = stgs,
+          mvs = mvs
+        )
         mv_p <- scaling:::mvp_summary(results, digits = digits)
 
     } else {
@@ -241,7 +254,11 @@ mvp_analysis <- function(resp, vars, select, valid = NULL, grouping = NULL, stag
             if (!is.null(stages)) stgs <- resp[resp[[g]],names(stages)]
 
             # Create dataframe with missing values per person and missing value type
-            results[[g]] <- scaling:::mvp_calc(responses = resp_g, stages = stages, stgs = stgs, mvs = mvs)
+            results[[g]] <- scaling:::mvp_calc(
+              responses = resp_g,
+              stages = stages,
+              stgs = stgs, mvs = mvs
+            )
             results$all <- rbind(results$all, results[[g]])
 
             # Calculate summaries
@@ -306,9 +323,7 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
         results <- scaling:::write_mvp_table(mv_p)
     } else {
         results <- list()
-        for (g in names(mv_p)) {
-            results[[g]] <- scaling:::write_mvp_table(mv_p[[g]])
-        }
+        for (g in names(mv_p)) results[[g]] <- scaling:::write_mvp_table(mv_p[[g]])
     }
 
     # Save table
