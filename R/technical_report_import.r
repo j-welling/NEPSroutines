@@ -34,7 +34,8 @@
 #' @export
 Import <- function(path, filename = NULL, sheet = NULL, regexp = NULL,
                    rename = NULL,
-                   replace = c("dif_poly_" = "", "dif_dich_" = "")) {
+                   replace = c("dif_poly_" = "", "dif_dich_" = "",
+                               "mv_person_" = "")) {
 
   # Normalize arguments
   path <- path[1]

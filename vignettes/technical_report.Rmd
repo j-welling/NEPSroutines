@@ -113,6 +113,8 @@ The optional `bibdata` setting specifies some additional information about the N
 
 The `format` setting sets the Quarto extension for NEPS Survey Papers. The default setting `neps-paper-pdf` creates a pdf version of the technical report, while `neps-paper-docx` renders a word document. Generally, the pdf version is recommended for the final technical report because it more closely follows the style of NEPS Survey Papers. In contrast, the word version often exhibits minor formatting issues. However, the content of the pdf and word versions are identical.
 
+Please note when opening a word document created with `scaling` word may ask to "restore hidden content of the document" or "update fields" in the document. If so, these questions should be confirmed to automatically set some information (e.g., in the page headings) in the word document.
+
 ### `bibliography` Setting
 
 The `bibliography` setting specifies the name of the bibtex file with the cited references. Typically, it needs no modification because it has been set using `scaling::Setup()` .

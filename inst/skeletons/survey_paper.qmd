@@ -84,8 +84,10 @@ TblItemProps(
   prop = "type",
   propname = "Response format"
 )
+```
 
 {{ifre}}
+```{r}
 #| tbl-cap: "Number of Items by Text Types"
 #| label: tbl-texttypes
 
@@ -95,8 +97,9 @@ TblItemProps(
   prop = "texttype",
   propname = "Text types"
 )
+```
 
-
+```{r}
 #| tbl-cap: "Number of Items by Cognitive Requirements"
 #| label: tbl-cogfun
 
