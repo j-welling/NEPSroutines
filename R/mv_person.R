@@ -479,6 +479,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
 
             mv_wide <- tidyr::gather(mv, key = "group", value = "MV",
                                      tidyselect::all_of(groups))
+            mv_wide$group <- factor(mv_wide$group, levels = groups)
             ylim <- ceiling(max(mv_wide$MV, na.rm = TRUE)/10)*10
 
             # create plot
