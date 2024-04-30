@@ -486,17 +486,8 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
 
         } else {
 
-            end <- max(as.double(names(mv_all[[i]])))
-            mv <- data.frame(matrix(0, nrow = end + 1, ncol = length(groups)))
-            names(mv) <- groups
-            mv$number <- seq(0, end)
-
-            for (g in groups) {
-                mv[[g]][mv$number %in% names(mv_p[[g]][[i]])] <- mv_p[[g]][[i]]
-            }
-
-            mv_wide <- tidyr::gather(mv, key = "group", value = "MV",
-                                     tidyselect::all_of(groups))
+            end <- max(as.double(names(mv_p$all[[i]])))
+            mv_wide <- scaling:::create_wide_df(mv_p, groups, i, end)
             ylim <- ceiling(max(mv_wide$MV, na.rm = TRUE)/10)*10
 
             # create plot
@@ -562,6 +553,35 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
         # Print progress
         if (verbose) cat("Missing plot", i, "created.\n")
     }
+}
+
+#' Create dataframe in wide format for all groups
+#'
+#' @param mv_all see function mvp_plots()
+#' @param mv_p see function mvp_plots()
+#' @param groups character vector; includes names of groups for graph
+#' @param i string; name of missing value type for graph
+#'
+#' @return dataframe in wide format
+#' @noRd
+
+create_wide_df <- function(mv_p, groups, i, end) {
+
+  mv <- data.frame(matrix(0, nrow = end + 1, ncol = length(groups)))
+  names(mv) <- groups
+  mv$number <- seq(0, end)
+
+  for (g in groups) {
+    mv[[g]][mv$number %in% names(mv_p[[g]][[i]])] <- mv_p[[g]][[i]]
+  }
+
+  mv_wide <- tidyr::gather(
+    mv, key = "group", value = "MV", tidyselect::all_of(groups)
+  )
+
+  mv_wide$group <- factor(mv_wide$group, levels = groups)
+
+  return(mv_wide)
 }
 
 
