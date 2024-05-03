@@ -496,10 +496,8 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
   if (irtmodel %in% c("1PL", "PCM2")) {
 
     # Match item parameters by item name
-    if (!is.null(xsi_fixed)) {
-      xsi_fixed <-
-          scaling:::order_xsi_fixed(xsi_fixed, resp, irtmodel = irtmodel, Q = Q)
-    }
+    if (!is.null(xsi_fixed))
+      xsi_fixed <- scaling:::order_xsi_fixed(xsi_fixed, resp, irtmodel = irtmodel, Q = Q)
 
     # Calculate model
     mod <- TAM::tam.mml(

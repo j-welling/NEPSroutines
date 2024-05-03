@@ -537,7 +537,7 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
 
   # Match item parameters by item name
   xsi_fixed <- scaling:::order_xsi_fixed(
-    xsi_fixed, resp2, irtmodel = '1PL', include_steps = FALSE, A = A, B = B
+    xsi_fixed, resp2, irtmodel = '1PL', A = A, B = B, rename_steps = TRUE
   )
 
   # Fit model
