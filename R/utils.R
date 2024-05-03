@@ -579,16 +579,21 @@ create_name <- function(start, name_group = NULL, end = NULL, sep = "_") {
 #' @param resp data.frame (containing item responses) as passed to TAM functions
 #' @param irtmodel string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
 #'   "GPCM" for GPCM analysis
-#' @param include_steps logical; whether step parameters shall be included
+#' @param rename_steps logical; whether step parameters shall be renamed
+#'   (from "_step" to ":step")
 #' @param Q Q matrix as passed to TAM functions
 #' @param A A array as passed to TAM functions
 #' @param B B array as passed to TAM functions
 #'
 #' @returns xsi_fixed with correct order
 #' @noRd
-order_xsi_fixed <- function(xsi_fixed, resp, irtmodel,
-                           include_steps = TRUE, Q = NULL, A = NULL, B = NULL) {
-
+order_xsi_fixed <- function(
+    xsi_fixed,
+    resp,
+    irtmodel,
+    Q = NULL, A = NULL, B = NULL,
+    include_steps = FALSE
+  ) {
 
   if (irtmodel %in% c("1PL", "PCM2")) {
     xsi_arg <- TAM::tam.mml(
@@ -623,8 +628,6 @@ order_xsi_fixed <- function(xsi_fixed, resp, irtmodel,
 
   return(xsi_new)
 }
-
-
 
 
 #' Create names for output as used in suf (this concerns the variables with collapsed categories)
