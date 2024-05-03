@@ -25,6 +25,8 @@
 #' contains the scoring factor to be applied to loading matrix
 #' @param include_mv numeric; identifies threshold for which group size missing
 #' values should be included in analysis as an extra group (defaults to 200)
+#' @param min_val integer; minimum number of valid responses for each group on
+#' each item for the item to be included in the analysis (defaults to 50)
 #' @param control list; function argument as passed to TAM-functions
 #' @param pweights character; defines name of numerical variable in resp that
 #' contains person weights as passed to TAM-function
@@ -49,43 +51,44 @@
 #'   tr_tables: table for TR with summary of results for all variables defined in 'dif_vars'
 #' @export
 
-dif_analysis <- function(resp,
-                         vars,
-                         select,
-                         dif_vars,
-                         valid = NULL,
-                         mvs = NULL,
-                         scoring = NULL,
-                         overwrite = FALSE,
-                         save = TRUE,
-                         print = TRUE,
-                         return = FALSE,
-                         include_mv = 200,
-                         control = NULL,
-                         pweights = NULL,
-                         path_results = 'Results',
-                         path_table = 'Tables',
-                         suf_item_names = FALSE,
-                         name_group = NULL,
-                         verbose = FALSE,
-                         warn = TRUE,
-                         dif_threshold = 0.5,
-                         digits = 3
-                         ) {
+dif_analysis <- function(
+    resp,
+    vars,
+    select,
+    dif_vars,
+    valid = NULL,
+    mvs = NULL,
+    scoring = NULL,
+    overwrite = FALSE,
+    save = TRUE,
+    print = TRUE,
+    return = FALSE,
+    include_mv = 200,
+    min_val = 50,
+    control = NULL,
+    pweights = NULL,
+    path_results = 'Results',
+    path_table = 'Tables',
+    suf_item_names = FALSE,
+    name_group = NULL,
+    verbose = FALSE,
+    warn = TRUE,
+    dif_threshold = 0.5,
+    digits = 3
+  ) {
 
     # Test data
     scaling:::test_dif_data(
       resp = resp,
       vars = vars,
       valid = valid,
+      select = select,
       dif_vars = dif_vars,
       scoring = scoring,
       pweights = pweights,
       mvs = mvs,
       warn = warn
     )
-
-    scaling:::check_select(select, dif_vars)
 
     # Create list for results
     dif <- list()
@@ -98,6 +101,7 @@ dif_analysis <- function(resp,
         vars = vars,
         scoring = scoring,
         include_mv = include_mv,
+        min_val = min_val,
         valid = valid,
         path = path_results,
         mvs = mvs,
@@ -141,18 +145,6 @@ dif_analysis <- function(resp,
     if (return) return(dif)
 }
 
-#' Checks whether arguments select and dif_vars match
-#' @param select function argument 'select'
-#' @param dif_vars function argument 'dif_vars'
-#'
-#' @noRd
-check_select <- function(select, dif_vars) {
-    if (length(select) > 1 & length(select) != length(dif_vars)) {
-        stop("Please check 'select' and 'dif_vars'. At least one of them does ",
-             "not match the intended analysis.")
-    }
-}
-
 #' Conduct DIF analyses
 #'
 #' Testing for differential item functioning for binary and polytomous data.
@@ -179,6 +171,8 @@ check_select <- function(select, dif_vars) {
 #' contains the scoring factor to be applied to loading matrix
 #' @param include_mv numeric; identifies threshold for which group size missing
 #' values should be included in analysis as an extra group (defaults to 200)
+#' @param min_val integer; minimum number of valid responses for each group on
+#' each item for the item to be included in the analysis (defaults to 50)
 #' @param control list; function argument as passed to TAM-functions
 #' @param pweights character; defines name of numerical variable in resp that
 #' contains person weights as passed to TAM-function
@@ -194,11 +188,25 @@ check_select <- function(select, dif_vars) {
 #'   mmod: main effects model
 #'   dmod: DIF effects model
 #' @export
-conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
-                                 scoring = NULL, mvs = NULL, include_mv = 200,
-                                 path = 'Results', save = TRUE,
-                                 name_group = NULL, control = NULL, pweights = NULL,
-                                 verbose = FALSE, warn = TRUE, test = TRUE) {
+conduct_dif_analysis <- function(
+    resp,
+    vars,
+    select,
+    dif_vars,
+    valid = NULL,
+    scoring = NULL,
+    mvs = NULL,
+    include_mv = 200,
+    min_val = 50,
+    path = 'Results',
+    save = TRUE,
+    name_group = NULL,
+    control = NULL,
+    pweights = NULL,
+    verbose = FALSE,
+    warn = TRUE,
+    test = TRUE
+  ) {
 
     # Test data
     if (test) {
@@ -206,6 +214,7 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
           resp = resp,
           vars = vars,
           valid = valid,
+          select = select,
           dif_vars = dif_vars,
           scoring = scoring,
           pweights = pweights,
@@ -218,9 +227,7 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
     dif_models <- list()
 
     # Set same items to all dif variables if items has length 1
-    if (length(select) == 1) {
-        select <- rep(select, length(dif_vars))
-    }
+    if (length(select) == 1) select <- rep(select, length(dif_vars))
 
     # Conduct dif analyses
     for (i in seq_along(dif_vars)) {
@@ -232,6 +239,7 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
             dif_var = dif_vars[i],
             scoring = scoring,
             include_mv = include_mv,
+            min_val = min_val,
             verbose = verbose,
             mvs = mvs,
             warn = warn,
@@ -280,11 +288,19 @@ conduct_dif_analysis <- function(resp, vars, select, dif_vars, valid = NULL,
 #'
 #' @returns a list of dif summaries for each input entry in dif_models.
 #' @export
-summarize_dif_analysis <- function(dif_models, dif_vars, vars, dif_threshold = 0.5,
-                                   print = TRUE, save = TRUE, overwrite = FALSE,
-                                   path_results = 'Results',
-                                   path_table = 'Tables',
-                                   name_group = NULL, digits = 3) {
+summarize_dif_analysis <- function(
+    dif_models,
+    dif_vars,
+    vars,
+    dif_threshold = 0.5,
+    print = TRUE,
+    save = TRUE,
+    overwrite = FALSE,
+    path_results = 'Results',
+    path_table = 'Tables',
+    name_group = NULL,
+    digits = 3
+  ) {
 
     dif_summaries <- list()
 
@@ -343,6 +359,8 @@ summarize_dif_analysis <- function(dif_models, dif_vars, vars, dif_threshold = 0
 #' variables in vars
 #' @param include_mv numeric; identifies threshold for which group size missing
 #' values should be included in analysis as an extra group (defaults to 200)
+#' @param min_val integer; minimum number of valid responses for each group on
+#' each item for the item to be included in the analysis (defaults to 50)
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param mvs named integer vector; contains user-defined missing values
@@ -365,28 +383,40 @@ summarize_dif_analysis <- function(dif_models, dif_vars, vars, dif_threshold = 0
 #'   dmod: DIF effects model.
 #' @importFrom stats as.formula
 #' @export
-dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
-                      valid = NULL, include_mv = 200,
-                      mvs = NULL, verbose = FALSE, warn = TRUE, test = TRUE,
-                      control = NULL, pweights = NULL, save = TRUE,
-                      path = "Results", name_group = NULL) {
+dif_model <- function(
+    resp,
+    vars,
+    select,
+    dif_var,
+    scoring = NULL,
+    valid = NULL,
+    include_mv = 200,
+    min_val = 50,
+    mvs = NULL,
+    verbose = FALSE,
+    warn = TRUE,
+    test = TRUE,
+    control = NULL,
+    pweights = NULL,
+    save = TRUE,
+    path = "Results",
+    name_group = NULL
+  ) {
 
     # Test data
     if (test) {
         scaling:::test_dif_data(
           resp = resp,
           vars = vars,
+          select = select,
           valid = valid,
           dif_vars = dif_var,
           scoring = scoring,
           pweights = pweights,
           mvs = mvs,
-          warn = warn)
+          warn = warn
+        )
     }
-
-    scaling:::check_items(vars$item[vars[[select]]])
-    scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
-    scaling:::check_items(vars$item[vars[[select]]])
 
     # Select only valid cases
     resp <- scaling:::only_valid(resp, valid = valid, warn = FALSE)
@@ -399,8 +429,9 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     pws <- scaling:::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
 
     # Prepare resp by converting missing values and selecting only necessary variables
-    resp <- scaling:::prepare_resp(resp, vars = vars, select = select,
-                                   convert = TRUE, mvs = mvs, warn = FALSE)
+    resp <- scaling:::prepare_resp(
+      resp, vars = vars, select = select, convert = TRUE, mvs = mvs, warn = FALSE
+    )
 
     # Test resp
     scaling:::check_numerics(resp, "resp", check_invalid = TRUE)
@@ -408,30 +439,15 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     # Identify IRT type
     irt_type <- ifelse(scaling:::is_poly(resp, vars, select), 'poly', 'dich')
 
-    # Prepare DIF analysis
-    tmp_formula <- paste("~ item +", ifelse(irt_type == 'poly', "item * step +", ""))
-    formula_dmod <- as.formula(paste(tmp_formula, "item *", dif_var))
-    formula_mmod <- as.formula(paste(tmp_formula, dif_var))
-    rm(tmp_formula)
+    # Prepare formula
+    formula <- paste("~ item +", ifelse(irt_type == 'poly', "item * step +", ""))
+    formula_dmod <- as.formula(paste(formula, "item *", dif_var))
+    formula_mmod <- as.formula(paste(formula, dif_var))
 
     # Prepare facets
-    facets[[dif_var]] <- as.integer(facets[[dif_var]])
-    invalid <- facets[[dif_var]] < 0
+    facets[[dif_var]] <- prepare_facets(facets[[dif_var]], dif_var)
 
-    if (sum(invalid, na.rm = TRUE) > 0) {
-        facets[[dif_var]][ifelse(is.na(invalid), FALSE, invalid), ] <- NA
-        if (warn) {
-            warning(paste0(
-                sum(invalid, na.rm = TRUE),
-                " invalid values (< 0) were found",
-                " in the DIF variable ",
-                dif_var,
-                ". The corresponding cases were replaced",
-                " by NAs.\n")
-            )
-        }
-    }
-
+    # Missing values on DIF variable
     mis <- is.na(facets[[dif_var]])
 
     if (any(mis)) {
@@ -442,19 +458,15 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
             resp <- resp[!mis, ]
             pid <- pid[!mis]
 
-            fcts <- scaling:::create_facets_df(facets[[dif_var]], labels = lbls_facet)
+            fcts <- scaling:::create_facets_df(
+              facets[[dif_var]], labels = lbls_facet
+            )
 
-            if (warn) {
-                warning(paste0(sum(mis), " missing values were found in the DIF variable ",
-                               dif_var, ". The corresponding cases have been excluded from the analysis.\n"))
-            }
+            if (warn) warn_excluded_missings(dif_var, mis)
 
         } else {
 
-            vals <- unique(facets[[dif_var]])
-            max_val <- max(vals, na.rm = TRUE)
-            min_val <- min(vals, na.rm = TRUE)
-            facets[mis, ] <- max_val + 1
+            facets[mis, ] <- max(unique(facets[[dif_var]]), na.rm = TRUE) + 1
 
             fcts <- scaling:::create_facets_df(
                 facets[[dif_var]],
@@ -462,21 +474,38 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
                 missings = TRUE
             )
 
-            # DIF analysis does not work with more than two groups when one group == 0
-            if (min_val == 0) {
-                facets <- facets + 1
-                fcts$number <- as.integer(fcts$number)
-            }
-
-            if (warn) {
-                warning(paste0(sum(mis), " missing values were found in the DIF variable ",
-                               dif_var, ". The corresponding cases have been included in the analysis as",
-                               " an extra group.\n"))
-            }
+            if (warn) warn_included_missings(dif_var, mis)
 
         }
     } else {
-        fcts <- scaling:::create_facets_df(facets[[dif_var]], labels = lbls_facet)
+
+        fcts <- scaling:::create_facets_df(
+          facets[[dif_var]],
+          labels = lbls_facet
+        )
+
+    }
+
+    # Check for minimum number of valid responses per group and item
+    vars$select_ <- check_minimum_valid(
+      resp = resp,
+      vars = vars,
+      facets = facets[[dif_var]],
+      select = select,
+      dif_var = dif_var,
+      min_val = min_val,
+      warn = warn
+    )
+    resp <- dplyr::select(resp, vars$item[vars$select_])
+
+    # Check if one group has the value 0 (does not work with more than two groups)
+    vals <- unique(facets[[dif_var]])
+
+    if (length(vals) > 2 & min(vals, na.rm = TRUE) == 0) {
+
+      facets <- facets + 1
+      fcts$number <- as.integer(fcts$number)
+
     }
 
     # DIF analysis
@@ -493,7 +522,7 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
             formulaA = formula_mmod,
             pid = pid,
             vars = vars,
-            select = select,
+            select = "select_",
             scoring = scoring,
             verbose = verbose,
             control = control,
@@ -506,7 +535,7 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
             formulaA = formula_dmod,
             pid = pid,
             vars = vars,
-            select = select,
+            select = "select_",
             scoring = scoring,
             verbose = verbose,
             control = control,
@@ -518,12 +547,13 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
         # Check whether resp contains only dichotomous items
         scaling:::check_dich(resp, "resp")
 
-        Q <- scaling:::create_q(vars, select = select, scoring = scoring, poly = FALSE)
-        irtmodel <- '1PL'
+        Q <- scaling:::create_q(
+          vars, select = "select_", scoring = scoring, poly = FALSE
+        )
 
         dmod <- TAM::tam.mml.mfr(
           resp,
-          irtmodel = irtmodel,
+          irtmodel = '1PL',
           facets = facets,
           Q = Q,
           pid = pid,
@@ -535,7 +565,7 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
 
         mmod <- TAM::tam.mml.mfr(
           resp,
-          irtmodel = irtmodel,
+          irtmodel = '1PL',
           facets = facets,
           Q = Q,
           pid = pid,
@@ -572,6 +602,35 @@ dif_model <- function(resp, vars, select, dif_var, scoring = NULL,
     return(results)
 }
 
+#' Prepare facets variable and check for invalid values
+#'
+#' @param facets numeric vector; contains group values for each person in resp
+#' @param dif_var string; defines the name of the variable to be tested for DIF
+#' (e.g., "gender")
+#'
+#' @return numeric vector that contains group values for each person in resp
+#' @noRd
+prepare_facets <- function(facets, dif_var) {
+
+  facets <- as.integer(facets)
+  invalid <- facets < 0
+
+  if (sum(invalid, na.rm = TRUE) > 0) {
+
+    facets[ifelse(is.na(invalid), FALSE, invalid), ] <- NA
+
+    if (warn) warning(
+      sum(invalid, na.rm = TRUE),
+      " invalid values (< 0) were found in the DIF variable ", dif_var,
+      ". The corresponding cases were replaced by NAs.\n"
+    )
+
+  }
+
+  return(facets)
+
+}
+
 #' Create data.frame for facets with counts
 #'
 #' @param facet factor or numeric vector; defines groups of facet
@@ -597,6 +656,91 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
     }
 
     df
+}
+
+#' Warn if missings in DIF variable are excluded from analysis
+#'
+#' @param dif_var string; defines the name of the variable to be tested for DIF
+#' (e.g., "gender")
+#' @param mis logical vector; contains information on missings in DIF variable
+#'
+#' @noRd
+warn_excluded_missings <- function(dif_var, mis) {
+  warning(
+    sum(mis), " missing values were found in the DIF variable ",
+    dif_var, ". The corresponding cases were excluded from the analysis.\n"
+  )
+}
+
+#' Warn if missings in DIF variable are included from analysis
+#'
+#' @param dif_var string; defines the name of the variable to be tested for DIF
+#' (e.g., "gender")
+#' @param mis logical vector; contains information on missings in DIF variable
+#'
+#' @noRd
+warn_included_missings <- function(dif_var, mis){
+  warning(
+    sum(mis), " missing values were found in the DIF variable ",
+    dif_var, ". The corresponding cases were included in the analysis as",
+    " an extra group.\n"
+  )
+}
+
+#' Check for minimum number of valid responses for each group and item
+#'
+#' @param resp  data.frame; contains only item responses of relevant items
+#' @param vars data.frame; contains information about items with items as rows;
+#' includes variable 'item' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param facets numeric vector; contains group values for each person in resp
+#' @param select string; defines name of logical variable in vars that indicates
+#' which items to use for the analysis
+#' @param dif_var string; defines the name of the variable to be tested for DIF
+#' (e.g., "gender")
+#' @param min_val integer; minimum number of valid responses for each group on
+#' each item for the item to be included in the analysis (defaults to 50)
+#' @param warn  logical; whether to print warnings (should be set to TRUE)
+#'
+#' @return logical vector that contains information on which items should be kept for analysis
+#' @noRd
+check_minimum_valid <- function(
+    resp,
+    vars,
+    facets,
+    select,
+    dif_var,
+    min_val,
+    warn
+) {
+
+  remove <- c()
+
+  for (group in unique(facets)) {
+
+    resp_group <- resp[facets == group,]
+
+    for (item in names(resp_group)) {
+
+      no_valid <- sum(!is.na(resp_group[[item]]) & resp_group[[item]] >= 0)
+
+      if (no_valid < min_val) remove <- c(remove, item)
+
+    }
+
+  }
+
+  remove <- unique(remove)
+
+  if (length(remove) > 0 & warn) warning(
+    "At least one group from the DIF variable '", dif_var, "' does not have ",
+    "the minimum number of valid responses (", min_val, ") on ",
+    ifelse(length(remove) > 1, "items ", "item "), paste(remove, collapse = ", "),
+    ". The corresponding items were excluded from the analysis.\n"
+  )
+
+  select_new <- ifelse(vars$item %in% remove, FALSE, vars[[select]])
+
 }
 
 #' DIF analyses for PCM model
@@ -669,10 +813,18 @@ pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
 #'   data frames for dif analysis.
 #' @export
 
-dif_summary <- function(diflist, vars, print = TRUE, save = TRUE,
-                        path = 'Tables', dif_threshold = 0.5, 
-                        suf_item_names = FALSE,
-                        overwrite = FALSE, name_group = NULL, digits = 3L) {
+dif_summary <- function(
+    diflist,
+    vars,
+    print = TRUE,
+    save = TRUE,
+    path = 'Tables',
+    dif_threshold = 0.5,
+    suf_item_names = FALSE,
+    overwrite = FALSE,
+    name_group = NULL,
+    digits = 3L
+  ) {
     # information criteria for DIF and main model
     # main effects of main and DIF model + standardized
     # DIF per item + standard error + meht p-values
@@ -899,17 +1051,23 @@ difsum <- function(obj, dif_var, vars, groups = 1, digits = 3) {
 #' @return table with results for TR.
 #' @export
 
-build_dif_tr_tables <- function(dif_summaries, vars,
-                                save = TRUE, overwrite = FALSE,
-                                path = 'Tables',
-                                suf_item_names = FALSE,
-                                digits = 3,
-                                name_group = NULL) {
+build_dif_tr_tables <- function(
+    dif_summaries,
+    vars,
+    save = TRUE,
+    overwrite = FALSE,
+    path = 'Tables',
+    suf_item_names = FALSE,
+    digits = 3,
+    name_group = NULL
+  ) {
 
     dif_vars <- names(dif_summaries)
     are_poly <- sapply(dif_summaries, function(x) x$irt_type == 'poly')
-    irt_type <- ifelse(sum(are_poly) == length(are_poly), 'poly',
-                       ifelse(sum(are_poly) == 0, 'dich', 'mixed'))
+    irt_type <- ifelse(
+      sum(are_poly) == length(are_poly),'poly',
+      ifelse(sum(are_poly) == 0, 'dich', 'mixed')
+    )
 
     # information criteria table
     gof <- Reduce(rbind, lapply(dif_summaries, function(x) x$gof))
@@ -1057,17 +1215,42 @@ print_dif_summary <- function(resp, diflist, res, dif_threshold = 0.5) {
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #'
 #' @noRd
-test_dif_data <- function(resp,
-                          vars,
-                          dif_vars,
-                          valid = NULL,
-                          mvs = NULL,
-                          scoring = NULL,
-                          pweights = NULL,
-                          warn = TRUE) {
+test_dif_data <- function(
+    resp,
+    vars,
+    dif_vars,
+    select,
+    valid = NULL,
+    mvs = NULL,
+    scoring = NULL,
+    pweights = NULL,
+    warn = TRUE
+  ) {
 
     scaling:::check_logicals(resp, "resp", valid, warn = warn)
     scaling:::check_variables(resp, "resp", dif_vars)
+    scaling:::check_logicals(vars, "vars", select, warn = warn)
+
+    if (length(select) > 1) {
+
+      if (length(select) != length(dif_vars)) {
+        stop("Please check 'select' and 'dif_vars'. At least one of them does ",
+             "not match the intended analysis.")
+      }
+
+      for (sel in select) {
+
+        scaling:::check_items(vars$item[vars[[sel]]])
+        scaling:::check_numerics(resp, "resp", vars$item[vars[[sel]]])
+
+      }
+
+    } else {
+
+      scaling:::check_items(vars$item[vars[[select]]])
+      scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+
+    }
 
     if (!is.null(scoring))
         scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
@@ -1076,4 +1259,5 @@ test_dif_data <- function(resp,
         scaling:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
 
     if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
+
 }
