@@ -564,7 +564,7 @@ GetDist <- function(obj, stat = median, correct = FALSE, item = FALSE,
     tab <- as.data.frame(obj$distractor)
   }
   if (!item) {
-    return(rnd(stat(tab$corr, na.rm = TRUE), digits = digits))
+    return(rnd(stat(tab$corr, na.rm = TRUE), d0 = TRUE, digits = digits))
   } else {
     i <- tab[tab$corr == stat(tab$corr, na.rm = TRUE), 1]
     i <- paste0(substring(i, 1, nchar(i) - 1), "_c")

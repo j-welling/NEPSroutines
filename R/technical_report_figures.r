@@ -171,12 +171,8 @@ FigMV <- FigMv
 #' @export
 FigWrightMap <- function(file, tbl = 5) {
 
-  return(Fig(
-    file = file,
-    crop = "800x1010+5+50",
-    width = 1500,
-    note.y = 150,
-    footnote =
+  if (grepl("_(PCM2|GPCM)\\.png", basename(file))) {
+    note <-
       paste0("The distribution of the person abilities in the ",
              "sample is given on the left-hand side of the graph. ",
              "The category thresholds of the items are given on ",
@@ -185,6 +181,22 @@ FigWrightMap <- function(file, tbl = 5) {
              "the dot) corresponding to the item numbers given in ",
              "Table ", tbl, " and the second part indicating the ",
              "threshold.")
+  } else {
+    note <-
+      paste0("The distribution of the person abilities in the ",
+             "sample is given on the left-hand side of the graph. ",
+             "The item difficulties are given on ",
+             "the right-hand side of the graph, with each number ",
+             "corresponding to the item numbers given in ",
+             "Table ", tbl, ".")
+  }
+
+  return(Fig(
+    file = file,
+    crop = "800x1010+5+50",
+    width = 1500,
+    note.y = 150,
+    footnote = note
   ))
 
 }

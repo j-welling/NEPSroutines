@@ -425,7 +425,7 @@ dif_model <- function(
     pid <- resp$ID_t
     scaling:::check_pid(pid)
     facets <- resp[, dif_var, drop = FALSE]
-    lbls_facet <- attributes(resp[[dif_var]])$label
+    lbls_facet <- attributes(resp[[dif_var]])$labels
     pws <- scaling:::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
 
     # Prepare resp by converting missing values and selecting only necessary variables
@@ -446,6 +446,7 @@ dif_model <- function(
 
     # Prepare facets
     facets[[dif_var]] <- prepare_facets(facets[[dif_var]], dif_var)
+
 
     # Missing values on DIF variable
     mis <- is.na(facets[[dif_var]])
@@ -473,7 +474,7 @@ dif_model <- function(
                 labels = lbls_facet,
                 missings = TRUE
             )
-
+          
             if (warn) warn_included_missings(dif_var, mis)
 
         }
@@ -498,7 +499,7 @@ dif_model <- function(
     )
     resp <- dplyr::select(resp, vars$item[vars$select_])
 
-    # Check if one group has the value 0 (does not work with more than two groups)
+    # DIF analysis does not work with more than two groups when one group == 0
     vals <- unique(facets[[dif_var]])
 
     if (length(vals) > 2 & min(vals, na.rm = TRUE) == 0) {
@@ -509,7 +510,6 @@ dif_model <- function(
     }
 
     # DIF analysis
-
 
     if (irt_type == 'poly') {
 
@@ -825,6 +825,7 @@ dif_summary <- function(
     name_group = NULL,
     digits = 3L
   ) {
+
     # information criteria for DIF and main model
     # main effects of main and DIF model + standardized
     # DIF per item + standard error + meht p-values
