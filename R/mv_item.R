@@ -51,31 +51,47 @@
 #'            summary_table: table with summary statistics for TR.
 #' @export
 
-mv_item <- function(resp, vars, select, valid = NULL,
-                    position = NULL, grouping = NULL, stages = NULL,
-                    mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                            UM = -90, ND = -55, MD = -54, AZ = -21),
-                    labels_mvs = c(
-                        ALL = "total missing items",
-                        OM = "omitted items",
-                        NV = "not valid items",
-                        NR = "not reached items",
-                        TA = "missing items due to test abortion",
-                        UM = "unspecific missing items",
-                        ND = "not determinable items",
-                        MD = "items missing by design",
-                        AZ = "missing items due to 'Angabe zurueckgesetzt'"
-                    ),
-                    missing_by_design = -54,
-                    plots = FALSE, print = TRUE, save = TRUE, return = FALSE,
-                    path_results = "Results",
-                    path_table = "Tables",
-                    path_plots = "Plots/Missing_Responses/by_item",
-                    suf_item_names = FALSE,
-                    show_all = TRUE, name_grouping = 'test version',
-                    overwrite = FALSE, name_group = NULL, color = NULL,
-                    digits = 3, warn = TRUE, verbose = TRUE,
-                    labels_legend = NULL) {
+mv_item <- function(
+    resp,
+    vars,
+    select,
+    valid = NULL,
+    position = NULL,
+    grouping = NULL,
+    stages = NULL,
+    mvs = c(
+      OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21
+    ),
+    labels_mvs = c(
+      ALL = "total missing items",
+      OM = "omitted items",
+      NV = "not valid items",
+      NR = "not reached items",
+      TA = "missing items due to test abortion",
+      UM = "unspecific missing items",
+      ND = "not determinable items",
+      MD = "items missing by design",
+      AZ = "missing items due to 'Angabe zurueckgesetzt'"
+    ),
+    missing_by_design = -54,
+    plots = FALSE,
+    print = TRUE,
+    save = TRUE,
+    return = FALSE,
+    path_results = "Results",
+    path_table = "Tables",
+    path_plots = "Plots/Missings_by_item",
+    suf_item_names = FALSE,
+    show_all = TRUE,
+    name_grouping = 'test version',
+    overwrite = FALSE,
+    name_group = NULL,
+    color = NULL,
+    digits = 3,
+    warn = TRUE,
+    verbose = TRUE,
+    labels_legend = NULL
+  ) {
 
     # Test data
     scaling:::check_logicals(resp, "resp", c(valid, grouping), warn = warn)
@@ -120,11 +136,14 @@ mv_item <- function(resp, vars, select, valid = NULL,
 
     # Write plots
     if (plots) scaling:::mvi_plots(
-        mv_i = mv_item,
+        resp = resp,
+        valid = valid,
+        position = position,
+        stages = stages,
+        digits = digits,
         vars = vars,
         select = select,
         grouping = grouping,
-        #position = position,
         mvs = mvs,
         labels_mvs = labels_mvs,
         missing_by_design = missing_by_design,
@@ -216,13 +235,26 @@ mv_item <- function(resp, vars, select, valid = NULL,
 #' @importFrom stats median sd na.omit
 #' @export
 
-mvi_analysis <- function(resp, vars, select, position,
-                         valid = NULL, grouping = NULL, stages = NULL,
-                         mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                                 UM = -90, ND = -55, MD = -54, AZ = -21),
-                         missing_by_design = -54,
-                         path = "Results", save = TRUE,
-                         name_group = NULL, digits = 3, warn = TRUE, test = TRUE) {
+mvi_analysis <- function(
+    resp,
+    vars,
+    select,
+    position,
+    valid = NULL,
+    grouping = NULL,
+    stages = NULL,
+    mvs = c(
+      OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21
+    ),
+    missing_by_design = -54,
+    path = "Results",
+    use_for_plot = FALSE,
+    save = TRUE,
+    name_group = NULL,
+    digits = 3,
+    warn = TRUE,
+    test = TRUE
+  ) {
 
     # Test data
     scaling:::test_mvi_analysis(
@@ -273,7 +305,8 @@ mvi_analysis <- function(resp, vars, select, position,
             resp = resp,
             vars = vars_c,
             mvs = mvs,
-            digits = digits
+            digits = digits,
+            use_for_plot = use_for_plot
         )
 
         # Summary across items
@@ -310,7 +343,8 @@ mvi_analysis <- function(resp, vars, select, position,
               resp = resp[resp[[g]],],
               vars = vars_g,
               mvs = mvs,
-              digits = digits
+              digits = digits,
+              use_for_plot = use_for_plot
             )
 
             # Summary across items
@@ -344,7 +378,12 @@ mvi_analysis <- function(resp, vars, select, position,
             # Determine percentage of missing values for each missing type
             mvlist$all <- cbind(
               mvlist$all,
-              data.frame(scaling:::mvi_calc(resp_p, mvs = mvs, digits = digits))
+              data.frame(scaling:::mvi_calc(
+                resp_p,
+                mvs = mvs,
+                digits = digits,
+                use_for_plot = use_for_plot
+              ))
             )
 
             # Summary across items
@@ -361,7 +400,8 @@ mvi_analysis <- function(resp, vars, select, position,
             resp = resp,
             vars = vars_c,
             mvs = mvs,
-            digits = digits
+            digits = digits,
+            use_for_plot = use_for_plot
           )
 
           # Summary across items
@@ -427,6 +467,141 @@ test_mvi_analysis <- function(
 
 }
 
+
+#' Create list with missing values per item
+#'
+#' @param item  character vector; contains names of items
+#' @param position  integer vector; contains position of items
+#' @param responses  data.frame; contains item responses with items as variables
+#' and persons as rows; all responses ∈ ℕ0; user-defined missing values;
+#' only the items administered to and the cases of the designated group
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'item' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param stages  character vector; contains names of stage variables in resp and vars,
+#' only applicable in multistage tests (otherwise NULL)
+#' @param digits  integer; number of decimals for rounding
+#'
+#' @return   list with results of missing values per item.
+#' @noRd
+
+create_mvlist <- function(
+    item,
+    position,
+    responses,
+    mvs,
+    resp,
+    vars,
+    stages = NULL,
+    digits = 3,
+    use_for_plot
+) {
+
+  if (length(item) != length(position) |
+      ncol(responses) != length(item) |
+      ncol(responses) != length(position)) {
+    stop("Number of items in dataframe responses, in vector item and in vector position do not match. ",
+         "Please provide matching arguments to function create_mvlist().")
+  }
+
+  # Create dataframe
+  mvlist <- data.frame(
+    item = item,
+    position = position,
+    N_administered = colSums(apply(responses, 2, function(x) !is.na(x))),
+    N_valid = colSums(apply(responses, 2, function(x) !(x %in% mvs | is.na(x))))
+  )
+
+  # Merge with percentage of missing values for each missing type
+  results <- data.frame(scaling:::mvi_calc(
+    responses,
+    mvs = mvs,
+    digits = digits,
+    use_for_plot = use_for_plot
+  ))
+  results$item <- row.names(results)
+  mvlist <- merge(mvlist, results, by = 'item')
+  mvlist <- mvlist[order(mvlist$position, mvlist$item), ]
+
+  # Return list
+  return(mvlist)
+}
+
+#' Create list with frequency of missing responses by item for each missing value type
+#'
+#' @param responses  data.frame; contains item responses with items as variables
+#' and persons as rows; all responses ∈ ℕ0; user-defined missing values;
+#' only the items administered to and the cases of the designated group
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param digits  integer; number of decimals for rounding
+#'
+#' @return list with frequency of missing values by item for each missing value
+#' type in mvs.
+#' @noRd
+
+mvi_calc <- function(responses, mvs, digits = 3, use_for_plot) {
+
+  result <- list()
+
+  # Determine percentage of missing values for each missing type
+  for (i in names(mvs)) {
+    result[[i]] <- scaling:::mvi_perc(
+      responses = responses,
+      mvs = mvs[[i]],
+      digits = digits,
+      use_for_plot = use_for_plot
+    )
+  }
+
+  # Percentage of total missing responses for each item
+  result$ALL <- scaling:::mvi_perc(
+    responses = responses,
+    mvs = mvs,
+    digits = digits,
+    use_for_plot = use_for_plot
+  )
+
+  return(result)
+}
+
+#' Calculate and round frequency (in percentage) of one missing value type (by item)
+#'
+#' @param responses  data.frame; contains item responses with items as variables
+#' and persons as rows; all responses ∈ ℕ0; user-defined missing values;
+#' only the items administered to and the cases of the designated group
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param digits  integer; number of decimals for rounding
+#' @param use_for_plot
+#'
+#' @return table with frequency of missing values for one missing value type
+#' (by item).
+#' @noRd
+
+mvi_perc <- function(responses, mvs, digits = 3, use_for_plot) {
+  perc <- data.frame(apply(responses, 2, function(x) {
+    ifelse(x %in% mvs, 1, ifelse(!is.na(x), 0, if(use_for_plot) 0 else NA))
+  }))
+  round(apply(perc, 2, mean, na.rm = TRUE) * 100, digits)
+}
+
+#' MVI summary
+#'
+#' @param mvlist  list; return object of create_mvlist()
+#' @param digits  integer; number of decimals for rounding
+#'
+#' @return  data.frame with mean, median, SD, min and max of missing values.
+#' @noRd
+
+mvi_summary <- function(mvlist, digits = 3) {
+  mvsum <- data.frame(t(apply(mvlist, 2, function(x) {
+    round(c(mean(x), sd(x), median(x), range(x)[1], range(x)[2]), digits)
+  })))
+  mvsum[1, ] <- round(mvsum[1, ])
+  colnames(mvsum) <- c("Mean", "SD", "Median", "Min", "Max")
+  return(mvsum)
+}
+
 #' Create dataframe with responses per position, not items
 #'
 #' @param resp  see mvi_analysis()
@@ -487,14 +662,23 @@ resp_per_position <- function(resp, resp_c, vars_c, grouping, position) {
 #' @return table with summary statistics for TR.
 #' @export
 
-mvi_table <- function(mv_i, vars, select, grouping = NULL,
-                      mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                              UM = -90, ND = -55, MD = -54, AZ = -21),
-                      missing_by_design = -54,
-                      save = TRUE, path = "Tables",
-                      suf_item_names = FALSE,
-                      overwrite = FALSE, name_group = NULL,
-                      test = TRUE, warn = TRUE) {
+mvi_table <- function(
+    mv_i,
+    vars,
+    select,
+    grouping = NULL,
+    mvs = c(
+      OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21
+    ),
+    missing_by_design = -54,
+    save = TRUE,
+    path = "Tables",
+    suf_item_names = FALSE,
+    overwrite = FALSE,
+    name_group = NULL,
+    test = TRUE,
+    warn = TRUE
+  ) {
 
   # Missing by design
   if (!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
@@ -558,15 +742,25 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
 #' item position. If not otherwise specified, the order in which the items are
 #' given to the function is taken as the order the items appeared in the test.
 #'
-#' @param mv_i  list; return object of mvi_analysis()
+#' @param resp  data.frame; contains item responses with items as variables and
+#' persons as rows; all responses ∈ ℕ0; user-defined missing values;
+#' includes all variables that are further defined in the function arguments
 #' @param vars  data.frame; contains information about items with items as rows;
 #' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
 #' @param select  string; defines name of logical variable in vars that indicates
 #' which items to use for the analysis
+#' @param valid  string; defines name of logical variable in resp that indicates
+#' (in)valid cases
+#' @param position  (named) character vector; defines name(s) of integer
+#' variable(s) in vars that indicate position of items; if groups with differing
+#' item positions in testlets exist, then vector must be named with names of
+#' groups (as in "grouping") as names of elements and names of variables as elements
 #' @param grouping  character vector; contains for each group a name of a logical
 #' variable in resp and vars that indicates to which group belongs a person or
 #' an item
+#' @param stages  character vector; contains names of stage variables in resp and vars,
+#' only applicable in multistage tests (otherwise NULL)
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
@@ -587,28 +781,61 @@ mvi_table <- function(mv_i, vars, select, grouping = NULL,
 #' @importFrom rlang .data
 #' @export
 
-mvi_plots <- function(mv_i, vars, select, grouping = NULL,
-                      mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                              UM = -90, ND = -55, MD = -54, AZ = -21),
-                      labels_mvs = c(
-                        ALL = "total missing items",
-                        OM = "omitted items",
-                        NV = "not valid items",
-                        NR = "not reached items",
-                        TA = "missing items due to test abortion",
-                        UM = "unspecific missing items",
-                        ND = "not determinable items",
-                        MD = "items missing by design",
-                        AZ = "missing items due to 'Angabe zurueckgesetzt'"
-                      ),
-                      missing_by_design = -54,
-                      path = "Plots/Missing_Responses/by_item",
-                      name_group = NULL, name_grouping = 'test version',
-                      show_all = TRUE, labels_legend = NULL, color = NULL,
-                      verbose = TRUE, warn = TRUE, test = TRUE) {
+mvi_plots <- function(
+    resp,
+    vars,
+    select,
+    valid,
+    position,
+    stages = NULL,
+    grouping = NULL,
+    mvs = c(
+      OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21
+    ),
+    labels_mvs = c(
+      ALL = "total missing items",
+      OM = "omitted items",
+      NV = "not valid items",
+      NR = "not reached items",
+      TA = "missing items due to test abortion",
+      UM = "unspecific missing items",
+      ND = "not determinable items",
+      MD = "items missing by design",
+      AZ = "missing items due to 'Angabe zurueckgesetzt'"
+    ),
+    missing_by_design = -54,
+    path = "Plots/Missings_by_item",
+    name_group = NULL,
+    name_grouping = 'test version',
+    show_all = TRUE,
+    labels_legend = NULL,
+    color = NULL,
+    digits = 3,
+    verbose = TRUE,
+    warn = TRUE,
+    test = TRUE
+  ) {
 
   # Missing by design
   if(!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
+
+  mv_i <- scaling:::mvi_analysis(
+    resp = resp,
+    vars = vars,
+    select = select,
+    valid = valid,
+    position = position,
+    grouping = grouping,
+    stages = stages,
+    mvs = mvs,
+    missing_by_design = missing_by_design,
+    digits = digits,
+    warn = warn,
+    save = FALSE,
+    test = TRUE,
+    use_for_plot = !is.null(stages)
+  )
+
 
   # Test data
   if (test) {
@@ -641,10 +868,21 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
 
   for (i in names(mvs)) {
 
+    add_missings_per_stage <- !is.null(stages) & "NR" %in% names(mvs) & i %in% c("NR", "ALL")
+
     if (is.null(grouping)) {
 
       # create plot
-      mv_i <- scaling:::mv_per_position(mv_i)
+      mv_i <- scaling:::mv_per_position(
+        mv_i,
+        mv = i,
+        resp = resp,
+        vars = vars,
+        stages = stages,
+        position = position,
+        add_missings_per_stage = add_missings_per_stage,
+        digits = digits
+      )
       y <- mv_i[[i]]
       ylim <- ceiling(max(y, na.rm = TRUE)/10)*10
 
@@ -662,7 +900,17 @@ mvi_plots <- function(mv_i, vars, select, grouping = NULL,
 
     } else {
 
-      mv_wide <- scaling:::create_wide_df(mv_i, groups, i)
+      mv_wide <- scaling:::create_wide_df_mvi(
+        mv_i,
+        groups = groups,
+        mv = i,
+        resp = resp,
+        vars = vars,
+        stages = stages,
+        position = position,
+        add_missings_per_stage = add_missings_per_stage,
+        digits = digits
+      )
       ylim <- ceiling(max(mv_wide$MV, na.rm = TRUE)/10)*10
 
       # create plot
@@ -762,28 +1010,54 @@ check_color <- function(color, grps) {
 #'
 #' @param mv_i  list with missing values as variables
 #' @param groups  character vector; includes names of groups for graph
-#' @param i string; name of missing value type for graph
+#' @param mv string; name of missing value type for graph
+#' @param resp see mvi_plots()
+#' @param vars see mvi_plots()
+#' @param stages see mvi_plots()
+#' @param position see mvi_plots()
+#' @param digits see mvi_plots()
+#' @param add_missings_per_stage logical; indicates whether for this missing
+#' value all missings per stage shall be added
 #'
 #' @return dataframe in wide format
 #' @noRd
 
-create_wide_df <- function(mv_i, groups, i) {
+create_wide_df_mvi <- function(
+    mv_i,
+    groups,
+    mv,
+    resp,
+    vars,
+    stages,
+    position,
+    add_missings_per_stage,
+    digits
+  ) {
 
-  mv <- data.frame(position = NA)
+  df <- data.frame(position = NA)
 
   for (g in groups) {
-    mv_i[[g]] <- scaling:::mv_per_position(mv_i[[g]])
-    mv_i[[g]][[g]] <- mv_i[[g]][[i]]
-    mv <- merge(mv, mv_i[[g]][, c("position", g)], by = 'position', all = TRUE)
+    mv_pos <- scaling:::mv_per_position(
+      mv_i[[g]],
+      mv = mv,
+      resp = resp[resp[[g]],],
+      vars = vars[vars[[g]],],
+      stages = stages,
+      position = position,
+      add_missings_per_stage = add_missings_per_stage,
+      digits = digits
+    )
+    mv_pos[[g]] <- mv_pos[[mv]]
+    df <- merge(df, mv_pos[, c("position", g)], by = 'position', all = TRUE)
   }
 
-  mv <- dplyr::filter(
-    dplyr::select(mv, c("position", tidyselect::all_of(groups))),
-    !is.na(mv$position)
+  df <- dplyr::filter(
+    dplyr::select(df, c("position", tidyselect::all_of(groups))),
+    !is.na(df$position)
   )
 
   mv_wide <- tidyr::gather(
-    mv, key = "group", value = "MV", tidyselect::all_of(groups)
+    df, key = "group", value = "MV", tidyselect::all_of(groups)
   )
 
   mv_wide$group <- factor(mv_wide$group, levels = groups)
@@ -794,11 +1068,28 @@ create_wide_df <- function(mv_i, groups, i) {
 #' Create dataframe with missing values per position and not item
 #'
 #' @param mv_i  list with missing values as variables
+#' @param mv string; name of missing value type for graph
+#' @param resp see mvi_plots()
+#' @param vars see mvi_plots()
+#' @param stages see mvi_plots()
+#' @param position see mvi_plots()
+#' @param digits see mvi_plots()
+#' @param add_missings_per_stage logical; indicates whether for this missing
+#' value all missings per stage shall be added
 #'
-#' @return list with missing values as variables and position as lines
+#' @return dataframe with missing values as variables and position as lines
 #' @noRd
 
-mv_per_position <- function(mv_i) {
+mv_per_position <- function(
+    mv_i,
+    mv,
+    resp,
+    vars,
+    stages,
+    position,
+    add_missings_per_stage,
+    digits
+  ) {
 
   pos <- mv_i$position[!is.na(mv_i$position)]
 
@@ -810,13 +1101,7 @@ mv_per_position <- function(mv_i) {
 
       df <- mv_i[mv_i$position == p, ]
 
-      for (mv in names(mvs)) {
-
-        mv_pos[mv_pos$position == p, mv] <-
-          sum(df$N_administered * df[[mv]], na.rm = TRUE) /
-            sum(df$N_administered, na.rm = TRUE)
-
-      }
+      mv_pos[mv_pos$position == p, mv] <- sum(df[[mv]], na.rm = TRUE)
 
     }
 
@@ -825,7 +1110,56 @@ mv_per_position <- function(mv_i) {
     mv_pos <- mv_i
   }
 
-    return(mv_pos)
+  # Multistage tests
+  if (add_missings_per_stage)
+    add_missings_per_stage(mv_pos, mv, resp, vars, stages, position, digits)
+
+  return(mv_pos)
+}
+
+#' Add missings per stage to dataframe
+#'
+#' @param mv_pos dataframe with missing values per position
+#' @param mv string; name of missing value type for graph
+#' @param resp see mvi_plots()
+#' @param vars see mvi_plots()
+#' @param stages see mvi_plots()
+#' @param position see mvi_plots()
+#' @param digits see mvi_plots()
+#'
+#' @return dataframe with missing values per position including missings per stage
+#' @noRd
+
+add_missings_per_stage <- function(
+    mv_pos,
+    mv,
+    resp,
+    vars,
+    stages,
+    position,
+    digits
+  ) {
+
+  not_reached_stage <- sapply(
+    resp[stages], function(x) {round((1 - mean(x)) * 100, digits)}
+  )
+
+  mv_pos$stage <- NA
+
+  for (stage in stages) {
+
+    s <- which(stages == stage)
+    item_in_stage <- mv_pos$position %in% unique(vars[[position]][vars[[stage]]])
+    mv_pos$stage[item_in_stage] <- s
+    mv_pos[[mv]][item_in_stage] <- mv_pos[[mv]][item_in_stage] + not_reached_stage[s]
+
+  }
+
+  mv_pos <- mv_pos[
+    order(mv_pos$stage, mv_pos$position),
+    names(mv_pos[c(1, length(mv_pos), 2:(length(mv_pos)-1))])
+  ]
+
 }
 
 
@@ -902,158 +1236,6 @@ print_mvi_results <- function(mv_i,
     }
 
     message("\n\n")
-}
-
-
-#' Calculate and round frequency (in percentage) of one missing value type (by item)
-#'
-#' @param responses  data.frame; contains item responses with items as variables
-#' and persons as rows; all responses ∈ ℕ0; user-defined missing values;
-#' only the items administered to and the cases of the designated group
-#' @param mvs  named integer vector; contains user-defined missing values
-#' @param digits  integer; number of decimals for rounding
-#'
-#' @return table with frequency of missing values for one missing value type
-#' (by item).
-#' @noRd
-
-mvi_perc <- function(responses, mvs, digits = 3) {
-    perc <- data.frame(apply(responses, 2, function(x) {
-        ifelse(x %in% mvs, 1, ifelse(!is.na(x), 0, NA))
-    }))
-    round(apply(perc, 2, mean, na.rm = TRUE) * 100, digits)
-}
-
-
-#' Create list with frequency of missing responses by item for each missing value type
-#'
-#' @param responses  data.frame; contains item responses with items as variables
-#' and persons as rows; all responses ∈ ℕ0; user-defined missing values;
-#' only the items administered to and the cases of the designated group
-#' @param mvs  named integer vector; contains user-defined missing values
-#' @param digits  integer; number of decimals for rounding
-#'
-#' @return list with frequency of missing values by item for each missing value
-#' type in mvs.
-#' @noRd
-
-mvi_calc <- function(responses, mvs, digits = 3) {
-
-    result <- list()
-
-    # Determine percentage of missing values for each missing type
-    for (i in names(mvs)) {
-        result[[i]] <- scaling:::mvi_perc(
-          responses = responses,
-          mvs = mvs[[i]],
-          digits = digits
-        )
-    }
-
-    # Percentage of total missing responses for each item
-    result$ALL <- scaling:::mvi_perc(
-      responses = responses,
-      mvs = mvs,
-      digits = digits
-    )
-
-    return(result)
-}
-
-
-#' Create list with missing values per item
-#'
-#' @param item  character vector; contains names of items
-#' @param position  integer vector; contains position of items
-#' @param responses  data.frame; contains item responses with items as variables
-#' and persons as rows; all responses ∈ ℕ0; user-defined missing values;
-#' only the items administered to and the cases of the designated group
-#' @param mvs  named integer vector; contains user-defined missing values
-#' @param vars  data.frame; contains information about items with items as rows;
-#' includes variable 'item' containing item names; additionally includes all
-#' variables that are further defined in the function arguments
-#' @param stages  character vector; contains names of stage variables in resp and vars,
-#' only applicable in multistage tests (otherwise NULL)
-#' @param digits  integer; number of decimals for rounding
-#'
-#' @return   list with results of missing values per item.
-#' @noRd
-
-create_mvlist <- function(
-    item,
-    position,
-    responses,
-    mvs,
-    resp,
-    vars,
-    stages = NULL,
-    digits = 3
-  ) {
-
-    if (length(item) != length(position) |
-          ncol(responses) != length(item) |
-            ncol(responses) != length(position)) {
-        stop("Number of items in dataframe responses, in vector item and in vector position do not match. ",
-             "Please provide matching arguments to function create_mvlist().")
-    }
-
-    # Create dataframe
-    mvlist <- data.frame(
-        item = item,
-        position = position,
-        N_administered = colSums(apply(responses, 2, function(x) !is.na(x))),
-        N_valid = colSums(apply(responses, 2, function(x) !(x %in% mvs | is.na(x))))
-    )
-
-    # Merge with percentage of missing values for each missing type
-    results <- data.frame(scaling:::mvi_calc(responses, mvs = mvs, digits = digits))
-    results$item <- row.names(results)
-    mvlist <- merge(mvlist, results, by = 'item')
-    mvlist <- mvlist[order(mvlist$position, mvlist$item), ]
-
-    # Multistage tests
-    if (!is.null(stages) & "NR" %in% names(mvs)) {
-
-        not_reached_stage <- sapply(
-          resp[stages], function(x) {round((1 - mean(x)) * 100, digits)}
-        )
-        mvlist$stage <- NA
-
-        for (s in seq(length(stages))) {
-
-            item_in_stage <- mvlist$item %in% vars$item[vars[[stages[s]]]]
-            mvlist$stage[item_in_stage] <- s
-            mvlist$NR[item_in_stage] <- mvlist$NR[item_in_stage] + not_reached_stage[s]
-            mvlist$ALL[item_in_stage] <- mvlist$ALL[item_in_stage] + not_reached_stage[s]
-
-        }
-
-        mvlist <- mvlist[
-          order(mvlist$stage, mvlist$position, mvlist$item),
-          names(mvlist[c(1, length(mvlist), 2:(length(mvlist)-1))])
-        ]
-    }
-
-    # Return list
-    return(mvlist)
-}
-
-
-#' MVI summary
-#'
-#' @param mvlist  list; return object of create_mvlist()
-#' @param digits  integer; number of decimals for rounding
-#'
-#' @return  data.frame with mean, median, SD, min and max of missing values.
-#' @noRd
-
-mvi_summary <- function(mvlist, digits = 3) {
-    mvsum <- data.frame(t(apply(mvlist, 2, function(x) {
-        round(c(mean(x), sd(x), median(x), range(x)[1], range(x)[2]), digits)
-    })))
-    mvsum[1, ] <- round(mvsum[1, ])
-    colnames(mvsum) <- c("Mean", "SD", "Median", "Min", "Max")
-    return(mvsum)
 }
 
 #' Test mv_i for completeness
