@@ -10,7 +10,7 @@ Import(
   sheet = NULL,
   regexp = NULL,
   rename = NULL,
-  replace = c(dif_poly_ = "", dif_dich_ = "")
+  replace = c(dif_poly_ = "", dif_dich_ = "", mv_person_ = "")
 )
 }
 \arguments{

@@ -126,7 +126,9 @@ Pandoc = function(doc)
                     authorsforhead = authorsforhead .. "& "
                 end
                 authorsforhead = authorsforhead .. stringify(author.name.family)
-                if i < nauthors and nauthors > 2 then
+                if i < nauthors and nauthors == 2 then
+                    authorsforhead = authorsforhead .. " "
+                elseif i < nauthors and nauthors > 2 then
                     authorsforhead = authorsforhead .. ", "
                 end
             end

@@ -119,8 +119,8 @@ test_that("summarize distractors works", {
            filename = "distractors_summary.xlsx")
   })
 
-  expect_equal(GetDist(tbl, stat = mean, digits = 3), "-0.161")
-  expect_equal(GetDist(tbl, stat = median, correct = TRUE), "0.38")
+  expect_equal(GetDist(tbl, stat = mean, digits = 3), "-.161")
+  expect_equal(GetDist(tbl, stat = median, correct = TRUE), ".38")
   expect_equal(GetDist(tbl,stat = max, item = TRUE), "grk10015_c")
 
 })
