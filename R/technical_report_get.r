@@ -36,6 +36,57 @@ GetProp <- function(obj, select, prop = "type", val = c("CMC", "MA"),
 }
 
 
+#'
+#' Get long label for item property
+#'
+#' @param short A short label
+#' @returns A long label
+#'
+GetPropLabels <- function(short = NULL) {
+
+  lbls <- c(
+    MC = "Simple multiple-choice items",
+    CMC = "Complex multiple-choice items",
+    SR  = "Short constructed responses",
+    MA  = "Matching items",
+    TET = "Text-enrichment tasks",
+    HL  = "Highlighting tasks",
+    # Reading
+    finding = "Finding information in the text",
+    conclusion = "Drawing text-related conclusions",
+    reflecting = "Reflecting and assessing",
+    information = "Information text",
+    instruction = "Instruction text",
+    advertising = "Advertising text",
+    commenting = "Commenting or argumenting text",
+    literary = "Literary text",
+    # Math
+    change = "Change and relationship",
+    data = "Data and chance",
+    units = "Units and measuring",
+    space = "Space and shape",
+    # ICT
+    access = "Access",
+    create = "Create",
+    evaluate = "Evaluate",
+    manage = "Manage",
+    email = "E-mail",
+    internet = "Internet / search engines",
+    spreadsheet = "Spread sheet / presentation software",
+    word = "Word"
+  )
+
+  if (is.null(short)) {
+    return(lbls)
+  } else if (short %in% names(lbls)) {
+    return(lbls[short])
+  } else {
+    return("")
+  }
+
+}
+
+
 #' Calculate statistics for missing values by item
 #'
 #' @param obj A list with data frames with sheets from "mv_item.xlsx"

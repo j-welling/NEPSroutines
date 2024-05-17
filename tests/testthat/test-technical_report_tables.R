@@ -52,7 +52,7 @@ test_that("create table with item facets works", {
   })
   expect_false(inherits(tbl, "try-error"))
   expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "a5b9d782fcfe198aac7439511572edd6")
+  expect_equal(rlang::hash(tbl), "01548156a34fa299096876f6f701319f")
 
 })
 

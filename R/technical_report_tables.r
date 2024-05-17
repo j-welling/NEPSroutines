@@ -181,24 +181,7 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
 #' }
 TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
                          na.rm = TRUE, size = 12, width = NULL,
-                         formats = c(MC  = "Simple multiple-choice items",
-                                     CMC = "Complex multiple-choice items",
-                                     SR  = "Short constructed responses",
-                                     MA  = "Matching items",
-                                     TET = "Text-enrichment tasks",
-                                     HL  = "Highlighting tasks",
-                                     finding = "Finding information in the text",
-                                     conclusion = "Drawing text-related conclusions",
-                                     reflecting = "Reflecting and assessing",
-                                     information = "Information text",
-                                     instruction = "Instruction text",
-                                     advertising = "Advertising text",
-                                     commenting = "Commenting or argumenting text",
-                                     literary = "Literary text",
-                                     change = "Change and relationship",
-                                     data = "Data and chance",
-                                     units = "Units and measuring",
-                                     space = "Space and shape")) {
+                         formats = NULL) {
 
     # Create frequency table
     freq_groups <- NULL
@@ -217,12 +200,17 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
     if (na.rm) freq_groups <- freq_groups[freq_groups$f > 0, ]
 
     # Sort table according to ordering in formats
-    keyDF <- data.frame(r = names(formats), w = 1:length(formats))
+    formatsvec <- GetPropLabels()
+    if (!is.null(formats)) {
+      formatsvec <- formatsvec[!(names(formatsvec) %in% names(formats))]
+      formatsvec <- c(formatsvec, formats)
+    }
+    keyDF <- data.frame(r = names(formatsvec), w = 1:length(formatsvec))
     freq_groups <- merge(freq_groups, keyDF, by = "r", all.x = TRUE)
     freq_groups <- freq_groups[order(freq_groups$w), 1:(length(select) + 1)]
 
     # Rename variables and formats
-    freq_groups$r <- formats[freq_groups$r]
+    freq_groups$r <- formatsvec[freq_groups$r]
     colnames(freq_groups) <- c(propname, names(select))
 
     # Add total number of items
@@ -274,18 +262,7 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
 #' }
 TblItemFacets <- function(vars, select, facets, position = NULL,
                           footnote = NULL, size = 12, width = 1.9,
-                          lbl = c(finding = "Finding information in the text",
-                                  conclusion = "Drawing text-related conclusions",
-                                  reflecting = "Reflecting and assessing",
-                                  information = "Information text",
-                                  instruction = "Instruction text",
-                                  advertising = "Advertising text",
-                                  commenting = "Commenting or argumenting text",
-                                  literary = "Literary text",
-                                  change = "Change and relationship",
-                                  data = "Data and chance",
-                                  units = "Units and measuring",
-                                  space = "Space and shape")) {
+                          lbl = NULL) {
 
   # Select variables
   cols <- c("item", facets)
@@ -295,8 +272,13 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
   tab <- tab[order(tab[, 1]), ]
 
   # Rename variables and formats
+  lblvec <- GetPropLabels()
+  if (!is.null(lbl)) {
+    lblvec <- lblvec[!(names(lblvec) %in% names(lbl))]
+    lblvec <- c(lblvec, lbl)
+  }
   for (i in seq_along(facets)) {
-    l <- lbl[as.character(tab[[facets[i]]])]
+    l <- lblvec[as.character(tab[[facets[i]]])]
     l[is.na(l)] <- as.character(tab[[facets[i]]])[is.na(l)]
     tab[[facets[i]]] <- l
   }
@@ -307,6 +289,7 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
   # Create flextable
   if (length(width) == 1) width <- c(0.3, rep(width, ncol(tab) - 1))
   ft <- Tbl(tab, footnote = footnote, width = width, size = size)
+  ft <- flextable::colformat_double(ft, j = 1, digits = 0)
   return (ft)
 
 }
@@ -878,7 +861,7 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
   vals[lbl == "sex"] <- "men vs. women"
   vals[lbl == "mig"] <- "without vs. with"
   vals[lbl == "books"] <- "<100 vs. >100"
-  vals[lbl %in% c("rotation", "position")] <- "first vs. second"
+  vals[lbl %in% c("rotation", "position", "rot")] <- "first vs. second"
   for (i in seq_along(colnames2)) {
     vals[colnames(tab) == names(colnames2)[i]] <- colnames2[i]
     }
@@ -886,10 +869,10 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
   lbl[lbl == "sex"] <- "Sex"
   lbl[lbl == "mig"] <- "Migration"
   lbl[lbl == "books"] <- "Books"
-  lbl[lbl %in% c("rotation", "position")] <- "Test position"
+  lbl[lbl %in% c("rotation", "position", "rot")] <- "Test position"
   lbl[lbl %in% c("sc", "cohort")] <- "Starting cohort"
   for (i in seq_along(colnames1)) {
-    lbl[colnames(tab) == names(colnames1)[i]] <- colnames1[i]
+    lbl[lbl == names(colnames1)[i]] <- colnames1[i]
   }
 
   # Line breaks for main effects
