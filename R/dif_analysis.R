@@ -474,7 +474,7 @@ dif_model <- function(
                 labels = lbls_facet,
                 missings = TRUE
             )
-          
+
             if (warn) warn_included_missings(dif_var, mis)
 
         }
@@ -772,25 +772,46 @@ check_minimum_valid <- function(
 #' @return a tam.mml model.
 #' @noRd
 
-pcm_dif <- function(resp, facets, formulaA, vars, select, pid,
-                    verbose, scoring = NULL, control = NULL, pweights = NULL) {
+pcm_dif <- function(
+    resp,
+    facets,
+    formulaA,
+    vars,
+    select,
+    pid,
+    verbose,
+    scoring = NULL,
+    control = NULL,
+    pweights = NULL
+  ) {
 
     # get design matrix for model
     B <- TAM::designMatrices(modeltype = 'PCM', resp = resp)$B
 
-    pcm_scoring <- scaling:::create_ifelse(is.null(scoring),
-                                           rep(1, length(vars[[select]])),
-                                           vars[[scoring]][vars[[select]]])
+    pcm_scoring <- scaling:::create_ifelse(
+      is.null(scoring),
+      rep(1, length(vars[[select]])),
+      vars[[scoring]][vars[[select]]]
+    )
 
     # 0.5 scoring for PCM
-    B[vars$item[vars[[select]]], , 1] <- B[vars$item[vars[[select]]], , 1] * pcm_scoring
+    B[vars$item[vars[[select]]], , 1] <-
+      B[vars$item[vars[[select]]], , 1] * pcm_scoring
 
     # set irtmodel
     irtmodel <- 'GPCM'
 
-    TAM::tam.mml.mfr(formulaA = formulaA, facets = facets, B = B, pid = pid,
-                     irtmodel = irtmodel, resp = resp, verbose = verbose,
-                     control = control, pweights = pweights)
+    TAM::tam.mml.mfr(
+      formulaA = formulaA,
+      facets = facets,
+      B = B,
+      pid = pid,
+      irtmodel = irtmodel,
+      resp = resp,
+      verbose = verbose,
+      control = control,
+      pweights = pweights
+    )
 
 }
 
