@@ -844,12 +844,14 @@ mvi_plots <- function(
     scaling:::check_items(vars$item[vars[[select]]])
   }
 
-  # Pepare data
+  # Prepare data
   mv_i <- mv_i$list
   k <- scaling:::create_ifelse(
     is.null(grouping),
-    sum(vars[[select]]),
-    max(sapply(grouping, function(x) {sum(vars[[select]] & vars[[x]])}), na.rm = TRUE)
+    max(vars[[position]][vars[[select]]], na.rm = TRUE),
+    max(sapply(grouping, \(x) {
+      max(vars[[position]][vars[[select]] & vars[[x]]], na.rm = TRUE)
+      }), na.rm = TRUE)
   )
 
   # Create groups vector
