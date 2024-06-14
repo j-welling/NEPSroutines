@@ -25,7 +25,7 @@ mv_item(
   return = FALSE,
   path_results = "Results",
   path_table = "Tables",
-  path_plots = "Plots/Missing_Responses/by_item",
+  path_plots = "Plots/Missings_by_item",
   suf_item_names = FALSE,
   show_all = TRUE,
   name_grouping = "test version",

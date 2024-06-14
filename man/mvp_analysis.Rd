@@ -10,6 +10,7 @@ mvp_analysis(
   select,
   valid = NULL,
   grouping = NULL,
+  stages = NULL,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21),
   missing_by_design = -54,
   save = TRUE,
@@ -38,6 +39,10 @@ which items to use for the analysis}
 \item{grouping}{character vector; contains for each group a name of a logical
 variable in resp and vars that indicates to which group belongs a person or
 an item}
+
+\item{stages}{named numeric vector; contains for each stage the number of
+items per stage as vector element and the name of the stage variable as name
+of the vector element (e.g., c(stage1 = 10, stage2 = 8))}
 
 \item{mvs}{named integer vector; contains user-defined missing values}
 

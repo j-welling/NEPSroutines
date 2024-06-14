@@ -13,6 +13,7 @@ conduct_dif_analysis(
   scoring = NULL,
   mvs = NULL,
   include_mv = 200,
+  min_val = 50,
   path = "Results",
   save = TRUE,
   name_group = NULL,
@@ -53,6 +54,9 @@ contains the scoring factor to be applied to loading matrix}
 
 \item{include_mv}{numeric; identifies threshold for which group size missing
 values should be included in analysis as an extra group (defaults to 200)}
+
+\item{min_val}{integer; minimum number of valid responses for each group on
+each item for the item to be included in the analysis (defaults to 50)}
 
 \item{path}{string; defines path to folder where results shall be saved}
 

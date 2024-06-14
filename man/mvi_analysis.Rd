@@ -15,6 +15,7 @@ mvi_analysis(
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21),
   missing_by_design = -54,
   path = "Results",
+  use_for_plot = FALSE,
   save = TRUE,
   name_group = NULL,
   digits = 3,
