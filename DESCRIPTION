@@ -33,6 +33,7 @@ Imports:
     rlang,
     stats,
     methods,
+    sfsmisc,
     TAM (>= 4.2),
     tibble,
     tidyr,
