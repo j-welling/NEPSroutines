@@ -6,3 +6,5 @@
 ^\testscripts$
 ^\build$
 ^data-raw$
+^doc$
+^Meta$

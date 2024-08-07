@@ -61,11 +61,10 @@ Import <- function(path, filename = NULL, sheet = NULL, regexp = NULL,
   for (f in filename) {
     if (is.null(sheet)) {
       sheets <- openxlsx::getSheetNames(paste0(path, f))
-      tbl <-
-        sapply(
-          sheets,
-          \(sn) { openxlsx::read.xlsx(xlsxFile = paste0(path, f), sheet = sn) }
-        )
+      tbl <- list()
+      for (s in sheets) {
+        tbl[[s]] <- openxlsx::read.xlsx(xlsxFile = paste0(path, f), sheet = s)
+      }
     } else {
       tbl <-
         openxlsx::read.xlsx(

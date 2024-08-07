@@ -133,6 +133,9 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
     ft <- flextable::align(ft, align = "left", part = "footer")
   }
 
+  # Set font family
+  ft <- flextable::font(ft, fontname = "Calibri", part = "all")
+
   return(ft)
 
 }
@@ -506,6 +509,10 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
     tab <- tab[, !grepl(paste(excl, collapse = "|"), colnames(tab))]
   }
 
+  # Model type
+  pcm <- TRUE
+  if (!is.null(tab$xsi) & sum(is.na(tab$xsi) == 0L)) pcm <- FALSE
+
   # Rename variables
   lbl <- colnames(tab)
   lbl[1] <- "Nr."
@@ -523,12 +530,17 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
     note <- append(note, list(flextable::as_i("N")))
     note <- append(note, " = Number of observed responses. ")
   }
-  if ("Difficulty" %in% colnames(tab))
-    note <- append(note, "Difficulty = Item difficulty / location. ")
+  if ("Difficulty" %in% colnames(tab)) {
+    if (pcm) {
+      note <- append(note, "Difficulty = Item difficulty / location. ")
+    } else {
+      note <- append(note, "Difficulty = Item difficulty. ")
+    }
+  }
   if ("SE" %in% colnames(tab)) {
     note <- append(note, list(flextable::as_i("SE")))
     note <- append(note,
-                   " =  Standard error of item difficulty / location. "
+                   " =  Standard error of item parameter. "
     )
   }
   if ("WMNSQ" %in% colnames(tab))
@@ -539,10 +551,17 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
     note <- append(note, list(flextable::as_i("t")))
     note <- append(note, "-value for WMNSQ. ")
   }
-  if ("Discr." %in% colnames(tab))
-    note <- append(note,
-                   "Discr. = Discrimination parameter of a generalized partial credit model. "
-    )
+  if ("Discr." %in% colnames(tab)) {
+    if (pcm) {
+      note <- append(note,
+                     "Discr. = Discrimination parameter of a generalized partial credit model. "
+      )
+    } else {
+      note <- append(note,
+                     "Discr. = Discrimination parameter of a two-parametric item response model. "
+      )
+    }
+  }
   if ("rit" %in% colnames(tab)) {
     note <- append(note, list(flextable::as_i("r")))
     note <- append(note, list(flextable::as_sub(flextable::as_i("it"))))
@@ -1012,11 +1031,11 @@ TblDifFit <-function(obj, footnote = NULL, excl = NULL, label = NULL,
     row_bic <- ifelse(tab$BIC[i] > tab$BIC[i + 1], i + 1, i)
     ft <- flextable::style(
       ft, i = row_aic, j = "AIC",
-      pr_t = officer::fp_text(underlined = TRUE, font.size = size)
+      pr_t = flextable::fp_text_default(underlined = TRUE, font.size = size)
     )
     ft <- flextable::style(
       ft, i = row_bic, j = "BIC",
-      pr_t = officer::fp_text(underlined = TRUE, font.size = size)
+      pr_t = flextable::fp_text_default(underlined = TRUE, font.size = size)
     )
   }
 

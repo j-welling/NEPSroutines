@@ -17,6 +17,7 @@ dif_analysis(
   print = TRUE,
   return = FALSE,
   include_mv = 200,
+  min_val = 50,
   control = NULL,
   pweights = NULL,
   path_results = "Results",
@@ -67,6 +68,9 @@ contains the scoring factor to be applied to loading matrix}
 
 \item{include_mv}{numeric; identifies threshold for which group size missing
 values should be included in analysis as an extra group (defaults to 200)}
+
+\item{min_val}{integer; minimum number of valid responses for each group on
+each item for the item to be included in the analysis (defaults to 50)}
 
 \item{control}{list; function argument as passed to TAM-functions}
 

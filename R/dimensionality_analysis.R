@@ -194,8 +194,9 @@ conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
 
       # Create Q matrix
       v <- c(t(vars[vars[[select]], d]))
-      dimensions <- sort(unique(v))
+      dimensions <- as.character(sort(unique(v)))
       Q <- matrix(0, nrow = length(v), ncol = length(dimensions))
+      colnames(Q) <- dimensions
       for (i in dimensions) {
           Q[v == i, i] <- 1
       }
@@ -263,6 +264,8 @@ dim_summary <- function(dimensionality, save = FALSE, name_group = NULL,
     tmp <- dimensionality[[d]]$variance
     dimsum[[paste("Cor-Var", d)]] <- round(cov2cor(tmp), digits)
     diag(dimsum[[paste("Cor-Var", d)]]) <- round(diag(tmp), digits)
+    rownames(dimsum[[paste("Cor-Var", d)]]) <-
+      colnames(dimsum[[paste("Cor-Var", d)]]) <- colnames(dimensionality[[d]]$Q)
   }
   dimsum[["Goodness of fit"]] <- gof
 

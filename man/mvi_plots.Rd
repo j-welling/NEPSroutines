@@ -5,11 +5,13 @@
 \title{Plot percentages of user-defined missing values by item position}
 \usage{
 mvi_plots(
-  mv_i,
+  resp,
   vars,
   select,
-  grouping = NULL,
+  valid,
   position,
+  stages = NULL,
+  grouping = NULL,
   mvs = c(OM = -97, NV = -95, NR = -94, TA = -91, UM = -90, ND = -55, MD = -54, AZ = -21),
   labels_mvs = c(ALL = "total missing items", OM = "omitted items", NV =
     "not valid items", NR = "not reached items", TA =
@@ -17,19 +19,22 @@ mvi_plots(
     "not determinable items", MD = "items missing by design", AZ =
     "missing items due to 'Angabe zurueckgesetzt'"),
   missing_by_design = -54,
-  path = "Plots/Missing_Responses/by_item",
+  path = "Plots/Missings_by_item",
   name_group = NULL,
   name_grouping = "test version",
   show_all = TRUE,
   labels_legend = NULL,
   color = NULL,
+  digits = 3,
   verbose = TRUE,
   warn = TRUE,
   test = TRUE
 )
 }
 \arguments{
-\item{mv_i}{list; return object of mvi_analysis()}
+\item{resp}{data.frame; contains item responses with items as variables and
+persons as rows; all responses ∈ ℕ0; user-defined missing values;
+includes all variables that are further defined in the function arguments}
 
 \item{vars}{data.frame; contains information about items with items as rows;
 includes variable 'item' containing item names; additionally includes all
@@ -37,6 +42,17 @@ variables that are further defined in the function arguments}
 
 \item{select}{string; defines name of logical variable in vars that indicates
 which items to use for the analysis}
+
+\item{valid}{string; defines name of logical variable in resp that indicates
+(in)valid cases}
+
+\item{position}{(named) character vector; defines name(s) of integer
+variable(s) in vars that indicate position of items; if groups with differing
+item positions in testlets exist, then vector must be named with names of
+groups (as in "grouping") as names of elements and names of variables as elements}
+
+\item{stages}{character vector; contains names of stage variables in resp and vars,
+only applicable in multistage tests (otherwise NULL)}
 
 \item{grouping}{character vector; contains for each group a name of a logical
 variable in resp and vars that indicates to which group belongs a person or
