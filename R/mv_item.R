@@ -1114,7 +1114,7 @@ mv_per_position <- function(
 
   # Multistage tests
   if (add_missings_per_stage)
-    add_missings_per_stage(mv_pos, mv, resp, vars, stages, position, digits)
+    scaling:::add_missings_per_stage(mv_pos, mv, resp, vars, stages, position, digits)
 
   return(mv_pos)
 }

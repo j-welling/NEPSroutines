@@ -52,17 +52,32 @@
 #' (as return object of irt_analysis()) as list elements.
 #' @export
 
-grouped_irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
-                                 missing_by_design = -54, scoring = NULL,
-                                 plots = FALSE, save = TRUE, print = TRUE,
-                                 return = FALSE, overwrite = FALSE,
-                                 path_plots = "Plots",
-                                 path_table = "Tables",
-                                 path_results = "Results",
-                                 suf_item_names = FALSE,
-                                 digits = 3, verbose = FALSE, warn = TRUE,
-                                 xsi_fixed_1p = NULL, xsi_fixed_2p = NULL,
-                                 pweights = NULL, control_tam = NULL, control_wle = NULL) {
+grouped_irt_analysis <- function(
+    resp,
+    vars,
+    select,
+    valid = NULL,
+    mvs = NULL,
+    missing_by_design = -54,
+    scoring = NULL,
+    plots = FALSE,
+    save = TRUE,
+    print = TRUE,
+    return = FALSE,
+    overwrite = FALSE,
+    path_plots = "Plots",
+    path_table = "Tables",
+    path_results = "Results",
+    suf_item_names = FALSE,
+    digits = 3,
+    verbose = FALSE,
+    warn = TRUE,
+    xsi_fixed_1p = NULL,
+    xsi_fixed_2p = NULL,
+    pweights = NULL,
+    control_tam = NULL,
+    control_wle = NULL
+  ) {
 
     # Test data
     scaling:::check_logicals(vars, "vars", c(select, "dich"), warn = warn)
@@ -180,17 +195,34 @@ grouped_irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 #'             steps: table with results of steps analysis (only for polytomous analysis)
 #' @export
 
-irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
-                         missing_by_design = -54, scoring = NULL,
-                         plots = FALSE, save = TRUE, print = TRUE, return = FALSE,
-                         path_plots = "Plots",
-                         path_table = "Tables",
-                         path_results = "Results",
-                         suf_item_names = FALSE,
-                         overwrite = FALSE, digits = 3, name_group = NULL,
-                         verbose = FALSE, warn = TRUE, test = TRUE,
-                         xsi_fixed_1p = NULL, xsi_fixed_2p = NULL, pweights = NULL,
-                         control_tam = NULL, control_wle = NULL) {
+irt_analysis <- function(
+    resp,
+    vars,
+    select,
+    valid = NULL,
+    mvs = NULL,
+    missing_by_design = -54,
+    scoring = NULL,
+    plots = FALSE,
+    save = TRUE,
+    print = TRUE,
+    return = FALSE,
+    path_plots = "Plots",
+    path_table = "Tables",
+    path_results = "Results",
+    suf_item_names = FALSE,
+    overwrite = FALSE,
+    digits = 3,
+    name_group = NULL,
+    verbose = FALSE,
+    warn = TRUE,
+    test = TRUE,
+    xsi_fixed_1p = NULL,
+    xsi_fixed_2p = NULL,
+    pweights = NULL,
+    control_tam = NULL,
+    control_wle = NULL
+  ) {
 
     # Test data
     if (test) {
@@ -223,6 +255,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
             valid = valid,
             mvs = mvs,
             irtmodel = '1PL',
+            scoring = scoring,
             control_tam = control_tam,
             control_wle = control_wle,
             pweights = pweights,
@@ -240,6 +273,7 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
             valid = valid,
             mvs = mvs,
             irtmodel = '2PL',
+            scoring = scoring,
             control_tam = control_tam,
             control_wle = control_wle,
             pweights = pweights,
@@ -436,12 +470,25 @@ irt_analysis <- function(resp, vars, select, valid = NULL, mvs = NULL,
 #'   info_crit: data.frame with information criteria of the model.
 #' @export
 
-irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
-                      scoring = NULL, verbose = FALSE, save = TRUE,
-                      path = "Results", name_group = NULL,
-                      xsi_fixed = NULL, pweights = NULL,
-                      control_tam = NULL, control_wle = NULL,
-                      warn = TRUE, test = TRUE) {
+irt_model <- function(
+    resp,
+    vars,
+    select,
+    valid = NULL,
+    mvs = NULL,
+    irtmodel,
+    scoring = NULL,
+    verbose = FALSE,
+    save = TRUE,
+    path = "Results",
+    name_group = NULL,
+    xsi_fixed = NULL,
+    pweights = NULL,
+    control_tam = NULL,
+    control_wle = NULL,
+    warn = TRUE,
+    test = TRUE
+  ) {
 
   # Test data
   if (test) {
@@ -515,7 +562,12 @@ irt_model <- function(resp, vars, select, valid = NULL, mvs = NULL, irtmodel,
 
     # Match item parameters by item name
     if (!is.null(xsi_fixed))
-      xsi_fixed <- scaling:::order_xsi_fixed(xsi_fixed, resp, irtmodel = irtmodel, Q = Q)
+      xsi_fixed <- scaling:::order_xsi_fixed(
+        xsi_fixed,
+        resp,
+        irtmodel = irtmodel,
+        Q = Q
+      )
 
     # Calculate model
     mod <- TAM::tam.mml.2pl(
@@ -705,13 +757,23 @@ wright_map <- function(model, path = "Plots", name_group = NULL) {
 #'   item difficulty, SE, WMNSQ, t, rit, item discrimination, Q3.
 #' @export
 
-irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
-                        missing_by_design = -54,
-                        results, disc = NULL, save = TRUE,
-                        path = "Tables",
-                        suf_item_names = FALSE,
-                        name_group = NULL,
-                        digits = 3, overwrite = FALSE, warn = TRUE, test = TRUE) {
+irt_summary <- function(
+    resp,
+    vars,
+    valid = NULL,
+    mvs = NULL,
+    missing_by_design = -54,
+    results,
+    disc = NULL,
+    save = TRUE,
+    path = "Tables",
+    suf_item_names = FALSE,
+    name_group = NULL,
+    digits = 3,
+    overwrite = FALSE,
+    warn = TRUE,
+    test = TRUE
+  ) {
 
   # test data data
   if (test) scaling:::check_logicals(vars, "vars", "dich", warn = warn)
@@ -763,7 +825,10 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
   resp <- scaling:::convert_mv(resp, vars, mvs = mvs, warn = FALSE)
 
   # percentage correct
-  pars$correct <- round(ifelse(vars$dich, colMeans(resp[, vars$item], na.rm = TRUE) * 100, NA), digits)
+  pars$correct <- round(
+    ifelse(vars$dich, colMeans(resp[, vars$item], na.rm = TRUE) * 100, NA),
+    digits
+  )
 
   # Number of valid responses
   pars$N_valid <- colSums(!is.na(resp))
@@ -837,8 +902,14 @@ irt_summary <- function(resp, vars, valid = NULL, mvs = NULL,
 #' both models.
 #' @export
 
-irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
-                          path = "Tables", name_group = NULL) {
+irt_model_fit <- function(
+    model_1p,
+    model_2p,
+    overwrite = FALSE,
+    save = TRUE,
+    path = "Tables",
+    name_group = NULL
+  ) {
 
   mfit <- data.frame(
       N = rep(NA_integer_, 2),
@@ -912,10 +983,15 @@ irt_model_fit <- function(model_1p, model_2p, overwrite = FALSE, save = TRUE,
 #' @return a data.frame containing the step parameters and SEs for each step.
 #' @export
 
-steps_analysis <- function(pcm_model, digits = 3, save = TRUE, overwrite = FALSE,
-                           path = "Tables",
-                           suf_item_names = FALSE,
-                           name_group = NULL) {
+steps_analysis <- function(
+    pcm_model,
+    digits = 3,
+    save = TRUE,
+    overwrite = FALSE,
+    path = "Tables",
+    suf_item_names = FALSE,
+    name_group = NULL
+  ) {
 
   # step parameters
   step <- round(pcm_model$mod$xsi[, c("xsi", "se.xsi")], digits)
