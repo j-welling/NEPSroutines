@@ -404,7 +404,7 @@ irt_analysis <- function(
 
         if(length(irt_summary[["steps"]]) > 0) {
           irt_summary[["steps"]][["item"]] <- row.names(irt_summary[["steps"]])
-          irt_summary[["steps"]] <- select(irt_summary[["steps"]], item, everything())
+          irt_summary[["steps"]] <- dplyr::select(irt_summary[["steps"]], item, everything())
           rownames(irt_summary[["steps"]]) <- NULL
           irt_summary[["steps"]][["item"]] <- scaling:::create_suf_names(
             vars_name = irt_summary[["steps"]][["item"]])
@@ -609,7 +609,7 @@ irt_model <- function(
     progress = verbose
   )
   wle_rel <- wle$WLE.rel[1]
-  wle <- wle[, c("pid", "theta", "error")]
+  #wle <- wle[, c("pid", "theta", "error")]
 
   # information criteria
   info_crit <- mod$ic
@@ -1029,7 +1029,7 @@ steps_analysis <- function(
 
     if(suf_item_names && length(steps) > 0) {
         steps[["item"]] <- row.names(steps)
-        steps <- select(steps, item, everything())
+        steps <- dplyr::select(steps, item, everything())
         rownames(steps) <- NULL
         steps[["item"]] <- scaling:::create_suf_names(vars_name = steps[["item"]])
       }
