@@ -40,14 +40,27 @@
 #' @export
 #' @importFrom stats AIC BIC logLik
 
-dim_analysis <- function(resp, vars, select, scoring = "scoring",
-                         dim = NULL, valid = NULL, mvs = NULL,
-                         irtmodel = "PCM2", maxiter = 10000, snodes = 5000,
-                         return = FALSE, save = TRUE, print = TRUE,
-                         path_results = 'Results',
-                         path_table = 'Tables',
-                         name_group = NULL, overwrite = TRUE,
-                         verbose = FALSE, digits = 3) {
+dim_analysis <- function(
+    resp,
+    vars,
+    select,
+    scoring = "scoring",
+    dim = NULL,
+    valid = NULL,
+    mvs = NULL,
+    irtmodel = "PCM2",
+    maxiter = 10000,
+    snodes = 5000,
+    return = FALSE,
+    save = TRUE,
+    print = TRUE,
+    path_results = 'Results',
+    path_table = 'Tables',
+    name_group = NULL,
+    overwrite = TRUE,
+    verbose = FALSE,
+    digits = 3
+  ) {
 
   dimensionality <- list()
 
@@ -130,12 +143,25 @@ dim_analysis <- function(resp, vars, select, scoring = "scoring",
 #'
 #' @return   list with results for each dimensionality model.
 #' @export
-conduct_dim_analysis <- function(resp, vars, select, dim, scoring = 'scoring',
-                                 valid = NULL, irtmodel, maxiter = 10000,
-                                 snodes = 5000, mvs = NULL, verbose = FALSE,
-                                 save = TRUE, name_group = NULL,
-                                 path = 'Results',
-                                 warn = TRUE, test = TRUE) {
+conduct_dim_analysis <- function(
+    resp,
+    vars,
+    select,
+    dim,
+    scoring = 'scoring',
+    valid = NULL,
+    irtmodel,
+    maxiter = 10000,
+    snodes = 5000,
+    mvs = NULL,
+    verbose = FALSE,
+    save = TRUE,
+    name_group = NULL,
+    path = 'Results',
+    warn = TRUE,
+    test = TRUE
+  ) {
+
   # Test data
   if (test) {
       scaling::check_logicals(vars, "vars", select, warn = warn)
