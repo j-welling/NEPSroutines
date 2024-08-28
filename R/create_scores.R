@@ -331,14 +331,16 @@ create_scores <- function(resp, vars, select, scoring = NULL,
   # scores <- list(wle = wles, linking = linked_scores) # commented out because linking is not yet implemented
 
   # Create objects that obtain item parameters and TAM model used to estimate wles
-  if (is.null(facet)) {
-      itemParamModel_wles <- fit$mod
-      itemParam_wles <- fit$mod$xsi["xsi"]
-  }
+  if (wle) {
+    if (is.null(facet)) {
+        itemParamModel_wles <- fit$mod
+        itemParam_wles <- fit$mod$xsi["xsi"]
+    }
 
-  if (!is.null(facet)) {
-      itemParamModel_wles.position <- mod_wles[[1]]
-      itemParam_wles.position <- itemParamModel_wles.position$xsi["xsi"]
+    if (!is.null(facet)) {
+        itemParamModel_wles.position <- mod_wles[[1]]
+        itemParam_wles.position <- itemParamModel_wles.position$xsi["xsi"]
+    }
   }
 
   # Save results
@@ -347,26 +349,27 @@ create_scores <- function(resp, vars, select, scoring = NULL,
       scaling:::save_results(scores, filename = name, path = path_results)
 
       # Save item parameters and TAM model used to estimate wles
-      if (is.null(facet)) {
-          name <- scaling:::create_name("itemParamModel_wles", name_group, ".rds")
-          scaling:::save_results(itemParamModel_wles, filename = name, path = path_results)
+      if (wle) {
+        if (is.null(facet)) {
+            name <- scaling:::create_name("itemParamModel_wles", name_group, ".rds")
+            scaling:::save_results(itemParamModel_wles, filename = name, path = path_results)
 
-          name <- scaling:::create_name("itemParam_wles", name_group, ".xlsx")
-          scaling:::save_table(itemParam_wles, filename = name, path = path_results)
-      }
-      if (!is.null(facet)) {
-          name <- scaling:::create_name("itemParamModel_wles.position", name_group, ".rds")
-          scaling:::save_results(itemParamModel_wles.position, filename = name, path = path_results)
+            name <- scaling:::create_name("itemParam_wles", name_group, ".xlsx")
+            scaling:::save_table(itemParam_wles, filename = name, path = path_results)
+        }
+        if (!is.null(facet)) {
+            name <- scaling:::create_name("itemParamModel_wles.position", name_group, ".rds")
+            scaling:::save_results(itemParamModel_wles.position, filename = name, path = path_results)
 
-          name <- scaling:::create_name("itemParam_wles.position", name_group, ".xlsx")
-          scaling:::save_table(itemParam_wles.position, filename = name, path = path_results)
+            name <- scaling:::create_name("itemParam_wles.position", name_group, ".xlsx")
+            scaling:::save_table(itemParam_wles.position, filename = name, path = path_results)
+        }
       }
-
-      }
+    }
 
 
   # Return results
-  if(return) return(scores)
+  if (return) return(scores)
 }
 
 
