@@ -446,6 +446,10 @@ scaling::dis_analysis(
 # Dimension analysis
 
 ```{r dimensionality analysis}
+
+vars$kog_type <- as.numeric(vars$kog_type)
+vars$text_type <- as.numeric(vars$text_type)
+
 scaling::dim_analysis(
   resp = resp,
   vars = vars,
@@ -464,12 +468,13 @@ scaling::dim_analysis(
   overwrite = TRUE,
   verbose = FALSE
 )
+
 ```
 
 
 # Linking
 
-Linking is not yet implemeted in this package version. 
+Linking is not yet implemented in this package version. 
 
 
 # Create scores
@@ -480,7 +485,6 @@ scores <- scaling::create_scores(
   vars = vars,
   scoring = 'irt_scoring',
   score_name = 'reg7',
-  facet = 'difficulty',
   select = 'mixed',
   valid = 'valid',
   wle = TRUE,
