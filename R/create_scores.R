@@ -15,7 +15,7 @@
 #'   reg4 instead of reg4_sc1 or mag12 instead of mag12_sc1u)
 #' @param xsi_fixed named numerical vector; contains fixed item difficulties as
 #'   elements and item names as names of elements
-#' @param facet character vector; contains the variable name indicating the
+#' @param rotation character vector; contains the variable name indicating the
 #'   test rotation
 #' @param select  string; defines name of logical variable in vars that indicates
 #'   which items to use for the analysis
@@ -107,7 +107,7 @@
 #' @export
 create_scores <- function(resp, vars, select, scoring = NULL,
                           score_name = 'score', num_cat = 'num_cat',
-                          xsi_fixed = NULL, facet = NULL, valid = NULL,
+                          xsi_fixed = NULL, rotation = NULL, valid = NULL,
                           mvs = NULL, missing_by_design = -54, wle = TRUE,
                           sum_score = FALSE, sum_select = NULL,
                           metap = FALSE, meta_variable = NULL,
@@ -198,7 +198,7 @@ create_scores <- function(resp, vars, select, scoring = NULL,
     scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
     scaling:::check_pid(resp$ID_t)
 
-    if (is.null(facet) | (!is.null(facet) & is.null(xsi_fixed))) {
+    if (is.null(rotation) | (!is.null(rotation) & is.null(xsi_fixed))) {
       fit <- scaling:::irt_analysis( # hier könnte man irt_model() anstatt irt_analysis() verwenden --> spart Berechnungszeit
         resp = resp,
         vars = vars,
@@ -227,7 +227,7 @@ create_scores <- function(resp, vars, select, scoring = NULL,
       warn <- FALSE
     }
 
-    if (!is.null(facet)) {
+    if (!is.null(rotation)) {
       if (is.null(xsi_fixed)) {
           xsi_fixed <- fit$mod$xsi$xsi
           names(xsi_fixed) <- row.names(fit$mod$xsi)
@@ -237,7 +237,7 @@ create_scores <- function(resp, vars, select, scoring = NULL,
         vars = vars,
         select = select,
         valid = valid,
-        facet = facet,
+        rotation = rotation,
         mvs = mvs,
         scoring = scoring,
         xsi_fixed = xsi_fixed,
@@ -331,12 +331,12 @@ create_scores <- function(resp, vars, select, scoring = NULL,
   # scores <- list(wle = wles, linking = linked_scores) # commented out because linking is not yet implemented
 
   # Create objects that obtain item parameters and TAM model used to estimate wles
-  if (is.null(facet)) {
+  if (is.null(rotation)) {
       itemParamModel_wles <- fit$mod
       itemParam_wles <- fit$mod$xsi["xsi"]
   }
 
-  if (!is.null(facet)) {
+  if (!is.null(rotation)) {
       itemParamModel_wles.position <- mod_wles[[1]]
       itemParam_wles.position <- itemParamModel_wles.position$xsi["xsi"]
   }
@@ -347,14 +347,14 @@ create_scores <- function(resp, vars, select, scoring = NULL,
       scaling:::save_results(scores, filename = name, path = path_results)
 
       # Save item parameters and TAM model used to estimate wles
-      if (is.null(facet)) {
+      if (is.null(rotation)) {
           name <- scaling:::create_name("itemParamModel_wles", name_group, ".rds")
           scaling:::save_results(itemParamModel_wles, filename = name, path = path_results)
 
           name <- scaling:::create_name("itemParam_wles", name_group, ".xlsx")
           scaling:::save_table(itemParam_wles, filename = name, path = path_results)
       }
-      if (!is.null(facet)) {
+      if (!is.null(rotation)) {
           name <- scaling:::create_name("itemParamModel_wles.position", name_group, ".rds")
           scaling:::save_results(itemParamModel_wles.position, filename = name, path = path_results)
 
@@ -462,7 +462,7 @@ estimate_sum_scores <- function(resp,
 #'   which items to use for the analysis
 #' @param valid  string; defines name of logical variable in resp that indicates
 #'   (in)valid cases
-#' @param facet character vector; contains the variable name indicating the
+#' @param rotation character vector; contains the variable name indicating the
 #'   test rotation
 #' @param xsi_fixed named numerical vector; contains fixed item difficulties as
 #'   elements and item names as names of elements
@@ -482,13 +482,13 @@ estimate_sum_scores <- function(resp,
 #'   in wle_name)
 #' @noRd
 estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
-                                  facet, xsi_fixed = NULL,
+                                  rotation, xsi_fixed = NULL,
                                   scoring = NULL, mvs = NULL, wle_name,
                                   control_wle = NULL, control_tam = NULL,
                                   pweights = NULL) {
 
   # Test data
-  scaling:::check_variables(resp, "resp", facet)
+  scaling:::check_variables(resp, "resp", rotation)
 
   if (is.null(xsi_fixed)) {
     warning("Please provide the item parameters to ensure the correct",
@@ -499,7 +499,7 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
   irt_type <- ifelse(scaling:::is_poly(resp, vars, select), 'poly', 'dich')
 
   # Prepare data
-  facet <- resp[resp[[valid]], facet, drop = FALSE]
+  rotation <- resp[resp[[valid]], rotation, drop = FALSE]
   pid <- resp$ID_t[resp[[valid]]]
   scaling:::check_pid(pid)
   resp_ <- scaling:::prepare_resp(
@@ -519,17 +519,17 @@ estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
   # Conduct analyses
   frmA <- as.formula(paste0("~ item + ",
                             ifelse(irt_type == "poly", " item:step + ", ""),
-                            names(facet)))
+                            names(rotation)))
 
   # Design matrix for model
-  des <- TAM::designMatrices.mfr2(resp = resp_, facets = facet, formulaA = frmA)
+  des <- TAM::designMatrices.mfr2(resp = resp_, facets = rotation, formulaA = frmA)
   resp2 <- des$gresp$gresp.noStep
   A <- des$A$A.3d[ , , -des$xsi.elim[, 2]]
   B <- des$B$B.3d
 
   # 0.5 scoring for PCMs
   if (irt_type == "poly" & !is.null(scoring)) {
-    v <- sub(paste0('-', names(facet)[1], '.+$'), "", rownames(B))
+    v <- sub(paste0('-', names(rotation)[1], '.+$'), "", rownames(B))
     v <- merge(data.frame(item = v), vars[vars[[select]], c("item", scoring)], by.x = "item")
     v[[2]][is.na(v[[2]])] <- 1
     B[, , 1] <- B[, , 1] * v[[2]]
