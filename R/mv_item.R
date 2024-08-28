@@ -271,7 +271,6 @@ mvi_analysis <- function(
 
     # Prepare data
     vars_c <- vars[vars[[select]], ]
-###    vars_c$item <- scaling:::create_suf_names(vars_name = vars_c)
     resp <- scaling:::only_valid(resp, valid = valid)
     resp_c <- scaling:::prepare_resp(
         resp,
@@ -280,7 +279,6 @@ mvi_analysis <- function(
         warn = warn,
         zap_labels = FALSE
     )
- ###   names(resp_c) <- scaling:::create_suf_names(resp_name = resp_c)
 
     # NAs are not acknowledged in mvs-argument
     if (warn & any(resp_c %in% NA)) {
@@ -700,7 +698,6 @@ mvi_table <- function(
 
         results <- list()
         results$list <- data.frame(item = vars$item[vars[[select]]])
-  ###      results$list$item <- scaling:::create_suf_names(vars_name=results$list)
         results$summary_all <- mv_i$summary$all
 
         for (g in grouping) {

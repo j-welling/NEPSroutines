@@ -592,7 +592,7 @@ order_xsi_fixed <- function(
     resp,
     irtmodel,
     Q = NULL, A = NULL, B = NULL,
-    include_steps = FALSE
+    rename_steps = FALSE
   ) {
 
   if (irtmodel %in% c("1PL", "PCM2")) {
@@ -617,7 +617,7 @@ order_xsi_fixed <- function(
     )$xsi.fixed.estimated
   }
 
-  if (!include_steps) names(xsi_fixed) <- gsub("_step", ":step", names(xsi_fixed))
+ if (rename_steps) names(xsi_fixed) <- gsub("_step", ":step", names(xsi_fixed))
 
   if (any(!names(xsi_fixed) %in% rownames(xsi_arg)))
     stop(paste0("Items in xsi_fixed do not match items in ", irtmodel, " model!"))
@@ -634,12 +634,7 @@ order_xsi_fixed <- function(
 #' @param vars_name  string; defines name of dataset vars
 #' @param resp_name string; defines name of dataset resp
 #' @noRd
-create_suf_names <- function(vars_name = NULL, resp_name = NULL) {
-
-  if(!is.null(vars_name) && !is.null(resp_name) ) {
-    stop("Please define either the variable information dataset (e.g., vars)
-         or the respondent responses dataset (e.g., resp), not both at the same time.")
-  }
+create_suf_names <- function(vars_name = NULL) {
 
   if (!is.null(vars_name)) {
 
@@ -656,14 +651,6 @@ create_suf_names <- function(vars_name = NULL, resp_name = NULL) {
       return(vars_name)
     }
   }
-
-  if (!is.null(resp_name)) {
-    for (name in seq_along(names(resp_name))) {
-      names(resp_name)[[name]] <- gsub("_collapsed", "",names(resp_name)[[name]])
-    }
-    return(names(resp_name))
-  }
-
 }
 
 
