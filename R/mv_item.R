@@ -369,8 +369,8 @@ mvi_analysis <- function(
             # Number of valid responses per position
             mvlist$all <- data.frame(
               position = pos,
-              N_administered = colSums(apply(resp_p, 2, \(x) !is.na(x))),
-              N_valid = colSums(apply(resp_p, 2, \(x) !(x %in% mvs | is.na(x))))
+              N_administered = colSums(apply(resp_p, 2, function(x) !is.na(x))),
+              N_valid = colSums(apply(resp_p, 2, function(x) !(x %in% mvs | is.na(x))))
             )
 
             # Determine percentage of missing values for each missing type
@@ -507,8 +507,8 @@ create_mvlist <- function(
   mvlist <- data.frame(
     item = item,
     position = position,
-    N_administered = colSums(apply(responses, 2, \(x) !is.na(x))),
-    N_valid = colSums(apply(responses, 2, \(x) !(x %in% mvs | is.na(x))))
+    N_administered = colSums(apply(responses, 2, function(x) !is.na(x))),
+    N_valid = colSums(apply(responses, 2, function(x) !(x %in% mvs | is.na(x))))
   )
 
   # Merge with percentage of missing values for each missing type
@@ -577,7 +577,7 @@ mvi_calc <- function(responses, mvs, digits = 3, use_for_plot) {
 #' @noRd
 
 mvi_perc <- function(responses, mvs, digits = 3, use_for_plot) {
-  perc <- data.frame(apply(responses, 2, \(x) {
+  perc <- data.frame(apply(responses, 2, function(x) {
     ifelse(x %in% mvs, 1, ifelse(!is.na(x), 0, if(use_for_plot) 0 else NA))
   }))
   round(apply(perc, 2, mean, na.rm = TRUE) * 100, digits)
@@ -592,7 +592,7 @@ mvi_perc <- function(responses, mvs, digits = 3, use_for_plot) {
 #' @noRd
 
 mvi_summary <- function(mvlist, digits = 3) {
-  mvsum <- data.frame(t(apply(mvlist, 2, \(x) {
+  mvsum <- data.frame(t(apply(mvlist, 2, function(x) {
     round(c(mean(x), sd(x), median(x), range(x)[1], range(x)[2]), digits)
   })))
   mvsum[1, ] <- round(mvsum[1, ])
@@ -702,7 +702,7 @@ mvi_table <- function(
 
         for (g in grouping) {
             mv <- mv_i$list[[g]]
-            names(mv)[-1] <- apply(data.frame(names(mv)[-1]), 2, \(x) {
+            names(mv)[-1] <- apply(data.frame(names(mv)[-1]), 2, function(x) {
                 paste0(x, "_", g)
             })
             results$list <- dplyr::full_join(results$list, mv, by = "item")
@@ -1134,7 +1134,7 @@ add_missings_per_stage <- function(
   ) {
 
   not_reached_stage <- sapply(
-    resp[stages], \(x) {round((1 - mean(x)) * 100, digits)}
+    resp[stages], function(x) {round((1 - mean(x)) * 100, digits)}
   )
 
   mv_pos$stage <- NA

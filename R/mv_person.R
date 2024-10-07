@@ -488,7 +488,7 @@ mvp_plots <- function(
     k <- scaling:::create_ifelse(
       is.null(grouping),
       sum(vars[[select]]),
-      max(sapply(grouping, \(x) sum(vars[[select]] & vars[[x]])), na.rm = TRUE)
+      max(sapply(grouping, function(x) sum(vars[[select]] & vars[[x]])), na.rm = TRUE)
     )
 
     if(!is.null(grouping))
@@ -662,7 +662,7 @@ mvp_calc <- function(responses, stages, reached_stage, mvs) {
 
     # Determine percentage of missing values for each missing type
     for (i in names(mvs)) {
-        result[[i]] <- rowSums(apply(responses, 2, \(x) x %in% mvs[[i]]))
+        result[[i]] <- rowSums(apply(responses, 2, function(x) x %in% mvs[[i]]))
     }
 
     # multistage
@@ -696,12 +696,12 @@ mvp_calc <- function(responses, stages, reached_stage, mvs) {
 mvp_summary <- function(results, digits = 3) {
 
     # Create tables with frequencies per missing value type
-    out <- lapply(results, \(x) {
+    out <- lapply(results, function(x) {
         round(prop.table(table(x)) * 100, digits)
     })
 
     # Create table with descriptive statistics for all missing value types
-    out$summary <- sapply(results, \(x) {
+    out$summary <- sapply(results, function(x) {
         round(psych::describe(x), digits)[c(3:5, 8:9)]
     })
 
