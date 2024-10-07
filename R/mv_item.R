@@ -846,8 +846,8 @@ mvi_plots <- function(
   k <- scaling:::create_ifelse(
     is.null(grouping),
     max(vars[[position]][vars[[select]]], na.rm = TRUE),
-    max(sapply(grouping, \(x) {
-      max(vars[[position]][vars[[select]] & vars[[x]]], na.rm = TRUE)
+    max(sapply(grouping, \(group) {
+      max(vars[[position[group]]][vars[[select]] & vars[[group]]], na.rm = TRUE)
       }), na.rm = TRUE)
   )
 
