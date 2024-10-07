@@ -49,34 +49,55 @@
 #'
 #' @export
 
-mv_person <- function(resp, vars, select,
-                      valid = NULL, grouping = NULL, stages = NULL,
-                      mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                              UM = -90, ND = -55, MD = -54, AZ = -21),
-                      labels_mvs = c(
-                          ALL = "total missing items",
-                          OM = "omitted items",
-                          NV = "not valid items",
-                          NR = "not reached items",
-                          TA = "missing items due to test abortion",
-                          UM = "unspecific missing items",
-                          ND = "not determinable items",
-                          MD = "items missing by design",
-                          AZ = "missing items due to 'Angabe zurueckgesetzt'"
-                      ),
-                      missing_by_design = -54, color = NULL,
-                      plots = FALSE, print = TRUE, save = TRUE, return = FALSE,
-                      path_results = "Results",
-                      path_table = "Tables",
-                      path_plots = "Plots/Missing_Responses/by_person",
-                      show_all = TRUE, overwrite = FALSE, name_group = NULL,
-                      name_grouping = 'test version', labels_legend = NULL,
-                      digits = 3, warn = TRUE, verbose = TRUE) {
+mv_person <- function(
+    resp,
+    vars,
+    select,
+    valid = NULL,
+    grouping = NULL,
+    stages = NULL,
+    mvs = c(
+      OM = -97, NV = -95, NR = -94, TA = -91,
+      UM = -90, ND = -55, MD = -54, AZ = -21
+    ),
+    labels_mvs = c(
+      ALL = "total missing items",
+      OM = "omitted items",
+      NV = "not valid items",
+      NR = "not reached items",
+      TA = "missing items due to test abortion",
+      UM = "unspecific missing items",
+      ND = "not determinable items",
+      MD = "items missing by design",
+      AZ = "missing items due to 'Angabe zurueckgesetzt'"
+    ),
+    missing_by_design = -54,
+    color = NULL,
+    plots = FALSE,
+    print = TRUE,
+    save = TRUE,
+    return = FALSE,
+    path_results = "Results",
+    path_table = "Tables",
+    path_plots = "Plots/Missings_by_person",
+    show_all = TRUE,
+    overwrite = FALSE,
+    name_group = NULL,
+    name_grouping = 'test version',
+    labels_legend = NULL,
+    digits = 3,
+    warn = TRUE,
+    verbose = TRUE
+  ) {
 
     # Test data
     scaling:::check_logicals(resp, "resp", valid, warn = warn)
-    scaling:::check_logicals(scaling:::only_valid(resp, valid = valid), "resp",
-                             grouping, warn = warn)
+    scaling:::check_logicals(
+      scaling:::only_valid(resp, valid = valid),
+      "resp",
+      grouping,
+      warn = warn
+    )
     scaling:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
     scaling:::check_items(vars$item[vars[[select]]])
     scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
@@ -193,13 +214,25 @@ mv_person <- function(resp, vars, select,
 #'
 #' @export
 
-mvp_analysis <- function(resp, vars, select,
-                         valid = NULL, grouping = NULL, stages = NULL,
-                         mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                                 UM = -90, ND = -55, MD = -54, AZ = -21),
-                         missing_by_design = -54,
-                         save = TRUE, path = "Results",
-                         name_group = NULL, digits = 3, warn = TRUE, test = TRUE) {
+mvp_analysis <- function(
+    resp,
+    vars,
+    select,
+    valid = NULL,
+    grouping = NULL,
+    stages = NULL,
+    mvs = c(
+      OM = -97, NV = -95, NR = -94, TA = -91,
+      UM = -90, ND = -55, MD = -54, AZ = -21
+    ),
+    missing_by_design = -54,
+    save = TRUE,
+    path = "Results",
+    name_group = NULL,
+    digits = 3,
+    warn = TRUE,
+    test = TRUE
+  ) {
 
     # Test data
     if (test) {
@@ -234,11 +267,11 @@ mvp_analysis <- function(resp, vars, select,
     if (is.null(grouping)) {
 
         # Determine percentage of missing values for each missing type
-        if (!is.null(stages)) stgs <- resp[,names(stages)]
+        if (!is.null(stages)) reached_stage <- resp[,names(stages)]
         results <- scaling:::mvp_calc(
           responses = resp_c,
           stages = stages,
-          stgs = stgs,
+          reached_stage = reached_stage,
           mvs = mvs
         )
         mv_p <- scaling:::mvp_summary(results, digits = digits)
@@ -251,13 +284,14 @@ mvp_analysis <- function(resp, vars, select,
         for (g in grouping) {
 
             resp_g <- resp_c[resp[[g]], vars$item[vars[[select]] & vars[[g]]]]
-            if (!is.null(stages)) stgs <- resp[resp[[g]],names(stages)]
+            if (!is.null(stages)) reached_stage <- resp[resp[[g]], names(stages)]
 
             # Create dataframe with missing values per person and missing value type
             results[[g]] <- scaling:::mvp_calc(
               responses = resp_g,
               stages = stages,
-              stgs = stgs, mvs = mvs
+              reached_stage = reached_stage,
+              mvs = mvs
             )
             results$all <- rbind(results$all, results[[g]])
 
@@ -305,12 +339,20 @@ mvp_analysis <- function(resp, vars, select,
 #'
 #' @export
 
-mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
-                      mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                              UM = -90, ND = -55, MD = -54, AZ = -21),
-                      missing_by_design = -54,
-                      save = TRUE, path = "Tables",
-                      name_group = NULL, test = TRUE) {
+mvp_table <- function(
+    mv_p,
+    grouping = NULL,
+    overwrite = FALSE,
+    mvs = c(
+      OM = -97, NV = -95, NR = -94, TA = -91,
+      UM = -90, ND = -55, MD = -54, AZ = -21
+    ),
+    missing_by_design = -54,
+    save = TRUE,
+    path = "Tables",
+    name_group = NULL,
+    test = TRUE
+  ) {
 
   # Missing by design
   if(!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
@@ -399,25 +441,37 @@ mvp_table <- function(mv_p, grouping = NULL, overwrite = FALSE,
 #'
 #' @export
 
-mvp_plots <- function(mv_p, vars, select, grouping = NULL,
-                      mvs = c(OM = -97, NV = -95, NR = -94, TA = -91,
-                              UM = -90, ND = -55, MD = -54, AZ = -21),
-                      labels_mvs = c(
-                          ALL = "total missing items",
-                          OM = "omitted items",
-                          NV = "not valid items",
-                          NR = "not reached items",
-                          TA = "missing items due to test abortion",
-                          UM = "unspecific missing items",
-                          ND = "not determinable items",
-                          MD = "items missing by design",
-                          AZ = "missing items due to 'Angabe zurueckgesetzt'"
-                      ),
-                      missing_by_design = -54,
-                      path = "Plots/Missing_Responses/by_person",
-                      show_all = TRUE, name_group = NULL, color = NULL,
-                      name_grouping = 'test version', labels_legend = NULL,
-                      verbose = TRUE, warn = TRUE, test = TRUE) {
+mvp_plots <- function(
+    mv_p,
+    vars,
+    select,
+    grouping = NULL,
+    mvs = c(
+      OM = -97, NV = -95, NR = -94, TA = -91,
+      UM = -90, ND = -55, MD = -54, AZ = -21
+    ),
+    labels_mvs = c(
+      ALL = "total missing items",
+      OM = "omitted items",
+      NV = "not valid items",
+      NR = "not reached items",
+      TA = "missing items due to test abortion",
+      UM = "unspecific missing items",
+      ND = "not determinable items",
+      MD = "items missing by design",
+      AZ = "missing items due to 'Angabe zurueckgesetzt'"
+    ),
+    missing_by_design = -54,
+    path = "Plots/Missings_by_person",
+    show_all = TRUE,
+    name_group = NULL,
+    color = NULL,
+    name_grouping = 'test version',
+    labels_legend = NULL,
+    verbose = TRUE,
+    warn = TRUE,
+    test = TRUE
+  ) {
 
     # Missing by design
     if(!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
@@ -434,7 +488,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
     k <- scaling:::create_ifelse(
       is.null(grouping),
       sum(vars[[select]]),
-      max(sapply(grouping, function(x) sum(vars[[select]] & vars[[x]])), na.rm = TRUE)
+      max(sapply(grouping, \(x) sum(vars[[select]] & vars[[x]])), na.rm = TRUE)
     )
 
     if(!is.null(grouping))
@@ -545,7 +599,7 @@ mvp_plots <- function(mv_p, vars, select, grouping = NULL,
 
         # save plot
         ggplot2::ggsave(
-            filename = paste0("Missing_responses_by_person_", i,".png"),
+            filename = paste0("Missings_by_person_", i,".png"),
             plot = gg, path = path_, width = 2000, height = 1200, units = "px",
             dpi = 300
         )
@@ -591,19 +645,24 @@ create_wide_df_mvp <- function(mv_p, groups, i, end) {
 #' @param responses  data.frame; contains item responses with items as
 #' variables and persons as rows; all responses ∈ ℕ0; user-defined missing values;
 #' only the items administered to and the cases of the designated group
+#' @param stages  named numeric vector; contains for each stage the number of
+#' items per stage as vector element and the name of the stage variable as name
+#' of the vector element (e.g., c(stage1 = 10, stage2 = 8))
+#' @param reached_stage data.frame; contains for each stage a logical variable
+#' that indicates for all participants whether the person reached this stage or not
 #' @param mvs  named integer vector; contains user-defined missing values
 #'
 #' @return  data.frame with missing values per person and missing value type.
 #' @noRd
 
-mvp_calc <- function(responses, stages, stgs, mvs) {
+mvp_calc <- function(responses, stages, reached_stage, mvs) {
 
     result <- data.frame(matrix(NA, nrow(responses), length(mvs) + 1))
     names(result) <- c(names(mvs), 'ALL')
 
     # Determine percentage of missing values for each missing type
     for (i in names(mvs)) {
-        result[[i]] <- rowSums(apply(responses, 2, function(x) x %in% mvs[[i]]))
+        result[[i]] <- rowSums(apply(responses, 2, \(x) x %in% mvs[[i]]))
     }
 
     # multistage
@@ -611,7 +670,7 @@ mvp_calc <- function(responses, stages, stgs, mvs) {
 
       for (stage in names(stages)) {
 
-        result$NR <- result$NR + ifelse(stgs[[stage]], 0, stages[[stage]])
+        result$NR <- result$NR + ifelse(reached_stage[[stage]], 0, stages[[stage]])
 
       }
 
@@ -637,12 +696,12 @@ mvp_calc <- function(responses, stages, stgs, mvs) {
 mvp_summary <- function(results, digits = 3) {
 
     # Create tables with frequencies per missing value type
-    out <- lapply(results, function(x) {
+    out <- lapply(results, \(x) {
         round(prop.table(table(x)) * 100, digits)
     })
 
     # Create table with descriptive statistics for all missing value types
-    out$summary <- sapply(results, function(x) {
+    out$summary <- sapply(results, \(x) {
         round(psych::describe(x), digits)[c(3:5, 8:9)]
     })
 
