@@ -843,13 +843,7 @@ mvi_plots <- function(
 
   # Prepare data
   mv_i <- mv_i$list
-  k <- scaling:::create_ifelse(
-    is.null(grouping),
-    max(vars[[position]][vars[[select]]], na.rm = TRUE),
-    max(sapply(grouping, \(group) {
-      max(vars[[position[group]]][vars[[select]] & vars[[group]]], na.rm = TRUE)
-      }), na.rm = TRUE)
-  )
+  k <- max(vars[vars[[select]], position], na.rm = TRUE)
 
   # Create groups vector
   if (!is.null(grouping))
