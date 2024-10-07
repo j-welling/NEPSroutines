@@ -87,10 +87,17 @@ convert_mv <- function(resp, vars, select = NULL, mvs = NULL, warn = TRUE) {
 #'
 #' @export
 
-prepare_resp <- function(resp, vars = NULL, select = NULL,
-                         use_only_valid = FALSE,  valid = NULL,
-                         convert = FALSE, mvs = NULL,
-                         warn = TRUE, zap_labels = TRUE) {
+prepare_resp <- function(
+    resp,
+    vars = NULL,
+    select = NULL,
+    use_only_valid = FALSE,
+    valid = NULL,
+    convert = FALSE,
+    mvs = NULL,
+    warn = TRUE,
+    zap_labels = TRUE
+  ) {
 
     # Use only valid cases
     if (use_only_valid) {
@@ -107,9 +114,9 @@ prepare_resp <- function(resp, vars = NULL, select = NULL,
             stop("To create a data frame (resp) with only the indicated items, ",
                  "please also provide vars.")
         } else {
-            check_logicals(vars, "vars", select, warn = warn)
+            scaling:::check_logicals(vars, "vars", select, warn = warn)
             items <- vars$item[vars[[select]]]
-            check_variables(resp, "resp", variables = items)
+            scaling:::check_variables(resp, "resp", variables = items)
             resp <- resp[ , items]
         }
     } else if (warn) {

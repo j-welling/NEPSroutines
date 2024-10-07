@@ -25,7 +25,6 @@ n_valid <- function(resp, valid = NULL) {
     "in the dataset.")
 }
 
-
 #' Descriptives of continuous variables
 #'
 #' @param resp  data.frame; contains sociodemographic and booklet variables
@@ -211,9 +210,15 @@ show_attributes <- function(resp, desc) {
 #' @return data.frame with sample size by groups.
 #' @export
 
-sample_by_group <- function(resp, grouping_variable, labels = NULL, save = FALSE,
-                            overwrite = FALSE, path = "Tables",
-                            name_group = NULL) {
+sample_by_group <- function(
+    resp,
+    grouping_variable,
+    labels = NULL,
+    save = FALSE,
+    overwrite = FALSE,
+    path = "Tables",
+    name_group = NULL
+  ) {
 
     # Check variable
     scaling:::check_variables(resp, "resp", grouping_variable)
