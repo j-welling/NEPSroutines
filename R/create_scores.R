@@ -45,6 +45,13 @@
 #'   passed to TAM-functions
 #' @param poly2dich  logical; indicates whether count only correctly scored
 #'   binary or FULLY correctly scored PC items
+#' @param save  logical; whether results shall be saved to hard drive
+#' @param return  logical; whether results shall be returned
+#' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
+#' @param path_results  string; defines path to folder where results shall be
+#'   saved
+#' @param warn  logical; whether to print warnings
 # #' @param resp_prev data.frame with responses of first measurement wave,
 # #'    a person identifier; may also include a WLE as given in wid
 # #' @param resp_link data.frame with responses of link sample,
@@ -84,12 +91,6 @@
 # #' @param longitudinal  logical; do within cohort linking (TRUE) or between
 # #'   cohort linking (FALSE)
 # #' @param print  logical; whether results shall be printed to console
-#' @param save  logical; whether results shall be saved to hard drive
-#' @param return  logical; whether results shall be returned
-# #' @param overwrite logical; whether to overwrite existing file when saving table
-#' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
-#' @param path_results  string; defines path to folder where results shall be
-#'   saved
 # #' @param path_table  string; defines path to folder where tables shall be saved
 # #' @param do_dim logical; whether to do dimensionality analysis for linking
 # #' @param do_dif logical; whether to do dif analysis for linking
@@ -102,34 +103,64 @@
 # #'   for the dimensionality analyses
 # #' @param digits  numeric; number of decimal places for rounding
 # #' @param verbose  logical; verbose as passed to the TAM function
-#' @param warn  logical; whether to print warnings
 #'
 #' @export
-create_scores <- function(resp, vars, select, scoring = NULL,
-                          score_name = 'score', num_cat = 'num_cat',
-                          xsi_fixed = NULL, rotation = NULL, valid = NULL,
-                          mvs = NULL, missing_by_design = -54, wle = TRUE,
-                          sum_score = FALSE, sum_select = NULL,
-                          metap = FALSE, meta_variable = NULL,
-                          meta_score_name = NULL, meta_select = NULL,
-                          control_tam = NULL, control_wle = NULL,
-                          pweights = NULL, poly2dich = TRUE,
-                          # resp_prev = NULL, resp_link = NULL,                 # commented out because linking is not yet implemented
-                          # vars_prev = NULL, vars_link = NULL,                 # commented out because linking is not yet implemented
-                          # select_prev = NULL, select_link = NULL,             # commented out because linking is not yet implemented
-                          # valid_prev = NULL, valid_link = NULL,               # commented out because linking is not yet implemented
-                          # scoring_prev = NULL, scoring_link = NULL,           # commented out because linking is not yet implemented
-                          # pweights_prev = NULL, pweights_link = NULL,         # commented out because linking is not yet implemented
-                          # anchors = NULL, longitudinal = TRUE,                # commented out because linking is not yet implemented
-                          save = TRUE, return = FALSE, #print = TRUE,           # commented out because linking is not yet implemented
-                          name_group = NULL, #overwrite = FALSE,                # commented out because linking is not yet implemented
-                          #path_table = "Tables",                   # commented out because linking is not yet implemented
-                          path_results = "Results",
-                          #do_dim = TRUE, do_dif = TRUE,                        # commented out because linking is not yet implemented
-                          #dif_threshold = .5, wid = NULL,                      # commented out because linking is not yet implemented
-                          #snodes = 5000, maxiter = 10000,                      # commented out because linking is not yet implemented
-                          # digits = 3, verbose = TRUE,                         # commented out because linking is not yet implemented
-                          warn = TRUE) {
+create_scores <- function(
+    resp,
+    vars,
+    select,
+    scoring = NULL,
+    score_name = 'score',
+    num_cat = 'num_cat',
+    xsi_fixed = NULL,
+    rotation = NULL,
+    valid = NULL,
+    mvs = NULL,
+    missing_by_design = -54,
+    wle = TRUE,
+    sum_score = FALSE,
+    sum_select = NULL,
+    metap = FALSE,
+    meta_variable = NULL,
+    meta_score_name = NULL,
+    meta_select = NULL,
+    control_tam = NULL,
+    control_wle = NULL,
+    pweights = NULL,
+    poly2dich = TRUE,
+    save = TRUE,
+    return = FALSE,
+    name_group = NULL,
+    overwrite = FALSE,
+    path_results = "Results",
+    path_table = "Tables",
+    warn = TRUE
+    ### The following function arguments were commented out
+    ### because linking is not yet implemented
+    # print = TRUE,
+    # resp_prev = NULL,
+    # resp_link = NULL,
+    # vars_prev = NULL,
+    # vars_link = NULL,
+    # select_prev = NULL,
+    # select_link = NULL,
+    # valid_prev = NULL,
+    # valid_link = NULL,
+    # scoring_prev = NULL,
+    # scoring_link = NULL,
+    # pweights_prev = NULL,
+    # pweights_link = NULL,
+    # anchors = NULL,
+    # longitudinal = TRUE,
+    # do_dim = TRUE,
+    # do_dif = TRUE,
+    # dif_threshold = .5,
+    # wid = NULL,
+    # snodes = 5000,
+    # maxiter = 10000,
+    # digits = 3,
+    # verbose = TRUE,
+) {
 
 
   if (!is.null(scoring))
@@ -349,17 +380,38 @@ create_scores <- function(resp, vars, select, scoring = NULL,
       # Save item parameters and TAM model used to estimate wles
       if (wle) {
         if (is.null(rotation)) {
+
             name <- scaling:::create_name("itemParamModel_wles", name_group, ".rds")
-            scaling:::save_results(itemParamModel_wles, filename = name, path = path_results)
+            scaling:::save_results(
+              itemParamModel_wles,
+              filename = name,
+              path = path_results
+            )
 
             name <- scaling:::create_name("itemParam_wles", name_group, ".xlsx")
-            scaling:::save_table(itemParam_wles, filename = name, path = path_results)
+            scaling:::save_table(
+              itemParam_wles,
+              filename = name,
+              path = path_table,
+              overwrite = overwrite
+            )
+
         } else {
+
             name <- scaling:::create_name("itemParamModel_wles.position", name_group, ".rds")
-            scaling:::save_results(itemParamModel_wles.position, filename = name, path = path_results)
+            scaling:::save_results(
+              itemParamModel_wles.position,
+              filename = name,
+              path = path_results
+            )
 
             name <- scaling:::create_name("itemParam_wles.position", name_group, ".xlsx")
-            scaling:::save_table(itemParam_wles.position, filename = name, path = path_results)
+            scaling:::save_table(
+              itemParam_wles.position,
+              filename = name,
+              path = path_table,
+              overwrite = overwrite
+            )
         }
       }
     }
@@ -481,10 +533,17 @@ estimate_sum_scores <- function(resp,
 #' @return a data.frame containing ID_t, wle and se of wle (named like indicated
 #'   in wle_name)
 #' @noRd
-estimate_rotated_wles <- function(resp, vars, select, valid = NULL,
-                                  rotation, xsi_fixed = NULL,
-                                  scoring = NULL, mvs = NULL, wle_name,
-                                  control_wle = NULL, control_tam = NULL,
+estimate_rotated_wles <- function(resp,
+                                  vars,
+                                  select,
+                                  valid = NULL,
+                                  rotation,
+                                  xsi_fixed = NULL,
+                                  scoring = NULL,
+                                  mvs = NULL,
+                                  wle_name,
+                                  control_wle = NULL,
+                                  control_tam = NULL,
                                   pweights = NULL) {
 
   # Test data
