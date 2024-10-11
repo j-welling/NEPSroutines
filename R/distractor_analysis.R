@@ -182,7 +182,7 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
       resp[[valid]] <- TRUE
       irt_results <-
         suppressWarnings({
-          scaling::irt_analysis(
+          NEPSroutines::irt_analysis(
             resp = resp,
             vars = vars,
             select = select_score,

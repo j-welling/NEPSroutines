@@ -114,9 +114,9 @@ prepare_resp <- function(
             stop("To create a data frame (resp) with only the indicated items, ",
                  "please also provide vars.")
         } else {
-            scaling:::check_logicals(vars, "vars", select, warn = warn)
+            NEPSroutines:::check_logicals(vars, "vars", select, warn = warn)
             items <- vars$item[vars[[select]]]
-            scaling:::check_variables(resp, "resp", variables = items)
+            NEPSroutines:::check_variables(resp, "resp", variables = items)
             resp <- resp[ , items]
         }
     } else if (warn) {

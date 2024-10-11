@@ -92,7 +92,7 @@ Setup <- function(path = getwd(), ask = TRUE, sc = 0, domain = "re",
   # Copy extension
   if (!dir.exists(file.path(path, "_extensions")))
     dir.create(file.path(path, "_extensions"))
-  file.copy(system.file("_extensions", package = "scaling"),
+  file.copy(system.file("_extensions", package = "NEPSroutines"),
             path, recursive = TRUE, copy.date = TRUE)
 
   # Names for .bib and .qmd files
@@ -103,14 +103,14 @@ Setup <- function(path = getwd(), ask = TRUE, sc = 0, domain = "re",
   if (length(domain) > 0L) name <- paste0(name, "_", toupper(domain))
 
   # Copy bibtex file
-  file.copy(system.file("skeletons/survey_paper.bib", package = "scaling"),
+  file.copy(system.file("skeletons/survey_paper.bib", package = "NEPSroutines"),
             path, copy.date = TRUE)
   file.rename(file.path(path, "survey_paper.bib"),
               file.path(path, paste0(name, ".bib")))
 
   # Copy Quarto file
   txt <- base::readLines(system.file("skeletons/survey_paper.qmd",
-                                     package = "scaling"))
+                                     package = "NEPSroutines"))
   txt <- gsub('bibliography: "survey_paper.bib"',
               paste0('bibliography: "', name, '.bib"'),
               txt)
@@ -152,7 +152,7 @@ Update <- function(path = getwd()) {
   # Copy extension
   if (!dir.exists(file.path(path, "_extensions")))
     dir.create(file.path(path, "_extensions"))
-  file.copy(system.file("_extensions", package = "scaling"),
+  file.copy(system.file("_extensions", package = "NEPSroutines"),
             path, recursive = TRUE, copy.date = TRUE)
 
   message(paste0("\n The Quarto extension in ", file.path(path, "_extensions"),

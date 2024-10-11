@@ -172,10 +172,10 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
                                          path_table = "Tables") {
 
   # Check whether variables are indeed contained in data.frames
-  scaling:::check_logicals(vars, "vars", select, warn = TRUE)
+  NEPSroutines:::check_logicals(vars, "vars", select, warn = TRUE)
   polyt_items <- vars$item[vars[[select]]]
-  scaling:::check_numerics(resp, "resp", polyt_items)
-  scaling:::check_items(polyt_items)
+  NEPSroutines:::check_numerics(resp, "resp", polyt_items)
+  NEPSroutines:::check_items(polyt_items)
 
   collapsed_items <- c()
   dichotomous_items <- c()
@@ -307,7 +307,7 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
   # Save results
   if (save) {
 
-    scaling:::save_table(
+    NEPSroutines:::save_table(
         results = list(
             collapsed = item_names,
             dichotomous = dichotomous_items,
@@ -370,9 +370,9 @@ create_table <- function(response) {
 min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    scaling:::check_logicals(vars, "vars", select)
+    NEPSroutines:::check_logicals(vars, "vars", select)
     items <- vars$item[vars[[select]]]
-    scaling:::check_numerics(resp, "resp", items)
+    NEPSroutines:::check_numerics(resp, "resp", items)
     resp_ <- resp[ , items]
 
     # Set minimum number of valid values
@@ -423,8 +423,8 @@ min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 pos_new <- function(vars, select, position) {
 
     # Check whether variables are indeed contained in data.frames
-    scaling:::check_logicals(vars, "vars", select)
-    scaling:::check_numerics(vars, "vars", position, check_invalid = TRUE)
+    NEPSroutines:::check_logicals(vars, "vars", select)
+    NEPSroutines:::check_numerics(vars, "vars", position, check_invalid = TRUE)
 
     if (length(position) == 1) {
 
@@ -478,7 +478,7 @@ calculate_age <- function(resp,
                           birth_day = NULL, test_day = NULL) {
 
     # Check and create birth date variables
-    scaling:::check_variables(resp, "resp", c(birth_year, birth_month)    )
+    NEPSroutines:::check_variables(resp, "resp", c(birth_year, birth_month)    )
     byear <- resp[[birth_year]]
     bmonth <- resp[[birth_month]]
 
@@ -486,14 +486,14 @@ calculate_age <- function(resp,
     if (is.numeric(test_year)) {
         tyear <- test_year
     } else {
-        scaling:::check_variables(resp, "resp", test_year)
+        NEPSroutines:::check_variables(resp, "resp", test_year)
         tyear <- resp[[test_year]]
     }
 
     if (is.numeric(test_month)) {
         tmonth <- test_month
     } else {
-        scaling:::check_variables(resp, "resp", test_month)
+        NEPSroutines:::check_variables(resp, "resp", test_month)
         tmonth <- resp[[test_month]]
     }
 
@@ -501,7 +501,7 @@ calculate_age <- function(resp,
     if (is.null(birth_day)) {
         bday <- 15
     } else {
-        scaling:::check_variables(resp, "resp", birth_day)
+        NEPSroutines:::check_variables(resp, "resp", birth_day)
         bday <- resp[[birth_day]]
     }
 
@@ -510,7 +510,7 @@ calculate_age <- function(resp,
     } else if (is.numeric(test_day)) {
         tday <- test_day
     } else {
-        scaling:::check_variables(resp, "resp", test_day)
+        NEPSroutines:::check_variables(resp, "resp", test_day)
         tday <- resp[[test_day]]
     }
 
@@ -563,7 +563,7 @@ calculate_age <- function(resp,
 calculate_num_cat <- function(vars, poly_items = NULL, select_suf) {
 
   # Test data
-  scaling:::check_logicals(vars, "vars", select_suf, warn = TRUE)
+  NEPSroutines:::check_logicals(vars, "vars", select_suf, warn = TRUE)
 
   # Create vector with number of categories for items to be included in suf
   ## All items get a value of 1 as the number of categories

@@ -64,7 +64,7 @@ dim_analysis <- function(
 
   dimensionality <- list()
 
-  dimensionality$analysis <- scaling:::conduct_dim_analysis(
+  dimensionality$analysis <- NEPSroutines:::conduct_dim_analysis(
     resp = resp,
     vars = vars,
     select = select,
@@ -80,7 +80,7 @@ dim_analysis <- function(
     test = TRUE
   )
 
-  dimensionality$summary <- scaling:::dim_summary(
+  dimensionality$summary <- NEPSroutines:::dim_summary(
       dimensionality$analysis,
       digits = digits,
       save = FALSE
@@ -88,13 +88,13 @@ dim_analysis <- function(
 
   # Save results
   if (save) {
-      name <- scaling:::create_name("dimensionality", name_group)
-      scaling:::save_results(
+      name <- NEPSroutines:::create_name("dimensionality", name_group)
+      NEPSroutines:::save_results(
           dimensionality,
           filename = paste0(name, ".rds"),
           path = path_results
       )
-      scaling:::save_table(
+      NEPSroutines:::save_table(
           dimensionality$summary,
           overwrite = overwrite,
           filename = paste0(name, ".xlsx"),
@@ -103,7 +103,7 @@ dim_analysis <- function(
   }
 
   # Print results
-  if (print) scaling:::print_dim_summary(dimensionality$summary)
+  if (print) NEPSroutines:::print_dim_summary(dimensionality$summary)
 
   # Return results
   if (return) return(dimensionality)
@@ -164,24 +164,24 @@ conduct_dim_analysis <- function(
 
   # Test data
   if (test) {
-      scaling::check_logicals(vars, "vars", select, warn = warn)
-      scaling::check_logicals(resp, "resp", valid, warn = warn)
-      scaling::check_variables(vars, "vars", c(dim, scoring))
-      scaling::check_items(vars$item[vars[[select]]])
-      scaling::check_numerics(resp, "resp", vars$item[vars[[select]]])
+      NEPSroutines::check_logicals(vars, "vars", select, warn = warn)
+      NEPSroutines::check_logicals(resp, "resp", valid, warn = warn)
+      NEPSroutines::check_variables(vars, "vars", c(dim, scoring))
+      NEPSroutines::check_items(vars$item[vars[[select]]])
+      NEPSroutines::check_numerics(resp, "resp", vars$item[vars[[select]]])
   }
 
-  if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
+  if (warn) NEPSroutines:::is_null_mvs_valid(mvs = mvs, valid = valid)
 
   # Select only valid cases
-  resp <- scaling:::only_valid(resp, valid = valid, warn = FALSE)
+  resp <- NEPSroutines:::only_valid(resp, valid = valid, warn = FALSE)
 
   # Create ID and facets variable
   pid <- resp$ID_t
-  scaling::check_pid(pid)
+  NEPSroutines::check_pid(pid)
 
   # Select only indicated items and convert mvs
-  resp <- scaling::prepare_resp(
+  resp <- NEPSroutines::prepare_resp(
       resp,
       vars = vars,
       select = select,
@@ -190,7 +190,7 @@ conduct_dim_analysis <- function(
       warn = FALSE
   )
 
-  scaling::check_numerics(resp, "resp", check_invalid = TRUE)
+  NEPSroutines::check_numerics(resp, "resp", check_invalid = TRUE)
 
   # Create object for results
   dimensionality <- list()
@@ -210,7 +210,7 @@ conduct_dim_analysis <- function(
     control = list(maxiter = maxiter, snodes = snodes)
   )
 
-  scaling:::reached_maxiter(dimensionality$uni, "'unidimensional'")
+  NEPSroutines:::reached_maxiter(dimensionality$uni, "'unidimensional'")
 
   message("Finished unidimensional reference model.")
 
@@ -238,7 +238,7 @@ conduct_dim_analysis <- function(
         verbose = verbose
       )
 
-      scaling:::reached_maxiter(dimensionality[[d]], paste0("'", d, "-dimensional'"))
+      NEPSroutines:::reached_maxiter(dimensionality[[d]], paste0("'", d, "-dimensional'"))
 
       message("Finished ", d," model.")
     }
@@ -246,8 +246,8 @@ conduct_dim_analysis <- function(
 
   # Save results
   if (save) {
-      name <- scaling:::create_name("dimensionality", name_group, ".rds")
-      scaling:::save_results(dimensionality, filename = name, path = path)
+      name <- NEPSroutines:::create_name("dimensionality", name_group, ".rds")
+      NEPSroutines:::save_results(dimensionality, filename = name, path = path)
   }
 
   # Return results
@@ -297,8 +297,8 @@ dim_summary <- function(dimensionality, save = FALSE, name_group = NULL,
 
   # Save results
   if (save) {
-      name <- scaling:::create_name("dimensionality", name_group, ".xlsx")
-      scaling:::save_table(dimsum, overwrite = overwrite, filename = name, path = path)
+      name <- NEPSroutines:::create_name("dimensionality", name_group, ".xlsx")
+      NEPSroutines:::save_table(dimsum, overwrite = overwrite, filename = name, path = path)
   }
 
   # Return results

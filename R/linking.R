@@ -254,8 +254,8 @@ linking <- function(resp_curr,
                 varcor <- linking$link_dim$dim_sum$`Cor-Var wave`
             }
 
-            name <- scaling:::create_name("linking", name_group, ".xlsx")
-            scaling:::save_table(
+            name <- NEPSroutines:::create_name("linking", name_group, ".xlsx")
+            NEPSroutines:::save_table(
                 list(DIF = linking$link_dif$link_dif_summary$link_dif_table,
                      'Dimensionality (Cor-Var)' = varcor,
                      'Dimensionality (GoF)' = linking$link_dim$dim_sum$`Goodness Of fit`),
@@ -266,8 +266,8 @@ linking <- function(resp_curr,
             )
         }
 
-        name <- scaling:::create_name("linking", name_group, ".rds")
-        scaling:::save_results(linking, filename = name, path = path_results)
+        name <- NEPSroutines:::create_name("linking", name_group, ".rds")
+        NEPSroutines:::save_results(linking, filename = name, path = path_results)
     }
 
     # Return results
@@ -374,14 +374,14 @@ prepare_longitudinal_resp <- function(resp_curr,
     is_anchor_group <- !is.null(resp_link)
 
     # Check if ID_ts are available
-    scaling:::check_variables(resp_curr, "resp_curr", "ID_t")
-    scaling:::check_variables(resp_prev, "resp_prev", "ID_t")
+    NEPSroutines:::check_variables(resp_curr, "resp_curr", "ID_t")
+    NEPSroutines:::check_variables(resp_prev, "resp_prev", "ID_t")
     if (is_anchor_group)
-        scaling:::check_variables(resp_link, "resp_link", "ID_t")
+        NEPSroutines:::check_variables(resp_link, "resp_link", "ID_t")
 
     # Prepare response data
     resp_curr <-
-        scaling:::prepare_resp(
+        NEPSroutines:::prepare_resp(
             resp = resp_curr,
             valid = valid_curr,
             use_only_valid = TRUE,
@@ -390,7 +390,7 @@ prepare_longitudinal_resp <- function(resp_curr,
             warn = FALSE
         )
     resp_prev <-
-        scaling:::prepare_resp(
+        NEPSroutines:::prepare_resp(
             resp = resp_prev,
             valid = valid_prev,
             use_only_valid = TRUE,
@@ -400,7 +400,7 @@ prepare_longitudinal_resp <- function(resp_curr,
         )
     if (is_anchor_group) {
         resp_link <-
-            scaling:::prepare_resp(
+            NEPSroutines:::prepare_resp(
                 resp = resp_link,
                 valid = valid_link,
                 use_only_valid = TRUE,
@@ -432,34 +432,34 @@ prepare_longitudinal_resp <- function(resp_curr,
 
     # Item names
     items_curr <- vars_curr$item[vars_curr[[select_curr]]]
-    scaling:::check_numerics(resp_curr, "resp_curr", items_curr, check_invalid = TRUE)
+    NEPSroutines:::check_numerics(resp_curr, "resp_curr", items_curr, check_invalid = TRUE)
 
     items_prev <- vars_prev$item[vars_prev[[select_prev]]]
-    scaling:::check_numerics(resp_prev, "resp_prev", items_prev, check_invalid = TRUE)
+    NEPSroutines:::check_numerics(resp_prev, "resp_prev", items_prev, check_invalid = TRUE)
 
     if (is_anchor_group) {
         items_link <- vars_link$item[vars_link[[select_link]]]
-        scaling:::check_numerics(resp_link, "resp_link", items_link, check_invalid = TRUE)
+        NEPSroutines:::check_numerics(resp_link, "resp_link", items_link, check_invalid = TRUE)
     } else {
         items_link <- NULL
     }
 
     # Identify IRT model
     is_pcm_curr <-
-        scaling:::is_poly(
+        NEPSroutines:::is_poly(
             resp_curr[, items_curr],
             vars = vars_curr,
             select = select_curr
         )
     is_pcm_prev <-
-        scaling:::is_poly(
+        NEPSroutines:::is_poly(
             resp_prev[, items_prev],
             vars = vars_prev,
             select = select_prev
         )
     if (is_anchor_group) {
         is_pcm_link <-
-            scaling:::is_poly(
+            NEPSroutines:::is_poly(
                 resp_link[, items_link],
                 vars = vars_link,
                 select = select_link
@@ -674,7 +674,7 @@ check_dif_anchor <- function(resp_curr,
 
     # Estimate item parameters for first measurement wave
     dif$mod_prev <-
-        scaling:::irt_model(
+        NEPSroutines:::irt_model(
             resp = pre_dat$resp_prev,
             vars = vars_prev,
             select = select_prev,
@@ -694,7 +694,7 @@ check_dif_anchor <- function(resp_curr,
 
     # Estimate item parameters for second measurement wave
     dif$mod_curr <-
-        scaling:::irt_model(
+        NEPSroutines:::irt_model(
             resp = pre_dat$resp_curr,
             vars = vars_curr,
             select = select_curr,
@@ -715,7 +715,7 @@ check_dif_anchor <- function(resp_curr,
     # Estimate item parameters for link study
     if (pre_dat$is_anchor_group) {
         dif$mod_link <-
-            scaling:::irt_model(
+            NEPSroutines:::irt_model(
                 resp = pre_dat$resp_link,
                 vars = vars_link,
                 select = select_link,
@@ -994,7 +994,7 @@ check_link_dimensionality <- function(resp_curr,
                                  ifelse(vars_link$item %in% pre_dat$items_curr, 2,
                                         NA))
         dimensionality <-
-            scaling:::conduct_dim_analysis(
+            NEPSroutines:::conduct_dim_analysis(
                 resp = pre_dat$resp_link,
                 vars = vars_link,
                 select = select_link,
@@ -1023,7 +1023,7 @@ check_link_dimensionality <- function(resp_curr,
                                                NA))
 
         dimensionality$previous <-
-            scaling:::conduct_dim_analysis(
+            NEPSroutines:::conduct_dim_analysis(
                 resp = pre_dat$resp_prev,
                 vars = vars_prev,
                 select = select_prev,
@@ -1044,7 +1044,7 @@ check_link_dimensionality <- function(resp_curr,
                                         ifelse(vars_curr$item %in% pre_dat$items_curr, 1,
                                                NA))
         dimensionality$current <-
-            scaling:::conduct_dim_analysis(
+            NEPSroutines:::conduct_dim_analysis(
                 resp = pre_dat$resp_curr,
                 vars = vars_curr,
                 select = select_curr,
@@ -1223,7 +1223,7 @@ link_samples <- function(resp_curr,
 
     # Estimate item parameters for first measurement wave
     xsi_prev <-
-        scaling:::irt_model(
+        NEPSroutines:::irt_model(
             resp = pre_dat$resp_prev,
             vars = vars_prev,
             select = select_prev,
@@ -1243,7 +1243,7 @@ link_samples <- function(resp_curr,
 
     # Estimate item parameters for second measurement wave
     xsi_curr <-
-        scaling:::irt_model(
+        NEPSroutines:::irt_model(
             resp = pre_dat$resp_curr,
             vars = vars_curr,
             select = select_curr,
@@ -1264,7 +1264,7 @@ link_samples <- function(resp_curr,
     # Estimate item parameters for link study
     if (pre_dat$is_anchor_group) {
         xsi_link <-
-            scaling:::irt_model(
+            NEPSroutines:::irt_model(
                 resp = pre_dat$resp_link,
                 vars = vars_link,
                 select = select_link,
@@ -1308,7 +1308,7 @@ link_samples <- function(resp_curr,
     # WLEs for first measurement wave
     if (is.null(pre_dat$wle_prev)) {
         wle_prev <-
-            scaling:::irt_model(
+            NEPSroutines:::irt_model(
                 resp = resp_prev,
                 vars = vars_prev,
                 select = select_prev,
@@ -1335,7 +1335,7 @@ link_samples <- function(resp_curr,
 
     # WLEs for second measurement wave
     wle_curr <-
-        scaling:::irt_model(
+        NEPSroutines:::irt_model(
             resp = resp_curr,
             vars = vars_curr,
             select = select_curr,
@@ -1580,12 +1580,12 @@ link_item_parameters <- function(xsi, const, vars, select,
 
     # Test data
     if (test) {
-        scaling:::check_logicals(vars, "vars", select, warn = warn)
+        NEPSroutines:::check_logicals(vars, "vars", select, warn = warn)
     }
 
     # Check scoring vector
     if (!is.null(scoring)) {
-      scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+      NEPSroutines:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
     } else {
       vars$scoring <- 1
       scoring <- "scoring"
@@ -1843,45 +1843,45 @@ test_linking_data <- function(vars_curr,
 ) {
 
     # Test select and item names
-    scaling:::check_logicals(vars_curr, "vars_curr", select_curr, warn = warn)
-    scaling:::check_items(vars_curr$item[vars_curr[[select_curr]]])
-    scaling:::check_logicals(vars_prev, "vars_prev", select_prev, warn = warn)
-    scaling:::check_items(vars_prev$item[vars_prev[[select_prev]]])
+    NEPSroutines:::check_logicals(vars_curr, "vars_curr", select_curr, warn = warn)
+    NEPSroutines:::check_items(vars_curr$item[vars_curr[[select_curr]]])
+    NEPSroutines:::check_logicals(vars_prev, "vars_prev", select_prev, warn = warn)
+    NEPSroutines:::check_items(vars_prev$item[vars_prev[[select_prev]]])
     if (!is.null(select_link) & !is.null(vars_link))
-        scaling:::check_logicals(vars_link, "vars_link", select_link, warn = warn)
-    scaling:::check_items(vars_link$item[vars_link[[select_link]]])
+        NEPSroutines:::check_logicals(vars_link, "vars_link", select_link, warn = warn)
+    NEPSroutines:::check_items(vars_link$item[vars_link[[select_link]]])
 
     # Test items
     if (!is.null(resp_curr))
-      scaling:::check_numerics(resp_curr, "resp_curr", vars_curr$item[vars_curr[[select_curr]]])
+      NEPSroutines:::check_numerics(resp_curr, "resp_curr", vars_curr$item[vars_curr[[select_curr]]])
     if (!is.null(resp_prev))
-      scaling:::check_numerics(resp_prev, "resp_prev", vars_prev$item[vars_prev[[select_prev]]])
+      NEPSroutines:::check_numerics(resp_prev, "resp_prev", vars_prev$item[vars_prev[[select_prev]]])
     if (!is.null(resp_link) & !is.null(vars_link) & !is.null(select_link))
-      scaling:::check_numerics(resp_link, "resp_link", vars_link$item[vars_link[[select_link]]])
+      NEPSroutines:::check_numerics(resp_link, "resp_link", vars_link$item[vars_link[[select_link]]])
 
     # Test valid
     if (!is.null(valid_curr) & !is.null(resp_curr))
-        scaling:::check_logicals(resp_curr, "resp_curr", valid_curr, warn = warn)
+        NEPSroutines:::check_logicals(resp_curr, "resp_curr", valid_curr, warn = warn)
     if (!is.null(valid_prev) & !is.null(resp_prev))
-        scaling:::check_logicals(resp_prev, "resp_prev", valid_prev, warn = warn)
+        NEPSroutines:::check_logicals(resp_prev, "resp_prev", valid_prev, warn = warn)
     if (!is.null(valid_link) & !is.null(resp_link))
-        scaling:::check_logicals(resp_link, "resp_link", valid_link, warn = warn)
+        NEPSroutines:::check_logicals(resp_link, "resp_link", valid_link, warn = warn)
 
     # Test scoring
     if (!is.null(scoring_curr))
-        scaling:::check_numerics(vars_curr, "vars_curr", scoring_curr, check_invalid = TRUE)
+        NEPSroutines:::check_numerics(vars_curr, "vars_curr", scoring_curr, check_invalid = TRUE)
     if (!is.null(scoring_prev))
-        scaling:::check_numerics(vars_prev, "vars_prev", scoring_prev, check_invalid = TRUE)
+        NEPSroutines:::check_numerics(vars_prev, "vars_prev", scoring_prev, check_invalid = TRUE)
     if (!is.null(scoring_link) & !is.null(vars_link))
-        scaling:::check_numerics(vars_link, "vars_link", scoring_link, check_invalid = TRUE)
+        NEPSroutines:::check_numerics(vars_link, "vars_link", scoring_link, check_invalid = TRUE)
 
     # Test pweights
     if (!is.null(pweights_curr) & !is.null(resp_curr))
-        scaling:::check_numerics(resp_curr, "resp_curr", pweights_curr, check_invalid = TRUE)
+        NEPSroutines:::check_numerics(resp_curr, "resp_curr", pweights_curr, check_invalid = TRUE)
     if (!is.null(pweights_prev) & !is.null(resp_prev))
-        scaling:::check_numerics(resp_prev, "resp_prev", pweights_prev, check_invalid = TRUE)
+        NEPSroutines:::check_numerics(resp_prev, "resp_prev", pweights_prev, check_invalid = TRUE)
     if (!is.null(pweights_link) & !is.null(resp_link))
-        scaling:::check_numerics(resp_link, "resp_link", pweights_link, check_invalid = TRUE)
+        NEPSroutines:::check_numerics(resp_link, "resp_link", pweights_link, check_invalid = TRUE)
 
     # Test anchors
     if (is.null(vars_link) & !is.null(anchors)) {
@@ -1900,6 +1900,6 @@ test_linking_data <- function(vars_curr,
     }
 
     # Test mvs
-    if (warn) scaling:::is_null_mvs_valid(mvs = mvs)
+    if (warn) NEPSroutines:::is_null_mvs_valid(mvs = mvs)
 
 }

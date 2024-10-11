@@ -78,7 +78,7 @@ dif_analysis <- function(
   ) {
 
     # Test data
-    scaling:::test_dif_data(
+    NEPSroutines:::test_dif_data(
       resp = resp,
       vars = vars,
       valid = valid,
@@ -94,7 +94,7 @@ dif_analysis <- function(
     dif <- list()
 
     # Conduct dif analyses
-    dif$models <- scaling:::conduct_dif_analysis(
+    dif$models <- NEPSroutines:::conduct_dif_analysis(
         select = select,
         dif_vars = dif_vars,
         resp = resp,
@@ -115,7 +115,7 @@ dif_analysis <- function(
     )
 
     # Create summary
-    dif$summaries <- scaling:::summarize_dif_analysis(
+    dif$summaries <- NEPSroutines:::summarize_dif_analysis(
         dif_models = dif$models,
         dif_vars = dif_vars,
         vars = vars,
@@ -130,7 +130,7 @@ dif_analysis <- function(
     )
 
     # Create table for TR
-    dif$tr_tables <- scaling:::build_dif_tr_tables(
+    dif$tr_tables <- NEPSroutines:::build_dif_tr_tables(
         dif_summaries = dif$summaries,
         vars = vars,
         save = save,
@@ -210,7 +210,7 @@ conduct_dif_analysis <- function(
 
     # Test data
     if (test) {
-        scaling:::test_dif_data(
+        NEPSroutines:::test_dif_data(
           resp = resp,
           vars = vars,
           valid = valid,
@@ -231,7 +231,7 @@ conduct_dif_analysis <- function(
 
     # Conduct dif analyses
     for (i in seq_along(dif_vars)) {
-        dif_models[[i]] <- scaling:::dif_model(
+        dif_models[[i]] <- NEPSroutines:::dif_model(
             resp = resp,
             vars = vars,
             select = select[i],
@@ -259,10 +259,10 @@ conduct_dif_analysis <- function(
             'poly',
             ifelse(sum(are_poly) == 0, 'dich', 'mixed')
         )
-        name <- scaling:::create_name(
+        name <- NEPSroutines:::create_name(
             paste0("dif_", irt_type, "_models"), name_group, ".rds"
         )
-        scaling:::save_results(dif_models, path = path, filename = name)
+        NEPSroutines:::save_results(dif_models, path = path, filename = name)
     }
 
     # Return results
@@ -306,7 +306,7 @@ summarize_dif_analysis <- function(
 
     for (i in dif_vars) {
 
-        dif_summaries[[i]] <- scaling:::dif_summary(
+        dif_summaries[[i]] <- NEPSroutines:::dif_summary(
             dif_models[[i]],
             vars = vars,
             dif_threshold = dif_threshold,
@@ -327,10 +327,10 @@ summarize_dif_analysis <- function(
             'poly',
             ifelse(sum(are_poly) == 0, 'dich', 'mixed')
         )
-        name <- scaling:::create_name(
+        name <- NEPSroutines:::create_name(
             paste0("dif_", irt_type, "_summaries"), name_group, ".rds"
         )
-        scaling:::save_results(dif_summaries, path = path_results, filename = name)
+        NEPSroutines:::save_results(dif_summaries, path = path_results, filename = name)
     }
 
     # Return results
@@ -405,7 +405,7 @@ dif_model <- function(
 
     # Test data
     if (test) {
-        scaling:::test_dif_data(
+        NEPSroutines:::test_dif_data(
           resp = resp,
           vars = vars,
           select = select,
@@ -419,25 +419,25 @@ dif_model <- function(
     }
 
     # Select only valid cases
-    resp <- scaling:::only_valid(resp, valid = valid, warn = FALSE)
+    resp <- NEPSroutines:::only_valid(resp, valid = valid, warn = FALSE)
 
     # Create ID, facets and pweights variable
     pid <- resp$ID_t
-    scaling:::check_pid(pid)
+    NEPSroutines:::check_pid(pid)
     facets <- resp[, dif_var, drop = FALSE]
     lbls_facet <- attributes(resp[[dif_var]])$labels
-    pws <- scaling:::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
+    pws <- NEPSroutines:::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
 
     # Prepare resp by converting missing values and selecting only necessary variables
-    resp <- scaling:::prepare_resp(
+    resp <- NEPSroutines:::prepare_resp(
       resp, vars = vars, select = select, convert = TRUE, mvs = mvs, warn = FALSE
     )
 
     # Test resp
-    scaling:::check_numerics(resp, "resp", check_invalid = TRUE)
+    NEPSroutines:::check_numerics(resp, "resp", check_invalid = TRUE)
 
     # Identify IRT type
-    irt_type <- ifelse(scaling:::is_poly(resp, vars, select), 'poly', 'dich')
+    irt_type <- ifelse(NEPSroutines:::is_poly(resp, vars, select), 'poly', 'dich')
 
     # Prepare formula
     formula <- paste("~ item +", ifelse(irt_type == 'poly', "item * step +", ""))
@@ -459,7 +459,7 @@ dif_model <- function(
             resp <- resp[!mis, ]
             pid <- pid[!mis]
 
-            fcts <- scaling:::create_facets_df(
+            fcts <- NEPSroutines:::create_facets_df(
               facets[[dif_var]], labels = lbls_facet
             )
 
@@ -469,7 +469,7 @@ dif_model <- function(
 
             facets[mis, ] <- max(unique(facets[[dif_var]]), na.rm = TRUE) + 1
 
-            fcts <- scaling:::create_facets_df(
+            fcts <- NEPSroutines:::create_facets_df(
                 facets[[dif_var]],
                 labels = lbls_facet,
                 missings = TRUE
@@ -480,7 +480,7 @@ dif_model <- function(
         }
     } else {
 
-        fcts <- scaling:::create_facets_df(
+        fcts <- NEPSroutines:::create_facets_df(
           facets[[dif_var]],
           labels = lbls_facet
         )
@@ -516,7 +516,7 @@ dif_model <- function(
         if(is.null(scoring) & warn)
             warning("No scoring variable provided. All items are scored with 1.")
 
-        mmod <- scaling:::pcm_dif(
+        mmod <- NEPSroutines:::pcm_dif(
             resp = resp,
             facets = facets,
             formulaA = formula_mmod,
@@ -529,7 +529,7 @@ dif_model <- function(
             pweights = pws
         )
 
-        dmod <- scaling:::pcm_dif(
+        dmod <- NEPSroutines:::pcm_dif(
             resp = resp,
             facets = facets,
             formulaA = formula_dmod,
@@ -545,9 +545,9 @@ dif_model <- function(
     } else {
 
         # Check whether resp contains only dichotomous items
-        scaling:::check_dich(resp, "resp")
+        NEPSroutines:::check_dich(resp, "resp")
 
-        Q <- scaling:::create_q(
+        Q <- NEPSroutines:::create_q(
           vars, select = "select_", scoring = scoring, poly = FALSE
         )
 
@@ -578,8 +578,8 @@ dif_model <- function(
     }
 
     # Warn if maximum number of iterations were reached
-    scaling:::reached_maxiter(mmod, paste0("'", dif_var, "' without DIF"))
-    scaling:::reached_maxiter(dmod, paste0("'", dif_var, "' with DIF"))
+    NEPSroutines:::reached_maxiter(mmod, paste0("'", dif_var, "' without DIF"))
+    NEPSroutines:::reached_maxiter(dmod, paste0("'", dif_var, "' with DIF"))
 
     # Create list with results
     results <- list(
@@ -592,10 +592,10 @@ dif_model <- function(
 
     # Save results
     if (save) {
-        name <- scaling:::create_name(
+        name <- NEPSroutines:::create_name(
             paste0("dif_", irt_type, "_model"), name_group, ".rds"
         )
-        scaling:::save_results(results, path = path, filename = name)
+        NEPSroutines:::save_results(results, path = path, filename = name)
     }
 
     # Return results
@@ -643,13 +643,13 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 
     df <- data.frame(table(facet))
     names(df) <- c("number", "counts")
-    row.names(df) <- scaling:::create_ifelse(
+    row.names(df) <- NEPSroutines:::create_ifelse(
       !missings,
       paste0("Group ", sort(unique(facet))),
       c(paste0("Group ", sort(unique(facet))[-length(unique(facet))]), "missings")
     )
     if(!is.null(labels)) {
-        df$label <- scaling:::create_ifelse(
+        df$label <- NEPSroutines:::create_ifelse(
           !missings,
           names(labels),
           c(names(labels), 'missings'))
@@ -788,7 +788,7 @@ pcm_dif <- function(
     # get design matrix for model
     B <- TAM::designMatrices(modeltype = 'PCM', resp = resp)$B
 
-    pcm_scoring <- scaling:::create_ifelse(
+    pcm_scoring <- NEPSroutines:::create_ifelse(
       is.null(scoring),
       rep(1, length(vars[[select]])),
       vars[[scoring]][vars[[select]]]
@@ -859,7 +859,7 @@ dif_summary <- function(
     groups <- gsub(diflist$dif_var, "", groups)
 
     # Create summary for DIF analysis
-    res <- scaling:::difsum(
+    res <- NEPSroutines:::difsum(
       obj = diflist,
       dif_var = dif_var,
       vars = vars,
@@ -869,7 +869,7 @@ dif_summary <- function(
 
     # Print results
     if (print) {
-        scaling:::print_dif_summary(
+        NEPSroutines:::print_dif_summary(
             resp = resp,
             diflist = diflist,
             res = res,
@@ -886,10 +886,10 @@ dif_summary <- function(
         res_$est <- res_$mne <- NULL
         names(res_) <- gsub(":", "", names(res_))
 
-        name <- scaling:::create_name(
+        name <- NEPSroutines:::create_name(
             paste0("dif_", irt_type, "_", dif_var), name_group, ".xlsx"
         )
-        scaling:::save_table(
+        NEPSroutines:::save_table(
             res_,
             filename = name,
             path = path,
@@ -959,7 +959,7 @@ difsum <- function(obj, dif_var, vars, groups = 1, digits = 3) {
         # Differences in item parameters
         mest[[lbl]] <- est[[grps[1]]]
         mest[[lbl]]$xsi <-  round(est[[grps[1]]]$xsi - est[[grps[2]]]$xsi, digits)
-        mest[[lbl]]$se.xsi <- round(scaling:::create_ifelse(
+        mest[[lbl]]$se.xsi <- round(NEPSroutines:::create_ifelse(
           any(grps == max(groups)),
           sqrt(est[[grps[!grps == max(groups)]]]$se.xsi^2 * 2),
           sqrt(est[[grps[1]]]$se.xsi^2 + est[[grps[2]]]$se.xsi^2)
@@ -1142,16 +1142,16 @@ build_dif_tr_tables <- function(
 
     # Save results
     if (save) {
-        name <- scaling:::create_name(
+        name <- NEPSroutines:::create_name(
             paste0("dif_", irt_type, "_TR"), name_group, ".xlsx"
         )
 
         if(suf_item_names) {
-           dif_tr_tables[["estimates"]][["item"]] <- scaling:::create_suf_names(
+           dif_tr_tables[["estimates"]][["item"]] <- NEPSroutines:::create_suf_names(
              vars_name = dif_tr_tables[["estimates"]][["item"]])
         }
 
-        scaling:::save_table(
+        NEPSroutines:::save_table(
             dif_tr_tables,
             filename = name,
             path = path,
@@ -1249,9 +1249,9 @@ test_dif_data <- function(
     warn = TRUE
   ) {
 
-    scaling:::check_logicals(resp, "resp", valid, warn = warn)
-    scaling:::check_variables(resp, "resp", dif_vars)
-    scaling:::check_logicals(vars, "vars", select, warn = warn)
+    NEPSroutines:::check_logicals(resp, "resp", valid, warn = warn)
+    NEPSroutines:::check_variables(resp, "resp", dif_vars)
+    NEPSroutines:::check_logicals(vars, "vars", select, warn = warn)
 
     if (length(select) > 1) {
 
@@ -1262,24 +1262,24 @@ test_dif_data <- function(
 
       for (sel in select) {
 
-        scaling:::check_items(vars$item[vars[[sel]]])
-        scaling:::check_numerics(resp, "resp", vars$item[vars[[sel]]])
+        NEPSroutines:::check_items(vars$item[vars[[sel]]])
+        NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[sel]]])
 
       }
 
     } else {
 
-      scaling:::check_items(vars$item[vars[[select]]])
-      scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+      NEPSroutines:::check_items(vars$item[vars[[select]]])
+      NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[select]]])
 
     }
 
     if (!is.null(scoring))
-        scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+        NEPSroutines:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
     if (!is.null(pweights))
-        scaling:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
+        NEPSroutines:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
 
-    if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
+    if (warn) NEPSroutines:::is_null_mvs_valid(mvs = mvs, valid = valid)
 
 }

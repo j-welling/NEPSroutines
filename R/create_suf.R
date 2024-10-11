@@ -35,8 +35,8 @@ create_suf <- function(resp, vars, select, competence, scores = NULL, mvs = NULL
                        save = TRUE, return = TRUE, warn = TRUE) {
 
   # Test data
-  scaling:::check_logicals(vars, "vars", select, warn = warn)
-  scaling:::check_items(vars$item[vars[[select]]])
+  NEPSroutines:::check_logicals(vars, "vars", select, warn = warn)
+  NEPSroutines:::check_items(vars$item[vars[[select]]])
 
   # Select items for SUF
   suf <- resp[, c("ID_t", vars$item[vars[[select]]])]
@@ -52,7 +52,7 @@ create_suf <- function(resp, vars, select, competence, scores = NULL, mvs = NULL
 
   # Add labels to response items, ID_t, WLEs, and SEs
   suf <-
-    scaling:::set_labels(
+    NEPSroutines:::set_labels(
       suf = suf,
       vars = vars,
       select = select,
@@ -68,8 +68,8 @@ create_suf <- function(resp, vars, select, competence, scores = NULL, mvs = NULL
 
   # (save SUF in rds, sav and dta format)
   if (save) {
-    name <- scaling:::create_name(suf_name, name_group)
-    scaling:::save_suf(suf = suf, path = path, filename = name)
+    name <- NEPSroutines:::create_name(suf_name, name_group)
+    NEPSroutines:::save_suf(suf = suf, path = path, filename = name)
     message("SUF successfully saved!")
   }
 
@@ -105,8 +105,8 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
 
   # Test data
   if (test) {
-    scaling:::check_logicals(vars, "vars", select, warn = warn)
-    scaling:::check_items(vars$item[vars[[select]]])
+    NEPSroutines:::check_logicals(vars, "vars", select, warn = warn)
+    NEPSroutines:::check_items(vars$item[vars[[select]]])
   }
 
   # Label for ID_t
@@ -268,7 +268,7 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
 #' @noRd
 save_suf <- function(suf, path, filename) {
 
-  scaling::check_folder(path = path)
+  NEPSroutines::check_folder(path = path)
   saveRDS(suf, file = paste0(path, "/", filename, ".rds"))
   haven::write_dta(suf, path = paste0(path, "/", filename, ".dta"))
   haven::write_sav(suf, path = paste0(path, "/", filename, ".sav"))

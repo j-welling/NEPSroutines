@@ -80,13 +80,13 @@ grouped_irt_analysis <- function(
   ) {
 
     # Test data
-    scaling:::check_logicals(vars, "vars", c(select, "dich"), warn = warn)
-    scaling:::check_logicals(resp, "resp", c(valid, names(select)), warn = warn)
+    NEPSroutines:::check_logicals(vars, "vars", c(select, "dich"), warn = warn)
+    NEPSroutines:::check_logicals(resp, "resp", c(valid, names(select)), warn = warn)
     if (!is.null(scoring))
-        scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+        NEPSroutines:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
     if (!is.null(pweights))
-        scaling:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
-    if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
+        NEPSroutines:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
+    if (warn) NEPSroutines:::is_null_mvs_valid(mvs = mvs, valid = valid)
 
     # Create list for results
     irt_groups <- list()
@@ -95,14 +95,14 @@ grouped_irt_analysis <- function(
     # Conduct irt_analysis for each group
     for (g in names(select)) {
 
-        scaling:::check_items(vars$item[vars[[ select[[g]] ]] ])
-        scaling:::check_numerics(resp, "resp", vars$item[vars[[ select[[g]] ]] ])
+        NEPSroutines:::check_items(vars$item[vars[[ select[[g]] ]] ])
+        NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[ select[[g]] ]] ])
 
         message(toupper(paste0("\n\n\n(", i, ") irt analysis (",
                                ifelse(is_poly(resp, vars, select[[g]]), 'poly', 'dich'),
                                ") for group '", g, "':\n")))
 
-        irt_groups[[g]] <- scaling:::irt_analysis(
+        irt_groups[[g]] <- NEPSroutines:::irt_analysis(
           resp = resp[resp[[g]], ],
           vars = vars,
           select = select[[g]],
@@ -226,18 +226,18 @@ irt_analysis <- function(
 
     # Test data
     if (test) {
-        scaling:::check_logicals(vars, "vars", c(select, "dich"), warn = warn)
-        scaling:::check_logicals(resp, "resp", valid, warn = warn)
-        scaling:::check_items(vars$item[vars[[select]]])
-        scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+        NEPSroutines:::check_logicals(vars, "vars", c(select, "dich"), warn = warn)
+        NEPSroutines:::check_logicals(resp, "resp", valid, warn = warn)
+        NEPSroutines:::check_items(vars$item[vars[[select]]])
+        NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[select]]])
         if (!is.null(scoring))
-            scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+            NEPSroutines:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
         if (!is.null(pweights))
-            scaling:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
-        if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
+            NEPSroutines:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
+        if (warn) NEPSroutines:::is_null_mvs_valid(mvs = mvs, valid = valid)
     }
 
-    scaling:::check_items(vars$item[vars[[select]]])
+    NEPSroutines:::check_items(vars$item[vars[[select]]])
 
     # Identify IRT type
     irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
@@ -248,7 +248,7 @@ irt_analysis <- function(
     # Conduct IRT analyses
     if (irt_type == 'dich') {
 
-        irt$model.1pl <- scaling:::irt_model(
+        irt$model.1pl <- NEPSroutines:::irt_model(
             resp = resp,
             vars = vars,
             select = select,
@@ -266,7 +266,7 @@ irt_analysis <- function(
             test = FALSE
         )
 
-        irt$model.2pl <- scaling:::irt_model(
+        irt$model.2pl <- NEPSroutines:::irt_model(
             resp = resp,
             vars = vars,
             select = select,
@@ -286,7 +286,7 @@ irt_analysis <- function(
 
     } else if (irt_type == 'poly') {
 
-      irt$model.pcm <- scaling:::irt_model(
+      irt$model.pcm <- NEPSroutines:::irt_model(
           resp = resp,
           vars = vars,
           select = select,
@@ -304,7 +304,7 @@ irt_analysis <- function(
           test = FALSE
       )
 
-      irt$model.gpcm <- scaling:::irt_model(
+      irt$model.gpcm <- NEPSroutines:::irt_model(
           resp = resp,
           vars = vars,
           select = select,
@@ -330,10 +330,10 @@ irt_analysis <- function(
     for (i in 1:2) {
 
       # ICC plots
-      scaling:::icc_plots(model = irt[[i]], path = path_plots, name_group = name_group)
+      NEPSroutines:::icc_plots(model = irt[[i]], path = path_plots, name_group = name_group)
 
       # Wright map
-      scaling:::wright_map(model = irt[[i]], path = path_plots, name_group = name_group)
+      NEPSroutines:::wright_map(model = irt[[i]], path = path_plots, name_group = name_group)
 
     }
   }
@@ -341,7 +341,7 @@ irt_analysis <- function(
   # Create tables
   if (return | print | save) {
     # IRT summary
-    irt$summary <- scaling:::irt_summary(
+    irt$summary <- NEPSroutines:::irt_summary(
       resp = resp,
       vars = vars,
       results = irt[[1]],
@@ -356,7 +356,7 @@ irt_analysis <- function(
     )
 
     # Model fit
-    irt$model_fit <- scaling:::irt_model_fit(
+    irt$model_fit <- NEPSroutines:::irt_model_fit(
       model_1p = irt[[1]],
       model_2p = irt[[2]],
       save = FALSE
@@ -364,7 +364,7 @@ irt_analysis <- function(
 
     # Steps analysis
     if (irt_type == 'poly') {
-      irt$steps <- scaling:::steps_analysis(
+      irt$steps <- NEPSroutines:::steps_analysis(
         pcm_model = irt$model.pcm,
         suf_item_names = suf_item_names,
         digits = digits,
@@ -384,7 +384,7 @@ irt_analysis <- function(
       print(irt$steps)
     }
     message("\nSUMMARY FOR TR\n")
-    scaling:::print_irt_summary(
+    NEPSroutines:::print_irt_summary(
       model = irt[[1]],
       irt_sum = irt$summary,
       steps_sum = irt$steps,
@@ -394,24 +394,24 @@ irt_analysis <- function(
 
   # Save results
   if (save) {
-      name <- scaling:::create_name(paste0("irt_", irt_type), name_group)
+      name <- NEPSroutines:::create_name(paste0("irt_", irt_type), name_group)
       irt_summary <- irt[-c(1:2)]
-      scaling:::save_results(irt, filename = paste0(name, ".rds"), path = path_results)
+      NEPSroutines:::save_results(irt, filename = paste0(name, ".rds"), path = path_results)
 
       if(suf_item_names) {
-         irt_summary[["summary"]][["Item"]] <- scaling:::create_suf_names(
+         irt_summary[["summary"]][["Item"]] <- NEPSroutines:::create_suf_names(
            vars_name = irt_summary[["summary"]][["Item"]])
 
         if(length(irt_summary[["steps"]]) > 0) {
           irt_summary[["steps"]][["item"]] <- row.names(irt_summary[["steps"]])
           irt_summary[["steps"]] <- dplyr::select(irt_summary[["steps"]], item, everything())
           rownames(irt_summary[["steps"]]) <- NULL
-          irt_summary[["steps"]][["item"]] <- scaling:::create_suf_names(
+          irt_summary[["steps"]][["item"]] <- NEPSroutines:::create_suf_names(
             vars_name = irt_summary[["steps"]][["item"]])
         }
       }
 
-      scaling:::save_table(
+      NEPSroutines:::save_table(
         irt_summary,
         filename = paste0(name, ".xlsx"),
         path = path_table,
@@ -492,15 +492,15 @@ irt_model <- function(
 
   # Test data
   if (test) {
-      scaling:::check_logicals(vars, "vars", select, warn = warn)
-      scaling:::check_logicals(resp, "resp", valid, warn = warn)
-      scaling:::check_items(vars$item[vars[[select]]])
-      scaling:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+      NEPSroutines:::check_logicals(vars, "vars", select, warn = warn)
+      NEPSroutines:::check_logicals(resp, "resp", valid, warn = warn)
+      NEPSroutines:::check_items(vars$item[vars[[select]]])
+      NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[select]]])
       if (!is.null(scoring))
-          scaling:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+          NEPSroutines:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
       if (!is.null(pweights))
-          scaling:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
-      if (warn) scaling:::is_null_mvs_valid(mvs = mvs, valid = valid)
+          NEPSroutines:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
+      if (warn) NEPSroutines:::is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
   # Check if input is correct
@@ -510,15 +510,15 @@ irt_model <- function(
   }
 
   # Select only valid cases
-  resp <- scaling:::only_valid(resp, valid = valid, warn = FALSE)
+  resp <- NEPSroutines:::only_valid(resp, valid = valid, warn = FALSE)
 
   # Create ID variable
   pid <- resp$ID_t
-  scaling:::check_pid(pid)
-  pws <- scaling:::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
+  NEPSroutines:::check_pid(pid)
+  pws <- NEPSroutines:::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
 
   # Prepare data
-  resp <- scaling:::prepare_resp(
+  resp <- NEPSroutines:::prepare_resp(
     resp,
     vars = vars,
     select = select,
@@ -528,11 +528,11 @@ irt_model <- function(
   )
 
   # Test data
-  scaling:::check_numerics(resp, "resp", check_invalid = TRUE) # this check is very important as otherwise R might be aborted!!
-  if (irtmodel %in% c("1PL", "2PL")) scaling:::check_dich(resp, "resp")
+  NEPSroutines:::check_numerics(resp, "resp", check_invalid = TRUE) # this check is very important as otherwise R might be aborted!!
+  if (irtmodel %in% c("1PL", "2PL")) NEPSroutines:::check_dich(resp, "resp")
 
   # Create scoring matrix if not provided in function arguments
-  Q <- scaling:::create_q(
+  Q <- NEPSroutines:::create_q(
     vars,
     select = select,
     scoring = scoring,
@@ -544,7 +544,7 @@ irt_model <- function(
 
     # Match item parameters by item name
     if (!is.null(xsi_fixed))
-      xsi_fixed <- scaling:::order_xsi_fixed(xsi_fixed, resp, irtmodel = irtmodel, Q = Q)
+      xsi_fixed <- NEPSroutines:::order_xsi_fixed(xsi_fixed, resp, irtmodel = irtmodel, Q = Q)
 
     # Calculate model
     mod <- TAM::tam.mml(
@@ -562,7 +562,7 @@ irt_model <- function(
 
     # Match item parameters by item name
     if (!is.null(xsi_fixed))
-      xsi_fixed <- scaling:::order_xsi_fixed(
+      xsi_fixed <- NEPSroutines:::order_xsi_fixed(
         xsi_fixed,
         resp,
         irtmodel = irtmodel,
@@ -584,7 +584,7 @@ irt_model <- function(
 
 
   # Warn if maximum number of iterations were reached
-  scaling:::reached_maxiter(mod, paste0("'", irtmodel, "'"))
+  NEPSroutines:::reached_maxiter(mod, paste0("'", irtmodel, "'"))
 
   # WMNSQ
   fit <- TAM::msq.itemfit(mod)$itemfit[, c("item", "Infit", "Infit_t", "Infit_p")]
@@ -628,8 +628,8 @@ irt_model <- function(
 
   # Save results
   if (save) {
-      name <- scaling:::create_name(irtmodel, name_group, ".rds")
-      scaling:::save_results(results, filename = name, path = path)
+      name <- NEPSroutines:::create_name(irtmodel, name_group, ".rds")
+      NEPSroutines:::save_results(results, filename = name, path = path)
   }
 
   # Return results
@@ -653,14 +653,14 @@ icc_plots <- function(model, path = "Plots", name_group = NULL) {
   irtmodel <- model$irtmodel
 
   # Add group name to path
-  path_ <- scaling:::create_ifelse(
+  path_ <- NEPSroutines:::create_ifelse(
       is.null(name_group),
       paste0(path, "/ICCs/ICCs_for_", irtmodel),
       paste0(path, "/ICCs/", name_group, "/ICCs_for_", irtmodel)
   )
 
   # create directory for plots
-  scaling:::check_folder(path = path_)
+  NEPSroutines:::check_folder(path = path_)
 
   # ICC plots
   for (i in 1:model$mod$nitems) {
@@ -698,10 +698,10 @@ wright_map <- function(model, path = "Plots", name_group = NULL) {
   lbl <- ifelse(irtmodel %in% c("PCM2", "GPCM"), "Category thresholds", "Item difficulties")
 
   # Add group name to path
-  path_ <- scaling:::create_name(paste0(path, "/Wright_Maps"), name_group, sep = "/")
+  path_ <- NEPSroutines:::create_name(paste0(path, "/Wright_Maps"), name_group, sep = "/")
 
   # Create directory for plots
-  scaling:::check_folder(path = path_)
+  NEPSroutines:::check_folder(path = path_)
 
   # Create Wright Map
   png(paste0(path_, "/Wright_map_for_", irtmodel, ".png"),
@@ -776,13 +776,13 @@ irt_summary <- function(
   ) {
 
   # test data data
-  if (test) scaling:::check_logicals(vars, "vars", "dich", warn = warn)
-  scaling:::check_items(rownames(results$mod$xsi))
+  if (test) NEPSroutines:::check_logicals(vars, "vars", "dich", warn = warn)
+  NEPSroutines:::check_items(rownames(results$mod$xsi))
 
   # prepare data
   vars$irt_item <- vars$item %in% rownames(results$mod$xsi)
   vars <- vars[vars$irt_item, ]
-  resp <- scaling:::prepare_resp(
+  resp <- NEPSroutines:::prepare_resp(
       resp,
       vars = vars,
       select = 'irt_item',
@@ -815,14 +815,14 @@ irt_summary <- function(
   pars <- pars[pars$Item %in% vars$item, ]
 
   # number of administered items
-  pars$N_administered <- scaling:::create_ifelse(
+  pars$N_administered <- NEPSroutines:::create_ifelse(
       is.null(missing_by_design),
       rep(nrow(resp), rows),
       sapply(resp, function(x) sum(!(x %in% missing_by_design)))
   )
 
   # convert missing values in NAs
-  resp <- scaling:::convert_mv(resp, vars, mvs = mvs, warn = FALSE)
+  resp <- NEPSroutines:::convert_mv(resp, vars, mvs = mvs, warn = FALSE)
 
   # percentage correct
   pars$correct <- round(
@@ -864,15 +864,15 @@ irt_summary <- function(
 
   # Save table
   if (save) {
-    name <- scaling:::create_name(results$irtmodel, name_group, ".xlsx")
+    name <- NEPSroutines:::create_name(results$irtmodel, name_group, ".xlsx")
 
     if(suf_item_names) {
-       pars_formatted[["Item"]] <- scaling:::create_suf_names(
+       pars_formatted[["Item"]] <- NEPSroutines:::create_suf_names(
          vars_name = pars_formatted[["Item"]])
 
     }
 
-    scaling:::save_table(
+    NEPSroutines:::save_table(
       pars_formatted,
       filename = name,
       path = path,
@@ -953,8 +953,8 @@ irt_model_fit <- function(
 
   # Save table
   if (save) {
-    name <- scaling:::create_name(paste0("model.fit_", irt_type), name_group, ".xlsx")
-    scaling:::save_table(
+    name <- NEPSroutines:::create_name(paste0("model.fit_", irt_type), name_group, ".xlsx")
+    NEPSroutines:::save_table(
       mfit,
       filename = name,
       path = path,
@@ -1025,16 +1025,16 @@ steps_analysis <- function(
 
   # Save table as Excel sheet
   if (save) {
-    name <- scaling:::create_name("steps_analysis", name_group, ".xlsx")
+    name <- NEPSroutines:::create_name("steps_analysis", name_group, ".xlsx")
 
     if(suf_item_names && length(steps) > 0) {
         steps[["item"]] <- row.names(steps)
         steps <- dplyr::select(steps, item, everything())
         rownames(steps) <- NULL
-        steps[["item"]] <- scaling:::create_suf_names(vars_name = steps[["item"]])
+        steps[["item"]] <- NEPSroutines:::create_suf_names(vars_name = steps[["item"]])
       }
 
-    scaling:::save_table(
+    NEPSroutines:::save_table(
       steps,
       filename = name,
       path = path,
