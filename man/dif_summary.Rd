@@ -32,6 +32,9 @@ includes variable 'item' containing item names}
 \item{dif_threshold}{numeric scalar; indicates absolute threshold of
 problematic DIF (defaults to 0.5)}
 
+\item{suf_item_names}{logical; whether to output SUF item names in the .xlsx file
+for items with collapsed categories}
+
 \item{overwrite}{logical; whether to overwrite existing file when saving table}
 
 \item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}

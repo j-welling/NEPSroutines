@@ -80,6 +80,8 @@ for title and legend of plots (only needed when grouping exists)}
 
 \item{color}{character scalar or vector; defines color(s) of the bar in plots}
 
+\item{digits}{integer; number of decimals for rounding}
+
 \item{verbose}{logical; whether to print processing information to console}
 
 \item{warn}{logical; whether to print warnings (should be set to TRUE)}

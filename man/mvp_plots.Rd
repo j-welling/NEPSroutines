@@ -16,7 +16,7 @@ mvp_plots(
     "not determinable items", MD = "items missing by design", AZ =
     "missing items due to 'Angabe zurueckgesetzt'"),
   missing_by_design = -54,
-  path = "Plots/Missing_Responses/by_person",
+  path = "Plots/Missings_by_person",
   show_all = TRUE,
   name_group = NULL,
   color = NULL,

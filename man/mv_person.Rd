@@ -25,7 +25,7 @@ mv_person(
   return = FALSE,
   path_results = "Results",
   path_table = "Tables",
-  path_plots = "Plots/Missing_Responses/by_person",
+  path_plots = "Plots/Missings_by_person",
   show_all = TRUE,
   overwrite = FALSE,
   name_group = NULL,

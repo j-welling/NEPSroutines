@@ -223,6 +223,7 @@ mv_item <- function(
 #' @param missing_by_design  integer; user defined missing value for missing by
 #' design
 #' @param path  string; defines path to folder where results shall be saved
+#' @param use_for_plot logical; indicates whether function is executed to create mvi plots
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param name_group  string; defines name of group used in analysis (e.g. 'settingA')
 #' @param digits  integer; number of decimals for rounding
@@ -771,6 +772,7 @@ mvi_table <- function(
 #' @param labels_legend character vector; contains legend labels
 #' @param show_all  logical; whether whole sample shall be included as a "group"
 #' (only applicable when grouping exists)
+#' @param digits  integer; number of decimals for rounding
 #' @param verbose  logical; whether to print processing information to console
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)

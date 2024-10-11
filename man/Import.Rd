@@ -15,7 +15,7 @@ Import(
 }
 \arguments{
 \item{path}{A path to the folder with the result tables created by the
-`scaling` package.}
+`NEPSroutines` package.}
 
 \item{filename}{An optional name of an excel file to import or a vector of
 multiple file names; if not set `regexp` should be used.}

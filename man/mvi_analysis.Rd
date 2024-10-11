@@ -57,6 +57,8 @@ design}
 
 \item{path}{string; defines path to folder where results shall be saved}
 
+\item{use_for_plot}{logical; indicates whether function is executed to create mvi plots}
+
 \item{save}{logical; whether results shall be saved to hard drive}
 
 \item{name_group}{string; defines name of group used in analysis (e.g. 'settingA')}

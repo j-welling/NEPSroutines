@@ -827,6 +827,8 @@ pcm_dif <- function(
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param path  string; defines path to folder where tables shall be saved
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
+#' @param suf_item_names logical; whether to output SUF item names in the .xlsx file
+#'  for items with collapsed categories
 #' @param overwrite logical; whether to overwrite existing file when saving table
 #' @param digits  integer; number of decimals for rounding
 #'

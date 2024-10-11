@@ -12,7 +12,7 @@ create_scores(
   score_name = "score",
   num_cat = "num_cat",
   xsi_fixed = NULL,
-  facet = NULL,
+  rotation = NULL,
   valid = NULL,
   mvs = NULL,
   missing_by_design = -54,
@@ -30,7 +30,9 @@ create_scores(
   save = TRUE,
   return = FALSE,
   name_group = NULL,
+  overwrite = FALSE,
   path_results = "Results",
+  path_table = "Tables",
   warn = TRUE
 )
 }
@@ -61,7 +63,7 @@ the maximum number of response options for the items}
 \item{xsi_fixed}{named numerical vector; contains fixed item difficulties as
 elements and item names as names of elements}
 
-\item{facet}{character vector; contains the variable name indicating the
+\item{rotation}{character vector; contains the variable name indicating the
 test rotation}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
@@ -108,8 +110,12 @@ binary or FULLY correctly scored PC items}
 
 \item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
 
+\item{overwrite}{logical; whether to overwrite existing file when saving table}
+
 \item{path_results}{string; defines path to folder where results shall be
 saved}
+
+\item{path_table}{string; defines path to folder where tables shall be saved}
 
 \item{warn}{logical; whether to print warnings}
 }
