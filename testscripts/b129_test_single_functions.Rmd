@@ -20,28 +20,19 @@ editor_options:
   
 ## Set working directory
 ```{r working directory}
-setwd('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket')
+#setwd(insert_path)
 ```
 
 ## Load data
 
 ```{r load-data, warning = FALSE, message = FALSE, comment = NA, results = 'hide'}
-rm(list = ls())
 load(here::here('Test/B129/Version 1.1.0/Data/data.Rdata'))
-#load('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Data/data.Rdata')
 ```
 
-## Load scaling package
+## Load NEPSroutines package
 
-```{r load-scaling, warning = FALSE, message = FALSE, comment = NA, results = 'hide', eval = FALSE}
-pkgload::load_all(here::here('scaling'))
-#pkgload::load_all('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/scaling')
-```
-
-# Debugging
-
-```{r 'debugging', eval = FALSE}
-# Hier könnte DEIN Debugging stehen :)
+```{r load-NEPSroutines, warning = FALSE, message = FALSE, comment = NA, results = 'hide', eval = FALSE}
+pkgload::load_all(here::here('NEPSroutines'))
 ```
 
 # Missing responses analyses
@@ -51,8 +42,8 @@ pkgload::load_all(here::here('scaling'))
 ### Separate functions
 
 ```{r missing responses by person with separate functions}
-?scaling::mvp_analysis
-mv_p <- scaling::mvp_analysis(
+?NEPSroutines::mvp_analysis
+mv_p <- NEPSroutines::mvp_analysis(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -60,36 +51,36 @@ mv_p <- scaling::mvp_analysis(
   grouping = c('easy', 'difficult'),
   mvs = mvs,
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results'
+  path = 'Test/B129/Version 1.1.0/Results'
 )
 
-?scaling::mvp_plots
-scaling::mvp_plots(
+?NEPSroutines::mvp_plots
+NEPSroutines::mvp_plots(
   mv_p = mv_p,
   vars = vars,
   select = 'mixed',
   grouping = c('easy', 'difficult'),
   mvs = mvs,
   labels_mvs = labels_mvs,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots/Missing_Responses/by_person',
+  path = 'Test/B129/Version 1.1.0/Plots/Missing_Responses/by_person',
   show_all = TRUE,
   #show_all = FALSE,
   name_grouping = 'test difficulty'#,
   #labels_legend = c('A', 'B', 'C')
 )
 
-?scaling::mvp_table
-scaling::mvp_table(
+?NEPSroutines::mvp_table
+NEPSroutines::mvp_table(
   mv_p = mv_p,
   grouping = c('easy', 'difficult'),
   mvs = mvs,
   save = FALSE,
   overwrite = TRUE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+  path = 'Test/B129/Version 1.1.0/Tables'
 )
 
-?scaling::print_mvp_results
-scaling::print_mvp_results(mv_p)
+?NEPSroutines::print_mvp_results
+NEPSroutines::print_mvp_results(mv_p)
 
 rm(mv_p)
 ```
@@ -97,7 +88,7 @@ rm(mv_p)
 ### Overaching functions
 
 ```{r missing responses by person}
-scaling::mv_person(
+NEPSroutines::mv_person(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -109,9 +100,9 @@ scaling::mv_person(
   print = TRUE,
   save = FALSE,
   return = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots/Missing_Responses/by_person',
+  path_results = 'Test/B129/Version 1.1.0/Results',
+  path_table = 'Test/B129/Version 1.1.0/Tables',
+  path_plots = 'Test/B129/Version 1.1.0/Plots/Missing_Responses/by_person',
   show_all = TRUE,
   overwrite = TRUE,
   warn = TRUE,
@@ -124,8 +115,8 @@ scaling::mv_person(
 ### Separate functions
 
 ```{r missing responses by item with separate functions}
-?scaling::mvi_analysis
-mv_i <- scaling::mvi_analysis(
+?NEPSroutines::mvi_analysis
+mv_i <- NEPSroutines::mvi_analysis(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -135,25 +126,25 @@ mv_i <- scaling::mvi_analysis(
   #position = 'position_mixed',
   mvs = mvs,
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results'
+  path = 'Test/B129/Version 1.1.0/Results'
 )
 
-?scaling::mvi_plots
+?NEPSroutines::mvi_plots
 mvi_plots(
   mv_i = mv_i,
   vars = vars,
   select = 'mixed',
   grouping = c('easy', 'difficult'),
   mvs = mvs,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots/Missing_Responses/by_item',
+  path = 'Test/B129/Version 1.1.0/Plots/Missing_Responses/by_item',
   show_all = TRUE,
   #show_all = FALSE,
   name_grouping = 'test difficulty'#,
   #labels_legend = c('A', 'B', 'C')
 )
 
-?scaling::mvi_table
-scaling::mvi_table(
+?NEPSroutines::mvi_table
+NEPSroutines::mvi_table(
   mv_i = mv_i,
   vars = vars,
   select = 'mixed',
@@ -161,11 +152,11 @@ scaling::mvi_table(
   mvs = mvs,
   save = FALSE,
   overwrite = TRUE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+  path = 'Test/B129/Version 1.1.0/Tables'
 )
 
-?scaling::print_mvi_results
-scaling::print_mvi_results(mv_i, labels_mvs = labels_mvs, name_grouping = 'test version')
+?NEPSroutines::print_mvi_results
+NEPSroutines::print_mvi_results(mv_i, labels_mvs = labels_mvs, name_grouping = 'test version')
 
 rm(mv_i)
 ```
@@ -174,7 +165,7 @@ rm(mv_i)
 
 
 ```{r missing responses by item}
-scaling::mv_item(
+NEPSroutines::mv_item(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -187,9 +178,9 @@ scaling::mv_item(
   print = TRUE,
   save = FALSE,
   return = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots/Missing_Responses/by_item',
+  path_results = 'Test/B129/Version 1.1.0/Results',
+  path_table = 'Test/B129/Version 1.1.0/Tables',
+  path_plots = 'Test/B129/Version 1.1.0/Plots/Missing_Responses/by_item',
   show_all = TRUE,
   overwrite = TRUE,
   warn = TRUE,
@@ -205,15 +196,15 @@ scaling::mv_item(
 
 ```{r single IRT analysis with separate functions, eval = FALSE}
 # Rasch and 2PL
-?scaling::irt_model
-rasch <- scaling::irt_model(
+?NEPSroutines::irt_model
+rasch <- NEPSroutines::irt_model(
   resp = resp,
   vars = vars,
   select = 'dich',
   valid = 'valid',
   irtmodel = '1PL',
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path = 'Test/B129/Version 1.1.0/Results',
   name_group = 'all',
   pweights = NULL,
   #pweights = 'difficulty',
@@ -223,14 +214,14 @@ rasch <- scaling::irt_model(
   #control_wle = list(Msteps = 10, convM = 0.1)
 )
 
-irt.2pl <- scaling::irt_model(
+irt.2pl <- NEPSroutines::irt_model(
   resp = resp,
   vars = vars,
   select = 'dich',
   valid = 'valid',
   irtmodel = '2PL',
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path = 'Test/B129/Version 1.1.0/Results',
   name_group = 'all',
   pweights = NULL,
   #pweights = 'difficulty',
@@ -240,45 +231,45 @@ irt.2pl <- scaling::irt_model(
   #control_wle = list(Msteps = 10, convM = 0.1)
 )
 
-?scaling::icc_plots
-scaling::icc_plots(
+?NEPSroutines::icc_plots
+NEPSroutines::icc_plots(
   model = rasch,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots',
+  path = 'Test/B129/Version 1.1.0/Plots',
   name_group = 'all'
 )
 
-?scaling::wright_map
-scaling::wright_map(
+?NEPSroutines::wright_map
+NEPSroutines::wright_map(
   model = rasch,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots',
+  path = 'Test/B129/Version 1.1.0/Plots',
   name_group = 'all'
 )
 
-?scaling::irt_summary()
-rasch_sum <- scaling::irt_summary(
+?NEPSroutines::irt_summary()
+rasch_sum <- NEPSroutines::irt_summary(
   resp = resp,
   vars = vars,
   valid = 'valid',
   results = rasch,
   disc = irt.2pl,
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path = 'Test/B129/Version 1.1.0/Tables',
   name_group = 'all',
   overwrite = TRUE
 )
 
-?scaling::irt_model_fit()
-scaling::irt_model_fit(
+?NEPSroutines::irt_model_fit()
+NEPSroutines::irt_model_fit(
   model_1p = rasch,
   model_2p = irt.2pl,
   overwrite = TRUE,
   save = TRUE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path = 'Test/B129/Version 1.1.0/Tables',
   name_group = 'all'
 )
 
-?scaling::print_irt_summary
-scaling::print_irt_summary(
+?NEPSroutines::print_irt_summary
+NEPSroutines::print_irt_summary(
   model = rasch,
   irt_sum = rasch_sum
 )
@@ -286,8 +277,8 @@ scaling::print_irt_summary(
 rm(rasch, irt.2pl, rasch_sum)
 
 # PCM and GPCM
-?scaling::irt_model
-pcm <- scaling::irt_model(
+?NEPSroutines::irt_model
+pcm <- NEPSroutines::irt_model(
   resp = resp,
   vars = vars,
   select = 'dich',
@@ -295,7 +286,7 @@ pcm <- scaling::irt_model(
   irtmodel = 'PCM2',
   scoring = 'irt_scoring',
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path = 'Test/B129/Version 1.1.0/Results',
   name_group = 'all',
   pweights = NULL,
   #pweights = 'difficulty',
@@ -305,7 +296,7 @@ pcm <- scaling::irt_model(
   #control_wle = list(Msteps = 10, convM = 0.1)
 )
 
-gpcm <- scaling::irt_model(
+gpcm <- NEPSroutines::irt_model(
   resp = resp,
   vars = vars,
   select = 'dich',
@@ -313,7 +304,7 @@ gpcm <- scaling::irt_model(
   irtmodel = 'GPCM',
   scoring = 'irt_scoring',
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path = 'Test/B129/Version 1.1.0/Results',
   name_group = 'all',
   pweights = NULL,
   #pweights = 'difficulty',
@@ -323,45 +314,45 @@ gpcm <- scaling::irt_model(
   #control_wle = list(Msteps = 10, convM = 0.1)
 )
 
-?scaling::icc_plots
-scaling::icc_plots(
+?NEPSroutines::icc_plots
+NEPSroutines::icc_plots(
   model = pcm,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots',
+  path = 'Test/B129/Version 1.1.0/Plots',
   name_group = 'all'
 )
 
-?scaling::wright_map
-scaling::wright_map(
+?NEPSroutines::wright_map
+NEPSroutines::wright_map(
   model = pcm,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots',
+  path = 'Test/B129/Version 1.1.0/Plots',
   name_group = 'all'
 )
 
-?scaling::irt_summary()
-pcm_sum <- scaling::irt_summary(
+?NEPSroutines::irt_summary()
+pcm_sum <- NEPSroutines::irt_summary(
   resp = resp,
   vars = vars,
   valid = 'valid',
   results = pcm,
   disc = gpcm,
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path = 'Test/B129/Version 1.1.0/Tables',
   name_group = 'all',
   overwrite = TRUE
 )
 
-?scaling::irt_model_fit()
-scaling::irt_model_fit(
+?NEPSroutines::irt_model_fit()
+NEPSroutines::irt_model_fit(
   model_1p = pcm,
   model_2p = gpcm,
   overwrite = FALSE,
   save = TRUE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path = 'Test/B129/Version 1.1.0/Tables',
   name_group = 'all'
 )
 
-?scaling::print_irt_summary
-scaling::print_irt_summary(
+?NEPSroutines::print_irt_summary
+NEPSroutines::print_irt_summary(
   model = pcm,
   irt_sum = pcm_sum
 )
@@ -373,7 +364,7 @@ rm(pcm, gpcm, pcm_sum)
 
 ```{r single IRT analysis, eval = FALSE}
 # Rasch and 2PL
-scaling::irt_analysis(
+NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = 'dich',
@@ -383,16 +374,16 @@ scaling::irt_analysis(
   save = FALSE,
   print = TRUE,
   return = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots',
+  path_results = 'Test/B129/Version 1.1.0/Results',
+  path_table = 'Test/B129/Version 1.1.0/Tables',
+  path_plots = 'Test/B129/Version 1.1.0/Plots',
   overwrite = TRUE,
   verbose = FALSE,
   name_group = 'all'
 )
 
 # PCM and GPCM
-scaling::irt_analysis(
+NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -402,9 +393,9 @@ scaling::irt_analysis(
   save = FALSE,
   print = TRUE,
   return = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots',
+  path_results = 'Test/B129/Version 1.1.0/Results',
+  path_table = 'Test/B129/Version 1.1.0/Tables',
+  path_plots = 'Test/B129/Version 1.1.0/Plots',
   overwrite = TRUE,
   verbose = FALSE,
   name_group = 'all'
@@ -416,7 +407,7 @@ scaling::irt_analysis(
 
 ```{r grouped IRT analysis}
 # Rasch and 2PL
-scaling::grouped_irt_analysis(
+NEPSroutines::grouped_irt_analysis(
   groups = c(easy = 'dich_easy', difficult = 'dich_difficult', common = 'dich_common'),
   resp = resp,
   vars = vars,
@@ -426,13 +417,13 @@ scaling::grouped_irt_analysis(
   plots = FALSE,
   return = FALSE,
   overwrite = TRUE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots'
+  path_results = 'Test/B129/Version 1.1.0/Results',
+  path_table = 'Test/B129/Version 1.1.0/Tables',
+  path_plots = 'Test/B129/Version 1.1.0/Plots'
 )
 
 # PCM and GPCM
-scaling::grouped_irt_analysis(
+NEPSroutines::grouped_irt_analysis(
   groups = c(easy = 'mixed_easy', difficult = 'mixed_difficult', common = 'mixed_common'),
   resp = resp,
   vars = vars,
@@ -443,9 +434,9 @@ scaling::grouped_irt_analysis(
   plots = FALSE,
   return = FALSE,
   overwrite = TRUE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Plots'
+  path_results = 'Test/B129/Version 1.1.0/Results',
+  path_table = 'Test/B129/Version 1.1.0/Tables',
+  path_plots = 'Test/B129/Version 1.1.0/Plots'
 )
 ```
 
@@ -458,8 +449,8 @@ scaling::grouped_irt_analysis(
 # For Rasch
 
 ## One DIF variable
-?scaling::dif_model
-dif_sex <- scaling::dif_model(
+?NEPSroutines::dif_model
+dif_sex <- NEPSroutines::dif_model(
   resp = resp,
   vars = vars,
   select = 'dich',
@@ -472,11 +463,11 @@ dif_sex <- scaling::dif_model(
   pweights = NULL,
   #pweights = 'difficulty',
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path = 'Test/B129/Version 1.1.0/Results',
   name_group = 'all'
 )
 
-dif_diff <- scaling::dif_model(
+dif_diff <- NEPSroutines::dif_model(
   resp = resp,
   vars = vars,
   select = 'dich_common',
@@ -489,43 +480,43 @@ dif_diff <- scaling::dif_model(
   pweights = NULL,
   #pweights = 'difficulty',
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path = 'Test/B129/Version 1.1.0/Results',
   name_group = 'all'
 )
 
-?scaling::dif_summary
-sex_sum <- scaling::dif_summary(
+?NEPSroutines::dif_summary
+sex_sum <- NEPSroutines::dif_summary(
   diflist = dif_sex,
   vars = vars,
   #dif_threshold = 0.2,
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path = 'Test/B129/Version 1.1.0/Tables',
   overwrite = TRUE,
   name_group = 'all'
 )
 
-diff_sum <- scaling::dif_summary(
+diff_sum <- NEPSroutines::dif_summary(
   diflist = dif_diff,
   vars = vars,
   #dif_threshold = 0.2,
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path = 'Test/B129/Version 1.1.0/Tables',
   overwrite = TRUE,
   name_group = 'all'
 )
 
-?scaling::build_dif_tr_tables
-scaling::build_dif_tr_tables(
+?NEPSroutines::build_dif_tr_tables
+NEPSroutines::build_dif_tr_tables(
   dif_summaries = list(diff_sum = diff_sum,sex_sum = sex_sum),
   vars = vars,
   save = FALSE,
   overwrite = TRUE,
   name_group = 'all',
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+  path = 'Test/B129/Version 1.1.0/Tables'
 )
 
-?scaling::print_dif_summary
-scaling::print_dif_summary(
+?NEPSroutines::print_dif_summary
+NEPSroutines::print_dif_summary(
   resp,
   diflist = dif_sex,
   res = sex_sum,
@@ -533,8 +524,8 @@ scaling::print_dif_summary(
 )
 
 ## Several DIF variables
-?scaling::conduct_dif_analysis
-dif_models <- scaling::conduct_dif_analysis(
+?NEPSroutines::conduct_dif_analysis
+dif_models <- NEPSroutines::conduct_dif_analysis(
   resp = resp,
   vars = vars,
   select = c('dich_common', 'dich', 'dich'),
@@ -548,29 +539,29 @@ dif_models <- scaling::conduct_dif_analysis(
   pweights = NULL,
   #pweights = 'difficulty',
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path = 'Test/B129/Version 1.1.0/Results',
   name_group = 'all'
 )
 
-?scaling::summarize_dif_analysis
-dif_summaries <- scaling::summarize_dif_analysis(
+?NEPSroutines::summarize_dif_analysis
+dif_summaries <- NEPSroutines::summarize_dif_analysis(
   dif_models = dif_models,
   dif_vars = c('difficulty', 'sex', 'migration'),
   #dif_threshold = 0.2,
   save = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path_results = 'Test/B129/Version 1.1.0/Results',
+  path_table = 'Test/B129/Version 1.1.0/Tables',
   overwrite = TRUE,
   name_group = 'all'
 )
 
-?scaling::build_dif_tr_tables
-scaling::build_dif_tr_tables(
+?NEPSroutines::build_dif_tr_tables
+NEPSroutines::build_dif_tr_tables(
   dif_summaries = dif_summaries,
   save = FALSE,
   overwrite = TRUE,
   name_group = 'all',
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+  path = 'Test/B129/Version 1.1.0/Tables'
 )
 
 rm(dif_sex, sex_sum, dif_models, dif_summaries)
@@ -578,8 +569,8 @@ rm(dif_sex, sex_sum, dif_models, dif_summaries)
 # For PCM
 
 ## One DIF variable
-?scaling::dif_model
-dif_sex <- scaling::dif_model(
+?NEPSroutines::dif_model
+dif_sex <- NEPSroutines::dif_model(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -592,22 +583,22 @@ dif_sex <- scaling::dif_model(
   pweights = NULL,
   #pweights = 'difficulty',
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path = 'Test/B129/Version 1.1.0/Results',
   name_group = 'all'
 )
 
-?scaling::dif_summary
-sex_sum <- scaling::dif_summary(
+?NEPSroutines::dif_summary
+sex_sum <- NEPSroutines::dif_summary(
   diflist = dif_sex,
   #dif_threshold = 0.2,
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path = 'Test/B129/Version 1.1.0/Tables',
   overwrite = TRUE,
   name_group = 'all'
 )
 
-?scaling::print_dif_summary
-scaling::print_dif_summary(
+?NEPSroutines::print_dif_summary
+NEPSroutines::print_dif_summary(
   resp,
   diflist = dif_sex,
   res = sex_sum,
@@ -615,8 +606,8 @@ scaling::print_dif_summary(
 )
 
 ## Several DIF variables
-?scaling::conduct_dif_analysis
-dif_models <- scaling::conduct_dif_analysis(
+?NEPSroutines::conduct_dif_analysis
+dif_models <- NEPSroutines::conduct_dif_analysis(
   resp = resp,
   vars = vars,
   select = c('mixed_common', 'mixed', 'mixed'),
@@ -630,29 +621,29 @@ dif_models <- scaling::conduct_dif_analysis(
   pweights = NULL,
   #pweights = 'difficulty',
   save = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path = 'Test/B129/Version 1.1.0/Results',
   name_group = 'all'
 )
 
-?scaling::summarize_dif_analysis
-dif_summaries <- scaling::summarize_dif_analysis(
+?NEPSroutines::summarize_dif_analysis
+dif_summaries <- NEPSroutines::summarize_dif_analysis(
   dif_models = dif_models,
   dif_vars = c('difficulty', 'sex', 'migration'),
   #dif_threshold = 0.2,
   save = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
+  path_results = 'Test/B129/Version 1.1.0/Results',
+  path_table = 'Test/B129/Version 1.1.0/Tables',
   overwrite = TRUE,
   name_group = 'all'
 )
 
-?scaling::build_dif_tr_tables
-scaling::build_dif_tr_tables(
+?NEPSroutines::build_dif_tr_tables
+NEPSroutines::build_dif_tr_tables(
   dif_summaries = dif_summaries,
   save = FALSE,
   overwrite = TRUE,
   name_group = 'all',
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+  path = 'Test/B129/Version 1.1.0/Tables'
 )
 
 rm(dif_sex, sex_sum, dif_models, dif_summaries)
@@ -665,7 +656,7 @@ rm(dif_sex, sex_sum, dif_models, dif_summaries)
 vars <- vars[c(171:172, 1:170), ]
 
 # For Rasch
-dif <- scaling::dif_analysis(
+dif <- NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
   select = c('dich_common', 'dich', 'dich'),
@@ -678,12 +669,12 @@ dif <- scaling::dif_analysis(
   save = TRUE,
   return = TRUE,
   digits = 2,
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results'
+  path_table = 'Test/B129/Version 1.1.0/Tables',
+  path_results = 'Test/B129/Version 1.1.0/Results'
 )
 
 # For PCM
-scaling::dif_analysis(
+NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
   select = c('mixed_common', 'mixed', 'mixed'),
@@ -695,8 +686,8 @@ scaling::dif_analysis(
   verbose = FALSE,
   save = FALSE,
   return = FALSE,
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables',
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results'
+  path_table = 'Test/B129/Version 1.1.0/Tables',
+  path_results = 'Test/B129/Version 1.1.0/Results'
 )
 ```
 
@@ -706,8 +697,8 @@ scaling::dif_analysis(
 ## Separate functions
 
 ```{r distractor analysis with separate functions}
-?scaling::conduct_dis_analysis
-dis <- scaling::conduct_dis_analysis(
+?NEPSroutines::conduct_dis_analysis
+dis <- NEPSroutines::conduct_dis_analysis(
   resp = resp,
   vars = vars,
   valid = 'valid',
@@ -716,20 +707,20 @@ dis <- scaling::conduct_dis_analysis(
   #select_score = 'mixed',
   save = FALSE,
   name_group = 'all',
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results'
+  path = 'Test/B129/Version 1.1.0/Results'
 )
 
-?scaling::dis_summary
-dis_sum <- scaling::dis_summary(
+?NEPSroutines::dis_summary
+dis_sum <- NEPSroutines::dis_summary(
   dis,
   save = FALSE,
   overwrite = TRUE,
   name_group = 'all',
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+  path = 'Test/B129/Version 1.1.0/Tables'
 )
 
-?scaling::print_dis_summary
-scaling::print_dis_summary(dis_sum)
+?NEPSroutines::print_dis_summary
+NEPSroutines::print_dis_summary(dis_sum)
 
 rm(dis, dis_sum)
 ```
@@ -737,7 +728,7 @@ rm(dis, dis_sum)
 ## Overarching functions
 
 ```{r distractor analysis}
-scaling::dis_analysis(
+NEPSroutines::dis_analysis(
   resp = resp,
   vars = vars,
   valid = 'valid',
@@ -745,8 +736,8 @@ scaling::dis_analysis(
   print = TRUE,
   save = FALSE,
   overwrite = TRUE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+  path_results = 'Test/B129/Version 1.1.0/Results',
+  path_table = 'Test/B129/Version 1.1.0/Tables'
 )
 ```
 
@@ -756,8 +747,8 @@ scaling::dis_analysis(
 ## Separate functions
 
 ```{r dimensionality analysis with separate functions}
-?scaling::conduct_dim_analysis
-dim <- scaling::conduct_dim_analysis(
+?NEPSroutines::conduct_dim_analysis
+dim <- NEPSroutines::conduct_dim_analysis(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -769,20 +760,20 @@ dim <- scaling::conduct_dim_analysis(
   snodes = 5,
   save = FALSE,
   name_group = 'all',
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results'
+  path = 'Test/B129/Version 1.1.0/Results'
 )
 
-?scaling::dim_summary
-dim_sum <- scaling::dim_summary(
+?NEPSroutines::dim_summary
+dim_sum <- NEPSroutines::dim_summary(
   dim,
   save = FALSE,
   overwrite = TRUE,
   name_group = 'all',
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables'
+  path = 'Test/B129/Version 1.1.0/Tables'
 )
 
-?scaling::print_dim_summary
-scaling::print_dim_summary(dim_sum)
+?NEPSroutines::print_dim_summary
+NEPSroutines::print_dim_summary(dim_sum)
 
 rm(dim, dim_sum)
 ```
@@ -790,7 +781,7 @@ rm(dim, dim_sum)
 ## Overarching functions
 
 ```{r dimensionality analysis}
-dim <- scaling::dim_analysis(
+dim <- NEPSroutines::dim_analysis(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -803,8 +794,8 @@ dim <- scaling::dim_analysis(
   return = TRUE,
   save = FALSE,
   print = TRUE,
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Tables', 
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/Results',
+  path_table = 'Test/B129/Version 1.1.0/Tables', 
+  path_results = 'Test/B129/Version 1.1.0/Results',
   overwrite = TRUE,
   dim = c('kog_type', 'text_type')
 )

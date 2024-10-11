@@ -1,6 +1,6 @@
 
 ---
-title: "Test script for scaling package with example data from A14 (Grammar)"
+title: "Test script for NEPSroutines package with example data from A14 (Grammar)"
 author: "Jana Welling"
 date: "`r Sys.time()`"
 output:
@@ -22,18 +22,14 @@ editor_options:
   
 ```{r preparation, warning = FALSE, message = FALSE, comment = NA, results = 'hide'}
 
-#' ** Clear working space**
-rm(list = ls())
-
 #' **Load packages**
 library('here')
 library('dplyr')
 library('haven')
 
-#' **Load scaling package**
+#' **Load NEPSroutines package**
 suppressMessages(
-  pkgload::load_all(here::here('scaling'))
-  #pkgload::load_all('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/scaling')
+  pkgload::load_all(here::here('NEPSroutines'))
 )
 
 ```
@@ -97,7 +93,7 @@ resp$valid_new_set <- min_val(resp = resp, vars = vars, select = 'new_set', inva
 # Save example data
 check_folder('Test/A14/Version 1.1.0/Data')
 save(resp, vars, mvs, labels_mvs, #mvs_link, resp_previous, 
-     file = ('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Data/data.Rdata'))
+     file = ('Test/A14/Version 1.1.0/Data/data.Rdata'))
 
 # Delete variables
 rm(list = ls())
@@ -139,7 +135,7 @@ vars_A12$link <- ifelse(vars_A12$item %in% common$A12_Item, TRUE, FALSE)
 # Save data
 check_folder('Test/A14/Version 1.1.0/Data')
 save(resp_A12, resp_A14, vars_A12, vars_A14, mvs_link, common,
-     file = ('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Data/link_data.Rdata'))
+     file = ('Test/A14/Version 1.1.0/Data/link_data.Rdata'))
 
 # Delete variables
 rm(list = ls())

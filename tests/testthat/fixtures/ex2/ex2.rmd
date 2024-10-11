@@ -28,7 +28,7 @@ format:
 rm(list = ls())
 
 # Load packages
-library(scaling)
+library(NEPSroutines)
 library(rlang)
 
 # Turn off warnings
@@ -55,11 +55,11 @@ labels_mvs <- c(
 ```{r descriptives}
 
 # Sample size with only valid cases
-scaling::n_valid(resp, valid = "valid")
+NEPSroutines::n_valid(resp, valid = "valid")
 
 # Descriptives for nominal variables
-scaling::desc_nom(resp, desc = c("sex", "mig", "school"), valid = "valid")
-scaling::show_attributes(resp, desc = c("sex", "mig", "school"))
+NEPSroutines::desc_nom(resp, desc = c("sex", "mig", "school"), valid = "valid")
+NEPSroutines::show_attributes(resp, desc = c("sex", "mig", "school"))
 
 ```
 
@@ -69,7 +69,7 @@ scaling::show_attributes(resp, desc = c("sex", "mig", "school"))
 
 ```{r missing responses by person}
 
-scaling::mv_person(
+NEPSroutines::mv_person(
   resp = resp,
   vars = vars,
   select = "mixed",
@@ -95,7 +95,7 @@ scaling::mv_person(
 
 ```{r missing responses by item}
 
-scaling::mv_item(
+NEPSroutines::mv_item(
   resp = resp,
   vars = vars,
   select = "mixed",
@@ -124,7 +124,7 @@ scaling::mv_item(
 
 ```{r IRT analysis for dichotomous items}
 
-scaling::irt_analysis(
+NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = "dich",
@@ -149,7 +149,7 @@ scaling::irt_analysis(
 
 ```{r IRT analysis for polytomous items}
 
-scaling::irt_analysis(
+NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = "mixed",
@@ -174,7 +174,7 @@ scaling::irt_analysis(
 
 ```{r dif analysis for PCM}
 
-scaling::dif_analysis(
+NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
   select = "mixed",
@@ -198,7 +198,7 @@ scaling::dif_analysis(
 ```{r dimensionality analysis}
 
 vars$content <- as.numeric(factor(vars$content))
-scaling::dim_analysis(
+NEPSroutines::dim_analysis(
   resp = resp,
   vars = vars,
   select = "mixed",
@@ -222,7 +222,7 @@ scaling::dim_analysis(
 
 ```{r distractor analysis}
 
-scaling::dis_analysis(
+NEPSroutines::dis_analysis(
   resp = resp,
   vars = vars,
   valid = "valid",
@@ -242,7 +242,7 @@ scaling::dis_analysis(
 
 ```{r create suf}
 
-scores <- scaling::create_scores(
+scores <- NEPSroutines::create_scores(
   resp = resp,
   vars = vars,
   score_name = "mag12",
@@ -251,7 +251,7 @@ scores <- scaling::create_scores(
   mvs = mvs,
   sum_select = "dich",
   scoring = "scoring",
-  #facet = "rotation", # does not work in current version of scaling
+  #facet = "rotation", # does not work in current version of NEPSroutines
   wle = TRUE,
   sum_score = TRUE,
   metap = FALSE,
@@ -260,7 +260,7 @@ scores <- scaling::create_scores(
   path_results = paste0(getwd(), "/results")
 )
 
-scaling::create_suf(
+NEPSroutines::create_suf(
   resp = resp,
   vars = vars,
   select = "mixed",

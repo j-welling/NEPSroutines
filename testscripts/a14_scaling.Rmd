@@ -1,6 +1,6 @@
 
 ---
-title: "Scaling study A14 (Grammar) with the scaling package"
+title: "Scaling study A14 (Grammar) with the NEPSroutines package"
 author: "Jana Welling"
 date: "`r Sys.time()`"
 output:
@@ -20,30 +20,19 @@ editor_options:
 
 ## Set working directory
 ```{r working directory}
-setwd('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket')
+#setwd(insert_path)
 ```
 
 ## Load data
 
 ```{r load-data, warning = FALSE, message = FALSE, comment = NA, results = 'hide'}
-rm(list = ls())
 load(here::here('Test/A14/Version 1.1.0/Data/data.Rdata'))
-# Problem: wegen Linking sind Items doppelt in vars enthalten
-# load('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Data/data.Rdata')
 ```
 
-## Load scaling package
+## Load NEPSroutines package
 
-```{r load-scaling-package, eval = FALSE}
-pkgload::load_all(here::here('scaling'))
-# pkgload::load_all('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/scaling')
-```
-
-
-# Debugging
-
-```{r 'debugging', eval = FALSE}
-# Hier könnte DEIN Debugging stehen :)
+```{r load-NEPSroutines-package, eval = FALSE}
+pkgload::load_all(here::here('NEPSroutines'))
 ```
 
 
@@ -51,18 +40,18 @@ pkgload::load_all(here::here('scaling'))
 
 ```{r descriptives}
 # Sample size with only valid cases
-scaling::n_valid(resp, valid = 'valid_new_set')
+NEPSroutines::n_valid(resp, valid = 'valid_new_set')
 
 # Descriptives (mean, sd, etc.) of continuous variables
-scaling::desc_con(resp, desc = 'age', valid = 'valid_new_set')
+NEPSroutines::desc_con(resp, desc = 'age', valid = 'valid_new_set')
 
 # Descriptives (attributes, frequency) of nominal sociodemographic variables
-scaling::desc_nom(resp, desc = c('sex', 'migration', 'books'), valid = 'valid_new_set')
-scaling::show_attributes(resp, desc = c('sex', 'migration', 'books'))
+NEPSroutines::desc_nom(resp, desc = c('sex', 'migration', 'books'), valid = 'valid_new_set')
+NEPSroutines::show_attributes(resp, desc = c('sex', 'migration', 'books'))
 
 # Descriptives (attributes, frequency) of nominal booklet variables
-scaling::desc_nom(resp, desc = c('pos', 'vers'), valid = 'valid_new_set')
-scaling::show_attributes(resp, desc = c('pos', 'vers'))
+NEPSroutines::desc_nom(resp, desc = c('pos', 'vers'), valid = 'valid_new_set')
+NEPSroutines::show_attributes(resp, desc = c('pos', 'vers'))
 ```
 
 
@@ -71,7 +60,7 @@ scaling::show_attributes(resp, desc = c('pos', 'vers'))
 ## Missing responses by person
 
 ```{r missing responses by person}
-scaling::mv_person(
+NEPSroutines::mv_person(
   resp = resp,
   vars = vars,
   select = 'new_set',
@@ -83,9 +72,9 @@ scaling::mv_person(
   save = TRUE,
   print = TRUE,
   return = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Plots/Missing_Responses/by_person',
+  path_results = 'Test/A14/Version 1.1.0/Results',
+  path_table = 'Test/A14/Version 1.1.0/Tables',
+  path_plots = 'Test/A14/Version 1.1.0/Plots/Missing_Responses/by_person',
   digits = 2,
   warn = TRUE,
   verbose = FALSE
@@ -95,7 +84,7 @@ scaling::mv_person(
 ## Missing responses by item
 
 ```{r missing responses by item}
-scaling::mv_item(
+NEPSroutines::mv_item(
   resp = resp,
   vars = vars,
   select = 'new_set',
@@ -108,9 +97,9 @@ scaling::mv_item(
   save = TRUE,
   print = TRUE,
   return = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Plots/Missing_Responses/by_item',
+  path_results = 'Test/A14/Version 1.1.0/Results',
+  path_table = 'Test/A14/Version 1.1.0/Tables',
+  path_plots = 'Test/A14/Version 1.1.0/Plots/Missing_Responses/by_item',
   digits = 2,
   warn = TRUE,
   verbose = FALSE
@@ -123,7 +112,7 @@ scaling::mv_item(
 ## Old set (only dichotomous items)
 
 ```{r Rasch and 2PL}
-scaling::irt_analysis(
+NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = 'old_set',
@@ -133,9 +122,9 @@ scaling::irt_analysis(
   save = TRUE,
   print = TRUE,
   return = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Plots',
+  path_results = 'Test/A14/Version 1.1.0/Results',
+  path_table = 'Test/A14/Version 1.1.0/Tables',
+  path_plots = 'Test/A14/Version 1.1.0/Plots',
   digits = 2,
   warn = TRUE,
   verbose = FALSE
@@ -145,7 +134,7 @@ scaling::irt_analysis(
 ## New set (also polytomous items)
 
 ```{r PCM and GPCM}
-scaling::irt_analysis(
+NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = 'new_set',
@@ -156,9 +145,9 @@ scaling::irt_analysis(
   save = TRUE,
   print = TRUE,
   return = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Plots',
+  path_results = 'Test/A14/Version 1.1.0/Results',
+  path_table = 'Test/A14/Version 1.1.0/Tables',
+  path_plots = 'Test/A14/Version 1.1.0/Plots',
   digits = 2,
   warn = TRUE,
   verbose = FALSE
@@ -169,7 +158,7 @@ scaling::irt_analysis(
 # DIF analysis (for PCM)
 
 ```{r dif analysis for PCM}
-scaling::dif_analysis(
+NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
   select = 'new_set',
@@ -180,8 +169,8 @@ scaling::dif_analysis(
   save = TRUE,
   print = TRUE,
   return = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Tables'
+  path_results = 'Test/A14/Version 1.1.0/Results',
+  path_table = 'Test/A14/Version 1.1.0/Tables'
 )
 ```
 
@@ -219,8 +208,8 @@ Scaling of A14 does not include dimension analysis.
 #   return = TRUE,
 #   save = TRUE,
 #   print = TRUE,
-#   path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Linking', 
-#   path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Linking',
+#   path_table = 'Test/A14/Version 1.1.0/Linking', 
+#   path_results = 'Test/A14/Version 1.1.0/Linking',
 #   do_dif = TRUE,
 #   do_dim = FALSE
 # )
@@ -231,7 +220,7 @@ Scaling of A14 does not include dimension analysis.
 
 ```{r suf}
 # Note that this creates the scores and the SUF without linking and without rotation, only for testing purposes
-scores <- scaling::create_scores(
+scores <- NEPSroutines::create_scores(
   resp = resp,
   vars = vars,
   score_name = 'grg1',
@@ -242,10 +231,10 @@ scores <- scaling::create_scores(
   metap = FALSE,
   return = TRUE,
   save = TRUE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/A14/Version 1.1.0/Results'
+  path_results = 'Test/A14/Version 1.1.0/Results'
 )
 
-scaling::create_suf(
+NEPSroutines::create_suf(
   resp = resp,
   vars = vars,
   select = 'new_set',
@@ -254,7 +243,7 @@ scaling::create_suf(
   score_name = 'grg1',
   mvs = mvs,
   return = FALSE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.1.0/SUF'
+  path = 'Test/B129/Version 1.1.0/SUF'
 )
 
 rm(scores)

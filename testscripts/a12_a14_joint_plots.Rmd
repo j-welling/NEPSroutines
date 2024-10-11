@@ -1,6 +1,6 @@
 
 ---
-title: 'Test script for scaling package with example data from A12 (Grammar)'
+title: 'Test script for NEPSroutines package with example data from A12 (Grammar)'
 author: 'Jana Welling'
 date: '`r Sys.time()`'
 output:
@@ -30,8 +30,8 @@ library('here')
 library('dplyr')
 library('haven')
 
-#' **Load scaling package**
-pkgload::load_all(here::here('scaling'))
+#' **Load NEPSroutines package**
+pkgload::load_all(here::here('NEPSroutines'))
 ```
 
 ## Prepare data
@@ -92,7 +92,7 @@ load(here::here('Test/TR_Grammatik/Version 1.1.0/data.Rdata'))
 
 ```{r missing responses by person}
 # Wichtig: Man darf die Analysen nicht nur mit einem Teil der mvs durchführen, denn sonst sind die total missing responses inkorrekt!!
-scaling::mv_person(
+NEPSroutines::mv_person(
   resp = resp,
   vars = vars,
   select = 'new_set',
@@ -121,7 +121,7 @@ scaling::mv_person(
 ```{r missing responses by item}
 # Wichtig: Man darf die Analysen nicht nur mit einem Teil der mvs durchführen, denn sonst sind die total missing responses inkorrekt!!
 vars$position_new_set <- ifelse(vars$new_set, vars$position_old_set, NA)
-scaling::mv_item(
+NEPSroutines::mv_item(
   resp = resp,
   vars = vars,
   select = 'new_set',

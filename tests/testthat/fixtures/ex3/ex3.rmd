@@ -28,7 +28,7 @@ format:
 rm(list = ls())
 
 # Load packages
-library(scaling)
+library(NEPSroutines)
 library(rlang)
 
 # Turn of warnings
@@ -57,10 +57,10 @@ labels_mvs <- c(
 ```{r descriptives}
 
 # Sample size with only valid cases
-scaling::n_valid(resp, valid = "valid")
+NEPSroutines::n_valid(resp, valid = "valid")
 
 # Sample size by test version
-scaling::sample_by_group(
+NEPSroutines::sample_by_group(
   resp = resp,
   grouping_variable = "booklet",
   labels = c("missing" = -56, "easy" = 1, "medium" = 2, "difficult" = 3),
@@ -70,11 +70,11 @@ scaling::sample_by_group(
 )
 
 # Descriptives for nominal variables
-scaling::desc_nom(resp, desc = c("sex", "mig", "rotation"), valid = "valid")
-scaling::show_attributes(resp, desc = c("sex", "mig", "rotation"))
+NEPSroutines::desc_nom(resp, desc = c("sex", "mig", "rotation"), valid = "valid")
+NEPSroutines::show_attributes(resp, desc = c("sex", "mig", "rotation"))
 
 # Item type by test version
-scaling::props_by_group(
+NEPSroutines::props_by_group(
   vars = vars,
   select = "mixed",
   grouping = c("booklet1", "booklet2", "booklet3"),
@@ -92,7 +92,7 @@ scaling::props_by_group(
 
 ```{r missing responses by person}
 
-scaling::mv_person(
+NEPSroutines::mv_person(
   resp = resp,
   vars = vars,
   select = "dich",
@@ -122,7 +122,7 @@ scaling::mv_person(
 
 ```{r missing responses by item}
 
-scaling::mv_item(
+NEPSroutines::mv_item(
   resp = resp,
   vars = vars,
   select = "mixed",
@@ -159,7 +159,7 @@ scaling::mv_item(
 vars$dich1 <- vars$dich & vars$booklet1
 vars$dich2 <- vars$dich & vars$booklet2
 vars$dich3 <- vars$dich & vars$booklet3
-scaling::grouped_irt_analysis(
+NEPSroutines::grouped_irt_analysis(
   resp = resp,
   vars = vars,
   select = c(booklet1 = "dich1", booklet2 = "dich2", booklet3 = "dich3"),
@@ -179,7 +179,7 @@ scaling::grouped_irt_analysis(
 )
 
 # combined
-scaling::irt_analysis(
+NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = "dich",
@@ -209,7 +209,7 @@ scaling::irt_analysis(
 vars$mixed1 <- vars$mixed & vars$booklet1
 vars$mixed2 <- vars$mixed & vars$booklet2
 vars$mixed3 <- vars$mixed & vars$booklet3
-scaling::grouped_irt_analysis(
+NEPSroutines::grouped_irt_analysis(
   resp = resp,
   vars = vars,
   select = c(booklet1 = "mixed1", booklet2 = "mixed2", booklet3 = "mixed3"),
@@ -229,7 +229,7 @@ scaling::grouped_irt_analysis(
 )
 
 # combined
-scaling::irt_analysis(
+NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = "mixed",
@@ -255,7 +255,7 @@ scaling::irt_analysis(
 
 ```{r dif analysis for Rasch}
 
-scaling::dif_analysis(
+NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
   select = "dich",
@@ -278,7 +278,7 @@ scaling::dif_analysis(
 ```{r dif analysis for PCM}
 
 vars$mixed_common <- vars$mixed & vars$booklet1 & vars$booklet2 & vars$booklet3
-scaling::dif_analysis(
+NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
   select = c("mixed", "mixed", "mixed_common"),
@@ -302,7 +302,7 @@ scaling::dif_analysis(
 
 ```{r distractor analysis}
 
-scaling::dis_analysis(
+NEPSroutines::dis_analysis(
   resp = resp,
   vars = vars,
   valid = "valid",
@@ -325,14 +325,14 @@ scaling::dis_analysis(
 
 ```{r create suf}
 
-scores <- scaling::create_scores(
+scores <- NEPSroutines::create_scores(
   resp = resp,
   vars = vars,
   score_name = "reg7",
   select = "mixed",
   valid = "valid",
   scoring = "scoring",
-  #facet = "rotation", # does not work in current version of scaling
+  #facet = "rotation", # does not work in current version of NEPSroutines
   num_cat = "num_cat",
   mvs = mvs,
   sum_select = "dich",
@@ -344,7 +344,7 @@ scores <- scaling::create_scores(
   path_results = paste0(getwd(), "/results")
 )
 
-scaling::create_suf(
+NEPSroutines::create_suf(
   resp = resp,
   vars = vars,
   select = "mixed",

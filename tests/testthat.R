@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(scaling)
+library(NEPSroutines)
 
-test_check("scaling")
+test_check("NEPSroutines")

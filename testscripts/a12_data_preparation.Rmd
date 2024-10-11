@@ -1,6 +1,6 @@
 
 ---
-title: "Test script for scaling package with example data from A14 (Grammar)"
+title: "Test script for NEPSroutines package with example data from A14 (Grammar)"
 author: "Jana Welling"
 date: "`r Sys.time()`"
 output:
@@ -30,10 +30,9 @@ library('here')
 library('dplyr')
 library('haven')
 
-#' **Load scaling package**
+#' **Load NEPSroutines package**
 suppressMessages(
-  pkgload::load_all(here::here('scaling'))
-  #pkgload::load_all('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/scaling')
+  pkgload::load_all(here::here('NEPSroutines'))
 )
 
 ```
@@ -82,7 +81,7 @@ resp$valid_new_set <- min_val(resp = resp, vars = vars, select = 'new_set', inva
 
 # Save example data
 check_folder(here::here('Test/A12/Version 1.1.0/Data'))
-save(resp, vars, mvs, labels_mvs, file = 'Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/Test/A12/Version 1.1.0/Data/data.Rdata')
+save(resp, vars, mvs, labels_mvs, file = 'Test/A12/Version 1.1.0/Data/data.Rdata')
 
 # Delete variables
 rm(list = ls())

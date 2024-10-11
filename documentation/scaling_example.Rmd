@@ -26,23 +26,23 @@ rm(list = ls())
 load(here::here('b129.Rdata'))
 ```
 
-## Load scaling package
+## Load NEPSroutines package
 
-```{r load-scaling, warning = FALSE, message = FALSE, comment = NA, results = 'hide', eval = FALSE}
+```{r load-NEPSroutines, warning = FALSE, message = FALSE, comment = NA, results = 'hide', eval = FALSE}
 path_project <- # here define path to project (as string, ending with '/')
-scaling_package <- # here define name of newest version of scaling package (as string)
-install.packages(paste0(path_project, scaling_package), type='source', repos=NULL)
-library('scaling')
+NEPSroutines_package <- # here define name of newest version of NEPSroutines package (as string)
+install.packages(paste0(path_project, NEPSroutines_package), type='source', repos=NULL)
+library('NEPSroutines')
 ```
 
 # Sample and booklet descriptives
 
 ```{r descriptives}
 # Sample size by (in)valid cases
-scaling::n_valid(resp = resp, valid = 'valid')
+NEPSroutines::n_valid(resp = resp, valid = 'valid')
 
 # Sample size by test version
-scaling::sample_by_group(
+NEPSroutines::sample_by_group(
   resp = resp,
   grouping_variable = 'difficulty',
   labels = c('EasyTestlet' = 0, 'DifficultTestlet' = 1),
@@ -52,20 +52,20 @@ scaling::sample_by_group(
 )
 
 # Descriptives (mean, sd, etc.) of continuous variables
-scaling::desc_con(resp = resp, desc = 'age', valid = 'valid')
+NEPSroutines::desc_con(resp = resp, desc = 'age', valid = 'valid')
 
 # Descriptives (attributes, frequency) of nominal sociodemographic variables
 sdv = c('sex', 'attendsGymnasium', 'migration', 'books')
-scaling::desc_nom(resp = resp, desc = sdv, valid = 'valid')
-scaling::show_attributes(resp = resp, desc = sdv)
+NEPSroutines::desc_nom(resp = resp, desc = sdv, valid = 'valid')
+NEPSroutines::show_attributes(resp = resp, desc = sdv)
 rm(sdv)
 
 # Descriptives (attributes, frequency) of nominal booklet variables
-scaling::desc_nom(resp = resp, desc = 'difficulty', valid = 'valid')
-scaling::show_attributes(resp = resp, desc = c('difficulty'))
+NEPSroutines::desc_nom(resp = resp, desc = 'difficulty', valid = 'valid')
+NEPSroutines::show_attributes(resp = resp, desc = c('difficulty'))
 
 # Item type by test version
-scaling::props_by_group(
+NEPSroutines::props_by_group(
   vars = vars,
   select = 'mixed',
   grouping = c('easy', 'difficult'),
@@ -96,7 +96,7 @@ scaling::props_by_group(
 ## Missing responses by person
 
 ```{r missing responses by person}
-scaling::mv_person(
+NEPSroutines::mv_person(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -122,7 +122,7 @@ scaling::mv_person(
 ## Missing responses by item
 
 ```{r missing responses by item}
-scaling::mv_item(
+NEPSroutines::mv_item(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -152,7 +152,7 @@ scaling::mv_item(
 
 ```{r single IRT analysis, eval = FALSE}
 # Rasch and 2PL
-scaling::irt_analysis(
+NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = 'dich',
@@ -172,7 +172,7 @@ scaling::irt_analysis(
 )
 
 # PCM and GPCM
-scaling::irt_analysis(
+NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -196,7 +196,7 @@ scaling::irt_analysis(
 
 ```{r grouped IRT analysis}
 # Rasch and 2PL
-scaling::grouped_irt_analysis(
+NEPSroutines::grouped_irt_analysis(
   resp = resp,
   vars = vars,
   select = c(easy = 'dich_easy', difficult = 'dich_difficult', common = 'dich_common'),
@@ -214,7 +214,7 @@ scaling::grouped_irt_analysis(
 )
 
 # PCM and GPCM
-scaling::grouped_irt_analysis(
+NEPSroutines::grouped_irt_analysis(
   resp = resp,
   vars = vars,
   select = c(easy = 'mixed_easy', difficult = 'mixed_difficult', common = 'mixed_common'),
@@ -238,7 +238,7 @@ scaling::grouped_irt_analysis(
 
 ```{r dif analysis}
 # For Rasch
-scaling::dif_analysis(
+NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
   select = c('dich_common', 'dich', 'dich'),
@@ -254,7 +254,7 @@ scaling::dif_analysis(
 )
 
 # For PCM
-scaling::dif_analysis(
+NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
   select = c('mixed_common', 'mixed', 'mixed'),
@@ -275,7 +275,7 @@ scaling::dif_analysis(
 # Distractor analysis
 
 ```{r distractor analysis}
-scaling::dis_analysis(
+NEPSroutines::dis_analysis(
   resp = resp,
   vars = vars,
   valid = 'valid',
@@ -292,7 +292,7 @@ scaling::dis_analysis(
 # Dimension analysis
 
 ```{r dimensionality analysis}
-scaling::dim_analysis(
+NEPSroutines::dim_analysis(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -321,7 +321,7 @@ Linking is not yet implemented in this package version.
 The function create_scores() gives an error for this data in this package version.
 
 ```{r scores}
-# scores <- scaling::create_scores(
+# scores <- NEPSroutines::create_scores(
 #   resp = resp,
 #   vars = vars,
 #   scoring = 'scoring',
@@ -344,7 +344,7 @@ The function create_scores() gives an error for this data in this package versio
 # Create SUF
 
 ```{r suf}
-scaling::suf <- scaling::create_suf(
+NEPSroutines::suf <- NEPSroutines::create_suf(
   resp = resp,
   vars = vars,
   select = 'suf',

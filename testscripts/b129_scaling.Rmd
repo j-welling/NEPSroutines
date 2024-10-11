@@ -1,6 +1,6 @@
 
 ---
-title: "Scaling study  B129 (Reading) with the scaling package"
+title: "Scaling study  B129 (Reading) with the NEPSroutines package"
 author: "Jana Welling"
 date: "`r Sys.time()`"
 output:
@@ -21,7 +21,7 @@ editor_options:
 ## Set working directory
 
 ```{r working directory}
-setwd('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket')
+#setwd(insert_path)
 ```
 
 ## Load data
@@ -32,11 +32,11 @@ load(here::here('Test/B129/Version 1.2.0/Data/data.Rdata'))
 #load('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Data/data.Rdata')
 ```
 
-## Load scaling package
+## Load NEPSroutines package
 
-```{r load-scaling, warning = FALSE, message = FALSE, comment = NA, results = 'hide', eval = FALSE}
-pkgload::load_all(here::here('scaling'))
-#pkgload::load_all('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/scaling')
+```{r load-NEPSroutines, warning = FALSE, message = FALSE, comment = NA, results = 'hide', eval = FALSE}
+pkgload::load_all(here::here('NEPSroutines'))
+#pkgload::load_all('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/NEPSroutines')
 ```
 
 # Debugging
@@ -49,33 +49,33 @@ pkgload::load_all(here::here('scaling'))
 
 ```{r descriptives}
 # Sample size by (in)valid cases
-scaling::n_valid(resp = resp, valid = 'valid')
+NEPSroutines::n_valid(resp = resp, valid = 'valid')
 
 # Sample size by test version
-scaling::sample_by_group(
+NEPSroutines::sample_by_group(
   resp = resp,
   grouping_variable = 'difficulty',
   labels = c('EasyTestlet' = 0, 'DifficultTestlet' = 1),
   save = TRUE,
   overwrite = TRUE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Tables'
+  path = 'Test/B129/Version 1.2.0/Tables'
 )
 
 # Descriptives (mean, sd, etc.) of continuous variables
-scaling::desc_con(resp = resp, desc = 'age', valid = 'valid')
+NEPSroutines::desc_con(resp = resp, desc = 'age', valid = 'valid')
 
 # Descriptives (attributes, frequency) of nominal sociodemographic variables
 sdv = c('sex', 'attendsGymnasium', 'migration', 'books')
-scaling::desc_nom(resp = resp, desc = sdv, valid = 'valid')
-scaling::show_attributes(resp = resp, desc = sdv)
+NEPSroutines::desc_nom(resp = resp, desc = sdv, valid = 'valid')
+NEPSroutines::show_attributes(resp = resp, desc = sdv)
 rm(sdv)
 
 # Descriptives (attributes, frequency) of nominal booklet variables
-scaling::desc_nom(resp = resp, desc = 'difficulty', valid = 'valid')
-scaling::show_attributes(resp = resp, desc = c('difficulty'))
+NEPSroutines::desc_nom(resp = resp, desc = 'difficulty', valid = 'valid')
+NEPSroutines::show_attributes(resp = resp, desc = c('difficulty'))
 
 # Item type by test version
-scaling::props_by_group(
+NEPSroutines::props_by_group(
   vars = vars,
   select = 'mixed',
   grouping = c('easy', 'difficult'),
@@ -96,7 +96,7 @@ scaling::props_by_group(
     ),
   save = TRUE,
   overwrite = TRUE,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Tables'
+  path = 'Test/B129/Version 1.2.0/Tables'
 )
 ```
 
@@ -106,7 +106,7 @@ scaling::props_by_group(
 ## Missing responses by person
 
 ```{r missing responses by person}
-scaling::mv_person(
+NEPSroutines::mv_person(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -119,9 +119,9 @@ scaling::mv_person(
   print = TRUE,
   save = TRUE,
   return = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Plots/Missing_Responses/by_person',
+  path_results = 'Test/B129/Version 1.2.0/Results',
+  path_table = 'Test/B129/Version 1.2.0/Tables',
+  path_plots = 'Test/B129/Version 1.2.0/Plots/Missing_Responses/by_person',
   show_all = TRUE,
   overwrite = TRUE,
   warn = TRUE,
@@ -143,7 +143,7 @@ vars$stage_1 <- c(rep(TRUE, 57), rep(FALSE, 115))
 vars$stage_2 <- c(rep(FALSE, 57), rep(TRUE, 57), rep(FALSE, 58))
 vars$stage_3 <- c(rep(FALSE, 114), rep(TRUE, 58))
 
-scaling::mv_item(
+NEPSroutines::mv_item(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -159,9 +159,9 @@ scaling::mv_item(
   print = TRUE,
   save = TRUE,
   return = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Plots/Missing_Responses/by_item',
+  path_results = 'Test/B129/Version 1.2.0/Results',
+  path_table = 'Test/B129/Version 1.2.0/Tables',
+  path_plots = 'Test/B129/Version 1.2.0/Plots/Missing_Responses/by_item',
   show_all = TRUE,
   overwrite = TRUE,
   warn = TRUE,
@@ -172,7 +172,7 @@ scaling::mv_item(
 # IRT analyses (Rasch & 2PL)
 
 ```{r IRT analysis}
-irt_dich <- scaling::irt_analysis(
+irt_dich <- NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = 'dich',
@@ -196,7 +196,7 @@ names(xsi_fixed_1p) <- row.names(irt_dich$model.1pl$mod$xsi)
 xsi_fixed_2p <- irt_dich$model.2pl$mod$xsi$xsi
 names(xsi_fixed_2p) <- row.names(irt_dich$model.2pl$mod$xsi)
 
-irt_dich_fixed <- scaling::irt_analysis(
+irt_dich_fixed <- NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = 'dich',
@@ -216,7 +216,7 @@ irt_dich_fixed <- scaling::irt_analysis(
   name_group = 'all'
 )
 
-irt_poly <- scaling::irt_analysis(
+irt_poly <- NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -240,7 +240,7 @@ names(xsi_fixed_pcm) <- row.names(irt_poly$model.pcm$mod$xsi)
 xsi_fixed_gpcm <- irt_poly$model.gpcm$mod$xsi$xsi
 names(xsi_fixed_gpcm) <- row.names(irt_poly$model.gpcm$mod$xsi)
 
-irt_poly_fixed <- scaling::irt_analysis(
+irt_poly_fixed <- NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -260,7 +260,7 @@ irt_poly_fixed <- scaling::irt_analysis(
   name_group = 'all'
 )
 
-irt_grouped <- scaling::grouped_irt_analysis(
+irt_grouped <- NEPSroutines::grouped_irt_analysis(
   select = c(easy = 'dich_easy', difficult = 'dich_difficult', common = 'dich_common'),
   resp = resp,
   vars = vars,
@@ -284,7 +284,7 @@ xsi_fixed_easy_2p <- irt_grouped$easy$model.2pl$mod$xsi$xsi
 names(xsi_fixed_easy_2p) <- row.names(irt_grouped$easy$model.2pl$mod$xsi)
 xsi_fixed_2p <- list(easy = xsi_fixed_easy_2p)
 
-irt_grouped <- scaling::grouped_irt_analysis(
+irt_grouped <- NEPSroutines::grouped_irt_analysis(
   select = c(easy = 'dich_easy', difficult = 'dich_difficult', common = 'dich_common'),
   resp = resp,
   vars = vars,
@@ -309,7 +309,7 @@ irt_grouped <- scaling::grouped_irt_analysis(
 
 ```{r single IRT analysis}
 # Rasch and 2PL
-scaling::irt_analysis(
+NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = 'dich',
@@ -319,16 +319,16 @@ scaling::irt_analysis(
   save = TRUE,
   print = TRUE,
   return = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Plots',
+  path_results = 'Test/B129/Version 1.2.0/Results',
+  path_table = 'Test/B129/Version 1.2.0/Tables',
+  path_plots = 'Test/B129/Version 1.2.0/Plots',
   overwrite = TRUE,
   verbose = FALSE,
   name_group = 'all'
 )
 
 # PCM and GPCM
-scaling::irt_analysis(
+NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -338,9 +338,9 @@ scaling::irt_analysis(
   save = TRUE,
   print = TRUE,
   return = FALSE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Plots',
+  path_results = 'Test/B129/Version 1.2.0/Results',
+  path_table = 'Test/B129/Version 1.2.0/Tables',
+  path_plots = 'Test/B129/Version 1.2.0/Plots',
   overwrite = TRUE,
   verbose = FALSE,
   name_group = 'all'
@@ -351,7 +351,7 @@ scaling::irt_analysis(
 
 ```{r grouped IRT analysis}
 # Rasch and 2PL
-scaling::grouped_irt_analysis(
+NEPSroutines::grouped_irt_analysis(
   select = c(easy = 'dich_easy', difficult = 'dich_difficult', common = 'dich_common'),
   resp = resp,
   vars = vars,
@@ -361,14 +361,14 @@ scaling::grouped_irt_analysis(
   plots = TRUE,
   return = FALSE,
   overwrite = TRUE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Plots',
+  path_results = 'Test/B129/Version 1.2.0/Results',
+  path_table = 'Test/B129/Version 1.2.0/Tables',
+  path_plots = 'Test/B129/Version 1.2.0/Plots',
   verbose = FALSE
 )
 
 # PCM and GPCM
-scaling::grouped_irt_analysis(
+NEPSroutines::grouped_irt_analysis(
   select = c(easy = 'mixed_easy', difficult = 'mixed_difficult', common = 'mixed_common'),
   resp = resp,
   vars = vars,
@@ -379,9 +379,9 @@ scaling::grouped_irt_analysis(
   plots = TRUE,
   return = FALSE,
   overwrite = TRUE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Tables',
-  path_plots = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Plots',
+  path_results = 'Test/B129/Version 1.2.0/Results',
+  path_table = 'Test/B129/Version 1.2.0/Tables',
+  path_plots = 'Test/B129/Version 1.2.0/Plots',
   verbose = FALSE
 )
 ```
@@ -391,7 +391,7 @@ scaling::grouped_irt_analysis(
 
 ```{r dif analysis}
 # For Rasch
-scaling::dif_analysis(
+NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
   select = c('dich_common', 'dich', 'dich'),
@@ -402,13 +402,13 @@ scaling::dif_analysis(
   print = TRUE,
   save = TRUE,
   return = FALSE,
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Tables',
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Results',
+  path_table = 'Test/B129/Version 1.2.0/Tables',
+  path_results = 'Test/B129/Version 1.2.0/Results',
   verbose = FALSE
 )
 
 # For PCM
-scaling::dif_analysis(
+NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
   select = c('mixed_common', 'mixed', 'mixed'),
@@ -419,8 +419,8 @@ scaling::dif_analysis(
   print = TRUE,
   save = TRUE,
   return = FALSE,
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Tables',
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Results',
+  path_table = 'Test/B129/Version 1.2.0/Tables',
+  path_results = 'Test/B129/Version 1.2.0/Results',
   verbose = FALSE
 )
 ```
@@ -429,7 +429,7 @@ scaling::dif_analysis(
 # Distractor analysis
 
 ```{r distractor analysis}
-scaling::dis_analysis(
+NEPSroutines::dis_analysis(
   resp = resp,
   vars = vars,
   valid = 'valid',
@@ -437,8 +437,8 @@ scaling::dis_analysis(
   print = TRUE,
   save = TRUE,
   overwrite = TRUE,
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Results',
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Tables'
+  path_results = 'Test/B129/Version 1.2.0/Results',
+  path_table = 'Test/B129/Version 1.2.0/Tables'
 )
 ```
 
@@ -450,7 +450,7 @@ scaling::dis_analysis(
 vars$kog_type <- as.numeric(vars$kog_type)
 vars$text_type <- as.numeric(vars$text_type)
 
-scaling::dim_analysis(
+NEPSroutines::dim_analysis(
   resp = resp,
   vars = vars,
   select = 'mixed',
@@ -463,8 +463,8 @@ scaling::dim_analysis(
   return = TRUE,
   save = TRUE,
   print = TRUE,
-  path_table = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Tables', 
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Results',
+  path_table = 'Test/B129/Version 1.2.0/Tables', 
+  path_results = 'Test/B129/Version 1.2.0/Results',
   overwrite = TRUE,
   verbose = FALSE
 )
@@ -480,7 +480,7 @@ Linking is not yet implemented in this package version.
 # Create scores
 
 ```{r scores}
-scores <- scaling::create_scores(
+scores <- NEPSroutines::create_scores(
   resp = resp,
   vars = vars,
   scoring = 'irt_scoring',
@@ -491,7 +491,7 @@ scores <- scaling::create_scores(
   sum_score = TRUE,
   sum_select = 'suf',
   num_cat = 'num_cat',
-  path_results = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/Results',
+  path_results = 'Test/B129/Version 1.2.0/Results',
   return = TRUE,
   save = TRUE
 )
@@ -501,7 +501,7 @@ scores <- scaling::create_scores(
 # Create SUF
 
 ```{r suf}
-scaling::create_suf(
+NEPSroutines::create_suf(
   resp = resp,
   vars = vars,
   select = 'suf',
@@ -510,7 +510,7 @@ scaling::create_suf(
   score_name = 'reg7',
   mvs = NULL,
   items_labels = NULL,
-  path = 'C:/Users/ba4eb5/Desktop/Skalierung/Skalierungspaket/Test/B129/Version 1.2.0/SUF',
+  path = 'Test/B129/Version 1.2.0/SUF',
   save = TRUE,
   return = FALSE,
   warn = TRUE

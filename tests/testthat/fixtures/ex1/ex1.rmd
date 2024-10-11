@@ -28,7 +28,7 @@ format:
 rm(list = ls())
 
 # Load packages
-library(scaling)
+library(NEPSroutines)
 library(rlang)
 
 # Turn off warnings
@@ -56,11 +56,11 @@ labels_mvs <- c(
 ```{r descriptives}
 
 # Sample size with only valid cases
-scaling::n_valid(resp, valid = "valid")
+NEPSroutines::n_valid(resp, valid = "valid")
 
 # Descriptives for nominal variables
-scaling::desc_nom(resp, desc = c("sex", "mig", "school"), valid = "valid")
-scaling::show_attributes(resp, desc = c("sex", "mig", "school"))
+NEPSroutines::desc_nom(resp, desc = c("sex", "mig", "school"), valid = "valid")
+NEPSroutines::show_attributes(resp, desc = c("sex", "mig", "school"))
 
 ```
 
@@ -70,7 +70,7 @@ scaling::show_attributes(resp, desc = c("sex", "mig", "school"))
 
 ```{r missing responses by person}
 
-scaling::mv_person(
+NEPSroutines::mv_person(
   resp = resp,
   vars = vars,
   select = "dich",
@@ -96,7 +96,7 @@ scaling::mv_person(
 
 ```{r missing responses by item}
 
-scaling::mv_item(
+NEPSroutines::mv_item(
   resp = resp,
   vars = vars,
   select = "dich",
@@ -123,7 +123,7 @@ scaling::mv_item(
 
 ```{r IRT analysis for dichotomous items}
 
-scaling::irt_analysis(
+NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = "dich",
@@ -148,7 +148,7 @@ scaling::irt_analysis(
 
 ```{r dif analysis for Rasch}
 
-scaling::dif_analysis(
+NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
   select = "dich",
@@ -172,7 +172,7 @@ scaling::dif_analysis(
 
 ```{r distractor analysis}
 
-scaling::dis_analysis(
+NEPSroutines::dis_analysis(
   resp = resp,
   vars = vars,
   valid = "valid",
@@ -192,7 +192,7 @@ scaling::dis_analysis(
 
 ```{r create suf}
 
-scores <- scaling::create_scores(
+scores <- NEPSroutines::create_scores(
   resp = resp,
   vars = vars,
   score_name = "grk1",
@@ -208,7 +208,7 @@ scores <- scaling::create_scores(
   path_results = paste0(getwd(), "/results")
 )
 
-scaling::create_suf(
+NEPSroutines::create_suf(
   resp = resp,
   vars = vars,
   select = "dich",

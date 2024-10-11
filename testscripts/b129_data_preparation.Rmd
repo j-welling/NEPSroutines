@@ -1,6 +1,6 @@
 
 ---
-title: "Data preparation with scaling package of example data from B129 (Reading)"
+title: "Data preparation with NEPSroutines package of example data from B129 (Reading)"
 author: "Jana Welling"
 date: "`r Sys.time()`"
 output:
@@ -22,20 +22,16 @@ editor_options:
   
 ```{r preparation, warning = FALSE, message = FALSE, comment = NA, results = 'hide'}
 
-#' ** Cleare working space** 
-rm(list = ls())
-
 #' **Load packages**
 library('here')
 library('dplyr')
 library('haven')
 
 #' **Set path**
-#here::i_am('Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket')
-# Error [only if in file 'scaling']: filepath must be a file or a relative path, not an absolute path.
+#setwd(insert_path)
 
-#' **Load scaling package**
-pkgload::load_all(here::here('scaling'))
+#' **Load NEPSroutines package**
+pkgload::load_all(here::here('NEPSroutines'))
 ```
 
 ## Prepare data
