@@ -51,6 +51,7 @@
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param path_results  string; defines path to folder where results shall be
 #'   saved
+#' @param path_table  string; defines path to folder where tables shall be saved
 #' @param warn  logical; whether to print warnings
 # #' @param resp_prev data.frame with responses of first measurement wave,
 # #'    a person identifier; may also include a WLE as given in wid
@@ -91,7 +92,6 @@
 # #' @param longitudinal  logical; do within cohort linking (TRUE) or between
 # #'   cohort linking (FALSE)
 # #' @param print  logical; whether results shall be printed to console
-# #' @param path_table  string; defines path to folder where tables shall be saved
 # #' @param do_dim logical; whether to do dimensionality analysis for linking
 # #' @param do_dif logical; whether to do dif analysis for linking
 # #' @param dif_threshold numeric; threshold under which DIF in common link items
