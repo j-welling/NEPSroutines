@@ -168,9 +168,13 @@ is_null_mvs_valid <- function(mvs = NA, valid = NA) {
 #' @returns NULL invisibly
 #' @noRd
 
-save_table <- function(results, filename, path,
-                       overwrite = FALSE,
-                       show_rownames = TRUE) {
+save_table <- function(
+    results,
+    filename,
+    path,
+    overwrite = FALSE,
+    show_rownames = TRUE
+  ) {
 
   if (!is.null(filename)) {
 
