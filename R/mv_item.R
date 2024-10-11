@@ -843,13 +843,7 @@ mvi_plots <- function(
 
   # Prepare data
   mv_i <- mv_i$list
-  k <- scaling:::create_ifelse(
-    is.null(grouping),
-    max(vars[[position]][vars[[select]]], na.rm = TRUE),
-    max(sapply(grouping, \(x) {
-      max(vars[[position]][vars[[select]] & vars[[x]]], na.rm = TRUE)
-      }), na.rm = TRUE)
-  )
+  k <- max(vars[vars[[select]], position], na.rm = TRUE)
 
   # Create groups vector
   if (!is.null(grouping))
@@ -972,7 +966,7 @@ mvi_plots <- function(
 
     # save plot
     ggplot2::ggsave(
-      filename = paste0("Missing_responses_by_item_", i,".png"),
+      filename = paste0("Missings_by_item_", i,".png"),
       plot = gg, path = path_, width = 2000, height = 1200, units = "px",
       dpi = 300
     )
@@ -1172,19 +1166,21 @@ add_missings_per_stage <- function(
 #'
 #' @export
 
-print_mvi_results <- function(mv_i,
-                              name_grouping = 'test version',
-                              labels_mvs = c(
-                                  ALL = "total missing items",
-                                  OM = "omitted items",
-                                  NV = "not valid items",
-                                  NR = "not reached items",
-                                  TA = "missing items due to test abortion",
-                                  UM = "unspecific missing items",
-                                  ND = "not determinable items",
-                                  MD = "items missing by design",
-                                  AZ = "missing items due to 'Angabe zurueckgesetzt'"
-                                  )) {
+print_mvi_results <- function(
+    mv_i,
+    name_grouping = 'test version',
+    labels_mvs = c(
+      ALL = "total missing items",
+      OM = "omitted items",
+      NV = "not valid items",
+      NR = "not reached items",
+      TA = "missing items due to test abortion",
+      UM = "unspecific missing items",
+      ND = "not determinable items",
+      MD = "items missing by design",
+      AZ = "missing items due to 'Angabe zurueckgesetzt'"
+    )
+  ) {
     if (is.data.frame(mv_i$list)) {
 
       n <- ifelse(is.null(mv_i$list$stage), 4, 5)
