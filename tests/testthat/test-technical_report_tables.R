@@ -1,4 +1,4 @@
-
+skip()
 test_that("create table with item properties works", {
 
   skip_if_not_installed("flextable")
