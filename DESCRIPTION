@@ -1,7 +1,7 @@
 Type: Package
 Package: NEPSroutines
 Title: Implementing the NEPS Scaling Guidelines
-Version: 1.2.0
+Version: 1.2.1
 Authors@R: c(
     person("Jana", "Welling", , "jana.welling@lifbi.de", role = c("cre", "aut")),
     person("Anna", "Scharl", role = "aut"),
