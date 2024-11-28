@@ -167,9 +167,12 @@ FigMV <- FigMv
 #'
 #' @param file A file path for the image.
 #' @param tbl The table number for the footnote.
+#' @param crop A string indicating how to crop the image in the format
+#' "<width>x<height>{+-}<xoffset>{+-}<yoffset>"
+#' (see http://www.imagemagick.org/Magick++/Geometry.html)
 #' @returns An image.
 #' @export
-FigWrightMap <- function(file, tbl = 5) {
+FigWrightMap <- function(file, tbl = 5, crop = "800x1010+5+50") {
 
   if (grepl("_(PCM2|GPCM)\\.png", basename(file))) {
     note <-
@@ -193,7 +196,7 @@ FigWrightMap <- function(file, tbl = 5) {
 
   return(Fig(
     file = file,
-    crop = "800x1010+5+50",
+    crop = crop,
     width = 1500,
     note.y = 150,
     footnote = note
