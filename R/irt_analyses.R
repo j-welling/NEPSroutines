@@ -704,12 +704,13 @@ wright_map <- function(model, path = "Plots", name_group = NULL) {
   NEPSroutines:::check_folder(path = path_)
 
   # Create Wright Map
+  th <- TAM::IRT.threshold(model$mod)
   png(paste0(path_, "/Wright_map_for_", irtmodel, ".png"),
       width = 800, height = 1300, bg = "white",
       res = 300, pointsize = 10)
-  TAM::IRT.WrightMap(TAM::IRT.threshold(model$mod),
+  TAM::IRT.WrightMap(th,
                      main.title = "Wright map",
-                     label.items =  paste0("I",c(1:length(model$mod$xsi))),
+                     label.items =  paste0("I",c(1:nrow(th))),
                      item.side = "itemClassic",
                      return.thresholds = FALSE, dim.names = "",
                      show.axis.logits = "R",
