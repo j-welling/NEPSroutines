@@ -347,7 +347,7 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' }
 TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
                    size = 12, width = NULL,
-                   excl = c("N_administered", "ND", "ALL")) {
+                   excl = c("N_administered", "ND", "ALL", "...1")) {
 
   # Result table
   if (is.list(obj) & "list" %in% names(obj))
