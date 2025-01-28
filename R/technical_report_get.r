@@ -205,6 +205,7 @@ GetMvp <- function(obj, type, value, digits = 0) {
     value <- as.numeric(substring(value, 2))
   }
   if (operator == "=") operator <- paste0(operator, "=")
+  names(obj[[type]]) <- gsub(" ", ".", names(obj[[type]]))
   n <- as.numeric(obj[[type]]$`Number.of.missing.responses`)
   out <- sum(obj[[type]]$Percentage[methods::getFunction(operator)(n, value)])
   return(rnd(out, digits = digits))
