@@ -215,10 +215,13 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
         dis[[item]]$rit <- NA
 
         # Create corrected total score
-        item_scored <- ifelse(
-          resp[[item]] == vars[[correct]][vars$item == item], 1, 0
-        )
-        cscore <- resp$score - item_scored / k
+        cscore <- resp$score
+        if (!use_wle) {
+          item_scored <- ifelse(
+            resp[[item]] == vars[[correct]][vars$item == item], 1, 0
+          )
+          cscore <- cscore - item_scored / k
+        }
 
         # Correlation between each response option and corrected total score
         for (s in seq_len(nrow(dis[[item]]))) {
