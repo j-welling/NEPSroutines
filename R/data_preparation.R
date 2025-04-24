@@ -116,7 +116,7 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 pc_scoring <- function(resp, poly_items, mvs = NULL, warn = TRUE) {
 
     # Check whether variables are indeed contained in data.frames
-    check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
+    NEPSroutines:::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
 
     for (item in names(poly_items)) {
         subitems <- poly_items[[item]]
