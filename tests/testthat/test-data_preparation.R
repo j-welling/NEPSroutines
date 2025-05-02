@@ -21,29 +21,70 @@ test_that("dichotomous_scoring() works", {
 
 test_that("pc_scoring() works", {
 
+  # Simulated data
+  data(ex1)
+  resp <- ex1$resp#[ex1$resp$valid, c("ID_t", ex1$vars$item[!ex1$vars$raw])]
+  resp$grk10014_c[resp$grk10014_c < 0] <- 0
+  resp$grk10015_c[resp$grk10015_c < 0] <- 0
+  vars <- ex1$vars[!ex1$vars$raw, ]
+
+  # Define polytomous items
   poly_items <- list(
-    "mag9100s_c" = c("mag91001_c", "mag91002_c", "mag91003_c"),
-    "mag9200s_c" = c("mag92001_c", "mag92002_c")
-  )
-  resp <- data.frame(
-    mag91001_c = rep(1, 10),
-    mag91002_c = c(rep(1, 8), -97, -97),
-    mag91003_c = c(rep(1, 8), -95, -97),
-    mag92001_c = rep(c(0, 1), 5),
-    mag92002_c = rep(1, 10)
+    "grk1000s_c" = c("grk10001_c", "grk10002_c", "grk10003_c"), # with missing
+    "grk1001s_c" = c("grk10014_c", "grk10015_c")               # without missing
   )
 
-  expect_no_error( pc_scoring(resp = resp, poly_items = poly_items, warn = FALSE))
-  expect_warning( pc_scoring(resp = resp, poly_items = poly_items, warn = TRUE))
+  # Without imputation
+  expect_no_error(
+    pc_scoring(resp = resp, poly_items = poly_items,
+               impute = FALSE, warn = FALSE)
+  )
+  expect_warning(
+    pc_scoring(resp = resp, poly_items = poly_items,
+               impute = FALSE, warn = TRUE)
+  )
   expect_equal(
-    pc_scoring(resp = resp, poly_items = poly_items, warn = FALSE)$mag9100s_c[9],
-    -55)
+    pc_scoring(resp = resp, poly_items = poly_items,
+               impute = FALSE, warn = FALSE)$grk1000s_c[26],
+    -95)
   expect_equal(
-    pc_scoring(resp = resp, poly_items = poly_items, warn = FALSE)$mag9100s_c[10],
+    pc_scoring(resp = resp, poly_items = poly_items,
+               impute = FALSE, warn = FALSE)$grk1000s_c[43],
     -97)
   expect_true(
     all(pc_scoring(resp = resp, poly_items = poly_items,
-                   warn = FALSE)$mag9100s_c[-c(9:10)] == 3)
+                   impute = FALSE, warn = FALSE)$mag9100s_c[1:2] == 3)
+  )
+  expect_true(
+    all(pc_scoring(resp = resp, poly_items = poly_items,
+                   impute = FALSE, warn = FALSE)$mag9100s_c[c(6, 22, 34)] == 1)
+  )
+
+  # With imputation
+  x=  pc_scoring(resp = resp, poly_items = poly_items,
+                 vars = vars, select = "dich", mvs = -99:-1,
+                 impute = TRUE, warn = TRUE, verbose = FALSE)
+  expect_no_error(
+    pc_scoring(resp = resp, poly_items = poly_items,
+               vars = vars, select = "dich",
+               verbose = FALSE, impute = TRUE, warn = FALSE)
+  )
+  expect_warning(
+    pc_scoring(resp = resp, poly_items = poly_items,
+               vars = vars, select = "dich",
+               verbose = FALSE, impute = TRUE, warn = TRUE)
+  )
+  expect_equal(
+    pc_scoring(resp = resp, poly_items = poly_items,
+               vars = vars, select = "dich",
+               verbose = FALSE, impute = TRUE, warn = FALSE)$grk1000s_c[26],
+    0
+  )
+  expect_equal(
+    pc_scoring(resp = resp, poly_items = poly_items,
+               vars = vars, select = "dich",
+               verbose = FALSE, impute = TRUE, warn = FALSE)$grk1000s_c[367],
+    -97
   )
 
 

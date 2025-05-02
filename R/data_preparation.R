@@ -112,37 +112,344 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 #'
 #' @return resp including unscored (raw) and scored items
 #' @export
+pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
+                       mvs = NULL, warn = TRUE,
+                       missing_by_design = -54,
+                       impute = TRUE, threshold = .50,
+                       path_results = "Results", save = TRUE,
+                       verbose = TRUE) {
 
-pc_scoring <- function(resp, poly_items, mvs = NULL, warn = TRUE) {
+  # Test data
+  if ( !is.list(poly_items) ) {
+    stop( "The argument 'poly_items' must be a list. Please check your input." )
+  }
+  if ( !is.numeric(threshold) | threshold < 0 | threshold > 1) {
+    stop( "The argument 'treshold' must be numeric in the interval ",
+          "between 0 and 1. Please check your input." )
+  }
 
-    # Check whether variables are indeed contained in data.frames
-    NEPSroutines:::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
+  # Check whether variables are indeed contained in data.frames
+  NEPSroutines:::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
 
-    for (item in names(poly_items)) {
-        subitems <- poly_items[[item]]
+  # Check pc_item (should be marked with 's_c')
+  if (warn) {
+    for ( pc_name in names(poly_items) ) {
+      is_pc_named_correctly <- grepl("s_c$", pc_name)
+      if ( !is_pc_named_correctly ) {
+        message( pc_name, ": Variable name should end with 's_c'.\n" )
+      }
+    }
+  }
 
-        pc_item <- rowSums(resp[, subitems] == 1)
-        number_missing <- rowSums(resp[, subitems] < 0)
-        any_missing <- number_missing > 0
-        pc_item[any_missing] <- -55
+  # Set missing values
+  if (is.null(mvs)) {
+    mvs <- c(-99:-1)
+    if (isTRUE(warn))
+      warning("No missing values provided. c(-99:-1) used as default.")
+  }
 
-        if (is.null(mvs)) {
-            mvs <- c(-99:-1)
-            if (isTRUE(warn))
-              warning("No missing values provided. c(-99:-1) used as default.")
-        }
+  # Impute missing subitems
+  if (impute) {
 
-        for (mv in mvs) {
-            all_this_missing_type <-
-                (rowSums(resp[, subitems] == mv) == number_missing) & any_missing
-            pc_item[all_this_missing_type] <- mv
-        }
-
-        resp[[item]] <- pc_item
+    if (verbose) {
+      message( "Missing values of subitems are imputed if the share of ",
+               "missing responses falls below the 'threshold'. ",
+               "However, the returned dataset remains unchanged, that is, ",
+               "it includes the original (non-imputed) responses for the ",
+               "subitems.\n",
+               "To skip subitem imputation, set 'imputation = FALSE'." )
     }
 
-    return(resp)
+    # Create indicators for missing subitems to impute
+    indicators <- NEPSroutines:::pc_missing_subitems(
+      resp = resp,
+      mvs = mvs,
+      missing_by_design = missing_by_design,
+      poly_items = poly_items,
+      threshold = threshold,
+      path_results = path_results,
+      save = save
+    )
+
+    # Impute missing values
+    resp_full <- NEPSroutines:::pc_imputation(
+      resp = resp,
+      vars = vars,
+      select = select,
+      mvs = mvs,
+      missing_by_design = missing_by_design,
+      poly_items = poly_items,
+      indicators = indicators,
+      path_results = path_results,
+      save = save
+    )
+
+  } else {
+
+    resp_full <- resp
+
+  }
+
+  # Score polytomous items
+  for (item in names(poly_items)) {
+    subitems <- poly_items[[item]]
+
+    pc_item <- rowSums(resp_full[, subitems] == 1)
+    number_missing <- rowSums(resp_full[, subitems] < 0)
+    any_missing <- number_missing > 0
+    pc_item[any_missing] <- -55
+
+    for (mv in mvs) {
+      all_this_missing_type <-
+        (rowSums(resp_full[, subitems] == mv) == number_missing) & any_missing
+      pc_item[all_this_missing_type] <- mv
+    }
+
+    resp[[item]] <- pc_item
+
+  }
+
+  return(resp)
+
 }
+
+
+
+#' Create indicators for subitems with OM (omitted missing) values
+#' (criterion: ≤ 50% of subitems of a pc-item with OM values).
+#' @param resp  data.frame; contains item responses with items as variables and
+#'   persons as rows; y in {0, 1} for binary data; additionally includes ID_t
+#'   as a person identifier and all variables that are further defined in
+#'   the function arguments
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param poly_items  list; contains character vector with subitems for each
+#' polytomous item, name of the vector is the name of the polytomous item (e.g.
+#' poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))
+#' @param missing_by_design  numeric; missing value indicating missing by design
+#' @param threshold numeric; gives the threshold for the share of missing subitems
+#'   used to impute missing responses
+#' @param path_results  string; defines path to folder where results shall be saved
+#' @param save  logical; whether results shall be saved to hard drive
+#' @noRd
+pc_missing_subitems <- function( resp, mvs, poly_items,
+                                 missing_by_design = -54, threshold,
+                                 path_results, save ) {
+
+  # Test data
+  if ( !is.list(poly_items) ) {
+    stop( "The argument 'poly_items' must be a list. Please check your input." )
+  }
+  NEPSroutines:::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
+  if ( !is.numeric(threshold) | threshold < 0 | threshold > 1) {
+    stop( "The argument 'treshold' must be numeric in the interval between ",
+          "0 and 1. Please check your input." )
+  }
+
+  # Step 1. Create indicators for missing values on subitems
+  subitems <- unlist(poly_items)
+  indicators <- resp[c("ID_t", subitems)]
+  indicators[subitems] <- lapply(indicators[subitems], \(x) {
+    ifelse(x %in% missing_by_design, NA,
+           ifelse(x %in% mvs, 1, 0))
+  })
+  # test
+  if ( sum(sapply(indicators[subitems], \(x) {
+    all(range(x, na.rm = TRUE) %in% c(0, 1))
+  })) != length(names(indicators)[-1]) ) {
+    warning( "Recoding of subitems into indicator variables failed. ",
+             "Please contact the package developers." )
+  }
+
+  # Step 2. Calculate number of missing values (coded as 1) within each
+  # polytomous item
+  for ( i in names(poly_items) ) {
+    indicators[[paste0(i, "_sumMV")]] <-
+      rowSums(indicators[poly_items[[i]]], na.rm = TRUE)
+    indicators[[paste0(i, "_relMV")]] <-
+      indicators[[paste0(i, "_sumMV")]] / length(poly_items[[i]])
+    indicators[[paste0(i, "_impMV")]] <-
+      as.numeric(
+        indicators[[paste0(i, "_relMV")]] > 0 &
+        indicators[[paste0(i, "_relMV")]] < threshold
+      )
+  }
+  #test
+  if ( sum(grepl("_sumMV$", names(indicators))) != length(poly_items) ) {
+    stop( "Number of 'sumMV' variables does not match the number of 'pc_items'. ",
+          "Please contact the package developers." )
+  }
+  rm(i)
+
+  # Save results
+  if ( save ) {
+    tab_sumMV <- apply(indicators[, names(indicators)[grepl("_sumMV", names(indicators))]], 2, table, useNA = "always")
+    tab_impMV <- apply(indicators[, names(indicators)[grepl("_impMV", names(indicators))]], 2, table, useNA = "always")
+    results = list(indicators = indicators,
+                   tab_sumMV = tab_sumMV,
+                   tab_impMV = tab_impMV)
+    NEPSroutines:::save_results(
+      results,
+      "pc_subitems_mv_indicators.rds",
+      path_results
+    )
+
+  }
+
+  return( indicators )
+
+}
+
+
+
+#' Subitem imputation
+#' (criterion =< 50% of OM (omitted missing) values on subitems of a pc-item)
+#' @param resp  data.frame; contains item responses with items as variables and
+#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   polytomous responses with k categories; missing values (default -999 to -1)
+#'   are coded as NA internally; additionally includes ID_t as a person identifier
+#'   and all variables that are further defined in the function arguments
+#' @param vars  data.frame; contains information about items with items as rows;
+#'   includes variable 'item' containing item names; additionally includes all
+#'   variables that are further defined in the function arguments
+#' @param select  string; defines name of logical variable in vars that indicates
+#'   which items to use for the analysis
+#' @param mvs  named integer vector; contains user-defined missing values
+#' @param missing_by_design  numeric; user defined missing value for missing by
+#' design (is necessary for calculating N_administered)
+#' @param poly_items  list; contains character vector with subitems for each
+#' polytomous item, name of the vector is the name of the polytomous item (e.g.
+#' poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))
+#' @param path_results  string; defines path to folder where results shall be saved
+#' @param save  logical; whether results shall be saved to hard drive
+#' @noRd
+pc_imputation <- function( resp, vars, select,
+                           mvs, missing_by_design,
+                           poly_items, indicators,
+                           path_results, save ) {
+
+  # Test
+  if ( is.null(indicators) | !is.data.frame(indicators) ) {
+    stop( "The imputation of missing values on subitems, requires a ",
+          "data.frame with missing indicators. ",
+          "This data.frame should have been generated automatically ",
+          "using 'pc_scoring()' with 'imputation = TRUE'. ",
+          "Please contact the package developers." )
+  }
+  if ( length(intersect(resp$ID_t, indicators$ID_t)) != nrow(resp) ) {
+    stop( "The number of respondents 'resp' does not match the ",
+          "number of respondents in 'indicators'. These ",
+          "data.frames should have generated automatically ",
+          "using 'pc_scoring()' with 'imputation = TRUE'. ",
+          "Please contact the package developers." )
+  }
+  if ( !all(unlist(poly_items) %in% names(indicators)) ) {
+    stop( "The subitems defined in 'poly_items' are not included in ",
+                 "'indicators'. Please check your input." )
+
+  }
+  if ( !all(unlist(poly_items) %in% vars$item[vars[[select]]]) ) {
+    stop( "The subitems defined in 'poly_items' are not included in ",
+          "the selected item set. Please check your input." )
+
+  }
+
+  # Default valid cases
+  resp_ <- NEPSroutines:::convert_mv(resp, vars = vars, select = select,
+                                     warn = FALSE)
+  resp$valid <- rowSums(!is.na(resp_[, vars$item[vars[[select]]]])) >= 3
+  valid <- "valid"
+  rm(resp_)
+
+  # Fit Rasch model
+  fit <- NEPSroutines::irt_analysis(
+    resp = resp,
+    vars = vars,
+    select = select,
+    valid = valid,
+    mvs = mvs,
+    missing_by_design = missing_by_design,
+    scoring = NULL,
+    plots = FALSE,
+    save = FALSE,
+    print = FALSE,
+    return = TRUE,
+    suf_item_names = FALSE,
+    verbose = FALSE,
+    overwrite = FALSE,
+    warn = FALSE,
+    test = TRUE,
+    xsi_fixed_1p = NULL,
+    xsi_fixed_2p = NULL,
+    pweights = NULL,
+    control_tam = NULL,
+    control_wle = NULL
+  )
+
+  # Calculate predicted responses (threshold = .50 as criterion for predicted response)
+  xsi <- fit$model.1pl$mod$xsi$xsi
+  names(xsi) <- row.names(fit$model.1pl$mod$xsi)
+  theta <- as.data.frame(fit$model.1pl$mod$person[, c("pid", "EAP", "SD.EAP")])
+  P <- data.frame(ID_t = theta$pid, sapply(xsi, \(x) 1 / (1 + exp(-(theta$EAP - x)))))
+  pred_resp <- data.frame(ID_t = theta$pid, ifelse(P[,-1] > 0.5, 1, 0))
+  #test
+  if ( !setequal(resp$ID_t[resp[[valid]] == TRUE], pred_resp$ID_t) |
+       length(resp$ID_t[resp[[valid]] == TRUE]) != length(pred_resp$ID_t) ) {
+    warning( "ID_ts in original data.frame and in data.frame with ",
+             "predicted responses are different. ",
+             "Please contact the package developer." )
+  }
+
+  # Calculate error rate (threshold = .50 as criterion for predicted response)
+  merged <- merge(resp, pred_resp, by.x = "ID_t", by.y = "ID_t", suffixes = c("_true", "_pred"))
+  error_rates_.50 <- data.frame(
+    item = vars$item[vars[[select]]],
+    error_rate = sapply(vars$item[vars[[select]]], \(item) {
+      true_values <- merged[[paste0(item, "_true")]]
+      pred_values <- merged[[paste0(item, "_pred")]]
+      no_na <- !is.na(true_values)
+      mean(true_values[no_na] != pred_values[no_na]) # % der Unstimmigkeiten zw. beobachteten und vorhergesagten Responses
+    })
+  )
+  mean_error_rates_.50 <- mean(error_rates_.50$error_rate)
+
+  # Imputation of predicted responses for subitems with missing values
+  resp_imp <- resp
+  impMV <- names(indicators)[grepl("_impMV$", names(indicators))]
+  for (ID_t in resp$ID_t) {
+    for (imp in impMV) {
+      sel <- indicators$ID_t == ID_t
+      if (indicators[sel, imp] == 1) {
+        item_stem <- sub("_impMV$", "", imp)
+        for (subitem in poly_items[[item_stem]]) {
+          if (indicators[sel, subitem] == 1) {
+            resp_imp[resp_imp$ID_t == ID_t, subitem] <-
+              pred_resp[pred_resp$ID_t == ID_t, subitem]
+          }
+        }
+      }
+    }
+  }
+
+  # Save results
+  if (save) {
+    subitems_imputation_details <- list(
+      fit = fit,
+      pred_resp = pred_resp,
+      error_rates_.50 = error_rates_.50,
+      mean_error_rates_.50 = mean_error_rates_.50,
+      resp_imp = resp_imp
+    )
+    NEPSroutines:::save_results(
+      subitems_imputation_details,
+      "pc_subitems_imputations.rds",
+      path_results
+    )
+  }
+
+  return( resp_imp )
+
+}
+
 
 
 #' Collapse response categories with N < 200

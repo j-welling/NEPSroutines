@@ -25,9 +25,6 @@
 #' @param missing_by_design  numeric; user defined missing value for missing by
 #' design (is necessary for calculating N_administered)
 #' @param wle logical; whether to estimate WLEs
-#' @param imp_poly_items logical; whether to impute omitted missing values for
-#' subitems of a polytomous item, when less than 50% of the subitems of a
-#' polytomous item contain missing values
 #' @param poly_items  list; contains character vector with subitems for each
 #' polytomous item, name of the vector is the name of the polytomous item (e.g.
 #' poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))
@@ -126,7 +123,6 @@ create_scores <- function(
     mvs = NULL,
     missing_by_design = -54,
     wle = TRUE,
-    imp_poly_items = TRUE,
     poly_items = NULL,
     per_cat = 200,
     sum_score = FALSE,
@@ -240,174 +236,63 @@ create_scores <- function(
     NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[select]]])
     NEPSroutines:::check_pid(resp$ID_t)
 
-    # Whether the estimation of wles should be executed after imputation of subitems
-    if ( imp_poly_items ) {
-      message( "\nBy default, WLE estimation includes subitem imputation for polytomous items.
-      To ensure smooth processing, specify 'poly_items' as a list of polytomous items
-      and their subitems in the 'create_score()' function.
-      Category collapsing is then applied to the dataset with imputed subitems ('resp_imp')
-      if the ≤ 50% missingness criterion is met. Categories with fewer than 200 cases
-      are collapsed by default—adjustable via the 'per_cat' argument.
-      Note that the original dataset ('resp') remains unchanged.
-      \nIf you wish to skip subitem imputation, set 'imp_poly_items = FALSE'." )
-
-      if ( !is.null(poly_items) ) {
-        # Create indicators for OM values for subitems
-        indicators <- NEPSroutines:::missings_subitems(
-          resp = resp,
-          vars = vars,
-          select = select,
-          valid = valid,
-          mvs = mvs,
-          poly_items = poly_items,
-          path_results = path_results,
-          save = save
-        )
-
-        # Create 'resp_imp' containing imputed subitems if criterion met
-        resp_imp <- NEPSroutines:::imputation_OM_subitems(
-          resp = resp,
-          vars = vars,
-          select = select,
-          valid = valid,
-          mvs = mvs,
-          poly_items = poly_items,
-          per_cat = per_cat,
-          indicators = indicators,
-          path_results = path_results,
-          save = save
-        )
-        message( "\nDataset with imputed subitems has been successfully created.")
-
-        # Estimation of wles based on 'resp_imp'
-        if (is.null(rotation) | (!is.null(rotation) & is.null(xsi_fixed))) {
-          fit <- NEPSroutines:::irt_analysis( # hier könnte man irt_model() anstatt irt_analysis() verwenden --> spart Berechnungszeit
-            resp = resp_imp,
-            vars = vars,
-            select = select,
-            valid = valid,
-            mvs = mvs,
-            missing_by_design = missing_by_design,
-            scoring = scoring,
-            xsi_fixed_1p = xsi_fixed,
-            verbose = FALSE,
-            warn = warn,
-            return = TRUE,
-            plots = FALSE,
-            save = FALSE,
-            print = FALSE,
-            control_tam = control_tam,
-            control_wle = control_wle,
-            pweights = pweights,
-            test = FALSE
-          )
-          if (is.null(fit$model.1pl)) {
-            fit <- fit$model.pcm
-          } else {
-            fit <- fit$model.1pl
-          }
-          warn <- FALSE
-        }
-
-        if (!is.null(rotation)) {
-          if (is.null(xsi_fixed)) {
-            xsi_fixed <- fit$mod$xsi$xsi
-            names(xsi_fixed) <- row.names(fit$mod$xsi)
-          }
-          mod_wles <- NEPSroutines:::estimate_rotated_wles(
-            resp = resp_imp,
-            vars = vars,
-            select = select,
-            valid = valid,
-            rotation = rotation,
-            mvs = mvs,
-            scoring = scoring,
-            xsi_fixed = xsi_fixed,
-            wle_name = score_name,
-            control_tam = control_tam,
-            pweights = pweights
-          )
-          wles <- mod_wles[[2]]
-        } else {
-          wles <- as.data.frame(fit$wle[, c("pid", "theta", "error")])
-          names(wles) <- c("ID_t", paste0(score_name, c("_sc1", "_sc2")))
-        }
-
-        # if (!is.null(wles_linked))                                                # commented out because linking is not yet implemented
-        # wles <- merge(wles, wles_linked, by = "ID_t", all = TRUE)               # commented out because linking is not yet implemented
-
-        message( "\nWLEs based on the dataset with imputed subitems have been successfully estimated." )
-
-      } else { # when is.null(poly_items)
-        # Check whether selected variables are poyltomous
-        if ( NEPSroutines:::is_poly(resp, vars, select) ) {
-          stop("\nNo list of pc-items with subitems (poly_items) was provided.
-          To enable imputation before WLE estimation, please specify the poly_items argument.
-          If WLE scores should be estimated based on the original dataset (without imputed subitems),
-          please set 'imp_poly_items' to 'FALSE'.")
-        }
-      }
-    } else { # when imp_poly_items = FALSE
-      # Estimation of wles based on original dataset 'resp'
-      if (is.null(rotation) | (!is.null(rotation) & is.null(xsi_fixed))) {
-        fit <- NEPSroutines:::irt_analysis( # hier könnte man irt_model() anstatt irt_analysis() verwenden --> spart Berechnungszeit
-          resp = resp,
-          vars = vars,
-          select = select,
-          valid = valid,
-          mvs = mvs,
-          missing_by_design = missing_by_design,
-          scoring = scoring,
-          xsi_fixed_1p = xsi_fixed,
-          verbose = FALSE,
-          warn = warn,
-          return = TRUE,
-          plots = FALSE,
-          save = FALSE,
-          print = FALSE,
-          control_tam = control_tam,
-          control_wle = control_wle,
-          pweights = pweights,
-          test = FALSE
-        )
-        if (is.null(fit$model.1pl)) {
-          fit <- fit$model.pcm
-        } else {
-          fit <- fit$model.1pl
-        }
-        warn <- FALSE
-      }
-
-      if (!is.null(rotation)) {
-        if (is.null(xsi_fixed)) {
-          xsi_fixed <- fit$mod$xsi$xsi
-          names(xsi_fixed) <- row.names(fit$mod$xsi)
-        }
-        mod_wles <- NEPSroutines:::estimate_rotated_wles(
-          resp = resp,
-          vars = vars,
-          select = select,
-          valid = valid,
-          rotation = rotation,
-          mvs = mvs,
-          scoring = scoring,
-          xsi_fixed = xsi_fixed,
-          wle_name = score_name,
-          control_tam = control_tam,
-          pweights = pweights
-        )
-        wles <- mod_wles[[2]]
+    # Estimation of wles based on original dataset 'resp'
+    if (is.null(rotation) | (!is.null(rotation) & is.null(xsi_fixed))) {
+      fit <- NEPSroutines:::irt_analysis( # hier könnte man irt_model() anstatt irt_analysis() verwenden --> spart Berechnungszeit
+        resp = resp,
+        vars = vars,
+        select = select,
+        valid = valid,
+        mvs = mvs,
+        missing_by_design = missing_by_design,
+        scoring = scoring,
+        xsi_fixed_1p = xsi_fixed,
+        verbose = FALSE,
+        warn = warn,
+        return = TRUE,
+        plots = FALSE,
+        save = FALSE,
+        print = FALSE,
+        control_tam = control_tam,
+        control_wle = control_wle,
+        pweights = pweights,
+        test = FALSE
+      )
+      if (is.null(fit$model.1pl)) {
+        fit <- fit$model.pcm
       } else {
-        wles <- as.data.frame(fit$wle[, c("pid", "theta", "error")])
-        names(wles) <- c("ID_t", paste0(score_name, c("_sc1", "_sc2")))
+        fit <- fit$model.1pl
       }
-
-      # if (!is.null(wles_linked))                                                # commented out because linking is not yet implemented
-      # wles <- merge(wles, wles_linked, by = "ID_t", all = TRUE)               # commented out because linking is not yet implemented
-
-      message( "\nWLEs based on the original dataset (without imputed subitems) have been successfully estimated.")
-
+      warn <- FALSE
     }
+
+    if (!is.null(rotation)) {
+      if (is.null(xsi_fixed)) {
+        xsi_fixed <- fit$mod$xsi$xsi
+        names(xsi_fixed) <- row.names(fit$mod$xsi)
+      }
+      mod_wles <- NEPSroutines:::estimate_rotated_wles(
+        resp = resp,
+        vars = vars,
+        select = select,
+        valid = valid,
+        rotation = rotation,
+        mvs = mvs,
+        scoring = scoring,
+        xsi_fixed = xsi_fixed,
+        wle_name = score_name,
+        control_tam = control_tam,
+        pweights = pweights
+      )
+      wles <- mod_wles[[2]]
+    } else {
+      wles <- as.data.frame(fit$wle[, c("pid", "theta", "error")])
+      names(wles) <- c("ID_t", paste0(score_name, c("_sc1", "_sc2")))
+    }
+
+    # if (!is.null(wles_linked))                                                # commented out because linking is not yet implemented
+    # wles <- merge(wles, wles_linked, by = "ID_t", all = TRUE)               # commented out because linking is not yet implemented
+
   }
 
   # Estimate sum scores
@@ -543,369 +428,6 @@ create_scores <- function(
 
   # Return results
   if (return) return(scores)
-}
-
-
-
-#' Create indicators for subitems with OM (omitted missing) values
-#' (criterion: ≤ 50% of subitems of a pc-item with OM values).
-#' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
-#'   polytomous responses with k categories; missing values (default -999 to -1)
-#'   are coded as NA internally; additionally includes ID_t as a person identifier
-#'   and all variables that are further defined in the function arguments
-#' @param vars  data.frame; contains information about items with items as rows;
-#'   includes variable 'item' containing item names; additionally includes all
-#'   variables that are further defined in the function arguments
-#' @param select  string; defines name of logical variable in vars that indicates
-#'   which items to use for the analysis
-#' @param valid  string; defines name of logical variable in resp that indicates
-#'   (in)valid cases
-#' @param mvs  named integer vector; contains user-defined missing values
-#' @param missing_by_design  numeric; user defined missing value for missing by
-#' design (is necessary for calculating N_administered)
-#' @param poly_items  list; contains character vector with subitems for each
-#' polytomous item, name of the vector is the name of the polytomous item (e.g.
-#' poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))
-#' @param path_results  string; defines path to folder where results shall be saved
-#' @param save  logical; whether results shall be saved to hard drive
-#' @noRd
-missings_subitems <- function( resp, vars, select, valid,
-                               mvs, missing_by_design = missing_by_design,
-                               poly_items, path_results,
-                               save ) {
-
-  # Test data
-  if ( !is.null(poly_items) ) {
-
-    if ( !is.list(poly_items) ) {
-      stop( "❌ 'poly_items' must be a list. Please check your input." )
-    }
-    NEPSroutines:::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
-
-    # Check pc_item and subitem names (should be marked with 's_c' and '[number]_c', respectively)
-    for ( pc_name in names(poly_items) ) {
-      is_pc_named_correctly <- grepl("s_c$", pc_name)
-      subitems <- poly_items[[pc_name]]
-      subitem_check <- grepl(paste0("^", sub("s_c$", "", pc_name), "_[0-9]+_c$"), subitems)
-
-      if ( !is_pc_named_correctly ) {
-        message( pc_name, ": ❌ pc-item name should end with 's_c'" )
-      }
-
-      if ( !all(subitem_check) ) {
-        message( pc_name, ": ❌ One or more subitems are incorrectly named: ",
-                 paste(subitems[!subitem_check], collapse = ", "),
-                 ". Each subitem ends with _<number>_c." )
-      }
-    }
-  }
-
-  # Create indicators for OM values on subitems
-  # Step 1. Identify subitems of poly_items included in the analysis
-  pc_items <- vars$item[vars[[select]] == TRUE][grepl("s_c(_collapsed)?$", vars$item[vars[[select]] == TRUE])]
-  subitems <- as.character(unlist(poly_items))[sapply(as.character(unlist(poly_items)), function(item) {
-    any(startsWith(item, sub("s_c(_collapsed)?$", "", pc_items)))
-  })]
-
-  # Step 2. Recode responses and missing values in indicators (OM = 1)
-  indicators <- resp[c("ID_t", subitems)]
-  indicators[subitems] <- lapply(indicators[subitems], function(x) {
-    ifelse(x == -97, 1,
-           ifelse(x %in% -95:-21, NA,
-                  0))
-  })
-  # test
-  if ( sum(sapply(indicators[subitems], function(x) {
-    all(range(x, na.rm = TRUE) == c(0, 1))
-  })) != length(names(indicators)[-1]) ) {
-    warning( "\nRecoding of subitems into indicator variables is incorrect,
-              please estimate the wle values without imputation of missing values for subitems
-              and contact package developers" )
-  }
-
-  # Step 3. Calculate total number of OM values (coded as 1) within each poly item
-  sel <- unique(sub("_.*", "", subitems))
-  for ( i in sel ) {
-    indicators[[paste0(i, "_sumOM")]] <- rowSums(indicators[subitems[grepl(i, subitems)]] == 1, na.rm = TRUE)
-  }
-  #test
-  if ( sum(grepl("_sumOM$", names(indicators))) != length(pc_items) ) {
-    warning( "❌ Number of ‘_sumOM’ variables does not match the number of pc_items. Please contact package developer." )
-  }
-  rm(sel, i)
-
-  # Step 4. Calculate relative frequencies of OM subitems
-  num_subitems <- vars[vars$item %in% gsub("_collapsed", "", pc_items), c("item", "num_cat")]
-
-  sel <- names(indicators)[grepl("_sumOM", names(indicators))]
-  for( i in sel ) {
-    stem <- sub("_.*", "", i)
-    num_cat_value <- num_subitems$num_cat[grepl(stem, num_subitems$item)]
-    indicators[[paste0(stem, "_relOM")]] <- ( indicators[[i]] / num_cat_value )
-  }
-  rm(sel, i, stem, num_cat_value)
-  #test
-  if ( sum(grepl("_relOM$", names(indicators))) != length(pc_items) ) {
-    warning("❌ Number of ‘_relOM’ variables does not match the number of pc_items. Please contact package developer")
-  }
-
-  # Step 5. Check whether the relOM criterion (≤ 0.50), required for imputation, is met.
-  sel <- names(indicators)[grepl("_relOM", names(indicators))]
-
-  for ( i in sel ) {
-    stem <- sub("_.*", "", i)
-    indicators[[paste0(stem, "_indOM")]] <- ifelse(( indicators[[i]] > 0 & indicators[[i]] <= 0.5 ), 1, 0)
-  }
-  rm(sel, i, stem)
-  #test
-  if ( sum(grepl("_indOM$", names(indicators))) != length(pc_items) ) {
-    warning( "❌ Number of ‘_indOM’ variables does not match the number of pc_items. Please contact package developer." )
-  }
-
-
-
-  # Save results
-  if ( save ) {
-
-    # Frequency tables
-    tab_sumOM <- apply(indicators[, names(indicators)[grepl("_sumOM", names(indicators))]], 2, table, useNA = "always")
-    tab_indOM <- apply(indicators[, names(indicators)[grepl("_indOM", names(indicators))]], 2, table, useNA = "always")
-
-    results = list(indicators = indicators,
-                   tab_sumOM = tab_sumOM,
-                   tab_indOM = tab_indOM)
-
-    NEPSroutines:::save_results(results, "subitems_indicators_OM.rds", "results")
-  }
-
-  return( results$indicators )
-}
-
-
-#' Subitem imputation
-#' (criterion =< 50% of OM (omitted missing) values on subitems of a pc-item)
-#' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
-#'   polytomous responses with k categories; missing values (default -999 to -1)
-#'   are coded as NA internally; additionally includes ID_t as a person identifier
-#'   and all variables that are further defined in the function arguments
-#' @param vars  data.frame; contains information about items with items as rows;
-#'   includes variable 'item' containing item names; additionally includes all
-#'   variables that are further defined in the function arguments
-#' @param select  string; defines name of logical variable in vars that indicates
-#'   which items to use for the analysis
-#' @param valid  string; defines name of logical variable in resp that indicates
-#'   (in)valid cases
-#' @param mvs  named integer vector; contains user-defined missing values
-#' @param missing_by_design  numeric; user defined missing value for missing by
-#' design (is necessary for calculating N_administered)
-#' @param poly_items  list; contains character vector with subitems for each
-#' polytomous item, name of the vector is the name of the polytomous item (e.g.
-#' poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))
-#' @param per_cat integer; minimum number of persons per category; defaults to 200
-#' @param path_results  string; defines path to folder where results shall be saved
-#' @param save  logical; whether results shall be saved to hard drive
-#' @noRd
-imputation_OM_subitems <- function( resp, vars, select, valid,
-                                    mvs, missing_by_design = missing_by_design,
-                                    poly_items,
-                                    per_cat,
-                                    indicators,
-                                    path_results,
-                                    save ) {
-
-  # Test
-  if ( is.null(indicators) | !is.data.frame(indicators) ) {
-    stop( "\nFor imputation of missing values on subitems, a data.frame with indicators is required.
-             This data.frame should be generated automatically using the create_score function
-             if poly_items are provided. Please contact package developers." )
-  }
-
-  if ( !is.numeric(per_cat) ) {
-    stop( "\nPlease define 'per_cat' as an integer." )
-  }
-
-
-  # Prepare data (Select subitems and MC-items used in the analysis)
-  items <- vars$item[vars[[select]] == TRUE]
-  pc_items <- items[grepl("s_c(_collapsed)?$", items)]
-  MC_items <- setdiff(items, pc_items)
-  pc_subitems <- as.character(unlist(poly_items))[sapply(as.character(unlist(poly_items)), function(item) {
-    stem <- sub("(_\\d+_c)$", "", item)
-    stem %in% sub("s_c(_collapsed)?$", "", pc_items)
-  })]
-  rm(items)
-  items <- c(MC_items, pc_subitems)
-  rm(pc_items, MC_items)
-
-  resp_ <- resp[, c("ID_t", valid, items)]
-  vars_ <- vars[vars$item %in% items, ]
-
-
-  # Fit Rasch model
-  fit <- NEPSroutines::irt_analysis(
-    resp = resp_,
-    vars = vars_,
-    select = "dich",
-    valid = "valid",
-    mvs = mvs,
-    missing_by_design = -54,
-    scoring = NULL,
-    plots = FALSE,
-    save = FALSE,
-    print = FALSE,
-    return = TRUE,
-    suf_item_names = FALSE,
-    verbose = FALSE,
-    overwrite = FALSE,
-    warn = TRUE,
-    test = TRUE,
-    xsi_fixed_1p = NULL,
-    xsi_fixed_2p = NULL,
-    pweights = NULL,
-    control_tam = NULL,
-    control_wle = NULL
-  )
-
-
-  # Calculate predicted responses (threshold = .50 as criterion for predicted response)
-  xsi <- fit$model.1pl$mod$xsi$xsi
-  names(xsi) <- row.names(fit$model.1pl$mod$xsi)
-  theta <- as.data.frame(fit$model.1pl$mod$person[, c("pid", "EAP", "SD.EAP")])
-
-  P <- data.frame(ID_t = theta$pid, sapply(xsi, function(x) 1 / (1 + exp(-(theta$EAP - x)))))
-  pred_resp <- data.frame(ID_t = theta$pid, ifelse(P[,-1] > 0.5, 1, 0))
-
-  # Calculate error rate (threshold = .50 as criterion for predicted response)
-  #test
-  if ( !setequal(resp_$ID_t[resp_[valid] == TRUE], pred_resp$ID_t) | length(resp_$ID_t[resp_[valid] == TRUE]) != length(pred_resp$ID_t) ) {
-    warning( "\nID_ts in original data.frame and in data.frame with predicted responses are different.
-             Please contact the package developer." )
-  }
-
-  merged <- merge(resp_, pred_resp, by.x = "ID_t", by.y = "ID_t", suffixes = c("_true", "_pred"))
-
-  error_rates_.50 <- data.frame(
-    item = items,
-    error_rate = sapply(items, function(item) {
-      true_values <- merged[[paste0(item, "_true")]]
-      pred_values <- merged[[paste0(item, "_pred")]]
-      no_na <- !is.na(true_values)
-      mean(true_values[no_na] != pred_values[no_na]) # % der Unstimmigkeiten zw. beobachteten und vorhergesagten Responses
-    })
-  )
-  mean_error_rates_.50 <- mean(error_rates_.50$error_rate)
-
-  # Alternative calculation of predicted responses (empirical optimal cut-off obtained by ROC analysis)
-  suppressMessages(suppressPackageStartupMessages({
-    if (!requireNamespace("pROC", quietly = TRUE)) {
-      invisible(capture.output(install.packages("pROC")))
-    }
-    if (!require("pROC", quietly = TRUE, character.only = TRUE)) {
-      stop("\nPackage ‘pROC’ could not be installed or loaded.
-           First install the pROC package and then execute the 'create_score' function again.")
-    }
-  }))
-
-  optimal_cutoffs_roc <- data.frame(item = character(),
-                                    threshold = numeric(),
-                                    sensitivity = numeric(),
-                                    specificity = numeric(),
-                                    error_rate = numeric(),
-                                    stringsAsFactors = FALSE)
-  pred_resp_roc <- data.frame(matrix(NA, nrow = as.numeric(table(resp_[valid])["TRUE"]), ncol = length(items)))
-  colnames(pred_resp_roc) <- items
-
-  for (item in items) {
-    inp_obs <- resp_[[item]][resp_[[valid]]== TRUE]
-    inp_obs[inp_obs < 0] <- NA
-    inp_pred <- P[[item]]
-
-    roc_obj <- suppressMessages(roc(inp_obs, inp_pred))
-    optimal_cutoff <- coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity"))
-
-    out_pred <- ifelse(inp_pred >= optimal_cutoff$threshold, 1, 0)
-    pred_resp_roc[[item]] <- out_pred
-
-    error_rate <- mean(out_pred != inp_obs, na.rm = TRUE)
-    optimal_cutoffs_roc <- rbind(optimal_cutoffs_roc,
-                                 data.frame(item = item,
-                                            threshold = optimal_cutoff$threshold,
-                                            sensitivity = optimal_cutoff$sensitivity,
-                                            specificity = optimal_cutoff$specificity,
-                                            error_rate = error_rate))
-    rm(inp_obs, inp_pred, roc_obj, out_pred, error_rate, optimal_cutoff)
-  }
-
-  pred_resp_roc <- data.frame(ID_t = resp_$ID_t[resp_[valid]==TRUE], pred_resp_roc)
-  mean_error_rates_roc <- mean(optimal_cutoffs_roc$error_rate)
-
-
-  # Imputation of predicted responses for subitems with OM values
-  resp_imp <- resp
-  indOM <- names(indicators)[grepl("_indOM$", names(indicators))]
-
-  for (person in 1:nrow(resp)) {
-    for (ind in indOM) {
-      if (indicators[person, ind] == 1) {
-        ind_stem <- sub("_indOM$", "", ind)
-        subitems_one_pc <- pc_subitems[grepl(ind_stem, pc_subitems)]
-
-        ind_subitems_one_pc <- indicators[person, subitems_one_pc]
-        pred_resp_subitems_one_pc <- pred_resp[person, subitems_one_pc]
-
-        if ( length(ind_subitems_one_pc) == length(pred_resp_subitems_one_pc) ) {
-          for (subitem in subitems_one_pc) {
-            if (ind_subitems_one_pc[[subitem]] == 1) {
-              resp_imp[person, subitem] <- pred_resp_subitems_one_pc[[subitem]]
-            }
-          }
-        } else {
-          warning( "\nThe number of subitems of at least one pc-item in the data.frame 'indicators' differs
-                   from the data.frame with predicted responses. Please contact the package developer." )
-        }
-      }
-    }
-  }
-
-
-  # Score polytomous items
-  resp_imp <- NEPSroutines:::pc_scoring(resp = resp_imp[ , !(names(resp_imp) %in% grep("s_c", names(resp_imp), value = TRUE))],
-                                        poly_items = poly_items,
-                                        mvs = mvs)
-
-  # Collapse categories
-  vars_imp <- vars[!grepl("s_c_collapsed", vars$item), ]
-  resp_imp <-
-    NEPSroutines:::collapse_response_categories(resp = resp_imp,
-                                                vars = vars_imp,
-                                                select = "poly",
-                                                save = save,
-                                                path_table = here::here("tables/", "collapsed_pc_items_resp_imp"),
-                                                per_cat = per_cat)
-
-  # Save results
-  tab_pc_items_imputed <- sapply(resp_imp[ , (names(resp_imp) %in% grep("s_c", names(resp_imp), value = TRUE))], table, useNA="always")
-  tab_pc_items_imputed_collapsed <- sapply(resp_imp[ , (names(resp_imp) %in% grep("s_c_collapsed", names(resp_imp), value = TRUE))], table, useNA="always")
-
-  subitems_imputation_details = list(fit = fit,
-                                     pred_resp = pred_resp,
-                                     error_rates_.50 = error_rates_.50,
-                                     mean_error_rates_.50 = mean_error_rates_.50,
-                                     pred_resp_roc = pred_resp_roc,
-                                     optimal_cutoffs_roc = optimal_cutoffs_roc,
-                                     mean_error_rates_roc = mean_error_rates_roc,
-                                     resp_imp = resp_imp,
-                                     tab_pc_items_imputed = tab_pc_items_imputed,
-                                     tab_pc_items_imputed_collapsed = tab_pc_items_imputed_collapsed)
-
-  if (save) {
-
-    save_results(subitems_imputation_details, "subitems_imputation_details.rds", "results")
-  }
-
-  return( subitems_imputation_details$resp_imp )
 }
 
 
