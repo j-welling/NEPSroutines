@@ -236,7 +236,7 @@ create_scores <- function(
     NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[select]]])
     NEPSroutines:::check_pid(resp$ID_t)
 
-    # Estimation of wles based on original dataset 'resp'
+    # Estimation of wles
     if (is.null(rotation) | (!is.null(rotation) & is.null(xsi_fixed))) {
       fit <- NEPSroutines:::irt_analysis( # hier könnte man irt_model() anstatt irt_analysis() verwenden --> spart Berechnungszeit
         resp = resp,

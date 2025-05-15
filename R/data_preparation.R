@@ -107,8 +107,26 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 #' @param poly_items  list; contains character vector with subitems for each
 #' polytomous item, name of the vector is the name of the polytomous item (e.g.
 #' poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))
+#' @param vars  data.frame; contains information about items with items as rows;
+#' includes variable 'item' containing item names; additionally includes all
+#' variables that are further defined in the function arguments
+#' @param select  string; defines the name of the logical variable in vars
+#' that indicates which items should be included in the imputation model.
+#' It refers to all scored dichotomous items: multiple-choice items and
+#' subitems of polytomous items.
 #' @param mvs  integer vector; contains user-defined missing values
 #' @param warn  logical; print warnings
+#' @param missing_by_design  numeric; missing value indicating missing by design
+#' @param impute logical; whether to impute missing values for
+#' subitems of a polytomous item
+#' @param threshold numeric; gives the threshold for the share of missing subitems
+#'   used to impute missing responses
+#' @param path_results  string; defines path to folder where results shall be
+#' saved
+#' @param path_table  string; defines path to folder where tables shall be saved
+#' @param save  logical; whether results shall be saved to hard drive
+#' @param overwrite logical; whether to overwrite existing file when saving table
+#' @param verbose  logical; provides information on how polytomous items are scored
 #'
 #' @return resp including unscored (raw) and scored items
 #' @export
@@ -116,8 +134,8 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
                        mvs = NULL, warn = TRUE,
                        missing_by_design = -54,
                        impute = TRUE, threshold = .50,
-                       path_results = "Results", save = TRUE,
-                       verbose = TRUE) {
+                       path_results = "Results",  path_table = "Tables",
+                       save = TRUE, overwrite = TRUE, verbose = TRUE) {
 
   # Test data
   if ( !is.list(poly_items) ) {
@@ -152,12 +170,12 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
   if (impute) {
 
     if (verbose) {
-      message( "Missing values of subitems are imputed if the share of ",
-               "missing responses falls below the 'threshold'. ",
+      message( "When scoring polytomous items, missing values of subitems are ",
+               "imputed if the share of missing responses falls below the 'threshold'. ",
                "However, the returned dataset remains unchanged, that is, ",
                "it includes the original (non-imputed) responses for the ",
                "subitems.\n",
-               "To skip subitem imputation, set 'imputation = FALSE'." )
+               "To skip subitem imputation, set 'impute = FALSE'." )
     }
 
     # Create indicators for missing subitems to impute
@@ -168,7 +186,9 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
       poly_items = poly_items,
       threshold = threshold,
       path_results = path_results,
-      save = save
+      path_table = path_table,
+      save = save,
+      overwrite = overwrite
     )
 
     # Impute missing values
@@ -214,13 +234,12 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
 }
 
 
-
-#' Create indicators for subitems with OM (omitted missing) values
-#' (criterion: ≤ 50% of subitems of a pc-item with OM values).
+#' Create indicators for subitems with missing values
+#' (criterion: < 50% of subitems of a pc-item with missing values, as defined with 'threshold')
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data; additionally includes ID_t
-#'   as a person identifier and all variables that are further defined in
-#'   the function arguments
+#' persons as rows; y in {0, 1} for binary data; additionally includes ID_t
+#' as a person identifier and all variables that are further defined in
+#'the function arguments
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param poly_items  list; contains character vector with subitems for each
 #' polytomous item, name of the vector is the name of the polytomous item (e.g.
@@ -229,21 +248,14 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
 #' @param threshold numeric; gives the threshold for the share of missing subitems
 #'   used to impute missing responses
 #' @param path_results  string; defines path to folder where results shall be saved
+#' @param path_table  string; defines path to folder where tables shall be saved
 #' @param save  logical; whether results shall be saved to hard drive
+#' @param overwrite logical; whether to overwrite existing file when saving table
 #' @noRd
 pc_missing_subitems <- function( resp, mvs, poly_items,
-                                 missing_by_design = -54, threshold,
-                                 path_results, save ) {
-
-  # Test data
-  if ( !is.list(poly_items) ) {
-    stop( "The argument 'poly_items' must be a list. Please check your input." )
-  }
-  NEPSroutines:::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
-  if ( !is.numeric(threshold) | threshold < 0 | threshold > 1) {
-    stop( "The argument 'treshold' must be numeric in the interval between ",
-          "0 and 1. Please check your input." )
-  }
+                                 missing_by_design, threshold,
+                                 path_results, path_table,
+                                 save, overwrite ) {
 
   # Step 1. Create indicators for missing values on subitems
   subitems <- unlist(poly_items)
@@ -280,19 +292,50 @@ pc_missing_subitems <- function( resp, mvs, poly_items,
   }
   rm(i)
 
+  # Print results
+  summary_items_impMV <- data.frame(
+    Item = sub("_impMV.*", "", grep("_impMV", names(indicators), value = TRUE)),
+    Freq_of_imputed_MV = sapply(indicators[grep("_impMV", names(indicators), value = TRUE)], function(x) sum(x == 1, na.rm = TRUE)),
+    RelFreq_of_imputed_MV = sapply(indicators[grep("_impMV", names(indicators), value = TRUE)], function(x) round(mean(x == 1, na.rm = TRUE), 3)),
+    row.names = NULL
+  )
+  message("\nOverview of the absolute and relative frequencies of imputed missing values " ,
+          "for the polytomous items in the dataset: ")
+  print(summary_items_impMV)
+  desc_items_impMV <- psych::describe(summary_items_impMV["RelFreq_of_imputed_MV"])[c(2:5,8:10)]
+  print(desc_items_impMV, digits = 3)
+
+  Freq <- table(rowSums(indicators[grep("_impMV", names(indicators), value = TRUE)], na.rm = TRUE))
+  RelFreq <- round(prop.table(Freq), 3)
+  summary_cases_impMV <- data.frame(Nr_of_polytomous_items_with_imputed_MV = rownames(Freq),
+                                    cbind(Freq = as.integer(Freq), RelFreq = as.numeric(RelFreq)),
+                                    row.names = NULL)
+  message("\nOverview of cases with imputed missing values for the polytomous items in the dataset:")
+  print(summary_cases_impMV)
+
   # Save results
   if ( save ) {
     tab_sumMV <- apply(indicators[, names(indicators)[grepl("_sumMV", names(indicators))]], 2, table, useNA = "always")
     tab_impMV <- apply(indicators[, names(indicators)[grepl("_impMV", names(indicators))]], 2, table, useNA = "always")
     results = list(indicators = indicators,
                    tab_sumMV = tab_sumMV,
-                   tab_impMV = tab_impMV)
+                   tab_impMV = tab_impMV,
+                   summary_items_impMV = summary_items_impMV,
+                   desc_items_impMV = desc_items_impMV,
+                   summary_cases_impMV = summary_cases_impMV)
     NEPSroutines:::save_results(
       results,
       "pc_subitems_mv_indicators.rds",
       path_results
     )
 
+    results <- results[4:6]
+    NEPSroutines:::save_table(
+      results,
+      "summary_pc_subitems_mv_indicators.xlsx",
+      path_table,
+      overwrite = overwrite
+    )
   }
 
   return( indicators )
@@ -302,7 +345,6 @@ pc_missing_subitems <- function( resp, mvs, poly_items,
 
 
 #' Subitem imputation
-#' (criterion =< 50% of OM (omitted missing) values on subitems of a pc-item)
 #' @param resp  data.frame; contains item responses with items as variables and
 #'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
@@ -319,6 +361,8 @@ pc_missing_subitems <- function( resp, mvs, poly_items,
 #' @param poly_items  list; contains character vector with subitems for each
 #' polytomous item, name of the vector is the name of the polytomous item (e.g.
 #' poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))
+#' @param indicators data.frame; contains indicators for missing values
+#' that should be imputed
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param save  logical; whether results shall be saved to hard drive
 #' @noRd
@@ -332,25 +376,37 @@ pc_imputation <- function( resp, vars, select,
     stop( "The imputation of missing values on subitems, requires a ",
           "data.frame with missing indicators. ",
           "This data.frame should have been generated automatically ",
-          "using 'pc_scoring()' with 'imputation = TRUE'. ",
+          "using 'pc_scoring()' with 'impute = TRUE'. ",
           "Please contact the package developers." )
   }
   if ( length(intersect(resp$ID_t, indicators$ID_t)) != nrow(resp) ) {
     stop( "The number of respondents 'resp' does not match the ",
           "number of respondents in 'indicators'. These ",
           "data.frames should have generated automatically ",
-          "using 'pc_scoring()' with 'imputation = TRUE'. ",
+          "using 'pc_scoring()' with 'impute = TRUE'. ",
           "Please contact the package developers." )
+  }
+  if ( is.null(vars) | !is.data.frame(vars) ) {
+    stop( "The imputation of missing values on subitems, requires a ",
+          "data.frame containing information on the competence items. ",
+          "This should be specified in the 'vars' argument. ",
+          "Please check your input." )
+  }
+  if ( is.null(select) ) {
+    stop( "The imputation of missing values on subitems requires ",
+          "the name of a logical variable in vars that indicates ",
+          "the scored dichotomous items: multiple-choice items ",
+          "and subitems of polytomous items. ",
+          "This should be specified in the 'select' argument. ",
+          "Please check your input." )
   }
   if ( !all(unlist(poly_items) %in% names(indicators)) ) {
     stop( "The subitems defined in 'poly_items' are not included in ",
                  "'indicators'. Please check your input." )
-
   }
   if ( !all(unlist(poly_items) %in% vars$item[vars[[select]]]) ) {
     stop( "The subitems defined in 'poly_items' are not included in ",
           "the selected item set. Please check your input." )
-
   }
 
   # Default valid cases
@@ -401,16 +457,16 @@ pc_imputation <- function( resp, vars, select,
 
   # Calculate error rate (threshold = .50 as criterion for predicted response)
   merged <- merge(resp, pred_resp, by.x = "ID_t", by.y = "ID_t", suffixes = c("_true", "_pred"))
-  error_rates_.50 <- data.frame(
+  error_rates <- data.frame(
     item = vars$item[vars[[select]]],
     error_rate = sapply(vars$item[vars[[select]]], \(item) {
       true_values <- merged[[paste0(item, "_true")]]
       pred_values <- merged[[paste0(item, "_pred")]]
-      no_na <- !is.na(true_values)
-      mean(true_values[no_na] != pred_values[no_na]) # % der Unstimmigkeiten zw. beobachteten und vorhergesagten Responses
+      no_na <- !(true_values %in% mvs)
+      mean(true_values[no_na] != pred_values[no_na]) # % of discrepancies between observed and predicted responses
     })
   )
-  mean_error_rates_.50 <- mean(error_rates_.50$error_rate)
+  mean_error_rates <- mean(error_rates$error_rate)
 
   # Imputation of predicted responses for subitems with missing values
   resp_imp <- resp
@@ -432,15 +488,15 @@ pc_imputation <- function( resp, vars, select,
 
   # Save results
   if (save) {
-    subitems_imputation_details <- list(
+    pc_subitems_imputation <- list(
       fit = fit,
       pred_resp = pred_resp,
-      error_rates_.50 = error_rates_.50,
-      mean_error_rates_.50 = mean_error_rates_.50,
+      error_rates = error_rates,
+      mean_error_rates = mean_error_rates,
       resp_imp = resp_imp
     )
     NEPSroutines:::save_results(
-      subitems_imputation_details,
+      pc_subitems_imputation,
       "pc_subitems_imputations.rds",
       path_results
     )
