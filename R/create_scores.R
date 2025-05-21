@@ -25,11 +25,6 @@
 #' @param missing_by_design  numeric; user defined missing value for missing by
 #' design (is necessary for calculating N_administered)
 #' @param wle logical; whether to estimate WLEs
-#' @param poly_items  list; contains character vector with subitems for each
-#' polytomous item, name of the vector is the name of the polytomous item (e.g.
-#' poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))
-#' @param per_cat integer; minimum number of persons per category of a scored
-#' polytomous item; defaults to 200
 #' @param sum_score logical; whether to calculate sum scores
 #' @param sum_select string; defines name of logical variable in vars that indicates
 #'   which items to use for the analysis
@@ -123,8 +118,6 @@ create_scores <- function(
     mvs = NULL,
     missing_by_design = -54,
     wle = TRUE,
-    poly_items = NULL,
-    per_cat = 200,
     sum_score = FALSE,
     sum_select = NULL,
     metap = FALSE,
