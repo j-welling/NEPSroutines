@@ -21,8 +21,6 @@
 #' design
 #' @param labels_mvs  named character vector; contains labels for user-defined
 #' missing values to use them in plot titles and printed results
-#' @param missing_by_design  integer; user defined missing value for missing by
-#' design
 #' @param plots  logical; whether plots shall be created and saved to hard drive
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param print  logical; whether results shall be printed to console

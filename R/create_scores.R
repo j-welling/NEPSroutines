@@ -229,6 +229,7 @@ create_scores <- function(
     NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[select]]])
     NEPSroutines:::check_pid(resp$ID_t)
 
+    # Estimation of wles
     if (is.null(rotation) | (!is.null(rotation) & is.null(xsi_fixed))) {
       fit <- NEPSroutines:::irt_analysis( # hier könnte man irt_model() anstatt irt_analysis() verwenden --> spart Berechnungszeit
         resp = resp,
@@ -260,8 +261,8 @@ create_scores <- function(
 
     if (!is.null(rotation)) {
       if (is.null(xsi_fixed)) {
-          xsi_fixed <- fit$mod$xsi$xsi
-          names(xsi_fixed) <- row.names(fit$mod$xsi)
+        xsi_fixed <- fit$mod$xsi$xsi
+        names(xsi_fixed) <- row.names(fit$mod$xsi)
       }
       mod_wles <- NEPSroutines:::estimate_rotated_wles(
         resp = resp,
@@ -276,14 +277,15 @@ create_scores <- function(
         control_tam = control_tam,
         pweights = pweights
       )
-        wles <- mod_wles[[2]]
+      wles <- mod_wles[[2]]
     } else {
       wles <- as.data.frame(fit$wle[, c("pid", "theta", "error")])
       names(wles) <- c("ID_t", paste0(score_name, c("_sc1", "_sc2")))
     }
 
     # if (!is.null(wles_linked))                                                # commented out because linking is not yet implemented
-      # wles <- merge(wles, wles_linked, by = "ID_t", all = TRUE)               # commented out because linking is not yet implemented
+    # wles <- merge(wles, wles_linked, by = "ID_t", all = TRUE)               # commented out because linking is not yet implemented
+
   }
 
   # Estimate sum scores
@@ -292,7 +294,7 @@ create_scores <- function(
     # Select
     if (is.null(sum_select)) {
       sum_select <- select
-      warning("No variable 'sum_select' provided for sum scores. All items as ",
+      warning("\nNo variable 'sum_select' provided for sum scores. All items as ",
               "specified in variable '", select, "' are used instead.")
     }
 
@@ -330,7 +332,7 @@ create_scores <- function(
 
     if (is.null(meta_select)) {
       meta_select <- select
-      warning("No variable 'meta_select' provided for meta scores. All items as ",
+      warning("\nNo variable 'meta_select' provided for meta scores. All items as ",
               "specified in variable '", select, "' are used instead.")
     }
 
@@ -422,9 +424,7 @@ create_scores <- function(
 }
 
 
-
 #' Create scores
-#'
 #' @param resp  data.frame; contains item responses with items as variables and
 #'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... , k-1} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
@@ -550,7 +550,7 @@ estimate_rotated_wles <- function(resp,
   NEPSroutines:::check_variables(resp, "resp", rotation)
 
   if (is.null(xsi_fixed)) {
-    warning("Please provide the item parameters to ensure the correct",
+    warning("\nPlease provide the item parameters to ensure the correct",
             " results in the WLE estimation.")
   }
 

@@ -565,7 +565,7 @@ create_ifelse <- function(condition, a, b) {
 }
 
 
-#' Create object depending on condition
+#' Create group name
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
 #' @param start string; first part of name
 #' @param end string; last part of name
@@ -665,7 +665,6 @@ create_suf_names <- function(vars_name = NULL) {
 }
 
 
-#'
 #' Calculate basic descriptive statistics for variables
 #'
 #' @param x A data frame with variables to calculate the statistics for
@@ -725,3 +724,15 @@ rnd <- function(x, digits = 2, d0 = FALSE) {
   return(x)
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
