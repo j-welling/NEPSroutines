@@ -149,12 +149,12 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
   # Check whether variables are indeed contained in data.frames
   NEPSroutines:::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
 
-  # Check pc_item (should be marked with 's_c')
+  # Check pc_item (should be marked with 's_c' or 's_[startingCohortTargetGroup]_c')
   if (warn) {
     for ( pc_name in names(poly_items) ) {
-      is_pc_named_correctly <- grepl("s_c$", pc_name)
+      is_pc_named_correctly <- grepl("s(_[a-zA-Z0-9]+)*_c$", pc_name)
       if ( !is_pc_named_correctly ) {
-        message( pc_name, ": Variable name should end with 's_c'.\n" )
+        message( pc_name, ": Variable name should contain a subitem marker like 's', e.g. '[item]s_c', '[item]s_sc3g9_c'.\n" )
       }
     }
   }
