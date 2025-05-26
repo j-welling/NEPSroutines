@@ -1,6 +1,5 @@
-
 author_list <- c(
-  utils::person(given = "Jana", family = "Welling"),
+  utils::person(family = "Welling", given = "Jana"),
   utils::person(given = "Anna", family = "Scharl"),
   utils::person(given = "Tanja", family = "Kutscher"),
   utils::person(given = "Timo", family = "Gnambs")
@@ -26,7 +25,7 @@ bibentry(
   textVersion =
     paste0(
       paste(
-        sapply(author_list, \(x) x$given), ", ",
+        sapply(author_list, \(x) x$family), ", ",
         sapply(author_list, \(x) paste0(substr(x$given, 1, 1), ".")),
         collapse = ", ", sep = ""
       ),

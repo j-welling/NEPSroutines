@@ -684,12 +684,15 @@ icc_plots <- function(model, path = "Plots", name_group = NULL) {
 #' @param model  list; return object of irt_model()
 #' @param path  string; defines path to folder where plots shall be saved
 #' @param name_group  string; defines name of group used in analysis (e.g. 'easy')
+#' @param width  number; width of generated plot
+#' @param height  number; height of generated plot
 #'
 #' @importFrom grDevices dev.off png tiff
 #' @importFrom graphics mtext text
 #' @export
 
-wright_map <- function(model, path = "Plots", name_group = NULL) {
+wright_map <- function(model, path = "Plots", name_group = NULL,
+                       width = 800, height = 1300) {
 
   # Identify kind of irt model
   irtmodel <- model$irtmodel
@@ -704,12 +707,13 @@ wright_map <- function(model, path = "Plots", name_group = NULL) {
   NEPSroutines:::check_folder(path = path_)
 
   # Create Wright Map
+  th <- TAM::IRT.threshold(model$mod)
   png(paste0(path_, "/Wright_map_for_", irtmodel, ".png"),
-      width = 800, height = 1300, bg = "white",
+      width = width, height = height, bg = "white",
       res = 300, pointsize = 10)
-  TAM::IRT.WrightMap(TAM::IRT.threshold(model$mod),
+  TAM::IRT.WrightMap(th,
                      main.title = "Wright map",
-                     label.items =  paste0("I",c(1:length(model$mod$xsi))),
+                     label.items =  paste0("I",c(1:nrow(th))),
                      item.side = "itemClassic",
                      return.thresholds = FALSE, dim.names = "",
                      show.axis.logits = "R",

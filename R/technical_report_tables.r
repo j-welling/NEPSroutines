@@ -347,7 +347,7 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' }
 TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
                    size = 12, width = NULL,
-                   excl = c("N_administered", "ND", "ALL")) {
+                   excl = c("N_administered", "ND", "ALL", "...1")) {
 
   # Result table
   if (is.list(obj) & "list" %in% names(obj))
@@ -885,11 +885,11 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
     vals[colnames(tab) == names(colnames2)[i]] <- colnames2[i]
     }
   lbl[1] <- "Item"
-  lbl[lbl == "sex"] <- "Sex"
-  lbl[lbl == "mig"] <- "Migration"
-  lbl[lbl == "books"] <- "Books"
-  lbl[lbl %in% c("rotation", "position", "rot")] <- "Test position"
-  lbl[lbl %in% c("sc", "cohort")] <- "Starting cohort"
+  lbl[lbl == "sex" & !(lbl %in% names(colnames1))] <- "Gender"
+  lbl[lbl == "mig" & !(lbl %in% names(colnames1))] <- "Migration"
+  lbl[lbl == "books" & !(lbl %in% names(colnames1))] <- "Books"
+  lbl[lbl %in% c("rotation", "position", "rot") & !(lbl %in% names(colnames1))] <- "Test position"
+  lbl[lbl %in% c("sc", "cohort") & !(lbl %in% names(colnames1))] <- "Starting cohort"
   for (i in seq_along(colnames1)) {
     lbl[lbl == names(colnames1)[i]] <- colnames1[i]
   }
