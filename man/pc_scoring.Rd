@@ -4,7 +4,22 @@
 \alias{pc_scoring}
 \title{Score partial credit items}
 \usage{
-pc_scoring(resp, poly_items, mvs = NULL, warn = TRUE)
+pc_scoring(
+  resp,
+  poly_items,
+  vars = NULL,
+  select = NULL,
+  mvs = NULL,
+  warn = TRUE,
+  missing_by_design = -54,
+  impute = TRUE,
+  threshold = 0.5,
+  path_results = "Results",
+  path_table = "Tables",
+  save = TRUE,
+  overwrite = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{resp}{data.frame; contains original item responses}
@@ -13,9 +28,37 @@ pc_scoring(resp, poly_items, mvs = NULL, warn = TRUE)
 polytomous item, name of the vector is the name of the polytomous item (e.g.
 poly_items = list(poly1 = c("subitem1", "subitem2"), poly2 = c("subitem1", "subitem2")))}
 
+\item{vars}{data.frame; contains information about items with items as rows;
+includes variable 'item' containing item names; additionally includes all
+variables that are further defined in the function arguments}
+
+\item{select}{string; defines the name of the logical variable in vars
+that indicates which items should be included in the imputation model.
+It refers to all scored dichotomous items: multiple-choice items and
+subitems of polytomous items.}
+
 \item{mvs}{integer vector; contains user-defined missing values}
 
 \item{warn}{logical; print warnings}
+
+\item{missing_by_design}{numeric; missing value indicating missing by design}
+
+\item{impute}{logical; whether to impute missing values for
+subitems of a polytomous item}
+
+\item{threshold}{numeric; gives the threshold for the share of missing subitems
+used to impute missing responses}
+
+\item{path_results}{string; defines path to folder where results shall be
+saved}
+
+\item{path_table}{string; defines path to folder where tables shall be saved}
+
+\item{save}{logical; whether results shall be saved to hard drive}
+
+\item{overwrite}{logical; whether to overwrite existing file when saving table}
+
+\item{verbose}{logical; provides information on how polytomous items are scored}
 }
 \value{
 resp including unscored (raw) and scored items
