@@ -36,7 +36,7 @@ test_that("conduct_dis_analysis() works", {
   tabitem_fix <- Import(
     test_path("fixtures/ex2/tables"), "distractors_items.xlsx"
   )
-  tabsum_fix <-Import(
+  tabsum_fix <- Import(
     test_path("fixtures/ex2/tables"), "distractors_summary.xlsx"
   )
   res_fix <- readRDS(test_path("fixtures/ex2/results/distractors.rds"))
@@ -83,7 +83,7 @@ test_that("conduct_dis_analysis() works", {
   tabitem_fix <- Import(
     test_path("fixtures/ex3/tables"), "distractors_items.xlsx"
   )
-  tabsum_fix <-Import(
+  tabsum_fix <- Import(
     test_path("fixtures/ex3/tables"), "distractors_summary.xlsx"
   )
   res_fix <- readRDS(test_path("fixtures/ex3/results/distractors.rds"))
