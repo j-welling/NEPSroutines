@@ -4,7 +4,13 @@
 \alias{wright_map}
 \title{Wright maps}
 \usage{
-wright_map(model, path = "Plots", name_group = NULL)
+wright_map(
+  model,
+  path = "Plots",
+  name_group = NULL,
+  width = 800,
+  height = 1300
+)
 }
 \arguments{
 \item{model}{list; return object of irt_model()}
@@ -12,6 +18,10 @@ wright_map(model, path = "Plots", name_group = NULL)
 \item{path}{string; defines path to folder where plots shall be saved}
 
 \item{name_group}{string; defines name of group used in analysis (e.g. 'easy')}
+
+\item{width}{number; width of generated plot}
+
+\item{height}{number; height of generated plot}
 }
 \description{
 Create Wright maps for IRT models.

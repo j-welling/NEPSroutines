@@ -68,6 +68,8 @@
 #'                       items across the stages.
 #' @param rotation       A logical to include a test rotation with two positions
 #'                       (first and second).
+#' @param unscored       A logical indicating to return the unscored variables
+#' @param scored         A logical indicating to return the scored variables
 #' @param seed           A random seed for reproducible results.
 #' @param control        A list of control settings:
 #' * var.theta:          Variance of the population abilities.
@@ -84,6 +86,11 @@
 #'                       `booklets` or the length of `mst`. Otherwise, the same
 #'                       number of unique items is used for all booklets or
 #'                       levels.
+#' * mc.resp.letter:     Use a mixture of numbers and letters as unscored
+#'                       responses (TRUE) or only numbers (FALSE)
+#' * mc.resp.options:    A numeric vector for the number of response options
+#'                       in MC items; for a given item, the number is randomly
+#'                       selected from this vector.
 #' * varname:            Stem for the variable names. After the stem the item
 #'                       number is added with four digits. Scored items are
 #'                       additionally appended with "_c". CMC items are
@@ -127,6 +134,7 @@
 #' * vars:               A data frame with item characteristics.
 sim.testlet <- function(N = 2000, I = 25, CMC = 5, SCR = 5, MC = NULL,
                         booklets = 1, mst = 1, rotation = TRUE,
+                        unscored = TRUE, scored = TRUE,
                         seed = 6237, control = list()) {
 
   set.seed(seed)
@@ -165,6 +173,8 @@ sim.testlet <- function(N = 2000, I = 25, CMC = 5, SCR = 5, MC = NULL,
     booklets <- 1L
     MST <- TRUE
   }
+  unscored <- as.logical(unscored[1])
+  scored <- as.logical(scored[1])
   if (!MST & booklets != length(control$unique))
     control$unique <- rep(control$unique[1], booklets)
   if (MST & length(mst) != length(control$unique))
@@ -192,6 +202,9 @@ sim.testlet <- function(N = 2000, I = 25, CMC = 5, SCR = 5, MC = NULL,
                 "reduce the number of unique items."))
   if (I < 15)
     stop(paste0("The minimum number items that can be used is 15!"))
+  if (!unscored & ! scored)
+    stop(paste0("No item responses requested! Set either 'unscored' or ",
+                "'scored' to 'TRUE'."))
 
   # Update sample size
   N <- N + control$mis.notparticipated
@@ -206,8 +219,9 @@ sim.testlet <- function(N = 2000, I = 25, CMC = 5, SCR = 5, MC = NULL,
     sex = base::sample(c(0, 1), N, replace = TRUE),
     mig = stats::rbinom(N, 1, 0.20),
     school = base::sample(c(0, 1, 2), N, replace = TRUE),
-    t34005a = sample(1:6, N, replace = TRUE)
+    t34005a = sample(1:6, N, replace = TRUE) # number of books
   )
+  Y$books <- ifelse(Y$t34005a <= 3, 0, 1)
 
   # Create raw migration variable
   Y$t400500 <- NA
@@ -228,6 +242,7 @@ sim.testlet <- function(N = 2000, I = 25, CMC = 5, SCR = 5, MC = NULL,
     base::sample(control$testyear - control$age + c(-1, 0, 1), N,
                  replace = TRUE)
   Y$birthm <- base::sample(1:12, N, replace = TRUE)
+  Y$age <- NEPSroutines::calculate_age(Y)
 
   # Booklet indicators
   if (booklets > 1L) {
@@ -719,7 +734,20 @@ sim.testlet <- function(N = 2000, I = 25, CMC = 5, SCR = 5, MC = NULL,
   resp$mig[resp$valid & stats::runif(N) < control$mis.mig] <- NA
   resp$t400500[is.na(resp$mig)] <- NA
 
+  # Select variables to return
   if (CMC == 0L) vars$poly <- vars$mixed <- NULL
+  if (!unscored) {
+    resp$t34005a <- resp$t400500 <- resp$testy <- resp$testm <-
+      resp$birthy <- resp$birthm <- NULL
+    resp[, grepl(paste0("^", control$varname, "[0-9s]{4}$"), colnames(resp))] <- NULL
+    vars <- vars[!grepl(paste0("^", control$varname, "[0-9s]{4}$"), vars$item), ]
+  }
+  if (!scored) {
+    resp$mig <- resp$books <- resp$age <- NULL
+    resp[, grepl(paste0("^", control$varname, "[0-9s]{4}_c$"), colnames(resp))] <- NULL
+    vars <- vars[!grepl(paste0("^", control$varname, "[0-9s]{4}_c$"), vars$item), ]
+  }
+
   return(list(resp = resp, vars = vars))
 
 }
