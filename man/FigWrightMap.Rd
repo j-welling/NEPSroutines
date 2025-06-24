@@ -5,14 +5,18 @@
 \alias{FigWright_Map}
 \title{Crop plot with Wright map and include footnote}
 \usage{
-FigWrightMap(file, tbl = 5)
+FigWrightMap(file, tbl = 5, crop = "800x1010+5+50")
 
-FigWright_Map(file, tbl = 5)
+FigWright_Map(file, tbl = 5, crop = "800x1010+5+50")
 }
 \arguments{
 \item{file}{A file path for the image.}
 
 \item{tbl}{The table number for the footnote.}
+
+\item{crop}{A string indicating how to crop the image in the format
+"<width>x<height>{+-}<xoffset>{+-}<yoffset>"
+(see http://www.imagemagick.org/Magick++/Geometry.html)}
 }
 \value{
 An image.

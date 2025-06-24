@@ -12,7 +12,7 @@ TblMvi(
   sort = "position",
   size = 12,
   width = NULL,
-  excl = c("N_administered", "ND", "ALL")
+  excl = c("N_administered", "ND", "ALL", "...1")
 )
 
 TblMVI(
@@ -22,7 +22,7 @@ TblMVI(
   sort = "position",
   size = 12,
   width = NULL,
-  excl = c("N_administered", "ND", "ALL")
+  excl = c("N_administered", "ND", "ALL", "...1")
 )
 }
 \arguments{
