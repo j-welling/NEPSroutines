@@ -46,7 +46,7 @@
 #' @param seed A random seed for reproducible results.
 #' @param control A list of control settings:
 #' * var.theta: Variance of the population abilities
-#' * var.theta: Variance of each population testlet effect
+#' * var.testlet: Variance of each population testlet effect
 #' * main.sex: Main effect for the DIF variable `sex`
 #' * main.mig: Main effect for the DIF variable `mig`
 #' * main.school: Main effect for the DIF variable `school`
@@ -98,7 +98,7 @@ sim.testlet <- function(N = 2000, I = 25, poly = 5, booklets = 1,
                 "requested booklets! Please make sure that at least 5 common ",
                 "items are available."))
   if (I < 15)
-    stop(paste0("The minimum number items that can be used is 15!"))
+    stop(paste0("The minimum number of items that can be used is 15!"))
 
   # Update sample size
   N <- N + control$not.participated
