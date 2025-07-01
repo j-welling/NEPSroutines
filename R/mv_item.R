@@ -868,7 +868,7 @@ mvi_plots <- function(
     if (is.null(grouping)) {
 
       # create plot
-      mv_i <- NEPSroutines:::mv_per_position(
+      mv_i_pp <- NEPSroutines:::mv_per_position(
         mv_i,
         mv = i,
         resp = resp,
@@ -878,11 +878,11 @@ mvi_plots <- function(
         add_missings_per_stage = add_missings_per_stage,
         digits = digits
       )
-      y <- mv_i[[i]]
+      y <- mv_i_pp[[i]]
       ylim <- ceiling(max(y, na.rm = TRUE)/10)*10
 
       gg <- ggplot2::ggplot(
-              data = mv_i,
+              data = mv_i_pp,
               mapping = ggplot2::aes(x = position, y = y, fill = color)
             ) +
             ggplot2::scale_fill_manual(values = color) +
