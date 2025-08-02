@@ -708,12 +708,14 @@ wright_map <- function(model, path = "Plots", name_group = NULL,
 
   # Create Wright Map
   th <- TAM::IRT.threshold(model$mod)
+  nnum <- nchar(as.character(nrow(th)))
+  lbl_items <- paste0("I", sprintf(paste0("%0", nnum, "d"), 1:nrow(th)))
   png(paste0(path_, "/Wright_map_for_", irtmodel, ".png"),
       width = width, height = height, bg = "white",
       res = 300, pointsize = 10)
   TAM::IRT.WrightMap(th,
                      main.title = "Wright map",
-                     label.items =  paste0("I",c(1:nrow(th))),
+                     label.items = lbl_items,
                      item.side = "itemClassic",
                      return.thresholds = FALSE, dim.names = "",
                      show.axis.logits = "R",
