@@ -23,7 +23,6 @@ scaling of NEPS competence data. It implements standardized scaling routines for
 one- and two-parametric logistic models with binary and polytomous responses.
 
 ## Features
- 
 - Analyses of descriptive information, missing values, distractors,
   dimensionality, and differential item functioning
 - Generation of item and respondent scores for NEPS scientific use files
