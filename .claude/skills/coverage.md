@@ -26,7 +26,7 @@ When the user invokes `/coverage`:
 
    **Specific file coverage:**
    ```bash
-   Rscript -e "covr::file_coverage('R/<file>.R', 'tests/testthat/')"
+   Rscript -e "covr::package_coverage(source_files = 'R/<file>.R')"
    ```
 
    **HTML report:**
