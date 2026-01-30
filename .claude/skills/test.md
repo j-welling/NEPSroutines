@@ -42,7 +42,7 @@ When the user invokes `/test`:
 ## Examples
 
 ```
-/test              # Run all 51 tests
+/test              # Run test suite (27 active tests, 24 skipped)
 /test utils        # Run only test-utils.R tests
 /test irt          # Run tests matching "irt"
 /test --coverage   # Run with coverage report
