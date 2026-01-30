@@ -89,6 +89,6 @@ Each fixture typically contains:
 ## Notes
 
 - Fixtures are pre-computed to avoid slow test runs
-- Total size: ~127MB (not committed to git lfs)
+- Total size: ~127MB (tracked in Git as regular files, not via Git LFS)
 - Update fixtures when algorithm changes
 - Used for regression testing
