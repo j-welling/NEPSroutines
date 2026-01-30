@@ -59,7 +59,7 @@ This skill implements steps 7-8 of CLAUDE.md workflow:
 ## Expected Duration
 
 - Document: ~5-10 seconds
-- Test: ~30-60 seconds (51 tests)
+- Test: ~30-60 seconds (27 running tests; 51 total, 24 skipped)
 - Check: ~1-3 minutes
 
 Total: ~2-4 minutes for full verification
