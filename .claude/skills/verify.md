@@ -50,12 +50,18 @@ When the user invokes `/verify`:
 
 This skill implements steps 7-8 of CLAUDE.md workflow:
 
-1. ~~Spec~~ → ~~Plan~~ → ~~Draft~~ → ~~Simplify~~
-2. ~~Update Tests~~ → ~~Update Docs~~
-3. **Test** → `/verify` step 1
-4. **Verify** → `/verify` step 2
-5. Quality Check → Commit & PR
+CLAUDE.md defines a 10-step workflow:
 
+1. ~~Spec~~ (step 1)
+2. ~~Plan~~ (step 2)
+3. ~~Draft~~ (step 3)
+4. ~~Simplify~~ (step 4)
+5. ~~Update Tests~~ (step 5)
+6. ~~Update Docs~~ (step 6)
+7. **Test** (step 7) → `devtools::test()`
+8. **Verify** (step 8) → `devtools::check(args = '--no-tests')`
+9. Quality Check (step 9)
+10. Commit & PR (step 10)
 ## Expected Duration
 
 - Document: ~5-10 seconds
