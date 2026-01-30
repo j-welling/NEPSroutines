@@ -379,11 +379,14 @@ check_invalid_values <- function(df, name_df, items = NULL) {
 
   if (is.null(items)) items <- names(df)
 
-  if (any(df[ , items, drop = FALSE][!is.na(df[ , items, drop = FALSE])] < 0)) {
+  df_items <- df[, items, drop = FALSE]
+  invalid_values <- unique(unlist(df_items[df_items < 0 & !is.na(df_items)]))
+
+  if (length(invalid_values) > 0) {
     stop(paste0("Data.frame ", name_df, " contains invalid values (< 0) in ",
-                "specified items. Please check again and be sure to include all ",
-                "user defined missing values in the vector mvs. Default is ",
-                "-999 to -1."))
+                "specified items: ", paste(sort(invalid_values), collapse = ", "),
+                ". Please check again and be sure to include all ",
+                "user defined missing values in the vector mvs."))
   }
   return(invisible())
 }

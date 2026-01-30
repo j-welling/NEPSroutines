@@ -224,6 +224,12 @@ test_that("check_invalid_values() works", {
                                     items = "var3"))
   expect_error(check_invalid_values(df = df, name_df = "myname"))
 
+  # Test that error message includes the invalid values (issue #47)
+  df2 <- data.frame(var1 = c(-5, -2, 1:8))
+  expect_error(check_invalid_values(df = df2, name_df = "myname",
+                                    items = "var1"),
+               regexp = "-5, -2")
+
 })
 
 
