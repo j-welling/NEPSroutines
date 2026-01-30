@@ -284,7 +284,7 @@ Use withr for temporary changes. Never use:
 This project (NEPSroutines) uses these testing patterns:
 
 ### Fixtures Location
-Test fixtures are stored in `tests/testthat/fixtures/` with subdirectories for different test scenarios (ex1, ex2).
+Test fixtures are stored in `tests/testthat/fixtures/` with subdirectories for different test scenarios (e.g., ex1, ex2, ex3).
 
 ### Common Expectations Used
 - `expect_no_error()` for function execution success
