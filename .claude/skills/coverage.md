@@ -31,7 +31,7 @@ When the user invokes `/coverage`:
 
    **HTML report:**
    ```bash
-   Rscript -e "covr::report()"
+   Rscript -e "covr::report(covr::package_coverage())"
    ```
 
 3. **Report results:**
