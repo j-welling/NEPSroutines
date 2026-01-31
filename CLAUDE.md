@@ -14,6 +14,7 @@ Always work on a git worktree, not the main repository.
 8. **Verify** - Run `devtools::check(args = "--no-tests")` (skip tests since already run)
 9. **Quality Check** - Use a subagent to verify code quality and safety
 10. **Commit & PR** - Commit changes and create a pull request
+11 ** Learnings** - If problems occurred, note mistakes to avoid into /dev/01_claude_reference.md
 
 ## Quick Commands
 
