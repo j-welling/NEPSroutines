@@ -77,6 +77,8 @@ test_that("link_item_parameters() warns without scoring", {
 
 test_that("link_wles() applies linking constant correctly", {
 
+  set.seed(123)  # For reproducibility
+
   # Create mock WLE data
   wle_prev <- data.frame(
     ID_t = 1:100,
@@ -107,6 +109,8 @@ test_that("link_wles() applies linking constant correctly", {
 
 
 test_that("link_wles() handles non-overlapping samples", {
+
+  set.seed(456)  # For reproducibility
 
   wle_prev <- data.frame(
     ID_t = 1:50,
