@@ -71,6 +71,13 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL,
 #' if raw shall be set to FALSE and dich to TRUE for all new items.
 #'
 #' @return vars with new rows including the duplicated items.
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{\code{stop}}{One or more names in \code{old_names} are not found in
+#'     \code{vars$item}. Effect: the function halts; no new rows are added to
+#'     \code{vars}.}
+#' }
 #' @export
 duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 
@@ -129,6 +136,29 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 #' @param verbose  logical; provides information on how polytomous items are scored
 #'
 #' @return resp including unscored (raw) and scored items
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{\code{stop}: \code{poly_items} is not a list}{Triggered when
+#'     \code{poly_items} is not of class \code{list}. Effect: the function
+#'     halts; no scoring is performed.}
+#'   \item{\code{stop}: \code{threshold} is out of range}{Triggered when
+#'     \code{threshold} is not numeric or not in the interval \[0, 1\]. Effect:
+#'     the function halts; no scoring is performed.}
+#'   \item{\code{warning}: polytomous item naming convention}{Triggered when
+#'     a polytomous item name in \code{poly_items} does not contain the
+#'     expected subitem marker (e.g., \code{"s_c"} or \code{"s_sc3g9_c"}).
+#'     Effect: scoring proceeds but downstream functions that rely on the
+#'     naming convention (e.g., label lookup) may silently fail or produce
+#'     unexpected results.}
+#'   \item{\code{warning}: no \code{mvs} provided}{Triggered when
+#'     \code{mvs = NULL}. Effect: the default \code{c(-99:-1)} is used;
+#'     any user-defined missing values outside this range will not be
+#'     converted to \code{NA}.}
+#'   \item{\code{message}: verbose imputation info}{Triggered when
+#'     \code{impute = TRUE} and \code{verbose = TRUE}. Effect: informational
+#'     message printed to the console; no impact on results.}
+#' }
 #' @export
 pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
                        mvs = NULL, warn = TRUE,
@@ -251,6 +281,23 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param overwrite logical; whether to overwrite existing file when saving table
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{\code{stop}: recoding failure}{Triggered when recoding subitems to
+#'     binary missing-value indicators produces values outside \{0, 1\} — an
+#'     internal consistency check. Effect: the function halts; no indicator
+#'     data.frame is returned.}
+#'   \item{\code{stop}: \code{_sumMV} count mismatch}{Triggered when the
+#'     number of \code{_sumMV} summary columns created does not match the
+#'     number of polytomous items — an internal consistency check. Effect:
+#'     the function halts; no indicator data.frame is returned.}
+#'   \item{\code{message}: missing-value imputation summary}{Always printed
+#'     (unless output is suppressed). Two tables are shown: absolute / relative
+#'     frequencies of imputed missing values per item, and distribution of
+#'     imputed items across persons. Effect: informational only; no impact on
+#'     results.}
+#' }
 #' @noRd
 pc_missing_subitems <- function( resp, mvs, poly_items,
                                  missing_by_design, threshold,
@@ -365,6 +412,39 @@ pc_missing_subitems <- function( resp, mvs, poly_items,
 #' that should be imputed
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param save  logical; whether results shall be saved to hard drive
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{\code{stop}: \code{indicators} is not a data.frame}{Triggered when
+#'     \code{indicators} is \code{NULL} or not a data.frame — this object
+#'     should be created automatically by \code{pc_scoring()} with
+#'     \code{impute = TRUE}. Effect: the function halts; no imputed response
+#'     data.frame is returned.}
+#'   \item{\code{stop}: respondent count mismatch between \code{resp} and
+#'     \code{indicators}}{Triggered when the person IDs in \code{resp} and
+#'     \code{indicators} do not fully overlap. Effect: the function halts to
+#'     prevent a corrupted merge that would produce wrong error-rate estimates
+#'     and imputed values.}
+#'   \item{\code{stop}: \code{vars} is not a data.frame}{Triggered when
+#'     \code{vars} is \code{NULL} or not a data.frame. Effect: the function
+#'     halts; no imputed data.frame is returned.}
+#'   \item{\code{stop}: \code{select} is \code{NULL}}{Triggered when no
+#'     selection variable is provided. Effect: the function halts; no imputed
+#'     data.frame is returned.}
+#'   \item{\code{stop}: subitems not in \code{indicators}}{Triggered when the
+#'     subitems defined in \code{poly_items} are missing from the
+#'     \code{indicators} data.frame. Effect: the function halts to prevent
+#'     silent imputation of wrong items.}
+#'   \item{\code{stop}: subitems not in selected item set}{Triggered when the
+#'     subitems defined in \code{poly_items} are not included in the item set
+#'     selected by \code{select}. Effect: the function halts to prevent
+#'     imputation based on a mismatched item set.}
+#'   \item{\code{stop}: person ID mismatch between \code{resp} and IRT
+#'     predictions}{Triggered when the set of valid person IDs in \code{resp}
+#'     does not match the person IDs in the IRT-predicted responses. Effect:
+#'     the function halts to prevent wrong imputed values being assigned to
+#'     the wrong persons.}
+#' }
 #' @noRd
 pc_imputation <- function( resp, vars, select,
                            mvs, missing_by_design,
@@ -527,6 +607,24 @@ pc_imputation <- function( resp, vars, select,
 #'   given PC items IN PLACE. If you want to keep the original data, please
 #'   copy and rename the items to be collapsed first.
 #'
+#' @section Notifications:
+#' \describe{
+#'   \item{\code{message}: problematic items}{Triggered when one or more
+#'     polytomous items cannot be collapsed because fewer than two response
+#'     categories have sufficient observations (>= \code{per_cat}). Effect:
+#'     the affected items are omitted from collapsing; they appear in the
+#'     printed list and should be reviewed manually.}
+#'   \item{\code{message}: dichotomous items skipped}{Triggered when the
+#'     selected item set contains items with only two response categories.
+#'     Effect: these items are silently left unchanged; the message lists
+#'     the skipped items.}
+#'   \item{\code{message}: items collapsed}{Always printed when at least one
+#'     item was successfully collapsed. Lists each item and its new scoring
+#'     scheme. Effect: informational only.}
+#'   \item{\code{message}: no items collapsed}{Printed when no items met the
+#'     collapsing criterion. Effect: informational only; \code{resp} is
+#'     returned unchanged.}
+#' }
 #' @export
 #' @return data.frame resp with collapsed and original items
 
@@ -729,6 +827,14 @@ create_table <- function(response) {
 #' function defaults to NA and negative values)
 #'
 #' @return   logical vector with length = nrow(resp), indicating whether case is valid
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{\code{warning}: invalid \code{min.val}}{Triggered when
+#'     \code{min.val} is \code{NULL} or negative. Effect: the default of
+#'     3 valid responses per person is used; cases with fewer than 3 valid
+#'     responses are marked as invalid.}
+#' }
 #' @export
 min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 
@@ -834,6 +940,30 @@ pos_new <- function(vars, select, position) {
 #' the test day if it's the same for all participants (default is median)
 #'
 #' @return   numeric vector with approximate age in years
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{\code{warning}: missing birth year replaced}{Triggered when
+#'     \code{birth_year} contains \code{NA}s. Effect: the missing values are
+#'     silently replaced by the sample median of \code{birth_year}; the
+#'     number of replacements is reported. Age values for affected persons are
+#'     approximate.}
+#'   \item{\code{warning}: missing birth month replaced}{Triggered when
+#'     \code{birth_month} contains \code{NA}s. Effect: the missing values are
+#'     silently replaced by the sample median of \code{birth_month}; the
+#'     number of replacements is reported. Age values for affected persons are
+#'     approximate.}
+#'   \item{\code{warning}: missing test year replaced}{Triggered when
+#'     \code{test_year} contains \code{NA}s. Effect: the missing values are
+#'     silently replaced by the sample median of \code{test_year}; the number
+#'     of replacements is reported. Age values for affected persons are
+#'     approximate.}
+#'   \item{\code{warning}: missing test month replaced}{Triggered when
+#'     \code{test_month} contains \code{NA}s. Effect: the missing values are
+#'     silently replaced by the sample median of \code{test_month}; the
+#'     number of replacements is reported. Age values for affected persons are
+#'     approximate.}
+#' }
 #' @export
 calculate_age <- function(resp,
                           birth_year = "birthy", birth_month = "birthm",
