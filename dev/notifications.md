@@ -93,7 +93,7 @@ following information is provided:
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
 | 13 | **error** | *"Variable '\<var\>' in data.frame \<name_df\> is no logical. Please check again."* | A variable that should be logical (TRUE/FALSE) is of a different type. | Execution stops. Non-logical selector variables would yield incorrect item or case selection. |
-| 14 | **warning** | *"Logical variable '\<var\>' in data.frame \<name_df\> contains other values than TRUE or FALSE (e.g., NA). Please check again."* | A logical selector variable contains `NA` values (`warn = TRUE`). | Execution continues. Rows where the selector is `NA` are treated as `FALSE` (excluded). Results may be unexpected if the `NA`s are unintentional. |
+| 14 | **warning** | *"Logical variable '\<var\>' in data.frame \<name_df\> contains other values than TRUE or FALSE (e.g., NA). Please check again."* | A logical selector variable contains `NA` values (`warn = TRUE`). | Execution continues. `check_logicals()` does not modify the data; downstream subsetting or logical indexing may behave unexpectedly or error if `NA`s are not handled before use. |
 
 ### `check_numerics()`
 
@@ -143,11 +143,11 @@ following information is provided:
 
 ## Data preparation (`data_preparation.R`)
 
-### `rename_vars()`
+### `duplicate_items()`
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
-| 24 | **error** | *"Item/s '\<items\>' is/are not included in vars! Please check again."* | Items listed for renaming do not exist in the `vars` data frame. | Execution stops. The renaming cannot proceed without valid source names. |
+| 24 | **error** | *"Item/s '\<items\>' is/are not included in vars! Please check again."* | Items listed for duplication/renaming do not exist in the `vars` data frame. | Execution stops. The duplication/renaming cannot proceed without valid source items in `vars`. |
 
 ### `pc_scoring()`
 
@@ -163,7 +163,7 @@ following information is provided:
 | 32 | **message** | Overview of absolute and relative frequencies of imputed missing values. | Always printed when imputation is performed. | Informational: supports quality-control review of how many missing subitems were imputed. |
 | 33 | **message** | Overview of cases with imputed missing values per polytomous item. | Always printed when imputation is performed. | Informational: supports quality-control review at the person level. |
 
-### `impute_mv()` (internal helper for `pc_scoring()`)
+### `pc_imputation()` (internal helper for `pc_scoring()`)
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
@@ -175,20 +175,25 @@ following information is provided:
 | 39 | **error** | *"The subitems defined in 'poly_items' are not included in the selected item set. …"* | Subitems listed in `poly_items` are not flagged by the `select` variable in `vars`. | Execution stops. |
 | 40 | **warning** | *"ID_ts in original data.frame and in data.frame with predicted responses are different. Please contact the package developer."* | After prediction, the set of valid respondent IDs in `resp` and `pred_resp` diverges. | Execution continues but the imputed responses may be assigned to wrong persons. Contact the developers. |
 
-### `collapse_cats()` / `print_collapse_summary()`
+### `collapse_response_categories()`
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
 | 41 | **message** | *"The following items resulted in less than two response categories with more than \<per_cat\> cases …"* | Some items have sparse response categories that cannot be collapsed further. | Informational. The listed items are left unchanged; review them manually before IRT analysis. |
-| 42 | **message** | *"Dichotomous items were not considered for collapsing. The following items have less than three response categories: …"* | Dichotomous items are found among the set of items passed to `collapse_cats()`. | Informational. Dichotomous items require no collapsing. |
+| 42 | **message** | *"Dichotomous items were not considered for collapsing. The following items have less than three response categories: …"* | Dichotomous items are found among the set of items passed to `collapse_response_categories()`. | Informational. Dichotomous items require no collapsing. |
 | 43 | **message** | *"The following items have been collapsed: …"* | At least one polytomous item had categories successfully merged. | Informational: lists collapsed items and the new category structure. |
 | 44 | **message** | *"No items have been collapsed."* | No items met the collapsing criterion. | Informational. |
 
-### `create_age()` 
+### `min_val()` 
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
 | 45 | **warning** | *"No valid (=> 0) number of minimum valid responses per person (min.val) provided. Default of 3 valid responses applies."* | `min.val` is `NULL` or negative. | Execution continues using `min.val = 3`. Persons with fewer than 3 valid item responses are treated as having insufficient data. |
+
+### `calculate_age()`
+
+| # | Type | Message text (abbreviated) | Trigger | Effect |
+|---|------|---------------------------|---------|--------|
 | 46 | **message** | *"\<n\> missing value(s) in birth year were replaced by the sample median."* | `NA`s exist in the birth year variable. | Median imputation is applied; the affected person count is reported. Age calculations for those persons are approximate. |
 | 47 | **message** | *"\<n\> missing value(s) in birth month were replaced by the sample median."* | `NA`s exist in the birth month variable. | Analogous to #46. |
 | 48 | **message** | *"\<n\> missing value(s) in test year were replaced by the sample median."* | `NA`s exist in the test year variable. | Analogous to #46. |
@@ -301,19 +306,19 @@ Messages 57–67 are all `message()` calls emitted when `verbose = TRUE` (the de
 
 ## Linking (`linking.R`)
 
-### `prepare_link_data()` (internal)
+### `prepare_longitudinal_resp()` (internal)
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
 | 79 | **error** | *"No anchor items found!"* | After filtering, the anchor item matrix has fewer than 2 rows, i.e., no (or only one) shared item remains. | Execution stops. Linking requires at least two anchor items. |
 
-### `link_irt()` (internal)
+### `calculate_link_parameters()` (internal)
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
 | 80 | **error** | *"Anchor items in 'anchors' do not match item names in the IRT models. Please check that all anchor items exist in both the previous and current datasets."* | User-supplied `anchors` data frame references item names absent from either the previous or current IRT result objects. | Execution stops. |
 
-### `create_q_link()` (internal)
+### `link_item_parameters()` (internal)
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
@@ -331,7 +336,7 @@ Messages 57–67 are all `message()` calls emitted when `verbose = TRUE` (the de
 | 87 | **message** | *"Linking constant: \<c\>\nLinking error: \<e\>"* | Always printed. | Reports the main linking results. |
 | 88 | **message** | Dimensionality analysis results (factor correlations, fit indices) for the link study and/or previous/current test. | Always printed. | Informational. Provides evidence for (or against) unidimensionality of the linked construct. |
 
-### `test_link_data()` (internal)
+### `test_linking_data()` (internal)
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
@@ -347,14 +352,9 @@ Messages 57–67 are all `message()` calls emitted when `verbose = TRUE` (the de
 |---|------|---------------------------|---------|--------|
 | 90 | **message** | *"Table 1 shows missing values by item position and missing type. All other tables show summary statistics over all items."* | `print = TRUE`. | Informational header before printed tables. |
 | 91 | **message** | *"Summary for TR"* followed by prose summary. | `print = TRUE`. | Prose summary ready for inclusion in a technical report. |
+| 92 | **warning** | *"NAs found in resp! These values are ignored."* | `resp` contains raw `NA` values not listed in `mvs`, and `warn = TRUE`. | Execution continues. Genuine `NA`s (e.g., "missing by design" not coded numerically) are ignored in the missing-type breakdown and are not counted in any missing-value category. |
 
-### `count_mv()` (internal)
-
-| # | Type | Message text (abbreviated) | Trigger | Effect |
-|---|------|---------------------------|---------|--------|
-| 92 | **warning** | *"NAs found in resp! These values are ignored."* | `resp` contains raw `NA` values not listed in `mvs`, and `warn = TRUE`. | Execution continues. Genuine `NA`s (e.g., "missing by design" not coded numerically) are counted separately and silently excluded from the missing-type breakdown. |
-
-### `check_position_grouping()` (internal)
+### `test_mvi_analysis()` (internal)
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
@@ -369,7 +369,7 @@ Messages 57–67 are all `message()` calls emitted when `verbose = TRUE` (the de
 |---|------|---------------------------|---------|--------|
 | 97 | **error** | *"Number of items in dataframe responses, in vector item and in vector position do not match. Please provide matching arguments to function create_mvlist()."* | Lengths of `item`, `position`, and the number of columns in `responses` are inconsistent. | Execution stops. |
 
-### Plot helpers (`plot_mv_item()`)
+### `mvi_plots()` / `check_color()`
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
@@ -393,13 +393,13 @@ Messages 57–67 are all `message()` calls emitted when `verbose = TRUE` (the de
 
 ## Missing-value analysis — persons (`mv_person.R`)
 
-### `mvp_analysis()` / `count_mv_person()` (internal)
+### `mvp_analysis()`
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
 | 103 | **warning** | *"NAs found in resp! These values are ignored."* | `resp` contains raw `NA` values and `warn = TRUE`. | Analogous to #92. |
 
-### Plot helpers (`plot_mv_person()`)
+### `mvp_plots()`
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
@@ -468,20 +468,15 @@ Messages 57–67 are all `message()` calls emitted when `verbose = TRUE` (the de
 
 ## Score creation (`create_scores.R`)
 
-### `sum_scores()`
+### `create_scores()`
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
 | 121 | **message** | *"No variable 'sum_select' provided for sum scores. All items as specified in variable '\<select\>' are used instead."* | `sum_select = NULL`. | Execution continues using the same `select` variable used for the IRT analysis. The full selected item set is summed. |
-
-### `meta_scores()`
-
-| # | Type | Message text (abbreviated) | Trigger | Effect |
-|---|------|---------------------------|---------|--------|
 | 122 | **error** | *"No argument 'meta_variable' provided."* | `meta_variable = NULL`. | Execution stops. The meta-score cannot be computed without a variable identifying metacognition items. |
 | 123 | **message** | *"No variable 'meta_select' provided for meta scores. All items as specified in variable '\<select\>' are used instead."* | `meta_select = NULL`. | Analogous to #121. |
 
-### `wle_scores()`
+### `estimate_rotated_wles()` (internal)
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
@@ -524,7 +519,7 @@ Messages 57–67 are all `message()` calls emitted when `verbose = TRUE` (the de
 
 ## Technical report — import (`technical_report_import.r`)
 
-### `import_results()`
+### `Import()`
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
@@ -535,7 +530,7 @@ Messages 57–67 are all `message()` calls emitted when `verbose = TRUE` (the de
 
 ## Technical report — tables (`technical_report_tables.r`)
 
-### `neps_table()`
+### `Tbl()`
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
@@ -553,7 +548,7 @@ Messages 57–67 are all `message()` calls emitted when `verbose = TRUE` (the de
 
 ## Technical report — figures (`technical_report_figures.r`)
 
-### `include_figure()`
+### `Fig()`
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
@@ -563,14 +558,14 @@ Messages 57–67 are all `message()` calls emitted when `verbose = TRUE` (the de
 
 ## Technical report — get (`technical_report_get.r`)
 
-### `get_n()` / `get_dif()` and related helpers
+### `GetPars()` / `GetDif()` and related helpers
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
-| 137 | **error** | *"Unknown stat function."* (in `get_n()` `excl` branch) | An exclusion condition string does not start with `=`, `<`, or `>`. | Execution stops. Only simple comparison operators are supported in the `excl` argument. |
-| 138 | **error** | *"Unknown stat function."* (in `get_n()` `stat` branch) | A statistic condition string does not start with `=`, `<`, or `>`. | Execution stops. Analogous to #137. |
-| 139 | **error** | *"Allowed values for argument main are 'std' and 'ustd'."* | `main` is not `"std"` or `"ustd"`. | Execution stops. Only standardised and unstandardised effect-size variants are implemented. |
-| 140 | **error** | *"Unknown stat function."* (in `get_dif()` `dif` branch) | A DIF condition string uses an unsupported operator. | Execution stops. Analogous to #137. |
+| 137 | **error** | *"Unknown stat function."* (in `GetPars()` `excl` branch) | An exclusion condition string does not start with `=`, `<`, or `>`. | Execution stops. Only simple comparison operators are supported in the `excl` argument. |
+| 138 | **error** | *"Unknown stat function."* (in `GetPars()` `stat` branch) | A statistic condition string does not start with `=`, `<`, or `>`. | Execution stops. Analogous to #137. |
+| 139 | **error** | *"Allowed values for argument main are 'std' and 'ustd'."* (in `GetDif()` `main` argument validation) | `main` is not `"std"` or `"ustd"`. | Execution stops. Only standardised and unstandardised effect-size variants are implemented. |
+| 140 | **error** | *"Unknown stat function."* (in `GetDif()` `dif` branch) | A DIF condition string uses an unsupported operator. | Execution stops. Analogous to #137. |
 
 ---
 
