@@ -1,3 +1,13 @@
+# Suppress R CMD check NOTE for NSE variables used in dplyr/ggplot2 pipelines
+utils::globalVariables(c(
+  "MV", "group", "item", "number", "ord", "resp", "tab", "warn", "y"
+))
+
+#' @importFrom stats cor model.matrix
+#' @importFrom utils capture.output
+#' @importFrom tidyselect everything
+NULL
+
 #'
 #' Run when loading the package
 #'

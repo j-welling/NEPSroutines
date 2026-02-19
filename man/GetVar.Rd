@@ -19,6 +19,7 @@ The population variance.
 Get variance of latent proficiency distribution
 }
 \examples{
+\dontrun{
 data("ex1")
 
 # IRT analyses
@@ -48,4 +49,5 @@ GetVar(irt)
 # Clean up generated files
 file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
 file.remove(paste0(tmpdir, "/irt_dich.rds"))
+}
 }

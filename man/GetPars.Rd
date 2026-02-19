@@ -39,6 +39,7 @@ item names.
 Summarize item parameters
 }
 \examples{
+\dontrun{
 data("ex1")
 
 # IRT analyses
@@ -73,7 +74,9 @@ GetPars(pars, "xsi", "<-2", item = TRUE)
 
 # Largest WMNSQ between 1 and 1.2
 GetPars(pars, "WMNSQ", max, excl = "<1|>1.2")
+
 # Clean up generated files
 file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
 file.remove(paste0(tmpdir, "/irt_dich.rds"))
+}
 }

@@ -4,7 +4,7 @@
 #' Main effects and DIF effects models are estimated.
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #' polytomous responses with k categories; missing values (default -999 to -1)
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
@@ -78,7 +78,7 @@ dif_analysis <- function(
   ) {
 
     # Test data
-    NEPSroutines:::test_dif_data(
+    test_dif_data(
       resp = resp,
       vars = vars,
       valid = valid,
@@ -94,7 +94,7 @@ dif_analysis <- function(
     dif <- list()
 
     # Conduct dif analyses
-    dif$models <- NEPSroutines:::conduct_dif_analysis(
+    dif$models <- conduct_dif_analysis(
         select = select,
         dif_vars = dif_vars,
         resp = resp,
@@ -115,7 +115,7 @@ dif_analysis <- function(
     )
 
     # Create summary
-    dif$summaries <- NEPSroutines:::summarize_dif_analysis(
+    dif$summaries <- summarize_dif_analysis(
         dif_models = dif$models,
         dif_vars = dif_vars,
         vars = vars,
@@ -130,7 +130,7 @@ dif_analysis <- function(
     )
 
     # Create table for TR
-    dif$tr_tables <- NEPSroutines:::build_dif_tr_tables(
+    dif$tr_tables <- build_dif_tr_tables(
         dif_summaries = dif$summaries,
         vars = vars,
         save = save,
@@ -151,7 +151,7 @@ dif_analysis <- function(
 #' Main effects and DIF effects models are estimated.
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #' polytomous responses with k categories; missing values (default -999 to -1)
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
@@ -210,7 +210,7 @@ conduct_dif_analysis <- function(
 
     # Test data
     if (test) {
-        NEPSroutines:::test_dif_data(
+        test_dif_data(
           resp = resp,
           vars = vars,
           valid = valid,
@@ -231,7 +231,7 @@ conduct_dif_analysis <- function(
 
     # Conduct dif analyses
     for (i in seq_along(dif_vars)) {
-        dif_models[[i]] <- NEPSroutines:::dif_model(
+        dif_models[[i]] <- dif_model(
             resp = resp,
             vars = vars,
             select = select[i],
@@ -259,10 +259,10 @@ conduct_dif_analysis <- function(
             'poly',
             ifelse(sum(are_poly) == 0, 'dich', 'mixed')
         )
-        name <- NEPSroutines:::create_name(
+        name <- create_name(
             paste0("dif_", irt_type, "_models"), name_group, ".rds"
         )
-        NEPSroutines:::save_results(dif_models, path = path, filename = name)
+        save_results(dif_models, path = path, filename = name)
     }
 
     # Return results
@@ -306,7 +306,7 @@ summarize_dif_analysis <- function(
 
     for (i in dif_vars) {
 
-        dif_summaries[[i]] <- NEPSroutines:::dif_summary(
+        dif_summaries[[i]] <- dif_summary(
             dif_models[[i]],
             vars = vars,
             dif_threshold = dif_threshold,
@@ -327,10 +327,10 @@ summarize_dif_analysis <- function(
             'poly',
             ifelse(sum(are_poly) == 0, 'dich', 'mixed')
         )
-        name <- NEPSroutines:::create_name(
+        name <- create_name(
             paste0("dif_", irt_type, "_summaries"), name_group, ".rds"
         )
-        NEPSroutines:::save_results(dif_summaries, path = path_results, filename = name)
+        save_results(dif_summaries, path = path_results, filename = name)
     }
 
     # Return results
@@ -345,7 +345,7 @@ summarize_dif_analysis <- function(
 #' Main effects and DIF effects models are estimated.
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #' polytomous responses with k categories; missing values (default -999 to -1)
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
@@ -405,7 +405,7 @@ dif_model <- function(
 
     # Test data
     if (test) {
-        NEPSroutines:::test_dif_data(
+        test_dif_data(
           resp = resp,
           vars = vars,
           select = select,
@@ -419,25 +419,25 @@ dif_model <- function(
     }
 
     # Select only valid cases
-    resp <- NEPSroutines:::only_valid(resp, valid = valid, warn = FALSE)
+    resp <- only_valid(resp, valid = valid, warn = FALSE)
 
     # Create ID, facets and pweights variable
     pid <- resp$ID_t
-    NEPSroutines:::check_pid(pid)
+    check_pid(pid)
     facets <- resp[, dif_var, drop = FALSE]
     lbls_facet <- attributes(resp[[dif_var]])$labels
-    pws <- NEPSroutines:::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
+    pws <- create_ifelse(is.null(pweights), NULL, resp[[pweights]])
 
     # Prepare resp by converting missing values and selecting only necessary variables
-    resp <- NEPSroutines:::prepare_resp(
+    resp <- prepare_resp(
       resp, vars = vars, select = select, convert = TRUE, mvs = mvs, warn = FALSE
     )
 
     # Test resp
-    NEPSroutines:::check_numerics(resp, "resp", check_invalid = TRUE)
+    check_numerics(resp, "resp", check_invalid = TRUE)
 
     # Identify IRT type
-    irt_type <- ifelse(NEPSroutines:::is_poly(resp, vars, select), 'poly', 'dich')
+    irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
 
     # Prepare formula
     formula <- paste("~ item +", ifelse(irt_type == 'poly', "item * step +", ""))
@@ -459,7 +459,7 @@ dif_model <- function(
             resp <- resp[!mis, ]
             pid <- pid[!mis]
 
-            fcts <- NEPSroutines:::create_facets_df(
+            fcts <- create_facets_df(
               facets[[dif_var]], labels = lbls_facet
             )
 
@@ -469,7 +469,7 @@ dif_model <- function(
 
             facets[mis, ] <- max(unique(facets[[dif_var]]), na.rm = TRUE) + 1
 
-            fcts <- NEPSroutines:::create_facets_df(
+            fcts <- create_facets_df(
                 facets[[dif_var]],
                 labels = lbls_facet,
                 missings = TRUE
@@ -480,7 +480,7 @@ dif_model <- function(
         }
     } else {
 
-        fcts <- NEPSroutines:::create_facets_df(
+        fcts <- create_facets_df(
           facets[[dif_var]],
           labels = lbls_facet
         )
@@ -516,7 +516,7 @@ dif_model <- function(
         if(is.null(scoring) & warn)
             warning("No scoring variable provided. All items are scored with 1.")
 
-        mmod <- NEPSroutines:::pcm_dif(
+        mmod <- pcm_dif(
             resp = resp,
             facets = facets,
             formulaA = formula_mmod,
@@ -529,7 +529,7 @@ dif_model <- function(
             pweights = pws
         )
 
-        dmod <- NEPSroutines:::pcm_dif(
+        dmod <- pcm_dif(
             resp = resp,
             facets = facets,
             formulaA = formula_dmod,
@@ -545,9 +545,9 @@ dif_model <- function(
     } else {
 
         # Check whether resp contains only dichotomous items
-        NEPSroutines:::check_dich(resp, "resp")
+        check_dich(resp, "resp")
 
-        Q <- NEPSroutines:::create_q(
+        Q <- create_q(
           vars, select = "select_", scoring = scoring, poly = FALSE
         )
 
@@ -578,8 +578,8 @@ dif_model <- function(
     }
 
     # Warn if maximum number of iterations were reached
-    NEPSroutines:::reached_maxiter(mmod, paste0("'", dif_var, "' without DIF"))
-    NEPSroutines:::reached_maxiter(dmod, paste0("'", dif_var, "' with DIF"))
+    reached_maxiter(mmod, paste0("'", dif_var, "' without DIF"))
+    reached_maxiter(dmod, paste0("'", dif_var, "' with DIF"))
 
     # Create list with results
     results <- list(
@@ -592,10 +592,10 @@ dif_model <- function(
 
     # Save results
     if (save) {
-        name <- NEPSroutines:::create_name(
+        name <- create_name(
             paste0("dif_", irt_type, "_model"), name_group, ".rds"
         )
-        NEPSroutines:::save_results(results, path = path, filename = name)
+        save_results(results, path = path, filename = name)
     }
 
     # Return results
@@ -643,13 +643,13 @@ create_facets_df <- function(facet, missings = FALSE, labels = NULL) {
 
     df <- data.frame(table(facet))
     names(df) <- c("number", "counts")
-    row.names(df) <- NEPSroutines:::create_ifelse(
+    row.names(df) <- create_ifelse(
       !missings,
       paste0("Group ", sort(unique(facet))),
       c(paste0("Group ", sort(unique(facet))[-length(unique(facet))]), "missings")
     )
     if(!is.null(labels)) {
-        df$label <- NEPSroutines:::create_ifelse(
+        df$label <- create_ifelse(
           !missings,
           names(labels),
           c(names(labels), 'missings'))
@@ -748,7 +748,7 @@ check_minimum_valid <- function(
 #' Testing for differential item functioning for polytomous data.
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #' polytomous responses with k categories; missing values (default -999 to -1)
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
@@ -788,7 +788,7 @@ pcm_dif <- function(
     # get design matrix for model
     B <- TAM::designMatrices(modeltype = 'PCM', resp = resp)$B
 
-    pcm_scoring <- NEPSroutines:::create_ifelse(
+    pcm_scoring <- create_ifelse(
       is.null(scoring),
       rep(1, length(vars[[select]])),
       vars[[scoring]][vars[[select]]]
@@ -861,7 +861,7 @@ dif_summary <- function(
     groups <- gsub(diflist$dif_var, "", groups)
 
     # Create summary for DIF analysis
-    res <- NEPSroutines:::difsum(
+    res <- difsum(
       obj = diflist,
       dif_var = dif_var,
       vars = vars,
@@ -871,7 +871,7 @@ dif_summary <- function(
 
     # Print results
     if (print) {
-        NEPSroutines:::print_dif_summary(
+        print_dif_summary(
             resp = resp,
             diflist = diflist,
             res = res,
@@ -888,10 +888,10 @@ dif_summary <- function(
         res_$est <- res_$mne <- NULL
         names(res_) <- gsub(":", "", names(res_))
 
-        name <- NEPSroutines:::create_name(
+        name <- create_name(
             paste0("dif_", irt_type, "_", dif_var), name_group, ".xlsx"
         )
-        NEPSroutines:::save_table(
+        save_table(
             res_,
             filename = name,
             path = path,
@@ -961,7 +961,7 @@ difsum <- function(obj, dif_var, vars, groups = 1, digits = 3) {
         # Differences in item parameters
         mest[[lbl]] <- est[[grps[1]]]
         mest[[lbl]]$xsi <-  round(est[[grps[1]]]$xsi - est[[grps[2]]]$xsi, digits)
-        mest[[lbl]]$se.xsi <- round(NEPSroutines:::create_ifelse(
+        mest[[lbl]]$se.xsi <- round(create_ifelse(
           any(grps == max(groups)),
           sqrt(est[[grps[!grps == max(groups)]]]$se.xsi^2 * 2),
           sqrt(est[[grps[1]]]$se.xsi^2 + est[[grps[2]]]$se.xsi^2)
@@ -1144,16 +1144,16 @@ build_dif_tr_tables <- function(
 
     # Save results
     if (save) {
-        name <- NEPSroutines:::create_name(
+        name <- create_name(
             paste0("dif_", irt_type, "_TR"), name_group, ".xlsx"
         )
 
         if(suf_item_names) {
-           dif_tr_tables[["estimates"]][["item"]] <- NEPSroutines:::create_suf_names(
+           dif_tr_tables[["estimates"]][["item"]] <- create_suf_names(
              vars_name = dif_tr_tables[["estimates"]][["item"]])
         }
 
-        NEPSroutines:::save_table(
+        save_table(
             dif_tr_tables,
             filename = name,
             path = path,
@@ -1220,7 +1220,7 @@ print_dif_summary <- function(resp, diflist, res, dif_threshold = 0.5) {
 #' Test DIF data
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #' polytomous responses with k categories; missing values (default -999 to -1)
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
@@ -1251,9 +1251,9 @@ test_dif_data <- function(
     warn = TRUE
   ) {
 
-    NEPSroutines:::check_logicals(resp, "resp", valid, warn = warn)
-    NEPSroutines:::check_variables(resp, "resp", dif_vars)
-    NEPSroutines:::check_logicals(vars, "vars", select, warn = warn)
+    check_logicals(resp, "resp", valid, warn = warn)
+    check_variables(resp, "resp", dif_vars)
+    check_logicals(vars, "vars", select, warn = warn)
 
     if (length(select) > 1) {
 
@@ -1264,24 +1264,24 @@ test_dif_data <- function(
 
       for (sel in select) {
 
-        NEPSroutines:::check_items(vars$item[vars[[sel]]])
-        NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[sel]]])
+        check_items(vars$item[vars[[sel]]])
+        check_numerics(resp, "resp", vars$item[vars[[sel]]])
 
       }
 
     } else {
 
-      NEPSroutines:::check_items(vars$item[vars[[select]]])
-      NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+      check_items(vars$item[vars[[select]]])
+      check_numerics(resp, "resp", vars$item[vars[[select]]])
 
     }
 
     if (!is.null(scoring))
-        NEPSroutines:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+        check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
     if (!is.null(pweights))
-        NEPSroutines:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
+        check_numerics(resp, "resp", pweights, check_invalid = TRUE)
 
-    if (warn) NEPSroutines:::is_null_mvs_valid(mvs = mvs, valid = valid)
+    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 
 }

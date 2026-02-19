@@ -22,6 +22,7 @@ The reliability.
 Get reliability
 }
 \examples{
+\dontrun{
 data("ex1")
 
 # IRT analyses
@@ -54,4 +55,5 @@ GetRel(irt, TRUE)
 # Clean up generated files
 file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
 file.remove(paste0(tmpdir, "/irt_dich.rds"))
+}
 }

@@ -24,6 +24,7 @@ The model fit statistic.
 Get model fit
 }
 \examples{
+\dontrun{
 data("ex1")
 
 # IRT analyses
@@ -56,4 +57,5 @@ GetFit(pars, "Npars", GPCM = TRUE)
 # Clean up generated files
 file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
 file.remove(paste0(tmpdir, "/ir.rds"))
+}
 }

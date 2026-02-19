@@ -24,6 +24,7 @@ The calculated statistic or a vector of item names.
 Summarize category thresholds
 }
 \examples{
+\dontrun{
 data("ex2")
 
 # IRT analyses
@@ -56,4 +57,5 @@ GetCat(irt, max, item = TRUE)
 # Clean up generated files
 file.remove(paste0(tmpdir, "/irt_poly.xlsx"))
 file.remove(paste0(tmpdir, "/irt_poly.rds"))
+}
 }

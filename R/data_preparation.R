@@ -1,7 +1,7 @@
 #' Dichotomous scoring of MC items
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
@@ -147,7 +147,7 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
   }
 
   # Check whether variables are indeed contained in data.frames
-  NEPSroutines:::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
+  check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
 
   # Check pc_item (should be marked with 's_c' or 's_[startingCohortTargetGroup]_c')
   if (warn) {
@@ -179,7 +179,7 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
     }
 
     # Create indicators for missing subitems to impute
-    indicators <- NEPSroutines:::pc_missing_subitems(
+    indicators <- pc_missing_subitems(
       resp = resp,
       mvs = mvs,
       missing_by_design = missing_by_design,
@@ -192,7 +192,7 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
     )
 
     # Impute missing values
-    resp_full <- NEPSroutines:::pc_imputation(
+    resp_full <- pc_imputation(
       resp = resp,
       vars = vars,
       select = select,
@@ -237,7 +237,7 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
 #' Create indicators for subitems with missing values
 #' (criterion: < 50% of subitems of a pc-item with missing values, as defined with 'threshold')
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data; additionally includes ID_t
+#' persons as rows; y in \{0, 1\} for binary data; additionally includes ID_t
 #' as a person identifier and all variables that are further defined in
 #'the function arguments
 #' @param mvs  named integer vector; contains user-defined missing values
@@ -323,14 +323,14 @@ pc_missing_subitems <- function( resp, mvs, poly_items,
                    summary_items_impMV = summary_items_impMV,
                    desc_items_impMV = desc_items_impMV,
                    summary_cases_impMV = summary_cases_impMV)
-    NEPSroutines:::save_results(
+    save_results(
       results,
       "pc_subitems_mv_indicators.rds",
       path_results
     )
 
     results <- results[4:6]
-    NEPSroutines:::save_table(
+    save_table(
       results,
       "summary_pc_subitems_mv_indicators.xlsx",
       path_table,
@@ -346,7 +346,7 @@ pc_missing_subitems <- function( resp, mvs, poly_items,
 
 #' Subitem imputation
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
@@ -410,7 +410,7 @@ pc_imputation <- function( resp, vars, select,
   }
 
   # Default valid cases
-  resp_ <- NEPSroutines:::convert_mv(resp, vars = vars, select = select,
+  resp_ <- convert_mv(resp, vars = vars, select = select,
                                      warn = FALSE)
   resp$valid <- rowSums(!is.na(resp_[, vars$item[vars[[select]]]])) >= 3
   valid <- "valid"
@@ -495,7 +495,7 @@ pc_imputation <- function( resp, vars, select,
       mean_error_rates = mean_error_rates,
       resp_imp = resp_imp
     )
-    NEPSroutines:::save_results(
+    save_results(
       pc_subitems_imputation,
       "pc_subitems_imputations.rds",
       path_results
@@ -511,7 +511,7 @@ pc_imputation <- function( resp, vars, select,
 #' Collapse response categories with N < 200
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
@@ -535,10 +535,10 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
                                          path_table = "Tables") {
 
   # Check whether variables are indeed contained in data.frames
-  NEPSroutines:::check_logicals(vars, "vars", select, warn = TRUE)
+  check_logicals(vars, "vars", select, warn = TRUE)
   polyt_items <- vars$item[vars[[select]]]
-  NEPSroutines:::check_numerics(resp, "resp", polyt_items)
-  NEPSroutines:::check_items(polyt_items)
+  check_numerics(resp, "resp", polyt_items)
+  check_items(polyt_items)
 
   collapsed_items <- c()
   dichotomous_items <- c()
@@ -670,7 +670,7 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
   # Save results
   if (save) {
 
-    NEPSroutines:::save_table(
+    save_table(
         results = list(
             collapsed = item_names,
             dichotomous = dichotomous_items,
@@ -733,9 +733,9 @@ create_table <- function(response) {
 min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    NEPSroutines:::check_logicals(vars, "vars", select)
+    check_logicals(vars, "vars", select)
     items <- vars$item[vars[[select]]]
-    NEPSroutines:::check_numerics(resp, "resp", items)
+    check_numerics(resp, "resp", items)
     resp_ <- resp[ , items]
 
     # Set minimum number of valid values
@@ -786,8 +786,8 @@ min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 pos_new <- function(vars, select, position) {
 
     # Check whether variables are indeed contained in data.frames
-    NEPSroutines:::check_logicals(vars, "vars", select)
-    NEPSroutines:::check_numerics(vars, "vars", position, check_invalid = TRUE)
+    check_logicals(vars, "vars", select)
+    check_numerics(vars, "vars", position, check_invalid = TRUE)
 
     if (length(position) == 1) {
 
@@ -841,7 +841,7 @@ calculate_age <- function(resp,
                           birth_day = NULL, test_day = NULL) {
 
     # Check and create birth date variables
-    NEPSroutines:::check_variables(resp, "resp", c(birth_year, birth_month)    )
+    check_variables(resp, "resp", c(birth_year, birth_month)    )
     byear <- resp[[birth_year]]
     bmonth <- resp[[birth_month]]
 
@@ -849,14 +849,14 @@ calculate_age <- function(resp,
     if (is.numeric(test_year)) {
         tyear <- test_year
     } else {
-        NEPSroutines:::check_variables(resp, "resp", test_year)
+        check_variables(resp, "resp", test_year)
         tyear <- resp[[test_year]]
     }
 
     if (is.numeric(test_month)) {
         tmonth <- test_month
     } else {
-        NEPSroutines:::check_variables(resp, "resp", test_month)
+        check_variables(resp, "resp", test_month)
         tmonth <- resp[[test_month]]
     }
 
@@ -864,7 +864,7 @@ calculate_age <- function(resp,
     if (is.null(birth_day)) {
         bday <- 15
     } else {
-        NEPSroutines:::check_variables(resp, "resp", birth_day)
+        check_variables(resp, "resp", birth_day)
         bday <- resp[[birth_day]]
     }
 
@@ -873,7 +873,7 @@ calculate_age <- function(resp,
     } else if (is.numeric(test_day)) {
         tday <- test_day
     } else {
-        NEPSroutines:::check_variables(resp, "resp", test_day)
+        check_variables(resp, "resp", test_day)
         tday <- resp[[test_day]]
     }
 
@@ -926,7 +926,7 @@ calculate_age <- function(resp,
 calculate_num_cat <- function(vars, poly_items = NULL, select_suf) {
 
   # Test data
-  NEPSroutines:::check_logicals(vars, "vars", select_suf, warn = TRUE)
+  check_logicals(vars, "vars", select_suf, warn = TRUE)
 
   # Create vector with number of categories for items to be included in suf
   ## All items get a value of 1 as the number of categories

@@ -27,7 +27,7 @@ dis_analysis(
 }
 \arguments{
 \item{resp}{data.frame; contains item responses with items as variables and
-persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 polytomous responses with k categories; missing values (default -999 to -1)
 are coded as NA internally; additionally includes ID_t as a person identifier
 and all variables that are further defined in the function arguments}

@@ -240,6 +240,7 @@ GetMVP <- GetMvp
 #' item names.
 #' @export
 #' @examples
+#' \dontrun{
 #' data("ex1")
 #'
 #' # IRT analyses
@@ -274,10 +275,11 @@ GetMVP <- GetMvp
 #'
 #' # Largest WMNSQ between 1 and 1.2
 #' GetPars(pars, "WMNSQ", max, excl = "<1|>1.2")
-
+#'
 #' # Clean up generated files
 #' file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
 #' file.remove(paste0(tmpdir, "/irt_dich.rds"))
+#' }
 GetPars <- function(obj, type, stat = median, item = FALSE,
                     excl = NULL, digits = 2) {
 
@@ -399,6 +401,7 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
 #' @returns The calculated statistic or a vector of item names.
 #' @export
 #' @examples
+#' \dontrun{
 #' data("ex2")
 #'
 #' # IRT analyses
@@ -431,6 +434,7 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
 #' # Clean up generated files
 #' file.remove(paste0(tmpdir, "/irt_poly.xlsx"))
 #' file.remove(paste0(tmpdir, "/irt_poly.rds"))
+#' }
 GetCat <- function(obj, stat = median, item = FALSE, digits = 2) {
 
   # Normalize arguments
@@ -460,6 +464,7 @@ GetCat <- function(obj, stat = median, item = FALSE, digits = 2) {
 #' @returns The population variance.
 #' @export
 #' @examples
+#' \dontrun{
 #' data("ex1")
 #'
 #' # IRT analyses
@@ -489,6 +494,7 @@ GetCat <- function(obj, stat = median, item = FALSE, digits = 2) {
 #' # Clean up generated files
 #' file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
 #' file.remove(paste0(tmpdir, "/irt_dich.rds"))
+#' }
 GetVar <- function(obj, digits = 2) {
 
   digits <- as.integer(digits[1])
@@ -509,6 +515,7 @@ GetVar <- function(obj, digits = 2) {
 #' @returns The reliability.
 #' @export
 #' @examples
+#' \dontrun{
 #' data("ex1")
 #'
 #' # IRT analyses
@@ -541,6 +548,7 @@ GetVar <- function(obj, digits = 2) {
 #' # Clean up generated files
 #' file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
 #' file.remove(paste0(tmpdir, "/irt_dich.rds"))
+#' }
 GetRel <- function(obj, WLE = FALSE, digits = 2) {
 
   digits <- as.integer(digits[1])
@@ -637,6 +645,7 @@ GetDist <- function(obj, stat = median, correct = FALSE, item = FALSE,
 #' @returns The model fit statistic.
 #' @export
 #' @examples
+#' \dontrun{
 #' data("ex1")
 #'
 #' # IRT analyses
@@ -669,6 +678,7 @@ GetDist <- function(obj, stat = median, correct = FALSE, item = FALSE,
 #' # Clean up generated files
 #' file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
 #' file.remove(paste0(tmpdir, "/ir.rds"))
+#' }
 GetFit <- function(obj, type, GPCM = FALSE, digits = 2) {
 
   type <- as.character(type[1])
@@ -835,6 +845,7 @@ GetDim <- function(obj, model = "dim", stat = median, var = FALSE,
 #' @returns The calculated DIF statistics or a vector of item names.
 #' @export
 #' @examples
+#' \dontrun{
 #' data("ex1")
 #'
 #' # DIF analyses
@@ -890,6 +901,7 @@ GetDim <- function(obj, model = "dim", stat = median, var = FALSE,
 #' file.remove(paste0(tmpdir, "/dif_dich_TR.xlsx"))
 #' file.remove(paste0(tmpdir, "/dif_dich_models.rds"))
 #' file.remove(paste0(tmpdir, "/dif_dich_summaries.rds"))
+#' }
 GetDif <- function(obj, n = NULL, main = NULL, dif = NULL,
                    item = FALSE, group = NULL, model = "dif",
                    signed = FALSE, digits = 2) {
@@ -1020,6 +1032,7 @@ GetDIF <- GetDif
 #' @returns The model fit statistic.
 #' @export
 #' @examples
+#' \dontrun{
 #' data("ex1")
 #'
 #' # DIF analyses
@@ -1056,6 +1069,7 @@ GetDIF <- GetDif
 #' file.remove(paste0(tmpdir, "/dif_dich_TR.xlsx"))
 #' file.remove(paste0(tmpdir, "/dif_dich_models.rds"))
 #' file.remove(paste0(tmpdir, "/dif_dich_summaries.rds"))
+#' }
 GetDifFit <- function(obj, difvar, type, model = "dif") {
 
   difvar <- as.character(difvar[1])

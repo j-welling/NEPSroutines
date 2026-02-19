@@ -1,7 +1,7 @@
 #' IRT analyses for several groups
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
@@ -80,13 +80,13 @@ grouped_irt_analysis <- function(
   ) {
 
     # Test data
-    NEPSroutines:::check_logicals(vars, "vars", c(select, "dich"), warn = warn)
-    NEPSroutines:::check_logicals(resp, "resp", c(valid, names(select)), warn = warn)
+    check_logicals(vars, "vars", c(select, "dich"), warn = warn)
+    check_logicals(resp, "resp", c(valid, names(select)), warn = warn)
     if (!is.null(scoring))
-        NEPSroutines:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+        check_numerics(vars, "vars", scoring, check_invalid = TRUE)
     if (!is.null(pweights))
-        NEPSroutines:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
-    if (warn) NEPSroutines:::is_null_mvs_valid(mvs = mvs, valid = valid)
+        check_numerics(resp, "resp", pweights, check_invalid = TRUE)
+    if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 
     # Create list for results
     irt_groups <- list()
@@ -95,14 +95,14 @@ grouped_irt_analysis <- function(
     # Conduct irt_analysis for each group
     for (g in names(select)) {
 
-        NEPSroutines:::check_items(vars$item[vars[[ select[[g]] ]] ])
-        NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[ select[[g]] ]] ])
+        check_items(vars$item[vars[[ select[[g]] ]] ])
+        check_numerics(resp, "resp", vars$item[vars[[ select[[g]] ]] ])
 
         message(toupper(paste0("\n\n\n(", i, ") irt analysis (",
                                ifelse(is_poly(resp, vars, select[[g]]), 'poly', 'dich'),
                                ") for group '", g, "':\n")))
 
-        irt_groups[[g]] <- NEPSroutines:::irt_analysis(
+        irt_groups[[g]] <- irt_analysis(
           resp = resp[resp[[g]], ],
           vars = vars,
           select = select[[g]],
@@ -143,7 +143,7 @@ grouped_irt_analysis <- function(
 #' polytomous data, generate summary and plots.
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
@@ -226,18 +226,18 @@ irt_analysis <- function(
 
     # Test data
     if (test) {
-        NEPSroutines:::check_logicals(vars, "vars", c(select, "dich"), warn = warn)
-        NEPSroutines:::check_logicals(resp, "resp", valid, warn = warn)
-        NEPSroutines:::check_items(vars$item[vars[[select]]])
-        NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+        check_logicals(vars, "vars", c(select, "dich"), warn = warn)
+        check_logicals(resp, "resp", valid, warn = warn)
+        check_items(vars$item[vars[[select]]])
+        check_numerics(resp, "resp", vars$item[vars[[select]]])
         if (!is.null(scoring))
-            NEPSroutines:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+            check_numerics(vars, "vars", scoring, check_invalid = TRUE)
         if (!is.null(pweights))
-            NEPSroutines:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
-        if (warn) NEPSroutines:::is_null_mvs_valid(mvs = mvs, valid = valid)
+            check_numerics(resp, "resp", pweights, check_invalid = TRUE)
+        if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
     }
 
-    NEPSroutines:::check_items(vars$item[vars[[select]]])
+    check_items(vars$item[vars[[select]]])
 
     # Identify IRT type
     irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
@@ -248,7 +248,7 @@ irt_analysis <- function(
     # Conduct IRT analyses
     if (irt_type == 'dich') {
 
-        irt$model.1pl <- NEPSroutines:::irt_model(
+        irt$model.1pl <- irt_model(
             resp = resp,
             vars = vars,
             select = select,
@@ -266,7 +266,7 @@ irt_analysis <- function(
             test = FALSE
         )
 
-        irt$model.2pl <- NEPSroutines:::irt_model(
+        irt$model.2pl <- irt_model(
             resp = resp,
             vars = vars,
             select = select,
@@ -286,7 +286,7 @@ irt_analysis <- function(
 
     } else if (irt_type == 'poly') {
 
-      irt$model.pcm <- NEPSroutines:::irt_model(
+      irt$model.pcm <- irt_model(
           resp = resp,
           vars = vars,
           select = select,
@@ -304,7 +304,7 @@ irt_analysis <- function(
           test = FALSE
       )
 
-      irt$model.gpcm <- NEPSroutines:::irt_model(
+      irt$model.gpcm <- irt_model(
           resp = resp,
           vars = vars,
           select = select,
@@ -330,10 +330,10 @@ irt_analysis <- function(
     for (i in 1:2) {
 
       # ICC plots
-      NEPSroutines:::icc_plots(model = irt[[i]], path = path_plots, name_group = name_group)
+      icc_plots(model = irt[[i]], path = path_plots, name_group = name_group)
 
       # Wright map
-      NEPSroutines:::wright_map(model = irt[[i]], path = path_plots, name_group = name_group)
+      wright_map(model = irt[[i]], path = path_plots, name_group = name_group)
 
     }
   }
@@ -341,7 +341,7 @@ irt_analysis <- function(
   # Create tables
   if (return | print | save) {
     # IRT summary
-    irt$summary <- NEPSroutines:::irt_summary(
+    irt$summary <- irt_summary(
       resp = resp,
       vars = vars,
       results = irt[[1]],
@@ -356,7 +356,7 @@ irt_analysis <- function(
     )
 
     # Model fit
-    irt$model_fit <- NEPSroutines:::irt_model_fit(
+    irt$model_fit <- irt_model_fit(
       model_1p = irt[[1]],
       model_2p = irt[[2]],
       save = FALSE
@@ -364,7 +364,7 @@ irt_analysis <- function(
 
     # Steps analysis
     if (irt_type == 'poly') {
-      irt$steps <- NEPSroutines:::steps_analysis(
+      irt$steps <- steps_analysis(
         pcm_model = irt$model.pcm,
         suf_item_names = suf_item_names,
         digits = digits,
@@ -384,7 +384,7 @@ irt_analysis <- function(
       print(irt$steps)
     }
     message("\nSUMMARY FOR TR\n")
-    NEPSroutines:::print_irt_summary(
+    print_irt_summary(
       model = irt[[1]],
       irt_sum = irt$summary,
       steps_sum = irt$steps,
@@ -394,24 +394,24 @@ irt_analysis <- function(
 
   # Save results
   if (save) {
-      name <- NEPSroutines:::create_name(paste0("irt_", irt_type), name_group)
+      name <- create_name(paste0("irt_", irt_type), name_group)
       irt_summary <- irt[-c(1:2)]
-      NEPSroutines:::save_results(irt, filename = paste0(name, ".rds"), path = path_results)
+      save_results(irt, filename = paste0(name, ".rds"), path = path_results)
 
       if(suf_item_names) {
-         irt_summary[["summary"]][["Item"]] <- NEPSroutines:::create_suf_names(
+         irt_summary[["summary"]][["Item"]] <- create_suf_names(
            vars_name = irt_summary[["summary"]][["Item"]])
 
         if(length(irt_summary[["steps"]]) > 0) {
           irt_summary[["steps"]][["item"]] <- row.names(irt_summary[["steps"]])
           irt_summary[["steps"]] <- dplyr::select(irt_summary[["steps"]], item, everything())
           rownames(irt_summary[["steps"]]) <- NULL
-          irt_summary[["steps"]][["item"]] <- NEPSroutines:::create_suf_names(
+          irt_summary[["steps"]][["item"]] <- create_suf_names(
             vars_name = irt_summary[["steps"]][["item"]])
         }
       }
 
-      NEPSroutines:::save_table(
+      save_table(
         irt_summary,
         filename = paste0(name, ".xlsx"),
         path = path_table,
@@ -429,7 +429,7 @@ irt_analysis <- function(
 #' polytomous data.
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
@@ -492,15 +492,15 @@ irt_model <- function(
 
   # Test data
   if (test) {
-      NEPSroutines:::check_logicals(vars, "vars", select, warn = warn)
-      NEPSroutines:::check_logicals(resp, "resp", valid, warn = warn)
-      NEPSroutines:::check_items(vars$item[vars[[select]]])
-      NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[select]]])
+      check_logicals(vars, "vars", select, warn = warn)
+      check_logicals(resp, "resp", valid, warn = warn)
+      check_items(vars$item[vars[[select]]])
+      check_numerics(resp, "resp", vars$item[vars[[select]]])
       if (!is.null(scoring))
-          NEPSroutines:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+          check_numerics(vars, "vars", scoring, check_invalid = TRUE)
       if (!is.null(pweights))
-          NEPSroutines:::check_numerics(resp, "resp", pweights, check_invalid = TRUE)
-      if (warn) NEPSroutines:::is_null_mvs_valid(mvs = mvs, valid = valid)
+          check_numerics(resp, "resp", pweights, check_invalid = TRUE)
+      if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
   }
 
   # Check if input is correct
@@ -510,15 +510,15 @@ irt_model <- function(
   }
 
   # Select only valid cases
-  resp <- NEPSroutines:::only_valid(resp, valid = valid, warn = FALSE)
+  resp <- only_valid(resp, valid = valid, warn = FALSE)
 
   # Create ID variable
   pid <- resp$ID_t
-  NEPSroutines:::check_pid(pid)
-  pws <- NEPSroutines:::create_ifelse(is.null(pweights), NULL, resp[[pweights]])
+  check_pid(pid)
+  pws <- create_ifelse(is.null(pweights), NULL, resp[[pweights]])
 
   # Prepare data
-  resp <- NEPSroutines:::prepare_resp(
+  resp <- prepare_resp(
     resp,
     vars = vars,
     select = select,
@@ -528,11 +528,11 @@ irt_model <- function(
   )
 
   # Test data
-  NEPSroutines:::check_numerics(resp, "resp", check_invalid = TRUE) # this check is very important as otherwise R might be aborted!!
-  if (irtmodel %in% c("1PL", "2PL")) NEPSroutines:::check_dich(resp, "resp")
+  check_numerics(resp, "resp", check_invalid = TRUE) # this check is very important as otherwise R might be aborted!!
+  if (irtmodel %in% c("1PL", "2PL")) check_dich(resp, "resp")
 
   # Create scoring matrix if not provided in function arguments
-  Q <- NEPSroutines:::create_q(
+  Q <- create_q(
     vars,
     select = select,
     scoring = scoring,
@@ -544,7 +544,7 @@ irt_model <- function(
 
     # Match item parameters by item name
     if (!is.null(xsi_fixed))
-      xsi_fixed <- NEPSroutines:::order_xsi_fixed(xsi_fixed, resp, irtmodel = irtmodel, Q = Q)
+      xsi_fixed <- order_xsi_fixed(xsi_fixed, resp, irtmodel = irtmodel, Q = Q)
 
     # Calculate model
     mod <- TAM::tam.mml(
@@ -562,7 +562,7 @@ irt_model <- function(
 
     # Match item parameters by item name
     if (!is.null(xsi_fixed))
-      xsi_fixed <- NEPSroutines:::order_xsi_fixed(
+      xsi_fixed <- order_xsi_fixed(
         xsi_fixed,
         resp,
         irtmodel = irtmodel,
@@ -584,7 +584,7 @@ irt_model <- function(
 
 
   # Warn if maximum number of iterations were reached
-  NEPSroutines:::reached_maxiter(mod, paste0("'", irtmodel, "'"))
+  reached_maxiter(mod, paste0("'", irtmodel, "'"))
 
   # WMNSQ
   fit <- TAM::msq.itemfit(mod)$itemfit[, c("item", "Infit", "Infit_t", "Infit_p")]
@@ -628,8 +628,8 @@ irt_model <- function(
 
   # Save results
   if (save) {
-      name <- NEPSroutines:::create_name(irtmodel, name_group, ".rds")
-      NEPSroutines:::save_results(results, filename = name, path = path)
+      name <- create_name(irtmodel, name_group, ".rds")
+      save_results(results, filename = name, path = path)
   }
 
   # Return results
@@ -653,14 +653,14 @@ icc_plots <- function(model, path = "Plots", name_group = NULL) {
   irtmodel <- model$irtmodel
 
   # Add group name to path
-  path_ <- NEPSroutines:::create_ifelse(
+  path_ <- create_ifelse(
       is.null(name_group),
       paste0(path, "/ICCs/ICCs_for_", irtmodel),
       paste0(path, "/ICCs/", name_group, "/ICCs_for_", irtmodel)
   )
 
   # create directory for plots
-  NEPSroutines:::check_folder(path = path_)
+  check_folder(path = path_)
 
   # ICC plots
   for (i in 1:model$mod$nitems) {
@@ -701,10 +701,10 @@ wright_map <- function(model, path = "Plots", name_group = NULL,
   lbl <- ifelse(irtmodel %in% c("PCM2", "GPCM"), "Category thresholds", "Item difficulties")
 
   # Add group name to path
-  path_ <- NEPSroutines:::create_name(paste0(path, "/Wright_Maps"), name_group, sep = "/")
+  path_ <- create_name(paste0(path, "/Wright_Maps"), name_group, sep = "/")
 
   # Create directory for plots
-  NEPSroutines:::check_folder(path = path_)
+  check_folder(path = path_)
 
   # Create Wright Map
   th <- TAM::IRT.threshold(model$mod)
@@ -732,7 +732,7 @@ wright_map <- function(model, path = "Plots", name_group = NULL,
 #' Create table with results of IRT analysis.
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
@@ -780,13 +780,13 @@ irt_summary <- function(
   ) {
 
   # test data data
-  if (test) NEPSroutines:::check_logicals(vars, "vars", "dich", warn = warn)
-  NEPSroutines:::check_items(rownames(results$mod$xsi))
+  if (test) check_logicals(vars, "vars", "dich", warn = warn)
+  check_items(rownames(results$mod$xsi))
 
   # prepare data
   vars$irt_item <- vars$item %in% rownames(results$mod$xsi)
   vars <- vars[vars$irt_item, ]
-  resp <- NEPSroutines:::prepare_resp(
+  resp <- prepare_resp(
       resp,
       vars = vars,
       select = 'irt_item',
@@ -819,14 +819,14 @@ irt_summary <- function(
   pars <- pars[pars$Item %in% vars$item, ]
 
   # number of administered items
-  pars$N_administered <- NEPSroutines:::create_ifelse(
+  pars$N_administered <- create_ifelse(
       is.null(missing_by_design),
       rep(nrow(resp), rows),
       sapply(resp, function(x) sum(!(x %in% missing_by_design)))
   )
 
   # convert missing values in NAs
-  resp <- NEPSroutines:::convert_mv(resp, vars, mvs = mvs, warn = FALSE)
+  resp <- convert_mv(resp, vars, mvs = mvs, warn = FALSE)
 
   # percentage correct
   pars$correct <- round(
@@ -868,15 +868,15 @@ irt_summary <- function(
 
   # Save table
   if (save) {
-    name <- NEPSroutines:::create_name(results$irtmodel, name_group, ".xlsx")
+    name <- create_name(results$irtmodel, name_group, ".xlsx")
 
     if(suf_item_names) {
-       pars_formatted[["Item"]] <- NEPSroutines:::create_suf_names(
+       pars_formatted[["Item"]] <- create_suf_names(
          vars_name = pars_formatted[["Item"]])
 
     }
 
-    NEPSroutines:::save_table(
+    save_table(
       pars_formatted,
       filename = name,
       path = path,
@@ -957,8 +957,8 @@ irt_model_fit <- function(
 
   # Save table
   if (save) {
-    name <- NEPSroutines:::create_name(paste0("model.fit_", irt_type), name_group, ".xlsx")
-    NEPSroutines:::save_table(
+    name <- create_name(paste0("model.fit_", irt_type), name_group, ".xlsx")
+    save_table(
       mfit,
       filename = name,
       path = path,
@@ -1029,16 +1029,16 @@ steps_analysis <- function(
 
   # Save table as Excel sheet
   if (save) {
-    name <- NEPSroutines:::create_name("steps_analysis", name_group, ".xlsx")
+    name <- create_name("steps_analysis", name_group, ".xlsx")
 
     if(suf_item_names && length(steps) > 0) {
         steps[["item"]] <- row.names(steps)
         steps <- dplyr::select(steps, item, everything())
         rownames(steps) <- NULL
-        steps[["item"]] <- NEPSroutines:::create_suf_names(vars_name = steps[["item"]])
+        steps[["item"]] <- create_suf_names(vars_name = steps[["item"]])
       }
 
-    NEPSroutines:::save_table(
+    save_table(
       steps,
       filename = name,
       path = path,

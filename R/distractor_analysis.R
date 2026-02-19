@@ -3,7 +3,7 @@
 #' Checks how the distractors in multiple choice items functioned.
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #' polytomous responses with k categories; missing values (default -999 to -1)
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
@@ -110,7 +110,7 @@ dis_analysis <- function(resp, vars, valid = NULL, mvs = NULL,
 #' Calculates the item-rest correlations of distractor and correct responses
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #' polytomous responses with k categories; missing values (default -999 to -1)
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments

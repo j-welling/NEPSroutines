@@ -27,6 +27,7 @@ The model fit statistic.
 Get model fit for DIF analyses
 }
 \examples{
+\dontrun{
 data("ex1")
 
 # DIF analyses
@@ -63,4 +64,5 @@ file.remove(paste0(tmpdir, "/dif_dich_mig.xlsx"))
 file.remove(paste0(tmpdir, "/dif_dich_TR.xlsx"))
 file.remove(paste0(tmpdir, "/dif_dich_models.rds"))
 file.remove(paste0(tmpdir, "/dif_dich_summaries.rds"))
+}
 }

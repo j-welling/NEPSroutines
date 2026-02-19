@@ -1,7 +1,7 @@
 #' Dimensionality analysis
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #' polytomous responses with k categories; missing values (default -999 to -1)
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
@@ -64,7 +64,7 @@ dim_analysis <- function(
 
   dimensionality <- list()
 
-  dimensionality$analysis <- NEPSroutines:::conduct_dim_analysis(
+  dimensionality$analysis <- conduct_dim_analysis(
     resp = resp,
     vars = vars,
     select = select,
@@ -80,7 +80,7 @@ dim_analysis <- function(
     test = TRUE
   )
 
-  dimensionality$summary <- NEPSroutines:::dim_summary(
+  dimensionality$summary <- dim_summary(
       dimensionality$analysis,
       digits = digits,
       save = FALSE
@@ -88,13 +88,13 @@ dim_analysis <- function(
 
   # Save results
   if (save) {
-      name <- NEPSroutines:::create_name("dimensionality", name_group)
-      NEPSroutines:::save_results(
+      name <- create_name("dimensionality", name_group)
+      save_results(
           dimensionality,
           filename = paste0(name, ".rds"),
           path = path_results
       )
-      NEPSroutines:::save_table(
+      save_table(
           dimensionality$summary,
           overwrite = overwrite,
           filename = paste0(name, ".xlsx"),
@@ -103,7 +103,7 @@ dim_analysis <- function(
   }
 
   # Print results
-  if (print) NEPSroutines:::print_dim_summary(dimensionality$summary)
+  if (print) print_dim_summary(dimensionality$summary)
 
   # Return results
   if (return) return(dimensionality)
@@ -112,7 +112,7 @@ dim_analysis <- function(
 #' Conduct dimensionality analysis
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#' persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #' polytomous responses with k categories; missing values (default -999 to -1)
 #' are coded as NA internally; additionally includes ID_t as a person identifier
 #' and all variables that are further defined in the function arguments
@@ -171,10 +171,10 @@ conduct_dim_analysis <- function(
       NEPSroutines::check_numerics(resp, "resp", vars$item[vars[[select]]])
   }
 
-  if (warn) NEPSroutines:::is_null_mvs_valid(mvs = mvs, valid = valid)
+  if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 
   # Select only valid cases
-  resp <- NEPSroutines:::only_valid(resp, valid = valid, warn = FALSE)
+  resp <- only_valid(resp, valid = valid, warn = FALSE)
 
   # Create ID and facets variable
   pid <- resp$ID_t
@@ -210,7 +210,7 @@ conduct_dim_analysis <- function(
     control = list(maxiter = maxiter, snodes = snodes)
   )
 
-  NEPSroutines:::reached_maxiter(dimensionality$uni, "'unidimensional'")
+  reached_maxiter(dimensionality$uni, "'unidimensional'")
 
   message("Finished unidimensional reference model.")
 
@@ -238,7 +238,7 @@ conduct_dim_analysis <- function(
         verbose = verbose
       )
 
-      NEPSroutines:::reached_maxiter(dimensionality[[d]], paste0("'", d, "-dimensional'"))
+      reached_maxiter(dimensionality[[d]], paste0("'", d, "-dimensional'"))
 
       message("Finished ", d," model.")
     }
@@ -246,8 +246,8 @@ conduct_dim_analysis <- function(
 
   # Save results
   if (save) {
-      name <- NEPSroutines:::create_name("dimensionality", name_group, ".rds")
-      NEPSroutines:::save_results(dimensionality, filename = name, path = path)
+      name <- create_name("dimensionality", name_group, ".rds")
+      save_results(dimensionality, filename = name, path = path)
   }
 
   # Return results
@@ -297,8 +297,8 @@ dim_summary <- function(dimensionality, save = FALSE, name_group = NULL,
 
   # Save results
   if (save) {
-      name <- NEPSroutines:::create_name("dimensionality", name_group, ".xlsx")
-      NEPSroutines:::save_table(dimsum, overwrite = overwrite, filename = name, path = path)
+      name <- create_name("dimensionality", name_group, ".xlsx")
+      save_table(dimsum, overwrite = overwrite, filename = name, path = path)
   }
 
   # Return results

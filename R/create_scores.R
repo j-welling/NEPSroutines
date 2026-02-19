@@ -1,7 +1,7 @@
 #' Create scores
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
@@ -164,19 +164,19 @@ create_scores <- function(
 
 
   if (!is.null(scoring))
-    NEPSroutines:::check_numerics(vars, "vars", scoring, check_invalid = TRUE)
+    check_numerics(vars, "vars", scoring, check_invalid = TRUE)
 
   if (sum_score | metap)
-    NEPSroutines:::check_variables(vars, "vars", num_cat)
+    check_variables(vars, "vars", num_cat)
 
-  if (warn) NEPSroutines:::is_null_mvs_valid(mvs = mvs, valid = valid)
+  if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
 
   ################################## Linking ##################################
 
   # # Estimate linked WLEs and SEs
   # if (wle & !is.null(resp_prev)) {
   #   linked_scores <-
-  #     NEPSroutines:::linking(
+  #     linking(
   #       resp_curr = resp,
   #       resp_prev = resp_prev,
   #       resp_link = resp_link,
@@ -223,15 +223,15 @@ create_scores <- function(
   if (wle) {
 
     # Test data
-    NEPSroutines:::check_logicals(vars, "vars", select, warn = warn)
-    NEPSroutines:::check_logicals(resp, "resp", valid, warn = warn)
-    NEPSroutines:::check_items(vars$item[vars[[select]]])
-    NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[select]]])
-    NEPSroutines:::check_pid(resp$ID_t)
+    check_logicals(vars, "vars", select, warn = warn)
+    check_logicals(resp, "resp", valid, warn = warn)
+    check_items(vars$item[vars[[select]]])
+    check_numerics(resp, "resp", vars$item[vars[[select]]])
+    check_pid(resp$ID_t)
 
     # Estimation of wles
     if (is.null(rotation) | (!is.null(rotation) & is.null(xsi_fixed))) {
-      fit <- NEPSroutines:::irt_analysis( # hier könnte man irt_model() anstatt irt_analysis() verwenden --> spart Berechnungszeit
+      fit <- irt_analysis( # hier könnte man irt_model() anstatt irt_analysis() verwenden --> spart Berechnungszeit
         resp = resp,
         vars = vars,
         select = select,
@@ -264,7 +264,7 @@ create_scores <- function(
         xsi_fixed <- fit$mod$xsi$xsi
         names(xsi_fixed) <- row.names(fit$mod$xsi)
       }
-      mod_wles <- NEPSroutines:::estimate_rotated_wles(
+      mod_wles <- estimate_rotated_wles(
         resp = resp,
         vars = vars,
         select = select,
@@ -299,13 +299,13 @@ create_scores <- function(
     }
 
     # Test data
-    NEPSroutines:::check_logicals(vars, "vars", sum_select, warn = warn)
-    NEPSroutines:::check_logicals(resp, "resp", valid, warn = warn)
-    NEPSroutines:::check_items(vars$item[vars[[sum_select]]])
-    NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[sum_select]]])
-    NEPSroutines:::check_pid(resp$ID_t)
+    check_logicals(vars, "vars", sum_select, warn = warn)
+    check_logicals(resp, "resp", valid, warn = warn)
+    check_items(vars$item[vars[[sum_select]]])
+    check_numerics(resp, "resp", vars$item[vars[[sum_select]]])
+    check_pid(resp$ID_t)
 
-    sss <- NEPSroutines:::estimate_sum_scores(
+    sss <- estimate_sum_scores(
       resp = resp,
       vars = vars,
       select = sum_select,
@@ -336,13 +336,13 @@ create_scores <- function(
               "specified in variable '", select, "' are used instead.")
     }
 
-    NEPSroutines:::check_logicals(vars, "vars", meta_select, warn = warn)
-    NEPSroutines:::check_logicals(resp, "resp", valid, warn = warn)
-    NEPSroutines:::check_items(vars$item[vars[[meta_select]]])
-    NEPSroutines:::check_numerics(resp, "resp", c(meta_variable, vars$item[vars[[meta_select]]]))
-    NEPSroutines:::check_pid(resp$ID_t)
+    check_logicals(vars, "vars", meta_select, warn = warn)
+    check_logicals(resp, "resp", valid, warn = warn)
+    check_items(vars$item[vars[[meta_select]]])
+    check_numerics(resp, "resp", c(meta_variable, vars$item[vars[[meta_select]]]))
+    check_pid(resp$ID_t)
 
-    metas <- NEPSroutines:::estimate_metap(
+    metas <- estimate_metap(
       resp = resp,
       vars = vars,
       select = meta_select,
@@ -376,22 +376,22 @@ create_scores <- function(
 
   # Save results
   if (save) {
-      name <- NEPSroutines:::create_name("scores", name_group, ".rds")
-      NEPSroutines:::save_results(scores, filename = name, path = path_results)
+      name <- create_name("scores", name_group, ".rds")
+      save_results(scores, filename = name, path = path_results)
 
       # Save item parameters and TAM model used to estimate wles
       if (wle) {
         if (is.null(rotation)) {
 
-            name <- NEPSroutines:::create_name("itemParamModel_wles", name_group, ".rds")
-            NEPSroutines:::save_results(
+            name <- create_name("itemParamModel_wles", name_group, ".rds")
+            save_results(
               itemParamModel_wles,
               filename = name,
               path = path_results
             )
 
-            name <- NEPSroutines:::create_name("itemParam_wles", name_group, ".xlsx")
-            NEPSroutines:::save_table(
+            name <- create_name("itemParam_wles", name_group, ".xlsx")
+            save_table(
               itemParam_wles,
               filename = name,
               path = path_table,
@@ -400,15 +400,15 @@ create_scores <- function(
 
         } else {
 
-            name <- NEPSroutines:::create_name("itemParamModel_wles.position", name_group, ".rds")
-            NEPSroutines:::save_results(
+            name <- create_name("itemParamModel_wles.position", name_group, ".rds")
+            save_results(
               itemParamModel_wles.position,
               filename = name,
               path = path_results
             )
 
-            name <- NEPSroutines:::create_name("itemParam_wles.position", name_group, ".xlsx")
-            NEPSroutines:::save_table(
+            name <- create_name("itemParam_wles.position", name_group, ".xlsx")
+            save_table(
               itemParam_wles.position,
               filename = name,
               path = path_table,
@@ -426,7 +426,7 @@ create_scores <- function(
 
 #' Create scores
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... , k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... , k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
@@ -462,7 +462,7 @@ estimate_sum_scores <- function(resp,
   # Prepare data
   resp_ <- only_valid(resp, valid = valid, warn = FALSE)
   pid <- resp_$ID_t
-  resp_ <- NEPSroutines:::prepare_resp(resp_, vars, select, convert = TRUE,
+  resp_ <- prepare_resp(resp_, vars, select, convert = TRUE,
                                   mvs = mvs, warn = FALSE)
   resp_[is.na(resp_)] <- 0
 
@@ -478,7 +478,7 @@ estimate_sum_scores <- function(resp,
 
   # Sum score
   if (!poly2dich) {
-    scores <- NEPSroutines:::create_ifelse(
+    scores <- create_ifelse(
         is.null(scoring),
         rep(1, sum(vars[[select]])),
         vars[[scoring]][vars[[select]]]
@@ -501,7 +501,7 @@ estimate_sum_scores <- function(resp,
 
 #' Estimated WLEs with test rotation
 #' @param resp data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person
 #'   identifier and all variables that are further defined in the function
@@ -547,7 +547,7 @@ estimate_rotated_wles <- function(resp,
                                   pweights = NULL) {
 
   # Test data
-  NEPSroutines:::check_variables(resp, "resp", rotation)
+  check_variables(resp, "resp", rotation)
 
   if (is.null(xsi_fixed)) {
     warning("\nPlease provide the item parameters to ensure the correct",
@@ -555,13 +555,13 @@ estimate_rotated_wles <- function(resp,
   }
 
   # Identify IRT type
-  irt_type <- ifelse(NEPSroutines:::is_poly(resp, vars, select), 'poly', 'dich')
+  irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
 
   # Prepare data
   rotation <- resp[resp[[valid]], rotation, drop = FALSE]
   pid <- resp$ID_t[resp[[valid]]]
-  NEPSroutines:::check_pid(pid)
-  resp_ <- NEPSroutines:::prepare_resp(
+  check_pid(pid)
+  resp_ <- prepare_resp(
       resp = resp,
       vars = vars,
       select = select,
@@ -573,7 +573,7 @@ estimate_rotated_wles <- function(resp,
   )
 
   # Test resp
-  NEPSroutines:::check_numerics(resp_, "resp", check_invalid = TRUE)
+  check_numerics(resp_, "resp", check_invalid = TRUE)
 
   # Conduct analyses
   frmA <- as.formula(paste0("~ item + ",
@@ -595,7 +595,7 @@ estimate_rotated_wles <- function(resp,
   }
 
   # Match item parameters by item name
-  xsi_fixed <- NEPSroutines:::order_xsi_fixed(
+  xsi_fixed <- order_xsi_fixed(
     xsi_fixed, resp2, irtmodel = '1PL', A = A, B = B, rename_steps = TRUE
   )
 
@@ -632,7 +632,7 @@ estimate_rotated_wles <- function(resp,
 #' Create meta competence scores
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
@@ -663,7 +663,7 @@ estimate_metap <- function(resp,
                            mvs = NULL) {
 
   # Calculate sum scores
-  sss <- NEPSroutines:::estimate_sum_scores(
+  sss <- estimate_sum_scores(
     resp = resp,
     vars = vars,
     select = select,
