@@ -46,7 +46,7 @@ following information is provided:
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
-| 2 | **message** | *"No user defined missing values provided for item responses. Default of '-999 to -1' is used."* | `mvs = NULL` is passed to `convert_mv()` and `warn = TRUE`. | The package silently recodes values in the range −999 to −1 as `NA`. If the actual data uses a different coding, missing values will **not** be converted correctly. |
+| 2 | **message** | *"No user defined missing values provided for item responses. Default of '-999 to -1' is used."* | `mvs = NULL` is passed to `convert_mv()` and `warn = TRUE`. | When `warn = TRUE`, the package first emits this message and then recodes values in the range −999 to −1 as `NA`; when `warn = FALSE`, the recoding happens silently. If the actual data uses a different coding, missing values will **not** be converted correctly. |
 
 ### `prepare_resp()`
 
