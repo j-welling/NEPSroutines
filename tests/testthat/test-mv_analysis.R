@@ -383,7 +383,7 @@ test_that("mv_item() handles grouping correctly", {
 })
 
 
-test_that("mv_person() handles grouping correctly", {
+test_that("mv_person() works with mixed item types", {
 
   data(ex2)
 
