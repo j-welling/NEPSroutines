@@ -60,7 +60,8 @@ test_that("pc_scoring() works", {
                    impute = FALSE, warn = FALSE)$mag9100s_c[c(6, 22, 34)] == 1)
   )
 
-  # With imputation
+  # With imputation (requires MASS via TAM)
+  skip_if_not_installed("MASS")
   x=  pc_scoring(resp = resp, poly_items = poly_items,
                  vars = vars, select = "dich", mvs = -99:-1,
                  impute = TRUE, warn = TRUE, verbose = FALSE)

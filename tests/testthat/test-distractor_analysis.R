@@ -47,7 +47,8 @@ test_that("conduct_dis_analysis() works", {
   expect_true(identical(tabitem, tabitem_fix))
   expect_true(identical(res, res_fix))
 
-  ####### Data example 3 #######
+  ####### Data example 3 (use_wle = TRUE requires MASS via TAM) #######
+  skip_if_not_installed("MASS")
 
   # Run distractor analysis
   data(ex3)
