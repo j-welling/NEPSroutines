@@ -1195,7 +1195,7 @@ print_dif_summary <- function(resp, diflist, res, dif_threshold = 0.5) {
     message("\nMain effects of DIF model and main effects model:\n")
 
     for (i  in names(res$mne)) {
-        cat(paste0("Comparison ", i, ":\n"))
+        message("Comparison ", i, ":")
         print(res$mne[[i]])
     }
 
@@ -1203,17 +1203,16 @@ print_dif_summary <- function(resp, diflist, res, dif_threshold = 0.5) {
     message("\nItems exhibiting problematic DIF (|xsi| >= ", dif_threshold, "):\n")
 
     for (i  in names(res$est)) {
-        cat(paste0("Comparison ", i, ":\n"))
+        message("Comparison ", i, ":")
         f <- abs(res$est[[i]]$xsi) >= dif_threshold
         if (any(f)) {
             sig <- res$est[[i]]$p < .05
             res$est[[i]]$p <- paste0(round(res$est[[i]]$p, 3), ifelse(sig, "*", ""))
             print(res$est[[i]][f, ])
-            if (any(sig)) cat("\n*: p < .05")
+            if (any(sig)) message("*: p < .05")
         } else {
-            cat("No items found.")
+            message("No items found.")
         }
-        cat("\n\n")
     }
 }
 

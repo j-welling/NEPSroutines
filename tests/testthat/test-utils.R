@@ -5,9 +5,9 @@ test_that("only_valid() works", {
                      valid = c(rep(TRUE, 8), rep(FALSE, 2)))
 
   expect_no_error(only_valid(resp = resp, valid = NULL, warn = FALSE))
-  expect_warning(only_valid(resp = resp, valid = NULL, warn = TRUE),
+  expect_message(only_valid(resp = resp, valid = NULL, warn = TRUE),
                  regexp = "^No variable with valid cases provided.+")
-  expect_no_warning(only_valid(resp = resp, valid = NULL, warn = FALSE))
+  expect_no_message(only_valid(resp = resp, valid = NULL, warn = FALSE))
   expect_equal(nrow(only_valid(resp = resp, valid = NULL, warn = FALSE)), 10)
   expect_error(only_valid(resp = resp, valid = "something", warn = TRUE),
                regexp = "^Data.frame resp does not include any variable.+")
@@ -31,10 +31,10 @@ test_that("convert_mv() works", {
   )
 
   # mvs not set
-  expect_warning(convert_mv(resp = resp, vars = vars, select = NULL,
+  expect_message(convert_mv(resp = resp, vars = vars, select = NULL,
                             mvs = NULL, warn = TRUE),
                  regexp = "^No user defined missing values provided.+")
-  expect_no_warning(convert_mv(resp = resp, vars = vars, select = NULL,
+  expect_no_message(convert_mv(resp = resp, vars = vars, select = NULL,
                                mvs = NULL, warn = FALSE))
 
   # select is incorrect
@@ -83,9 +83,9 @@ test_that("prepare_resp() works", {
                regexp = "^To create a data frame \\(resp\\) with only the.+")
 
   # select not set or incorrect
-  expect_warning(prepare_resp(resp = resp, select = NULL, warn = TRUE),
+  expect_message(prepare_resp(resp = resp, select = NULL, warn = TRUE),
                  regexp = "^No variable provided indicating the items.+")
-  expect_no_warning(prepare_resp(resp = resp, select = NULL, warn = FALSE))
+  expect_no_message(prepare_resp(resp = resp, select = NULL, warn = FALSE))
   expect_error(prepare_resp(resp = resp, vars = vars, select = "dontuse"),
                regexp = "^Data.frame vars does not include any variable.+")
 
@@ -135,8 +135,8 @@ test_that("check_folder() works", {
   path <- withr::local_tempdir()
 
   expect_no_error(check_folder(path))
-  expect_no_warning(check_folder(path))
-  expect_warning(check_folder(paste0(path, "/emptyfolder")))
+  expect_no_message(check_folder(path))
+  expect_message(check_folder(paste0(path, "/emptyfolder")))
   expect_true(dir.exists(paste0(path, "/emptyfolder")))
 
 })

@@ -1540,7 +1540,8 @@ calculate_link_parameters <- function(vars_curr,
 
         if (any(!anchors[, 1] %in% row.names(xsi_prev)) |
             any(!anchors[, 2] %in% row.names(xsi_curr.linked))) {
-            stop("")
+            stop("Anchor items in 'anchors' do not match item names in the IRT models. ",
+                 "Please check that all anchor items exist in both the previous and current datasets.")
         }
         const.err <- sd(xsi_prev[anchors[, 1], "xsi"] -
                             xsi_curr.linked[anchors[, 2], 2]) / sqrt(nrow(anchors))
@@ -1703,53 +1704,50 @@ print_link_results <- function(link_dif,
     }
 
     # Print N longitudinal subsample, N link study
-    cat(paste0(N, "\n"))
+    message(N)
 
     # Print DIF table
-    cat("DIF estimates for anchor items:\n")
+    message("DIF estimates for anchor items:")
     print(link_dif$link_dif_summary$link_dif_table)
-    cat(paste0("\n",
-               "Items with potential DIF:\n",
-               "|xsi| < ", dif_threshold, " or p < 0.05 (marked with +) \n",
-               "|xsi| < ", dif_threshold, " and p < 0.05 (marked with *) \n\n"))
+    message("\nItems with potential DIF:\n",
+            "|xsi| < ", dif_threshold, " or p < 0.05 (marked with +)\n",
+            "|xsi| < ", dif_threshold, " and p < 0.05 (marked with *)")
 
     # Print critical F for DIF
-    cat("The critical values for the DIF between time points are:\n")
+    message("The critical values for the DIF between time points are:")
     Fs <- unique(link_dif$link_dif_summary$Fkrit)
     dfs <- sapply(Fs, \(x) {
         link_dif$link_dif_summary$dfkrit[link_dif$link_dif_summary$Fkrit == x][1]
     })
-    cat(paste0("F(1, ", dfs, ") = ", round(Fs, digits = digits), "\n"))
-    cat("\n")
+    message(paste0("F(1, ", dfs, ") = ", round(Fs, digits = digits), collapse = "\n"))
 
     # Print range of DIF
     xsi <- round(abs(link_dif$link_dif_summary$link_dif_table$xsi), digits = digits)
-    cat(paste0("Min. / max. abs. estimate: ",
-               paste(range(xsi, na.rm = TRUE), collapse = ", "), "\n\n"))
+    message("Min. / max. abs. estimate: ",
+            paste(range(xsi, na.rm = TRUE), collapse = ", "))
 
     # Print link constant and link error (link_results)
-    const <- paste0("Linking constant: ", round(link_results$const, digits = digits), "\n",
-                    "Linking error: ", round(link_results$const.err, digits = digits), "\n")
-    cat(paste0(const, "\n"))
+    message("Linking constant: ", round(link_results$const, digits = digits), "\n",
+            "Linking error: ", round(link_results$const.err, digits = digits))
 
     # Print GoF for dimensionality analyses
     if (!is.null(link_dif$mod_link)) {
-        cat("\nDimensionality analysis results for link study:")
-        cat("\nFactor correlations (off-diagonal) with variances (diagonal):\n")
+        message("\nDimensionality analysis results for link study:")
+        message("\nFactor correlations (off-diagonal) with variances (diagonal):")
         print(round(link_dim$dim_sum$`Cor-Var wave`, digits = digits))
-        cat("\nGoodness-of-fit indices for unidimensional (uni) and two-dimensional (wave) model:\n")
+        message("\nGoodness-of-fit indices for unidimensional (uni) and two-dimensional (wave) model:")
         print(link_dim$dim_sum$`Goodness Of fit`)
     } else {
-        cat("\nDimensionality analysis results for previous test:\n")
-        cat("\nFactor correlations (off-diagonal) with variances (diagonal):\n")
+        message("\nDimensionality analysis results for previous test:")
+        message("\nFactor correlations (off-diagonal) with variances (diagonal):")
         print(round(link_dim$dim_sum$previous$`Cor-Var anchoritems`, digits = digits))
-        cat("\nGoodness-of-fit indices for unidimensional and two-dimensional model:\n")
+        message("\nGoodness-of-fit indices for unidimensional and two-dimensional model:")
         print(link_dim$dim_sum$previous$`Goodness Of fit`)
 
-        cat("\nDimensionality analysis results for current test:\n")
-        cat("\nFactor correlations (off-diagonal) with variances (diagonal):\n")
+        message("\nDimensionality analysis results for current test:")
+        message("\nFactor correlations (off-diagonal) with variances (diagonal):")
         print(round(link_dim$dim_sum$current$`Cor-Var anchoritems`, digits = digits))
-        cat("\nGoodness-of-fit indices for unidimensional and two-dimensional model:\n")
+        message("\nGoodness-of-fit indices for unidimensional and two-dimensional model:")
         print(link_dim$dim_sum$current$`Goodness Of fit`)
     }
 }
