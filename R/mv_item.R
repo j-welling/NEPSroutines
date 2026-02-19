@@ -365,7 +365,7 @@ mvi_analysis <- function(
             )
 
             pos <- resp_p$position
-            resp_p <- data.frame(t(dplyr::select(resp_p, -.data$position)))
+            resp_p <- data.frame(t(dplyr::select(resp_p, -"position")))
 
             # Number of valid responses per position
             mvlist$all <- data.frame(
@@ -622,7 +622,7 @@ resp_per_position <- function(resp, resp_c, vars_c, grouping, position) {
     r$item <- rownames(r)
     r <- merge(r, vars_c[, c('item', position[g])], by = "item")
     r <- dplyr::rename(r, position = as.character(position[g]))
-    r <- dplyr::select(r,-.data$item)
+    r <- dplyr::select(r, -"item")
     resp_p <- dplyr::full_join(resp_p, r, by = "position")
   }
 
@@ -777,7 +777,6 @@ mvi_table <- function(
 #' @param warn  logical; whether to print warnings (should be set to TRUE)
 #' @param test  logical; whether to test data structure (should be set to TRUE)
 #'
-#' @importFrom rlang .data
 #' @export
 
 mvi_plots <- function(
@@ -887,7 +886,7 @@ mvi_plots <- function(
             ) +
             ggplot2::scale_fill_manual(values = color) +
             ggplot2::labs(
-              title = paste0(Hmisc::capitalize(labels_mvs[i]), " by item position"),
+              title = paste0(capitalize(labels_mvs[i]), " by item position"),
               x = "Item position", y = "Percentage"
             ) +
             ggplot2::theme_bw() +
@@ -919,7 +918,7 @@ mvi_plots <- function(
       ) +
         ggplot2::labs(
           title = paste0(
-            Hmisc::capitalize(labels_mvs[i]),
+            capitalize(labels_mvs[i]),
             " by item position and ",
             name_grouping
           ),
@@ -928,7 +927,7 @@ mvi_plots <- function(
         ) +
         if (is.null(labels_legend)) {
           ggplot2::scale_fill_manual(
-            name = Hmisc::capitalize(name_grouping),
+            name = capitalize(name_grouping),
             values = color
           )
         } else {
@@ -937,12 +936,12 @@ mvi_plots <- function(
                     "correspond to number of groups. ",
                     "Group labels are used instead.")
             ggplot2::scale_fill_manual(
-              name = Hmisc::capitalize(name_grouping),
+              name = capitalize(name_grouping),
               values = color
             )
           } else {
             ggplot2::scale_fill_manual(
-              name = Hmisc::capitalize(name_grouping),
+              name = capitalize(name_grouping),
               labels = labels_legend,
               values = color
             )
@@ -994,7 +993,7 @@ check_color <- function(color, grps) {
                   'of groups (', grps, ').'))
     }
   } else {
-    color <- colorspace::sequential_hcl(grps)
+    color <- grDevices::hcl.colors(grps)
   }
 
   return(color)
@@ -1046,14 +1045,11 @@ create_wide_df_mvi <- function(
     df <- merge(df, mv_pos[, c("position", g)], by = 'position', all = TRUE)
   }
 
-  df <- dplyr::filter(
-    dplyr::select(df, c("position", tidyselect::all_of(groups))),
-    !is.na(df$position)
-  )
+  df <- df[!is.na(df$position), c("position", groups)]
 
-  mv_wide <- tidyr::gather(
-    df, key = "group", value = "MV", tidyselect::all_of(groups)
-  )
+  mv_wide <- do.call(rbind, lapply(groups, function(g) {
+    data.frame(position = df$position, group = g, MV = df[[g]])
+  }))
 
   mv_wide$group <- factor(mv_wide$group, levels = groups)
 
@@ -1210,7 +1206,7 @@ print_mvi_results <- function(
         for (g in names(mv_i$list)[-length(names(mv_i$list))]) {
 
             n <- ifelse(is.null(mv_i$list[[g]]$stage), 4, 5)
-            message("\n", Hmisc::capitalize(g), ":\n")
+            message("\n", capitalize(g), ":\n")
 
             for (lbl in names(mv_i$list[[g]][-c(1:n)])) {
 

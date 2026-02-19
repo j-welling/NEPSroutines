@@ -22,30 +22,24 @@ Description: This package contains a collection of functions for the
     for the creation of semi-automated technical reports.
 License: GPL-2
 Imports:
-    colorspace,
     dplyr,
     ggplot2,
     graphics,
     grDevices,
     haven,
-    Hmisc,
     openxlsx,
     psych,
-    rlang,
     stats,
     methods,
-    sfsmisc,
-    TAM (>= 4.2),
-    tibble,
-    tidyr,
-    tidyselect,
-    WrightMap
+    TAM (>= 4.2)
 Suggests:
     flextable,
     officer (>= 0.6.5),
     magick (>= 2.8.3),
+    rlang,
     testthat (>= 3.2.0),
     withr,
+    WrightMap,
     knitr,
     rmarkdown,
     bookdown

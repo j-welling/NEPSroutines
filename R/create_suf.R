@@ -133,7 +133,7 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
   for (i in vars$item[vars[[select]]]) {
 
     # Variable label
-    lbl <- paste0(Hmisc::capitalize(competence), ": Item ", j)
+    lbl <- paste0(capitalize(competence), ": Item ", j)
     if (!is.null(items_labels)) lbl <- items_labels[i]
 
     # Dichotomous items
@@ -176,7 +176,7 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
 
     # Set label based on suffix of variable name
       type <- substring(i, regexpr("(_sc[1-9])(a|b|u|a_pb|b_pb|a_cb|b_cb|a_wb|b_wb)?$|pr_sc3|cs_sc8|bs_sc9|cs_sc9", i))
-      domain <- switch(paste0(Hmisc::capitalize(competence)),
+      domain <- switch(paste0(capitalize(competence)),
                        "Fr\u00fche Lesekompetenz"         = "Fr\u00fches Lesen",
                        "Orthografie"                      = "Orthografie",
                        "Grammatik"                        = "Grammatik",
@@ -206,37 +206,37 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
       }
 
     lbl <- switch(type,
-                  "_sc1"  = paste0(Hmisc::capitalize(competence), ": ", "WLE (korrigiert)"),
-                  "_sc2"  = paste0(Hmisc::capitalize(competence), ": ", "Standardfehler des WLE (korrigiert)"),
-                  "_sc1a" = paste0(Hmisc::capitalize(competence), ": ", "WLE (korrigiert)"),
-                  "_sc2a" = paste0(Hmisc::capitalize(competence), ": ", "Standardfehler des WLE (korrigiert)"),
-                  "_sc1b" = paste0(Hmisc::capitalize(competence), ": ", "WLE (korrigiert)"),
-                  "_sc2b" = paste0(Hmisc::capitalize(competence), ": ", "Standardfehler des WLE (korrigiert)"),
-                  "_sc1u" = paste0(Hmisc::capitalize(competence), ": ",  "WLE (unkorrigiert)"),
-                  "_sc2u" = paste0(Hmisc::capitalize(competence), ": ", "Standardfehler des WLE (unkorrigiert)"),
-                  "_sc3"  = paste0(Hmisc::capitalize(competence), ": ", "Summe"),
-                  "_sc3a" = paste0(Hmisc::capitalize(competence), ": ", "Summe"),
-                  "_sc3b" = paste0(Hmisc::capitalize(competence), ": ", "Summe"),
-                  "pr_sc3" = paste0(Hmisc::capitalize(competence), ": ", "Anzahl administrierter \u00dcbungsitems"),
-                  "_sc4"  = paste0(Hmisc::capitalize(competence), ": ", "Mittelwert"),
+                  "_sc1"  = paste0(capitalize(competence), ": ", "WLE (korrigiert)"),
+                  "_sc2"  = paste0(capitalize(competence), ": ", "Standardfehler des WLE (korrigiert)"),
+                  "_sc1a" = paste0(capitalize(competence), ": ", "WLE (korrigiert)"),
+                  "_sc2a" = paste0(capitalize(competence), ": ", "Standardfehler des WLE (korrigiert)"),
+                  "_sc1b" = paste0(capitalize(competence), ": ", "WLE (korrigiert)"),
+                  "_sc2b" = paste0(capitalize(competence), ": ", "Standardfehler des WLE (korrigiert)"),
+                  "_sc1u" = paste0(capitalize(competence), ": ",  "WLE (unkorrigiert)"),
+                  "_sc2u" = paste0(capitalize(competence), ": ", "Standardfehler des WLE (unkorrigiert)"),
+                  "_sc3"  = paste0(capitalize(competence), ": ", "Summe"),
+                  "_sc3a" = paste0(capitalize(competence), ": ", "Summe"),
+                  "_sc3b" = paste0(capitalize(competence), ": ", "Summe"),
+                  "pr_sc3" = paste0(capitalize(competence), ": ", "Anzahl administrierter \u00dcbungsitems"),
+                  "_sc4"  = paste0(capitalize(competence), ": ", "Mittelwert"),
                   "_sc5"  = paste0("Prozedurale Metakognition (", domain, "): Differenzma\u00df"),
                   "_sc6"  = paste0("Prozedurale Metakognition (", domain, "): Anteil korrekt"),
-                  "_sc5a_pb" = paste0(Hmisc::capitalize(competence), ": ", "Summe (papierbasiert)"),
-                  "_sc5b_pb" = paste0(Hmisc::capitalize(competence), ": ", "Summe (papierbasiert)"),
-                  "_sc5a_cb" = paste0(Hmisc::capitalize(competence), ": ", "Summe (computerbasiert)"),
-                  "_sc5a_cb" = paste0(Hmisc::capitalize(competence), ": ", "Summe (computerbasiert)"),
-                  "_sc5a_wb" = paste0(Hmisc::capitalize(competence), ": ", "Summe (internetbasiert)"),
-                  "_sc5a_wb" = paste0(Hmisc::capitalize(competence), ": ", "Summe (internetbasiert)"),
+                  "_sc5a_pb" = paste0(capitalize(competence), ": ", "Summe (papierbasiert)"),
+                  "_sc5b_pb" = paste0(capitalize(competence), ": ", "Summe (papierbasiert)"),
+                  "_sc5a_cb" = paste0(capitalize(competence), ": ", "Summe (computerbasiert)"),
+                  "_sc5a_cb" = paste0(capitalize(competence), ": ", "Summe (computerbasiert)"),
+                  "_sc5a_wb" = paste0(capitalize(competence), ": ", "Summe (internetbasiert)"),
+                  "_sc5a_wb" = paste0(capitalize(competence), ": ", "Summe (internetbasiert)"),
                   "_sc5a" = paste0("Prozedurale Metakognition (", domain, "): Differenzma\u00df f\u00fcr statische Items"),
                   "_sc6a" = paste0("Prozedurale Metakognition (", domain, "): Anteil korrekt f\u00fcr statische Items"),
                   "_sc5b" = paste0("Prozedurale Metakognition (", domain, "): Differenzma\u00df f\u00fcr interaktive Items"),
                   "_sc6b" = paste0("Prozedurale Metakognition (", domain, "): Anteil korrekt f\u00fcr interaktive Items"),
-                  "_sc7"  = paste0(Hmisc::capitalize(competence), ": ", "Person in L1-Zielpopulation"),
-                  "_sc8"  = paste0(Hmisc::capitalize(competence), ": ", "Testabbruch"),
-                  "_sc9"  = paste0(Hmisc::capitalize(competence), ": ", "Anzahl administrierter \u00dcbungsitems"),
-                  "cs_sc8"  = paste0(Hmisc::capitalize(competence), ": ", "Deckenset"),
-                  "bs_sc9"  = paste0(Hmisc::capitalize(competence), ": ", "Bodenset"),
-                  "cs_sc9"  = paste0(Hmisc::capitalize(competence), ": ", "Deckenset")
+                  "_sc7"  = paste0(capitalize(competence), ": ", "Person in L1-Zielpopulation"),
+                  "_sc8"  = paste0(capitalize(competence), ": ", "Testabbruch"),
+                  "_sc9"  = paste0(capitalize(competence), ": ", "Anzahl administrierter \u00dcbungsitems"),
+                  "cs_sc8"  = paste0(capitalize(competence), ": ", "Deckenset"),
+                  "bs_sc9"  = paste0(capitalize(competence), ": ", "Bodenset"),
+                  "cs_sc9"  = paste0(capitalize(competence), ": ", "Deckenset")
                   )
 
     if (is.null(lbl)) next
