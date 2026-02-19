@@ -1540,7 +1540,8 @@ calculate_link_parameters <- function(vars_curr,
 
         if (any(!anchors[, 1] %in% row.names(xsi_prev)) |
             any(!anchors[, 2] %in% row.names(xsi_curr.linked))) {
-            stop("Anchor items not found in item parameter matrices. Please check your anchor items.")
+            stop("Anchor items in 'anchors' do not match item names in the IRT models. ",
+                 "Please check that all anchor items exist in both the previous and current datasets.")
         }
         const.err <- sd(xsi_prev[anchors[, 1], "xsi"] -
                             xsi_curr.linked[anchors[, 2], 2]) / sqrt(nrow(anchors))
