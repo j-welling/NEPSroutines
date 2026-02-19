@@ -294,7 +294,7 @@ create_scores <- function(
     # Select
     if (is.null(sum_select)) {
       sum_select <- select
-      warning("\nNo variable 'sum_select' provided for sum scores. All items as ",
+      message("No variable 'sum_select' provided for sum scores. All items as ",
               "specified in variable '", select, "' are used instead.")
     }
 
@@ -332,7 +332,7 @@ create_scores <- function(
 
     if (is.null(meta_select)) {
       meta_select <- select
-      warning("\nNo variable 'meta_select' provided for meta scores. All items as ",
+      message("No variable 'meta_select' provided for meta scores. All items as ",
               "specified in variable '", select, "' are used instead.")
     }
 

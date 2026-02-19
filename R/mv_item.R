@@ -974,7 +974,7 @@ mvi_plots <- function(
     )
 
     # Print progress
-    if (verbose) cat("Missing plot", i, "created.\n")
+    if (verbose) message("Missing plot ", i, " created.")
   }
 }
 

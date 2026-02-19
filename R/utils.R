@@ -14,8 +14,8 @@ only_valid <- function(resp, valid = NULL, warn = TRUE) {
       check_logicals(resp, "resp", valid, warn = warn)
       resp <- resp[resp[[valid]], ]
   } else if (warn) {
-      warning("No variable with valid cases provided. ",
-              "All cases are used for analysis.\n")
+      message("No variable with valid cases provided. ",
+              "All cases are used for analysis.")
   }
 
   return(resp)
@@ -46,8 +46,8 @@ convert_mv <- function(resp, vars, select = NULL, mvs = NULL, warn = TRUE) {
     mvs <- -999:-1
 
     if (warn) {
-      warning("No user defined missing values provided for item responses. ",
-              "Default of '-999 to -1' is used.\n")
+      message("No user defined missing values provided for item responses. ",
+              "Default of '-999 to -1' is used.")
     }
   }
 
@@ -120,7 +120,7 @@ prepare_resp <- function(
             resp <- resp[ , items]
         }
     } else if (warn) {
-        warning("No variable provided indicating the items to keep. ",
+        message("No variable provided indicating the items to keep. ",
                 "All items are kept.")
     }
 
@@ -146,13 +146,13 @@ prepare_resp <- function(
 
 is_null_mvs_valid <- function(mvs = NA, valid = NA) {
   if (is.null(mvs)) {
-    warning("No user defined missing values provided. ",
-            "Default of '-999 to -1' is used.\n")
+    message("No user defined missing values provided. ",
+            "Default of '-999 to -1' is used.")
   }
 
   if (is.null(valid)) {
-    warning("No variable with valid cases provided. ",
-            "All cases are used for analysis.\n")
+    message("No variable with valid cases provided. ",
+            "All cases are used for analysis.")
   }
   return(invisible())
 }
@@ -227,7 +227,7 @@ save_results <- function(results, filename, path) {
 check_folder <- function(path) {
     if (!file.exists(path)) {
         dir.create(path, recursive = TRUE)
-        warning("The location ", path, " did not exist. New folder created.\n")
+        message("The location ", path, " did not exist. New folder created.")
     }
   return(invisible())
 }
@@ -452,19 +452,13 @@ meht <- function(stat, df1, df2, eta2 = NULL, delta = .40,
     pnil <- pf(stat, df1, df2, lower.tail = FALSE) # p for nil hypothesis test
 
     if (verbose) {
-        cat("\nNil hypothesis test:\n")
-        cat("   Critical F-value: F(", df1, ",", df2, ") = ",
-            round(Fnil, digits), "\n",
-            sep = ""
-        )
-        cat("   p for F = ", stat, ": p = ", round(pnil, digits), "\n", sep = "")
-
-        cat("\nMinimum effect hypothesis test:\n")
-        cat("   Critical F-value: F(", df1, ", ", df2, ", ", round(ncp, digits), ") = ",
-            round(Fmin, digits), "\n",
-            sep = ""
-        )
-        cat("   p for F = ", stat, ": p = ", round(pmin, digits), "\n\n", sep = "")
+        message("\nNil hypothesis test:")
+        message("   Critical F-value: F(", df1, ",", df2, ") = ", round(Fnil, digits))
+        message("   p for F = ", stat, ": p = ", round(pnil, digits))
+        message("\nMinimum effect hypothesis test:")
+        message("   Critical F-value: F(", df1, ", ", df2, ", ", round(ncp, digits), ") = ",
+                round(Fmin, digits))
+        message("   p for F = ", stat, ": p = ", round(pmin, digits))
     }
 
     out <- list(
