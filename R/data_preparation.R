@@ -154,7 +154,7 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
     for ( pc_name in names(poly_items) ) {
       is_pc_named_correctly <- grepl("s(_[a-zA-Z0-9]+)*_c$", pc_name)
       if ( !is_pc_named_correctly ) {
-        message( pc_name, ": Variable name should contain a subitem marker like 's', e.g. '[item]s_c', '[item]s_sc3g9_c'.\n" )
+        warning( pc_name, ": Variable name should contain a subitem marker like 's', e.g. '[item]s_c', '[item]s_sc3g9_c'.\n" )
       }
     }
   }
@@ -268,7 +268,7 @@ pc_missing_subitems <- function( resp, mvs, poly_items,
   if ( sum(sapply(indicators[subitems], \(x) {
     all(range(x, na.rm = TRUE) %in% c(0, 1))
   })) != length(names(indicators)[-1]) ) {
-    warning( "Recoding of subitems into indicator variables failed. ",
+    stop( "Recoding of subitems into indicator variables failed. ",
              "Please contact the package developers." )
   }
 
@@ -450,7 +450,7 @@ pc_imputation <- function( resp, vars, select,
   #test
   if ( !setequal(resp$ID_t[resp[[valid]] == TRUE], pred_resp$ID_t) |
        length(resp$ID_t[resp[[valid]] == TRUE]) != length(pred_resp$ID_t) ) {
-    warning( "ID_ts in original data.frame and in data.frame with ",
+    stop( "ID_ts in original data.frame and in data.frame with ",
              "predicted responses are different. ",
              "Please contact the package developer." )
   }
@@ -884,22 +884,22 @@ calculate_age <- function(resp,
     na_tm <- is.na(tmonth)
 
     if (sum(na_by) > 0) {
-        message(sum(na_by), " missing value(s) in birth year were replaced by the sample median.")
+        warning(sum(na_by), " missing value(s) in birth year were replaced by the sample median.")
         byear[na_by] <- round(median(byear, na.rm = TRUE))
     }
 
     if (sum(na_bm) > 0) {
-        message(sum(na_bm), " missing value(s) in birth month were replaced by the sample median.")
+        warning(sum(na_bm), " missing value(s) in birth month were replaced by the sample median.")
         bmonth[na_bm] <- round(median(bmonth, na.rm = TRUE))
     }
 
     if (sum(na_ty) > 0) {
-        message(sum(na_ty), " missing value(s) in test year were replaced by the sample median.")
+        warning(sum(na_ty), " missing value(s) in test year were replaced by the sample median.")
         tyear[na_ty] <- round(median(tyear, na.rm = TRUE))
     }
 
     if (sum(na_tm) > 0) {
-        message(sum(na_tm), " missing values in test month were replaced by the sample median.")
+        warning(sum(na_tm), " missing value(s) in test month were replaced by the sample median.")
         tmonth[na_tm] <- round(median(tmonth, na.rm = TRUE))
     }
 

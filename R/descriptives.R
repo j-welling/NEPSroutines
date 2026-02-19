@@ -18,7 +18,7 @@ n_valid <- function(resp, valid = NULL) {
     } else {
         n_inval <- 0
         n_val <- nrow(resp)
-        warn("No variable to identify (in)valid cases provided. Thus, all cases are counted as valid.")
+        warning("No variable to identify (in)valid cases provided. Thus, all cases are counted as valid.")
     }
 
     message("There are ", n_val, " valid cases and ", n_inval, " invalid cases ",
