@@ -42,3 +42,27 @@ numeric vector with approximate age in years
 \description{
 Calculate age from birth and test date
 }
+\section{Notifications}{
+\describe{
+  \item{\code{message()} -- missing birth year values replaced by median}{
+    Triggered when one or more \code{NA} values are present in the birth year
+    variable. The affected values are replaced by the rounded sample median.
+    Age calculations for those respondents are approximate.
+  }
+  \item{\code{message()} -- missing birth month values replaced by median}{
+    Triggered when one or more \code{NA} values are present in the birth month
+    variable. The affected values are replaced by the rounded sample median.
+    Age calculations for those respondents are approximate.
+  }
+  \item{\code{message()} -- missing test year values replaced by median}{
+    Triggered when one or more \code{NA} values are present in the test year
+    variable. The affected values are replaced by the rounded sample median.
+    Age calculations for those respondents are approximate.
+  }
+  \item{\code{message()} -- missing test month values replaced by median}{
+    Triggered when one or more \code{NA} values are present in the test month
+    variable. The affected values are replaced by the rounded sample median.
+    Age calculations for those respondents are approximate.
+  }
+}
+}

@@ -71,6 +71,14 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL,
 #' if raw shall be set to FALSE and dich to TRUE for all new items.
 #'
 #' @return vars with new rows including the duplicated items.
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{`stop()` -- item not found in vars}{
+#'     Triggered when one or more names in `old_names` are not present in
+#'     `vars$item`. The function halts and no new rows are added to `vars`.
+#'   }
+#' }
 #' @export
 duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 
@@ -129,6 +137,88 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 #' @param verbose  logical; provides information on how polytomous items are scored
 #'
 #' @return resp including unscored (raw) and scored items
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{`stop()` -- invalid `poly_items` type}{
+#'     Triggered when `poly_items` is not a list. The function halts without
+#'     scoring any items.
+#'   }
+#'   \item{`stop()` -- invalid `threshold` value}{
+#'     Triggered when `threshold` is not numeric or is outside the interval
+#'     [0, 1]. The function halts without scoring any items.
+#'   }
+#'   \item{`message()` -- non-standard PC item name (when `warn = TRUE`)}{
+#'     Triggered for each polytomous item whose name does not contain the
+#'     expected subitem marker pattern (e.g. `s_c` or `s_sc3g9_c`). Processing
+#'     continues normally; the message is purely informational.
+#'   }
+#'   \item{`warning()` -- no missing values provided (when `mvs = NULL` and `warn = TRUE`)}{
+#'     Triggered when `mvs` is `NULL`. The default range `c(-99:-1)` is used
+#'     instead. Results may be affected if the actual missing-value codes differ
+#'     from this default.
+#'   }
+#'   \item{`message()` -- subitem imputation information (when `impute = TRUE` and `verbose = TRUE`)}{
+#'     Triggered at the start of subitem imputation. Explains the imputation
+#'     strategy and notes that the returned dataset retains the original
+#'     (non-imputed) subitem responses. No effect on results.
+#'   }
+#'   \item{`message()` -- overview of imputed missing values (when `impute = TRUE`)}{
+#'     Triggered after subitem indicator creation. Prints absolute and relative
+#'     frequencies of imputed missing values per polytomous item, plus
+#'     descriptive statistics. No effect on results.
+#'   }
+#'   \item{`message()` -- overview of cases with imputed missing values (when `impute = TRUE`)}{
+#'     Triggered after subitem indicator creation. Prints the number of
+#'     polytomous items with imputed missing values per respondent. No effect
+#'     on results.
+#'   }
+#'   \item{`warning()` -- recoding of subitems into indicator variables failed}{
+#'     Triggered internally when the created indicator variables contain values
+#'     other than 0 and 1. Indicates an unexpected data issue; please contact
+#'     the package developers. Scoring continues but results may be unreliable.
+#'   }
+#'   \item{`stop()` -- sumMV variable count mismatch}{
+#'     Triggered internally when the number of generated `_sumMV` indicator
+#'     variables does not match the number of polytomous items. Indicates an
+#'     internal error; please contact the package developers. The function
+#'     halts.
+#'   }
+#'   \item{`stop()` -- missing indicators data.frame required}{
+#'     Triggered internally when the `indicators` data.frame is `NULL` or not a
+#'     data.frame. Indicates an internal wiring issue; please contact the
+#'     package developers. The function halts.
+#'   }
+#'   \item{`stop()` -- respondent count mismatch between `resp` and `indicators`}{
+#'     Triggered internally when the IDs in `resp` and `indicators` do not
+#'     agree. Indicates an internal issue; please contact the package
+#'     developers. The function halts.
+#'   }
+#'   \item{`stop()` -- `vars` data.frame required for imputation}{
+#'     Triggered when `impute = TRUE` but `vars` is `NULL` or not a data.frame.
+#'     The function halts. Provide a valid `vars` data.frame.
+#'   }
+#'   \item{`stop()` -- `select` argument required for imputation}{
+#'     Triggered when `impute = TRUE` but `select` is `NULL`. The function
+#'     halts. Provide the name of the logical selection variable in `vars`.
+#'   }
+#'   \item{`stop()` -- subitems not found in indicators}{
+#'     Triggered when one or more subitems from `poly_items` are absent from
+#'     the indicator data.frame. Indicates a data-consistency issue. The
+#'     function halts.
+#'   }
+#'   \item{`stop()` -- subitems not in selected item set}{
+#'     Triggered when one or more subitems from `poly_items` are not in
+#'     `vars$item[vars[[select]]]`. The function halts; check the `select`
+#'     variable and `vars`.
+#'   }
+#'   \item{`warning()` -- ID mismatch in predicted responses}{
+#'     Triggered internally when IDs in the original data.frame and the
+#'     predicted-response data.frame differ. Indicates an internal model issue;
+#'     please contact the package developer. Imputation proceeds but results
+#'     may be incorrect.
+#'   }
+#' }
 #' @export
 pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
                        mvs = NULL, warn = TRUE,
@@ -527,6 +617,29 @@ pc_imputation <- function( resp, vars, select,
 #'   given PC items IN PLACE. If you want to keep the original data, please
 #'   copy and rename the items to be collapsed first.
 #'
+#' @section Notifications:
+#' \describe{
+#'   \item{`message()` -- items with fewer than two usable categories}{
+#'     Triggered when one or more items cannot be collapsed because the
+#'     collapsing procedure would result in fewer than two response categories
+#'     with at least `per_cat` respondents. The affected item names are listed.
+#'     These items are excluded from the output; inspect them manually.
+#'   }
+#'   \item{`message()` -- dichotomous items skipped}{
+#'     Triggered when one or more polytomous items selected via `select` already
+#'     have fewer than three response categories. These items are skipped
+#'     silently; the message lists which items were not considered.
+#'   }
+#'   \item{`message()` -- items have been collapsed}{
+#'     Triggered when at least one item was successfully collapsed. Prints a
+#'     tibble showing the original item name, the collapsing scheme applied,
+#'     and the name of the new collapsed variable (suffix `_collapsed`).
+#'   }
+#'   \item{`message()` -- no items collapsed}{
+#'     Triggered when no items required collapsing (all categories already have
+#'     sufficient respondents). No changes are made to `resp`.
+#'   }
+#' }
 #' @export
 #' @return data.frame resp with collapsed and original items
 
@@ -729,6 +842,16 @@ create_table <- function(response) {
 #' function defaults to NA and negative values)
 #'
 #' @return   logical vector with length = nrow(resp), indicating whether case is valid
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{`warning()` -- invalid `min.val`}{
+#'     Triggered when `min.val` is `NULL` or a negative number. The default of
+#'     3 valid responses per person is applied instead. Respondents may be
+#'     incorrectly classified as valid or invalid if the intended threshold
+#'     differs from 3.
+#'   }
+#' }
 #' @export
 min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 
@@ -834,6 +957,30 @@ pos_new <- function(vars, select, position) {
 #' the test day if it's the same for all participants (default is median)
 #'
 #' @return   numeric vector with approximate age in years
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{`message()` -- missing birth year values replaced by median}{
+#'     Triggered when one or more `NA` values are present in the birth year
+#'     variable. The affected values are replaced by the rounded sample median.
+#'     Age calculations for those respondents are approximate.
+#'   }
+#'   \item{`message()` -- missing birth month values replaced by median}{
+#'     Triggered when one or more `NA` values are present in the birth month
+#'     variable. The affected values are replaced by the rounded sample median.
+#'     Age calculations for those respondents are approximate.
+#'   }
+#'   \item{`message()` -- missing test year values replaced by median}{
+#'     Triggered when one or more `NA` values are present in the test year
+#'     variable. The affected values are replaced by the rounded sample median.
+#'     Age calculations for those respondents are approximate.
+#'   }
+#'   \item{`message()` -- missing test month values replaced by median}{
+#'     Triggered when one or more `NA` values are present in the test month
+#'     variable. The affected values are replaced by the rounded sample median.
+#'     Age calculations for those respondents are approximate.
+#'   }
+#' }
 #' @export
 calculate_age <- function(resp,
                           birth_year = "birthy", birth_month = "birthm",

@@ -66,3 +66,85 @@ resp including unscored (raw) and scored items
 \description{
 Score partial credit items
 }
+\section{Notifications}{
+\describe{
+  \item{\code{stop()} -- invalid \code{poly_items} type}{
+    Triggered when \code{poly_items} is not a list. The function halts without
+    scoring any items.
+  }
+  \item{\code{stop()} -- invalid \code{threshold} value}{
+    Triggered when \code{threshold} is not numeric or is outside the interval
+    [0, 1]. The function halts without scoring any items.
+  }
+  \item{\code{message()} -- non-standard PC item name (when \code{warn = TRUE})}{
+    Triggered for each polytomous item whose name does not contain the
+    expected subitem marker pattern (e.g. \code{s_c} or \code{s_sc3g9_c}).
+    Processing continues normally; the message is purely informational.
+  }
+  \item{\code{warning()} -- no missing values provided (when \code{mvs = NULL} and \code{warn = TRUE})}{
+    Triggered when \code{mvs} is \code{NULL}. The default range \code{c(-99:-1)} is
+    used instead. Results may be affected if the actual missing-value codes
+    differ from this default.
+  }
+  \item{\code{message()} -- subitem imputation information (when \code{impute = TRUE} and \code{verbose = TRUE})}{
+    Triggered at the start of subitem imputation. Explains the imputation
+    strategy and notes that the returned dataset retains the original
+    (non-imputed) subitem responses. No effect on results.
+  }
+  \item{\code{message()} -- overview of imputed missing values (when \code{impute = TRUE})}{
+    Triggered after subitem indicator creation. Prints absolute and relative
+    frequencies of imputed missing values per polytomous item, plus
+    descriptive statistics. No effect on results.
+  }
+  \item{\code{message()} -- overview of cases with imputed missing values (when \code{impute = TRUE})}{
+    Triggered after subitem indicator creation. Prints the number of
+    polytomous items with imputed missing values per respondent. No effect
+    on results.
+  }
+  \item{\code{warning()} -- recoding of subitems into indicator variables failed}{
+    Triggered internally when the created indicator variables contain values
+    other than 0 and 1. Indicates an unexpected data issue; please contact
+    the package developers. Scoring continues but results may be unreliable.
+  }
+  \item{\code{stop()} -- sumMV variable count mismatch}{
+    Triggered internally when the number of generated \code{_sumMV} indicator
+    variables does not match the number of polytomous items. Indicates an
+    internal error; please contact the package developers. The function
+    halts.
+  }
+  \item{\code{stop()} -- missing indicators data.frame required}{
+    Triggered internally when the \code{indicators} data.frame is \code{NULL} or not a
+    data.frame. Indicates an internal wiring issue; please contact the
+    package developers. The function halts.
+  }
+  \item{\code{stop()} -- respondent count mismatch between \code{resp} and \code{indicators}}{
+    Triggered internally when the IDs in \code{resp} and \code{indicators} do not
+    agree. Indicates an internal issue; please contact the package
+    developers. The function halts.
+  }
+  \item{\code{stop()} -- \code{vars} data.frame required for imputation}{
+    Triggered when \code{impute = TRUE} but \code{vars} is \code{NULL} or not a
+    data.frame. The function halts. Provide a valid \code{vars} data.frame.
+  }
+  \item{\code{stop()} -- \code{select} argument required for imputation}{
+    Triggered when \code{impute = TRUE} but \code{select} is \code{NULL}. The function
+    halts. Provide the name of the logical selection variable in \code{vars}.
+  }
+  \item{\code{stop()} -- subitems not found in indicators}{
+    Triggered when one or more subitems from \code{poly_items} are absent from
+    the indicator data.frame. Indicates a data-consistency issue. The
+    function halts.
+  }
+  \item{\code{stop()} -- subitems not in selected item set}{
+    Triggered when one or more subitems from \code{poly_items} are not in
+    \code{vars$item[vars[[select]]]}. The function halts; check the \code{select}
+    variable and \code{vars}.
+  }
+  \item{\code{warning()} -- ID mismatch in predicted responses}{
+    Triggered internally when IDs in the original data.frame and the
+    predicted-response data.frame differ. Indicates an internal model issue;
+    please contact the package developer. Imputation proceeds but results
+    may be incorrect.
+  }
+}
+}

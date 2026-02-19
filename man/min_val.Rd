@@ -27,3 +27,13 @@ logical vector with length = nrow(resp), indicating whether case is valid
 \description{
 Select sample with a minimum number of valid values
 }
+\section{Notifications}{
+\describe{
+  \item{\code{warning()} -- invalid \code{min.val}}{
+    Triggered when \code{min.val} is \code{NULL} or a negative number. The default of
+    3 valid responses per person is applied instead. Respondents may be
+    incorrectly classified as valid or invalid if the intended threshold
+    differs from 3.
+  }
+}
+}
