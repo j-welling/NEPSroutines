@@ -6,7 +6,14 @@
       "Bash(tar:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(done)",
+      "Bash(gh run download:*)",
+      "Bash(gh run watch:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)"
     ]
   }
 }
