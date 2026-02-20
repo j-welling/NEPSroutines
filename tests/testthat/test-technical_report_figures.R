@@ -1,20 +1,4 @@
 
-# Helper: check if magick can render ggplot2 text (requires FreeType fonts)
-.can_render_magick_text <- function() {
-  if (!requireNamespace("magick", quietly = TRUE)) return(FALSE)
-  tryCatch({
-    dev <- magick::image_graph(100, 100, bg = "white")
-    graphics::par(mar = c(0, 0, 0, 0))
-    graphics::plot.new()
-    graphics::text(0.5, 0.5, "test")
-    grDevices::dev.off()
-    TRUE
-  }, error = function(e) {
-    try(grDevices::dev.off(), silent = TRUE)
-    FALSE
-  })
-}
-
 test_that("create figure for missing values works", {
 
   skip_if_not_installed("magick")
@@ -25,8 +9,10 @@ test_that("create figure for missing values works", {
   expect_false(inherits(img, "try-error"))
   expect_true(inherits(img, "magick-image"))
 
-  # footnote path uses image_graph() + ggplot2 text - requires fonts
-  skip_if(!.can_render_magick_text(), "ImageMagick cannot render text (fonts unavailable)")
+  # footnote path uses image_graph() + ggplot2 text rendering, which requires
+  # FreeType fonts. These are unavailable on macOS ARM64 CI runners and cause
+  # a process crash (SIGABRT) rather than a catchable R error.
+  skip_on_os("mac")
   img <- try({
     FigMv(
       test_path("fixtures/ex1/plots/missing/by_item/Missing_responses_by_item_NR.png"),
@@ -42,8 +28,9 @@ test_that("create figure for missing values works", {
 test_that("create Wright map works", {
 
   skip_if_not_installed("magick")
-  # FigWrightMap always includes a footnote, which requires image_graph() + fonts
-  skip_if(!.can_render_magick_text(), "ImageMagick cannot render text (fonts unavailable)")
+  # FigWrightMap always adds a footnote, which uses image_graph() + text rendering.
+  # On macOS ARM64 CI runners, missing FreeType fonts cause a process crash.
+  skip_on_os("mac")
   img <- try({
     FigWrightMap(test_path("fixtures/ex1/plots/Wright_Maps/Wright_map_for_1PL.png"))
   })
