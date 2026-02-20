@@ -62,7 +62,7 @@ test_that("pc_scoring() works", {
 
   # With imputation (requires MASS via TAM)
   skip_if_not_installed("MASS")
-  expect_warning(
+  expect_no_error(
     pc_scoring(resp = resp, poly_items = poly_items,
                vars = vars, select = "dich", mvs = -99:-1,
                impute = TRUE, warn = TRUE, verbose = FALSE)
