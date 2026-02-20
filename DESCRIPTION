@@ -40,6 +40,7 @@ Imports:
     tidyselect
 Suggests:
     flextable,
+    MASS,
     officer (>= 0.6.5),
     magick (>= 2.8.3),
     sfsmisc,

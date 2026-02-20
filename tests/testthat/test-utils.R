@@ -310,6 +310,7 @@ test_that("create_name() works", {
 
 # argument include_step incorrect?
 test_that("order_xsi_fixed() works", {
+  skip_if_not_installed("MASS")
 
   data(ex2)
   resp <- ex2$resp[ex2$resp$valid, c("mag120001_c", "mag120002_c", "mag120003_c")]

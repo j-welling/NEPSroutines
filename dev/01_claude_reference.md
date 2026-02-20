@@ -56,3 +56,9 @@ NEPSroutines is an R package for scaling NEPS (National Educational Panel Study)
 **RoxygenNote version mismatch**: If installed roxygen2 version doesn't match `RoxygenNote` in DESCRIPTION, `devtools::check()` won't re-document. Update `RoxygenNote` in DESCRIPTION to match installed version before running `devtools::document()`.
 
 **WrightMap/sfsmisc in Imports**: These packages were declared in Imports but only used transitively through TAM. Move to Suggests to avoid "All declared Imports should be used" NOTE.
+
+### CI test failures (2026-02-20)
+
+**MASS not available in R CMD check tests**: MASS is a "recommended" R package but CDM uses it as an undeclared soft dependency (`CDM:::CDM_require_namespace("MASS")`). In R CMD check clean environments, MASS is absent from the transitive dependency tree, causing tests that call IRT functions to fail with "Package 'MASS' is needed". Fix: add `MASS` to `Suggests` in DESCRIPTION (ensures installation) AND add `skip_if_not_installed("MASS")` before affected test sections as a safety guard. Affected tests: `test-data_preparation.R` (pc_scoring with impute=TRUE), `test-distractor_analysis.R` (dis_analysis with use_wle=TRUE), `test-utils.R` (order_xsi_fixed).
+
+**macOS CI: magick::image_graph() crash (SIGABRT)**: On macOS ARM64 GitHub Actions runners, calling `magick::image_graph()` + ggplot2 text rendering (`annotate("text", ...)`) causes a C-level abort (Abort trap: 6 / SIGABRT) due to missing FreeType fonts. This is NOT a catchable R error — it crashes the entire R process. Do NOT try to probe for this with `tryCatch`. Fix: add `skip_on_os("mac")` for any test that calls `Fig()` with a footnote, or `FigWrightMap()` (which always adds a footnote). Basic `magick::image_read/crop/scale` without text rendering works fine on macOS.
