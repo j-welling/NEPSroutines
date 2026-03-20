@@ -505,8 +505,10 @@ irt_model <- function(
 
   # Check if input is correct
   if (!irtmodel %in% c("1PL", "2PL", "GPCM", "PCM2")) {
-    stop("Invalid irtmodel. Please provide one of the following:
-          '1PL', '2PL', 'PCM2', 'GPCM'.")
+    stop(sprintf(
+      "Invalid irtmodel '%s'. Must be one of: '1PL', '2PL', 'PCM2', 'GPCM'.",
+      irtmodel
+    ))
   }
 
   # Select only valid cases

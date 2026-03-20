@@ -10,7 +10,7 @@ test_that("only_valid() works", {
   expect_no_message(only_valid(resp = resp, valid = NULL, warn = FALSE))
   expect_equal(nrow(only_valid(resp = resp, valid = NULL, warn = FALSE)), 10)
   expect_error(only_valid(resp = resp, valid = "something", warn = TRUE),
-               regexp = "^Data.frame resp does not include any variable.+")
+               regexp = "^Variable 'something' not found in 'resp'.+")
   expect_equal(nrow(only_valid(resp = resp, valid = "valid", warn = TRUE)), 8)
 
 })
@@ -33,20 +33,20 @@ test_that("convert_mv() works", {
   # mvs not set
   expect_message(convert_mv(resp = resp, vars = vars, select = NULL,
                             mvs = NULL, warn = TRUE),
-                 regexp = "^No user defined missing values provided.+")
+                 regexp = "^No user-defined missing values provided for item responses.+")
   expect_no_message(convert_mv(resp = resp, vars = vars, select = NULL,
                                mvs = NULL, warn = FALSE))
 
   # select is incorrect
   expect_error(convert_mv(resp = resp, vars = vars, select = "notdefined",
                           warn = FALSE),
-               regexp = "^Data.frame vars does not include any variable with.+")
+               regexp = "^Variable 'notdefined' not found in 'vars'.+")
   expect_error(convert_mv(resp = resp, vars = vars, select = "incorrect",
                           warn = FALSE),
-               regexp = "^Variable 'incorrect' in data.frame vars is no logical.+")
+               regexp = "^Variable 'incorrect' in 'vars' is not logical.+")
   expect_error(convert_mv(resp = resp, vars = vars, select = "donotuse",
                           warn = FALSE),
-               regexp = "^Data.frame resp does not include any variable with.+")
+               regexp = "^Variables? .+ not found in 'resp'.+")
 
   # all values < 0 replaced with NA
   expect_equal(sum(convert_mv(resp = resp, vars = vars, select = "use",
@@ -87,7 +87,7 @@ test_that("prepare_resp() works", {
                  regexp = "^No variable provided indicating the items.+")
   expect_no_message(prepare_resp(resp = resp, select = NULL, warn = FALSE))
   expect_error(prepare_resp(resp = resp, vars = vars, select = "dontuse"),
-               regexp = "^Data.frame vars does not include any variable.+")
+               regexp = "^Variable 'dontuse' not found in 'vars'.+")
 
   # all correctly set
   expect_equal(dim(prepare_resp(resp = resp, vars = vars, select = "use",
@@ -172,8 +172,13 @@ test_that("check_variables() works", {
                                   variables = c("var1", "var2")))
   expect_no_error(check_variables(df = df, name_df = "myname",
                                   variables = "var1"))
-  expect_error(check_variabes(df = df, name_df = "myname",
-                              variables = c("var1", "var2", "var3")))
+  expect_error(check_variables(df = df, name_df = "myname",
+                               variables = c("var1", "var2", "var3")),
+               regexp = "'var3' not found in 'myname'")
+  # name_df = NULL falls back to "<unknown>" — full message is still informative
+  expect_error(check_variables(df = df, name_df = NULL,
+                               variables = "missing_var"),
+               regexp = "'missing_var' not found in '<unknown>'")
 
 })
 
@@ -186,13 +191,18 @@ test_that("check_logicals() works", {
   expect_no_error(check_logicals(df = df, name_df = "myname",
                                  logicals = "var1"))
   expect_error(check_logicals(df = df, name_df = "myname",
-                              logicals = "var2"))
-  expect_warning(check_logicals(df = df, name_df = NULL,
-                                logicals = "var3"))
+                              logicals = "var2"),
+               regexp = "'var2' in 'myname' is not logical")
+  expect_warning(check_logicals(df = df, name_df = "myname",
+                                logicals = "var3"),
+                 regexp = "'var3' in 'myname' contains values other than TRUE/FALSE")
   expect_no_warning(check_logicals(df = df, name_df = NULL, warn = FALSE,
                                    logicals = "var3"))
-  expect_error(check_logicals(df = df, name_df = "myname",
-                              logicals = c("var1", "var2", "var3")))
+  # Multiple non-logical variables trigger plural grammar
+  df_multi <- data.frame(v1 = rep(TRUE, 5), v2 = 1:5, v3 = letters[1:5])
+  expect_error(check_logicals(df = df_multi, name_df = "myname",
+                              logicals = c("v2", "v3")),
+               regexp = "Variables 'v2', 'v3' in 'myname' are not logical")
 
 })
 
@@ -207,8 +217,10 @@ test_that("check_numerics() works", {
   expect_no_error(check_numerics(df = df, name_df = NULL,
                                  numerics = "var3"))
   expect_error(check_numerics(df = df, name_df = NULL,
-                              numerics = "var1"))
-  expect_error(check_numerics(df = df, name_df = "myname"))
+                              numerics = "var1"),
+               regexp = "'var1' in '<unknown>' is not numeric")
+  expect_error(check_numerics(df = df, name_df = "myname"),
+               regexp = "'var1' in 'myname' is not numeric")
 
 })
 
@@ -240,8 +252,14 @@ test_that("check_dich() works", {
 
   expect_no_error(check_dich(df = df, name_df = "myname",
                              dich_items = c("var2", "var3")))
-  expect_error(check_dich(df = df, name_df = NULL, items = "var1"))
+  expect_error(check_dich(df = df, name_df = "myname", dich_items = "var1"),
+               regexp = "'var1' in 'myname' contains values > 1 \\(max: 'var1'=10\\)")
   expect_error(check_dich(df = df, name_df = "myname"))
+
+  # Multi-item: both unlabelled max values and plural grammar tested
+  df2 <- data.frame(a = 1:3, b = c(0, 2, 1))
+  expect_error(check_dich(df = df2, name_df = "test", dich_items = c("a", "b")),
+               regexp = "Items 'a', 'b' in 'test' contain values > 1")
 
 })
 
@@ -373,12 +391,11 @@ test_that("order_xsi_fixed() works", {
 })
 
 
-# Argument resp wird nie verwendet, vars wird immer nur als vector verwendet
 test_that("create_suf_names() works", {
 
   varnames <- c(paste0("var", 1:2), paste0("var", 3:4, "_collapsed"))
-  expect_error(create_suf_names(vars = varnames, resp = "resp"))
-  expect_equal(create_suf_names(vars = varnames), paste0("var", 1:4))
+  expect_equal(create_suf_names(vars_name = varnames), paste0("var", 1:4))
+  expect_null(create_suf_names(vars_name = NULL))
 
 })
 

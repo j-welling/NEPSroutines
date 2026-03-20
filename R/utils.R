@@ -46,7 +46,7 @@ convert_mv <- function(resp, vars, select = NULL, mvs = NULL, warn = TRUE) {
     mvs <- -999:-1
 
     if (warn) {
-      message("No user defined missing values provided for item responses. ",
+      message("No user-defined missing values provided for item responses. ",
               "Default of '-999 to -1' is used.")
     }
   }
@@ -146,7 +146,7 @@ prepare_resp <- function(
 
 is_null_mvs_valid <- function(mvs = NA, valid = NA) {
   if (is.null(mvs)) {
-    message("No user defined missing values provided. ",
+    message("No user-defined missing values provided for item responses. ",
             "Default of '-999 to -1' is used.")
   }
 
@@ -259,11 +259,14 @@ check_pid <- function(pid) {
 
 check_items <- function(items) {
     if (length(items) != length(unique(items))) {
-        stop("There are duplicates in the item names.")
+        dupes <- unique(items[duplicated(items)])
+        stop("Duplicate item names found in 'vars$item': ",
+             paste(dupes, collapse = ", "), ".")
     }
 
     if (any(is.na(items))) {
-        stop("There are missing values in the item names.")
+        stop("Missing values (NA) found in 'vars$item'. ",
+             "Check that all selected items have a name in vars.")
     }
   return(invisible())
 }
@@ -280,13 +283,20 @@ check_items <- function(items) {
 
 check_variables <- function(df, name_df, variables) {
 
+  if (is.null(name_df)) name_df <- "<unknown>"
+
   if (!is.null(variables)) {
 
     not_included <- !variables %in% names(df)
 
     if (sum(not_included) > 0) {
-      stop(paste0("Data.frame ", name_df, " does not include any variable with the",
-                  " name '", variables[not_included], "'. Please check again.\n"))
+      missing <- variables[not_included]
+      stop(sprintf(
+        "Variable%s %s not found in '%s'. ",
+        if (length(missing) > 1) "s" else "",
+        paste0("'", missing, "'", collapse = ", "),
+        name_df
+      ), "Check that the column name is spelled correctly.")
     }
   }
   return(invisible())
@@ -305,6 +315,8 @@ check_variables <- function(df, name_df, variables) {
 
 check_logicals <- function(df, name_df, logicals, warn = TRUE) {
 
+  if (is.null(name_df)) name_df <- "<unknown>"
+
   if (!is.null(logicals)) {
 
     # Check whether variables are included in dataframe
@@ -313,16 +325,27 @@ check_logicals <- function(df, name_df, logicals, warn = TRUE) {
     no_logical <- sapply(df[ , logicals, drop = FALSE], function(x) !is.logical(x))
 
     if (sum(no_logical) > 0) {
-      stop(paste0("Variable '", logicals[no_logical], "' in data.frame ",
-                  name_df, " is no logical. Please check again.\n"))
+      bad <- logicals[no_logical]
+      stop(sprintf(
+        "Variable%s %s in '%s' %s not logical (TRUE/FALSE). ",
+        if (length(bad) > 1) "s" else "",
+        paste0("'", bad, "'", collapse = ", "),
+        name_df,
+        if (length(bad) > 1) "are" else "is"
+      ), "Convert to logical before passing to the function.")
     }
 
     other_value <- sapply(df[ , logicals, drop = FALSE], function(x) any(!x %in% c(TRUE, FALSE)))
 
     if (warn & (sum(other_value) > 0)) {
-      warning(paste0("Logical variable '", logicals[other_value], "' in ",
-                     "data.frame ", name_df, " contains other values than TRUE or ",
-                     "FALSE (e.g., NA). Please check again.\n"))
+      bad <- logicals[other_value]
+      warning(sprintf(
+        "Logical variable%s %s in '%s' contain%s values other than TRUE/FALSE (e.g. NA). ",
+        if (length(bad) > 1) "s" else "",
+        paste0("'", bad, "'", collapse = ", "),
+        name_df,
+        if (length(bad) > 1) "" else "s"
+      ), "NA rows will be excluded from the analysis.")
     }
   }
 
@@ -344,6 +367,7 @@ check_logicals <- function(df, name_df, logicals, warn = TRUE) {
 check_numerics <- function(df, name_df, numerics = NULL, check_invalid = FALSE,
                            dich = FALSE) {
 
+  if (is.null(name_df)) name_df <- "<unknown>"
   if (is.null(numerics)) numerics <- names(df)
 
   # Check whether variables are included in dataframe
@@ -352,8 +376,14 @@ check_numerics <- function(df, name_df, numerics = NULL, check_invalid = FALSE,
   no_numeric <- sapply(df[ , numerics, drop = FALSE], function(x) !is.numeric(x))
 
   if (sum(no_numeric) > 0) {
-    stop(paste0("Variable '", numerics[no_numeric], "' in data.frame ", name_df,
-                " is no numeric variable. Please check again.\n"))
+    bad <- numerics[no_numeric]
+    stop(sprintf(
+      "Variable%s %s in '%s' %s not numeric. ",
+      if (length(bad) > 1) "s" else "",
+      paste0("'", bad, "'", collapse = ", "),
+      name_df,
+      if (length(bad) > 1) "are" else "is"
+    ), "Convert the column to numeric before passing to the function.")
   }
 
   # Check whether variables contain invalid values
@@ -377,6 +407,7 @@ check_numerics <- function(df, name_df, numerics = NULL, check_invalid = FALSE,
 
 check_invalid_values <- function(df, name_df, items = NULL) {
 
+  if (is.null(name_df)) name_df <- "<unknown>"
   if (is.null(items)) items <- names(df)
 
   df_items <- df[, items, drop = FALSE]
@@ -386,7 +417,7 @@ check_invalid_values <- function(df, name_df, items = NULL) {
     stop(paste0("Data.frame ", name_df, " contains invalid values (< 0) in ",
                 "specified items: ", paste(sort(invalid_values), collapse = ", "),
                 ". Please check again and be sure to include all ",
-                "user defined missing values in the vector mvs."))
+                "user-defined missing values via the `mvs` argument."))
   }
   return(invisible())
 }
@@ -403,15 +434,24 @@ check_invalid_values <- function(df, name_df, items = NULL) {
 
 check_dich <- function(df, name_df, dich_items = NULL) {
 
+  if (is.null(name_df)) name_df <- "<unknown>"
   if (is.null(dich_items)) dich_items <- names(df)
 
   no_dich <- sapply(df[ , dich_items, drop = FALSE], function(x) {
     max(x, na.rm = TRUE) > 1})
 
   if (sum(no_dich) > 0) {
-    stop(paste0("Variable '", dich_items[no_dich], "' in data.frame ", name_df,
-                " contains values greater than 1, although specified as",
-                " dichotomous. Please check again.\n"))
+    bad <- dich_items[no_dich]
+    max_vals <- sapply(df[, bad, drop = FALSE], function(x) max(x, na.rm = TRUE))
+    max_label <- paste(paste0("'", bad, "'=", max_vals), collapse = ", ")
+    stop(sprintf(
+      "Item%s %s in '%s' contain%s values > 1 (max: %s). Dichotomous responses (0/1) are required. ",
+      if (length(bad) > 1) "s" else "",
+      paste0("'", bad, "'", collapse = ", "),
+      name_df,
+      if (length(bad) > 1) "" else "s",
+      max_label
+    ), "Use a polytomous model (PCM2/GPCM) for these items, or recode to 0/1.")
   }
   return(invisible())
 }
@@ -673,7 +713,6 @@ order_xsi_fixed <- function(
 
 #' Create names for output as used in suf (this concerns the variables with collapsed categories)
 #' @param vars_name  string; defines name of dataset vars
-#' @param resp_name string; defines name of dataset resp
 #' @noRd
 create_suf_names <- function(vars_name = NULL) {
 
