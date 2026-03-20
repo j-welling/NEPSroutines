@@ -13,7 +13,10 @@
       "Bash(gh run download:*)",
       "Bash(gh run watch:*)",
       "Bash(git fetch:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(ls:*)",
+      "Bash(gh auth:*)",
+      "Bash(git worktree:*)"
     ]
   }
 }

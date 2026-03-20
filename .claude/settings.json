@@ -1,10 +1,14 @@
 {
   "permissions": {
     "allow": [
+<<<<<<< Updated upstream
       "Bash(Rscript -e \"devtools::test*)",
       "Bash(Rscript -e \"devtools::check*)",
       "Bash(Rscript -e \"devtools::document*)",
       "Bash(Rscript -e \"devtools::load_all*)",
+=======
+      "Bash(Rscript -e \"devtools:*\")",
+>>>>>>> Stashed changes
       "Bash(git status*)",
       "Bash(git diff*)",
       "Bash(git log*)",
