@@ -16,7 +16,9 @@
       "Bash(git pull:*)",
       "Bash(ls:*)",
       "Bash(gh auth:*)",
-      "Bash(git worktree:*)"
+      "Bash(git worktree:*)",
+      "Bash(for b:*)",
+      "Bash(do echo:*)"
     ]
   }
 }
