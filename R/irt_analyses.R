@@ -530,6 +530,7 @@ irt_model <- function(
   # Test data
   check_numerics(resp, "resp", check_invalid = TRUE) # this check is very important as otherwise R might be aborted!!
   if (irtmodel %in% c("1PL", "2PL")) check_dich(resp, "resp")
+  check_max_zero(resp, "resp")
 
   # Create scoring matrix if not provided in function arguments
   Q <- create_q(
