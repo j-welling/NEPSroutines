@@ -417,6 +417,39 @@ check_dich <- function(df, name_df, dich_items = NULL) {
 }
 
 
+#' Check data.frame for items with maximum score of 0
+#'
+#' Items where all observed values (after missing-value conversion) are 0 or NA
+#' cause TAM to crash with an uninformative internal error.  This function
+#' detects such items early and raises a descriptive error.
+#'
+#' @param df  data.frame; contains item responses (MVs already converted to NA)
+#' @param name_df  string; name of df shown in the error message
+#' @param name_group  string or NULL; group name included in the error message
+#'   when running a multi-group analysis (e.g. from \code{grouped_irt_analysis})
+#' @returns NULL invisibly
+#' @noRd
+
+check_max_zero <- function(df, name_df, name_group = NULL) {
+
+  max_score <- sapply(df, function(x) suppressWarnings(max(x, na.rm = TRUE)))
+  zero_items <- names(max_score[max_score <= 0])
+
+  if (length(zero_items) > 0) {
+    group_info <- if (!is.null(name_group)) paste0(" (group '", name_group, "')") else ""
+    stop(paste0(
+      "The following items in ", name_df, group_info, " have a maximum observed score of 0 ",
+      "(all responses are 0 or missing after missing-value conversion). ",
+      "TAM cannot fit a model to such items. ",
+      "Please exclude them from the analysis or verify the data and missing-value ",
+      "specification (mvs):\n  ",
+      paste(zero_items, collapse = "\n  ")
+    ))
+  }
+  return(invisible())
+}
+
+
 #' Minimum effect hypothesis test
 #' (following Murphy & Myors, 1999)
 #'

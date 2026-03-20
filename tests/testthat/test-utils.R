@@ -246,6 +246,32 @@ test_that("check_dich() works", {
 })
 
 
+test_that("check_max_zero() works", {
+
+  df_ok    <- data.frame(item1 = c(0, 1, 0, 1), item2 = c(NA, 1, 0, 1))
+  df_bad   <- data.frame(item1 = c(0, 1, 0, 1), item2 = c(0, 0, NA, 0))
+  df_all_na <- data.frame(item1 = c(0, 1),       item2 = c(NA, NA))
+
+  expect_no_error(check_max_zero(df_ok, "resp"))
+
+  # item2 is flagged, message contains key phrase
+  expect_error(check_max_zero(df_bad, "resp"), regexp = "item2")
+  expect_error(check_max_zero(df_bad, "resp"), regexp = "maximum observed score of 0")
+
+  # item1 is fine and must NOT appear in the error
+  err_bad <- tryCatch(check_max_zero(df_bad, "resp"), error = conditionMessage)
+  expect_false(grepl("item1", err_bad))
+
+  # all-NA column is also caught
+  expect_error(check_max_zero(df_all_na, "resp"), regexp = "item2")
+
+  # group name is included when provided
+  expect_error(check_max_zero(df_bad, "resp", name_group = "isRegular"),
+               regexp = "group 'isRegular'")
+
+})
+
+
 test_that("reached_maxiter() works", {
 
   mod <- readRDS(test_path("fixtures/ex2/results/irt_poly.rds"))

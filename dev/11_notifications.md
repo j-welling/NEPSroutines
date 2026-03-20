@@ -219,6 +219,14 @@ following information is provided:
 | 54 | **message** | Steps analysis table header and content. | `print = TRUE` and `irt_type == 'poly'`. | Informational: prints threshold (step) parameters for polytomous items. |
 | 55 | **message** | *"SUMMARY FOR TR"* followed by text summary. | `print = TRUE`. | Informational: prints a prose summary suitable for pasting into a technical report. |
 
+### `irt_model()` (internal)
+
+Called by `irt_analysis()` for each model type (1PL, 2PL, PCM2, GPCM).
+
+| # | Type | Message text (abbreviated) | Trigger | Effect |
+|---|------|---------------------------|---------|--------|
+| 55a | **error** | *"The following items in resp\[\<group info\>\] have a maximum observed score of 0 … \<item names\>"* | At least one item's maximum observed response is 0 (all values are 0 or `NA` after MV conversion). Fires before any TAM function is called. | Execution stops. Without this check TAM crashes internally with an uninformative `dimnames` error. The message lists the offending items and suggests excluding them or revising the `mvs` specification. |
+
 ### `model_fit_table()` (internal)
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
