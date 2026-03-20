@@ -153,9 +153,11 @@ test_that("check_pid() works", {
 
 test_that("check_items() works", {
 
-  expect_error(check_items(c(paste0("var", 1:10), "var10")))
+  expect_error(check_items(c(paste0("var", 1:10), "var10")),
+               regexp = "Duplicate item names found in 'vars\\$item': 'var10'")
   expect_no_error(check_items(c(paste0("var", 1:10), "var11")))
-  expect_error(check_items(c(paste0("var", 1:10), NA)))
+  expect_error(check_items(c(paste0("var", 1:10), NA)),
+               regexp = "Missing values \\(NA\\) found in 'vars\\$item'")
 
 })
 
@@ -175,10 +177,18 @@ test_that("check_variables() works", {
   expect_error(check_variables(df = df, name_df = "myname",
                                variables = c("var1", "var2", "var3")),
                regexp = "'var3' not found in 'myname'")
-  # name_df = NULL falls back to "<unknown>" — full message is still informative
+  # name_df defaults to "<unknown>" when omitted or NULL
   expect_error(check_variables(df = df, name_df = NULL,
                                variables = "missing_var"),
                regexp = "'missing_var' not found in '<unknown>'")
+  # Plural branch: multiple missing variables
+  expect_error(check_variables(df = df, name_df = "myname",
+                               variables = c("var3", "var4")),
+               regexp = "Variables 'var3', 'var4' not found in 'myname'")
+  # Long list is truncated
+  many <- paste0("z", 1:8)
+  expect_error(check_variables(df = df, name_df = "myname", variables = many),
+               regexp = "and 3 more")
 
 })
 
@@ -221,6 +231,11 @@ test_that("check_numerics() works", {
                regexp = "'var1' in '<unknown>' is not numeric")
   expect_error(check_numerics(df = df, name_df = "myname"),
                regexp = "'var1' in 'myname' is not numeric")
+  # Plural branch: multiple non-numeric variables
+  df_multi <- data.frame(a = letters[1:5], b = rep(TRUE, 5), c = 1:5)
+  expect_error(check_numerics(df = df_multi, name_df = "test",
+                              numerics = c("a", "b")),
+               regexp = "Variables 'a', 'b' in 'test' are not numeric")
 
 })
 
@@ -233,8 +248,10 @@ test_that("check_invalid_values() works", {
   expect_no_error(check_invalid_values(df = df, name_df = "myname",
                                        items = c("var1", "var2")))
   expect_error(check_invalid_values(df = df, name_df = NULL,
-                                    items = "var3"))
-  expect_error(check_invalid_values(df = df, name_df = "myname"))
+                                    items = "var3"),
+               regexp = "Data frame '<unknown>' contains invalid values")
+  expect_error(check_invalid_values(df = df, name_df = "myname"),
+               regexp = "Data frame 'myname' contains invalid values")
 
   # Test that error message includes the invalid values (issue #47)
   df2 <- data.frame(var1 = c(-5, -2, 1:8))
@@ -254,12 +271,22 @@ test_that("check_dich() works", {
                              dich_items = c("var2", "var3")))
   expect_error(check_dich(df = df, name_df = "myname", dich_items = "var1"),
                regexp = "'var1' in 'myname' contains values > 1 \\(max: 'var1'=10\\)")
-  expect_error(check_dich(df = df, name_df = "myname"))
+  expect_error(check_dich(df = df, name_df = "myname"),
+               regexp = "'var1' in 'myname' contains values > 1")
 
   # Multi-item: both unlabelled max values and plural grammar tested
   df2 <- data.frame(a = 1:3, b = c(0, 2, 1))
   expect_error(check_dich(df = df2, name_df = "test", dich_items = c("a", "b")),
                regexp = "Items 'a', 'b' in 'test' contain values > 1")
+
+  # All-NA column is caught rather than silently passing
+  df_na <- data.frame(ok = c(0, 1, 0), bad = c(NA, NA, NA))
+  expect_error(check_dich(df = df_na, name_df = "test", dich_items = "bad"),
+               regexp = "'bad' in 'test' is entirely NA")
+
+  # name_df defaults to "<unknown>"
+  expect_error(check_dich(df = df, name_df = NULL, dich_items = "var1"),
+               regexp = "'var1' in '<unknown>' contains values > 1")
 
 })
 
@@ -396,6 +423,23 @@ test_that("create_suf_names() works", {
   varnames <- c(paste0("var", 1:2), paste0("var", 3:4, "_collapsed"))
   expect_equal(create_suf_names(vars_name = varnames), paste0("var", 1:4))
   expect_null(create_suf_names(vars_name = NULL))
+
+})
+
+
+test_that("irt_model() rejects invalid irtmodel argument", {
+
+  # Minimal data — irtmodel check fires before data validation
+  resp <- data.frame(ID_t = 1:3, x = c(0, 1, 0))
+  vars <- data.frame(item = "x", use = TRUE)
+
+  expect_error(irt_model(resp, vars, "use", irtmodel = "3PL", test = FALSE),
+               regexp = "Invalid irtmodel '3PL'")
+  expect_error(irt_model(resp, vars, "use", irtmodel = NULL, test = FALSE),
+               regexp = "must be a single character string")
+  expect_error(irt_model(resp, vars, "use", irtmodel = c("1PL", "2PL"),
+                         test = FALSE),
+               regexp = "must be a single character string")
 
 })
 
