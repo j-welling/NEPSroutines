@@ -490,6 +490,18 @@ irt_model <- function(
     test = TRUE
   ) {
 
+  # Check irtmodel argument first (no data needed)
+  if (is.null(irtmodel) || length(irtmodel) != 1L || !is.character(irtmodel)) {
+    stop("Argument 'irtmodel' must be a single character string. ",
+         "Choose one of: '1PL', '2PL', 'PCM2', 'GPCM'.")
+  }
+  if (!irtmodel %in% c("1PL", "2PL", "GPCM", "PCM2")) {
+    stop(sprintf(
+      "Invalid irtmodel '%s'. Must be one of: '1PL', '2PL', 'PCM2', 'GPCM'.",
+      irtmodel
+    ))
+  }
+
   # Test data
   if (test) {
       check_logicals(vars, "vars", select, warn = warn)
@@ -501,12 +513,6 @@ irt_model <- function(
       if (!is.null(pweights))
           check_numerics(resp, "resp", pweights, check_invalid = TRUE)
       if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
-  }
-
-  # Check if input is correct
-  if (!irtmodel %in% c("1PL", "2PL", "GPCM", "PCM2")) {
-    stop("Invalid irtmodel. Please provide one of the following:
-          '1PL', '2PL', 'PCM2', 'GPCM'.")
   }
 
   # Select only valid cases
