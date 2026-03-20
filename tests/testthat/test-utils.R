@@ -151,6 +151,32 @@ test_that("check_pid() works", {
 })
 
 
+test_that("fmt_names() formats and truncates name lists", {
+
+  expect_equal(fmt_names(character(0)), "<none>")
+  expect_equal(fmt_names("x"), "'x'")
+  expect_equal(fmt_names(c("a", "b")), "'a', 'b'")
+  expect_equal(fmt_names(letters[1:5]), "'a', 'b', 'c', 'd', 'e'")
+  expect_equal(fmt_names(letters[1:6]),
+               "'a', 'b', 'c', 'd', 'e' and 1 more")
+  expect_equal(fmt_names(letters[1:8]),
+               "'a', 'b', 'c', 'd', 'e' and 3 more")
+
+})
+
+
+test_that("validation_msg() handles singular and plural", {
+
+  single <- validation_msg("Variable", "x", "df", "is", "are", "not numeric.")
+  expect_equal(single, "Variable 'x' in 'df' is not numeric.")
+
+  plural <- validation_msg("Variable", c("x", "y"), "df", "is", "are",
+                           "not numeric.")
+  expect_equal(plural, "Variables 'x', 'y' in 'df' are not numeric.")
+
+})
+
+
 test_that("check_items() works", {
 
   expect_error(check_items(c(paste0("var", 1:10), "var10")),
@@ -283,6 +309,10 @@ test_that("check_dich() works", {
   df_na <- data.frame(ok = c(0, 1, 0), bad = c(NA, NA, NA))
   expect_error(check_dich(df = df_na, name_df = "test", dich_items = "bad"),
                regexp = "'bad' in 'test' is entirely NA")
+  # All-NA plural branch
+  df_multi_na <- data.frame(a = c(NA, NA), b = c(NA, NA))
+  expect_error(check_dich(df = df_multi_na, name_df = "test"),
+               regexp = "Items 'a', 'b' in 'test' are entirely NA")
 
   # name_df defaults to "<unknown>"
   expect_error(check_dich(df = df, name_df = NULL, dich_items = "var1"),

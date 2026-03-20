@@ -262,6 +262,7 @@ check_pid <- function(pid) {
 #' @returns A single string like "'a', 'b' and 3 more"
 #' @noRd
 fmt_names <- function(x, max_show = 5L) {
+  if (length(x) == 0L) return("<none>")
   if (length(x) > max_show) {
     shown <- paste0("'", x[seq_len(max_show)], "'", collapse = ", ")
     paste0(shown, " and ", length(x) - max_show, " more")
@@ -490,7 +491,7 @@ check_dich <- function(df, name_df = "<unknown>", dich_items = NULL) {
     ))
   }
 
-  no_dich <- dich_items[item_max > 1]
+  no_dich <- dich_items[!is.na(item_max) & item_max > 1]
   if (length(no_dich) > 0) {
     max_label <- paste(paste0("'", no_dich, "'=", item_max[no_dich]),
                        collapse = ", ")
