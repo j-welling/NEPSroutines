@@ -139,12 +139,32 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 #'
 #' @section Notifications:
 #' \describe{
-#'   \item{\code{stop}: \code{poly_items} is not a list}{Triggered when
-#'     \code{poly_items} is not of class \code{list}. Effect: the function
-#'     halts; no scoring is performed.}
+#'   \item{\code{stop}: \code{resp} is not a data.frame}{Triggered when
+#'     \code{resp} is not a data.frame. Effect: the function halts.}
+#'   \item{\code{stop}: \code{poly_items} is invalid}{Triggered when
+#'     \code{poly_items} is not a non-empty named list of character vectors.
+#'     Effect: the function halts; no scoring is performed.}
+#'   \item{\code{stop}: logical parameter is invalid}{Triggered when
+#'     \code{impute}, \code{warn}, \code{save}, \code{overwrite}, or
+#'     \code{verbose} is not a single \code{TRUE}/\code{FALSE} value.
+#'     Effect: the function halts.}
 #'   \item{\code{stop}: \code{threshold} is out of range}{Triggered when
-#'     \code{threshold} is not numeric or not in the interval \[0, 1\]. Effect:
-#'     the function halts; no scoring is performed.}
+#'     \code{threshold} is not a single numeric value in the interval
+#'     \[0, 1\]. Effect: the function halts; no scoring is performed.}
+#'   \item{\code{stop}: \code{mvs} is invalid}{Triggered when \code{mvs}
+#'     is provided but is not a numeric vector. Effect: the function halts.}
+#'   \item{\code{stop}: \code{missing_by_design} is invalid}{Triggered when
+#'     \code{missing_by_design} is not a single numeric value. Effect: the
+#'     function halts.}
+#'   \item{\code{stop}: string parameter is invalid}{Triggered when
+#'     \code{path_results}, \code{path_table}, or \code{select} is not a
+#'     single character string (or NULL for \code{select}). Effect: the
+#'     function halts.}
+#'   \item{\code{stop}: imputation prerequisites missing}{Triggered when
+#'     \code{impute = TRUE} but \code{vars} is not a data.frame or
+#'     \code{select} is \code{NULL}. Effect: the function halts with an
+#'     actionable message suggesting to provide the argument or set
+#'     \code{impute = FALSE}.}
 #'   \item{\code{warning}: polytomous item naming convention}{Triggered when
 #'     a polytomous item name in \code{poly_items} does not contain the
 #'     expected subitem marker (e.g., \code{"s_c"} or \code{"s_sc3g9_c"}).
@@ -167,13 +187,94 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
                        path_results = "Results",  path_table = "Tables",
                        save = TRUE, overwrite = TRUE, verbose = TRUE) {
 
-  # Test data
-  if ( !is.list(poly_items) ) {
-    stop( "The argument 'poly_items' must be a list. Please check your input." )
+  # --- Input validation ---
+
+  # resp must be a data.frame
+  if (!is.data.frame(resp)) {
+    stop("The argument 'resp' must be a data.frame. Got '",
+         class(resp)[1], "'. Please check your input.")
   }
-  if ( !is.numeric(threshold) | threshold < 0 | threshold > 1) {
-    stop( "The argument 'treshold' must be numeric in the interval ",
-          "between 0 and 1. Please check your input." )
+
+  # poly_items must be a non-empty named list of character vectors
+  if (!is.list(poly_items)) {
+    stop("The argument 'poly_items' must be a list. Got '",
+         class(poly_items)[1], "'. Please check your input.")
+  }
+  if (length(poly_items) == 0L) {
+    stop("The argument 'poly_items' must have at least one element. ",
+         "Please check your input.")
+  }
+  if (is.null(names(poly_items)) || any(names(poly_items) == "")) {
+    stop("All elements of 'poly_items' must be named. ",
+         "The names are used as column names for the scored items. ",
+         "Please check your input.")
+  }
+  bad_elements <- names(which(!vapply(poly_items, is.character, logical(1))))
+  if (length(bad_elements) > 0L) {
+    stop("Each element of 'poly_items' must be a character vector of subitem ",
+         "names. Element(s) ", fmt_names(bad_elements),
+         " are not character vectors. Please check your input.")
+  }
+
+  # Scalar logical parameters
+  logical_params <- list(impute = impute, warn = warn, save = save,
+                         overwrite = overwrite, verbose = verbose)
+  for (param_name in names(logical_params)) {
+    if (!is.logical(logical_params[[param_name]]) ||
+        length(logical_params[[param_name]]) != 1L ||
+        is.na(logical_params[[param_name]])) {
+      stop("The argument '", param_name, "' must be TRUE or FALSE ",
+           "(single logical value). Please check your input.")
+    }
+  }
+
+  # threshold must be a single numeric in [0, 1]
+  if (!is.numeric(threshold) || length(threshold) != 1L || is.na(threshold) ||
+      threshold < 0 || threshold > 1) {
+    stop("The argument 'threshold' must be a single numeric value in the ",
+         "interval [0, 1]. Please check your input.")
+  }
+
+  # mvs must be a numeric vector when provided
+  if (!is.null(mvs) && (!is.numeric(mvs) || length(mvs) == 0L)) {
+    stop("The argument 'mvs' must be a numeric vector of missing value codes ",
+         "(or NULL to use the default). Got '", class(mvs)[1],
+         "'. Please check your input.")
+  }
+
+  # missing_by_design must be a single numeric value
+  if (!is.numeric(missing_by_design) || length(missing_by_design) != 1L ||
+      is.na(missing_by_design)) {
+    stop("The argument 'missing_by_design' must be a single numeric value. ",
+         "Please check your input.")
+  }
+
+  # String parameters
+  if (!is.character(path_results) || length(path_results) != 1L) {
+    stop("The argument 'path_results' must be a single character string. ",
+         "Please check your input.")
+  }
+  if (!is.character(path_table) || length(path_table) != 1L) {
+    stop("The argument 'path_table' must be a single character string. ",
+         "Please check your input.")
+  }
+  if (!is.null(select) && (!is.character(select) || length(select) != 1L)) {
+    stop("The argument 'select' must be a single character string (or NULL). ",
+         "Please check your input.")
+  }
+
+  # Early check: imputation prerequisites
+  if (impute) {
+    if (is.null(vars) || !is.data.frame(vars)) {
+      stop("When 'impute = TRUE', the argument 'vars' must be a data.frame ",
+           "containing information on the competence items. ",
+           "Please provide 'vars' or set 'impute = FALSE'.")
+    }
+    if (is.null(select)) {
+      stop("When 'impute = TRUE', the argument 'select' must specify the name ",
+           "of a logical variable in 'vars' that indicates the scored ",
+           "dichotomous items. Please provide 'select' or set 'impute = FALSE'.")
+    }
   }
 
   # Check whether variables are indeed contained in data.frames
