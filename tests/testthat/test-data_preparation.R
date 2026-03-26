@@ -94,3 +94,169 @@ test_that("pc_scoring() works", {
 })
 
 
+# --- pc_scoring() validation tests ---
+
+test_that("pc_scoring() validates resp", {
+  expect_error(
+    pc_scoring(resp = "not a df", poly_items = list(a = "x"),
+               impute = FALSE, warn = FALSE),
+    "must be a data.frame"
+  )
+  expect_error(
+    pc_scoring(resp = matrix(1:4, 2, 2), poly_items = list(a = "x"),
+               impute = FALSE, warn = FALSE),
+    "must be a data.frame"
+  )
+})
+
+test_that("pc_scoring() validates poly_items", {
+  data(ex1)
+  resp <- ex1$resp
+
+  # Not a list
+  expect_error(
+    pc_scoring(resp = resp, poly_items = "x", impute = FALSE, warn = FALSE),
+    "must be a list"
+  )
+  # Empty list
+  expect_error(
+    pc_scoring(resp = resp, poly_items = list(), impute = FALSE, warn = FALSE),
+    "at least one element"
+  )
+  # Unnamed list
+  expect_error(
+    pc_scoring(resp = resp, poly_items = list(c("grk10001_c")),
+               impute = FALSE, warn = FALSE),
+    "must be named"
+  )
+  # Non-character element
+  expect_error(
+    pc_scoring(resp = resp, poly_items = list(a = 1:3),
+               impute = FALSE, warn = FALSE),
+    "character vector"
+  )
+})
+
+test_that("pc_scoring() validates logical parameters", {
+  data(ex1)
+  resp <- ex1$resp
+  pi <- list("grk1000s_c" = c("grk10001_c", "grk10002_c", "grk10003_c"))
+
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, impute = "yes", warn = FALSE),
+    "'impute' must be TRUE or FALSE"
+  )
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, impute = FALSE, warn = NA),
+    "'warn' must be TRUE or FALSE"
+  )
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, impute = FALSE, warn = FALSE,
+               save = 1),
+    "'save' must be TRUE or FALSE"
+  )
+})
+
+test_that("pc_scoring() validates threshold", {
+  data(ex1)
+  resp <- ex1$resp
+  pi <- list("grk1000s_c" = c("grk10001_c", "grk10002_c", "grk10003_c"))
+
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, threshold = "high",
+               impute = FALSE, warn = FALSE),
+    "threshold"
+  )
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, threshold = 1.5,
+               impute = FALSE, warn = FALSE),
+    "threshold"
+  )
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, threshold = -0.1,
+               impute = FALSE, warn = FALSE),
+    "threshold"
+  )
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, threshold = NA_real_,
+               impute = FALSE, warn = FALSE),
+    "threshold"
+  )
+})
+
+test_that("pc_scoring() validates mvs", {
+  data(ex1)
+  resp <- ex1$resp
+  pi <- list("grk1000s_c" = c("grk10001_c", "grk10002_c", "grk10003_c"))
+
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, mvs = "missing",
+               impute = FALSE, warn = FALSE),
+    "mvs.*numeric vector"
+  )
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, mvs = character(0),
+               impute = FALSE, warn = FALSE),
+    "mvs.*numeric vector"
+  )
+})
+
+test_that("pc_scoring() validates missing_by_design", {
+  data(ex1)
+  resp <- ex1$resp
+  pi <- list("grk1000s_c" = c("grk10001_c", "grk10002_c", "grk10003_c"))
+
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, missing_by_design = "x",
+               impute = FALSE, warn = FALSE),
+    "missing_by_design.*single numeric"
+  )
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, missing_by_design = NA_real_,
+               impute = FALSE, warn = FALSE),
+    "missing_by_design.*single numeric"
+  )
+})
+
+test_that("pc_scoring() validates string parameters", {
+  data(ex1)
+  resp <- ex1$resp
+  pi <- list("grk1000s_c" = c("grk10001_c", "grk10002_c", "grk10003_c"))
+
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, path_results = 123,
+               impute = FALSE, warn = FALSE),
+    "path_results.*character string"
+  )
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, path_table = NULL,
+               impute = FALSE, warn = FALSE),
+    "path_table.*character string"
+  )
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, select = 42,
+               impute = FALSE, warn = FALSE),
+    "select.*character string"
+  )
+})
+
+test_that("pc_scoring() validates imputation prerequisites early", {
+  data(ex1)
+  resp <- ex1$resp
+  pi <- list("grk1000s_c" = c("grk10001_c", "grk10002_c", "grk10003_c"))
+
+  # impute=TRUE but no vars
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, impute = TRUE,
+               vars = NULL, select = "dich", warn = FALSE, verbose = FALSE),
+    "impute.*TRUE.*vars"
+  )
+  # impute=TRUE but no select
+  expect_error(
+    pc_scoring(resp = resp, poly_items = pi, impute = TRUE,
+               vars = ex1$vars, select = NULL, warn = FALSE, verbose = FALSE),
+    "impute.*TRUE.*select"
+  )
+})
+
+
