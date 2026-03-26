@@ -111,7 +111,7 @@ test_that("pc_scoring() validates resp", {
 
 test_that("pc_scoring() validates poly_items", {
   data(ex1)
-  resp <- ex1
+  resp <- ex1$resp
 
   # Not a list
   expect_error(
@@ -139,7 +139,7 @@ test_that("pc_scoring() validates poly_items", {
 
 test_that("pc_scoring() validates logical parameters", {
   data(ex1)
-  resp <- ex1
+  resp <- ex1$resp
   pi <- list("grk1000s_c" = c("grk10001_c", "grk10002_c", "grk10003_c"))
 
   expect_error(
@@ -159,7 +159,7 @@ test_that("pc_scoring() validates logical parameters", {
 
 test_that("pc_scoring() validates threshold", {
   data(ex1)
-  resp <- ex1
+  resp <- ex1$resp
   pi <- list("grk1000s_c" = c("grk10001_c", "grk10002_c", "grk10003_c"))
 
   expect_error(
@@ -186,7 +186,7 @@ test_that("pc_scoring() validates threshold", {
 
 test_that("pc_scoring() validates mvs", {
   data(ex1)
-  resp <- ex1
+  resp <- ex1$resp
   pi <- list("grk1000s_c" = c("grk10001_c", "grk10002_c", "grk10003_c"))
 
   expect_error(
@@ -203,7 +203,7 @@ test_that("pc_scoring() validates mvs", {
 
 test_that("pc_scoring() validates missing_by_design", {
   data(ex1)
-  resp <- ex1
+  resp <- ex1$resp
   pi <- list("grk1000s_c" = c("grk10001_c", "grk10002_c", "grk10003_c"))
 
   expect_error(
@@ -220,7 +220,7 @@ test_that("pc_scoring() validates missing_by_design", {
 
 test_that("pc_scoring() validates string parameters", {
   data(ex1)
-  resp <- ex1
+  resp <- ex1$resp
   pi <- list("grk1000s_c" = c("grk10001_c", "grk10002_c", "grk10003_c"))
 
   expect_error(
@@ -242,7 +242,7 @@ test_that("pc_scoring() validates string parameters", {
 
 test_that("pc_scoring() validates imputation prerequisites early", {
   data(ex1)
-  resp <- ex1
+  resp <- ex1$resp
   pi <- list("grk1000s_c" = c("grk10001_c", "grk10002_c", "grk10003_c"))
 
   # impute=TRUE but no vars
