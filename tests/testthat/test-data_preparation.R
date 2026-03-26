@@ -254,7 +254,7 @@ test_that("pc_scoring() validates imputation prerequisites early", {
   # impute=TRUE but no select
   expect_error(
     pc_scoring(resp = resp, poly_items = pi, impute = TRUE,
-               vars = ex1, select = NULL, warn = FALSE, verbose = FALSE),
+               vars = ex1$vars, select = NULL, warn = FALSE, verbose = FALSE),
     "impute.*TRUE.*select"
   )
 })
