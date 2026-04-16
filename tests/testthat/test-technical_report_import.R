@@ -24,9 +24,19 @@ test_that("import reports missing folders and files clearly", {
     "The folder .* does not exist"
   )
 
+  missing_file_path <- normalizePath(
+    file.path(test_path("fixtures/ex1/tables"), "missing.xlsx"),
+    winslash = "/",
+    mustWork = FALSE
+  )
+  missing_file_path_regexp <- gsub(
+    "([][{}()+*^$|\\\\.?])",
+    "\\\\\\1",
+    missing_file_path
+  )
   expect_error(
     Import(path = test_path("fixtures/ex1/tables"), filename = "missing.xlsx"),
-    "Cannot find Excel file"
+    paste0("Cannot find Excel file.*", missing_file_path_regexp)
   )
 
 })

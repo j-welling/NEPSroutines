@@ -46,12 +46,10 @@ Import <- function(path, filename = NULL, sheet = NULL, regexp = NULL,
   if (any(!is.null(filename)) & !is.null(regexp))
     warning("The argument 'filename' was ignored because 'regexp' was set.")
 
-  # Normalize path
-  if (!(substr(path, base::nchar(path), base::nchar(path)) %in% c("/", "\\")))
-    path <- paste0(path, "/")
+  path_display <- normalizePath(path, winslash = "/", mustWork = FALSE)
 
   if (!dir.exists(path)) {
-    stop("The folder '", path, "' does not exist.")
+    stop("The folder '", path_display, "' does not exist.")
   }
 
   # Determine file names
@@ -61,12 +59,17 @@ Import <- function(path, filename = NULL, sheet = NULL, regexp = NULL,
   }
 
   if (length(filename) == 0) {
-    stop("No Excel files were found in folder '", path, "'.")
+    if (!is.null(regexp)) {
+      stop("No files matching '", regexp, "' were found in folder '",
+           path_display, "'.")
+    }
+    stop("No Excel files were found in folder '", path_display, "'.")
   }
 
   file_path <- file.path(path, filename)
   missing_files <- file_path[!file.exists(file_path)]
   if (length(missing_files) > 0) {
+    missing_files <- normalizePath(missing_files, winslash = "/", mustWork = FALSE)
     stop(
       "Cannot find Excel file",
       if (length(missing_files) > 1) "s" else "",

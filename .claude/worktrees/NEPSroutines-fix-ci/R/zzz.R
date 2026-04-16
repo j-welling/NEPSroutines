@@ -1,0 +1,35 @@
+# Suppress R CMD check NOTE for NSE variables used in dplyr/ggplot2 pipelines
+utils::globalVariables(c(
+  "MV", "group", "item", "number", "ord", "resp", "tab", "warn", "y"
+))
+
+#' @importFrom stats cor model.matrix
+#' @importFrom utils capture.output
+#' @importFrom tidyselect everything
+NULL
+
+#'
+#' Run when loading the package
+#'
+#'@noRd
+.onLoad <- function(libname, pkgname) {
+
+    # Default settings for tables in technical reports
+    options(knitr.kable.NA = "")
+    if (requireNamespace("flextable", quietly = TRUE)) {
+        flextable::set_flextable_defaults(
+            font.size = 12,
+            font.family = "Calibri",
+            text.align = "center",
+            big.mark = ",",
+            decimal.mark = ".",
+            digits = 2,
+            theme_fun = flextable::theme_apa,
+            padding = 6,
+            background.color = "#FFFFFF"
+        )
+    }
+
+    return(invisible())
+
+}
