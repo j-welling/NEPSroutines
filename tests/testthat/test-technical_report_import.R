@@ -16,6 +16,22 @@ test_that("import single sheet works", {
 })
 
 
+test_that("import reports missing folders and files clearly", {
+
+  missing_path <- file.path(tempdir(), "nepsroutines-does-not-exist")
+  expect_error(
+    Import(path = missing_path, filename = "mv_item.xlsx"),
+    "The folder .* does not exist"
+  )
+
+  expect_error(
+    Import(path = test_path("fixtures/ex1/tables"), filename = "missing.xlsx"),
+    "Cannot find Excel file"
+  )
+
+})
+
+
 test_that("import all sheets works", {
 
   tbl <- try({

@@ -50,25 +50,45 @@ Import <- function(path, filename = NULL, sheet = NULL, regexp = NULL,
   if (!(substr(path, base::nchar(path), base::nchar(path)) %in% c("/", "\\")))
     path <- paste0(path, "/")
 
+  if (!dir.exists(path)) {
+    stop("The folder '", path, "' does not exist.")
+  }
+
   # Determine file names
   if (!is.null(regexp)) {
     filename <- base::list.files(path = path, pattern = regexp)
     filename <- filename[!(grepl("^[~\\.]", filename))] # remove temp files
   }
 
+  if (length(filename) == 0) {
+    stop("No Excel files were found in folder '", path, "'.")
+  }
+
+  file_path <- file.path(path, filename)
+  missing_files <- file_path[!file.exists(file_path)]
+  if (length(missing_files) > 0) {
+    stop(
+      "Cannot find Excel file",
+      if (length(missing_files) > 1) "s" else "",
+      ": ",
+      paste(shQuote(missing_files), collapse = ", "),
+      ". Check 'path' and 'filename'."
+    )
+  }
+
   # Load all files
   out <- list()
   for (f in filename) {
     if (is.null(sheet)) {
-      sheets <- openxlsx::getSheetNames(paste0(path, f))
+      sheets <- openxlsx::getSheetNames(file.path(path, f))
       tbl <- list()
       for (s in sheets) {
-        tbl[[s]] <- openxlsx::read.xlsx(xlsxFile = paste0(path, f), sheet = s)
+        tbl[[s]] <- openxlsx::read.xlsx(xlsxFile = file.path(path, f), sheet = s)
       }
     } else {
       tbl <-
         openxlsx::read.xlsx(
-          xlsxFile = paste0(path, f),
+          xlsxFile = file.path(path, f),
           colNames = TRUE,
           rowNames = FALSE,
           sheet = sheet
