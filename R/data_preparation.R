@@ -1,7 +1,7 @@
 #' Dichotomous scoring of MC items
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
@@ -71,6 +71,13 @@ dichotomous_scoring <- function(resp, vars, old_names, new_names = NULL,
 #' if raw shall be set to FALSE and dich to TRUE for all new items.
 #'
 #' @return vars with new rows including the duplicated items.
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{\code{stop}}{One or more names in \code{old_names} are not found in
+#'     \code{vars$item}. Effect: the function halts; no new rows are added to
+#'     \code{vars}.}
+#' }
 #' @export
 duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 
@@ -129,6 +136,49 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 #' @param verbose  logical; provides information on how polytomous items are scored
 #'
 #' @return resp including unscored (raw) and scored items
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{\code{stop}: \code{resp} is not a data.frame}{Triggered when
+#'     \code{resp} is not a data.frame. Effect: the function halts.}
+#'   \item{\code{stop}: \code{poly_items} is invalid}{Triggered when
+#'     \code{poly_items} is not a non-empty named list of character vectors.
+#'     Effect: the function halts; no scoring is performed.}
+#'   \item{\code{stop}: logical parameter is invalid}{Triggered when
+#'     \code{impute}, \code{warn}, \code{save}, \code{overwrite}, or
+#'     \code{verbose} is not a single \code{TRUE}/\code{FALSE} value.
+#'     Effect: the function halts.}
+#'   \item{\code{stop}: \code{threshold} is out of range}{Triggered when
+#'     \code{threshold} is not a single numeric value in the interval
+#'     \[0, 1\]. Effect: the function halts; no scoring is performed.}
+#'   \item{\code{stop}: \code{mvs} is invalid}{Triggered when \code{mvs}
+#'     is provided but is not a numeric vector. Effect: the function halts.}
+#'   \item{\code{stop}: \code{missing_by_design} is invalid}{Triggered when
+#'     \code{missing_by_design} is not a single numeric value. Effect: the
+#'     function halts.}
+#'   \item{\code{stop}: string parameter is invalid}{Triggered when
+#'     \code{path_results}, \code{path_table}, or \code{select} is not a
+#'     single character string (or NULL for \code{select}). Effect: the
+#'     function halts.}
+#'   \item{\code{stop}: imputation prerequisites missing}{Triggered when
+#'     \code{impute = TRUE} but \code{vars} is not a data.frame or
+#'     \code{select} is \code{NULL}. Effect: the function halts with an
+#'     actionable message suggesting to provide the argument or set
+#'     \code{impute = FALSE}.}
+#'   \item{\code{warning}: polytomous item naming convention}{Triggered when
+#'     a polytomous item name in \code{poly_items} does not contain the
+#'     expected subitem marker (e.g., \code{"s_c"} or \code{"s_sc3g9_c"}).
+#'     Effect: scoring proceeds but downstream functions that rely on the
+#'     naming convention (e.g., label lookup) may silently fail or produce
+#'     unexpected results.}
+#'   \item{\code{warning}: no \code{mvs} provided}{Triggered when
+#'     \code{mvs = NULL}. Effect: the default \code{c(-99:-1)} is used;
+#'     any user-defined missing values outside this range will not be
+#'     converted to \code{NA}.}
+#'   \item{\code{message}: verbose imputation info}{Triggered when
+#'     \code{impute = TRUE} and \code{verbose = TRUE}. Effect: informational
+#'     message printed to the console; no impact on results.}
+#' }
 #' @export
 pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
                        mvs = NULL, warn = TRUE,
@@ -137,24 +187,105 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
                        path_results = "Results",  path_table = "Tables",
                        save = TRUE, overwrite = TRUE, verbose = TRUE) {
 
-  # Test data
-  if ( !is.list(poly_items) ) {
-    stop( "The argument 'poly_items' must be a list. Please check your input." )
+  # --- Input validation ---
+
+  # resp must be a data.frame
+  if (!is.data.frame(resp)) {
+    stop("The argument 'resp' must be a data.frame. Got '",
+         class(resp)[1], "'. Please check your input.")
   }
-  if ( !is.numeric(threshold) | threshold < 0 | threshold > 1) {
-    stop( "The argument 'treshold' must be numeric in the interval ",
-          "between 0 and 1. Please check your input." )
+
+  # poly_items must be a non-empty named list of character vectors
+  if (!is.list(poly_items)) {
+    stop("The argument 'poly_items' must be a list. Got '",
+         class(poly_items)[1], "'. Please check your input.")
+  }
+  if (length(poly_items) == 0L) {
+    stop("The argument 'poly_items' must have at least one element. ",
+         "Please check your input.")
+  }
+  if (is.null(names(poly_items)) || any(names(poly_items) == "")) {
+    stop("All elements of 'poly_items' must be named. ",
+         "The names are used as column names for the scored items. ",
+         "Please check your input.")
+  }
+  bad_elements <- names(which(!vapply(poly_items, is.character, logical(1))))
+  if (length(bad_elements) > 0L) {
+    stop("Each element of 'poly_items' must be a character vector of subitem ",
+         "names. Element(s) ", fmt_names(bad_elements),
+         " are not character vectors. Please check your input.")
+  }
+
+  # Scalar logical parameters
+  logical_params <- list(impute = impute, warn = warn, save = save,
+                         overwrite = overwrite, verbose = verbose)
+  for (param_name in names(logical_params)) {
+    if (!is.logical(logical_params[[param_name]]) ||
+        length(logical_params[[param_name]]) != 1L ||
+        is.na(logical_params[[param_name]])) {
+      stop("The argument '", param_name, "' must be TRUE or FALSE ",
+           "(single logical value). Please check your input.")
+    }
+  }
+
+  # threshold must be a single numeric in [0, 1]
+  if (!is.numeric(threshold) || length(threshold) != 1L || is.na(threshold) ||
+      threshold < 0 || threshold > 1) {
+    stop("The argument 'threshold' must be a single numeric value in the ",
+         "interval [0, 1]. Please check your input.")
+  }
+
+  # mvs must be a numeric vector when provided
+  if (!is.null(mvs) && (!is.numeric(mvs) || length(mvs) == 0L)) {
+    stop("The argument 'mvs' must be a numeric vector of missing value codes ",
+         "(or NULL to use the default). Got '", class(mvs)[1],
+         "'. Please check your input.")
+  }
+
+  # missing_by_design must be a single numeric value
+  if (!is.numeric(missing_by_design) || length(missing_by_design) != 1L ||
+      is.na(missing_by_design)) {
+    stop("The argument 'missing_by_design' must be a single numeric value. ",
+         "Please check your input.")
+  }
+
+  # String parameters
+  if (!is.character(path_results) || length(path_results) != 1L) {
+    stop("The argument 'path_results' must be a single character string. ",
+         "Please check your input.")
+  }
+  if (!is.character(path_table) || length(path_table) != 1L) {
+    stop("The argument 'path_table' must be a single character string. ",
+         "Please check your input.")
+  }
+  if (!is.null(select) && (!is.character(select) || length(select) != 1L)) {
+    stop("The argument 'select' must be a single character string (or NULL). ",
+         "Please check your input.")
+  }
+
+  # Early check: imputation prerequisites
+  if (impute) {
+    if (is.null(vars) || !is.data.frame(vars)) {
+      stop("When 'impute = TRUE', the argument 'vars' must be a data.frame ",
+           "containing information on the competence items. ",
+           "Please provide 'vars' or set 'impute = FALSE'.")
+    }
+    if (is.null(select)) {
+      stop("When 'impute = TRUE', the argument 'select' must specify the name ",
+           "of a logical variable in 'vars' that indicates the scored ",
+           "dichotomous items. Please provide 'select' or set 'impute = FALSE'.")
+    }
   }
 
   # Check whether variables are indeed contained in data.frames
-  NEPSroutines:::check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
+  check_numerics(resp, "resp", unlist(poly_items), dich = TRUE)
 
   # Check pc_item (should be marked with 's_c' or 's_[startingCohortTargetGroup]_c')
   if (warn) {
     for ( pc_name in names(poly_items) ) {
       is_pc_named_correctly <- grepl("s(_[a-zA-Z0-9]+)*_c$", pc_name)
       if ( !is_pc_named_correctly ) {
-        message( pc_name, ": Variable name should contain a subitem marker like 's', e.g. '[item]s_c', '[item]s_sc3g9_c'.\n" )
+        warning( pc_name, ": Variable name should contain a subitem marker like 's', e.g. '[item]s_c', '[item]s_sc3g9_c'.\n" )
       }
     }
   }
@@ -179,7 +310,7 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
     }
 
     # Create indicators for missing subitems to impute
-    indicators <- NEPSroutines:::pc_missing_subitems(
+    indicators <- pc_missing_subitems(
       resp = resp,
       mvs = mvs,
       missing_by_design = missing_by_design,
@@ -192,7 +323,7 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
     )
 
     # Impute missing values
-    resp_full <- NEPSroutines:::pc_imputation(
+    resp_full <- pc_imputation(
       resp = resp,
       vars = vars,
       select = select,
@@ -237,7 +368,7 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
 #' Create indicators for subitems with missing values
 #' (criterion: < 50% of subitems of a pc-item with missing values, as defined with 'threshold')
 #' @param resp  data.frame; contains item responses with items as variables and
-#' persons as rows; y in {0, 1} for binary data; additionally includes ID_t
+#' persons as rows; y in \{0, 1\} for binary data; additionally includes ID_t
 #' as a person identifier and all variables that are further defined in
 #'the function arguments
 #' @param mvs  named integer vector; contains user-defined missing values
@@ -251,6 +382,23 @@ pc_scoring <- function(resp, poly_items, vars = NULL, select = NULL,
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param save  logical; whether results shall be saved to hard drive
 #' @param overwrite logical; whether to overwrite existing file when saving table
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{\code{stop}: recoding failure}{Triggered when recoding subitems to
+#'     binary missing-value indicators produces values outside \{0, 1\} — an
+#'     internal consistency check. Effect: the function halts; no indicator
+#'     data.frame is returned.}
+#'   \item{\code{stop}: \code{_sumMV} count mismatch}{Triggered when the
+#'     number of \code{_sumMV} summary columns created does not match the
+#'     number of polytomous items — an internal consistency check. Effect:
+#'     the function halts; no indicator data.frame is returned.}
+#'   \item{\code{message}: missing-value imputation summary}{Always printed
+#'     (unless output is suppressed). Two tables are shown: absolute / relative
+#'     frequencies of imputed missing values per item, and distribution of
+#'     imputed items across persons. Effect: informational only; no impact on
+#'     results.}
+#' }
 #' @noRd
 pc_missing_subitems <- function( resp, mvs, poly_items,
                                  missing_by_design, threshold,
@@ -268,7 +416,7 @@ pc_missing_subitems <- function( resp, mvs, poly_items,
   if ( sum(sapply(indicators[subitems], \(x) {
     all(range(x, na.rm = TRUE) %in% c(0, 1))
   })) != length(names(indicators)[-1]) ) {
-    warning( "Recoding of subitems into indicator variables failed. ",
+    stop( "Recoding of subitems into indicator variables failed. ",
              "Please contact the package developers." )
   }
 
@@ -323,14 +471,14 @@ pc_missing_subitems <- function( resp, mvs, poly_items,
                    summary_items_impMV = summary_items_impMV,
                    desc_items_impMV = desc_items_impMV,
                    summary_cases_impMV = summary_cases_impMV)
-    NEPSroutines:::save_results(
+    save_results(
       results,
       "pc_subitems_mv_indicators.rds",
       path_results
     )
 
     results <- results[4:6]
-    NEPSroutines:::save_table(
+    save_table(
       results,
       "summary_pc_subitems_mv_indicators.xlsx",
       path_table,
@@ -346,7 +494,7 @@ pc_missing_subitems <- function( resp, mvs, poly_items,
 
 #' Subitem imputation
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
@@ -365,6 +513,39 @@ pc_missing_subitems <- function( resp, mvs, poly_items,
 #' that should be imputed
 #' @param path_results  string; defines path to folder where results shall be saved
 #' @param save  logical; whether results shall be saved to hard drive
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{\code{stop}: \code{indicators} is not a data.frame}{Triggered when
+#'     \code{indicators} is \code{NULL} or not a data.frame — this object
+#'     should be created automatically by \code{pc_scoring()} with
+#'     \code{impute = TRUE}. Effect: the function halts; no imputed response
+#'     data.frame is returned.}
+#'   \item{\code{stop}: respondent count mismatch between \code{resp} and
+#'     \code{indicators}}{Triggered when the person IDs in \code{resp} and
+#'     \code{indicators} do not fully overlap. Effect: the function halts to
+#'     prevent a corrupted merge that would produce wrong error-rate estimates
+#'     and imputed values.}
+#'   \item{\code{stop}: \code{vars} is not a data.frame}{Triggered when
+#'     \code{vars} is \code{NULL} or not a data.frame. Effect: the function
+#'     halts; no imputed data.frame is returned.}
+#'   \item{\code{stop}: \code{select} is \code{NULL}}{Triggered when no
+#'     selection variable is provided. Effect: the function halts; no imputed
+#'     data.frame is returned.}
+#'   \item{\code{stop}: subitems not in \code{indicators}}{Triggered when the
+#'     subitems defined in \code{poly_items} are missing from the
+#'     \code{indicators} data.frame. Effect: the function halts to prevent
+#'     silent imputation of wrong items.}
+#'   \item{\code{stop}: subitems not in selected item set}{Triggered when the
+#'     subitems defined in \code{poly_items} are not included in the item set
+#'     selected by \code{select}. Effect: the function halts to prevent
+#'     imputation based on a mismatched item set.}
+#'   \item{\code{stop}: person ID mismatch between \code{resp} and IRT
+#'     predictions}{Triggered when the set of valid person IDs in \code{resp}
+#'     does not match the person IDs in the IRT-predicted responses. Effect:
+#'     the function halts to prevent wrong imputed values being assigned to
+#'     the wrong persons.}
+#' }
 #' @noRd
 pc_imputation <- function( resp, vars, select,
                            mvs, missing_by_design,
@@ -410,7 +591,7 @@ pc_imputation <- function( resp, vars, select,
   }
 
   # Default valid cases
-  resp_ <- NEPSroutines:::convert_mv(resp, vars = vars, select = select,
+  resp_ <- convert_mv(resp, vars = vars, select = select,
                                      warn = FALSE)
   resp$valid <- rowSums(!is.na(resp_[, vars$item[vars[[select]]]])) >= 3
   valid <- "valid"
@@ -450,7 +631,7 @@ pc_imputation <- function( resp, vars, select,
   #test
   if ( !setequal(resp$ID_t[resp[[valid]] == TRUE], pred_resp$ID_t) |
        length(resp$ID_t[resp[[valid]] == TRUE]) != length(pred_resp$ID_t) ) {
-    warning( "ID_ts in original data.frame and in data.frame with ",
+    stop( "ID_ts in original data.frame and in data.frame with ",
              "predicted responses are different. ",
              "Please contact the package developer." )
   }
@@ -495,7 +676,7 @@ pc_imputation <- function( resp, vars, select,
       mean_error_rates = mean_error_rates,
       resp_imp = resp_imp
     )
-    NEPSroutines:::save_results(
+    save_results(
       pc_subitems_imputation,
       "pc_subitems_imputations.rds",
       path_results
@@ -597,7 +778,7 @@ hl_scoring <- function(resp, hl_solutions, hl_distractors,
 #' Collapse response categories with N < 200
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
@@ -613,6 +794,24 @@ hl_scoring <- function(resp, hl_solutions, hl_distractors,
 #'   given PC items IN PLACE. If you want to keep the original data, please
 #'   copy and rename the items to be collapsed first.
 #'
+#' @section Notifications:
+#' \describe{
+#'   \item{\code{message}: problematic items}{Triggered when one or more
+#'     polytomous items cannot be collapsed because fewer than two response
+#'     categories have sufficient observations (>= \code{per_cat}). Effect:
+#'     the affected items are omitted from collapsing; they appear in the
+#'     printed list and should be reviewed manually.}
+#'   \item{\code{message}: dichotomous items skipped}{Triggered when the
+#'     selected item set contains items with only two response categories.
+#'     Effect: these items are silently left unchanged; the message lists
+#'     the skipped items.}
+#'   \item{\code{message}: items collapsed}{Always printed when at least one
+#'     item was successfully collapsed. Lists each item and its new scoring
+#'     scheme. Effect: informational only.}
+#'   \item{\code{message}: no items collapsed}{Printed when no items met the
+#'     collapsing criterion. Effect: informational only; \code{resp} is
+#'     returned unchanged.}
+#' }
 #' @export
 #' @return data.frame resp with collapsed and original items
 
@@ -621,10 +820,10 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
                                          path_table = "Tables") {
 
   # Check whether variables are indeed contained in data.frames
-  NEPSroutines:::check_logicals(vars, "vars", select, warn = TRUE)
+  check_logicals(vars, "vars", select, warn = TRUE)
   polyt_items <- vars$item[vars[[select]]]
-  NEPSroutines:::check_numerics(resp, "resp", polyt_items)
-  NEPSroutines:::check_items(polyt_items)
+  check_numerics(resp, "resp", polyt_items)
+  check_items(polyt_items)
 
   collapsed_items <- c()
   dichotomous_items <- c()
@@ -756,7 +955,7 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
   # Save results
   if (save) {
 
-    NEPSroutines:::save_table(
+    save_table(
         results = list(
             collapsed = item_names,
             dichotomous = dichotomous_items,
@@ -815,13 +1014,21 @@ create_table <- function(response) {
 #' function defaults to NA and negative values)
 #'
 #' @return   logical vector with length = nrow(resp), indicating whether case is valid
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{\code{warning}: invalid \code{min.val}}{Triggered when
+#'     \code{min.val} is \code{NULL} or negative. Effect: the default of
+#'     3 valid responses per person is used; cases with fewer than 3 valid
+#'     responses are marked as invalid.}
+#' }
 #' @export
 min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 
     # Check whether variables are indeed contained in data.frames
-    NEPSroutines:::check_logicals(vars, "vars", select)
+    check_logicals(vars, "vars", select)
     items <- vars$item[vars[[select]]]
-    NEPSroutines:::check_numerics(resp, "resp", items)
+    check_numerics(resp, "resp", items)
     resp_ <- resp[ , items]
 
     # Set minimum number of valid values
@@ -872,8 +1079,8 @@ min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 pos_new <- function(vars, select, position) {
 
     # Check whether variables are indeed contained in data.frames
-    NEPSroutines:::check_logicals(vars, "vars", select)
-    NEPSroutines:::check_numerics(vars, "vars", position, check_invalid = TRUE)
+    check_logicals(vars, "vars", select)
+    check_numerics(vars, "vars", position, check_invalid = TRUE)
 
     if (length(position) == 1) {
 
@@ -920,6 +1127,30 @@ pos_new <- function(vars, select, position) {
 #' the test day if it's the same for all participants (default is median)
 #'
 #' @return   numeric vector with approximate age in years
+#'
+#' @section Notifications:
+#' \describe{
+#'   \item{\code{warning}: missing birth year replaced}{Triggered when
+#'     \code{birth_year} contains \code{NA}s. Effect: the missing values are
+#'     silently replaced by the sample median of \code{birth_year}; the
+#'     number of replacements is reported. Age values for affected persons are
+#'     approximate.}
+#'   \item{\code{warning}: missing birth month replaced}{Triggered when
+#'     \code{birth_month} contains \code{NA}s. Effect: the missing values are
+#'     silently replaced by the sample median of \code{birth_month}; the
+#'     number of replacements is reported. Age values for affected persons are
+#'     approximate.}
+#'   \item{\code{warning}: missing test year replaced}{Triggered when
+#'     \code{test_year} contains \code{NA}s. Effect: the missing values are
+#'     silently replaced by the sample median of \code{test_year}; the number
+#'     of replacements is reported. Age values for affected persons are
+#'     approximate.}
+#'   \item{\code{warning}: missing test month replaced}{Triggered when
+#'     \code{test_month} contains \code{NA}s. Effect: the missing values are
+#'     silently replaced by the sample median of \code{test_month}; the
+#'     number of replacements is reported. Age values for affected persons are
+#'     approximate.}
+#' }
 #' @export
 calculate_age <- function(resp,
                           birth_year = "birthy", birth_month = "birthm",
@@ -927,7 +1158,7 @@ calculate_age <- function(resp,
                           birth_day = NULL, test_day = NULL) {
 
     # Check and create birth date variables
-    NEPSroutines:::check_variables(resp, "resp", c(birth_year, birth_month)    )
+    check_variables(resp, "resp", c(birth_year, birth_month)    )
     byear <- resp[[birth_year]]
     bmonth <- resp[[birth_month]]
 
@@ -935,14 +1166,14 @@ calculate_age <- function(resp,
     if (is.numeric(test_year)) {
         tyear <- test_year
     } else {
-        NEPSroutines:::check_variables(resp, "resp", test_year)
+        check_variables(resp, "resp", test_year)
         tyear <- resp[[test_year]]
     }
 
     if (is.numeric(test_month)) {
         tmonth <- test_month
     } else {
-        NEPSroutines:::check_variables(resp, "resp", test_month)
+        check_variables(resp, "resp", test_month)
         tmonth <- resp[[test_month]]
     }
 
@@ -950,7 +1181,7 @@ calculate_age <- function(resp,
     if (is.null(birth_day)) {
         bday <- 15
     } else {
-        NEPSroutines:::check_variables(resp, "resp", birth_day)
+        check_variables(resp, "resp", birth_day)
         bday <- resp[[birth_day]]
     }
 
@@ -959,7 +1190,7 @@ calculate_age <- function(resp,
     } else if (is.numeric(test_day)) {
         tday <- test_day
     } else {
-        NEPSroutines:::check_variables(resp, "resp", test_day)
+        check_variables(resp, "resp", test_day)
         tday <- resp[[test_day]]
     }
 
@@ -970,22 +1201,22 @@ calculate_age <- function(resp,
     na_tm <- is.na(tmonth)
 
     if (sum(na_by) > 0) {
-        message(sum(na_by), " missing value(s) in birth year were replaced by the sample median.")
+        warning(sum(na_by), " missing value(s) in birth year were replaced by the sample median.")
         byear[na_by] <- round(median(byear, na.rm = TRUE))
     }
 
     if (sum(na_bm) > 0) {
-        message(sum(na_bm), " missing value(s) in birth month were replaced by the sample median.")
+        warning(sum(na_bm), " missing value(s) in birth month were replaced by the sample median.")
         bmonth[na_bm] <- round(median(bmonth, na.rm = TRUE))
     }
 
     if (sum(na_ty) > 0) {
-        message(sum(na_ty), " missing value(s) in test year were replaced by the sample median.")
+        warning(sum(na_ty), " missing value(s) in test year were replaced by the sample median.")
         tyear[na_ty] <- round(median(tyear, na.rm = TRUE))
     }
 
     if (sum(na_tm) > 0) {
-        message(sum(na_tm), " missing values in test month were replaced by the sample median.")
+        warning(sum(na_tm), " missing value(s) in test month were replaced by the sample median.")
         tmonth[na_tm] <- round(median(tmonth, na.rm = TRUE))
     }
 
@@ -1012,7 +1243,7 @@ calculate_age <- function(resp,
 calculate_num_cat <- function(vars, poly_items = NULL, select_suf) {
 
   # Test data
-  NEPSroutines:::check_logicals(vars, "vars", select_suf, warn = TRUE)
+  check_logicals(vars, "vars", select_suf, warn = TRUE)
 
   # Create vector with number of categories for items to be included in suf
   ## All items get a value of 1 as the number of categories

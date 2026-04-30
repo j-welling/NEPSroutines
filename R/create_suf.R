@@ -1,7 +1,7 @@
 #' Create SUF
 #'
 #' @param resp  data.frame; contains item responses with items as variables and
-#'   persons as rows; y in {0, 1} for binary data and y in {0, 1, ... k-1} for
+#'   persons as rows; y in \{0, 1\} for binary data and y in \{0, 1, ... k-1\} for
 #'   polytomous responses with k categories; missing values (default -999 to -1)
 #'   are coded as NA internally; additionally includes ID_t as a person identifier
 #'   and all variables that are further defined in the function arguments
@@ -35,8 +35,8 @@ create_suf <- function(resp, vars, select, competence, scores = NULL, mvs = NULL
                        save = TRUE, return = TRUE, warn = TRUE) {
 
   # Test data
-  NEPSroutines:::check_logicals(vars, "vars", select, warn = warn)
-  NEPSroutines:::check_items(vars$item[vars[[select]]])
+  check_logicals(vars, "vars", select, warn = warn)
+  check_items(vars$item[vars[[select]]])
 
   # Select items for SUF
   suf <- resp[, c("ID_t", vars$item[vars[[select]]])]
@@ -52,7 +52,7 @@ create_suf <- function(resp, vars, select, competence, scores = NULL, mvs = NULL
 
   # Add labels to response items, ID_t, WLEs, and SEs
   suf <-
-    NEPSroutines:::set_labels(
+    set_labels(
       suf = suf,
       vars = vars,
       select = select,
@@ -68,8 +68,8 @@ create_suf <- function(resp, vars, select, competence, scores = NULL, mvs = NULL
 
   # (save SUF in rds, sav and dta format)
   if (save) {
-    name <- NEPSroutines:::create_name(suf_name, name_group)
-    NEPSroutines:::save_suf(suf = suf, path = path, filename = name)
+    name <- create_name(suf_name, name_group)
+    save_suf(suf = suf, path = path, filename = name)
     message("SUF successfully saved!")
   }
 
@@ -105,8 +105,8 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
 
   # Test data
   if (test) {
-    NEPSroutines:::check_logicals(vars, "vars", select, warn = warn)
-    NEPSroutines:::check_items(vars$item[vars[[select]]])
+    check_logicals(vars, "vars", select, warn = warn)
+    check_items(vars$item[vars[[select]]])
   }
 
   # Label for ID_t

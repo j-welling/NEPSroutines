@@ -1,0 +1,11 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+.gitignore
+^\.git$
+^\documentation$
+^\testscripts$
+^\build$
+^data-raw$
+^doc$
+^Meta$
+^README\.Rmd$

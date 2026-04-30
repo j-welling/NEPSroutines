@@ -94,17 +94,17 @@ mv_item <- function(
   ) {
 
     # Test data
-    NEPSroutines:::check_logicals(resp, "resp", c(valid, grouping), warn = warn)
-    NEPSroutines:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
-    NEPSroutines:::check_items(vars$item[vars[[select]]])
-    NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[select]]])
-    if (warn) NEPSroutines:::is_null_mvs_valid(valid = valid)
+    check_logicals(resp, "resp", c(valid, grouping), warn = warn)
+    check_logicals(vars, "vars", c(select, grouping), warn = warn)
+    check_items(vars$item[vars[[select]]])
+    check_numerics(resp, "resp", vars$item[vars[[select]]])
+    if (warn) is_null_mvs_valid(valid = valid)
 
     # Missing by design
     if (!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
 
     # Conduct analysis
-    mv_item <- NEPSroutines:::mvi_analysis(
+    mv_item <- mvi_analysis(
         resp = resp,
         vars = vars,
         select = select,
@@ -121,7 +121,7 @@ mv_item <- function(
     )
 
     # Write grouped table
-    mv_item$summary_table <- NEPSroutines:::mvi_table(
+    mv_item$summary_table <- mvi_table(
       mv_i = mv_item,
       vars = vars,
       select = select,
@@ -135,7 +135,7 @@ mv_item <- function(
     )
 
     # Write plots
-    if (plots) NEPSroutines:::mvi_plots(
+    if (plots) mvi_plots(
         resp = resp,
         valid = valid,
         position = position,
@@ -160,19 +160,19 @@ mv_item <- function(
 
     # Save results
     if (save) {
-        name <- NEPSroutines:::create_name("mv_item", name_group)
-        NEPSroutines:::save_results(
+        name <- create_name("mv_item", name_group)
+        save_results(
             mv_item,
             filename = paste0(name, ".rds"),
             path = path_results
         )
 
         if (suf_item_names) {
-            mv_item[["summary_table"]][["list"]][["item"]] <- NEPSroutines:::create_suf_names(
+            mv_item[["summary_table"]][["list"]][["item"]] <- create_suf_names(
                vars_name = mv_item[["summary_table"]][["list"]][["item"]])
         }
 
-        NEPSroutines:::save_table(
+        save_table(
           mv_item$summary_table,
           overwrite = overwrite,
           filename = paste0(name, ".xlsx"),
@@ -186,7 +186,7 @@ mv_item <- function(
                 "All other tables show summary statistics over all items.\n")
         print(mv_item$summary_table)
         message("\nSummary for TR\n")
-        NEPSroutines:::print_mvi_results(
+        print_mvi_results(
             mv_item,
             name_grouping = name_grouping,
             labels_mvs = labels_mvs
@@ -258,7 +258,7 @@ mvi_analysis <- function(
   ) {
 
     # Test data
-    NEPSroutines:::test_mvi_analysis(
+    test_mvi_analysis(
       resp = resp,
       vars = vars,
       select = select,
@@ -272,8 +272,8 @@ mvi_analysis <- function(
 
     # Prepare data
     vars_c <- vars[vars[[select]], ]
-    resp <- NEPSroutines:::only_valid(resp, valid = valid)
-    resp_c <- NEPSroutines:::prepare_resp(
+    resp <- only_valid(resp, valid = valid)
+    resp_c <- prepare_resp(
         resp,
         vars = vars,
         select = select,
@@ -288,7 +288,7 @@ mvi_analysis <- function(
 
     # Convert all values missing by design
     if (!is.null(missing_by_design)) {
-        resp_c <- NEPSroutines:::convert_mv(resp_c, vars_c, mvs = missing_by_design)
+        resp_c <- convert_mv(resp_c, vars_c, mvs = missing_by_design)
         mvs <- mvs[!(mvs %in% missing_by_design)]
     }
 
@@ -296,7 +296,7 @@ mvi_analysis <- function(
     if (is.null(grouping)) {
 
         # Create list with results
-        mvlist <- NEPSroutines:::create_mvlist(
+        mvlist <- create_mvlist(
             item = vars_c$item,
             position = vars_c[[position]],
             responses = resp_c,
@@ -309,7 +309,7 @@ mvi_analysis <- function(
         )
 
         # Summary across items
-        mvsum <- NEPSroutines:::mvi_summary(
+        mvsum <- mvi_summary(
           mvlist[ , -c(1:ifelse(is.null(stages), 2, 3))],
           digits = digits
         )
@@ -327,14 +327,14 @@ mvi_analysis <- function(
             resp_g <- resp_c[resp[[g]], vars_g$item]
 
             # Number of valid responses and position
-            pos <- NEPSroutines:::create_ifelse(
+            pos <- create_ifelse(
                 length(position) == 1,
                 vars_g[[position]],
                 vars_g[[position[g]]]
             )
 
             # Create list with results
-            mvlist[[g]] <- NEPSroutines:::create_mvlist(
+            mvlist[[g]] <- create_mvlist(
               item = vars_g$item[!is.na(pos)],
               position = na.omit(pos),
               responses = resp_g[, vars_g$item[!is.na(pos)]],
@@ -347,7 +347,7 @@ mvi_analysis <- function(
             )
 
             # Summary across items
-            mvsum[[g]] <- NEPSroutines:::mvi_summary(
+            mvsum[[g]] <- mvi_summary(
               mvlist[[g]][ , -c(1:ifelse(is.null(stages), 2, 3))],
               digits = digits
             )
@@ -356,7 +356,7 @@ mvi_analysis <- function(
         if (length(position) > 1) { # This branch is only compatible with linear tests (see tests at function start)
 
             # Creating new dataframe with responses by position, not by item
-            resp_p <- NEPSroutines:::resp_per_position(
+            resp_p <- resp_per_position(
               resp = resp,
               resp_c = resp_c,
               vars_c = vars_c,
@@ -377,7 +377,7 @@ mvi_analysis <- function(
             # Determine percentage of missing values for each missing type
             mvlist$all <- cbind(
               mvlist$all,
-              data.frame(NEPSroutines:::mvi_calc(
+              data.frame(mvi_calc(
                 resp_p,
                 mvs = mvs,
                 digits = digits,
@@ -386,12 +386,12 @@ mvi_analysis <- function(
             )
 
             # Summary across items
-            mvsum$all <- NEPSroutines:::mvi_summary(mvlist$all[ , -1], digits = digits)
+            mvsum$all <- mvi_summary(mvlist$all[ , -1], digits = digits)
 
         } else {
 
           # Create list with results
-          mvlist$all <- NEPSroutines:::create_mvlist(
+          mvlist$all <- create_mvlist(
             item = vars_c$item,
             position = vars_c[[position]],
             responses = resp_c[, vars_c$item],
@@ -404,7 +404,7 @@ mvi_analysis <- function(
           )
 
           # Summary across items
-          mvsum$all <- NEPSroutines:::mvi_summary(
+          mvsum$all <- mvi_summary(
             mvlist$all[ , -c(1:ifelse(is.null(stages), 2, 3))],
             digits = digits
           )
@@ -416,8 +416,8 @@ mvi_analysis <- function(
 
     # Save results
     if (save) {
-        name <- NEPSroutines:::create_name("mv_item", name_group, ".rds")
-        NEPSroutines:::save_results(mv_i, filename = name, path = path)
+        name <- create_name("mv_item", name_group, ".rds")
+        save_results(mv_i, filename = name, path = path)
     }
 
     # Return results
@@ -434,14 +434,14 @@ test_mvi_analysis <- function(
     resp, vars, select, valid, grouping, position, stages, warn, test
     ) {
 
-  NEPSroutines:::check_numerics(vars, "vars", position, check_invalid = TRUE)
+  check_numerics(vars, "vars", position, check_invalid = TRUE)
 
   if (test) {
-    NEPSroutines:::check_logicals(resp, "resp", c(valid, grouping, stages), warn = warn)
-    NEPSroutines:::check_logicals(vars, "vars", c(select, grouping, stages), warn = warn)
-    NEPSroutines:::check_items(vars$item[vars[[select]]])
-    NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[select]]])
-    if (warn) NEPSroutines:::is_null_mvs_valid(valid = valid)
+    check_logicals(resp, "resp", c(valid, grouping, stages), warn = warn)
+    check_logicals(vars, "vars", c(select, grouping, stages), warn = warn)
+    check_items(vars$item[vars[[select]]])
+    check_numerics(resp, "resp", vars$item[vars[[select]]])
+    if (warn) is_null_mvs_valid(valid = valid)
   }
 
   if (is.null(grouping)) {
@@ -513,7 +513,7 @@ create_mvlist <- function(
   )
 
   # Merge with percentage of missing values for each missing type
-  results <- data.frame(NEPSroutines:::mvi_calc(
+  results <- data.frame(mvi_calc(
     responses,
     mvs = mvs,
     digits = digits,
@@ -545,7 +545,7 @@ mvi_calc <- function(responses, mvs, digits = 3, use_for_plot) {
 
   # Determine percentage of missing values for each missing type
   for (i in names(mvs)) {
-    result[[i]] <- NEPSroutines:::mvi_perc(
+    result[[i]] <- mvi_perc(
       responses = responses,
       mvs = mvs[[i]],
       digits = digits,
@@ -554,7 +554,7 @@ mvi_calc <- function(responses, mvs, digits = 3, use_for_plot) {
   }
 
   # Percentage of total missing responses for each item
-  result$ALL <- NEPSroutines:::mvi_perc(
+  result$ALL <- mvi_perc(
     responses = responses,
     mvs = mvs,
     digits = digits,
@@ -684,9 +684,9 @@ mvi_table <- function(
 
   # Test data
     if (test) {
-        NEPSroutines:::test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
-        NEPSroutines:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
-        NEPSroutines:::check_items(vars$item[vars[[select]]])
+        test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
+        check_logicals(vars, "vars", c(select, grouping), warn = warn)
+        check_items(vars$item[vars[[select]]])
     }
 
     # Create table
@@ -713,14 +713,14 @@ mvi_table <- function(
 
     # Save table
     if (save) {
-        name <- NEPSroutines:::create_name("mv_item", name_group, ".xlsx")
+        name <- create_name("mv_item", name_group, ".xlsx")
 
         if (suf_item_names) {
-            results[["list"]][["item"]] <- NEPSroutines:::create_suf_names(
+            results[["list"]][["item"]] <- create_suf_names(
               vars_name = results[["list"]][["item"]])
         }
 
-        NEPSroutines:::save_table(
+        save_table(
           results,
           filename = name,
           path = path,
@@ -818,7 +818,7 @@ mvi_plots <- function(
   # Missing by design
   if(!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
 
-  mv_i <- NEPSroutines:::mvi_analysis(
+  mv_i <- mvi_analysis(
     resp = resp,
     vars = vars,
     select = select,
@@ -838,9 +838,9 @@ mvi_plots <- function(
 
   # Test data
   if (test) {
-    NEPSroutines:::test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
-    NEPSroutines:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
-    NEPSroutines:::check_items(vars$item[vars[[select]]])
+    test_mvi_data(mv_i, mvs = mvs, grouping = grouping)
+    check_logicals(vars, "vars", c(select, grouping), warn = warn)
+    check_items(vars$item[vars[[select]]])
   }
 
   # Prepare data
@@ -849,15 +849,15 @@ mvi_plots <- function(
 
   # Create groups vector
   if (!is.null(grouping))
-    groups <- NEPSroutines:::create_ifelse(show_all, c(grouping, 'all'), grouping)
+    groups <- create_ifelse(show_all, c(grouping, 'all'), grouping)
 
   # Check color argument
-  grps <- NEPSroutines:::create_ifelse(is.null(grouping), 1, length(groups))
-  color <- NEPSroutines:::check_color(color = color, grps = grps)
+  grps <- create_ifelse(is.null(grouping), 1, length(groups))
+  color <- check_color(color = color, grps = grps)
 
   # Create directory for plots
-  path_ <- NEPSroutines:::create_name(path, name_group, sep = "/")
-  NEPSroutines:::check_folder(path_)
+  path_ <- create_name(path, name_group, sep = "/")
+  check_folder(path_)
 
   # Create plots
 
@@ -868,7 +868,7 @@ mvi_plots <- function(
     if (is.null(grouping)) {
 
       # create plot
-      mv_i_pp <- NEPSroutines:::mv_per_position(
+      mv_i <- mv_per_position(
         mv_i,
         mv = i,
         resp = resp,
@@ -895,7 +895,7 @@ mvi_plots <- function(
 
     } else {
 
-      mv_wide <- NEPSroutines:::create_wide_df_mvi(
+      mv_wide <- create_wide_df_mvi(
         mv_i,
         groups = groups,
         mv = i,
@@ -974,7 +974,7 @@ mvi_plots <- function(
     )
 
     # Print progress
-    if (verbose) cat("Missing plot", i, "created.\n")
+    if (verbose) message("Missing plot ", i, " created.")
   }
 }
 
@@ -1032,7 +1032,7 @@ create_wide_df_mvi <- function(
   df <- data.frame(position = NA)
 
   for (g in groups) {
-    mv_pos <- NEPSroutines:::mv_per_position(
+    mv_pos <- mv_per_position(
       mv_i[[g]],
       mv = mv,
       resp = resp[resp[[g]],],
@@ -1107,7 +1107,7 @@ mv_per_position <- function(
 
   # Multistage tests
   if (add_missings_per_stage)
-    NEPSroutines:::add_missings_per_stage(mv_pos, mv, resp, vars, stages, position, digits)
+    add_missings_per_stage(mv_pos, mv, resp, vars, stages, position, digits)
 
   return(mv_pos)
 }
