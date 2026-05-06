@@ -722,7 +722,8 @@ wright_map <- function(model, path = "Plots", name_group = NULL,
   ymax <- ceiling(max(all_vals, na.rm = TRUE)) + 0.5
   yticks <- seq(ceiling(ymin), floor(ymax), by = 1)
 
-  # Build histogram with 0.5-logit bins
+  # Build histogram with 0.5-logit bins; 0.5 is the conventional IRT Wright map
+  # bin width, fine enough to show the ability distribution shape
   bin_width <- 0.5
   breaks <- seq(ymin, ymax, by = bin_width)
   h <- graphics::hist(theta, breaks = breaks, plot = FALSE)
@@ -743,10 +744,11 @@ wright_map <- function(model, path = "Plots", name_group = NULL,
   # ---- Left panel: Respondents ----
   graphics::par(mar = c(5, 4, 3, 0.2))
 
-  x_pad <- 1.15   # extra horizontal space beyond the tallest histogram bar
+  # Multiplier applied to the tallest bar count to add horizontal breathing room
+  max_count_padding <- 1.15
   max_count <- max(h$counts, 1L)
   graphics::plot(NULL,
-                 xlim = c(max_count * x_pad, 0),
+                 xlim = c(max_count * max_count_padding, 0),
                  ylim = c(ymin, ymax),
                  xaxt = "n", las = 1,
                  xlab = "", ylab = "Logits",
