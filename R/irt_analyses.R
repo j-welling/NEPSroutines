@@ -723,7 +723,8 @@ wright_map <- function(model, path = "Plots", name_group = NULL,
   yticks <- seq(ceiling(ymin), floor(ymax), by = 1)
 
   # Build histogram with 0.5-logit bins
-  breaks <- seq(ymin, ymax, by = 0.5)
+  bin_width <- 0.5
+  breaks <- seq(ymin, ymax, by = bin_width)
   h <- graphics::hist(theta, breaks = breaks, plot = FALSE)
 
   # Item threshold dimensions
@@ -742,9 +743,10 @@ wright_map <- function(model, path = "Plots", name_group = NULL,
   # ---- Left panel: Respondents ----
   graphics::par(mar = c(5, 4, 3, 0.2))
 
+  x_pad <- 1.15   # extra horizontal space beyond the tallest histogram bar
   max_count <- max(h$counts, 1L)
   graphics::plot(NULL,
-                 xlim = c(max_count * 1.15, 0),
+                 xlim = c(max_count * x_pad, 0),
                  ylim = c(ymin, ymax),
                  xaxt = "n", las = 1,
                  xlab = "", ylab = "Logits",
