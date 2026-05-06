@@ -185,15 +185,10 @@ sim.testlet <- function(N = 2000, I = 25, CMC = 5, SCR = 5, MC = NULL,
     control$lbl.testlets <- paste0("Dimension ", seq_len(control$testlets))
 
   # Check arguments
-  if (CMC > I)
-    stop(paste0("The number of polytomous items 'CMC' must not be larger ",
-                "than the total number of items 'I'!"))
-  if (SCR > I)
-    stop(paste0("The number of short constructed response items 'SCR' must not ",
-                "be larger than the total number of items 'I'!"))
-  if (SCR > I - CMC)
-    stop(paste0("More short constructed response items 'SCR' requested ",
-                "than available number of items 'I - CMC'!"))
+  if (MC < 0L)
+    stop(paste0("The number of polytomous items 'CMC' and short constructed ",
+                "response items 'SCR' must not be larger than the totel ",
+                "number of items 'I'!"))
   k <- length(unique(c(control$items.sex, control$items.mig, control$items.school)))
   if (k > I - CMC)
     stop(paste0("Not enough MC or SCR items to create the DIF effects!"))
