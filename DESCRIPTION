@@ -44,7 +44,6 @@ Suggests:
     officer (>= 0.6.5),
     magick (>= 2.8.3),
     sfsmisc,
-    WrightMap,
     testthat (>= 3.2.0),
     withr,
     knitr,

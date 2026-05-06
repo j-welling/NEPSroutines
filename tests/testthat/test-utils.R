@@ -498,3 +498,28 @@ test_that("rnd() works", {
   expect_equal(rnd(c(0.042, -0.1459), d0 = TRUE), c(".04", "-.15"))
 
 })
+
+
+test_that("wright_map() creates PNG without WrightMap package", {
+  skip_if_not_installed("MASS")
+
+  path <- withr::local_tempdir()
+
+  # Binary model (1PL)
+  model_dich <- readRDS(test_path("fixtures/ex1/results/irt_dich.rds"))$model.1pl
+  expect_no_error(
+    wright_map(model = model_dich, path = path)
+  )
+  expect_true(
+    file.exists(file.path(path, "Wright_Maps", "Wright_map_for_1PL.png"))
+  )
+
+  # Polytomous model (PCM2)
+  model_poly <- readRDS(test_path("fixtures/ex2/results/irt_poly.rds"))$model.pcm
+  expect_no_error(
+    wright_map(model = model_poly, path = path)
+  )
+  expect_true(
+    file.exists(file.path(path, "Wright_Maps", "Wright_map_for_PCM2.png"))
+  )
+})

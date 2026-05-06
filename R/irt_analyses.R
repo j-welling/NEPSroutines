@@ -695,7 +695,7 @@ icc_plots <- function(model, path = "Plots", name_group = NULL) {
 #' @param height  number; height of generated plot
 #'
 #' @importFrom grDevices dev.off png tiff
-#' @importFrom graphics mtext text
+#' @importFrom graphics axis hist layout mtext par plot rect text
 #' @export
 
 wright_map <- function(model, path = "Plots", name_group = NULL,
@@ -703,9 +703,8 @@ wright_map <- function(model, path = "Plots", name_group = NULL,
 
   # Identify kind of irt model
   irtmodel <- model$irtmodel
-
-  # Label for plot
-  lbl <- ifelse(irtmodel %in% c("PCM2", "GPCM"), "Category thresholds", "Item difficulties")
+  item_lbl <- ifelse(irtmodel %in% c("PCM2", "GPCM"),
+                     "Category thresholds", "Item difficulties")
 
   # Add group name to path
   path_ <- create_name(paste0(path, "/Wright_Maps"), name_group, sep = "/")
@@ -713,24 +712,79 @@ wright_map <- function(model, path = "Plots", name_group = NULL,
   # Create directory for plots
   check_folder(path = path_)
 
-  # Create Wright Map
+  # Data for the map
   th <- TAM::IRT.threshold(model$mod)
-  png(paste0(path_, "/Wright_map_for_", irtmodel, ".png"),
-      width = width, height = height, bg = "white",
-      res = 300, pointsize = 10)
-  TAM::IRT.WrightMap(th,
-                     main.title = "Wright map",
-                     label.items =  paste0("I",c(1:nrow(th))),
-                     item.side = "itemClassic",
-                     return.thresholds = FALSE, dim.names = "",
-                     show.axis.logits = "R",
-                     axis.items = "",
-                     axis.persons = "")
-  text(0, 0, "")
-  mtext(lbl, 3, line = 0.5, cex = .65)
-  mtext("Respondents", 3, line = 0.5, cex = .65, at = 0.04)
-  mtext("Logits", 3, line = 0.5, cex = .65, at = 1)
-  dev.off()
+  theta <- model$wle$theta
+
+  # Shared y-axis range (logit scale)
+  all_vals <- c(theta, as.numeric(th))
+  ymin <- floor(min(all_vals, na.rm = TRUE)) - 0.5
+  ymax <- ceiling(max(all_vals, na.rm = TRUE)) + 0.5
+  yticks <- seq(ceiling(ymin), floor(ymax), by = 1)
+
+  # Build histogram with 0.5-logit bins
+  breaks <- seq(ymin, ymax, by = 0.5)
+  h <- graphics::hist(theta, breaks = breaks, plot = FALSE)
+
+  # Item threshold dimensions
+  n_items <- nrow(th)
+  n_thresh <- ncol(th)
+
+  # Open PNG device
+  grDevices::png(paste0(path_, "/Wright_map_for_", irtmodel, ".png"),
+                 width = width, height = height, bg = "white",
+                 res = 300, pointsize = 10)
+  on.exit(grDevices::dev.off(), add = TRUE)
+
+  # Two-panel layout: wider person side (left) + narrower item side (right)
+  graphics::layout(matrix(1:2, nrow = 1), widths = c(1.5, 1))
+
+  # ---- Left panel: Respondents ----
+  graphics::par(mar = c(5, 4, 3, 0.2))
+
+  max_count <- max(h$counts, 1L)
+  graphics::plot(NULL,
+                 xlim = c(max_count * 1.15, 0),
+                 ylim = c(ymin, ymax),
+                 xaxt = "n", las = 1,
+                 xlab = "", ylab = "Logits",
+                 main = "",
+                 cex.lab = 0.7, cex.axis = 0.7)
+  graphics::mtext("Wright Map", side = 3, line = 1.2, cex = 0.8, font = 2)
+  graphics::mtext("Respondents", side = 3, line = 0.2, cex = 0.7)
+
+  # Draw horizontal histogram bars (bars go leftward from y-axis)
+  for (i in seq_along(h$counts)) {
+    if (h$counts[i] > 0L) {
+      graphics::rect(xleft  = h$counts[i], ybottom = h$breaks[i],
+                     xright = 0,           ytop    = h$breaks[i + 1L],
+                     col = "grey70", border = "white")
+    }
+  }
+
+  # ---- Right panel: Item difficulties / thresholds ----
+  graphics::par(mar = c(5, 0.2, 3, 5))
+
+  graphics::plot(NULL,
+                 xlim = c(0, 1),
+                 ylim = c(ymin, ymax),
+                 xaxt = "n", yaxt = "n",
+                 xlab = "", ylab = "",
+                 main = "")
+  graphics::mtext(item_lbl, side = 3, line = 0.2, cex = 0.7)
+  graphics::axis(4, at = yticks, las = 1, cex.axis = 0.7)
+  graphics::mtext("Logits", side = 4, line = 3.5, cex = 0.7)
+
+  # Draw item labels at their threshold values on the logit scale
+  for (i in seq_len(n_items)) {
+    for (j in seq_len(n_thresh)) {
+      val <- th[i, j]
+      if (!is.na(val)) {
+        lbl_text <- if (n_thresh > 1L) paste0(i, ".", j) else as.character(i)
+        graphics::text(0.5, val, lbl_text, cex = 0.55)
+      }
+    }
+  }
 }
 
 
