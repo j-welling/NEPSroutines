@@ -29,9 +29,11 @@ Imports:
     grDevices,
     haven,
     openxlsx,
+    sfsmisc,
     stats,
     methods,
-    TAM (>= 4.2)
+    TAM (>= 4.2),
+    WrightMap
 Suggests:
     flextable,
     officer (>= 0.6.5),
@@ -39,7 +41,6 @@ Suggests:
     rlang,
     testthat (>= 3.2.0),
     withr,
-    WrightMap,
     knitr,
     rmarkdown,
     bookdown
