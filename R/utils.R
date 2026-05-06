@@ -732,17 +732,5 @@ rnd <- function(x, digits = 2, d0 = FALSE) {
 # Internal helper: capitalize the first letter of each string element
 # @noRd
 capitalize <- function(x) {
-  paste0(toupper(substr(x, 1, 1)), substring(x, 2))
+  paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))
 }
-
-
-
-
-
-
-
-
-
-
-
-
