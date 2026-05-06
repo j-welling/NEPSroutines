@@ -702,7 +702,13 @@ pc_imputation <- function( resp, vars, select,
 #' @param select character; indicates the logical variable in vars which
 #'   contains the item names of the polytomous items
 #' @param per_cat integer; minimum number of persons per category; defaults to 200
+#' @param rules data.frame; collapsing rules for items;
+#'    same format as the excel file saved via \code{save}; must include three
+#'    variables (original_item, scoring, collapsed_item)
+#' @param rules_file character; path to excel file with collapsing rules created
+#'    via \code{save}
 #' @param path_table  string; defines path to folder where tables shall be saved
+#' @param filename  string; file name for saved tables
 #' @param save  logical; whether results shall be saved to hard drive
 #' @return resp with collapsed categories. Note that this function changes the
 #'   given PC items IN PLACE. If you want to keep the original data, please
@@ -730,160 +736,292 @@ pc_imputation <- function( resp, vars, select,
 #' @return data.frame resp with collapsed and original items
 
 collapse_response_categories <- function(resp, vars, select = 'poly',
-                                         per_cat = 200, save = FALSE,
-                                         path_table = "Tables") {
+                                         per_cat = 200,
+                                         rules = NULL,
+                                         rules_file = NULL,
+                                         save = FALSE,
+                                         path_table = "Tables",
+                                         filename = "collapsed_items") {
 
-  # Check whether variables are indeed contained in data.frames
-  check_logicals(vars, "vars", select, warn = TRUE)
-  polyt_items <- vars$item[vars[[select]]]
-  check_numerics(resp, "resp", polyt_items)
-  check_items(polyt_items)
+  if (!is.null(rules) | !is.null(rules_file)) {
 
-  collapsed_items <- c()
-  dichotomous_items <- c()
-  problematic_items <- c()
+    # Use rules
+    results <- collapse_response_categories_with_rules(
+      resp = resp, vars = vars, select = select, per_cat = per_cat,
+      rules = rules, rules_file = rules_file
+    )
 
-  for (item in polyt_items) {
-
-    response <- resp[[item]]
-
-    # Create table with all possible categories (= from minimum to maximum value)
-    vals <- unique(response[response >= 0 & !is.na(response)])
-    values <- 0:max(vals)
-    tab <- sapply(values, function (x) sum(response == x, na.rm = TRUE))
-    names(tab) <- values
-
-    # Skip dichotomous items with response categories 0 and 1
-    if (length(values) <= 2) {
-
-      dichotomous_items <- c(dichotomous_items, item)
-
-    } else {
-
-      collapse <- which(tab < per_cat)
-      collapse_values <- as.numeric(names(collapse))
-
-      if (length(collapse) > 0) {
-
-        log <- matrix(values, nrow = 1, dimnames = list("", values))
-        while (length(collapse) > 0) {
-
-          # for score of 0: left shift all values larger than 0
-          log <- rbind(log, NA)
-          if (collapse_values[1] == 0) {
-
-            j <- which(response > 0)
-
-            # for highest score: left shift current value
-            log[nrow(log), ] <-
-              c(log[nrow(log) - 1, log[nrow(log) - 1, ] == 0],
-                log[nrow(log) - 1, log[nrow(log) - 1, ] > 0] - 1)
-          } else if (collapse_values[1] == max(response, na.rm = TRUE)) {
-
-            j <- which(response == max(response, na.rm = TRUE))
-
-            # for scores between lowest and highest score, if the next score has
-            #  a smaller frequency than the previous score:
-            #  left shift all values greater than the current value
-            log[nrow(log), ] <-
-              c(log[nrow(log) - 1, log[nrow(log) - 1, ] != max(log[nrow(log) - 1, ])],
-                log[nrow(log) - 1, log[nrow(log) - 1, ] == max(log[nrow(log) - 1, ])] - 1)
-          } else if (tab[collapse[1] - 1] > tab[collapse[1] + 1]) {
-
-            j <- which(response > collapse_values[1])
-
-            # for scores between 1 and highest score, if the previous score has
-            #  a smaller frequency than the next score:
-            #  left shift the current value and all values greater than the
-            #  current value
-            log[nrow(log), ] <-
-              c(log[nrow(log) - 1, log[nrow(log) - 1, ] <= collapse_values[1]],
-                log[nrow(log) - 1, log[nrow(log) - 1, ] > collapse_values[1]] - 1)
-          } else if (tab[collapse[1] - 1] <= tab[collapse[1] + 1]) {
-
-            j <- which(response >= collapse_values[1])
-
-            log[nrow(log), ] <-
-              c(log[nrow(log) - 1, log[nrow(log) - 1, ] < collapse_values[1]],
-                log[nrow(log) - 1, log[nrow(log) - 1, ] >= collapse_values[1]] - 1)
-          }
-
-          response[j] <- response[j] - 1
-
-          # Create table with all possible categories (= from minimum to maximum value)
-          vals <- unique(response[response >= 0 & !is.na(response)])
-          values <- 0:max(vals)
-          tab <- sapply(values, function (x) sum(response == x, na.rm = TRUE))
-          names(tab) <- values
-
-          # Determine categories for collapsing
-          collapse <- which(tab < per_cat)
-          collapse_values <- as.numeric(names(collapse))
-
-          if (length(tab) <= 1)
-            break
-        }
-
-        if (length(collapse) == 0 & length(values) >= 2) {
-
-          resp[ , paste0(item, "_collapsed")] <- response
-          collapsed_items <- rbind(collapsed_items,
-                                   c(item, paste0(log[1, ], "=", log[nrow(log),], collapse = ", ")))
-        }
-        else {
-
-          problematic_items <- c(problematic_items, item)
-
-        }
-      }
-    }
-  }
-
-  # Which items have been collapsed?
-  colnames(collapsed_items) <- c("Item", "Scoring")
-  item_names <- tibble::tibble(original_item = collapsed_items[, 1],
-                               scoring = collapsed_items[, 2],
-                               collapsed_item = paste0(collapsed_items[, 1], "_collapsed"))
-
-  # Print results
-  if (!is.null(problematic_items)) {
-    message("\nThe following items resulted in less than two response categories ",
-            "with more than ", per_cat, " cases and were thus not collapsed. ",
-            "Please check these items manually:\n",
-            paste(problematic_items, collapse = ", "))
-  }
-
-  if (!is.null(dichotomous_items)) {
-    message("\nDichotomous items were not considered for collapsing. ",
-            "The following items have less than three response categories::\n",
-            paste(dichotomous_items, collapse = ", "))
-  }
-
-  if (!is.null(collapsed_items)) {
-    message("\nThe following items have been collapsed:\n")
-    print(item_names, n=nrow(item_names))
   } else {
-    message("\nNo items have been collapsed.")
+
+    # Create rules based on data
+    results <- collapse_response_categories_without_rules(
+      resp = resp, vars = vars, select = select, per_cat = per_cat
+    )
+
   }
 
   # Save results
   if (save) {
 
     save_table(
-        results = list(
-            collapsed = item_names,
-            dichotomous = dichotomous_items,
-            problematic = problematic_items
-        ),
-        filename = "collapsed_items.xlsx",
-        path = path_table,
-        overwrite = TRUE,
-        show_rownames = FALSE
+      results = list(
+        collapsed = results$collapsed_items,
+        dichotomous = results$dichotomous_items,
+        problematic = results$problematic_items
+      ),
+      filename = paste0(filename, ".xlsx"),
+      path = path_table,
+      overwrite = TRUE,
+      show_rownames = FALSE
     )
   }
 
-  return(resp)
+  return(results$resp)
 }
+
+
+
+#' Collapse response categories without existing collapsing rules
+#'
+#' @inhertParams collapse_response_categories
+
+collapse_response_categories_without_rules <-
+  function(resp, vars, select = 'poly', per_cat = 200) {
+
+    # Check whether variables are indeed contained in data.frames
+    check_logicals(vars, "vars", select, warn = TRUE)
+    polyt_items <- vars$item[vars[[select]]]
+    check_numerics(resp, "resp", polyt_items)
+    check_items(polyt_items)
+
+    collapsed_items <- matrix(NA, 0, 2)
+    dichotomous_items <- c()
+    problematic_items <- c()
+
+    for (item in polyt_items) {
+
+      response <- resp[[item]]
+
+      # Create table with all possible categories (= from minimum to maximum value)
+      vals <- unique(response[response >= 0 & !is.na(response)])
+      values <- 0:max(vals)
+      tab <- sapply(values, \(x) sum(response == x, na.rm = TRUE))
+      names(tab) <- values
+
+      # Skip dichotomous items with response categories 0 and 1
+      if (length(values) <= 2) {
+
+        dichotomous_items <- c(dichotomous_items, item)
+
+      } else {
+
+        collapse <- which(tab < per_cat)
+        collapse_values <- as.numeric(names(collapse))
+
+        if (length(collapse) > 0) {
+
+          log <- matrix(values, nrow = 1, dimnames = list("", values))
+          while (length(collapse) > 0) {
+
+            # for score of 0: left shift all values larger than 0
+            log <- rbind(log, NA)
+            if (collapse_values[1] == 0) {
+
+              j <- which(response > 0)
+
+              # for highest score: left shift current value
+              log[nrow(log), ] <-
+                c(log[nrow(log) - 1, log[nrow(log) - 1, ] == 0],
+                  log[nrow(log) - 1, log[nrow(log) - 1, ] > 0] - 1)
+            } else if (collapse_values[1] == max(response, na.rm = TRUE)) {
+
+              j <- which(response == max(response, na.rm = TRUE))
+
+              # for scores between lowest and highest score, if the next score has
+              #  a smaller frequency than the previous score:
+              #  left shift all values greater than the current value
+              log[nrow(log), ] <-
+                c(log[nrow(log) - 1, log[nrow(log) - 1, ] != max(log[nrow(log) - 1, ])],
+                  log[nrow(log) - 1, log[nrow(log) - 1, ] == max(log[nrow(log) - 1, ])] - 1)
+            } else if (tab[collapse[1] - 1] > tab[collapse[1] + 1]) {
+
+              j <- which(response > collapse_values[1])
+
+              # for scores between 1 and highest score, if the previous score has
+              #  a smaller frequency than the next score:
+              #  left shift the current value and all values greater than the
+              #  current value
+              log[nrow(log), ] <-
+                c(log[nrow(log) - 1, log[nrow(log) - 1, ] <= collapse_values[1]],
+                  log[nrow(log) - 1, log[nrow(log) - 1, ] > collapse_values[1]] - 1)
+            } else if (tab[collapse[1] - 1] <= tab[collapse[1] + 1]) {
+
+              j <- which(response >= collapse_values[1])
+
+              log[nrow(log), ] <-
+                c(log[nrow(log) - 1, log[nrow(log) - 1, ] < collapse_values[1]],
+                  log[nrow(log) - 1, log[nrow(log) - 1, ] >= collapse_values[1]] - 1)
+            }
+
+            response[j] <- response[j] - 1
+
+            # Create table with all possible categories (= from minimum to maximum value)
+            vals <- unique(response[response >= 0 & !is.na(response)])
+            values <- 0:max(vals)
+            tab <- sapply(values, \(x) sum(response == x, na.rm = TRUE))
+            names(tab) <- values
+
+            # Determine categories for collapsing
+            collapse <- which(tab < per_cat)
+            collapse_values <- as.numeric(names(collapse))
+
+            if (length(tab) <= 1)
+              break
+          }
+
+          if (length(collapse) == 0 & length(values) >= 2) {
+
+            resp[ , paste0(item, "_collapsed")] <- response
+            collapsed_items <- rbind(collapsed_items,
+                                     c(item, paste0(log[1, ], "=", log[nrow(log),], collapse = ", ")))
+          }
+          else {
+
+            problematic_items <- c(problematic_items, item)
+
+          }
+        }
+      }
+    }
+
+    # Which items have been collapsed?
+    colnames(collapsed_items) <- c("Item", "Scoring")
+    item_names <- tibble::tibble(original_item = collapsed_items[, 1],
+                                 scoring = collapsed_items[, 2],
+                                 collapsed_item = paste0(collapsed_items[, 1], "_collapsed"))
+
+    # Print results
+    if (!is.null(problematic_items)) {
+      message("\nThe following items resulted in less than two response categories ",
+              "with more than ", per_cat, " cases and were thus not collapsed. ",
+              "Please check these items manually:\n",
+              paste(problematic_items, collapse = ", "))
+    }
+
+    if (!is.null(dichotomous_items)) {
+      message("\nDichotomous items were not considered for collapsing. ",
+              "The following items have less than three response categories::\n",
+              paste(dichotomous_items, collapse = ", "))
+    }
+
+    if (nrow(collapsed_items) > 0L) {
+      message("\nThe following items have been collapsed:\n")
+      print(item_names, n = nrow(item_names))
+    } else {
+      message("\nNo items have been collapsed.")
+    }
+
+    out <- list(
+      resp = resp,
+      dichotomous_items = dichotomous_items,
+      collapsed_items = item_names,
+      problematic_items = problematic_items
+    )
+    return(out)
+  }
+
+
+#' Collapse response categories with existing collapsing rules
+#'
+#' @inhertParams collapse_response_categories
+
+collapse_response_categories_with_rules <-
+  function(resp, vars, select = 'poly', per_cat = 200,
+           rules = NULL, rules_file = NULL) {
+
+    # Check whether variables are indeed contained in data.frames
+    check_logicals(vars, "vars", select, warn = TRUE)
+    polyt_items <- vars$item[vars[[select]]]
+    check_numerics(resp, "resp", polyt_items)
+    check_items(polyt_items)
+
+    # Check supplied rules
+    if (!is.null(rules)) {
+      if (!("data.frame" %in% class(rules))) {
+        stop("Argument 'rules' is not a data.frame.")
+      }
+      check_variables(rules, name_df = "rules",
+                      variables = c("original_item", "scoring",
+                                    "collapsed_item"))
+    }
+
+    # Import rules
+    if (!is.null(rules_file)) {
+      if (!is.character(rules_file) ||
+          !length(rules_file) == 1L ||
+          !file.exists(rules_file) ||
+          !grepl("\\.(xlsx|xls)$", rules_file, ignore.case = TRUE))
+        stop(sprintf("The path '%s' supplied for argument 'rules_file' is not a valid excel file.",
+                     rules_file))
+      rules2 <- openxlsx::read.xlsx(rules_file, sheet = 1)
+      check_variables(rules2, name_df = "rules_file",
+                      variables = c("original_item", "scoring", "collapsed_item"))
+      if (is.null(rules)) {
+        rules <- rules2
+      } else {
+        rules <- rbind(rules, rules2)
+      }
+    }
+
+    # Check number of rules for items
+    n_rules <- table(rules$original_item)
+    duplicates <- names(n_rules)[n_rules > 1]
+    if (length(duplicates) > 0)
+      stop(paste(
+        "Multiple rules found for items:",
+        paste(duplicates, collapse = ", ")
+      ))
+
+    # Apply rules to data
+    for (i in seq_len(nrow(rules))) {
+      if (is.null(resp[[rules$original_item[i]]])) next
+      rec_string <- trimws(strsplit(rules$scoring[i], ",")[[1]])
+      resp[[paste0(rules$original_item[i], "_collapsed")]] <-
+        recodeVar(
+          resp[[rules$original_item[i]]],
+          src = regmatches(rec_string, regexpr("^([0-9]+)", rec_string)),
+          tgt = as.numeric(regmatches(rec_string, regexpr("([0-9]+)$", rec_string)))
+        )
+    }
+
+    # Identify problematic items
+    is_problematic <- apply(resp[, rules$collapsed_item], 2,
+                            \(x) min(table(x[x >= 0])) < per_cat)
+    if (sum(is_problematic) > 0L) {
+      problematic_items <- rules$collapsed_item[is_problematic]
+    } else {
+      problematic_items <- NULL
+    }
+
+    # Print results
+    message("\nThe following items have been collapsed:\n")
+    print(rules)
+
+    if (!is.null(problematic_items)) {
+      message("\nThe following items resulted in response categories ",
+              "with less than ", per_cat, " cases. ",
+              "Please check these items carefully:\n",
+              paste(problematic_items, collapse = ", "))
+    }
+
+    out <- list(
+      resp = resp,
+      dichotomous_items = NULL,
+      collapsed_items = rules,
+      problematic_items = problematic_items
+    )
+    return(out)
+  }
 
 
 
