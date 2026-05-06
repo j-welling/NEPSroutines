@@ -699,9 +699,7 @@ mvp_summary <- function(results, digits = 3) {
     })
 
     # Create table with descriptive statistics for all missing value types
-    out$summary <- sapply(results, function(x) {
-        round(psych::describe(x), digits)[c(3:5, 8:9)]
-    })
+    out$summary <- describe(results, digits = digits)[,-1] |> t()
 
     return(out)
 }

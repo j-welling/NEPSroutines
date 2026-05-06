@@ -302,7 +302,7 @@ pc_missing_subitems <- function( resp, mvs, poly_items,
   message("\nOverview of the absolute and relative frequencies of imputed missing values " ,
           "for the polytomous items in the dataset: ")
   print(summary_items_impMV)
-  desc_items_impMV <- psych::describe(summary_items_impMV["RelFreq_of_imputed_MV"])[c(2:5,8:10)]
+  desc_items_impMV <- describe(summary_items_impMV["RelFreq_of_imputed_MV"])
   print(desc_items_impMV, digits = 3)
 
   Freq <- table(rowSums(indicators[grep("_impMV", names(indicators), value = TRUE)], na.rm = TRUE))

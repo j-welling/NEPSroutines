@@ -28,7 +28,6 @@ Imports:
     grDevices,
     haven,
     openxlsx,
-    psych,
     stats,
     methods,
     TAM (>= 4.2)
