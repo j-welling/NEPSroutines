@@ -662,7 +662,7 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
 
   if (!is.null(collapsed_items)) {
     message("\nThe following items have been collapsed:\n")
-    print(item_names)
+    print(format(item_names, justify = "left"), right = F)
   } else {
     message("\nNo items have been collapsed.")
   }

@@ -993,7 +993,7 @@ check_color <- function(color, grps) {
                   'of groups (', grps, ').'))
     }
   } else {
-    color <- grDevices::hcl.colors(grps)
+    color <- colorspace::sequential_hcl(grps, palette = "Viridis")
   }
 
   return(color)

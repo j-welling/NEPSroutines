@@ -292,7 +292,7 @@ dis_summary <- function(
     desc <- describe(
       cbind(correct = rc[, 3], distract = rd[, 3]),
       digits = digits
-    )
+    ) |> t()
 
     # Create list with results
     results <- list(correct = rc, distractor = rd, descriptives = desc)

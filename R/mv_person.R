@@ -501,7 +501,7 @@ mvp_plots <- function(
                     'of groups (', grps, ').'))
       }
     } else {
-      color <- grDevices::hcl.colors(grps)
+      color <- colorspace::sequential_hcl(grps)
     }
 
     # Test labels
