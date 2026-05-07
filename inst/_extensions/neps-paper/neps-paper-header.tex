@@ -9,7 +9,7 @@
 \usepackage[format=plain,indention=0cm,justification=raggedright,
             belowskip=8pt,aboveskip=0pt,labelsep=newline,textfont=it,
             labelfont=bf,singlelinecheck=false]{caption}
-%\usepackage{lscape}
+\usepackage{pdflscape}
 \usepackage{typearea}
 
 %%%%%%%%%%% Colors for LIfBi %%%%%%%%%%%
@@ -57,18 +57,6 @@
 %%%%%%%%%%% Own commands %%%%%%%%%%%
 
 \newcommand{\orcid}[1]{\href{https://orcid.org/#1}{\textcolor[HTML]{A6CE39}{\aiOrcid}}}
-%\newcommand{\blandscape}{\begin{landscape}}
-%\newcommand{\elandscape}{\end{landscape}}
-\newcommand{\blandscape}{
-  \newpage
-	\KOMAoptions{paper=landscape,pagesize}
-	\recalctypearea
-	\areaset{2.1\textwidth}{1.6\textheight}% adjust here: \areaset{<text body width>}{<text body height>}
-}
-\AtBeginDocument{\storeareas\normalpapersize}
-\newcommand{\elandscape}{\newpage\normalpapersize}
-	%\KOMAoptions{paper=portrait,pagesize}
-	%\recalctypearea
 
 % Wiederverwendbarkeit von Fussnoten mittels \label
 \makeatletter
