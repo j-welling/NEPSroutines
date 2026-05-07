@@ -33,6 +33,7 @@ Imports:
     stats,
     methods,
     TAM (>= 4.2),
+    tidyselect,
     WrightMap
 Suggests:
     flextable,
