@@ -242,7 +242,9 @@ set_labels <- function(suf, vars, select, competence, score_name = NULL,
     if (is.null(lbl)) next
 
     # Set score label
-    suf[[paste0(score_name, type)]] <-
+    var_name <- paste0(score_name, type)
+    if (grepl("_sc(5|6)", type)) var_name <- i # metap
+    suf[[var_name]] <-
       haven::labelled_spss(
         suf[[i]],
         label = lbl,

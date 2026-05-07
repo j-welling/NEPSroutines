@@ -563,7 +563,7 @@ pc_imputation <- function( resp, vars, select,
   if ( length(intersect(resp$ID_t, indicators$ID_t)) != nrow(resp) ) {
     stop( "The number of respondents 'resp' does not match the ",
           "number of respondents in 'indicators'. These ",
-          "data.frames should have generated automatically ",
+          "data.frames should have been generated automatically ",
           "using 'pc_scoring()' with 'impute = TRUE'. ",
           "Please contact the package developers." )
   }
@@ -684,6 +684,92 @@ pc_imputation <- function( resp, vars, select,
   }
 
   return( resp_imp )
+
+}
+
+
+
+#' Score highlighting items
+#'
+#' @param resp  data.frame; contains original item responses
+#' @param hl_solutions  list; contains character vector with subitems for each
+#' highlighting item with correct solutions, name of the vector is the name of the highlighting item (e.g.
+#' hl_solutions = list(hl1 = c("subitem1", "subitem2"), hl2 = c("subitem1", "subitem2"))),
+#' name of the vector should match the vector names in @hl_distractors
+#' @param hl_distractors  list; contains character vector with subitems for each
+#' highlighting item with distractors, name of the vector is the name of the highlighting item (e.g.
+#' hl_distractors = list(hl1 = c("subitem1", "subitem2"), hl2 = c("subitem1", "subitem2"))),
+#' name of the vector should match the vector names in @hl_solutions
+#' @param mvs  integer vector; contains user-defined missing values
+#' @param warn  logical; print warnings
+#'
+#' @return resp including unscored (raw) and scored items
+#' @export
+hl_scoring <- function(resp, hl_solutions, hl_distractors,
+                       mvs = NULL, warn = TRUE, verbose = TRUE) {
+  if (!is.list(hl_solutions)) {
+    stop("The argument 'hl_solutions' must be a list. Please check your input.")
+  }
+  if (!is.list(hl_distractors)) {
+    stop("The argument 'hl_distractors' must be a list. Please check your input.")
+  }
+  names_diff <- setdiff(names(hl_solutions), names(hl_distractors))
+  if (length(names_diff) != 0L) {
+    stop(paste0("The arguments 'hl_solutions' and 'hl_distractors' ",
+                "must include the same names for their elements. ",
+                "Please check your input. Problems found for ",
+                paste(names_diff, collapse = ", "), "."))
+  }
+  NEPSroutines:::check_numerics(resp, "resp", unlist(hl_solutions), dich = TRUE)
+  NEPSroutines:::check_numerics(resp, "resp", unlist(hl_distractors), dich = TRUE)
+  if (warn) {
+    for (hl_name in names(hl_solutions)) {
+      is_hl_named_correctly <- grepl("s(_[a-zA-Z0-9]+)*_c$", hl_name)
+      if (!is_hl_named_correctly) {
+        message(hl_name, ": Variable name should contain a subitem marker like 's', e.g. '[item]s_c', '[item]s_sc3g9_c'.\n")
+      }
+    }
+  }
+  if (is.null(mvs)) {
+    mvs <- c(-99:-1)
+    if (isTRUE(warn))
+      warning("No missing values provided. c(-99:-1) used as default.")
+  }
+
+  # for each highlighting item
+  for (item in names(hl_solutions)) {
+
+    # Sensitivity index A
+    rp <- rowSums(resp[, hl_solutions[[item]], drop = FALSE])
+    fp <- rowSums(resp[, hl_distractors[[item]], drop = FALSE])
+    fn <- length(hl_solutions[[item]]) - rp
+    rn <- length(hl_distractors[[item]]) - fp
+    rpr <- rp / (rp + fn)
+    fpr <- fp / (fp + rn)
+    hl_item <-
+      0.5 + sign(rpr - fpr) * ((rpr - fpr)^2 + abs(rpr - fpr)) /
+      (4 * pmax(rpr, fpr) - 4 * rpr * fpr)
+    hl_item <-
+      cut(hl_item, c(-1, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 2),
+          labels = FALSE, right = FALSE) - 1
+
+    # Set missing values
+    subitems <- c(hl_solutions[[item]], hl_distractors[[item]])
+    number_missing <- rowSums(resp[, subitems] < 0)
+    any_missing <- number_missing > 0
+    hl_item[any_missing] <- -55
+    for (mv in mvs) {
+      all_this_missing_type <-
+        (rowSums(resp[, subitems] == mv) == number_missing) & any_missing
+      hl_item[all_this_missing_type] <- mv
+    }
+
+    # Set item score
+    resp[[item]] <- hl_item
+
+  }
+
+  return(resp)
 
 }
 

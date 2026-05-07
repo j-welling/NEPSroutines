@@ -877,11 +877,11 @@ mvi_plots <- function(
         add_missings_per_stage = add_missings_per_stage,
         digits = digits
       )
-      y <- mv_i[[i]]
+      y <- mv_i_pp[[i]]
       ylim <- ceiling(max(y, na.rm = TRUE)/10)*10
 
       gg <- ggplot2::ggplot(
-              data = mv_i,
+              data = mv_i_pp,
               mapping = ggplot2::aes(x = position, y = y, fill = color)
             ) +
             ggplot2::scale_fill_manual(values = color) +
