@@ -1,7 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(Rscript -e \"devtools::*\")",
+      "Bash(Rscript -e \"devtools:*\")",
       "Bash(git status*)",
       "Bash(git diff*)",
       "Bash(git log*)",
