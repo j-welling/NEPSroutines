@@ -450,7 +450,7 @@ pc_missing_subitems <- function( resp, mvs, poly_items,
   message("\nOverview of the absolute and relative frequencies of imputed missing values " ,
           "for the polytomous items in the dataset: ")
   print(summary_items_impMV)
-  desc_items_impMV <- psych::describe(summary_items_impMV["RelFreq_of_imputed_MV"])[c(2:5,8:10)]
+  desc_items_impMV <- describe(summary_items_impMV["RelFreq_of_imputed_MV"])
   print(desc_items_impMV, digits = 3)
 
   Freq <- table(rowSums(indicators[grep("_impMV", names(indicators), value = TRUE)], na.rm = TRUE))
@@ -841,9 +841,9 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
 
   # Which items have been collapsed?
   colnames(collapsed_items) <- c("Item", "Scoring")
-  item_names <- tibble::tibble(original_item = collapsed_items[, 1],
-                               scoring = collapsed_items[, 2],
-                               collapsed_item = paste0(collapsed_items[, 1], "_collapsed"))
+  item_names <- data.frame(original_item = collapsed_items[, 1],
+                           scoring = collapsed_items[, 2],
+                           collapsed_item = paste0(collapsed_items[, 1], "_collapsed"))
 
   # Print results
   if (!is.null(problematic_items)) {
@@ -861,7 +861,7 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
 
   if (!is.null(collapsed_items)) {
     message("\nThe following items have been collapsed:\n")
-    print(item_names, n=nrow(item_names))
+    print(format(item_names, justify = "left"), right = F)
   } else {
     message("\nNo items have been collapsed.")
   }
@@ -988,7 +988,6 @@ min_val <- function(resp, vars, select, min.val = NULL, invalid = NULL) {
 #'
 #' @return   data.frame as input, with one or more extra variable(s) containing
 #' the (relative) position of chosen items.
-#' @importFrom rlang .data
 #' @export
 pos_new <- function(vars, select, position) {
 
@@ -1001,7 +1000,7 @@ pos_new <- function(vars, select, position) {
         vars_ <- vars[vars[[select]], ]
         pos <- data.frame(item = vars_[['item']],
                           position = vars_[[position]])
-        pos <- dplyr::arrange(pos, .data$position)
+        pos <- dplyr::arrange(pos, position)
         pos[[paste0("position_", select)]] <- seq(1, nrow(pos))
         vars <- merge(vars, pos[ , c('item', paste0("position_", select))],
                       by = 'item', all = TRUE)
@@ -1012,7 +1011,7 @@ pos_new <- function(vars, select, position) {
             vars_ <- vars[vars[[select]] & !is.na(vars[[position[g]]]), ]
             pos <- data.frame(item = vars_[['item']],
                               position = vars_[[position[g]]])
-            pos <- dplyr::arrange(pos, .data$position)
+            pos <- dplyr::arrange(pos, position)
             pos[[paste0("position_", g, "_", select)]] <- seq(1, nrow(pos))
             vars <- merge(vars, pos[ , c('item', paste0("position_", g, "_", select))],
                           by = 'item', all = TRUE)

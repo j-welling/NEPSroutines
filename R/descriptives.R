@@ -41,18 +41,20 @@ n_valid <- function(resp, valid = NULL) {
 #'
 #' @export
 
-desc_con <- function(resp, desc, valid = NULL, digits = 3,
-                     print = TRUE, return = FALSE) {
+desc_con <- function(
+    resp,
+    desc,
+    valid = NULL,
+    digits = 3,
+    print = TRUE,
+    return = FALSE
+  ) {
 
     check_variables(resp, "resp", c(desc, valid))
 
     resp <- only_valid(resp, valid = valid)
 
-    stats <- data.frame(sapply(resp[ , desc, drop = FALSE], function(x) {
-             d <- data.frame(psych::describe(x))
-             d[, -c(1:2)] <- format(round(d[, -c(1:2)], digits), nsmall = digits)
-             d
-             }))
+    stats <- describe(resp[ , desc, drop = FALSE], digits = digits)
 
     if (print) {
         message("\nSummary statistics of the continuous variables:\n")

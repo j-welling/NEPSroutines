@@ -529,7 +529,7 @@ mvp_plots <- function(
                   ) +
                   ggplot2::scale_fill_manual(values = color) +
                   ggplot2::labs(
-                    title = paste0(Hmisc::capitalize(labels_mvs[i]), " by person"),
+                    title = paste0(capitalize(labels_mvs[i]), " by person"),
                     x = paste0("Number of ", labels_mvs[i]),
                     y = "Percentage"
                   ) +
@@ -549,7 +549,7 @@ mvp_plots <- function(
                   ) +
                   ggplot2::labs(
                     title = paste0(
-                      Hmisc::capitalize(labels_mvs[i]),
+                      capitalize(labels_mvs[i]),
                       " by person and ",
                       name_grouping
                     ),
@@ -557,7 +557,7 @@ mvp_plots <- function(
                   ) +
                   if (is.null(labels_legend)) {
                     ggplot2::scale_fill_manual(
-                      name = Hmisc::capitalize(name_grouping),
+                      name = capitalize(name_grouping),
                       values = color
                     )
                   } else {
@@ -566,12 +566,12 @@ mvp_plots <- function(
                                 "correspond to number of groups. ",
                                 "Group labels are used instead.")
                         ggplot2::scale_fill_manual(
-                          name = Hmisc::capitalize(name_grouping),
+                          name = capitalize(name_grouping),
                           values = color
                         )
                     } else {
                         ggplot2::scale_fill_manual(
-                          name = Hmisc::capitalize(name_grouping),
+                          name = capitalize(name_grouping),
                           labels = labels_legend,
                           values = color
                         )
@@ -627,9 +627,9 @@ create_wide_df_mvp <- function(mv_p, groups, i, end) {
     mv[[g]][mv$number %in% names(mv_p[[g]][[i]])] <- mv_p[[g]][[i]]
   }
 
-  mv_wide <- tidyr::gather(
-    mv, key = "group", value = "MV", tidyselect::all_of(groups)
-  )
+  mv_wide <- do.call(rbind, lapply(groups, function(g) {
+    data.frame(number = mv$number, group = g, MV = mv[[g]])
+  }))
 
   mv_wide$group <- factor(mv_wide$group, levels = groups)
 
@@ -699,9 +699,7 @@ mvp_summary <- function(results, digits = 3) {
     })
 
     # Create table with descriptive statistics for all missing value types
-    out$summary <- sapply(results, function(x) {
-        round(psych::describe(x), digits)[c(3:5, 8:9)]
-    })
+    out$summary <- describe(results, digits = digits)[,-1] |> t()
 
     return(out)
 }

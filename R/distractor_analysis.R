@@ -267,8 +267,14 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
 #'           descriptives: table with summary of results.
 #'
 #' @export
-dis_summary <- function(distractors, digits = 3, save = TRUE, name_group = NULL,
-                        path = 'Tables', overwrite = FALSE) {
+dis_summary <- function(
+    distractors,
+    digits = 3,
+    save = TRUE,
+    name_group = NULL,
+    path = 'Tables',
+    overwrite = FALSE
+  ) {
     # data.frames containing information for distractors and correct responses,
     # respectively
 
@@ -286,8 +292,7 @@ dis_summary <- function(distractors, digits = 3, save = TRUE, name_group = NULL,
     desc <- describe(
       cbind(correct = rc[, 3], distract = rd[, 3]),
       digits = digits
-    )
-    desc <- t(desc[, c("mean", "sd", "median", "min", "max")])
+    )[,-1] |> t()
 
     # Create list with results
     results <- list(correct = rc, distractor = rd, descriptives = desc)
