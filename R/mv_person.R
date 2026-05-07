@@ -89,17 +89,17 @@ mv_person <- function(
   ) {
 
     # Test data
-    NEPSroutines:::check_logicals(resp, "resp", valid, warn = warn)
-    NEPSroutines:::check_logicals(
-      NEPSroutines:::only_valid(resp, valid = valid),
+    check_logicals(resp, "resp", valid, warn = warn)
+    check_logicals(
+      only_valid(resp, valid = valid),
       "resp",
       grouping,
       warn = warn
     )
-    NEPSroutines:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
-    NEPSroutines:::check_items(vars$item[vars[[select]]])
-    NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[select]]])
-    if (warn) NEPSroutines:::is_null_mvs_valid(valid = valid)
+    check_logicals(vars, "vars", c(select, grouping), warn = warn)
+    check_items(vars$item[vars[[select]]])
+    check_numerics(resp, "resp", vars$item[vars[[select]]])
+    if (warn) is_null_mvs_valid(valid = valid)
 
     # Missing by design
     if (!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
@@ -108,7 +108,7 @@ mv_person <- function(
     mv_person <- list()
 
     # Conduct analysis
-    mv_person$mv_p <- NEPSroutines:::mvp_analysis(
+    mv_person$mv_p <- mvp_analysis(
       resp = resp,
       vars = vars,
       select = select,
@@ -125,7 +125,7 @@ mv_person <- function(
 
     # Create plots
     if (plots) {
-        NEPSroutines:::mvp_plots(
+        mvp_plots(
           mv_p = mv_person$mv_p,
           vars = vars,
           select = select,
@@ -147,7 +147,7 @@ mv_person <- function(
 
     # Create table
     if (save) {
-        mv_person$summary <- NEPSroutines:::mvp_table(
+        mv_person$summary <- mvp_table(
           mv_p = mv_person$mv_p,
           grouping = grouping,
           save = save,
@@ -158,11 +158,11 @@ mv_person <- function(
           missing_by_design = missing_by_design
         )
 
-        name <- NEPSroutines:::create_name("mv_person", name_group, ".rds")
-        NEPSroutines:::save_results(mv_person, filename = name, path = path_results)
+        name <- create_name("mv_person", name_group, ".rds")
+        save_results(mv_person, filename = name, path = path_results)
         # dass hier kein save_table steht ist Absicht
     } else {
-        mv_person$summary <- NEPSroutines:::mvp_table(
+        mv_person$summary <- mvp_table(
           mv_p = mv_person$mv_p,
           grouping = grouping,
           mvs = mvs,
@@ -172,7 +172,7 @@ mv_person <- function(
     }
 
     # Print results
-    if (print) NEPSroutines:::print_mvp_results(mv_person$mv_p)
+    if (print) print_mvp_results(mv_person$mv_p)
 
     # Return results
     if (return) return(mv_person)
@@ -234,11 +234,11 @@ mvp_analysis <- function(
 
     # Test data
     if (test) {
-        NEPSroutines:::check_logicals(vars, "vars", c(grouping, select), warn = warn)
-        NEPSroutines:::check_logicals(resp, "resp", c(grouping, valid), warn = warn)
-        NEPSroutines:::check_items(vars$item[vars[[select]]])
-        NEPSroutines:::check_numerics(resp, "resp", vars$item[vars[[select]]])
-        if (warn) NEPSroutines:::is_null_mvs_valid(valid = valid)
+        check_logicals(vars, "vars", c(grouping, select), warn = warn)
+        check_logicals(resp, "resp", c(grouping, valid), warn = warn)
+        check_items(vars$item[vars[[select]]])
+        check_numerics(resp, "resp", vars$item[vars[[select]]])
+        if (warn) is_null_mvs_valid(valid = valid)
     }
 
     # NAs are not acknowledged in mvs-argument
@@ -252,8 +252,8 @@ mvp_analysis <- function(
     mv_p <- list()
 
     # Prepare data
-    resp <- NEPSroutines:::only_valid(resp, valid = valid)
-    resp_c <- NEPSroutines:::prepare_resp(
+    resp <- only_valid(resp, valid = valid)
+    resp_c <- prepare_resp(
       resp,
       vars = vars,
       select = select,
@@ -266,13 +266,13 @@ mvp_analysis <- function(
 
         # Determine percentage of missing values for each missing type
         if (!is.null(stages)) reached_stage <- resp[,names(stages)]
-        results <- NEPSroutines:::mvp_calc(
+        results <- mvp_calc(
           responses = resp_c,
           stages = stages,
           reached_stage = reached_stage,
           mvs = mvs
         )
-        mv_p <- NEPSroutines:::mvp_summary(results, digits = digits)
+        mv_p <- mvp_summary(results, digits = digits)
 
     } else {
 
@@ -285,7 +285,7 @@ mvp_analysis <- function(
             if (!is.null(stages)) reached_stage <- resp[resp[[g]], names(stages)]
 
             # Create dataframe with missing values per person and missing value type
-            results[[g]] <- NEPSroutines:::mvp_calc(
+            results[[g]] <- mvp_calc(
               responses = resp_g,
               stages = stages,
               reached_stage = reached_stage,
@@ -294,18 +294,18 @@ mvp_analysis <- function(
             results$all <- rbind(results$all, results[[g]])
 
             # Calculate summaries
-            mv_p[[g]]<- NEPSroutines:::mvp_summary(results[[g]], digits = digits)
+            mv_p[[g]]<- mvp_summary(results[[g]], digits = digits)
         }
 
         # Calculate summaries for whole sample
-        mv_p$all<- NEPSroutines:::mvp_summary(results$all, digits = digits)
+        mv_p$all<- mvp_summary(results$all, digits = digits)
 
     }
 
     # Save results
     if (save) {
-        name <- NEPSroutines:::create_name("mv_person", name_group, ".rds")
-        NEPSroutines:::save_results(mv_p, filename = name, path = path)
+        name <- create_name("mv_person", name_group, ".rds")
+        save_results(mv_p, filename = name, path = path)
     }
 
     # Return results
@@ -356,25 +356,25 @@ mvp_table <- function(
   if(!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
 
   # Test data
-    if (test) NEPSroutines:::test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
+    if (test) test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
 
     # Create table
     if (is.null(grouping)) {
-        results <- NEPSroutines:::write_mvp_table(mv_p)
+        results <- write_mvp_table(mv_p)
     } else {
         results <- list()
-        for (g in names(mv_p)) results[[g]] <- NEPSroutines:::write_mvp_table(mv_p[[g]])
+        for (g in names(mv_p)) results[[g]] <- write_mvp_table(mv_p[[g]])
     }
 
     # Save table
     if (save) {
 
         # Create directory for table
-        NEPSroutines:::check_folder(path)
+        check_folder(path)
 
         # Write table as Excel sheet
         if (is.null(grouping)) {
-            name <- NEPSroutines:::create_name(
+            name <- create_name(
                 paste0(path, "/mv_person"),
                 name_group,
                 ".xlsx"
@@ -388,7 +388,7 @@ mvp_table <- function(
             )
         } else {
             for (g in names(mv_p)) {
-                name <- NEPSroutines:::create_name(
+                name <- create_name(
                     paste0(path, "/mv_person_", g),
                     name_group,
                     ".xlsx"
@@ -476,21 +476,21 @@ mvp_plots <- function(
 
     # Test data
     if (test) {
-        NEPSroutines:::test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
-        NEPSroutines:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
-        NEPSroutines:::check_items(vars$item[vars[[select]]])
+        test_mvp_data(mv_p, mvs = mvs, grouping = grouping)
+        check_logicals(vars, "vars", c(select, grouping), warn = warn)
+        check_items(vars$item[vars[[select]]])
     }
 
     # Prepare data
-    mv_all <- NEPSroutines:::create_ifelse(is.null(grouping), mv_p, mv_p$all)
-    k <- NEPSroutines:::create_ifelse(
+    mv_all <- create_ifelse(is.null(grouping), mv_p, mv_p$all)
+    k <- create_ifelse(
       is.null(grouping),
       sum(vars[[select]]),
       max(sapply(grouping, function(x) sum(vars[[select]] & vars[[x]])), na.rm = TRUE)
     )
 
     if(!is.null(grouping))
-        groups <- NEPSroutines:::create_ifelse(show_all, c(grouping, 'all'), grouping)
+        groups <- create_ifelse(show_all, c(grouping, 'all'), grouping)
 
     # Check color argument
     grps <- create_ifelse(is.null(grouping), 1, length(groups))
@@ -510,8 +510,8 @@ mvp_plots <- function(
     }
 
     # Create directory for plots
-    path_ <- NEPSroutines:::create_name(path, name_group, sep = "/")
-    NEPSroutines:::check_folder(path_)
+    path_ <- create_name(path, name_group, sep = "/")
+    check_folder(path_)
 
     # for each missing type
     for (i in names(mv_all)[-length(mv_all)]) {
@@ -539,7 +539,7 @@ mvp_plots <- function(
         } else {
 
             end <- max(as.double(names(mv_p$all[[i]])))
-            mv_wide <- NEPSroutines:::create_wide_df_mvp(mv_p, groups, i, end)
+            mv_wide <- create_wide_df_mvp(mv_p, groups, i, end)
             ylim <- ceiling(max(mv_wide$MV, na.rm = TRUE)/10)*10
 
             # create plot
@@ -603,7 +603,7 @@ mvp_plots <- function(
         )
 
         # Print progress
-        if (verbose) cat("Missing plot", i, "created.\n")
+        if (verbose) message("Missing plot ", i, " created.")
     }
 }
 

@@ -14,8 +14,8 @@ only_valid <- function(resp, valid = NULL, warn = TRUE) {
       check_logicals(resp, "resp", valid, warn = warn)
       resp <- resp[resp[[valid]], ]
   } else if (warn) {
-      warning("No variable with valid cases provided. ",
-              "All cases are used for analysis.\n")
+      message("No variable with valid cases provided. ",
+              "All cases are used for analysis.")
   }
 
   return(resp)
@@ -46,8 +46,8 @@ convert_mv <- function(resp, vars, select = NULL, mvs = NULL, warn = TRUE) {
     mvs <- -999:-1
 
     if (warn) {
-      warning("No user defined missing values provided for item responses. ",
-              "Default of '-999 to -1' is used.\n")
+      message("No user-defined missing values provided for item responses. ",
+              "Default of '-999 to -1' is used.")
     }
   }
 
@@ -114,13 +114,13 @@ prepare_resp <- function(
             stop("To create a data frame (resp) with only the indicated items, ",
                  "please also provide vars.")
         } else {
-            NEPSroutines:::check_logicals(vars, "vars", select, warn = warn)
+            check_logicals(vars, "vars", select, warn = warn)
             items <- vars$item[vars[[select]]]
-            NEPSroutines:::check_variables(resp, "resp", variables = items)
+            check_variables(resp, "resp", variables = items)
             resp <- resp[ , items]
         }
     } else if (warn) {
-        warning("No variable provided indicating the items to keep. ",
+        message("No variable provided indicating the items to keep. ",
                 "All items are kept.")
     }
 
@@ -146,13 +146,13 @@ prepare_resp <- function(
 
 is_null_mvs_valid <- function(mvs = NA, valid = NA) {
   if (is.null(mvs)) {
-    warning("No user defined missing values provided. ",
-            "Default of '-999 to -1' is used.\n")
+    message("No user-defined missing values provided for item responses. ",
+            "Default of '-999 to -1' is used.")
   }
 
   if (is.null(valid)) {
-    warning("No variable with valid cases provided. ",
-            "All cases are used for analysis.\n")
+    message("No variable with valid cases provided. ",
+            "All cases are used for analysis.")
   }
   return(invisible())
 }
@@ -227,7 +227,7 @@ save_results <- function(results, filename, path) {
 check_folder <- function(path) {
     if (!file.exists(path)) {
         dir.create(path, recursive = TRUE)
-        warning("The location ", path, " did not exist. New folder created.\n")
+        message("The location ", path, " did not exist. New folder created.")
     }
   return(invisible())
 }
@@ -251,6 +251,49 @@ check_pid <- function(pid) {
 }
 
 
+#' Format a list of names for error messages
+#'
+#' Quotes each name and collapses with commas. If the list is longer than
+#' \code{max_show}, only the first \code{max_show} items are shown and the
+#' remainder is summarised as "and N more".
+#'
+#' @param x character vector of names
+#' @param max_show integer; maximum number of names to display
+#' @returns A single string like "'a', 'b' and 3 more"
+#' @noRd
+fmt_names <- function(x, max_show = 5L) {
+  if (length(x) == 0L) return("<none>")
+  if (length(x) > max_show) {
+    shown <- paste0("'", x[seq_len(max_show)], "'", collapse = ", ")
+    paste0(shown, " and ", length(x) - max_show, " more")
+  } else {
+    paste0("'", x, "'", collapse = ", ")
+  }
+}
+
+#' Build a validation error message with singular/plural grammar
+#'
+#' @param label string; noun to use (e.g. "Variable", "Item")
+#' @param bad character vector; offending names
+#' @param name_df string; data frame name shown in the message
+#' @param verb_singular string; verb for a single item (e.g. "is")
+#' @param verb_plural string; verb for multiple items (e.g. "are")
+#' @param predicate string; the rest of the sentence (e.g. "not numeric")
+#' @returns A single formatted string
+#' @noRd
+validation_msg <- function(label, bad, name_df, verb_singular, verb_plural,
+                           predicate) {
+  sprintf(
+    "%s%s %s in '%s' %s %s",
+    label,
+    if (length(bad) > 1) "s" else "",
+    fmt_names(bad),
+    name_df,
+    if (length(bad) > 1) verb_plural else verb_singular,
+    predicate
+  )
+}
+
 #' Check item names for duplicates
 #'
 #' @param items  character vector with item names
@@ -259,11 +302,14 @@ check_pid <- function(pid) {
 
 check_items <- function(items) {
     if (length(items) != length(unique(items))) {
-        stop("There are duplicates in the item names.")
+        dupes <- unique(items[duplicated(items)])
+        stop("Duplicate item names found in 'vars$item': ",
+             fmt_names(dupes), ".")
     }
 
     if (any(is.na(items))) {
-        stop("There are missing values in the item names.")
+        stop("Missing values (NA) found in 'vars$item'. ",
+             "Check that all selected items have a name in vars.")
     }
   return(invisible())
 }
@@ -278,15 +324,22 @@ check_items <- function(items) {
 #' @returns NULL invisibly
 #' @export
 
-check_variables <- function(df, name_df, variables) {
+check_variables <- function(df, name_df = "<unknown>", variables) {
+
+  if (is.null(name_df)) name_df <- "<unknown>"
 
   if (!is.null(variables)) {
 
     not_included <- !variables %in% names(df)
 
-    if (sum(not_included) > 0) {
-      stop(paste0("Data.frame ", name_df, " does not include any variable with the",
-                  " name '", variables[not_included], "'. Please check again.\n"))
+    if (any(not_included)) {
+      missing <- variables[not_included]
+      stop(sprintf(
+        "Variable%s %s not found in '%s'. ",
+        if (length(missing) > 1) "s" else "",
+        fmt_names(missing),
+        name_df
+      ), "Check that the column name is spelled correctly.")
     }
   }
   return(invisible())
@@ -303,7 +356,9 @@ check_variables <- function(df, name_df, variables) {
 #' @returns NULL invisibly
 #' @export
 
-check_logicals <- function(df, name_df, logicals, warn = TRUE) {
+check_logicals <- function(df, name_df = "<unknown>", logicals, warn = TRUE) {
+
+  if (is.null(name_df)) name_df <- "<unknown>"
 
   if (!is.null(logicals)) {
 
@@ -312,17 +367,24 @@ check_logicals <- function(df, name_df, logicals, warn = TRUE) {
 
     no_logical <- sapply(df[ , logicals, drop = FALSE], function(x) !is.logical(x))
 
-    if (sum(no_logical) > 0) {
-      stop(paste0("Variable '", logicals[no_logical], "' in data.frame ",
-                  name_df, " is no logical. Please check again.\n"))
+    if (any(no_logical)) {
+      bad <- logicals[no_logical]
+      stop(
+        validation_msg("Variable", bad, name_df, "is", "are",
+                       "not logical (TRUE/FALSE)."),
+        " Convert to logical before passing to the function."
+      )
     }
 
     other_value <- sapply(df[ , logicals, drop = FALSE], function(x) any(!x %in% c(TRUE, FALSE)))
 
-    if (warn & (sum(other_value) > 0)) {
-      warning(paste0("Logical variable '", logicals[other_value], "' in ",
-                     "data.frame ", name_df, " contains other values than TRUE or ",
-                     "FALSE (e.g., NA). Please check again.\n"))
+    if (warn & any(other_value)) {
+      bad <- logicals[other_value]
+      warning(
+        validation_msg("Logical variable", bad, name_df, "contains", "contain",
+                       "values other than TRUE/FALSE (e.g. NA)."),
+        " NA rows will be excluded from the analysis."
+      )
     }
   }
 
@@ -341,9 +403,10 @@ check_logicals <- function(df, name_df, logicals, warn = TRUE) {
 #' @returns NULL invisibly
 #' @export
 
-check_numerics <- function(df, name_df, numerics = NULL, check_invalid = FALSE,
-                           dich = FALSE) {
+check_numerics <- function(df, name_df = "<unknown>", numerics = NULL,
+                           check_invalid = FALSE, dich = FALSE) {
 
+  if (is.null(name_df)) name_df <- "<unknown>"
   if (is.null(numerics)) numerics <- names(df)
 
   # Check whether variables are included in dataframe
@@ -351,9 +414,12 @@ check_numerics <- function(df, name_df, numerics = NULL, check_invalid = FALSE,
 
   no_numeric <- sapply(df[ , numerics, drop = FALSE], function(x) !is.numeric(x))
 
-  if (sum(no_numeric) > 0) {
-    stop(paste0("Variable '", numerics[no_numeric], "' in data.frame ", name_df,
-                " is no numeric variable. Please check again.\n"))
+  if (any(no_numeric)) {
+    bad <- numerics[no_numeric]
+    stop(
+      validation_msg("Variable", bad, name_df, "is", "are", "not numeric."),
+      " Convert the column to numeric before passing to the function."
+    )
   }
 
   # Check whether variables contain invalid values
@@ -375,18 +441,20 @@ check_numerics <- function(df, name_df, numerics = NULL, check_invalid = FALSE,
 #' @returns NULL invisibly
 #' @noRd
 
-check_invalid_values <- function(df, name_df, items = NULL) {
+check_invalid_values <- function(df, name_df = "<unknown>", items = NULL) {
 
+  if (is.null(name_df)) name_df <- "<unknown>"
   if (is.null(items)) items <- names(df)
 
   df_items <- df[, items, drop = FALSE]
-  invalid_values <- unique(unlist(df_items[df_items < 0 & !is.na(df_items)]))
+  invalid_values <- sort(unique(unlist(df_items[df_items < 0 & !is.na(df_items)])))
 
   if (length(invalid_values) > 0) {
-    stop(paste0("Data.frame ", name_df, " contains invalid values (< 0) in ",
-                "specified items: ", paste(sort(invalid_values), collapse = ", "),
-                ". Please check again and be sure to include all ",
-                "user defined missing values in the vector mvs."))
+    stop(sprintf(
+      "Data frame '%s' contains invalid values (< 0): %s. ",
+      name_df,
+      paste(invalid_values, collapse = ", ")
+    ), "Include all user-defined missing values via the `mvs` argument.")
   }
   return(invisible())
 }
@@ -401,17 +469,75 @@ check_invalid_values <- function(df, name_df, items = NULL) {
 #' @returns NULL invisibly
 #' @noRd
 
-check_dich <- function(df, name_df, dich_items = NULL) {
+check_dich <- function(df, name_df = "<unknown>", dich_items = NULL) {
 
+  if (is.null(name_df)) name_df <- "<unknown>"
   if (is.null(dich_items)) dich_items <- names(df)
 
-  no_dich <- sapply(df[ , dich_items, drop = FALSE], function(x) {
-    max(x, na.rm = TRUE) > 1})
+  item_max <- sapply(df[, dich_items, drop = FALSE], function(x) {
+    vals <- x[!is.na(x)]
+    if (length(vals) == 0L) return(NA_real_)
+    max(vals)
+  })
 
-  if (sum(no_dich) > 0) {
-    stop(paste0("Variable '", dich_items[no_dich], "' in data.frame ", name_df,
-                " contains values greater than 1, although specified as",
-                " dichotomous. Please check again.\n"))
+  all_na <- dich_items[is.na(item_max)]
+  if (length(all_na) > 0) {
+    stop(sprintf(
+      "Item%s %s in '%s' %s entirely NA. Cannot verify dichotomous coding.",
+      if (length(all_na) > 1) "s" else "",
+      fmt_names(all_na),
+      name_df,
+      if (length(all_na) > 1) "are" else "is"
+    ))
+  }
+
+  no_dich <- dich_items[!is.na(item_max) & item_max > 1]
+  if (length(no_dich) > 0) {
+    max_label <- paste(paste0("'", no_dich, "'=", item_max[no_dich]),
+                       collapse = ", ")
+    stop(
+      validation_msg("Item", no_dich, name_df, "contains", "contain",
+                     paste0("values > 1 (max: ", max_label,
+                            "). Dichotomous responses (0/1) are required.")),
+      " Use a polytomous model (PCM2/GPCM) for these items, or recode to 0/1."
+    )
+  }
+  return(invisible())
+}
+
+
+#' Check data.frame for items with maximum score of 0
+#'
+#' Items where all observed values (after missing-value conversion) are 0 or NA
+#' cause TAM to crash with an uninformative internal error.  This function
+#' detects such items early and raises a descriptive error.
+#'
+#' @param df  data.frame; contains item responses (MVs already converted to NA)
+#' @param name_df  string; name of df shown in the error message
+#' @param name_group  string or NULL; group name included in the error message
+#'   when running a multi-group analysis (e.g. from \code{grouped_irt_analysis})
+#' @returns NULL invisibly
+#' @noRd
+
+check_max_zero <- function(df, name_df, name_group = NULL) {
+
+  max_score <- sapply(df, function(x) {
+    vals <- x[!is.na(x)]
+    if (length(vals) == 0L) return(-Inf)
+    max(vals)
+  })
+  zero_items <- names(max_score[max_score <= 0])
+
+  if (length(zero_items) > 0) {
+    group_info <- if (!is.null(name_group)) paste0(" (group '", name_group, "')") else ""
+    stop(paste0(
+      "The following items in ", name_df, group_info, " have a maximum observed score of 0 ",
+      "(all responses are 0 or missing after missing-value conversion). ",
+      "TAM cannot fit a model to such items. ",
+      "Please exclude them from the analysis or verify the data and missing-value ",
+      "specification (mvs):\n  ",
+      paste(zero_items, collapse = "\n  ")
+    ))
   }
   return(invisible())
 }
@@ -452,19 +578,13 @@ meht <- function(stat, df1, df2, eta2 = NULL, delta = .40,
     pnil <- pf(stat, df1, df2, lower.tail = FALSE) # p for nil hypothesis test
 
     if (verbose) {
-        cat("\nNil hypothesis test:\n")
-        cat("   Critical F-value: F(", df1, ",", df2, ") = ",
-            round(Fnil, digits), "\n",
-            sep = ""
-        )
-        cat("   p for F = ", stat, ": p = ", round(pnil, digits), "\n", sep = "")
-
-        cat("\nMinimum effect hypothesis test:\n")
-        cat("   Critical F-value: F(", df1, ", ", df2, ", ", round(ncp, digits), ") = ",
-            round(Fmin, digits), "\n",
-            sep = ""
-        )
-        cat("   p for F = ", stat, ": p = ", round(pmin, digits), "\n\n", sep = "")
+        message("\nNil hypothesis test:")
+        message("   Critical F-value: F(", df1, ",", df2, ") = ", round(Fnil, digits))
+        message("   p for F = ", stat, ": p = ", round(pnil, digits))
+        message("\nMinimum effect hypothesis test:")
+        message("   Critical F-value: F(", df1, ", ", df2, ", ", round(ncp, digits), ") = ",
+                round(Fmin, digits))
+        message("   p for F = ", stat, ": p = ", round(pmin, digits))
     }
 
     out <- list(
@@ -645,25 +765,24 @@ order_xsi_fixed <- function(
 
 
 #' Create names for output as used in suf (this concerns the variables with collapsed categories)
-#' @param vars_name  string; defines name of dataset vars
-#' @param resp_name string; defines name of dataset resp
+#' @param vars_name  character vector of item names (possibly with '_collapsed'
+#'   suffixes), or a data.frame with an 'item' column. If NULL, returns NULL.
 #' @noRd
 create_suf_names <- function(vars_name = NULL) {
 
-  if (!is.null(vars_name)) {
+  if (is.null(vars_name)) return(NULL)
 
-    if(is.data.frame(vars_name)) {
-      for (item in seq_along(vars_name$item)) {
-        vars_name$item[[item]] <- gsub("_collapsed", "",vars_name$item[[item]])
-      }
-      return(vars_name$item)
-
-    } else {
-      for (item in seq_along(vars_name)) {
-        vars_name[[item]] <- gsub("_collapsed", "",vars_name[[item]])
-      }
-      return(vars_name)
+  if (is.data.frame(vars_name)) {
+    for (item in seq_along(vars_name$item)) {
+      vars_name$item[[item]] <- gsub("_collapsed", "",vars_name$item[[item]])
     }
+    return(vars_name$item)
+
+  } else {
+    for (item in seq_along(vars_name)) {
+      vars_name[[item]] <- gsub("_collapsed", "",vars_name[[item]])
+    }
+    return(vars_name)
   }
 }
 

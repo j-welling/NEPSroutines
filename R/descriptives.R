@@ -10,7 +10,7 @@
 
 n_valid <- function(resp, valid = NULL) {
 
-    NEPSroutines:::check_logicals(resp, "resp", valid, warn = TRUE)
+    check_logicals(resp, "resp", valid, warn = TRUE)
 
     if (!is.null(valid)) {
         n_inval <- sum(!resp[[valid]])
@@ -18,7 +18,7 @@ n_valid <- function(resp, valid = NULL) {
     } else {
         n_inval <- 0
         n_val <- nrow(resp)
-        warn("No variable to identify (in)valid cases provided. Thus, all cases are counted as valid.")
+        message("No variable to identify (in)valid cases provided. Thus, all cases are counted as valid.")
     }
 
     message("There are ", n_val, " valid cases and ", n_inval, " invalid cases ",
@@ -50,9 +50,9 @@ desc_con <- function(
     return = FALSE
   ) {
 
-    NEPSroutines:::check_variables(resp, "resp", c(desc, valid))
+    check_variables(resp, "resp", c(desc, valid))
 
-    resp <- NEPSroutines:::only_valid(resp, valid = valid)
+    resp <- only_valid(resp, valid = valid)
 
     stats <- describe(resp[ , desc, drop = FALSE], digits = digits)
 
@@ -84,18 +84,18 @@ desc_con <- function(
 desc_nom <- function(resp, desc, valid = NULL, digits = 2,
                      print = TRUE, return = FALSE) {
 
-    NEPSroutines:::check_variables(resp, "resp", c(desc, valid))
+    check_variables(resp, "resp", c(desc, valid))
 
-    resp <- NEPSroutines:::only_valid(resp, valid = valid)
+    resp <- only_valid(resp, valid = valid)
 
     descriptives <- list()
-    descriptives$frequency_abs <- NEPSroutines:::desc_abs(
+    descriptives$frequency_abs <- desc_abs(
         resp,
         desc = desc,
         valid = valid,
         warn = FALSE
     )
-    descriptives$frequency_perc_NA <- NEPSroutines:::desc_perc(
+    descriptives$frequency_perc_NA <- desc_perc(
         resp,
         desc = desc,
         valid = valid,
@@ -103,7 +103,7 @@ desc_nom <- function(resp, desc, valid = NULL, digits = 2,
         useNA = 'always',
         digits = digits
     )
-    descriptives$frequency_perc_noNA <- NEPSroutines:::desc_perc(
+    descriptives$frequency_perc_noNA <- desc_perc(
         resp,
         desc = desc,
         valid = valid,
@@ -142,9 +142,9 @@ desc_nom <- function(resp, desc, valid = NULL, digits = 2,
 
 desc_abs <- function(resp, desc, valid = NULL, warn = TRUE) {
 
-    NEPSroutines:::check_variables(resp, "resp", c(desc, valid))
+    check_variables(resp, "resp", c(desc, valid))
 
-    resp <- NEPSroutines:::only_valid(resp, valid = valid, warn = warn)
+    resp <- only_valid(resp, valid = valid, warn = warn)
 
     sapply(resp[ , desc, drop = FALSE], function(x) {table(x, useNA = "always")})
 }
@@ -169,9 +169,9 @@ desc_abs <- function(resp, desc, valid = NULL, warn = TRUE) {
 desc_perc <- function(resp, desc, valid = NULL, warn = TRUE, useNA = 'always',
                       digits = 2) {
 
-    NEPSroutines:::check_variables(resp, "resp", c(desc, valid))
+    check_variables(resp, "resp", c(desc, valid))
 
-    resp <- NEPSroutines:::only_valid(resp, valid = valid, warn = warn)
+    resp <- only_valid(resp, valid = valid, warn = warn)
 
     sapply(resp[ , desc, drop = FALSE], function(x) {
       d <- round(prop.table(table(x, useNA = useNA))*100, digits)
@@ -189,7 +189,7 @@ desc_perc <- function(resp, desc, valid = NULL, warn = TRUE, useNA = 'always',
 
 show_attributes <- function(resp, desc) {
 
-    NEPSroutines:::check_variables(resp, "resp", desc)
+    check_variables(resp, "resp", desc)
 
     for (var in desc) {
         message("\nThe attributes for variable ", var, " are:\n")
@@ -223,7 +223,7 @@ sample_by_group <- function(
   ) {
 
     # Check variable
-    NEPSroutines:::check_variables(resp, "resp", grouping_variable)
+    check_variables(resp, "resp", grouping_variable)
 
     # Create table with results
     df <- c(table(resp[[grouping_variable]]))
@@ -231,7 +231,7 @@ sample_by_group <- function(
 
     # Add labels as row names
     if(!is.null(labels) | !is.null(attributes(resp[[grouping_variable]])$labels)) {
-        lbls <- NEPSroutines:::create_ifelse(
+        lbls <- create_ifelse(
             is.null(labels),
             attributes(resp[[grouping_variable]])$labels,
             labels
@@ -244,12 +244,12 @@ sample_by_group <- function(
 
     # Save results
     if (save) {
-        name <- NEPSroutines:::create_name(
+        name <- create_name(
             paste0("sample.size.by.", grouping_variable),
             name_group,
             ".xlsx"
         )
-        NEPSroutines:::save_table(
+        save_table(
             as.data.frame(rbind(df)),
             filename = name,
             path = path,
@@ -292,12 +292,12 @@ props_by_group <- function(vars, select, grouping, properties, labels = NULL,
                            name_group = NULL, warn = TRUE) {
 
     # Check variables
-    NEPSroutines:::check_logicals(vars, "vars", c(select, grouping), warn = warn)
-    NEPSroutines:::check_variables(vars, "vars", properties)
+    check_logicals(vars, "vars", c(select, grouping), warn = warn)
+    check_variables(vars, "vars", properties)
 
     # Select only necessary items and check for duplicates
     vars <- subset(vars, vars[[select]])
-    NEPSroutines:::check_items(vars$item)
+    check_items(vars$item)
 
     res <- list()
     if(is.null(labels)) labels <- list()
@@ -324,7 +324,7 @@ props_by_group <- function(vars, select, grouping, properties, labels = NULL,
 
       # Add property labels as row names (if existent)
       if( (!is.null(labels[[props]])) | (!is.null(attributes(vars[[props]])$labels)) ) {
-        lbls <- NEPSroutines:::create_ifelse(
+        lbls <- create_ifelse(
           is.null(labels[[props]]),
           attributes(vars[[props]])$labels,
           labels[[props]]
@@ -342,12 +342,12 @@ props_by_group <- function(vars, select, grouping, properties, labels = NULL,
 
     # Save results
     if (save) {
-        name <- NEPSroutines:::create_name(
+        name <- create_name(
           paste0("item.properties.by.", name_grouping),
           name_group,
           ".xlsx"
         )
-        NEPSroutines:::save_table(
+        save_table(
             res,
             filename = name,
             path = path,

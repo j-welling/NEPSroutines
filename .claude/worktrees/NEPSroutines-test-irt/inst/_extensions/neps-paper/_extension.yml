@@ -1,0 +1,57 @@
+title: NEPS Survey and Working Papers
+author: 'Timo Gnambs'
+version: 1.0.0
+quarto-required: ">=1.3.0"
+contributes:
+  formats:
+    common:
+      csl: "apa.csl"
+      lang: en
+      toc-title: Contents
+      tbl-cap-location: top
+      fig-cap-location: top
+      crossref:
+        tbl-title: 'Table'
+        tbl-labels: arabic
+        fig-title: 'Figure'
+        fig-labels: arabic
+      execute:
+        echo: false
+      filters:
+        - abstract-section.lua
+        - landscape.lua
+        - neps-paper.lua
+    docx:
+      toc: false
+      reference-doc: neps-paper-template.docx
+      crossref:
+        ref-hyperlink: false
+        title-delim: "\\."
+      filters:
+        - neps-paper-docx.lua
+    pdf:
+      documentclass: scrartcl
+      classoption:
+        - numbers = noendperiod
+        - parskip = full
+      papersize: a4paper
+      geometry:
+        - left = 2.5cm
+        - right = 2.5cm
+        - top = 1.03cm
+        - bottom = 1.6cm
+        - includehead
+        - includefoot
+      whitespace: .5\baselineskip
+      fontsize: 12pt
+      mainfont: Calibri
+      monofont: Calibri
+      mathfont: Calibri
+      linestretch: 1.0
+      number-sections: true
+      toc: true
+      include-in-header: neps-paper-header.tex
+      template-partials:
+        - partials/title.tex
+        - partials/before-body.tex
+        - partials/toc.tex

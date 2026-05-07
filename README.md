@@ -4,6 +4,8 @@
 # NEPSroutines
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/j-welling/NEPSroutines/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/j-welling/NEPSroutines/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 NEPSroutines is an R package that provides a collection of functions for
