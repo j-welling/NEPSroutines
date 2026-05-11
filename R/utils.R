@@ -845,6 +845,46 @@ rnd <- function(x, digits = 2, d0 = FALSE) {
 }
 
 
+#' Recode variables
+#'
+#' @param x  vector; the variable to be recoded
+#' @param src source values: a subset of the present values of x
+#' @param tgt target values: the corresponding new values of x
+#' @param default default target value for those values of x not listed in
+#'     \code{src}. When \code{default=NULL}, values of x which are not given in
+#'     \code{src} will be kept in the output.
+#' @param keep.na logical; if TRUE then NA's in x will be retained in the output
+#' @return vector
+#' @author Søren Højsgaard, \email{sorenh@@math.aau.dk}
+#' @source doBy::recodeVar()
+recodeVar <- function(x, src, tgt, default = NULL, keep.na = TRUE) {
+  if (length(src) != length(tgt)) {
+    stop("length of src not equal to length of tgt")
+  }
+  mtc <- lapply(src, \(zzz) which(x %in% zzz))
+  idx <- seq_along(x)
+  unmatch <- setdiff(idx, unlist(mtc))
+  if (is.factor(x)) {
+    val <- as.character(x)
+  } else {
+    val <- x
+  }
+  for (ii in 1:length(tgt)) val[mtc[[ii]]] <- tgt[[ii]]
+  if (!is.null(default)) {
+    if (keep.na) {
+      iii <- intersect(which(!is.na(x)), unmatch)
+      val[iii] <- default
+    } else {
+      val[unmatch] <- default
+    }
+  }
+  if (is.factor(x))
+    val <- as.factor(val)
+  return(val)
+}
+
+
+
 # Internal helper: capitalize the first letter of each string element
 # @noRd
 capitalize <- function(x) {

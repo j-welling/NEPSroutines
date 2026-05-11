@@ -4,7 +4,7 @@
 \alias{check_logicals}
 \title{Check logical variable(s) for correctness}
 \usage{
-check_logicals(df, name_df, logicals, warn = TRUE)
+check_logicals(df, name_df = "<unknown>", logicals, warn = TRUE)
 }
 \arguments{
 \item{df}{data.frame; contains at least the indicated logical variable(s)}
