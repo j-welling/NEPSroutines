@@ -300,7 +300,6 @@ mvi_analysis <- function(
             item = vars_c$item,
             position = vars_c[[position]],
             responses = resp_c,
-            stages = stages,
             resp = resp,
             vars = vars_c,
             mvs = mvs,
@@ -338,7 +337,6 @@ mvi_analysis <- function(
               item = vars_g$item[!is.na(pos)],
               position = na.omit(pos),
               responses = resp_g[, vars_g$item[!is.na(pos)]],
-              stages = stages,
               resp = resp[resp[[g]],],
               vars = vars_g,
               mvs = mvs,
@@ -395,7 +393,6 @@ mvi_analysis <- function(
             item = vars_c$item,
             position = vars_c[[position]],
             responses = resp_c[, vars_c$item],
-            stages = stages,
             resp = resp,
             vars = vars_c,
             mvs = mvs,
@@ -478,8 +475,6 @@ test_mvi_analysis <- function(
 #' @param vars  data.frame; contains information about items with items as rows;
 #' includes variable 'item' containing item names; additionally includes all
 #' variables that are further defined in the function arguments
-#' @param stages  character vector; contains names of stage variables in resp and vars,
-#' only applicable in multistage tests (otherwise NULL)
 #' @param digits  integer; number of decimals for rounding
 #'
 #' @return   list with results of missing values per item.
@@ -492,7 +487,6 @@ create_mvlist <- function(
     mvs,
     resp,
     vars,
-    stages = NULL,
     digits = 3,
     use_for_plot
 ) {
