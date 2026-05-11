@@ -813,13 +813,10 @@ describe <- function(x, digits = 2) {
       median = median(v, na.rm = TRUE),
       min = min(v, na.rm = TRUE),
       max = max(v, na.rm = TRUE))
-  }))
-  if (ncol(x) == 1L) {
-    stats <- data.frame(t(stats))
-  } else {
-    stats <- as.data.frame(stats)
-  }
-  stats <- round(stats, digits = digits)
+  })) |>
+    data.frame()
+
+  stats[,-1] <- round(stats[,-1], digits = digits)
 
   return(stats)
 
@@ -888,3 +885,8 @@ recodeVar <- function(x, src, tgt, default = NULL, keep.na = TRUE) {
 
 
 
+# Internal helper: capitalize the first letter of each string element
+# @noRd
+capitalize <- function(x) {
+  paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))
+}
