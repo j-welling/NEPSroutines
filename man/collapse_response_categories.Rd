@@ -9,8 +9,11 @@ collapse_response_categories(
   vars,
   select = "poly",
   per_cat = 200,
+  rules = NULL,
+  rules_file = NULL,
   save = FALSE,
-  path_table = "Tables"
+  path_table = "Tables",
+  filename = "collapsed_items"
 )
 }
 \arguments{
@@ -29,9 +32,18 @@ contains the item names of the polytomous items}
 
 \item{per_cat}{integer; minimum number of persons per category; defaults to 200}
 
+\item{rules}{data.frame; collapsing rules for items;
+same format as the excel file saved via \code{save}; must include three
+variables (original_item, scoring, collapsed_item)}
+
+\item{rules_file}{character; path to excel file with collapsing rules created
+via \code{save}}
+
 \item{save}{logical; whether results shall be saved to hard drive}
 
 \item{path_table}{string; defines path to folder where tables shall be saved}
+
+\item{filename}{string; file name for saved tables}
 }
 \value{
 resp with collapsed categories. Note that this function changes the
@@ -43,3 +55,24 @@ data.frame resp with collapsed and original items
 \description{
 Collapse response categories with N < 200
 }
+\section{Notifications}{
+
+\describe{
+  \item{\code{message}: problematic items}{Triggered when one or more
+    polytomous items cannot be collapsed because fewer than two response
+    categories have sufficient observations (>= \code{per_cat}). Effect:
+    the affected items are omitted from collapsing; they appear in the
+    printed list and should be reviewed manually.}
+  \item{\code{message}: dichotomous items skipped}{Triggered when the
+    selected item set contains items with only two response categories.
+    Effect: these items are silently left unchanged; the message lists
+    the skipped items.}
+  \item{\code{message}: items collapsed}{Always printed when at least one
+    item was successfully collapsed. Lists each item and its new scoring
+    scheme. Effect: informational only.}
+  \item{\code{message}: no items collapsed}{Printed when no items met the
+    collapsing criterion. Effect: informational only; \code{resp} is
+    returned unchanged.}
+}
+}
+

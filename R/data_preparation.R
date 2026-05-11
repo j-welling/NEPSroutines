@@ -783,7 +783,7 @@ collapse_response_categories <- function(resp, vars, select = 'poly',
 
 #' Collapse response categories without existing collapsing rules
 #'
-#' @inhertParams collapse_response_categories
+#' @inheritParams collapse_response_categories
 
 collapse_response_categories_without_rules <-
   function(resp, vars, select = 'poly', per_cat = 200) {
@@ -933,7 +933,7 @@ collapse_response_categories_without_rules <-
 
 #' Collapse response categories with existing collapsing rules
 #'
-#' @inhertParams collapse_response_categories
+#' @inheritParams collapse_response_categories
 
 collapse_response_categories_with_rules <-
   function(resp, vars, select = 'poly', per_cat = 200,

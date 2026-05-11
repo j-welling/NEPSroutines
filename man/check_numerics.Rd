@@ -6,7 +6,7 @@
 \usage{
 check_numerics(
   df,
-  name_df,
+  name_df = "<unknown>",
   numerics = NULL,
   check_invalid = FALSE,
   dich = FALSE

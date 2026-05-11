@@ -4,7 +4,7 @@
 \alias{check_variables}
 \title{Check variables in df for existence}
 \usage{
-check_variables(df, name_df, variables)
+check_variables(df, name_df = "<unknown>", variables)
 }
 \arguments{
 \item{df}{data.frame}
