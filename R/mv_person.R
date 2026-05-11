@@ -721,7 +721,10 @@ write_mvp_table <- function(mv_p) {
         names(results[[i]]) <- c("Number of missing responses", "Percentage")
     }
 
-    results$summary <- mv_p$summary
+    results$summary <- data.frame(
+      statistics = row.names(mv_p$summary),
+      mv_p$summary
+    )
 
     return(results)
 }
