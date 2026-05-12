@@ -9,7 +9,9 @@
 ^doc$
 ^Meta$
 ^README\.Rmd$
+^AGENTS\.md$
 ^CLAUDE\.md$
+^\.agents$
 ^\.claude$
 ^dev$
 ^\.github$

@@ -702,6 +702,7 @@ pc_imputation <- function( resp, vars, select,
 #' name of the vector should match the vector names in @hl_solutions
 #' @param mvs  integer vector; contains user-defined missing values
 #' @param warn  logical; print warnings
+#' @param verbose logical; print messages
 #'
 #' @return resp including unscored (raw) and scored items
 #' @export

@@ -52,7 +52,7 @@ item response theory, scaling, {{domain}} competence, scientific use file
 
 # Introduction
 
-The National Educational Panel Study (NEPS)[^1] measures different competencies coherently across the lifespan. These include, among others, reading competence, mathematical competence, and domain-general cognitive functioning. An overview of the competencies measured in the NEPS is given by @Weinert2011 and @Fuss2021. Most of the administered competence tests are developed specifically for use in the NEPS and are therefore routinely evaluated using psychometric models based on item response theory [IRT, see @Pohl2012a].
+The National Educational Panel Study (NEPS)[^1] measures different competencies coherently across the lifespan. These include, among others, reading competence, mathematical competence, and domain-general cognitive functioning. An overview of the competencies measured in the NEPS is given by @Weinert2019 and @Fuss2025. Most of the administered competence tests are developed specifically for use in the NEPS and are therefore routinely evaluated using psychometric models based on item response theory [IRT, see @Pohl2012a].
 
 [^1]: <https://www.neps-data.de>
 
@@ -206,7 +206,7 @@ The dimensionality of the test was evaluated by examining the residuals of the P
 
 ## Software
 
-The item response models were estimated with the *TAM* package [@TAM4-2-21] in *R* [@R4-3-3].
+The item response models were estimated with the *TAM* package [@TAM4-2-21] in *R* [@R4-5-0].
 
 # Results
 
@@ -489,7 +489,7 @@ In conclusion, the test had satisfactory psychometric properties that allowed th
 
 ## Naming Conventions
 
-The SUF for the starting cohort contains `r sum(vars$mixed)` items, of which `r sum(vars$mixed & vardef$dich)` were scored dichotomously (multiple-choice items) with 0 indicating an incorrect response and 1 indicating a correct response. The remaining items were scored as polytomous variables (complex multiple choice and matching items) that are marked with a ‘s_c’ at the end of the variable names. Further details on the naming conventions of the variables can be found in @Fuss2021.
+The SUF for the starting cohort contains `r sum(vars$mixed)` items, of which `r sum(vars$mixed & vardef$dich)` were scored dichotomously (multiple-choice items) with 0 indicating an incorrect response and 1 indicating a correct response. The remaining items were scored as polytomous variables (complex multiple choice and matching items) that are marked with a ‘s_c’ at the end of the variable names. Further details on the naming conventions of the variables can be found in @Fuss2025.
 
 ## Linking of the Competence Tests
 
