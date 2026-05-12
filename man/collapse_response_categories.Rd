@@ -43,3 +43,24 @@ data.frame resp with collapsed and original items
 \description{
 Collapse response categories with N < 200
 }
+\section{Notifications}{
+
+\describe{
+  \item{\code{message}: problematic items}{Triggered when one or more
+    polytomous items cannot be collapsed because fewer than two response
+    categories have sufficient observations (>= \code{per_cat}). Effect:
+    the affected items are omitted from collapsing; they appear in the
+    printed list and should be reviewed manually.}
+  \item{\code{message}: dichotomous items skipped}{Triggered when the
+    selected item set contains items with only two response categories.
+    Effect: these items are silently left unchanged; the message lists
+    the skipped items.}
+  \item{\code{message}: items collapsed}{Always printed when at least one
+    item was successfully collapsed. Lists each item and its new scoring
+    scheme. Effect: informational only.}
+  \item{\code{message}: no items collapsed}{Printed when no items met the
+    collapsing criterion. Effect: informational only; \code{resp} is
+    returned unchanged.}
+}
+}
+
