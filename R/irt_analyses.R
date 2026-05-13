@@ -839,7 +839,12 @@ irt_summary <- function(
 
   # percentage correct
   pars$correct <- round(
-    ifelse(vars$dich, colMeans(resp[, vars$item], na.rm = TRUE) * 100, NA),
+    ifelse(
+      vars$dich,
+      colMeans(resp[, vars$item], na.rm = TRUE),
+      colMeans(resp[, vars$item], na.rm = TRUE) /
+        sapply(resp[, vars$item], \(item) max(item, na.rm = TRUE))
+      ) * 100,
     digits
   )
 
