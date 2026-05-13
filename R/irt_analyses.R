@@ -1137,7 +1137,7 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
           wmnsq_mean, " (SD = ", wmnsq_sd, "), and a median of ",
           wmnsq_median, ".")
 
-  wmnsq_misfit <- irt_sum$Item[irt_sum$WMNSQ > 1.15]
+  wmnsq_misfit <- irt_sum$Item[irt_sum$WMNSQ >= 1.15]
   message(ifelse(length(wmnsq_misfit) == 0, "No item",
                  paste0(ifelse(length(wmnsq_misfit) > 1, "Items ", "Item "),
                         paste(wmnsq_misfit, collapse = ", "))),
@@ -1159,12 +1159,12 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
           paste(t_max_item, collapse = ", "), ") with an average of ",
           t_mean, " (SD = ", t_sd, "), and a median of ", t_median, ".")
 
-  t_misfit <- irt_sum$Item[abs(irt_sum$t) > 8]
+  t_misfit <- irt_sum$Item[irt_sum$t >= 8]
 
   message(ifelse(length(t_misfit) == 0, "No item",
           paste0(ifelse(length(t_misfit) > 1, "Items ", "Item "),
           paste(t_misfit, collapse = ", "))),
-          " exhibited an absolute t-value of at least 8.")
+          " exhibited a t-value of at least 8.")
 
   # Correlation of item scores with total correct score
   rit_min <- min(irt_sum$rit, na.rm = TRUE)
