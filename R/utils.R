@@ -453,7 +453,7 @@ check_invalid_values <- function(df, name_df = "<unknown>", items = NULL) {
     stop(sprintf(
       "Data frame '%s' contains invalid values (< 0): %s. ",
       name_df,
-      paste(invalid_values, collapse = ", ")
+      list_elements(invalid_values)
     ), "Include all user-defined missing values via the `mvs` argument.")
   }
   return(invisible())
@@ -751,16 +751,44 @@ order_xsi_fixed <- function(
     )$xsi.fixed.estimated
   }
 
- if (rename_steps) names(xsi_fixed) <- gsub("_step", ":step", names(xsi_fixed))
+  if (rename_steps) names(xsi_fixed) <- gsub("_step", ":step", names(xsi_fixed))
 
-  if (any(!names(xsi_fixed) %in% rownames(xsi_arg)))
-    stop(paste0("Items in xsi_fixed do not match items in ", irtmodel, " model!"))
+  if (any(!names(xsi_fixed) %in% rownames(xsi_arg))) {
 
+    missing_items <- names(xsi_fixed)[!names(xsi_fixed) %in% rownames(xsi_arg)]
+    stop(paste0(
+      ifelse(
+        length(missing_items) == 1,
+        paste0("Item ", missing_items, " is "),
+        paste0("Items ", list_elements(missing_items), " are ")
+        ),
+      "included in xsi_fixed but not in the ", irtmodel, " model"
+    ))
+
+  }
+
+ if (any(!rownames(xsi_arg) %in% names(xsi_fixed))) {
+
+   missing_items <- rownames(xsi_arg)[!rownames(xsi_arg) %in% names(xsi_fixed)]
+   stop(paste0(
+     ifelse(
+       length(missing_items) == 1,
+       paste0("Item ", missing_items, " is "),
+       paste0("Items ", list_elements(missing_items), " are ")
+     ),
+     "included in the ", irtmodel, " model but not in xsi_fixed"
+     ))
+
+ }
+
+  # reorder xsi
   xsi_new <- cbind(
-    xsi_arg[names(xsi_fixed), 1], xsi_fixed[names(xsi_fixed)] # reorder xsi
+    xsi_arg[names(xsi_fixed), 1],
+    xsi_fixed[names(xsi_fixed)]
   )
 
   return(xsi_new)
+
 }
 
 
@@ -885,8 +913,20 @@ recodeVar <- function(x, src, tgt, default = NULL, keep.na = TRUE) {
 
 
 
-# Internal helper: capitalize the first letter of each string element
-# @noRd
+#' Internal helper: capitalize the first letter of each string element
+#' @param x string; the word or sentence to be capitalized
+#' @noRd
 capitalize <- function(x) {
   paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))
+}
+
+#' Internal helper: use the right separation when listing elements in a string
+#' @param x character vector; includes elements that shall be listed using oxford comma
+#' @noRd
+list_elements <- function(x) {
+  n <- length(x)
+  if (n == 0) return("")
+  if (n == 1) return(x)
+  if (n == 2) return(paste(x, collapse = " and "))
+  paste0(paste(x[-n], collapse = ", "), ", and ", x[n])
 }
