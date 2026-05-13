@@ -327,7 +327,9 @@ create_scores <- function(
   if (metap) {
 
     # Test and prepare data
-    if (is.null(meta_variable)) stop("No argument 'meta_variable' provided.")
+    if (is.null(meta_variable)) {
+      stop("No argument 'meta_variable' provided. Please check yout input.")
+    }
     meta_score_name <- ifelse(is.null(meta_score_name), score_name, meta_score_name)
 
     if (is.null(meta_select)) {

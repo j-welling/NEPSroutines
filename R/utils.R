@@ -111,17 +111,20 @@ prepare_resp <- function(
     # Select only certain variables
     if (!is.null(select)) {
         if (is.null(vars)) {
-            stop("To create a data frame (resp) with only the indicated items, ",
-                 "please also provide vars.")
+            stop(
+              "To create a data frame (resp) containing only the items ",
+              "indicated by variable '", select,
+              "', please also provide the data frame vars."
+              )
         } else {
             check_logicals(vars, "vars", select, warn = warn)
             items <- vars$item[vars[[select]]]
             check_variables(resp, "resp", variables = items)
             resp <- resp[ , items]
         }
-    } else if (warn) {
-        message("No variable provided indicating the items to keep. ",
-                "All items are kept.")
+    } else {
+        message("No variable was provided that indicates which the items to keep",
+        "(see function argument 'select'). All items are kept.")
     }
 
     # Convert missing values to NA
@@ -151,8 +154,8 @@ is_null_mvs_valid <- function(mvs = NA, valid = NA) {
   }
 
   if (is.null(valid)) {
-    message("No variable with valid cases provided. ",
-            "All cases are used for analysis.")
+    message("No variable was provided that indicates valid cases ",
+            "(see function argument 'valid'). All cases are used for analysis.")
   }
   return(invisible())
 }
@@ -225,11 +228,16 @@ save_results <- function(results, filename, path) {
 #' @export
 
 check_folder <- function(path) {
+
     if (!file.exists(path)) {
+
         dir.create(path, recursive = TRUE)
         message("The location ", path, " did not exist. New folder created.")
+
     }
+
   return(invisible())
+
 }
 
 
@@ -240,14 +248,25 @@ check_folder <- function(path) {
 #' @export
 
 check_pid <- function(pid) {
+
     if (length(pid) != length(unique(pid))) {
-        stop("There are duplicates in the person identifiers.")
+
+      dupes <- unique(pid[duplicated(pid)])
+
+      stop("There are duplicates of the following person identifiers: ",
+           "\n", fmt_names(dupes))
+
     }
 
     if (any(is.na(pid))) {
-        warning("There are missing values in the person identifiers.")
+
+        warning("There are missing values (NA) in the person identifiers. ",
+                "Check that all persons have an identifier in resp.")
+
     }
+
   return(invisible())
+
 }
 
 
@@ -301,7 +320,9 @@ validation_msg <- function(label, bad, name_df, verb_singular, verb_plural,
 #' @export
 
 check_items <- function(items) {
+
     if (length(items) != length(unique(items))) {
+
         dupes <- unique(items[duplicated(items)])
         stop("Duplicate item names found in 'vars$item': ",
              fmt_names(dupes), ".")
@@ -760,9 +781,9 @@ order_xsi_fixed <- function(
       ifelse(
         length(missing_items) == 1,
         paste0("Item ", missing_items, " is "),
-        paste0("Items ", list_elements(missing_items), " are ")
+        paste0("Items ", fmt_names(missing_items), " are ")
         ),
-      "included in xsi_fixed but not in the ", irtmodel, " model"
+      "included in xsi_fixed but not in the ", irtmodel, " model."
     ))
 
   }
@@ -774,9 +795,9 @@ order_xsi_fixed <- function(
      ifelse(
        length(missing_items) == 1,
        paste0("Item ", missing_items, " is "),
-       paste0("Items ", list_elements(missing_items), " are ")
+       paste0("Items ", fmt_names(missing_items), " are ")
      ),
-     "included in the ", irtmodel, " model but not in xsi_fixed"
+     "included in the ", irtmodel, " model but not in xsi_fixed."
      ))
 
  }
