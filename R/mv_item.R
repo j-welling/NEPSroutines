@@ -1192,11 +1192,11 @@ print_mvi_results <- function(
             message("The proportion of ", labels_mvs[lbl], " varied between ",
                     mv_min, "%", if(length(item_min) <= 3) {
                         paste0(" (", ifelse(length(item_min) > 1, "items ", "item "),
-                               paste(item_min, collapse = ", "), ")")
+                               list_elements(item_min), ")")
                     }, " and ",
                     mv_max, "%", if(length(item_max) <= 3) {
                         paste0(" (", ifelse(length(item_max) > 1, "items ", "item "),
-                               paste(item_max, collapse = ", "), ")")
+                               list_elements(item_max), ")")
                     }, ".")
 
         }
@@ -1218,11 +1218,11 @@ print_mvi_results <- function(
                         " ", name_grouping, " varied between ",
                         mv_min, "%", if(length(item_min) <= 3) {
                             paste0(" (", ifelse(length(item_min) > 1, "items ", "item "),
-                                   paste(item_min, collapse = ", "), ")")
+                                   list_elements(item_min), ")")
                         }, " and ",
                         mv_max, "%", if(length(item_max) <= 3) {
                             paste0(" (", ifelse(length(item_max) > 1, "items ", "item "),
-                                   paste(item_max, collapse = ", "), ")")
+                                   list_elements(item_max), ")")
                         }, ".")
             }
         }

@@ -327,9 +327,9 @@ print_dis_summary <- function(dist_sum) {
     corr_med_names <- rownames(rc[which(rc$corr == corr_med),])
 
     message("\nItem-total correlation for correct response: ",
-            "\nMin. = ",  corr_min, " (", paste(corr_min_names, collapse = ", "), ")",
-            "\nMax. = ",  corr_max, " (", paste(corr_max_names, collapse = ", "), ")",
-            "\nMd. = ",  corr_med, " (", paste(corr_med_names, collapse = ", "), ")")
+            "\nMin. = ",  corr_min, " (", list_elements(corr_min_names), ")",
+            "\nMax. = ",  corr_max, " (", list_elements(corr_max_names), ")",
+            "\nMd. = ",  corr_med, " (", list_elements(corr_med_names), ")")
 
     # Distractors
     dist_min <- min(rd$corr)
@@ -340,9 +340,9 @@ print_dis_summary <- function(dist_sum) {
     dist_med_names <- rownames(rd[which(rd$corr == dist_med),])
 
     message("\nItem-total correlation for distractor: ",
-            "\nMin. = ",  dist_min, " (", paste(dist_min_names, collapse = ", "), ")",
-            "\nMax. = ",  dist_max, " (", paste(dist_max_names, collapse = ", "), ")",
-            "\nMd. = ",  dist_med, " (", paste(dist_med_names, collapse = ", "),
+            "\nMin. = ",  dist_min, " (", list_elements(dist_min_names), ")",
+            "\nMax. = ",  dist_max, " (", list_elements(dist_max_names), ")",
+            "\nMd. = ",  dist_med, " (", list_elements(dist_med_names),
             ")\n")
 
     # Show problematic distractors and correct responses

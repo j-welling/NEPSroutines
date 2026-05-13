@@ -735,7 +735,7 @@ check_minimum_valid <- function(
   if (length(remove) > 0 & warn) warning(
     "At least one group from the DIF variable '", dif_var, "' does not have ",
     "the minimum number of valid responses (", min_val, ") on ",
-    ifelse(length(remove) > 1, "items ", "item "), paste(remove, collapse = ", "),
+    ifelse(length(remove) > 1, "items ", "item "), list_elements(remove),
     ". The corresponding items were excluded from the analysis.\n"
   )
 
