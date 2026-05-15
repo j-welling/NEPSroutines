@@ -1072,9 +1072,17 @@ collapse_response_categories_with_rules <-
         paste(duplicates, collapse = ", ")
       ))
 
+    # Remove rules for non-existent items
+    rm_rules <- c()
+    for (i in seq_len(nrow(rules))) {
+      if (is.null(resp[[rules$original_item[i]]]))
+        rm_rules <- c(rm_rules, i)
+    }
+    if (length(rm_rules) > 0L)
+      rules <- rules[(!seq_len(nrow(rules)) %in% rm_rules), ]
+
     # Apply rules to data
     for (i in seq_len(nrow(rules))) {
-      if (is.null(resp[[rules$original_item[i]]])) next
       rec_string <- trimws(strsplit(rules$scoring[i], ",")[[1]])
       resp[[paste0(rules$original_item[i], "_collapsed")]] <-
         recodeVar(
