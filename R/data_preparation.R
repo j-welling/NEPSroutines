@@ -746,12 +746,13 @@ hl_scoring <- function(resp, hl_solutions, hl_distractors,
     rn <- length(hl_distractors[[item]]) - fp
     rpr <- rp / (rp + fn)
     fpr <- fp / (fp + rn)
+    denom <- (4 * pmax(rpr, fpr) - 4 * rpr * fpr)
     hl_item <-
-      0.5 + sign(rpr - fpr) * ((rpr - fpr)^2 + abs(rpr - fpr)) /
-      (4 * pmax(rpr, fpr) - 4 * rpr * fpr)
+      0.5 + sign(rpr - fpr) * ((rpr - fpr)^2 + abs(rpr - fpr)) / denom
     hl_item <-
       cut(hl_item, c(-1, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 2),
           labels = FALSE, right = FALSE) - 1
+    hl_item[denom %in% 0] <- 0
 
     # Set missing values
     subitems <- c(hl_solutions[[item]], hl_distractors[[item]])
@@ -994,7 +995,7 @@ collapse_response_categories_without_rules <-
               "with more than ", per_cat, " cases and were thus not collapsed. ",
               "Please check these items manually:\n",
               paste(problematic_items, collapse = ", "))
-    }  
+    }
 
     if (!is.null(dichotomous_items)) {
       message("\nDichotomous items were not considered for collapsing. ",
@@ -1004,7 +1005,7 @@ collapse_response_categories_without_rules <-
 
     if (nrow(collapsed_items) > 0L) {
       message("\nThe following items have been collapsed:\n")
-      print(format(item_names, justify = "left"), n = nrow(item_names), right = F)
+      print(format(item_names, justify = "left"))
     } else {
       message("\nNo items have been collapsed.")
     }
@@ -1015,7 +1016,7 @@ collapse_response_categories_without_rules <-
       collapsed_items = item_names,
       problematic_items = problematic_items
     )
-    
+
     return(out)
   }
 
