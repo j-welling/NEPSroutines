@@ -308,6 +308,8 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' @param footnote An optional table note.
 #' @param sort A column name to indicate by which column to sort.
 #' @param excl A vector of column names to exclude.
+#' @param groups A vector of group labels with names corresponding to the
+#' group names.
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @export
@@ -346,22 +348,23 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' TblMvi(mvi, excl = NULL, sort = "N_valid")
 #' }
 TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
-                   size = 12, width = NULL,
-                   excl = c("N_administered", "ND", "ALL", "...1")) {
+                   size = 12, width = NULL, groups = NULL,
+                   excl = c("N_administered", "ND", "ALL",
+                            "SK", "RE", "...1")) {
 
   # Result table
   if (is.list(obj) & "list" %in% names(obj))
     obj <- obj[["list"]]
   tab <- obj
 
-  # Select results for group
+  # Select results for a specific group
   if (!is.null(select)) {
     tab <- tab[, grepl(paste0("item|_", select), colnames(tab))]
     colnames(tab) <- sub(paste0("_", select), "", colnames(tab))
   }
 
   # Exclude columns
-  regexp <-"^$"
+  regexp <- "^$"
   if (!is.null(excl)) regexp <- paste0(regexp, "|", paste(excl, collapse = "|"))
   tab <- tab[, !grepl(regexp, colnames(tab))]
 
@@ -376,76 +379,112 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
   # Add item number
   tab <- cbind("Nr." = seq(1, nrow(tab)), tab)
 
+  # Identify groups
+  group_labels <- rep(NA, ncol(tab))
+  if (length(groups) > 1L) {
+    tab_old <- tab
+    tab <- tab[, 1:2]
+    for (g in names(groups)) {
+      tab <- cbind(tab, tab_old[, grepl(paste0("_", g), colnames(tab_old))])
+    }
+    regexp <- paste(names(groups), collapse = "|")
+    group_labels <- regmatches(colnames(tab), regexec(regexp, colnames(tab)))
+    group_labels <- sapply(group_labels, `[`, 1)
+    group_labels <- groups[group_labels]
+  }
+
   # Rename variables
   lbl <- colnames(tab)
-  lbl[lbl == "item"] <- "Item"
-  lbl[lbl == "position"] <- "Pos."
-  lbl[lbl == "N_administered"] <- "Total"
-  lbl[lbl == "N_valid"] <- "N"
-  colnames(tab) <- lbl
+  if (length(groups) > 1L) {
+    lbl <- gsub(paste0("_", names(groups), collapse = "|"), "", lbl)
+  }
+  lbl[grepl("item", lbl)] <- "Item"
+  lbl[grepl("position", lbl)] <- "Pos."
+  lbl[grepl("N_administered", lbl)] <- "Total"
+  lbl[grepl("N_valid", lbl)] <- "N"
 
   # Create footnote
   note <- list()
-  if ("Pos." %in% colnames(tab))
+  if ("Pos." %in% lbl)
     note <- append(note, "Pos. = Item position within the test. ")
-  if ("Total" %in% colnames(tab)) {
+  if ("Total" %in% lbl) {
     note <- append(note, "Total = Number of persons the item was administered. ")
   }
-  if ("N" %in% colnames(tab)) {
+  if ("N" %in% lbl) {
     note <- append(note,
                    list(flextable::as_chunk(
                      "N", props = flextable::fp_text_default(italic = TRUE, font.size = 10)
                    )))
     note <- append(note, " = Number of valid responses. ")
   }
-  if ("NR" %in% colnames(tab))
+  if ("NR" %in% lbl)
     note <- append(note,
                    "NR = Percentage of respondents that did not reach an item. "
     )
-  if ("OM" %in% colnames(tab))
+  if ("OM" %in% lbl)
     note <- append(note,
                    "OM = Percentage of omitted responses. "
     )
-  if ("NV" %in% colnames(tab))
+  if ("NV" %in% lbl)
     note <- append(note,
                    "NV = Percentage of invalid responses. "
     )
-  if ("ND" %in% colnames(tab))
+  if ("ND" %in% lbl)
     note <- append(note,
                    "ND = Percentage of not determinable responses. "
     )
-  if ("TA" %in% colnames(tab))
+  if ("TA" %in% lbl)
     note <- append(note,
                    "TA = Percentage of missing due to test abortion. "
     )
-  if ("UM" %in% colnames(tab))
+  if ("UM" %in% lbl)
     note <- append(note,
                    "UM = Percentage of unspecific missing responses. "
     )
-  if ("MD" %in% colnames(tab))
+  if ("MD" %in% lbl)
     note <- append(note,
                    "MD = Percentage of responses missing by design. "
     )
-  if ("AZ" %in% colnames(tab))
+  if ("AZ" %in% lbl)
     note <- append(note,
                    "AZ = Percentage of reset responses. "
     )
-  if ("ALL" %in% colnames(tab))
+  if ("ALL" %in% lbl)
     note <- append(note,
                    "ALL = Percentage of all types of missing responses. "
     )
   if (!is.null(footnote))
-  note <- append(note, footnote)
+    note <- append(note, footnote)
 
   # Create flextable
-  ft <- Tbl(tab, footnote = note, size = size, width = width)
-  if ("Pos." %in% colnames(tab))
-    ft <- flextable::colformat_double(ft, j = "Pos.", digits = 0)
-  if ("Total" %in% colnames(tab))
-    ft <- flextable::colformat_double(ft, j = "Total", digits = 0)
-  if ("N" %in% colnames(tab)) {
-    ft <- flextable::italic(ft, j = "N", italic = TRUE, part = "header")
-    ft <- flextable::colformat_double(ft, j = "N", digits = 0)
+  ft <- Tbl(tab, footnote = note, size = size, width = width,
+            lbl = lbl)
+  if (length(groups) > 1L) {
+    ft <- flextable::add_header_row(ft, top = TRUE, values = group_labels)
+    ft <- flextable::style(ft, i = 1, part = "header",
+                           pr_t = officer::fp_text(bold = FALSE))
+    ft <- flextable::hline(
+      ft, i = 1, part = "header",
+      border = officer::fp_border(color = "white", width = 0.5)
+    )
+    ft <- flextable::merge_h(ft, i = 1, part = "header")
+  }
+  if ("Pos." %in% lbl)
+    ft <- flextable::colformat_double(ft,
+                                      j = colnames(tab)[lbl %in% "Pos."],
+                                      digits = 0)
+  if ("Total" %in% lbl)
+    ft <- flextable::colformat_double(ft,
+                                      j = colnames(tab)[lbl %in% "Total"],
+                                      digits = 0)
+  if ("N" %in% lbl) {
+    ft <- flextable::italic(ft,
+                            i = 2,
+                            j = colnames(tab)[lbl %in% "N"],
+                            italic = TRUE, part = "header")
+    ft <- flextable::colformat_double(ft,
+                                      j = colnames(tab)[lbl %in% "N"],
+                                      digits = 0)
   }
   return(ft)
 

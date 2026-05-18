@@ -12,7 +12,8 @@ TblMvi(
   sort = "position",
   size = 12,
   width = NULL,
-  excl = c("N_administered", "ND", "ALL", "...1")
+  groups = NULL,
+  excl = c("N_administered", "ND", "ALL", "SK", "RE", "...1")
 )
 
 TblMVI(
@@ -22,7 +23,8 @@ TblMVI(
   sort = "position",
   size = 12,
   width = NULL,
-  excl = c("N_administered", "ND", "ALL", "...1")
+  groups = NULL,
+  excl = c("N_administered", "ND", "ALL", "SK", "RE", "...1")
 )
 }
 \arguments{
@@ -41,6 +43,9 @@ or a data frame with sheet "summary" from "mv_item.xlsx" created by
 \item{width}{The widths of the columns; if a single value is provided, it
 will be applied to all columns; otherwise the length must correspond to the
 number of columns in `obj`.}
+
+\item{groups}{A vector of group labels with names corresponding to the
+group names.}
 
 \item{excl}{A vector of column names to exclude.}
 }
