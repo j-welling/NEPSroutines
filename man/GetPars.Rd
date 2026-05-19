@@ -4,7 +4,15 @@
 \alias{GetPars}
 \title{Summarize item parameters}
 \usage{
-GetPars(obj, type, stat = median, item = FALSE, excl = NULL, digits = 2)
+GetPars(
+  obj,
+  type,
+  stat = median,
+  item = FALSE,
+  excl = NULL,
+  digits = 2,
+  remove_collapsed = TRUE
+)
 }
 \arguments{
 \item{obj}{A data frame with sheets from "irt_dich.xlsx" or "irt_poly.xlsx"
