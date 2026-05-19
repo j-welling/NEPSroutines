@@ -11,7 +11,7 @@ GetPars(
   item = FALSE,
   excl = NULL,
   digits = 2,
-  remove_collapsed = TRUE
+  rename_collapsed = TRUE
 )
 }
 \arguments{
@@ -38,6 +38,9 @@ indicating values to exclude; e.g.,
 Multiple conditions can be combined using & and |.}
 
 \item{digits}{A number for rounding.}
+
+\item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
+item names.}
 }
 \value{
 A number with the calculated statistic or character vector with
