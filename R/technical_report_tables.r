@@ -479,7 +479,7 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
                                       digits = 0)
   if ("N" %in% lbl) {
     ft <- flextable::italic(ft,
-                            i = 2,
+                            i = ifelse(length(groups) > 1L, 2, 1),
                             j = colnames(tab)[lbl %in% "N"],
                             italic = TRUE, part = "header")
     ft <- flextable::colformat_double(ft,
