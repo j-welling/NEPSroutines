@@ -282,7 +282,7 @@ GetMVP <- GetMvp
 #' file.remove(paste0(tmpdir, "/irt_dich.rds"))
 #' }
 GetPars <- function(obj, type, stat = median, item = FALSE,
-                    excl = NULL, digits = 2, remove_collapsed = TRUE) {
+                    excl = NULL, digits = 2, rename_collapsed = TRUE) {
 
   # normalize arguments
   type <- as.character(type[1])
