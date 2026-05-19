@@ -12,7 +12,8 @@ TblItemFacets(
   footnote = NULL,
   size = 12,
   width = 1.9,
-  lbl = NULL
+  lbl = NULL,
+  rename_collapsed = TRUE
 )
 }
 \arguments{
@@ -37,6 +38,9 @@ will be applied to all columns; otherwise the length must correspond to the
 number of columns in `obj`.}
 
 \item{lbl}{Long names of item facets to be displayed in the table.}
+
+\item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
+item names.}
 }
 \value{
 A flextable.

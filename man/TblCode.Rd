@@ -4,7 +4,14 @@
 \alias{TblCode}
 \title{Create a table with the analysis code}
 \usage{
-TblCode(vars, select, collapsed = NULL, tbl = TRUE, special = FALSE)
+TblCode(
+  vars,
+  select,
+  collapsed = NULL,
+  tbl = TRUE,
+  special = FALSE,
+  rename_collapsed = TRUE
+)
 }
 \arguments{
 \item{vars}{data.frame; contains information about items with items as rows;
@@ -21,6 +28,9 @@ by [collapse_response_categories()].}
 
 \item{special}{A logical for special schools (`TRUE`) or regular schools
 (`FALSE`).}
+
+\item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
+item names.}
 }
 \value{
 A `knitr::knit_child()` object or a vector.

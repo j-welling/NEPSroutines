@@ -242,6 +242,7 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @inheritParams collapse_response_categories
+#' @inheritParams TblPars
 #' @export
 #' @examples
 #' \dontrun{
@@ -265,7 +266,7 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
 #' }
 TblItemFacets <- function(vars, select, facets, position = NULL,
                           footnote = NULL, size = 12, width = 1.9,
-                          lbl = NULL) {
+                          lbl = NULL, rename_collapsed = TRUE) {
 
   # Select variables
   cols <- c("item", facets)
@@ -288,6 +289,8 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
   if (is.null(names(facets))) names(facets) <- facets
   col_names <- c(ifelse(is.null(position), "No.", "Pos."), "Item", names(facets))
   colnames(tab) <- col_names
+  if (rename_collapsed)
+    tab$Item <- gsub("_collapsed", "", tab$Item)
 
   # Create flextable
   if (length(width) == 1) width <- c(0.3, rep(width, ncol(tab) - 1))
@@ -460,6 +463,8 @@ TblMVI <- TblMvi
 #' @param obj A list with data frames with sheets from "irt_poly.xlsx"
 #' or a data frame with sheet "summary" from "irt_poly.xlsx" created by
 #' [irt_analysis()].
+#' @param rename_collapsed A boolean to remove the "_collapsed" suffix from
+#' item names.
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
@@ -492,12 +497,12 @@ TblMVI <- TblMvi
 #' # Default parameter table
 #' TblPars(pars)
 #'
-#' # Parameter table including number of respondents the item was adminstered
+#' # Parameter table including number of respondents the item was administered
 #' # and a footnote
 #' TblPars(pars, excl = NULL, footnote = "Nothing to report.")
 #' }
 TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
-                    size = 10, width = 0.5) {
+                    size = 10, width = 0.5, rename_collapsed = TRUE) {
 
   # Result table
   if (is.list(obj) & "summary" %in% names(obj))
@@ -507,6 +512,11 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
   # Exclude columns
   if (!is.null(excl)) {
     tab <- tab[, !grepl(paste(excl, collapse = "|"), colnames(tab))]
+  }
+
+  # Rename collapsed items
+  if ("Item" %in% colnames(tab) & rename_collapsed) {
+    tab$Item <- gsub("_collapsed", "", tab$Item)
   }
 
   # Model type
@@ -633,6 +643,7 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
+#' @inheritParams TblPars
 #' @export
 #' @examples
 #' \dontrun{
@@ -665,7 +676,8 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
 #' # Parameter table with larger font size and footnote
 #' TblSteps(pars, size = 12, footnote = "Nothing to note.")
 #' }
-TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2) {
+TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
+                     rename_collapsed = TRUE) {
 
   # Result table
   if (is.list(obj) & "steps" %in% names(obj))
@@ -674,6 +686,10 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2) {
 
   # Rename variables
   colnames(tab) <- c("Item", paste0("Step ", seq(1, ncol(tab) - 1)))
+
+  if ("Item" %in% colnames(tab) & rename_collapsed) {
+    tab$Item <- gsub("_collapsed", "", tab$Item)
+  }
 
   # Rounding
   for (i in seq_along(tab)[-1]) {
@@ -827,6 +843,7 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 #' @return A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
+#' @inheritParams TblPars
 #' @export
 #' @examples
 #' \dontrun{
@@ -862,7 +879,8 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 #' }
 TblDif <- function(obj, footnote = NULL, excl = NULL,
                    colnames1 = NULL, colnames2 = NULL,
-                   width = 1.4, size = 10, digits = 2) {
+                   width = 1.4, size = 10, digits = 2,
+                   rename_collapsed = TRUE) {
 
   # Result table
   if (is.list(obj) & "estimates" %in% names(obj))
@@ -872,6 +890,11 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
   # Exclude columns
   if (!is.null(excl)) {
     tab <- tab[, !grepl(paste(excl, collapse = "|"), colnames(tab))]
+  }
+
+  # Rename collapsed items
+  if ("Item" %in% colnames(tab) & rename_collapsed) {
+    tab$Item <- gsub("_collapsed", "", tab$Item)
   }
 
   # Rename variables
@@ -1056,6 +1079,7 @@ TblDIFFit <- TblDifFit
 #' (`FALSE`).
 #' @returns A `knitr::knit_child()` object or a vector.
 #' @inheritParams collapse_response_categories
+#' @inheritParams TblPars
 #' @export
 #' @examples
 #' \dontrun{
@@ -1064,7 +1088,7 @@ TblDIFFit <- TblDifFit
 #' TblCode(ex2$vars, "mixed", tbl = FALSE)
 #' }
 TblCode <- function(vars, select, collapsed = NULL, tbl = TRUE,
-                    special = FALSE) {
+                    special = FALSE, rename_collapsed = TRUE) {
 
   txt = c(
     '# load packages',
@@ -1081,6 +1105,8 @@ TblCode <- function(vars, select, collapsed = NULL, tbl = TRUE,
     'items <- c('
   )
   items <- vars$item[vars[[select]]]
+  if (rename_collapsed)
+    items <- gsub("_collapsed", "", items)
   for (i in seq(1, length(items), 3)) {
     j <- i + 2
     while (j > length(items)) j <- j - 1
@@ -1100,6 +1126,8 @@ TblCode <- function(vars, select, collapsed = NULL, tbl = TRUE,
     ''
   )
   poly <- vars$item[vars$poly & vars[[select]]]
+  if (rename_collapsed)
+    poly <- gsub("_collapsed", "", poly)
   if (length(poly) >= 1) {
     txt <- c(
       txt,
@@ -1137,8 +1165,8 @@ TblCode <- function(vars, select, collapsed = NULL, tbl = TRUE,
           paste0('dat$', collapsed$original_item[i], ' <- '),
           '  doBy::recodeVar(',
           paste0('    dat$', collapsed$original_item[i], ', ',
-                 'c(', gsub("=\\d", "", collapsed$scoring[i], perl=T), '), ',
-                 'c(', gsub("\\d=", "", collapsed$scoring[i], perl=T), ')'),
+                 'c(', gsub("=\\d", "", collapsed$scoring[i], perl = TRUE), '), ',
+                 'c(', gsub("\\d=", "", collapsed$scoring[i], perl = TRUE), ')'),
           '  )'
         )
     }
