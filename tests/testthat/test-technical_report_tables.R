@@ -1,181 +1,275 @@
-skip()
-test_that("create table with item properties works", {
+
+test_that("Tbl() works", {
 
   skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  obj <- data.frame(
+    value = c(1.234, 5.678),
+    label = c("first", "second")
+  )
+
+  tbl <- Tbl(
+    obj,
+    footnote = "Generated for a test.",
+    lbl = c("Value", "Label"),
+    width = 0.5,
+    digits = c(1, 2),
+    align = c("right", "left"),
+    align_head = "center"
+  )
+
+  expect_s3_class(tbl, "flextable")
+  expect_equal(tbl$body$dataset, obj)
+  expect_equal(tbl$header$dataset, data.frame(value = "value", label = "label"))
+  expect_equal(nrow(tbl$footer$dataset), 1)
+  expect_equal(tbl$properties$align, "left")
+  expect_equal(unname(tbl$body$styles$pars$text.align$data[1, ]), c("right", "left"))
+
+})
+
+
+test_that("TblItemProps() works", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
   data("ex2")
+
+  tbl <- TblItemProps(
+    vars = ex2$vars,
+    select = c("Number of items" = "mixed"),
+    prop = "type",
+    propname = "Response formats",
+    width = 0.5
+  )
+
+  expect_s3_class(tbl, "flextable")
+  expect_equal(names(tbl$body$dataset), c("Response formats", "Number of items"))
+  expect_equal(tbl$body$dataset[["Response formats"]], c(
+    "Simple multiple-choice items",
+    "Complex multiple-choice items",
+    "Total number of items"
+  ))
+  expect_equal(tbl$body$dataset[["Number of items"]], c("13", "4", "17"))
+
+})
+
+
+test_that("TblItemFacets() works", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+  data("ex2")
+
+  tbl <- TblItemFacets(
+    vars = ex2$vars,
+    select = "mixed",
+    facets = c("Content area" = "content", "Response format" = "type"),
+    position = "pos",
+    footnote = "MC = simple multiple-choice",
+    width = 0.5
+  )
+
+  expect_s3_class(tbl, "flextable")
+  expect_equal(names(tbl$body$dataset), c(
+    "Pos.", "Item", "Content area", "Response format"
+  ))
+  expect_equal(tbl$body$dataset[["Pos."]][1:3], c(1, 2, 3))
+  expect_equal(tbl$body$dataset[["Item"]][1:3], c(
+    "mag120001_c", "mag120002_c", "mag120003_c"
+  ))
+  expect_equal(tbl$body$dataset[["Content area"]][1:3], c(
+    "Change and relationship",
+    "Change and relationship",
+    "Data and chance"
+  ))
+  expect_equal(tbl$body$dataset[["Response format"]][3],
+               "Complex multiple-choice items")
+  expect_equal(nrow(tbl$footer$dataset), 1)
+
+})
+
+
+test_that("TblMvi() works", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex1", "tables"), "mv_item.xlsx")
+  tbl <- TblMvi(tab, excl = "", sort = "N_valid")
+
+  expect_s3_class(tbl, "flextable")
+  expect_equal(names(tbl$body$dataset), c(
+    "Nr.", "Item", "Pos.", "Total", "N", "OM", "NV", "NR", "ALL"
+  ))
+  expect_equal(tbl$body$dataset[["Nr."]][1:3], c(1, 2, 3))
+  expect_equal(tbl$body$dataset[["Item"]][1:3], c(
+    "grk10015_c", "grk10014_c", "grk10013_c"
+  ))
+  expect_equal(tbl$body$dataset[["N"]][1:3], c(345, 552, 679))
+  expect_equal(tbl$body$dataset[["ALL"]][1:3], c(65.5, 44.8, 32.1))
+  expect_equal(TblMVI(tab)$body$dataset, TblMvi(tab)$body$dataset)
+
+})
+
+
+test_that("TblPars() works", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex2", "tables"), "irt_poly.xlsx")
+  tbl <- TblPars(tab, footnote = "Nothing of note happened.")
+
+  expect_s3_class(tbl, "flextable")
+  expect_equal(names(tbl$body$dataset), c(
+    "Nr.", "Item", "N", "Percentage\n correct", "Difficulty", "SE",
+    "WMNSQ", "t", "rit", "aQ3", "Discr."
+  ))
+  expect_equal(tbl$body$dataset[["Nr."]][1:3], c("1", "2", "3"))
+  expect_equal(tbl$body$dataset[["Item"]][1:3], c(
+    "mag120001_c", "mag120002_c", "mag120003_c"
+  ))
+  expect_equal(tbl$body$dataset[["N"]][1:3], c(1440, 1431, 1430))
+  expect_equal(tbl$body$dataset[["Difficulty"]][1:3], c(-1.96, -1.71, -1.56))
+  expect_true(is.na(tbl$body$dataset[["Percentage\n correct"]][3]))
+
+})
+
+
+test_that("TblSteps() works", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex2", "tables"), "irt_poly.xlsx")
+  tbl <- TblSteps(tab, footnote = "Nothing of note happened.")
+
+  expect_s3_class(tbl, "flextable")
+  expect_equal(names(tbl$body$dataset), c("Item", "Step 1", "Step 2", "Step 3"))
+  expect_equal(tbl$body$dataset[["Item"]][1:4], c(
+    "mag120003_c", "mag120007_c", "mag120014_c", "mag120016_c"
+  ))
+  expect_equal(tbl$body$dataset[["Step 1"]][1:4], c(
+    "1.67 (0.07)", "0.36 (0.07)", "0.84 (0.08)", "1.26 (0.08)"
+  ))
+  expect_equal(tbl$body$dataset[["Step 2"]][1:4], c(
+    "-1.56 (0.07)", "-0.36", "-0.84", "-0.96 (0.09)"
+  ))
+  expect_equal(tbl$body$dataset[["Step 3"]][1:4], c("-0.11", NA, NA, "-0.30"))
+
+})
+
+
+test_that("TblDim() works", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex2", "tables"), "dimensionality.xlsx")
+  tbl <- TblDim(
+    tab,
+    model = "content",
+    rownames = c("Change", "Data", "Units", "Space"),
+    footnote = "Nothing of note happened."
+  )
+
+  expect_s3_class(tbl, "flextable")
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1", "Dim 2", "Dim 3", "Dim 4"
+  ))
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: Change", "Dim 2: Data", "Dim 3: Units", "Dim 4: Space"
+  ))
+  expect_equal(tbl$body$dataset[["Dim 1"]], c("2.04", ".67", ".74", ".75"))
+  expect_equal(tbl$body$dataset[["Dim 4"]], c("", "", "", "2.39"))
+
+})
+
+
+test_that("TblDif() works", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_TR.xlsx")
+  tbl <- TblDif(
+    tab,
+    footnote = "Nothing to note.",
+    colnames2 = c(
+      "mig.1-3" = "without vs. missing",
+      "mig.2-3" = "with vs. missing"
+    )
+  )
+
+  expect_s3_class(tbl, "flextable")
+  expect_equal(nrow(tbl$header$dataset), 2)
+  expect_equal(
+    tbl$header$dataset[1, ],
+    setNames(
+      data.frame("item", "sex.0-1", "mig.1-2", "mig.1-3", "mig.2-3"),
+      c("item", "sex.0-1", "mig.1-2", "mig.1-3", "mig.2-3")
+    )
+  )
+  expect_equal(unname(unlist(tbl$header$dataset[2, ])), c(
+    "",
+    "men vs. women",
+    "without vs. with",
+    "without vs. missing",
+    "with vs. missing"
+  ))
+  expect_equal(tbl$body$dataset[["item"]][16:17], c(
+    "Main effect\n (DIF model)",
+    "Main effect\n (Main effect model)"
+  ))
+  expect_equal(tbl$body$dataset[["sex.0-1"]][1], "-0.01 (-0.01)")
+  expect_equal(TblDIF(tab)$body$dataset, TblDif(tab)$body$dataset)
+
+})
+
+
+test_that("TblDifFit() works", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_TR.xlsx")
+  tbl <- TblDifFit(tab, excl = "sex", label = c("mig" = "Migrant background"))
+
+  expect_s3_class(tbl, "flextable")
+  expect_equal(names(tbl$body$dataset), c(
+    "DIF variable", "Model", "N", "Deviance", "Number of parameters",
+    "AIC", "BIC"
+  ))
+  expect_equal(tbl$body$dataset[["DIF variable"]], c(
+    "Migrant background", "Migrant background"
+  ))
+  expect_equal(tbl$body$dataset[["Model"]], c("Main effect", "DIF"))
+  expect_equal(tbl$body$dataset[["AIC"]], c(13633, 13662))
+  expect_equal(tbl$body$dataset[["BIC"]], c(13721, 13888))
+  expect_equal(TblDIFFit(tab)$body$dataset, TblDifFit(tab)$body$dataset)
+
+})
+
+
+test_that("TblCode() works", {
+
   data("ex3")
 
-  tbl <- try({
-    TblItemProps(vars = ex2$vars, select = "mixed", prop = "type",
-                 propname = "Response formats")
-  })
-  expect_false(inherits(tbl, "try-error"))
-  expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "d2d32dd355e6e8b6c57d008b24e159c5")
+  code <- TblCode(vars = ex3$vars, select = "mixed", tbl = FALSE)
 
-  tbl <- try({
-    ex3$vars$mixed1 <- ex3$vars$mixed & ex3$vars$booklet1
-    ex3$vars$mixed2 <- ex3$vars$mixed & ex3$vars$booklet2
-    ex3$vars$mixed3 <- ex3$vars$mixed & ex3$vars$booklet3
-    TblItemProps(vars = ex3$vars,
-                 select = c("Booklet 1" = "mixed1", "Booklet 2" = "mixed2",
-                            "Booklet 3" = "mixed3"),
-                 prop = "type",
-                 propname = "Response formats")
-  })
-  expect_false(inherits(tbl, "try-error"))
-  expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "9967500c8157d9966882dc8f738be307")
+  expect_type(code, "character")
+  expect_equal(code[1:4], c(
+    "# load packages",
+    "library(rio)      # to import SPSS files",
+    "library(doBy)  # to recode variables",
+    "library(TAM)   # for IRT analyses"
+  ))
+  expect_true(any(grepl('^  "reg70001_c"', code)))
+  expect_true(any(grepl("^# polytomous items$", code)))
+  expect_true(any(grepl("TAM::tam.mml\\(resp = dat\\[, items\\], Q = Q", code)))
+  expect_equal(tail(code, 1), "TAM::tam.wle(mod)")
 
 })
 
-
-test_that("create table with item facets works", {
-
-  skip_if_not_installed("flextable")
-  data("ex2")
-
-  tbl <- try({
-    TblItemFacets(vars = ex2$vars, select = "mixed",
-                  facets = c("Content area" = "content"))
-  })
-  expect_false(inherits(tbl, "try-error"))
-  expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "48aeb0e742ee85d4c77ea1408ae507cf")
-
-  tbl <- try({
-    TblItemFacets(vars = ex2$vars, select = "mixed",
-                  facets = c("Content area" = "content",
-                             "Response formats" = "type"),
-                  position = "pos",
-                  footnote = "MC = simple multiple-choice, CMC = complex multiple-choice")
-  })
-  expect_false(inherits(tbl, "try-error"))
-  expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "01548156a34fa299096876f6f701319f")
-
-})
-
-
-test_that("create table for missing values by item works", {
-
-  skip_if_not_installed("flextable")
-
-  tab <- try({ Import(test_path("fixtures/ex1/tables"), "mv_item.xlsx") })
-  tbl <- try({ TblMvi(tab, footnote = "Nothing of note happend.") })
-  expect_false(inherits(tbl, "try-error"))
-  expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "4761e5a32f8f19ea22417ccf0b27d706")
-
-  tbl <- try({ TblMvi(tab, excl = "", sort = "N_valid") })
-  expect_false(inherits(tbl, "try-error"))
-  expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "fe0837b96ed2e2400c8ddc613507e174")
-
-})
-
-
-test_that("create table for item parameters works", {
-
-  skip_if_not_installed("flextable")
-  tbl <- try({
-    tab <- Import(test_path("fixtures/ex2/tables"), "irt_poly.xlsx")
-    TblPars(tab, footnote = "Nothing of note happend.")
-  })
-  expect_false(inherits(tbl, "try-error"))
-  expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "e7e7775f96f34e5d87660a9d7bd1e4be")
-
-})
-
-
-test_that("create table for step parameters works", {
-
-  skip_if_not_installed("flextable")
-  tbl <- try({
-    tab <- Import(test_path("fixtures/ex2/tables"), "irt_poly.xlsx")
-    TblSteps(tab, footnote = "Nothing of note happend.")
-  })
-  expect_false(inherits(tbl, "try-error"))
-  expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "fc421624eb958b6b3ca35b8b3c9290a6")
-
-})
-
-
-test_that("create table for facet correlations works", {
-
-  skip_if_not_installed("flextable")
-  tbl <- try({
-    tab <- Import(test_path("fixtures/ex2/tables"), "dimensionality.xlsx")
-    TblDim(tab, model = "content", footnote = "Nothing of note happend.",
-           rownames = c("Change", "Data", "Units", "Space"))
-  })
-  expect_false(inherits(tbl, "try-error"))
-  expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "d1c9d30f1e4d628a7c5e2aef0c08cb4b")
-
-})
-
-
-test_that("create table for dif works", {
-
-  skip_if_not_installed("flextable")
-
-  tbl <- try({
-    tab <- Import(test_path("fixtures/ex1/tables"), "dif_dich_TR.xlsx")
-    TblDif(tab, footnote = "Nothing to note.",
-           colnames2 = c("mig.1-3" = "without vs. missing",
-                         "mig.2-3" = "with vs. missing"))
-  })
-  expect_false(inherits(tbl, "try-error"))
-  expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "2700025522a8132ad26759bf2b4979db")
-
-  tbl <- try({
-    tab <- Import(test_path("fixtures/ex1/tables"), "dif_dich_TR.xlsx")
-    TblDif(tab, excl = c("mig.1-3", "mig.2-3"), size = 12)
-  })
-  expect_false(inherits(tbl, "try-error"))
-  expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "6c30e6c607a8ba71af8abbceab64a642")
-
-})
-
-
-test_that("create table for dif model fit works", {
-
-  skip_if_not_installed("flextable")
-
-  tbl <- try({
-    tab <- Import(test_path("fixtures/ex1/tables"), "dif_dich_TR.xlsx")
-    TblDifFit(tab, footnote = "Nothing to note.")
-  })
-  expect_false(inherits(tbl, "try-error"))
-  expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "e33303258c01b59166e5ed3bd83af00a")
-
-  tbl <- try({
-    tab <- Import(test_path("fixtures/ex1/tables"), "dif_dich_TR.xlsx")
-    TblDifFit(tab, excl = "sex", label = c("mig" = "Migrant background"))
-  })
-  expect_false(inherits(tbl, "try-error"))
-  expect_true(inherits(tbl, "flextable"))
-  expect_equal(rlang::hash(tbl), "2a6f0c7c34fb090331110074937bf926")
-
-})
-
-
-
-test_that("create table with analysis code works", {
-
-  skip_if_not_installed("flextable")
-  data(ex3)
-  tbl <- try({
-    TblCode(vars = ex3$vars, select ="mixed", tbl = FALSE)
-  })
-  expect_false(inherits(tbl, "try-error"))
-  expect_equal(rlang::hash(tbl), "ab05c01324651334464a80f141f61396")
-
-})
 

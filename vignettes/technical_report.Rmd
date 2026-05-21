@@ -47,7 +47,7 @@ To render a Quarto file in the style of NEPS Survey Papers a dedicated extension
 NEPSroutines::Setup("C:/Documents/example_tr")
 ```
 
-Before copying the relevant files `NEPSroutines::Setup()` will ask for some information in the R console about the NEPS study and the competence domain. This information is used to set the file name for the Quarto template and configure its content for the specific domain (e.g., refer to the correct domain within the technical report). Currently, the function is only designed for reading and mathematical competence. For other domains, the template for reading competence should be used and adapted accordingly.
+Before copying the relevant files `NEPSroutines::Setup()` will ask for some information in the R console about the NEPS study and the competence domain. This information is used to set the file name for the Quarto template and configure its content for the specific domain (e.g., refer to the correct domain within the technical report). Currently, the function is only designed for reading, mathematical, and digital competence. For other domains, the template for reading competence should be used and adapted accordingly.
 
 After running `NEPSroutines::Setup()` the specified folder includes the Quarto extension for NEPS survey papers (in the folder `_extensions`), a Quarto file with the content of the technical report (ending in `.qmd`), and a bibtex file with literature cited in the technical report (ending in `.bib`). Although the Quarto and bibtex file can be edited in any text editor, it is recommended to use [Rstudio](https://posit.co/download/rstudio-desktop/) which provides several features supporting the work with [R Markdown](https://rmarkdown.rstudio.com).
 
