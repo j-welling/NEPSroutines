@@ -809,7 +809,8 @@ mvi_plots <- function(
   ) {
 
   # Missing by design
-  if(!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
+  if (!is.null(missing_by_design))
+    mvs <- mvs[!(mvs %in% missing_by_design)]
 
   mv_i <- mvi_analysis(
     resp = resp,
@@ -861,7 +862,7 @@ mvi_plots <- function(
     if (is.null(grouping)) {
 
       # create plot
-      mv_i <- mv_per_position(
+      mv_i_pp <- mv_per_position(
         mv_i,
         mv = i,
         resp = resp,

@@ -1,5 +1,5 @@
 
-test_that("import single sheet works", {
+test_that("Import() imports a single sheet", {
 
   # no filename and no regexp
   expect_error(Import(path = test_path("fixtures/ex1/tables")))
@@ -16,7 +16,7 @@ test_that("import single sheet works", {
 })
 
 
-test_that("import reports missing folders and files clearly", {
+test_that("Import() reports missing folders and files clearly", {
 
   missing_path <- file.path(tempdir(), "nepsroutines-does-not-exist")
   expect_error(
@@ -42,7 +42,7 @@ test_that("import reports missing folders and files clearly", {
 })
 
 
-test_that("import all sheets works", {
+test_that("Import() imports all sheets", {
 
   tbl <- try({
     Import(path = test_path("fixtures/ex1/tables"),
@@ -56,7 +56,7 @@ test_that("import all sheets works", {
 })
 
 
-test_that("import using regular expression works", {
+test_that("Import() imports using regular expression", {
 
   tbl <- try(
     Import(path = test_path("fixtures/ex1/tables"),
