@@ -15,3 +15,6 @@ Returns `NULL`, invisibly.
 \description{
 Update the Quarto extension in a folder
 }
+\seealso{
+`vignette("technical_report", package = "NEPSroutines")`
+}

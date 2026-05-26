@@ -29,6 +29,8 @@ name of the vector should match the vector names in @hl_solutions}
 \item{mvs}{integer vector; contains user-defined missing values}
 
 \item{warn}{logical; print warnings}
+
+\item{verbose}{logical; print messages}
 }
 \value{
 resp including unscored (raw) and scored items
