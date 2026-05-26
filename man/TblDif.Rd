@@ -13,7 +13,8 @@ TblDif(
   colnames2 = NULL,
   width = 1.4,
   size = 10,
-  digits = 2
+  digits = 2,
+  rename_collapsed = TRUE
 )
 
 TblDIF(
@@ -24,7 +25,8 @@ TblDIF(
   colnames2 = NULL,
   width = 1.4,
   size = 10,
-  digits = 2
+  digits = 2,
+  rename_collapsed = TRUE
 )
 }
 \arguments{
@@ -51,6 +53,9 @@ correspond to the number of columns in `obj`.}
 \item{size}{The general font size.}
 
 \item{digits}{A number for rounding.}
+
+\item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
+item names.}
 }
 \value{
 A flextable.

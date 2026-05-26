@@ -4,7 +4,7 @@
 \alias{GetCat}
 \title{Summarize category thresholds}
 \usage{
-GetCat(obj, stat = median, item = FALSE, digits = 2)
+GetCat(obj, stat = median, item = FALSE, digits = 2, rename_collapsed = TRUE)
 }
 \arguments{
 \item{obj}{A [TAM::tam.mml()] object with a fitted IRT model from
@@ -16,6 +16,9 @@ GetCat(obj, stat = median, item = FALSE, digits = 2)
 (`FALSE`) or the item name corresponding to the value of `stat` (`TRUE`).}
 
 \item{digits}{A number for rounding.}
+
+\item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
+item names.}
 }
 \value{
 The calculated statistic or a vector of item names.

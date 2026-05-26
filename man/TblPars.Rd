@@ -9,7 +9,8 @@ TblPars(
   footnote = NULL,
   excl = c("N_administered"),
   size = 10,
-  width = 0.5
+  width = 0.5,
+  rename_collapsed = TRUE
 )
 }
 \arguments{
@@ -26,6 +27,9 @@ or a data frame with sheet "summary" from "irt_poly.xlsx" created by
 \item{width}{The widths of the columns; if a single value is provided, it
 will be applied to all columns; otherwise the length must correspond to the
 number of columns in `obj`.}
+
+\item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
+item names.}
 }
 \value{
 A flextable.
@@ -61,7 +65,7 @@ pars <- Import(tmpdir, "/irt_dich.xlsx")
 # Default parameter table
 TblPars(pars)
 
-# Parameter table including number of respondents the item was adminstered
+# Parameter table including number of respondents the item was administered
 # and a footnote
 TblPars(pars, excl = NULL, footnote = "Nothing to report.")
 }

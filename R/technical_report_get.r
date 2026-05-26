@@ -238,6 +238,7 @@ GetMVP <- GetMvp
 #' @param digits A number for rounding.
 #' @returns A number with the calculated statistic or character vector with
 #' item names.
+#' @inheritParams TblPars
 #' @export
 #' @examples
 #' \dontrun{
@@ -281,7 +282,7 @@ GetMVP <- GetMvp
 #' file.remove(paste0(tmpdir, "/irt_dich.rds"))
 #' }
 GetPars <- function(obj, type, stat = median, item = FALSE,
-                    excl = NULL, digits = 2) {
+                    excl = NULL, digits = 2, rename_collapsed = TRUE) {
 
   # normalize arguments
   type <- as.character(type[1])
@@ -364,7 +365,7 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
               boolvec,
               methods::getFunction(operators[i])(x, values[i])
             )
-          boolvec<- eval(expr)
+          boolvec <- eval(expr)
         }
       }
       if (item) {
@@ -382,6 +383,7 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
       return(rnd(stat(tab[, type], na.rm = TRUE), digits = digits))
     } else {
       i <- tab[stat(tab[, type], na.rm = TRUE, item = TRUE), "Item"]
+      if (rename_collapsed) i <- gsub("_collapsed", "", i)
       return(paste0(i, collapse = ", "))
     }
 
@@ -399,6 +401,7 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
 #' (`FALSE`) or the item name corresponding to the value of `stat` (`TRUE`).
 #' @param digits A number for rounding.
 #' @returns The calculated statistic or a vector of item names.
+#' @inheritParams TblPars
 #' @export
 #' @examples
 #' \dontrun{
@@ -435,7 +438,8 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
 #' file.remove(paste0(tmpdir, "/irt_poly.xlsx"))
 #' file.remove(paste0(tmpdir, "/irt_poly.rds"))
 #' }
-GetCat <- function(obj, stat = median, item = FALSE, digits = 2) {
+GetCat <- function(obj, stat = median, item = FALSE, digits = 2,
+                   rename_collapsed = TRUE) {
 
   # Normalize arguments
   item <- as.logical(item[1])
@@ -450,6 +454,7 @@ GetCat <- function(obj, stat = median, item = FALSE, digits = 2) {
     return(rnd(stat(na.omit(c(cat))), digits = digits))
   } else {
     i <- rownames(cat)[rowSums(cat == stat(na.omit(c(cat))), na.rm = TRUE) >= 1]
+    if (rename_collapsed) i <- gsub("_collapsed", "", i)
     return(paste0(i, collapse = ", "))
   }
 
