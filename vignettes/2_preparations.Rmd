@@ -1,0 +1,166 @@
+---
+title: "Peparations"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    toc: true
+    number_sections: no
+  bookdown::pdf_document2:
+    toc: true
+    number_sections: no
+bibliography: ../inst/NEPSroutines.bib
+vignette: >
+  %\VignetteIndexEntry{Preparations}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r, include = FALSE}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+
+```
+
+\newpage
+
+# Preparations in R
+
+For scaling, the latest version of R should be installed (see <https://cran.r-project.org/> for the latest R version or use `update.packages()`). The easiest way to work with R is via RStudio, which is a GUI (= graphical user interface) for the statistical programming language R. If it is not pre-installed on your computer, you can download the latest version here: <https://www.rstudio.com/products/rstudio/>.
+
+## Creating an R Project in the Study Directory
+
+For each scaling procedure, a separate R project should be created in the corresponding study directory on the network drive.
+
+The overarching study directory can be found here:
+
+`//wipo.lifbi.de/daten/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/HE`
+
+Each sub-study (e.g., reading, mathematics, etc.) has its own subfolder. The project should be created in the respective subfolder via:
+
+File → New Project… → New Directory → New Project → Create Project
+
+You will need to specify a project name and path.
+
+The project must be created on the LIfBi network drive, as NEPS data may only be stored and processed there. However, note that working via VPN can cause significant delays when saving large output files (usually result datasets rather than tables or plots). If this becomes problematic, saving of results can be disabled within the package. Local storage of results should only be used in exceptional cases and any locally stored files must be deleted immediately once they are no longer needed.
+
+## Installing and Loading the `NEPSroutines` Package
+
+The package `NEPSroutines` is not available on CRAN. Instead, it is provided as a `.tar.gz` file on the network drive.
+
+To install it, use:
+
+```{r}
+install.packages(
+  "PATH/TO/DIRECTORY/NEPSroutines_x.x.x.tar.gz",
+  type = "source",
+  repos = NULL
+)
+```
+
+The path depends on the location of the file. The most recent version is always located in:
+
+`Z:/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/Skalierungspaket/Paketversionen`
+
+You may also copy the package directly into your project folder to avoid specifying a long path. The file name follows the pattern:
+
+`NEPSroutines_1.3.0.tar.gz`
+
+The highest version number corresponds to the most recent release.
+
+Once installed, the package can be loaded in each R session using:
+
+```{r}
+library(NEPSroutines)
+```
+
+## Using R Markdown
+
+R Markdown can be used for scaling workflows (though it is not mandatory). R Markdown documents allow text, code, and output to be combined in a single file.
+
+If you use R Markdown, make sure to enable the option **"Chunk Output in Console"** in the settings (click the gear icon at the top of the script). Do not use “Chunk Output Inline”, as this may prevent some scaling outputs from being displayed correctly in R.
+
+## Session Information
+
+To ensure reproducibility, the versions of R and all packages used in the scaling process should be documented. This can be done using:
+
+```{r}
+sessionInfo()
+```
+
+# Required Data and Files
+
+Scaling requires multiple datasets that usually need to be assembled manually. This section provides an overview of the most commonly required data and their typical locations. Exceptions may apply depending on the specific study.
+
+Most relevant files can be found in:
+
+`//wipo.lifbi.de/daten/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/HE`
+
+Within each sub-study folder, SPSS files and codebooks are typically located in the `rawdata` folder (sometimes within `preloads`).
+
+If a required file is missing, it should be requested.
+
+## Competence Data
+
+Competence data are contained in SPSS files with `xTargetCompetencies` in the file name.
+
+Required variables include the ID variable (`ID_t`) and all competence items. Item names can be found in the respective study documentation or codebook. Only data from the relevant wave should be retained.
+
+## Information on Competence Items
+
+For scaling, additional item-level information is required, including:
+
+-    Item position (may vary across test booklets)
+
+-    Item type (e.g., multiple choice, constructed response)
+
+-    Correct response
+
+-    Test booklet assignment
+
+-    Item cluster or group
+
+-    Additional variables depending on the study (e.g., content domain)
+
+This information must typically be extracted from test booklets, study design documentation, or survey materials and ideally compiled into an Excel file.
+
+Relevant documents can often be found here:
+
+`//wipo.lifbi.de/daten/Projekte_(07)/NEPS-Kompetenzen_(14)/Netzwerk_(05)`
+
+## Sociodemographic Data
+
+In addition to competence items, sociodemographic variables are required for descriptive analyses and DIF analyses. Depending on the study type, these may include gender, migration background, cultural capital (e.g., number of books at home as part of socioeconomic status), school type (for students in secondary education), educational attainment (for adults), and age (for adults; in school samples this is typically homogeneous due to grade-level structure).
+
+These variables can be found in SPSS files such as `CohortProfile`, `pParent` (children), or `pTarget` (adults).
+
+Common variable names (may vary by study):
+
+-    **Gender**: `tx80501` in `CohortProfile`
+
+-    **Age**: must be computed (see vignette `data_preparation`) using `tx8050y` (year of birth), `tx8050m` (month of birth), and the survey year/month in `CohortProfile`
+
+-    **Migration background**: e.g., `p400500_g1` in `pParent` (children)
+
+-    **Cultural capital**: e.g., `p34005a` in `pParent` (children)
+
+All other variables should be verified using the respective codebook.
+
+## Test Booklet Design Information
+
+In addition to competence and socio-demographic data, information on survey design and test booklet structure is required.
+
+Many studies use multiple test booklets (e.g., easy vs. difficult forms) and/or rotational designs in which different groups receive different test orders (e.g., Group 1: Reading → Mathematics; Group 2: Mathematics → Reading).
+
+This information is typically stored in the SPSS file `xTargetCompetencies` in a variable whose name starts with `tx` and whose label contains *"survey/test instrument"*.
+
+Since values are encoded numerically, value labels must be used to interpret them. In SPSS, these can be viewed in variable view.
+
+In R, labels can be retrieved (after importing the data with `haven`) using:
+
+```{r}       
+attributes(dat$name_variable)$labels
+```
