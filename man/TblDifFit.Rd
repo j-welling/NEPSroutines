@@ -26,7 +26,7 @@ TblDIFFit(
 \arguments{
 \item{obj}{A list with data frames with sheets from "dif_poly_TR.xlsx"
 or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
-[dif_analysis()].}
+\code{\link[=dif_analysis]{dif_analysis()}}.}
 
 \item{footnote}{A table note.}
 
@@ -38,7 +38,7 @@ or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
 
 \item{width}{The widths of the columns; if a single values is given, it
 corresponds to the first column; otherwise the number of values must
-correspond to the number of columns in `obj`.}
+correspond to the number of columns in \code{obj}.}
 }
 \value{
 A flextable.

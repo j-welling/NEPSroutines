@@ -11,14 +11,14 @@ GetDIFFit(obj, difvar, type, model = "dif")
 }
 \arguments{
 \item{obj}{A data frame with sheets from "dif_dich_TR.xlsx" or
-"dif_poly_TR.xlsx" created by [dif_analysis()].}
+"dif_poly_TR.xlsx" created by \code{\link[=dif_analysis]{dif_analysis()}}.}
 
 \item{difvar}{The DIF variable.}
 
-\item{type}{The model fit statistic corresponding to the column name in `obj`}
+\item{type}{The model fit statistic corresponding to the column name in \code{obj}}
 
 \item{model}{The name of the model for which the main effects should be
-returned, one of `dif` or `main`.}
+returned, one of \code{dif} or \code{main}.}
 }
 \value{
 The model fit statistic.

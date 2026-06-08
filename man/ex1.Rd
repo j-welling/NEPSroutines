@@ -6,35 +6,35 @@
 \title{Dichotomous NEPS data without booklets}
 \format{
 A list with two data frames including the simulated responses
-(`resp`) and the characteristics of the variables (`vars`).
+(\code{resp}) and the characteristics of the variables (\code{vars}).
 
-`resp` is a data frame with 1,010 rows and 35 columns:
+\code{resp} is a data frame with 1,010 rows and 35 columns:
 \describe{
-  \item{ID_t}{Unique identifier for respondent.}
-  \item{sex}{Sex with 0 = male and 1 = female.}
-  \item{mig}{Migrant background with 0 = no and 1 = yes.}
-  \item{school}{School type with 0 = lower, 1 = intermediate, and 1 = upper.}
-  \item{grk1..._c}{Scored item responses 0 = incorrect and 1 = correct.}
-  \item{grk1...}{Unscored item responses for simple multiple-choice items
-  with values of 1 to 4 representing the selected response option.}
-  \item{valid}{A logical vector identifying valid respondents.}
+\item{ID_t}{Unique identifier for respondent.}
+\item{sex}{Sex with 0 = male and 1 = female.}
+\item{mig}{Migrant background with 0 = no and 1 = yes.}
+\item{school}{School type with 0 = lower, 1 = intermediate, and 1 = upper.}
+\item{grk1..._c}{Scored item responses 0 = incorrect and 1 = correct.}
+\item{grk1...}{Unscored item responses for simple multiple-choice items
+with values of 1 to 4 representing the selected response option.}
+\item{valid}{A logical vector identifying valid respondents.}
 }
 
-`vars` is a data frame with 30 rows and 8 columns:
+\code{vars} is a data frame with 30 rows and 8 columns:
 \describe{
-  \item{item}{Name of the item.}
-  \item{raw}{A logical distinguishing scored (`FALSE`) and unscored (`TRUE`)
-  items.}
-  \item{dich}{A logical identifying scored dichotomous (`TRUE`) and
-  other (`FALSE`) items.}
-  \item{type}{A string identifying the item type as simple multiple-choice
-   (`MC`) or complex multiple-choice (`CMC`).}
-  \item{scoring}{A number with the scoring weight in the item response
-  analyses.}
-  \item{num_cat}{A number with the number of response categories.}
-  \item{pos}{A number with the item position in the test.}
-  \item{correct}{A number between 1 and 4 representing the correct response
-  option for simple multiple-choice items.}
+\item{item}{Name of the item.}
+\item{raw}{A logical distinguishing scored (\code{FALSE}) and unscored (\code{TRUE})
+items.}
+\item{dich}{A logical identifying scored dichotomous (\code{TRUE}) and
+other (\code{FALSE}) items.}
+\item{type}{A string identifying the item type as simple multiple-choice
+(\code{MC}) or complex multiple-choice (\code{CMC}).}
+\item{scoring}{A number with the scoring weight in the item response
+analyses.}
+\item{num_cat}{A number with the number of response categories.}
+\item{pos}{A number with the item position in the test.}
+\item{correct}{A number between 1 and 4 representing the correct response
+option for simple multiple-choice items.}
 }
 }
 \usage{

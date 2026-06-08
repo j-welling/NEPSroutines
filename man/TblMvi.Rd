@@ -28,7 +28,7 @@ TblMVI(
 \arguments{
 \item{obj}{A list with data frames with sheets from "mv_item.xlsx"
 or a data frame with sheet "summary" from "mv_item.xlsx" created by
-[mv_item()].}
+\code{\link[=mv_item]{mv_item()}}.}
 
 \item{select}{An optional name of a specific group to select.}
 
@@ -40,7 +40,7 @@ or a data frame with sheet "summary" from "mv_item.xlsx" created by
 
 \item{width}{The widths of the columns; if a single value is provided, it
 will be applied to all columns; otherwise the length must correspond to the
-number of columns in `obj`.}
+number of columns in \code{obj}.}
 
 \item{excl}{A vector of column names to exclude.}
 }

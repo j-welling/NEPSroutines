@@ -77,9 +77,9 @@ are stored on the hard drive}
 }
 \value{
 (if return = TRUE) list with results:
-  analysis: list with one data frame per item containing item-total correlations
-    for each possible response; correct response is marked with an *
-  summary: list with summary of results.
+analysis: list with one data frame per item containing item-total correlations
+for each possible response; correct response is marked with an *
+summary: list with summary of results.
 }
 \description{
 Checks how the distractors in multiple choice items functioned.

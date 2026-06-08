@@ -15,7 +15,7 @@ TblSteps(
 }
 \arguments{
 \item{obj}{A list with data frames with sheets from "irt_poly.xlsx"
-or sheet "steps" from "irt_poly.xlsx" created by [irt_analysis()].}
+or sheet "steps" from "irt_poly.xlsx" created by \code{\link[=irt_analysis]{irt_analysis()}}.}
 
 \item{footnote}{A table note.}
 
@@ -23,7 +23,7 @@ or sheet "steps" from "irt_poly.xlsx" created by [irt_analysis()].}
 
 \item{width}{The widths of the columns; if a single value is provided, it
 will be applied to all columns; otherwise the length must correspond to the
-number of columns in `obj`.}
+number of columns in \code{obj}.}
 
 \item{digits}{A number for rounding.}
 

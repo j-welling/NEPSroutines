@@ -16,9 +16,9 @@ TblDim(
 }
 \arguments{
 \item{obj}{A data frame with sheets from "dimensionality.xlsx"
-created by [dim_analysis()].}
+created by \code{\link[=dim_analysis]{dim_analysis()}}.}
 
-\item{model}{The model name, typically `uni` for the unidimensional
+\item{model}{The model name, typically \code{uni} for the unidimensional
 reference model and the name of the facet variable.}
 
 \item{rownames}{A vector of labels for the rows.}
@@ -31,7 +31,7 @@ reference model and the name of the facet variable.}
 
 \item{width}{The column widths; if a single value is given, it refers to the
 first column; otherwise the number of values must correspond to the number of
-columns in `obj`.}
+columns in \code{obj}.}
 }
 \value{
 A flextable.

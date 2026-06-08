@@ -12,12 +12,12 @@ GetMVI(obj, type, stat, digits = 0)
 \arguments{
 \item{obj}{A list with data frames with sheets from "mv_item.xlsx"
 or a single data frame with the sheet "summary" from "mv_item.xlsx" created
-by [mv_item()].}
+by \code{\link[=mv_item]{mv_item()}}.}
 
-\item{type}{The type of missing values identifying the row in `obj` which is
+\item{type}{The type of missing values identifying the row in \code{obj} which is
 typcially one of OM, NR, NV, ND, or ALL.}
 
-\item{stat}{The calculated statistic identifying the column in `obj` which is
+\item{stat}{The calculated statistic identifying the column in \code{obj} which is
 typically one of Mean, SD, Median, Min, or Max.}
 
 \item{digits}{A number for rounding.}

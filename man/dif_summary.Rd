@@ -43,7 +43,7 @@ for items with collapsed categories}
 }
 \value{
 list of information criteria, dif estimates and main effects in
-  data frames for dif analysis.
+data frames for dif analysis.
 }
 \description{
 Summary for DIF analysis

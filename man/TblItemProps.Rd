@@ -21,11 +21,11 @@ TblItemProps(
 includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{select}{A named vector of variable names in `vars` identifying
+\item{select}{A named vector of variable names in \code{vars} identifying
 different groups of items for which the item property should be counted. The
 name of the vector gives the column headings of the table.}
 
-\item{prop}{A vector with the variable name in `vars` identifying the item
+\item{prop}{A vector with the variable name in \code{vars} identifying the item
 property such as response format, text function, or cognitive function.}
 
 \item{propname}{A name for the item property to be used in the table heading.}
@@ -38,7 +38,7 @@ property such as response format, text function, or cognitive function.}
 
 \item{width}{The widths of the columns; if a single value is provided, it
 will be applied to all columns; otherwise the length must correspond to the
-number of columns in `obj`.}
+number of columns in \code{obj}.}
 
 \item{formats}{Long names of item properties to be displayed in the table.}
 }

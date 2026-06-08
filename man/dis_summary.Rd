@@ -30,9 +30,9 @@ are stored on the hard drive}
 }
 \value{
 list of data frames
-          correct: item-total correlations for correct responses
-          distractor: item-total correlations for distractors
-          descriptives: table with summary of results.
+correct: item-total correlations for correct responses
+distractor: item-total correlations for distractors
+descriptives: table with summary of results.
 }
 \description{
 Summary of distractor analysis

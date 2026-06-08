@@ -27,7 +27,7 @@ Fig(
 \item{height}{The height of the resized image}
 
 \item{crop}{A string indicating how to crop the image in the format
-"<width>x<height>\{+-\}<xoffset>\{+-\}<yoffset>"
+"\if{html}{\out{<width>}}x\if{html}{\out{<height>}}\{+-\}\if{html}{\out{<xoffset>}}\{+-\}\if{html}{\out{<yoffset>}}"
 (see http://www.imagemagick.org/Magick++/Geometry.html)}
 
 \item{dpi}{The dots per inch.}

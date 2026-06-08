@@ -16,7 +16,7 @@ TblPars(
 \arguments{
 \item{obj}{A list with data frames with sheets from "irt_poly.xlsx"
 or a data frame with sheet "summary" from "irt_poly.xlsx" created by
-[irt_analysis()].}
+\code{\link[=irt_analysis]{irt_analysis()}}.}
 
 \item{footnote}{A table note.}
 
@@ -26,7 +26,7 @@ or a data frame with sheet "summary" from "irt_poly.xlsx" created by
 
 \item{width}{The widths of the columns; if a single value is provided, it
 will be applied to all columns; otherwise the length must correspond to the
-number of columns in `obj`.}
+number of columns in \code{obj}.}
 
 \item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
 item names.}

@@ -32,7 +32,7 @@ TblDIF(
 \arguments{
 \item{obj}{A list with data frames with sheets from "dif_poly_TR.xlsx"
 or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
-[dif_analysis()].}
+\code{\link[=dif_analysis]{dif_analysis()}}.}
 
 \item{footnote}{A table note.}
 
@@ -40,15 +40,15 @@ or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
 
 \item{colnames1}{A named vector of names for the DIF variables included in
 the first line of the table heading; the names indicate the group name in
-`obj`, while the values give th new headings.}
+\code{obj}, while the values give th new headings.}
 
 \item{colnames2}{A named vector of groups for the DIF variables included in
 the second line for the table heading; the names indicate the group name in
-`obj`, while the values give the new headings.}
+\code{obj}, while the values give the new headings.}
 
 \item{width}{The widths of the columns; if a single values is given, it
 corresponds to the first column; otherwise the number of values must
-correspond to the number of columns in `obj`.}
+correspond to the number of columns in \code{obj}.}
 
 \item{size}{The general font size.}
 

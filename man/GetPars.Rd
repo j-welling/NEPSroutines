@@ -16,26 +16,28 @@ GetPars(
 }
 \arguments{
 \item{obj}{A data frame with sheets from "irt_dich.xlsx" or "irt_poly.xlsx"
-created by [irt_analysis()].}
+created by \code{\link[=irt_analysis]{irt_analysis()}}.}
 
-\item{type}{A column name in `obj` identifying an item statistic.}
+\item{type}{A column name in \code{obj} identifying an item statistic.}
 
-\item{stat}{A function used to summarize `type` or a string specifying
+\item{stat}{A function used to summarize \code{type} or a string specifying
 an operator (=, <, >) with a number; e.g.,
-* =3 returns number of type equal to 3
-* <3 returns number of type less than 3
-* >3 returns number of type greater than 3
- Multiple conditions can be combined using & and |.}
+\itemize{
+\item =3 returns number of type equal to 3
+\item <3 returns number of type less than 3
+\item 3 returns number of type greater than 3Multiple conditions can be combined using & and |.
+}}
 
 \item{item}{A logical indicating whether to return the results from stat
-(`FALSE`) or the item name corresponding to the value of `stat` (`TRUE`).}
+(\code{FALSE}) or the item name corresponding to the value of \code{stat} (\code{TRUE}).}
 
 \item{excl}{A string specifying an operator (=, <, >) with a number
 indicating values to exclude; e.g.,
-* =3 excludes number of type equal to 3
-* <3 excludes number of type less than 3
-* >3 excludes number of type greater than 3
-Multiple conditions can be combined using & and |.}
+\itemize{
+\item =3 excludes number of type equal to 3
+\item <3 excludes number of type less than 3
+\item 3 excludes number of type greater than 3Multiple conditions can be combined using & and |.
+}}
 
 \item{digits}{A number for rounding.}
 

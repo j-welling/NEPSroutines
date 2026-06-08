@@ -8,12 +8,12 @@ GetFit(obj, type, GPCM = FALSE, digits = 2)
 }
 \arguments{
 \item{obj}{A data frame with sheets from "irt_dich.xlsx" or "irt_poly.xlsx"
-created by [irt_analysis()].}
+created by \code{\link[=irt_analysis]{irt_analysis()}}.}
 
-\item{type}{A column name in `obj` identifying the model fit statistic.}
+\item{type}{A column name in \code{obj} identifying the model fit statistic.}
 
-\item{GPCM}{A logical to return the GPCM fit (`TRUE`) instead of the PCM fit
-(`FALSE`).}
+\item{GPCM}{A logical to return the GPCM fit (\code{TRUE}) instead of the PCM fit
+(\code{FALSE}).}
 
 \item{digits}{A number for rounding.}
 }

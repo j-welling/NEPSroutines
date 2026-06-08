@@ -97,9 +97,9 @@ problematic DIF (defaults to 0.5)}
 }
 \value{
 (if return = TRUE) a list of:
-  models: list with DIF model results for all variables defined in 'dif_vars'
-  summaries: list with a summary of DIF results for all variables defined in 'dif_vars'
-  tr_tables: table for TR with summary of results for all variables defined in 'dif_vars'
+models: list with DIF model results for all variables defined in 'dif_vars'
+summaries: list with a summary of DIF results for all variables defined in 'dif_vars'
+tr_tables: table for TR with summary of results for all variables defined in 'dif_vars'
 }
 \description{
 Testing for differential item functioning for binary and polytomous data.

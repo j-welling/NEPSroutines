@@ -12,13 +12,13 @@ GetProp(obj, select, prop = "type", val = c("CMC", "MA"), item = FALSE)
 \item{select}{string; defines name of logical variable in vars that indicates
 which items to use for the analysis}
 
-\item{prop}{A variable name in `vars` identifying the item property such
-as response format, text function, or cognitive function (default: `type`).}
+\item{prop}{A variable name in \code{vars} identifying the item property such
+as response format, text function, or cognitive function (default: \code{type}).}
 
-\item{val}{The values of `prop` to count.}
+\item{val}{The values of \code{prop} to count.}
 
-\item{item}{A logical to return the item names (`TRUE`) or the numeric
-values (`FALSE`).}
+\item{item}{A logical to return the item names (\code{TRUE}) or the numeric
+values (\code{FALSE}).}
 }
 \value{
 The number of items or the item names.

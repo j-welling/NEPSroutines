@@ -8,12 +8,12 @@ GetDimFit(obj, model, type)
 }
 \arguments{
 \item{obj}{A data frame with sheets from "dimensionality.xlsx"
-created by [dim_analysis()].}
+created by \code{\link[=dim_analysis]{dim_analysis()}}.}
 
-\item{model}{A column name identifying the model in `obj` which is typically
+\item{model}{A column name identifying the model in \code{obj} which is typically
 one of uni or dim.}
 
-\item{type}{A row name identifying the model fit statistic in `obj` which
+\item{type}{A row name identifying the model fit statistic in \code{obj} which
 is typically one of Npars, loglik, AIC, or BIC.}
 }
 \value{

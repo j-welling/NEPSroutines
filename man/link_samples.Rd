@@ -124,12 +124,12 @@ sample; if NULL, all common items are used}
 }
 \value{
 list: wle = linked WLEs for second measurement with
-                       standard errors
-                 const   = linking constant
-                 const.err = linking error
-                 anchors = used anchor items
-                 k = number of anchor items
-                 xsi = linked item parameters
+standard errors
+const   = linking constant
+const.err = linking error
+anchors = used anchor items
+k = number of anchor items
+xsi = linked item parameters
 }
 \description{
 Link two samples using mean-mean linking

@@ -69,45 +69,45 @@ Score partial credit items
 \section{Notifications}{
 
 \describe{
-  \item{\code{stop}: \code{resp} is not a data.frame}{Triggered when
-    \code{resp} is not a data.frame. Effect: the function halts.}
-  \item{\code{stop}: \code{poly_items} is invalid}{Triggered when
-    \code{poly_items} is not a non-empty named list of character vectors.
-    Effect: the function halts; no scoring is performed.}
-  \item{\code{stop}: logical parameter is invalid}{Triggered when
-    \code{impute}, \code{warn}, \code{save}, \code{overwrite}, or
-    \code{verbose} is not a single \code{TRUE}/\code{FALSE} value.
-    Effect: the function halts.}
-  \item{\code{stop}: \code{threshold} is out of range}{Triggered when
-    \code{threshold} is not a single numeric value in the interval
-    \[0, 1\]. Effect: the function halts; no scoring is performed.}
-  \item{\code{stop}: \code{mvs} is invalid}{Triggered when \code{mvs}
-    is provided but is not a numeric vector. Effect: the function halts.}
-  \item{\code{stop}: \code{missing_by_design} is invalid}{Triggered when
-    \code{missing_by_design} is not a single numeric value. Effect: the
-    function halts.}
-  \item{\code{stop}: string parameter is invalid}{Triggered when
-    \code{path_results}, \code{path_table}, or \code{select} is not a
-    single character string (or NULL for \code{select}). Effect: the
-    function halts.}
-  \item{\code{stop}: imputation prerequisites missing}{Triggered when
-    \code{impute = TRUE} but \code{vars} is not a data.frame or
-    \code{select} is \code{NULL}. Effect: the function halts with an
-    actionable message suggesting to provide the argument or set
-    \code{impute = FALSE}.}
-  \item{\code{warning}: polytomous item naming convention}{Triggered when
-    a polytomous item name in \code{poly_items} does not contain the
-    expected subitem marker (e.g., \code{"s_c"} or \code{"s_sc3g9_c"}).
-    Effect: scoring proceeds but downstream functions that rely on the
-    naming convention (e.g., label lookup) may silently fail or produce
-    unexpected results.}
-  \item{\code{warning}: no \code{mvs} provided}{Triggered when
-    \code{mvs = NULL}. Effect: the default \code{c(-99:-1)} is used;
-    any user-defined missing values outside this range will not be
-    converted to \code{NA}.}
-  \item{\code{message}: verbose imputation info}{Triggered when
-    \code{impute = TRUE} and \code{verbose = TRUE}. Effect: informational
-    message printed to the console; no impact on results.}
+\item{\code{stop}: \code{resp} is not a data.frame}{Triggered when
+\code{resp} is not a data.frame. Effect: the function halts.}
+\item{\code{stop}: \code{poly_items} is invalid}{Triggered when
+\code{poly_items} is not a non-empty named list of character vectors.
+Effect: the function halts; no scoring is performed.}
+\item{\code{stop}: logical parameter is invalid}{Triggered when
+\code{impute}, \code{warn}, \code{save}, \code{overwrite}, or
+\code{verbose} is not a single \code{TRUE}/\code{FALSE} value.
+Effect: the function halts.}
+\item{\code{stop}: \code{threshold} is out of range}{Triggered when
+\code{threshold} is not a single numeric value in the interval
+[0, 1]. Effect: the function halts; no scoring is performed.}
+\item{\code{stop}: \code{mvs} is invalid}{Triggered when \code{mvs}
+is provided but is not a numeric vector. Effect: the function halts.}
+\item{\code{stop}: \code{missing_by_design} is invalid}{Triggered when
+\code{missing_by_design} is not a single numeric value. Effect: the
+function halts.}
+\item{\code{stop}: string parameter is invalid}{Triggered when
+\code{path_results}, \code{path_table}, or \code{select} is not a
+single character string (or NULL for \code{select}). Effect: the
+function halts.}
+\item{\code{stop}: imputation prerequisites missing}{Triggered when
+\code{impute = TRUE} but \code{vars} is not a data.frame or
+\code{select} is \code{NULL}. Effect: the function halts with an
+actionable message suggesting to provide the argument or set
+\code{impute = FALSE}.}
+\item{\code{warning}: polytomous item naming convention}{Triggered when
+a polytomous item name in \code{poly_items} does not contain the
+expected subitem marker (e.g., \code{"s_c"} or \code{"s_sc3g9_c"}).
+Effect: scoring proceeds but downstream functions that rely on the
+naming convention (e.g., label lookup) may silently fail or produce
+unexpected results.}
+\item{\code{warning}: no \code{mvs} provided}{Triggered when
+\code{mvs = NULL}. Effect: the default \code{c(-99:-1)} is used;
+any user-defined missing values outside this range will not be
+converted to \code{NA}.}
+\item{\code{message}: verbose imputation info}{Triggered when
+\code{impute = TRUE} and \code{verbose = TRUE}. Effect: informational
+message printed to the console; no impact on results.}
 }
 }
 

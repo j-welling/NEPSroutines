@@ -8,15 +8,15 @@ GetDist(obj, stat = median, correct = FALSE, item = FALSE, digits = 2)
 }
 \arguments{
 \item{obj}{A data frame with sheets from "distractors_summary.xlsx"
-created by [dis_analysis()].}
+created by \code{\link[=dis_analysis]{dis_analysis()}}.}
 
 \item{stat}{A function used to summarize the distractor correlations.}
 
 \item{correct}{A logical indicating whether to return the results for
-distractors (`FALSE`) or correct response options (`TRUE`).}
+distractors (\code{FALSE}) or correct response options (\code{TRUE}).}
 
-\item{item}{A logical indicating whether to return the results from `stat`
-(`FALSE`) or the item name corresponding to the value of `stat` (`TRUE`).}
+\item{item}{A logical indicating whether to return the results from \code{stat}
+(\code{FALSE}) or the item name corresponding to the value of \code{stat} (\code{TRUE}).}
 
 \item{digits}{A number for rounding.}
 }

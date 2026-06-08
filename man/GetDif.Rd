@@ -31,35 +31,34 @@ GetDIF(
 }
 \arguments{
 \item{obj}{A data frame with sheets from "dif_dich_XXX.xlsx" or
-"dif_poly_XXX.xlsx" created by [dif_analysis()].}
+"dif_poly_XXX.xlsx" created by \code{\link[=dif_analysis]{dif_analysis()}}.}
 
 \item{n}{A group name to return the sample size of this group
 (corresponds to the values in column "number" of sheet "facet").}
 
-\item{main}{Return standardized main effects (`std`) or unstandardized
-main effects (`ustd`). If the DIF variable has more than two groups
-and `group` is missing, results for the first group comparison are returned.}
+\item{main}{Return standardized main effects (\code{std}) or unstandardized
+main effects (\code{ustd}). If the DIF variable has more than two groups
+and \code{group} is missing, results for the first group comparison are returned.}
 
 \item{dif}{A function used to summarize the DIF effects or a string
 specifying an operator (=, <, >) with a number; e.g.,
-* =1 returns number of DIF effects equal to 1
-* <1 returns number of DIF effects less than 1
-* >1 returns number of DIF effects greater than 1
-Multiple conditions can be combined using & and |.
-If the DIF variable has more than two group and `group` is missing, results
-across all groups are returned.}
+\itemize{
+\item =1 returns number of DIF effects equal to 1
+\item <1 returns number of DIF effects less than 1
+\item 1 returns number of DIF effects greater than 1Multiple conditions can be combined using & and |.If the DIF variable has more than two group and group is missing, resultsacross all groups are returned.
+}}
 
-\item{item}{A logical to return the item names (`TRUE`) instead of the
-calculated statistic for the DIF effects (`FALSE`).}
+\item{item}{A logical to return the item names (\code{TRUE}) instead of the
+calculated statistic for the DIF effects (\code{FALSE}).}
 
 \item{group}{If the DIF variable has more than two groups, the name of
 the group comparison.}
 
 \item{model}{The name of the model for which the main effects should be
-returned, one of `dif` or `main`.}
+returned, one of \code{dif} or \code{main}.}
 
-\item{signed}{A logical to use the unsigned DIF effects (`FALSE`) instead of
-the signed DIF effects (`TRUE`).}
+\item{signed}{A logical to use the unsigned DIF effects (\code{FALSE}) instead of
+the signed DIF effects (\code{TRUE}).}
 
 \item{digits}{A number for rounding.}
 }
