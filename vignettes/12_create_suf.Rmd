@@ -1,0 +1,67 @@
+---
+title: "Create SUF"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    toc: true
+    number_sections: no
+  bookdown::pdf_document2:
+    toc: true
+    number_sections: no
+bibliography: ../inst/NEPSroutines.bib
+vignette: >
+  %\VignetteIndexEntry{Create SUF}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, include = FALSE}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+
+```
+
+\newpage
+
+# Main Function
+
+The function `create_suf()` is used to create the SUF with the newly
+computed WLEs. Note that all dichotomous and polytomous items used in
+the test must be included in the SUF. These refer to the scored items.
+Polytomous variables with collapsed categories should not be included in
+the SUF. During data preparation, a logical variable should therefore
+already have been created that identifies the relevant items (see
+Section 4.3.3 Variables for Scores and the SUF). In the example, this
+variable is called `suf`.
+
+```{r}
+NEPSroutines::create_suf(
+  resp = resp,
+  vars = vars,
+  select = "suf",
+  competence = "Reading",
+  scores = scores,
+  score_name = "reg7",
+  path = here::here("suf")
+)
+```
+
+Information on how the individual function arguments are used can be
+found via the help function (`?create_suf`).
+
+# Subordinate Functions
+
+In addition to the main function `create_suf()`, the subordinate
+function `set_labels()` can also be used. It allows changing the labels
+of items in the SUF. It returns a dataset that contains the SUF with the
+modified labels.
+
+Information on how the individual function arguments are used can be
+found via the help function (`?set_labels`).
