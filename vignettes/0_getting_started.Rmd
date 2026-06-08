@@ -1,0 +1,122 @@
+---
+title: "Getting Started"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    toc: true
+    number_sections: no
+  bookdown::pdf_document2:
+    toc: true
+    number_sections: no
+bibliography: ../inst/NEPSroutines.bib
+vignette: >
+  %\VignetteIndexEntry{Getting Started}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r, include = FALSE}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+
+```
+
+\newpage
+
+# Welcome to NEPSroutines
+
+Welcome to **NEPSroutines**. This package provides functions for preparing, scaling, and scoring NEPS competence data.
+
+This guide serves as an overview of the available documentation and helps you navigate the package.
+
+# Documentation with Vignettes
+
+Information on the scaling procedure, working with R and R Markdown, NEPS data, and the NEPSroutines package are documented using **vignettes**.
+
+To find all available vignettes included in this package, use the following R code:
+
+```{r, eval = FALSE}
+utils::vignette(package = "NEPSroutines")
+```
+
+To open a specific vignette, replace `"my_vignette"` with the required vignette name:
+
+```{r, eval = FALSE}
+utils::vignette("my_vignette", package = "NEPSroutines")
+```
+
+The following vignettes are included in the package:
+
+```{r, echo = FALSE, results = 'asis'}
+vignettes <- utils::vignette(package = "NEPSroutines")
+cat(paste0("- ", vignettes$results[, "Item"], "\n"), sep = "")
+```
+
+# Available Documentation
+
+The package documentation is organized according to the typical scaling process.
+
+## Introduction to R and Scaling NEPS Data
+
+If you are new to scaling NEPS data and maybe also to using R, start by reading the first vignettes that give you a short introduction to the scaling of NEPS data using R, RStudio, and R Markdown.
+
+-   *Scaling NEPS data*
+
+-   *Scaling with R*
+
+## Introduction to NEPSroutines
+
+Get acquainted with the NEPSroutines package, its required data structure, and the package workflow.
+
+-   *Package Introduction*
+
+## Data Import and Preparation
+
+Learn how to prepare competence items, score items, define missing values, and create the required data structures.
+
+-   *Import Data*
+-   *Prepare Data*
+
+## Descriptive Analyses
+
+Obtain descriptive statistics for samples, items, and test booklets.
+
+-   *Descriptive Analysis*
+
+## Missing Value Analyses
+
+Analyze user-defined missing values at the person and item level.
+
+-   *Missing Responses per Person*
+-   *Missing Responses per Item*
+
+## Psychometric Analyses
+
+Evaluate item and test quality.
+
+-   *Item Response Theory Analysis*
+-   *Differential Item Functioning Analysis*
+-   *Distractor Analysis*
+-   *Dimensionality Analysis*
+
+## Score Creation and SUF Generation
+
+Estimate scores and create the Scientific Use File.
+
+-   *Create Scores*
+-   *Create SUF*
+
+# Further Information
+
+For details on individual functions, see the corresponding help pages, e.g.
+
+```{r}
+?irt_analysis
+?create_scores
+```
+
+If the package and function documentation is missing vital information or if you are stuck, please write to *scaling\@lifbi.de*.
