@@ -34,27 +34,26 @@ knitr::opts_chunk$set(
 
 For scaling a test, it is important to analyse the different types of
 missing values, i.e. to examine the reasons for missing responses and
-how often they occur. For NEPS tests, this is done on the one hand per
-person (how many items were not answered on average per person and for
-what reason) and on the other hand per item (how many persons answered
-or did not answer an item and for what reason). To conduct these
-analyses, missing values of the competency items must be coded as
-user-defined missing values. Which values are typically used in NEPS and
-how to create the function arguments `mvs` and `labels_mvs` is described
-in Section 4.1.4.
+how often they occur. For NEPS tests, this is done both per person (how
+many items were not answered on average per person and for what reason)
+and per item (how many persons answered or did not answer an item and
+for what reason). To conduct these analyses, missing values of the
+competency items must be coded as user-defined missing values. Which
+values are typically used in NEPS and how to create the function
+arguments `mvs` and `labels_mvs` is described in Section 4.1.4.
 
 The analyses should only be conducted for all valid cases (function
-argument `valid`). Only those items (function argument `select`) that
-are also used for the final IRT scaling should be considered (in most
-cases `dich` or `mixed`, depending on the composition of the item set).
-The results of the analyses are automatically saved in RDS format. The
-summary of the results is saved as an Excel file and printed to the
+argument `valid`). Only those items that are also used for the final IRT
+scaling should be considered (provided in function argument `select`; in
+most cases `dich` or `mixed`, depending on the composition of the item
+set). The results of the analyses are automatically saved in RDS format.
+The summary of the results is saved as an Excel file and printed to the
 console. To generate and save plots, the function argument `plots` must
 be set to `TRUE`.
 
 # Analysis of Missing Values per Person
 
-## General Function
+## Main Function
 
 The function `mv_person()` is used to analyse missing values per person.
 This analysis includes information on all user-defined missing values
@@ -79,6 +78,14 @@ were also administered to that group. The name of the grouping (e.g.,
 labelling the plots. If results are required not only by group but also
 for the total sample (both in tables and plots), the argument `show_all`
 must be set to `TRUE`.
+
+If the analyses are conducted for a multistage test, the function
+argument `stages` needs to be defined. This argument is a named numeric
+vector which contains for each stage as vector element the number of
+items per stage and as name of the vector element the name of the stage
+variable as name. For example, if the test consisted of two stages with
+10 items in the first and 8 items in the second stage, the argument
+should be `stages = c(stage1 = 10, stage2 = 8)`.
 
 ```{r}
 NEPSroutines::mv_person(
@@ -107,13 +114,13 @@ NEPSroutines::mv_person(
 Information on the individual function arguments can be obtained via the
 help function (`?mvp_analysis`).
 
-## Subordinate Functions
+## Minor Functions
 
-In addition to the main function, the following subordinate functions
-can be used:
+In addition to the main function, the following minor functions can be
+used:
 
 | Function | Input | Output |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | `mvp_analysis` | Data.frames `resp` and `vars` containing information on responses, items, person characteristics, and optionally grouping | Results of the MVP analyses (R object, optionally RDS) |
 | `mvp_plots` | Output of the function `mvp_analysis` or the element `mv_p` from the output of `mv_person` | Plots for each user-defined missing value type (PNG) |
 | `mvp_table` | Output of the function `mvp_analysis` or the element `mv_p` from the output of `mv_person` | Table with results of the MVP analyses for the Technical Report (R object, optionally Excel) |
@@ -124,7 +131,7 @@ help function (`?mvp_analysis`).
 
 # Analysis of Missing Values per Item
 
-## General function
+## Main function
 
 Similar to the function `mv_person()`, missing values can also be
 analysed using the function `mv_item()`. The difference compared to the
@@ -151,6 +158,16 @@ were administered to that group. The name of the grouping (e.g., “test
 version”) can be specified using the argument `name_grouping` for
 labelling the plots. Missing values per item are displayed depending on
 item position and, if applicable, grouping.
+
+If the analyses are conducted for a multistage test, the function
+argument `stages` needs to be defined. The argument is a character
+vector which contains the names of stage variables in `resp` and `vars`.
+For example, if the test consisted of three stages, three logical
+variables that indicate if a person reached stage X or an item was part
+of stage X need to be defined in `resp` and `vars`, respectively (e.g.,
+named `"stage1"`, etc.). The function argument would then be defined as
+`stages = c("stage1", "stage2", "stage3")`. Note that the variables need
+to be identically named in `resp` and `vars`.
 
 By setting the argument `save` to `TRUE`, results can be saved in `.rds`
 and `.xlsx` files. The results from the Excel file can, for example, be
@@ -190,13 +207,13 @@ NEPSroutines::mv_item(
 Information on the individual function arguments can be obtained via the
 help function (`?mvi_analysis`).
 
-## Subordinate Functions
+## Minor Functions
 
-In addition to the main function, the following subordinate functions
-can be used:
+In addition to the main function, the following minor functions can be
+used:
 
 | Function | Input | Output |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | `mvi_analysis` | Data.frames `resp` and `vars` containing information on responses, items, person characteristics, and optionally grouping | Results of the MVI analyses (R object, optionally RDS) |
 | `mvi_plots` | Output of the function `mvi_analysis` (or element `mv_i` from the output of `mv_item`) | Plots for each user-defined missing value type (PNG) |
 | `mvi_table` | Output of the function `mvi_analysis` (or element `mv_i` from the output of `mv_item`) | Table with results of the MVI analyses for the Technical Report (R object, optionally Excel) |
@@ -204,5 +221,3 @@ can be used:
 
 Information on the individual function arguments can be obtained via the
 help function (e.g., `?mvi_analysis`).
-
-# [Include information on multistage tests]
