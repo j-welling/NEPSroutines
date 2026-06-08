@@ -70,13 +70,13 @@ NEPSroutines::dis_analysis(
   print = TRUE,
   save = FALSE,
   overwrite = TRUE,
-  path_table = here::here("Tables"),
-  path_results = here::here("Results"),
+  path_table = "tables",
+  path_results = "results",
 )
 ```
 
-Information on how the individual function arguments are used can be
-found via the help function (`?dis_analysis`).
+Information on the individual function arguments can be obtained via the
+help function (`?dis_analysis`).
 
 # Subordinate Functions
 
@@ -89,5 +89,5 @@ can be used:
 | `dis_summary` | Output of the function `conduct_dis_analysis` (or the element `analysis` from the output of `dis_analysis`) | Tables with results of the distractor analysis (R object, optionally Excel) |
 | `print_dis_summary` | Output of the function `dis_summary` (or the element `summary` from the output of `dis_analysis`) | Summary of the distractor analysis (printed in the console) |
 
-Information on how the individual function arguments are used can be
-found via the help function (e.g. `?dis_summary`).
+Information on the individual function arguments can be obtained via the
+help function (e.g., `?dis_summary`).

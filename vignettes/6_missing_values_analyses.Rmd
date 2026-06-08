@@ -94,9 +94,9 @@ NEPSroutines::mv_person(
   print = TRUE,
   save = TRUE,
   return = FALSE,
-  path_results = ("Results"),
-  path_table = ("Tables"),
-  path_plots = ("Plots/Missing_Responses/by_person"),
+  path_results = "results",
+  path_table = "tables",
+  path_plots = "plots/missings_by_person",
   show_all = FALSE,
   overwrite = TRUE,
   name_grouping = "test version",
@@ -104,8 +104,8 @@ NEPSroutines::mv_person(
 )
 ```
 
-Information on how to use the individual function arguments can be found
-via the help function (e.g. `?mvp_analysis`).
+Information on the individual function arguments can be obtained via the
+help function (`?mvp_analysis`).
 
 ## Subordinate Functions
 
@@ -113,14 +113,14 @@ In addition to the main function, the following subordinate functions
 can be used:
 
 | Function | Input | Output |
-|------------------|------------------------------|-----------------------|
+|----|----|----|
 | `mvp_analysis` | Data.frames `resp` and `vars` containing information on responses, items, person characteristics, and optionally grouping | Results of the MVP analyses (R object, optionally RDS) |
 | `mvp_plots` | Output of the function `mvp_analysis` or the element `mv_p` from the output of `mv_person` | Plots for each user-defined missing value type (PNG) |
 | `mvp_table` | Output of the function `mvp_analysis` or the element `mv_p` from the output of `mv_person` | Table with results of the MVP analyses for the Technical Report (R object, optionally Excel) |
 | `print _mvp_results` | Output of the function `mvp_analysis` or the element `mv_p` from the output of `mv_person` | Summary of the MVP analysis results (printed in the console) |
 
-Information on how to use the individual function arguments can be found
-via the help function (e.g. `?mvp_analysis`).
+Information on the individual function arguments can be obtained via the
+help function (`?mvp_analysis`).
 
 # Analysis of Missing Values per Item
 
@@ -176,9 +176,9 @@ NEPSroutines::mv_item(
   print = TRUE,
   save = TRUE,
   return = FALSE,
-  path_results = ("Results"),
-  path_table = ("Tables"),
-  path_plots = ("Plots/Missing_Responses/by_item"),
+  path_results = "results",
+  path_table = "tables",
+  path_plots = "plots/missings_by_item",
   suf_item_names = TRUE,
   show_all = FALSE,
   overwrite = TRUE,
@@ -187,8 +187,8 @@ NEPSroutines::mv_item(
 )
 ```
 
-Information on how to use the individual function arguments can be found
-via the help function (e.g. `?mvi_analysis`).
+Information on the individual function arguments can be obtained via the
+help function (`?mvi_analysis`).
 
 ## Subordinate Functions
 
@@ -196,13 +196,13 @@ In addition to the main function, the following subordinate functions
 can be used:
 
 | Function | Input | Output |
-|------------------------|------------------------|------------------------|
+|----|----|----|
 | `mvi_analysis` | Data.frames `resp` and `vars` containing information on responses, items, person characteristics, and optionally grouping | Results of the MVI analyses (R object, optionally RDS) |
 | `mvi_plots` | Output of the function `mvi_analysis` (or element `mv_i` from the output of `mv_item`) | Plots for each user-defined missing value type (PNG) |
 | `mvi_table` | Output of the function `mvi_analysis` (or element `mv_i` from the output of `mv_item`) | Table with results of the MVI analyses for the Technical Report (R object, optionally Excel) |
 | `print_mvi_results` | Output of the function `mvi_analysis` (or element `mv_i` from the output of `mv_item`) | Summary of the MVI analysis results (printed in the console) |
 
-Information on how to use the individual function arguments can be found
-via the help function (e.g. `?mvi_analysis`).
+Information on the individual function arguments can be obtained via the
+help function (e.g., `?mvi_analysis`).
 
 # [Include information on multistage tests]

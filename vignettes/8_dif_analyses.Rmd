@@ -88,8 +88,8 @@ NEPSroutines::dif_analysis(
   print = TRUE,
   save = TRUE,
   return = FALSE,
-  path_table = here::here("Tables"),
-  path_results = here::here("Results")
+  path_table = "tables",
+  path_results = "results"
 )
 
 # For PCM
@@ -104,14 +104,14 @@ NEPSroutines::dif_analysis(
   print = TRUE,
   save = TRUE,
   return = FALSE,
-  path_table = here::here("Tables"),
-  path_results = here::here("Results"),
+  path_table = "tables",
+  path_results = "results",
   suf_item_names = TRUE
 )
 ```
 
-Information on how the individual function arguments are used can be
-found via the help function (`?dif_analysis`).
+Information on the individual function arguments can be obtained via the
+help function (`?dif_analysis`).
 
 # Subordinate Functions
 
@@ -132,5 +132,5 @@ therefore be specified either as a string or as a vector (i.e., one
 | `summarize_dif_analysis` | Output of the function `conduct_dif_analysis` (or the element `models` from the output of `dif_analysis`) | Tables with results of the DIF analyses for multiple DIF variables (R object, optionally Excel) |
 | `build_dif_tr_tables` | Output of the function `dif_summaries` | Table with results for the Technical Report (R object, optionally Excel) |
 
-Information on how the individual function arguments are used can be
-found via the help function (e.g. `?dif_summary`).
+Information on the individual function arguments can be obtained via the
+help function (e.g., `?dif_summary`).

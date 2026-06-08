@@ -84,14 +84,14 @@ NEPSroutines::dim_analysis(
   return = FALSE,
   save = TRUE,
   print = TRUE,
-  path_table = here::here("Tables"),
-  path_results = here::here("Results"),
+  path_table = "tables",
+  path_results = "results",
   overwrite = TRUE
 )
 ```
 
-Information on how the individual function arguments are used can be
-found via the help function (`?dim_analysis`).
+Information on the individual function arguments can be obtained via the
+help function (`?dim_analysis`).
 
 # Subordinate Functions
 
@@ -99,10 +99,10 @@ In addition to the main function, the following subordinate functions
 can be used:
 
 | Function | Input | Output |
-|-------------------|-------------------------------------|-----------------|
+|-------------------|-----------------------------------|------------------|
 | `conduct_dim_analysis` | Data.frames containing information on items and person characteristics, as well as the specification of the items under investigation. Additionally, the IRT model and the scoring information created during data preparation in `vars` must be provided. | Results of the dimensionality analysis (R object, optionally RDS) |
 | `dim_summary` | Output of the function `conduct_dim_analysis` (or the element `analysis` from the output of `dim_analysis`) | Tables with results of the dimensionality analysis (R object, optionally Excel) |
 | `print_dim_summary` | Output of the function `dim_summary` (or the element `summary` from the output of `dim_analysis`) | Summary of the dimensionality analysis (printed in the console) |
 
-Information on how the individual function arguments are used can be
-found via the help function (e.g. `?dim_summary`).
+Information on the individual function arguments can be obtained via the
+help function (e.g., `?dim_summary`).

@@ -117,5 +117,5 @@ scores <- NEPSroutines::create_scores(
 )
 ```
 
-Information on how the individual function arguments are used can be
-found via the help function (`?create_scores`).
+Information on the individual function arguments can be obtained via the
+help function (`?create_scores`).

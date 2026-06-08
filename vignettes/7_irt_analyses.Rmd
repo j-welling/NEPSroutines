@@ -98,9 +98,9 @@ NEPSroutines::irt_analysis(
   save = TRUE,
   print = TRUE,
   return = FALSE,
-  path_results = "Results",
-  path_table = "Tables",
-  path_plots = "Plots",
+  path_results = "results",
+  path_table = "tables",
+  path_plots = "plots",
   overwrite = TRUE,
   digits = 3, 
   name_group = "all"
@@ -128,8 +128,8 @@ NEPSroutines::irt_analysis(
 )
 ```
 
-Information on how the individual function arguments are used can be
-obtained via the help function (e.g. `?irt_analysis`).
+Information on the individual function arguments can be obtained via the
+help function (`?irt_analysis`).
 
 # Main function `grouped_irt_analysis`
 
@@ -173,9 +173,9 @@ NEPSroutines::grouped_irt_analysis(
   overwrite = TRUE,
   plots = TRUE,
   return = FALSE,
-  path_results = "Results",
-  path_table = "Tables",
-  path_plots = "Plots"
+  path_results = "results",
+  path_table = "tables",
+  path_plots = "plots"
 )
 
 # PCM and GPCM
@@ -191,9 +191,9 @@ NEPSroutines::grouped_irt_analysis(
   overwrite = TRUE,
   plots = TRUE,
   return = FALSE,
-  path_results = "Results",
-  path_table = "Tables",
-  path_plots = "Plots",
+  path_results = "results",
+  path_table = "tables",
+  path_plots = "plots",
   suf_item_names = TRUE
 )
 ```
@@ -204,7 +204,7 @@ In addition to the main function, the following subordinate functions
 can be used:
 
 | Function | Input | Output |
-|-----------------|-----------------------------|---------------------------|
+|-------------------|----------------------------|--------------------------|
 | `irt_model` | Data.frames `resp` and `vars` containing information on responses, items, person characteristics, and optionally grouping | Results of the IRT analysis (R object, optionally RDS) |
 | `icc_plots` | Output of the function `irt_model` | ICC plots for IRT models (PNG) |
 | `wright_map` | Output of the function `irt_model` | Wright maps for IRT models (PNG) |
@@ -213,5 +213,5 @@ can be used:
 | `step_analysis` | Output of the function `irt_model` (only for PCM analyses) | Table with results of the step analysis (R object, optionally Excel) |
 | `print_irt_summary` | Output of the functions `irt_summary`, `irt_model`, and optionally `step_analysis` | Summary of the IRT and step analysis and additional results relevant for the Technical Report (printed in the console) |
 
-Information on how the individual function arguments are used can be
-obtained via the help function (e.g. `?irt_summary`).
+Information on the individual function arguments can be obtained via the
+help function (e.g. `?irt_summary`).

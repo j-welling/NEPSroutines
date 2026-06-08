@@ -40,7 +40,7 @@ display the results in the console.
 The following table provides an overview of the available functions:
 
 | Function | Output |
-|----|----|
+|-----------------|------------------------------------------------------|
 | `n_valid` | Number of all valid and invalid cases in the dataset. |
 | `desc_con` | Table with descriptive statistics (e.g., mean, SD) for the continuous variables defined in `desc`. |
 | `desc_abs` | Table with the number of cases in each category for the categorical variables defined in `desc` (e.g., number of males and females in the dataset for the variable `sex`). |
@@ -83,6 +83,9 @@ NEPSroutines::show_attributes(resp = resp, desc = booklet)
 rm(sociodemographics, booklet)
 ```
 
+Information on the individual function arguments can be obtained via the
+help function (e.g., `?desc_nom`).
+
 ## Descriptive Analysis by Subgroups (if applicable)
 
 In many scaling applications, one or more grouping variables are present
@@ -122,7 +125,7 @@ NEPSroutines::sample_by_group(
   labels = c("EasyTestlet" = 0, "DifficultTestlet" = 1),
   save = TRUE,
   overwrite = TRUE,
-  path = "Tables"
+  path = "tables"
 )
 
 # Testlet properties by test version
@@ -137,9 +140,12 @@ NEPSroutines::props_by_group(
   properties = c("text_type", "kog_type", "type"),
   labels = list(text_type = lbls_txt, kog_type = lbls_kog, type = lbls_type),
   save = TRUE, overwrite = TRUE,
-  path = "Tables"
+  path = "tables"
 )
 
 # Delete variables
 rm(lbls_txt, lbls_kog, lbls_type)
 ```
+
+Information on the individual function arguments can be obtained via the
+help function (e.g., ?`props_by_group`).

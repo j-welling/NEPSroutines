@@ -49,12 +49,12 @@ NEPSroutines::create_suf(
   competence = "Reading",
   scores = scores,
   score_name = "reg7",
-  path = here::here("suf")
+  path = "suf"
 )
 ```
 
-Information on how the individual function arguments are used can be
-found via the help function (`?create_suf`).
+Information on the individual function arguments can be obtained via the
+help function (`?create_suf`).
 
 # Subordinate Functions
 
@@ -63,5 +63,5 @@ function `set_labels()` can also be used. It allows changing the labels
 of items in the SUF. It returns a dataset that contains the SUF with the
 modified labels.
 
-Information on how the individual function arguments are used can be
-found via the help function (`?set_labels`).
+Information on the individual function arguments can be obtained via the
+help function (e.g., `?set_labels`).
