@@ -10,7 +10,7 @@ output:
     number_sections: no
 bibliography: ../inst/NEPSroutines.bib
 vignette: >
-  %\VignetteIndexEntry{Preparations}
+  %\VignetteIndexEntry{Package Introduction}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
