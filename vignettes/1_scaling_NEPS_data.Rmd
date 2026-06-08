@@ -1,5 +1,5 @@
 ---
-title: "General Information"
+title: "Scaling NEPS data"
 output:
   bookdown::html_document2:
     base_format: rmarkdown::html_vignette
@@ -10,7 +10,7 @@ output:
     number_sections: no
 bibliography: ../inst/NEPSroutines.bib
 vignette: >
-  %\VignetteIndexEntry{General Information}
+  %\VignetteIndexEntry{Scaling NEPS data}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 ---
@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-This scaling guide is primarily intended to introduce scaling of competence tests in the National Educational Panel Study (NEPS) using the R package `NEPSroutines`.
+This scaling guide is primarily intended to introduce the scaling of competence tests in the National Educational Panel Study (NEPS) using the R package `NEPSroutines`.
 
 It is not intended as a comprehensive introduction to the methodological foundations of scaling or to the basics of R. The following sections provide only a brief overview of scaling in NEPS and working with R and mainly serve as pointers for further reading.
 
