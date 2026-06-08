@@ -1,0 +1,145 @@
+---
+title: "Descriptive Analyses"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    toc: true
+    number_sections: no
+  bookdown::pdf_document2:
+    toc: true
+    number_sections: no
+bibliography: ../inst/NEPSroutines.bib
+vignette: >
+  %\VignetteIndexEntry{Descriptive Analyses}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, include = FALSE}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+
+```
+
+\newpage
+
+## Descriptive Analysis of the Sample
+
+First, descriptive analyses of the sample should be conducted. Within
+the NEPSroutines package, several smaller functions are available for
+this purpose. They summarize key information using text and tables and
+display the results in the console.
+
+The following table provides an overview of the available functions:
+
+| Function | Output |
+|----|----|
+| `n_valid` | Number of all valid and invalid cases in the dataset. |
+| `desc_con` | Table with descriptive statistics (e.g., mean, SD) for the continuous variables defined in `desc`. |
+| `desc_abs` | Table with the number of cases in each category for the categorical variables defined in `desc` (e.g., number of males and females in the dataset for the variable `sex`). |
+| `desc_perc` | Table with percentage values for each category of the categorical variables defined in `desc` (e.g., percentage of males and females in the dataset for the variable `sex`). The function argument `useNA` allows specifying whether missing cases should be included in the percentage calculations (`TRUE`) or not (`FALSE`). |
+| `desc_nom` | Combines the two functions `desc_abs` and `desc_perc`. It therefore provides both absolute and relative frequencies for categorical variables in a single table. |
+| `show_attributes` | Displays variable labels, allowing values to be assigned to their corresponding categories (e.g., 1 = male and 2 = female). This function only works if the variables are defined as `hvn_lbl`. |
+
+Most of these functions use two new function arguments. The argument
+`resp` requires a dataset containing sociodemographic information for
+all participants. If the data have been prepared as suggested in this
+guide, this corresponds to the dataset `resp`. The argument `desc`
+requires the name(s) of the variables to be analyzed, for example all
+categorical sociodemographic variables for the function `desc_nom`.
+
+The corresponding syntax could look as follows:
+
+```{r}
+# Sample size
+message("There are in total ", nrow(resp), " cases in the dataset.")
+
+# Number of (in)valid cases
+NEPSroutines::n_valid(resp = resp, valid = "valid")
+
+## Descriptives (mean, sd, etc.) of continuous variables
+NEPSroutines::desc_con(resp = resp, desc = "age", valid = "valid")
+
+# Creating vectors with all categorical sociodemographic or booklet variables, respectively
+sociodemographics = c("sex", "attendsGymnasium", "migration", "books")
+booklet = "difficulty" # In other NEPSroutiness some more characteristics might apply here, e.g. position of booklet
+
+# Descriptives (attributes, frequency) of nominal sociodemographic variables
+NEPSroutines::desc_nom(resp = resp, desc = sociodemographics, valid = "valid")
+NEPSroutines::show_attributes(resp = resp, desc = sociodemographics)
+
+# Descriptives (attributes, frequency) of nominal booklet variables
+NEPSroutines::desc_nom(resp = resp, desc = booklet, valid = "valid")
+NEPSroutines::show_attributes(resp = resp, desc = booklet)
+
+# Delete variables
+rm(sociodemographics, booklet)
+```
+
+## Descriptive Analysis by Subgroups (if applicable)
+
+In many scaling applications, one or more grouping variables are present
+(e.g., different test booklets). It is useful to report sample size as
+well as the number and type of items separately for these groups. In
+particular, descriptive statistics for all dimensionality variables
+(i.e., those later used in the dimensionality analysis) should be
+examined separately by group. This information is also required for the
+Technical Report. The NEPSroutines package provides two functions for
+descriptive analysis by test booklet: `sample_by_group()` and
+`props_by_group()`.
+
+The function `sample_by_group()` returns a table with the sample size
+per group. The argument `grouping_variable` specifies the name of the
+grouping variable in `resp`. The argument `labels` is optional and can
+be used to assign names to groups if the corresponding variable in
+`resp` does not already contain labels. For this purpose, a named vector
+is provided, where the names correspond to the group names (see example
+code).
+
+The function `props_by_group()` returns a table describing item
+properties per group, for example how many items of each type are
+included in each group. The argument `properties` requires a character
+vector containing the names of all variables in `vars` that describe
+item characteristics (e.g., `text_type`, `kog_type`, and `type`). In
+addition, user-defined labels for categories can be provided via the
+argument `labels` if the corresponding variables in `vars` are not
+already labelled.
+
+The syntax could look as follows:
+
+```{r}
+# Sample size by test version
+NEPSroutines::sample_by_group(
+  resp,
+  grouping_variable = "difficulty",
+  labels = c("EasyTestlet" = 0, "DifficultTestlet" = 1),
+  save = TRUE,
+  overwrite = TRUE,
+  path = "Tables"
+)
+
+# Testlet properties by test version
+lbls_txt = c(Advertising = 1, Information = 2, Instruction = 3, Literary = 4, Commenting = 5)
+lbls_kog = c(Finding_information = 1, Drawing_conclusions = 2, Reflecting = 3)
+lbls_type = c(MC = 2, CMC = 1, TXT = 3)
+
+NEPSroutines::props_by_group(
+  vars,
+  select = "mixed",
+  grouping = c("easy", "difficult"),
+  properties = c("text_type", "kog_type", "type"),
+  labels = list(text_type = lbls_txt, kog_type = lbls_kog, type = lbls_type),
+  save = TRUE, overwrite = TRUE,
+  path = "Tables"
+)
+
+# Delete variables
+rm(lbls_txt, lbls_kog, lbls_type)
+```
