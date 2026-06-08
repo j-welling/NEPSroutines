@@ -213,7 +213,7 @@ all original variables and, additionally, all collapsed items. This
 means that for each item with sparse response categories, there are now
 two variables in the dataset—the original item and a new item with
 collapsed response categories. The names of the new items end with the
-suffix `_collapsed`. The function outputs a list of all modified items
+suffix `_collapsed`. The function returns a list of all modified items
 in the console. If `save = TRUE`, this list is also saved as an Excel
 table. In the rare case that collapsing would leave an item with fewer
 than two categories, the function refrains from collapsing and issues a
