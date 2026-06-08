@@ -49,7 +49,10 @@ most cases `dich` or `mixed`, depending on the composition of the item
 set). The results of the analyses are automatically saved in RDS format.
 The summary of the results is saved as an Excel file and printed to the
 console. To generate and save plots, the function argument `plots` must
-be set to `TRUE`.
+be set to `TRUE`. If the file names need to be modified (e.g., because a
+test is scaled simultaneously for several cohorts), use the function
+argument `name_group` that adds a suffix to each file name (e.g.,
+`"cohort_6"`).
 
 # Analysis of Missing Values per Person
 

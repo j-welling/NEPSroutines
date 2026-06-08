@@ -69,14 +69,17 @@ to whom an item was administered.
 # Main function `irt_analysis`
 
 The main function `irt_analysis()` automatically performs the required
-IRT analyses, outputs results in several tables and as text in the
+IRT analyses, returns results in several tables and as text in the
 console, and saves the (most important) results as Excel files and in
 RDS format. ICC plots and Wright maps can also be generated and saved
-(if `plots = TRUE`). The function automatically detects whether the item
-set contains polytomous items and accordingly performs either a 1PL and
-2PL analysis (dichotomous items only) or a PCM and GPCM analysis
-(including polytomous items). PCM and GPCM are estimated using the
-ConQuest parameterisation `"item + item*step"`.
+(`plots = TRUE`). If the file names need to be modified (e.g., because a
+test is scaled simultaneously for several cohorts), use the function
+argument `name_group` that adds a suffix to each file name (e.g.,
+`"cohort_6"`). The function automatically detects whether the item set
+contains polytomous items and accordingly performs either a 1PL and 2PL
+analysis (dichotomous items only) or a PCM and GPCM analysis (including
+polytomous items). PCM and GPCM are estimated using the ConQuest
+parameterisation `"item + item*step"`.
 
 The function performs analyses for a single item set (e.g., all items
 selected via the argument `select`). If IRT analyses are required for

@@ -74,7 +74,10 @@ automatically saved in RDS format and as Excel tables. In particular,
 the function produces a table that can be directly used for the
 Technical Report (TR). This table reports unstandardized (before
 parentheses) and standardized (in parentheses) DIF effects for each
-item. A summary of the results is also printed to the console.
+item. A summary of the results is also printed to the console. If the
+file names need to be modified (e.g., because a test is scaled
+simultaneously for several cohorts), use the function argument
+`name_group` that adds a suffix to each file name (e.g., `"cohort_6"`).
 
 ```{r}
 # For Rasch

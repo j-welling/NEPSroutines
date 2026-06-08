@@ -41,6 +41,11 @@ already have been created that identifies the relevant items (see
 Section 4.3.3 Variables for Scores and the SUF). In the example, this
 variable is called `suf`.
 
+The function returns the SUF containing all scored variables. If the
+file name needs to be modified (e.g., because a test is scaled
+simultaneously for several cohorts), use the function argument
+`name_group` that adds a suffix to the SUF name (e.g., `"cohort_6"`).
+
 ```{r}
 NEPSroutines::create_suf(
   resp = resp,
@@ -56,12 +61,10 @@ NEPSroutines::create_suf(
 Information on the individual function arguments can be obtained via the
 help function (`?create_suf`).
 
-# Minor Functions
+# Minor Function
 
 In addition to the main function `create_suf()`, the minor function
 `set_labels()` can also be used. It allows changing the labels of items
 in the SUF and returns a dataset that contains the SUF with the modified
-labels.
-
-Information on the individual function arguments can be obtained via the
-help function (`?set_labels`).
+labels. Information on the individual function arguments can be obtained
+via the help function (`?set_labels`).

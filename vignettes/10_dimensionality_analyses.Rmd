@@ -66,7 +66,9 @@ compare models for multiple dimensionality variables simultaneously
 (argument `dim`). It performs the analyses and returns the required
 results in the form of a table as well as additional information in the
 console. In addition, the results are saved as an Excel file and in RDS
-format.
+format. If the file names need to be modified (e.g., because a test is
+scaled simultaneously for several cohorts), use the function argument
+`name_group` that adds a suffix to each file name (e.g., `"cohort_6"`).
 
 In the example, a multidimensional model is estimated for the item type
 and a multidimensional model is estimated for the text type.
@@ -99,7 +101,7 @@ In addition to the main function, the following minor functions can be
 used:
 
 | Function | Input | Output |
-|-------------------|-----------------------------------|-------------------|
+|-------------------|----------------------------------|-------------------|
 | `conduct_dim_analysis` | Data.frames containing information on items and person characteristics, as well as the specification of the items under investigation. Additionally, the IRT model and the scoring information created during data preparation in `vars` must be provided. | Results of the dimensionality analysis (R object, optionally RDS) |
 | `dim_summary` | Output of the function `conduct_dim_analysis` (or the element `analysis` from the output of `dim_analysis`) | Tables with results of the dimensionality analysis (R object, optionally Excel) |
 | `print_dim_summary` | Output of the function `dim_summary` (or the element `summary` from the output of `dim_analysis`) | Summary of the dimensionality analysis (printed in the console) |

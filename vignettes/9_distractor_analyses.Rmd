@@ -59,7 +59,10 @@ minimum and maximum correlations of correct responses and distractors
 with the total score. In addition, a table is produced that details the
 number of responses and the correlations between item responses and the
 total score for each task. Both outputs are saved in Excel and RDS
-format. The summary is also printed in the console.
+format. If the file names need to be modified (e.g., because a test is
+scaled simultaneously for several cohorts), use the function argument
+`name_group` that adds a suffix to each file name (e.g., `"cohort_6"`).
+A summary is printed in the console.
 
 ```{r}
 NEPSroutines::dis_analysis(

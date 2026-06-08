@@ -67,7 +67,10 @@ errors (`_sc2`). If these WLEs are to be included in the SUF later
 (which is usually the case), this table should be stored as an R object.
 By default, the computed scores are saved in RDS format. In addition,
 the item parameters used for WLE estimation are saved in XLSX format,
-and the corresponding TAM model is saved in RDS format.
+and the corresponding TAM model is saved in RDS format. If the file
+names need to be modified (e.g., because a test is scaled simultaneously
+for several cohorts), use the function argument `name_group` that adds a
+suffix to each file name (e.g., `"cohort_6"`).
 
 The package also allows the computation of sum scores and metacognitive
 scores in addition to WLEs. Sum scores (variables with suffix `_sc3`)
@@ -121,3 +124,4 @@ Information on the individual function arguments can be obtained via the
 help function (`?create_scores`).
 
 No minor functions exist for creating scores.
+
