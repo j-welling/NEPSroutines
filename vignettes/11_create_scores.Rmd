@@ -59,7 +59,7 @@ parameters must additionally be used. However, linking is not yet
 implemented in this version of the NEPSroutines package. In this case,
 scores must be computed without the package.
 
-# Provided Function
+# Main Function
 
 The function `create_scores()` returns a table with the newly computed
 WLEs (variables with suffix `_sc1`) and the corresponding standard
@@ -119,3 +119,5 @@ scores <- NEPSroutines::create_scores(
 
 Information on the individual function arguments can be obtained via the
 help function (`?create_scores`).
+
+No minor functions exist for creating scores.

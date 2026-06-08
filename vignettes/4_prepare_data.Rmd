@@ -686,14 +686,14 @@ table(unlist(resp[ , vars$item]), useNA = "ifany")
 Once the preparations have been completed, the data can be saved.
 
 ```{r}
-save(resp, vars, mvs, labels_mvs, file = here::here("data/dat.Rdata"))
+save(resp, vars, mvs, labels_mvs, file = "data/dat.Rdata")
 ```
 
 From this point onward, the data preparation step can be skipped, and
 the prepared data can be loaded directly.
 
 ```{r}
-load(here::here("data/dat.Rdata"))
+load("data/dat.Rdata")
 ```
 
 # Changes to Items During Scaling

@@ -56,12 +56,12 @@ NEPSroutines::create_suf(
 Information on the individual function arguments can be obtained via the
 help function (`?create_suf`).
 
-# Subordinate Functions
+# Minor Functions
 
-In addition to the main function `create_suf()`, the subordinate
-function `set_labels()` can also be used. It allows changing the labels
-of items in the SUF. It returns a dataset that contains the SUF with the
-modified labels.
+In addition to the main function `create_suf()`, the minor function
+`set_labels()` can also be used. It allows changing the labels of items
+in the SUF and returns a dataset that contains the SUF with the modified
+labels.
 
 Information on the individual function arguments can be obtained via the
-help function (e.g., `?set_labels`).
+help function (`?set_labels`).

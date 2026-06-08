@@ -40,7 +40,7 @@ display the results in the console.
 The following table provides an overview of the available functions:
 
 | Function | Output |
-|-----------------|------------------------------------------------------|
+|----|----|
 | `n_valid` | Number of all valid and invalid cases in the dataset. |
 | `desc_con` | Table with descriptive statistics (e.g., mean, SD) for the continuous variables defined in `desc`. |
 | `desc_abs` | Table with the number of cases in each category for the categorical variables defined in `desc` (e.g., number of males and females in the dataset for the variable `sex`). |

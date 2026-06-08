@@ -84,10 +84,10 @@ e.g. sociodemographic variables. Information about each participant is
 stored in a single row. An example of this dataset can be seen below for
 study B129. The following variables are particularly required:
 
-<table style="width:99%;">
+<table style="width:98%;">
 <colgroup>
 <col style="width: 25%" />
-<col style="width: 73%" />
+<col style="width: 72%" />
 </colgroup>
 <thead>
 <tr>
@@ -168,7 +168,7 @@ Example for `resp` (from study B129, only the first variables are
 shown):
 
 | Variable | Explanation |
-|-----------------|-------------------------------------------------------|
+|------------------|------------------------------------------------------|
 | **`ID_t`** | Contains the IDs of the persons |
 | `sex`, `migration` and `books` | Dichotomous (or dichotomized) sociodemographic variables for descriptive and DIF analyses |
 | `difficulty` | Grouping variable assigning persons to the different test booklets |
@@ -192,10 +192,10 @@ dataset can be seen below for study B129. How the variables are
 constructed is described in Chapter 4 *Data Preparation*. The following
 variables are particularly required:
 
-<table style="width:100%;">
+<table style="width:98%;">
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 78%" />
+<col style="width: 22%" />
+<col style="width: 75%" />
 </colgroup>
 <thead>
 <tr>
@@ -301,7 +301,7 @@ An example of `vars` (from study B129, only the first variables are
 shown):
 
 | Argument | Explanation |
-|-----------------|------------------------------------------------------|
+|------------------|------------------------------------------------------|
 | `item` | Contains the item names |
 | `type` and `correct_response` | Variables defining item type and correct response |
 | `raw`, `dich` and `poly` | Logical variables identifying unscored, dichotomously scored, and polytomously scored items |
@@ -359,18 +359,18 @@ process:
 
 In addition, the package contains general functions that may be useful
 for scaling outside the predefined framework. With the exception of data
-preparation and descriptive analyses, there is a single **overarching
+preparation and descriptive analyses, there is a single **main
 function** for each scaling section that automatically performs all
 necessary calculations and outputs results as plots, tables, and
-messages. However, there are also **subordinate functions** that allow
+messages. However, there are also **minor functions** that allow
 individual steps of each section to be performed separately, enabling
 users to refine the original analyses or adapt them to specific needs.
-In this guide, the overarching functions are presented in detail, while
-the subordinate functions are briefly described.
+In this guide, the main functions are presented in detail, while the
+minor functions are briefly described.
 
 ## Function Output
 
-The output of the overarching functions usually consists of optionally
+The output of the main functions usually consists of optionally
 generated summary results as an Excel table (function argument
 `save=TRUE`), the original results in RDS format (function argument
 `save=TRUE`), and additional information printed to the console
@@ -387,15 +387,15 @@ further processed directly. For example:
 irt_results <- irt_analysis()
 ```
 
-For subordinate functions that perform analyses, a list of results is
-always returned. This output, or parts of it, is usually required for
+For minor functions that perform analyses, a list of results is always
+returned. This output, or parts of it, is usually required for
 subsequent functions (e.g. for generating plots or result tables). It is
 therefore recommended to store the output in an R object (see above).
 When using downstream functions, pay close attention to the instructions
 in this guide and in the help files (see vignette `general_information`)
 regarding which output or which part of the output is actually required!
-For subordinate functions that generate plots or tables from results,
-users can choose whether these files should be saved (function argument
+For minor functions that generate plots or tables from results, users
+can choose whether these files should be saved (function argument
 `save=TRUE`).
 
 # Common Function Arguments
@@ -407,12 +407,12 @@ further detail in the remainder of the guide.
 
 **Input** arguments:
 
-<table style="width:100%;">
+<table style="width:97%;">
 <colgroup>
-<col style="width: 12%" />
-<col style="width: 10%" />
-<col style="width: 64%" />
-<col style="width: 11%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 53%" />
+<col style="width: 14%" />
 </colgroup>
 <thead>
 <tr>
@@ -485,7 +485,7 @@ version.</p></td>
 **Process** arguments:
 
 | Argument | Type | Description | Default |
-|----------|--------|--------------------------------------------|-----------|
+|------------|------------|------------------------------------|------------|
 | `digits` | integer | Number of decimal places to which the results should be rounded. | usually `3` |
 | `warn` | logical | Whether warnings should be printed to the console. | usually `TRUE` |
 | `verbose` | logical | Whether the processing steps should be printed to the console. | usually `TRUE` |
@@ -493,12 +493,12 @@ version.</p></td>
 **Output** arguments:
 
 | Argument | Type | Description | Default |
-|-----------|-------|--------------------------------------------|----------|
-| `plots` | logical | In overarching functions, users can choose whether plots of the analyses (e.g. ICC plots and Wright maps in IRT analyses) should be generated. | usually `FALSE` |
-| `print` | logical | In overarching functions, users can choose whether (additional) results should be printed to the console or included in the HTML document. | usually `TRUE` |
+|------------|------------|------------------------------------|------------|
+| `plots` | logical | In main functions, users can choose whether plots of the analyses (e.g. ICC plots and Wright maps in IRT analyses) should be generated. | usually `FALSE` |
+| `print` | logical | In main functions, users can choose whether (additional) results should be printed to the console or included in the HTML document. | usually `TRUE` |
 | `save` | logical | In almost all functions, users can choose whether results should be saved (as `Excel` and/or `RDS`). | usually `TRUE` |
-| `return` | logical | In overarching functions, users can choose whether results should be returned in R (as `Rdata`). | usually `FALSE` |
-| `path` | string | Path where results should be stored. If the specified folder does not exist, it will be created automatically. In overarching functions, this is split into `path_results`, `path_plots`, and `path_table`. | `"Results"`, `"Plots",` `"Tables"` |
+| `return` | logical | In main functions, users can choose whether results should be returned in R (as `Rdata`). | usually `FALSE` |
+| `path` | string | Path where results should be stored. If the specified folder does not exist, it will be created automatically. In main functions, this is split into `path_results`, `path_plots`, and `path_table`. | `"Results"`, `"Plots",` `"Tables"` |
 | `overwrite` | logical | Whether Excel tables should be overwritten if they already exist. | `FALSE` |
 | `name_group` | string | Name of the *group* to which the analyses refer (e.g. "easy", see 3.1.1 *Groupings*), used to label results, tables, and figures accordingly. Do not confuse this with `name_grouping` (= name of the *grouping*, e.g. "test version") in `mv_person` and `mv_item`! | `NULL` |
 
@@ -514,7 +514,7 @@ corresponding package functions, some of the following functions may be
 helpful.
 
 | Function | Usage |
-|-------------|-----------------------------------------------------------|
+|----------------|--------------------------------------------------------|
 | `convert_mv` | Converts user-defined missing values into NAs. Input arguments are `resp`, `items`, and `mvs`. The output is `resp` with converted missing values. |
 | `prepare_resp` | Prepares `resp` for subsequent analyses. Input arguments are `resp`, `vars`, `items`, `valid`, `mvs`, the logical `use_only_valid` (whether only valid cases should be used), and the logical `convert` (whether user-defined missing values should be converted to NAs). The output is `resp` containing only the items defined in `items` as variables, optionally restricted to valid cases and with missing values optionally converted to NAs. |
 | `check_folder` | Checks whether the folder specified in the path exists and creates it if it does not. |

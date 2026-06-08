@@ -78,10 +78,10 @@ NEPSroutines::dis_analysis(
 Information on the individual function arguments can be obtained via the
 help function (`?dis_analysis`).
 
-# Subordinate Functions
+# Minor Functions
 
-In addition to the main function, the following subordinate functions
-can be used:
+In addition to the main function, the following minor functions can be
+used:
 
 | Function | Input | Output |
 |-------------------|----------------------------------|-------------------|

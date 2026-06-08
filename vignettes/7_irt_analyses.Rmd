@@ -85,6 +85,18 @@ items), but repeated calls to `irt_analysis()` should be avoided, the
 function `grouped_irt_analysis()` can be used instead (see following
 section).
 
+Sometimes, the item parameters for the IRT analyses are already known
+and need to be fixed to predetermined values. The function
+`irt_analysis()` provides the possibility to use fixed item
+difficulties. Because this function conducts two IRT analyses (1PL and
+2PL models for dichotomous items, PCM and GPCM for polytomous or mixed
+items), it contains two different function arguments: `xsi_fixed_1p` and
+`xsi_fixed_2p`. The first argument may contain the fixed item
+difficulties for the 1PL model or PCM, while the second argument may
+contain the fixed item difficulties for the 2PL model or GPCM. Please
+note that the item discrimination parameters from the 2PL model and GPCM
+cannot be fixed within this package.
+
 ```{r}
 # Rasch and 2PL
 NEPSroutines::irt_analysis(
@@ -118,9 +130,9 @@ NEPSroutines::irt_analysis(
   save = TRUE,
   print = TRUE,
   return = FALSE,
-  path_results = "Results",
-  path_table = "Tables",
-  path_plots = "Plots",
+  path_results = "results",
+  path_table = "tables",
+  path_plots = "plots",
   suf_item_names = TRUE,
   overwrite = TRUE,
   digits = 3,
@@ -198,13 +210,13 @@ NEPSroutines::grouped_irt_analysis(
 )
 ```
 
-# Subordinate Functions
+# Minor Functions
 
-In addition to the main function, the following subordinate functions
-can be used:
+In addition to the main function, the following minor functions can be
+used:
 
 | Function | Input | Output |
-|-------------------|----------------------------|--------------------------|
+|-------------------|---------------------------|--------------------------|
 | `irt_model` | Data.frames `resp` and `vars` containing information on responses, items, person characteristics, and optionally grouping | Results of the IRT analysis (R object, optionally RDS) |
 | `icc_plots` | Output of the function `irt_model` | ICC plots for IRT models (PNG) |
 | `wright_map` | Output of the function `irt_model` | Wright maps for IRT models (PNG) |

@@ -113,14 +113,14 @@ NEPSroutines::dif_analysis(
 Information on the individual function arguments can be obtained via the
 help function (`?dif_analysis`).
 
-# Subordinate Functions
+# Minor Functions
 
-In addition to the main function, the following subordinate functions
-can be used. Note that some functions are intended only for DIF analyses
-with a single DIF variable, while others can also be used for DIF
-analyses with multiple DIF variables. Accordingly, the function argument
-for the DIF variable(s) is either `dif_var` (for a single DIF variable)
-or `dif_vars` (for multiple DIF variables). The argument `select` can
+In addition to the main function, the following Minor functions can be
+used. Note that some functions are intended only for DIF analyses with a
+single DIF variable, while others can also be used for DIF analyses with
+multiple DIF variables. Accordingly, the function argument for the DIF
+variable(s) is either `dif_var` (for a single DIF variable) or
+`dif_vars` (for multiple DIF variables). The argument `select` can
 therefore be specified either as a string or as a vector (i.e., one
 `select` variable per DIF variable).
 
