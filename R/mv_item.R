@@ -565,7 +565,7 @@ mvi_calc <- function(responses, mvs, digits = 3, use_for_plot) {
 #' only the items administered to and the cases of the designated group
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param digits  integer; number of decimals for rounding
-#' @param use_for_plot
+#' @param use_for_plot logical; indicates whether frequencies are used for a plot
 #'
 #' @return table with frequency of missing values for one missing value type
 #' (by item).
