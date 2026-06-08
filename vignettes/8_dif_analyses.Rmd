@@ -1,0 +1,136 @@
+---
+title: "DIF Analyses"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    toc: true
+    number_sections: no
+  bookdown::pdf_document2:
+    toc: true
+    number_sections: no
+bibliography: ../inst/NEPSroutines.bib
+vignette: >
+  %\VignetteIndexEntry{DIF Analyses}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, include = FALSE}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+
+```
+
+\newpage
+
+# General Information
+
+Differential Item Functioning (DIF) refers to the situation in which an
+item has different difficulty for different subgroups despite equal
+ability. DIF analysis therefore ensures that no items systematically
+favor or disadvantage particular groups (e.g., girls vs. boys or
+migrants vs. non-migrants). A main-effect model and a DIF model are
+estimated. The main effect represents the mean difference in competence
+between two subgroups and is therefore not an indicator of DIF. Relevant
+DIF is assumed when the effect size exceeds 0.4. If the value exceeds
+0.6, the DIF is considered problematic; below this threshold it is only
+considered potentially concerning. In addition, a Minimum Effects
+Hypothesis Test is conducted to assess the magnitude of DIF. In this
+framework, DIF effects should not be statistically significant. For NEPS
+assessments, no DIF should be present (i.e., all values \< 0.4 and
+non-significant).
+
+The analyses should again only be conducted for all valid cases
+(function argument `valid`). DIF analyses are based either on the 1PL
+model or the PCM. As with IRT analyses, a dichotomous DIF analysis
+should always be conducted. If the test also includes polytomous items,
+an additional polytomous DIF analysis is performed. Grouping variables
+generally do not need to be considered in DIF analyses, as they are
+already incorporated as DIF variables in the model.
+
+# Main Function `dif_analysis`
+
+To test whether DIF is present, the function `dif_analysis()` can be
+used. It can perform DIF analyses for multiple DIF variables
+simultaneously (defined in the argument `dif_vars`). In this case, the
+argument `select` can either contain a vector specifying a separate
+select variable for each DIF variable (see example), or—if the item set
+does not vary across DIF variables—a single string can be used as usual
+(e.g., `select = "mixed"`). The required items may vary when only
+specific items are considered for a given DIF variable (e.g., only
+common items across test booklets for the DIF variable `difficulty`).
+
+The function tests whether item difficulties differ significantly
+between DIF groups and also performs a model comparison between the DIF
+model and the main-effect model using AIC and BIC. The results are
+automatically saved in RDS format and as Excel tables. In particular,
+the function produces a table that can be directly used for the
+Technical Report (TR). This table reports unstandardized (before
+parentheses) and standardized (in parentheses) DIF effects for each
+item. A summary of the results is also printed to the console.
+
+```{r}
+# For Rasch
+NEPSroutines::dif_analysis(
+  resp = resp,
+  vars = vars,
+  select = c("dich_common", "dich", "dich"),
+  valid = "valid", 
+  dif_vars = c("difficulty", "sex", "migration"),
+  overwrite = TRUE,
+  print = TRUE,
+  save = TRUE,
+  return = FALSE,
+  path_table = here::here("Tables"),
+  path_results = here::here("Results")
+)
+
+# For PCM
+NEPSroutines::dif_analysis(
+  resp = resp,
+  vars = vars,
+  select = c("mixed_common", "mixed", "mixed"),
+  valid = "valid", 
+  dif_vars = c("difficulty", "sex", "migration"),
+  scoring = "scoring", 
+  overwrite = TRUE,
+  print = TRUE,
+  save = TRUE,
+  return = FALSE,
+  path_table = here::here("Tables"),
+  path_results = here::here("Results"),
+  suf_item_names = TRUE
+)
+```
+
+Information on how the individual function arguments are used can be
+found via the help function (`?dif_analysis`).
+
+# Subordinate Functions
+
+In addition to the main function, the following subordinate functions
+can be used. Note that some functions are intended only for DIF analyses
+with a single DIF variable, while others can also be used for DIF
+analyses with multiple DIF variables. Accordingly, the function argument
+for the DIF variable(s) is either `dif_var` (for a single DIF variable)
+or `dif_vars` (for multiple DIF variables). The argument `select` can
+therefore be specified either as a string or as a vector (i.e., one
+`select` variable per DIF variable).
+
+| Function | Input | Output |
+|---------------------|---------------------------|------------------------|
+| `dif_model` | Data.frames `resp` and `vars` containing information on responses, items, and person characteristics | Results of the DIF analysis for a single DIF variable (R object) |
+| `conduct_dif_analysis` | Data.frames `resp` and `vars` containing information on responses, items, and person characteristics | Results of the DIF analysis for multiple DIF variables (R object, optionally RDS) |
+| `dif_summary` | Output of the function `dif_model` (or the element `models$NameDIFVariable` from the output of `dif_analysis`) | Tables with results of the DIF analysis for a single DIF variable (R object, optionally Excel) |
+| `summarize_dif_analysis` | Output of the function `conduct_dif_analysis` (or the element `models` from the output of `dif_analysis`) | Tables with results of the DIF analyses for multiple DIF variables (R object, optionally Excel) |
+| `build_dif_tr_tables` | Output of the function `dif_summaries` | Table with results for the Technical Report (R object, optionally Excel) |
+
+Information on how the individual function arguments are used can be
+found via the help function (e.g. `?dif_summary`).
