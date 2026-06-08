@@ -883,10 +883,15 @@ recodeVar <- function(x, src, tgt, default = NULL, keep.na = TRUE) {
   return(val)
 }
 
-
-
-# Internal helper: capitalize the first letter of each string element
-# @noRd
+#' Internal helper: capitalize the first letter of each string element
+#' @noRd
 capitalize <- function(x) {
   paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))
+}
+
+#' Open first vignette
+#'
+#' @export
+open_guide <- function() {
+  utils::vignette("0_getting_started", package = "NEPSroutines")
 }
