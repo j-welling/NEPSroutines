@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-This scaling guide is primarily intended to introduce the scaling of competence tests in the National Educational Panel Study (NEPS) using the R package `NEPSroutines`.
+This scaling guide is primarily intended to introduce the general procedure of scaling of competence tests in the National Educational Panel Study (NEPS).
 
 It is not intended as a comprehensive introduction to the methodological foundations of scaling or to the basics of R. The following sections provide only a brief overview of scaling in NEPS and working with R and mainly serve as pointers for further reading.
 
@@ -38,14 +38,25 @@ It is not intended as a comprehensive introduction to the methodological foundat
 The scaling of competence tests in NEPS typically includes the following steps:
 
 -   Data search and preparation\
+
 -   Descriptive analysis\
+
 -   Analysis of missing values (per person & per item)\
+
 -   Item Response Theory (IRT) analyses\
+
 -   Differential Item Functioning (DIF) analyses\
+
 -   Distractor analyses\
+
 -   Dimensionality analyses\
+
 -   Linking\
--   Estimation of Weighted Maximum Likelihood Estimates (WLE) and creation of the Scientific Use File (SUF)\
+
+-   Estimation of Weighted Maximum Likelihood Estimates (WLE)
+
+-   Creation of the Scientific Use File (SUF)\
+
 -   Documentation of results in the Technical Report (TR)
 
 Individual steps may be omitted if the necessary prerequisites are not met (e.g., if no structure in the test justifies a dimensionality analysis).
@@ -99,7 +110,6 @@ A detailed description of the linking procedure is provided in @fischer2016:
 <https://www.neps-data.de/Portals/0/Survey%20Papers/SP_I.pdf>
 
 *Note*: Linking is not yet implemented in this version of the `NEPSroutines` package.
-
 
 # Basics in R
 

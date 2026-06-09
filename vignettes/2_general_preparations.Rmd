@@ -113,17 +113,17 @@ Required variables include the ID variable (`ID_t`) and all competence items. It
 
 For scaling, additional item-level information is required, including:
 
--    Item position (may vary across test booklets)
+-   Item position (may vary across test booklets)
 
--    Item type (e.g., multiple choice, constructed response)
+-   Item type (e.g., multiple choice, constructed response)
 
--    Correct response
+-   Correct response
 
--    Test booklet assignment
+-   Test booklet assignment
 
--    Item cluster or group
+-   Item cluster or group
 
--    Additional variables depending on the study (e.g., content domain)
+-   Additional variables depending on the study (e.g., content domain)
 
 This information must typically be extracted from test booklets, study design documentation, or survey materials and ideally compiled into an Excel file.
 
@@ -139,19 +139,19 @@ These variables can be found in SPSS files such as `CohortProfile`, `pParent` (c
 
 Common variable names (may vary by study):
 
--    **Gender**: `tx80501` in `CohortProfile`
+-   **Gender**: `tx80501` in `CohortProfile`
 
--    **Age**: must be computed (see vignette `data_preparation`) using `tx8050y` (year of birth), `tx8050m` (month of birth), and the survey year/month in `CohortProfile`
+-   **Age**: must be computed (see vignette `data_preparation`) using `tx8050y` (year of birth), `tx8050m` (month of birth), and the survey year/month in `CohortProfile`
 
--    **Migration background**: e.g., `p400500_g1` in `pParent` (children)
+-   **Migration background**: e.g., `p400500_g1` in `pParent` (children)
 
--    **Cultural capital**: e.g., `p34005a` in `pParent` (children)
+-   **Cultural capital**: e.g., `p34005a` in `pParent` (children)
 
 All other variables should be verified using the respective codebook.
 
 ## Test Booklet Design Information
 
-In addition to competence and socio-demographic data, information on survey design and test booklet structure is required.
+In addition to competence and sociodemographic data, information on survey design and test booklet structure is required.
 
 Many studies use multiple test booklets (e.g., easy vs. difficult forms) and/or rotational designs in which different groups receive different test orders (e.g., Group 1: Reading → Mathematics; Group 2: Mathematics → Reading).
 
@@ -161,6 +161,6 @@ Since values are encoded numerically, value labels must be used to interpret the
 
 In R, labels can be retrieved (after importing the data with `haven`) using:
 
-```{r}       
+```{r}
 attributes(dat$name_variable)$labels
 ```
