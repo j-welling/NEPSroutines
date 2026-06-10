@@ -3,7 +3,7 @@
 .gitignore
 ^\.git$
 ^\documentation
-^\testscripts
+^\manual_tests
 ^\build$
 ^data-raw$
 ^doc$
@@ -16,4 +16,4 @@
 ^dev$
 ^\.github$
 ^documentation$
-^testscripts$
+^\.manual_tests$
