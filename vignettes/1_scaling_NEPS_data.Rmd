@@ -57,9 +57,7 @@ The scaling of competence tests in NEPS typically includes the following steps:
 
 -   Documentation of results in the Technical Report (TR)
 
-Individual steps may be omitted if the necessary prerequisites are not met (e.g., if no structure in the test justifies a dimensionality analysis).
-
-This guide leads you step by step through these procedures starting in Chapter 4. Chapters 2 and 3 summarize key information on data preparation in R, required datasets, and the use of the `NEPSroutines` package. This chapter also provides background information on competence assessments and measurement models used in NEPS.
+Individual steps may be omitted if the necessary prerequisites are not met (e.g., if no structure in the test justifies a dimensionality analysis). The vignettes included in `NEPSroutines` lead you step by step through these procedures and summarize key information on data preparation in R, required datasets, and the use of the `NEPSroutines` package. This vignette also provides background information on competence assessments and measurement models used in NEPS.
 
 ### Competence Assessments in NEPS
 
