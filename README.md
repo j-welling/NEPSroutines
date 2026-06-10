@@ -15,19 +15,78 @@ polytomous responses.
 
 ## Features
 
-- Analyses of descriptive information, missing values, distractors,
-  dimensionality, and differential item functioning
-- Generation of item and respondent scores for NEPS scientific use files
-- General data preparation and consistency checks
+- Data preparation and consistency checks
+- Descriptive analyses
+- Analysis of missing values (per person & per item)
+- IRT analyses (1PL, 2PL, PCM, GPCM)
+- DIF analyses
+- Distractor analysis
+- Dimensionality analysis
+- Score creation (WLEs, sum scores, meta scores)
+- SUF creation
 - Quarto extension and functionalities for semi-automated technical
   reports
 
-## Installation
+## Information for Users
+
+### Installation
+
+To make your work reproducible, install the latest official release of
+the package. On the GitHub page of NEPSroutines, go to the panel
+“Releases” on the right. There, you find the number of the latest
+release (e.g., “Release v1.3.0”).
+
+You can install NEPSroutines in two different ways:
+
+#### TAR-Ball
+
+Click on the page of the latest release. Download the source code in
+TAR.GZ format. Install the TAR-Ball locally with:
+
+``` r
+install.packages(
+  "PATH/TO/DIRECTORY/NEPSroutines-X.Y.Z.tar.gz",
+  type = "source",
+  repos = NULL
+)
+```
+
+Replace PATH/TO/DIRECTORY with your local path and X.Y.Z with the actual
+version number.
+
+Once installed, you can load the package like any other R package:
+
+``` r
+library(NEPSroutines)
+```
+
+#### From GitHub
+
+You can also install the newest version of NEPSroutines from
+[GitHub](https://github.com/) with:
+
+``` r
+install.packages("remotes")
+remotes::install_github("j-welling/NEPSroutines@vX.Y.Z")
+```
+
+Replace X.Y.Z with the actual version number.
+
+### Getting Started
+
+Scaling NEPS data using R in general and NEPSroutines in particular is
+documented using **vignettes** within this package. Start with the
+**introductory vignette** by using the function `open_guide()`.
+
+## Information for Developers
+
+If you want to contribute to the package, please read first the
+DEVELOPMENT file in the inst/ folder.
 
 You can install the development version of NEPSroutines from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("remotes")
+install.packages("remotes")
 remotes::install_github("j-welling/NEPSroutines")
 ```
