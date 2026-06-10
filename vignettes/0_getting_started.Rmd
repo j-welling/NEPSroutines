@@ -15,25 +15,15 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
-```{r, include = FALSE}
-
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  eval = FALSE,
-  comment = "#>"
-)
-
-```
-
 \newpage
 
-# Welcome to NEPSroutines
+## Welcome to NEPSroutines
 
 Welcome to **NEPSroutines**. This package provides functions for preparing, scaling, and scoring NEPS competence data.
 
 This guide serves as an overview of the available documentation and helps you navigate the package.
 
-# Documentation with Vignettes
+## Documentation with Vignettes
 
 Information on the scaling procedure, working with R and R Markdown, NEPS data, and the NEPSroutines package are documented using **vignettes**.
 
@@ -56,11 +46,11 @@ vignettes <- utils::vignette(package = "NEPSroutines")
 cat(paste0("- ", vignettes$results[, "Item"], "\n"), sep = "")
 ```
 
-# Available Documentation
+## Available Documentation
 
 The package documentation is organized according to the typical scaling process.
 
-## Introduction to R and Scaling NEPS Data
+### Introduction to R and Scaling NEPS Data
 
 If you are new to scaling NEPS data and maybe also to using R, start by reading the first vignettes that give you a short introduction to the scaling of NEPS data using R, RStudio, and R Markdown.
 
@@ -68,33 +58,33 @@ If you are new to scaling NEPS data and maybe also to using R, start by reading 
 
 -   *Scaling with R*
 
-## Introduction to NEPSroutines
+### Introduction to NEPSroutines
 
 Get acquainted with the NEPSroutines package, its required data structure, and the package workflow.
 
 -   *Package Introduction*
 
-## Data Import and Preparation
+### Data Import and Preparation
 
 Learn how to prepare competence items, score items, define missing values, and create the required data structures.
 
 -   *Import Data*
 -   *Prepare Data*
 
-## Descriptive Analyses
+### Descriptive Analyses
 
 Obtain descriptive statistics for samples, items, and test booklets.
 
 -   *Descriptive Analysis*
 
-## Missing Value Analyses
+### Missing Value Analyses
 
 Analyze user-defined missing values at the person and item level.
 
 -   *Missing Responses per Person*
 -   *Missing Responses per Item*
 
-## Psychometric Analyses
+### Psychometric Analyses
 
 Evaluate item and test quality.
 
@@ -103,14 +93,14 @@ Evaluate item and test quality.
 -   *Distractor Analysis*
 -   *Dimensionality Analysis*
 
-## Score Creation and SUF Generation
+### Score Creation and SUF Generation
 
 Estimate scores and create the Scientific Use File.
 
 -   *Create Scores*
 -   *Create SUF*
 
-# Further Information
+## Further Information
 
 For details on individual functions, see the corresponding help pages, e.g.
 

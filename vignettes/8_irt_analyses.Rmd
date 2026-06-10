@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 
 \newpage
 
-# General Information
+## General Information
 
 In IRT analyses, person ability parameters as well as item difficulty
 and, if applicable, discrimination parameters are estimated. Depending
@@ -67,7 +67,7 @@ providing the user-defined missing value for design-related missing
 responses. This is necessary to correctly compute the number of persons
 to whom an item was administered.
 
-# Main function `irt_analysis`
+## Main function `irt_analysis`
 
 The main function `irt_analysis()` automatically performs the required
 IRT analyses, returns results in several tables and as text in the
@@ -147,7 +147,7 @@ NEPSroutines::irt_analysis(
 Information on the individual function arguments can be obtained via the
 help function (`?irt_analysis`).
 
-# Main function `grouped_irt_analysis`
+## Main function `grouped_irt_analysis`
 
 With the function `grouped_irt_analysis()` IRT analyses can be performed
 for multiple item sets (e.g., easy and difficult test booklets and
@@ -214,7 +214,7 @@ NEPSroutines::grouped_irt_analysis(
 )
 ```
 
-# Minor Functions
+## Minor Functions
 
 In addition to the main function, the following minor functions can be
 used:

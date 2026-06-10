@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 
 \newpage
 
-# General Information
+## General Information
 
 For scaling a test, it is important to analyse the different types of
 missing values, i.e. to examine the reasons for missing responses and
@@ -55,9 +55,9 @@ test is scaled simultaneously for several cohorts), use the function
 argument `name_group` that adds a suffix to each file name (e.g.,
 `"cohort_6"`).
 
-# Analysis of Missing Values per Person
+## Analysis of Missing Values per Person
 
-## Main Function
+### Main Function
 
 The function `mv_person()` is used to analyse missing values per person.
 This analysis includes information on all user-defined missing values
@@ -118,7 +118,7 @@ NEPSroutines::mv_person(
 Information on the individual function arguments can be obtained via the
 help function (`?mvp_analysis`).
 
-## Minor Functions
+### Minor Functions
 
 In addition to the main function, the following minor functions can be
 used:
@@ -133,9 +133,9 @@ used:
 Information on the individual function arguments can be obtained via the
 help function (`?mvp_analysis`).
 
-# Analysis of Missing Values per Item
+## Analysis of Missing Values per Item
 
-## Main function
+### Main function
 
 Similar to the function `mv_person()`, missing values can also be
 analysed using the function `mv_item()`. The difference compared to the
@@ -211,7 +211,7 @@ NEPSroutines::mv_item(
 Information on the individual function arguments can be obtained via the
 help function (`?mvi_analysis`).
 
-## Minor Functions
+### Minor Functions
 
 In addition to the main function, the following minor functions can be
 used:

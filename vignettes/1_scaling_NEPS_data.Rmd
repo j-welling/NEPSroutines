@@ -27,11 +27,11 @@ knitr::opts_chunk$set(
 
 \newpage
 
-# Introduction
+## Introduction
 
 This scaling guide is primarily intended to introduce the general procedure of scaling of competence tests in the National Educational Panel Study (NEPS). It is not intended as a comprehensive introduction to the methodological foundations of scaling or item response theory. The following sections provide only a brief overview of scaling in NEPS and mainly serve as pointers for further reading.
 
-# Scaling of Competence Tests in NEPS
+## Scaling of Competence Tests in NEPS
 
 The scaling of competence tests in NEPS typically includes the following steps:
 
@@ -61,7 +61,7 @@ Individual steps may be omitted if the necessary prerequisites are not met (e.g.
 
 This guide leads you step by step through these procedures starting in Chapter 4. Chapters 2 and 3 summarize key information on data preparation in R, required datasets, and the use of the `NEPSroutines` package. This chapter also provides background information on competence assessments and measurement models used in NEPS.
 
-## Competence Assessments in NEPS
+### Competence Assessments in NEPS
 
 General information on competence assessments in NEPS is available at:
 
@@ -73,7 +73,7 @@ Further information on specific assessments can be found here:
 
 <https://www.neps-data.de/Data-Center/Data-and-Documentation>
 
-## Competence Items
+### Competence Items
 
 Tasks in competence tests are called **items**. In the raw data, these are initially unscored and contain the response selected by the participant (e.g., “3” or "C" if the third option was chosen).
 
@@ -86,7 +86,7 @@ During scaling, a distinction is made between dichotomous and polytomous items:
 -   **Dichotomous items**: all simple scored items and all scored sub-items of polytomous items, as well as originally polytomous items reduced to two categories.
 -   **Polytomous items**: all items with more than two categories.
 
-## Item Response Theory Models
+### Item Response Theory Models
 
 The scaling framework for NEPS is described in @pohl2012:
 
@@ -99,7 +99,7 @@ The choice of model depends on the item format:
 -   If only dichotomous items are present: Rasch model and 2PL model are used\
 -   If at least one polytomous item is included: PCM and GPCM are used
 
-## Linking
+### Linking
 
 Competence assessments are often linked across waves or cohorts to ensure comparability between different measurements.
 
@@ -108,3 +108,5 @@ A detailed description of the linking procedure is provided in @fischer2016:
 <https://www.neps-data.de/Portals/0/Survey%20Papers/SP_I.pdf>
 
 *Note*: Linking is not yet implemented in this version of the `NEPSroutines` package.
+
+## References

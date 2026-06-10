@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 
 \newpage
 
-# General Information
+## General Information
 
 Differential Item Functioning (DIF) refers to the situation in which an
 item has different difficulty for different subgroups despite equal
@@ -55,7 +55,7 @@ an additional polytomous DIF analysis is performed. Grouping variables
 generally do not need to be considered in DIF analyses, as they are
 already incorporated as DIF variables in the model.
 
-# Main Function
+## Main Function
 
 To test whether DIF is present, the function `dif_analysis()` can be
 used. It can perform DIF analyses for multiple DIF variables
@@ -116,7 +116,7 @@ NEPSroutines::dif_analysis(
 Information on the individual function arguments can be obtained via the
 help function (`?dif_analysis`).
 
-# Minor Functions
+## Minor Functions
 
 In addition to the main function, the following Minor functions can be
 used. Note that some functions are intended only for DIF analyses with a
@@ -128,7 +128,7 @@ therefore be specified either as a string or as a vector (i.e., one
 `select` variable per DIF variable).
 
 | Function | Input | Output |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | `dif_model` | Data.frames `resp` and `vars` containing information on responses, items, and person characteristics | Results of the DIF analysis for a single DIF variable (R object) |
 | `conduct_dif_analysis` | Data.frames `resp` and `vars` containing information on responses, items, and person characteristics | Results of the DIF analysis for multiple DIF variables (R object, optionally RDS) |
 | `dif_summary` | Output of the function `dif_model` (or the element `models$NameDIFVariable` from the output of `dif_analysis`) | Tables with results of the DIF analysis for a single DIF variable (R object, optionally Excel) |

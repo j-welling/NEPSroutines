@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 
 \newpage
 
-# General Information
+## General Information
 
 At the end of the scaling process, cross-sectional and longitudinal WLEs
 are estimated and prepared for the SUF. In principle, WLEs are estimated
@@ -59,7 +59,7 @@ parameters must additionally be used. However, linking is not yet
 implemented in this version of the NEPSroutines package. In this case,
 scores must be computed without the package.
 
-# Main Function
+## Main Function
 
 The function `create_scores()` returns a table with the newly computed
 WLEs (variables with suffix `_sc1`) and the corresponding standard

@@ -27,7 +27,7 @@ knitr::opts_chunk$set(
 
 \newpage
 
-# Required Data and Files
+## Required Data and Files
 
 Scaling requires multiple datasets that usually need to be assembled manually. This section provides an overview of the most commonly required data and their typical locations. Exceptions may apply depending on the specific study.
 
@@ -39,13 +39,13 @@ Within each sub-study folder, SPSS files and codebooks are typically located in 
 
 If a required file is missing, it should be requested.
 
-## Competence Data
+### Competence Data
 
 Competence data are contained in SPSS files with `xTargetCompetencies` in the file name.
 
 Required variables include the ID variable (`ID_t`) and all competence items. Item names can be found in the respective study documentation or codebook. Only data from the relevant wave should be retained.
 
-## Information on Competence Items
+### Information on Competence Items
 
 For scaling, additional item-level information is required, including:
 
@@ -67,7 +67,7 @@ Relevant documents can often be found here:
 
 `//wipo.lifbi.de/daten/Projekte_(07)/NEPS-Kompetenzen_(14)/Netzwerk_(05)`
 
-## Sociodemographic Data
+### Sociodemographic Data
 
 In addition to competence items, sociodemographic variables are required for descriptive analyses and DIF analyses. Depending on the study type, these may include gender, migration background, cultural capital (e.g., number of books at home as part of socioeconomic status), school type (for students in secondary education), educational attainment (for adults), and age (for adults; in school samples this is typically homogeneous due to grade-level structure).
 
@@ -85,7 +85,7 @@ Common variable names (may vary by study):
 
 All other variables should be verified using the respective codebook.
 
-## Test Booklet Design Information
+### Test Booklet Design Information
 
 In addition to competence and sociodemographic data, information on survey design and test booklet structure is required.
 
@@ -101,9 +101,9 @@ In R, labels can be retrieved (after importing the data with `haven`) using:
 attributes(dat$name_variable)$labels
 ```
 
-# Import Data
+## Import Data
 
-## Information on Competence Items
+### Information on Competence Items
 
 First, the required data must be imported. We initially need certain information about the competence items (e.g., correct response, item type, position, test booklet; see Section *Required Data and Files*). This information should be identified beforehand for each unscored item and compiled in an Excel table so that it can now be loaded into the R environment as the data.frame `vars`. Pay attention to the naming conventions of the NEPSroutines package for the variables in the data.frame `vars` (see Section *Required Data Structure* in vignette `package_introduction`). Which items are included in the competency test can be found either in the codebook or in a document corresponding to the respective test (see Section *Required Data and Files*).
 
@@ -119,7 +119,7 @@ vars$dich <- FALSE
 vars$poly <- FALSE 
 ```
 
-## Competence Data
+### Competence Data
 
 The raw competency item data can be found in the SPSS dataset `xTargetCompetencies`. This dataset is loaded into the R environment as a data.frame named `resp` using the function `read_sav()`. The argument `use_na = FALSE` prevents missing values specified in SPSS from being imported as `NA`. Very large datasets may cause memory issues; in such cases, using `foreign::read.spss` may help.
 
@@ -135,7 +135,7 @@ design <- "NameDesignVariable"
 resp <- dplyr::select(resp, ID_t, design, all_of(item_names)) 
 ```
 
-## Sociodemographic Data
+### Sociodemographic Data
 
 In the DIF analyses, it is examined whether the items elicit comparable response behavior across different groups (e.g., test booklets A and B). Several sociodemographic and methodological variables are used as so-called DIF variables. The variables typically used in our scaling procedures are explained in Sections *Sociodemographic Data* and *Test Booklet Design Information* in vignette `import_data`. The raw data must be assembled from various SPSS files.
 

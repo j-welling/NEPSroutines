@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 
 \newpage
 
-# General Information
+## General Information
 
 The dimensionality of a test indicates how many latent dimensions are
 required to answer the test. It affects the IRT models used. For
@@ -58,7 +58,7 @@ The dimensionality analysis should only be conducted for all valid cases
 (function argument `valid`). It is typically performed using the full
 sample rather than separated by groups.
 
-# Main Function
+## Main Function
 
 In the **NEPSroutines** package, the function `dim_analysis()` is used
 to assess the dimensionality of a test. The function can estimate and
@@ -95,7 +95,7 @@ NEPSroutines::dim_analysis(
 Information on the individual function arguments can be obtained via the
 help function (`?dim_analysis`).
 
-# Minor Functions
+## Minor Functions
 
 In addition to the main function, the following minor functions can be
 used:

@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 
 \newpage
 
-# General Information
+## General Information
 
 In tasks where the respondent must choose between several answer options
 (multiple choice), so-called distractors are used. These are incorrect
@@ -46,7 +46,7 @@ The distractor analysis should only be conducted for all valid cases
 (function argument `valid`). It is typically performed using the full
 sample rather than separated by groups.
 
-# Main Function
+## Main Function
 
 The function `dis_analysis()` computes correlations between correct or
 incorrect item responses (distractors) and the total score. Distractors
@@ -81,7 +81,7 @@ NEPSroutines::dis_analysis(
 Information on the individual function arguments can be obtained via the
 help function (`?dis_analysis`).
 
-# Minor Functions
+## Minor Functions
 
 In addition to the main function, the following minor functions can be
 used:

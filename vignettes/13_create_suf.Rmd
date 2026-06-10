@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 
 \newpage
 
-# Main Function
+## Main Function
 
 The function `create_suf()` is used to create the SUF with the newly
 computed WLEs. Note that all dichotomous and polytomous items used in
@@ -61,7 +61,7 @@ NEPSroutines::create_suf(
 Information on the individual function arguments can be obtained via the
 help function (`?create_suf`).
 
-# Minor Function
+## Minor Function
 
 In addition to the main function `create_suf()`, the minor function
 `set_labels()` can also be used. It allows changing the labels of items

@@ -30,9 +30,9 @@ knitr::opts_chunk$set(
 
 \newpage
 
-# Prepare Competence Data
+## Prepare Competence Data
 
-## Dichotomous Item Scoring
+### Dichotomous Item Scoring
 
 In the next step, the unscored items must be scored. For each item, a
 new variable is created indicating whether the item was answered
@@ -86,7 +86,7 @@ vars <- NEPSroutines::duplicate_items(
 )
 ```
 
-## Polytomous Item Scoring
+### Polytomous Item Scoring
 
 If the competency test contains polytomous items, these must also be
 scored. The function `pc_scoring()` can be used for this purpose. The
@@ -244,7 +244,7 @@ vars$scoring[vars$mixed] <- ifelse(
 )
 ```
 
-## User-Defined Missing Values
+### User-Defined Missing Values
 
 The competency items in NEPS contain so-called user-defined missing
 values (UDMV). Missing values are therefore coded using negative
@@ -308,9 +308,9 @@ labels_mvs = c(
 )
 ```
 
-# Prepare DIF Variables
+## Prepare DIF Variables
 
-## Calculate Age
+### Calculate Age
 
 In NEPS, age is usually not available directly and must first be
 calculated from the date of birth and the assessment date. This is done
@@ -337,7 +337,7 @@ resp$age <- NEPSroutines::calculate_age(
 )
 ```
 
-## Dichotomize Sociodemographic Variables
+### Dichotomize Sociodemographic Variables
 
 Some DIF variables (e.g., age) still have more than two categories and
 therefore need to be dichotomized. The split criteria for
@@ -368,7 +368,7 @@ resp$migration <- ifelse(
 )
 ```
 
-## Create Variable for Test Booklet Design
+### Create Variable for Test Booklet Design
 
 The test booklet design variable from the raw data cannot yet be used
 directly. First, the necessary information must be extracted from it
@@ -392,7 +392,7 @@ resp$easy <- ifelse(resp$testlet == "A", TRUE, FALSE)
 resp$difficult <- ifelse(resp$testlet == "B", TRUE, FALSE)
 ```
 
-## Assign Labels for Variables
+### Assign Labels for Variables
 
 To avoid confusion regarding the values of the dichotomous DIF
 variables, labels should be assigned to the variables. This can be done
@@ -406,9 +406,9 @@ resp$migration <- haven::labelled(
 )
 ```
 
-# Other Preparations
+## Other Preparations
 
-## Identify Valid Cases
+### Identify Valid Cases
 
 If respondents have provided only very few valid responses, they are
 considered invalid cases and are excluded from the analyses. In NEPS,
@@ -430,7 +430,7 @@ necessary to create a new valid variable (e.g., `valid_new`).
 resp$valid <- NEPSroutines::min_val(resp, vars, select = "mixed")
 ```
 
-## Create Group Variables
+### Create Group Variables
 
 If a grouping exists (e.g., test booklets), additional variables must be
 created. This section assumes that both `vars` and `resp` already
@@ -473,16 +473,15 @@ vars$mixed_difficult <- vars$mixed & vars$difficult
 vars$mixed_common <- vars$mixed & vars$common
 ```
 
-## Create Variable for Distractor Analysis
+### Create Variable for Distractor Analysis
 
 For distractor analysis, a logical variable is required that identifies
 all unscored multiple-choice items. In our example, it is called
 `distan`.
 
-```{r} vars$distan <- vars$raw & vars$type == "MC"}
-```
+`{r} vars$distan <- vars$raw & vars$type == "MC"}`
 
-## Create Variables for Scores and SUF
+### Create Variables for Scores and SUF
 
 For the calculation of sum scores and metacognition scores, as well as
 for the creation of the SUF, the logical variable `suf` is required in
@@ -529,13 +528,13 @@ vars$num_cat <- NEPSroutines::calculate_num_cat(
 )
 ```
 
-## Additional Required Variables
+### Additional Required Variables
 
 Depending on the study design, additional variables may be required, for
 example for linking. Functions for these variables are not yet
 available, so they must be created manually.
 
-## Problem with Variables of Type `haven_labelled`
+### Problem with Variables of Type `haven_labelled`
 
 Unfortunately, R Markdown currently (as of October 2024) does not always
 handle variables of type `haven_labelled` correctly. This can lead to
@@ -545,10 +544,9 @@ In such cases, the variables must be converted without losing the UDMVs.
 In most cases, the following code works, but be sure to verify afterward
 that the missing values have not been converted to `NA`s.
 
-```{r} # Convert “haven_labelled” variables to “double” resp <- haven::zap_labels(resp)  # Check whether the user-defined missing values still exist table(unlist(resp[ , vars$item]), useNA = "ifany")}
-```
+`{r} # Convert “haven_labelled” variables to “double” resp <- haven::zap_labels(resp)  # Check whether the user-defined missing values still exist table(unlist(resp[ , vars$item]), useNA = "ifany")}`
 
-# Check Data Structure
+## Check Data Structure
 
 Once data preparation has been completed, the data structure can be
 checked using several functions. Although these checks are also
@@ -558,7 +556,7 @@ post-processing. The following functions are available for checking the
 data structure:
 
 | Function | Usage |
-|------------------------------------|------------------------------------|
+|----------------|--------------------------------------------------------|
 | `check_logicals` | Checks the specified variables in the defined dataset for existence, logical data type, and absence of missing values. The function takes the arguments `df` (the data.frame), `name_df` (name of the data.frame as a string), and `logicals` (character vector containing the names of the variables to be checked). |
 | `check_numerics` | Checks the specified variables in the defined dataset for existence, numeric data type, and, if required, for the absence of negative values and/or values greater than 1 (for dichotomous variables). The function takes the arguments `df`, `name_df`, `numerics` (character vector containing the names of the variables to be checked), `check_invalid` (logical, whether to check for negative values; default is `FALSE`), and `dich` (logical, whether to check for values greater than 1; default is `FALSE`). |
 | `check_variables` | Basic function for variables of any data type. It checks the specified variables in the defined dataset only for existence. The function takes the arguments `df`, `name_df`, and `variables` (character vector containing the names of the variables to be checked). |
@@ -593,7 +591,7 @@ NEPSroutines::check_numerics(resp, "resp", vars$item[vars$poly])
 NEPSroutines::check_pid(resp$ID_t)
 ```
 
-# Save Data
+## Save Data
 
 Once the preparations have been completed, the data can be saved.
 
@@ -608,7 +606,7 @@ the prepared data can be loaded directly.
 load("data/dat.Rdata")
 ```
 
-# Changes to Items During Scaling
+## Changes to Items During Scaling
 
 It is common for the item set used in the analyses to change during the
 scaling process, for example because individual items are excluded due
