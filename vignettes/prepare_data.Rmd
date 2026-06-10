@@ -1,5 +1,7 @@
 ---
 title: "Data Preparation"
+author: "Jana Welling, Christian Diegel"
+date: "`r Sys.Date()`"
 output:
   bookdown::html_document2:
     base_format: rmarkdown::html_vignette
@@ -54,9 +56,6 @@ function extends the data.frame `resp` with the new items.
 
 ```{r}
 resp <- NEPSroutines::dichotomous_scoring(resp, vars, old_names = item_names) 
-```
-
-```         
 ```
 
 In the NEPSroutines package, it is necessary to create a separate row in

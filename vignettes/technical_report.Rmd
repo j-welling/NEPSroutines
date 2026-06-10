@@ -1,5 +1,7 @@
 ---
 title: "Semi-automated technical reports with NEPSroutines"
+author: "Timo Gnambs"
+date: "`r Sys.Date()`"
 output:
   bookdown::html_document2:
     base_format: rmarkdown::html_vignette

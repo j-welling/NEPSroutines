@@ -1,5 +1,7 @@
 ---
 title: "Create Scores"
+author: "Jana Welling, Christian Diegel, Tanja Kutscher"
+date: "`r Sys.Date()`"
 output:
   bookdown::html_document2:
     base_format: rmarkdown::html_vignette

@@ -1,5 +1,7 @@
 ---
 title: "Descriptive Analyses"
+author: "Jana Welling, Christian Diegel"
+date: "`r Sys.Date()`"
 output:
   bookdown::html_document2:
     base_format: rmarkdown::html_vignette
