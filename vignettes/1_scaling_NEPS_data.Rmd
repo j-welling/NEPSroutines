@@ -29,33 +29,31 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-This scaling guide is primarily intended to introduce the general procedure of scaling of competence tests in the National Educational Panel Study (NEPS).
-
-It is not intended as a comprehensive introduction to the methodological foundations of scaling or to the basics of R. The following sections provide only a brief overview of scaling in NEPS and working with R and mainly serve as pointers for further reading.
+This scaling guide is primarily intended to introduce the general procedure of scaling of competence tests in the National Educational Panel Study (NEPS). It is not intended as a comprehensive introduction to the methodological foundations of scaling or item response theory. The following sections provide only a brief overview of scaling in NEPS and mainly serve as pointers for further reading.
 
 # Scaling of Competence Tests in NEPS
 
 The scaling of competence tests in NEPS typically includes the following steps:
 
--   Data search and preparation\
+-   Data search and preparation
 
--   Descriptive analysis\
+-   Descriptive analysis
 
--   Analysis of missing values (per person & per item)\
+-   Analysis of missing values (per person & per item)
 
--   Item Response Theory (IRT) analyses\
+-   Item Response Theory (IRT) analysis
 
--   Differential Item Functioning (DIF) analyses\
+-   Differential Item Functioning (DIF) analysis
 
--   Distractor analyses\
+-   Distractor analysis
 
--   Dimensionality analyses\
+-   Dimensionality analysis
 
--   Linking\
+-   Linking
 
 -   Estimation of Weighted Maximum Likelihood Estimates (WLE)
 
--   Creation of the Scientific Use File (SUF)\
+-   Creation of the Scientific Use File (SUF)
 
 -   Documentation of results in the Technical Report (TR)
 
@@ -110,45 +108,3 @@ A detailed description of the linking procedure is provided in @fischer2016:
 <https://www.neps-data.de/Portals/0/Survey%20Papers/SP_I.pdf>
 
 *Note*: Linking is not yet implemented in this version of the `NEPSroutines` package.
-
-# Basics in R
-
-Basic knowledge of R is required to use this guide, including:
-
--   Loading packages\
--   Importing data\
--   Basic data manipulation (subsetting and merging datasets)
-
-Key concepts include:
-
--   `NA` as missing value\
--   Data types: logical, numeric, integer, double, factor, character\
--   for-loops and if-statements\
--   Logical operators: `&`, `&&`, `|`, `||`, `!`, `==`, `!=`, `<=`, `>=`, `<`, `>`\
--   `%in%` operator\
--   Pipe operator `|>`\
--   Calling functions without loading packages: `package::function()`\
--   Indexing data frames:
-    -   `df[rows, columns]`
-    -   `df[[column]]`
-
-If you are not familiar with R basics, many resources are available online (Stack Overflow is often helpful). R cheat sheets are also recommended:
-
-<https://www.rstudio.com/resources/cheatsheets/>
-
-Step-by-step execution of code helps with debugging.
-
-# The `NEPSroutines` package
-
-The data is scaled using the `NEPSroutines` package.
-
-When installing and loading the package, all dependencies are automatically installed and loaded. Therefore, no additional packages need to be installed manually.
-
-However, **NEPSroutines must be loaded at the beginning of each R session**.
-
-If you need help with a function, you can use:
-
-```{r}
-help(function_name)
-?function_name
-```

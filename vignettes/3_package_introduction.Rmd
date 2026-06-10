@@ -30,6 +30,20 @@ knitr::opts_chunk$set(
 
 \newpage
 
+# Installing and Loading `NEPSroutines`
+
+The NEPS data is scaled using the `NEPSroutines` package.
+
+For this purpose, the latest stable version of `NEPSroutines` should be
+installed (see README file for an how-to-guide).
+
+Once installed, `NEPSroutines`must be loaded at the beginning of each R
+session:
+
+```{r}
+library(NEPSroutines)
+```
+
 # Required Data Structure
 
 Working with the `NEPSroutines` package requires a specific data
@@ -39,7 +53,7 @@ functions of the `NEPSroutines` package may be helpful in this process
 is described in Chapter 4 *Data Preparation*.
 
 The package is mainly based on the two datasets `resp` and `vars`. The
-**`bold` marked** variable names must be retained as specified. In all
+**bold marked** variable names must be retained as specified. In all
 other cases, variable names can be freely chosen.
 
 ## Groupings
@@ -84,10 +98,10 @@ e.g. sociodemographic variables. Information about each participant is
 stored in a single row. An example of this dataset can be seen below for
 study B129. The following variables are particularly required:
 
-<table style="width:99%;">
+<table style="width:97%;">
 <colgroup>
-<col style="width: 26%" />
-<col style="width: 71%" />
+<col style="width: 25%" />
+<col style="width: 70%" />
 </colgroup>
 <thead>
 <tr>
@@ -168,7 +182,7 @@ Example for `resp` (from study B129, only the first variables are
 shown):
 
 | Variable | Explanation |
-|-------------------|-----------------------------------------------------|
+|--------------------|----------------------------------------------------|
 | **`ID_t`** | Contains the IDs of the persons |
 | `sex`, `migration` and `books` | Dichotomous (or dichotomized) sociodemographic variables for descriptive and DIF analyses |
 | `difficulty` | Grouping variable assigning persons to the different test booklets |
@@ -187,15 +201,15 @@ This dataset (`data.frame`) contains all information about the
 competence items, e.g. item positions, assignment to a test booklet, and
 item type. Each version of a competence item (e.g. scored and unscored)
 is stored in a separate row (for an overview of the different item
-types, see Section 1.1.2 *Competence items*). An example of the `vars`
-dataset can be seen below for study B129. How the variables are
-constructed is described in Chapter 4 *Data Preparation*. The following
-variables are particularly required:
+types, see Section *Competence items* in vignette `scaling_NEPS_data`).
+An example of the `vars` dataset can be seen below for study B129. How
+the variables are constructed is described in Chapter 4 *Data
+Preparation*. The following variables are particularly required:
 
-<table style="width:99%;">
+<table style="width:97%;">
 <colgroup>
-<col style="width: 22%" />
-<col style="width: 75%" />
+<col style="width: 23%" />
+<col style="width: 73%" />
 </colgroup>
 <thead>
 <tr>
@@ -301,7 +315,7 @@ An example of `vars` (from study B129, only the first variables are
 shown):
 
 | Argument | Explanation |
-|------------------------|------------------------------------------------|
+|------------------------|-----------------------------------------------|
 | `item` | Contains the item names |
 | `type` and `correct_response` | Variables defining item type and correct response |
 | `raw`, `dich` and `poly` | Logical variables identifying unscored, dichotomously scored, and polytomously scored items |
@@ -410,12 +424,12 @@ further detail in the remainder of the guide.
 
 **Input** arguments:
 
-<table style="width:98%;">
+<table style="width:95%;">
 <colgroup>
-<col style="width: 15%" />
-<col style="width: 15%" />
-<col style="width: 50%" />
-<col style="width: 15%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 42%" />
+<col style="width: 17%" />
 </colgroup>
 <thead>
 <tr>
@@ -452,7 +466,7 @@ dichotomous <em>and</em> polytomous items.</p></td>
 <td><p>Optional in most functions. This function argument requires the
 name of the logical variable in <code>resp</code> that identifies all
 valid cases see section <em>Valid Cases</em> in vignette
-<code>data_preparation</code>.</p></td>
+<code>prepare_data</code>.</p></td>
 <td><p>all cases are used</p></td>
 </tr>
 <tr>
@@ -462,8 +476,8 @@ character vector</p></td>
 <td><p>Optional in most functions exception: missing value analysis.
 Requires a named character vector containing all user-defined missing
 values see section <em>User-Defined Missing Values</em> in vignette
-<code>data_preparation</code>. Warning: If this vector is incomplete,
-severe problems and errors in scaling may occur!</p></td>
+<code>prepare_data</code>. Warning: If this vector is incomplete, severe
+problems and errors in scaling may occur!</p></td>
 <td><p>-999 to -1</p></td>
 </tr>
 <tr>
@@ -488,7 +502,7 @@ version.</p></td>
 **Process** arguments:
 
 | Argument | Type | Description | Default |
-|-------------------|-------------------|-------------------|-----------------|
+|------------------|------------------|------------------|------------------|
 | `digits` | integer | Number of decimal places to which the results should be rounded. | usually `3` |
 | `warn` | logical | Whether warnings should be printed to the console. | usually `TRUE` |
 | `verbose` | logical | Whether the processing steps should be printed to the console. | usually `TRUE` |
@@ -496,7 +510,7 @@ version.</p></td>
 **Output** arguments:
 
 | Argument | Type | Description | Default |
-|-------------|-------------|----------------------------------|-------------|
+|---------------|---------------|-----------------------------|---------------|
 | `plots` | logical | In main functions, users can choose whether plots of the analyses (e.g. ICC plots and Wright maps in IRT analyses) should be generated. | usually `FALSE` |
 | `print` | logical | In main functions, users can choose whether (additional) results should be printed to the console or included in the HTML document. | usually `TRUE` |
 | `save` | logical | In almost all functions, users can choose whether results should be saved (as `Excel` and/or `RDS`). | usually `TRUE` |
@@ -517,13 +531,15 @@ corresponding package functions, some of the following functions may be
 helpful.
 
 | Function | Usage |
-|-----------------|-------------------------------------------------------|
+|------------------|------------------------------------------------------|
 | `convert_mv` | Converts user-defined missing values into NAs. Input arguments are `resp`, `items`, and `mvs`. The output is `resp` with converted missing values. |
 | `prepare_resp` | Prepares `resp` for subsequent analyses. Input arguments are `resp`, `vars`, `items`, `valid`, `mvs`, the logical `use_only_valid` (whether only valid cases should be used), and the logical `convert` (whether user-defined missing values should be converted to NAs). The output is `resp` containing only the items defined in `items` as variables, optionally restricted to valid cases and with missing values optionally converted to NAs. |
 | `check_folder` | Checks whether the folder specified in the path exists and creates it if it does not. |
 | `meht` | Performs the Minimum Effect Hypothesis Test. Input arguments are various statistical quantities. |
 
 # Debugging
+
+Step-by-step execution of code helps with debugging.
 
 Since every scaling procedure is slightly different, it is possible that
 errors occur when using the NEPSroutines package. However, in many
@@ -533,9 +549,10 @@ your data are correct: Are all item properties in the `vars` dataset
 correctly defined? Does every item in `vars` also appear in `resp` and
 vice versa? Do the variable classes match the required specifications?
 Have the variables been named correctly? The required data structure is
-described in detail in the section *Required Data Structure* and can be
-partially checked using dedicated functions (see vignette
+described in detail in the previous section *Required Data Structure*
+and can be partially checked using dedicated functions (see vignette
 `prepare_data`).
 
 If the data are correct and the error still occurs, you can contact
-*scaling\@lifbi.de* with the error message, your script, and the data.
+*skalierung\@lifbi.de* with the error message, your script, and the
+data.

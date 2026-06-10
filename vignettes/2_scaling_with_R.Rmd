@@ -1,0 +1,85 @@
+---
+title: "Scaling with R"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    toc: true
+    number_sections: no
+  bookdown::pdf_document2:
+    toc: true
+    number_sections: no
+bibliography: ../inst/NEPSroutines.bib
+vignette: >
+  %\VignetteIndexEntry{Scaling with R}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r, include = FALSE}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+
+```
+
+\newpage
+
+# Preparations in R
+
+For scaling, the latest version of R should be installed (see <https://cran.r-project.org/> for the latest R version or use `update.packages()`). The easiest way to work with R is via RStudio, which is a GUI (= graphical user interface) for the statistical programming language R. If it is not pre-installed on your computer, you can download the latest version here: <https://www.rstudio.com/products/rstudio/>.
+
+## Creating an R Project in the Study Directory
+
+For each scaling procedure, a separate R project should be created in the corresponding study directory on the network drive.
+
+The overarching study directory can be found here:
+
+`//wipo.lifbi.de/daten/Projektgruppen_(08)/Kompetenzen_BA_Hiwi_(p000012)/Methoden/Skalierung/HE`
+
+Each sub-study (e.g., reading, mathematics, etc.) has its own subfolder. The project should be created in the respective subfolder via:
+
+*File → New Project… → New Directory → New Project → Create Project*
+
+You will need to specify a project name and path.
+
+The project must be created on the LIfBi network drive, as NEPS data may only be stored and processed there. However, note that working via VPN can cause significant delays when saving large output files (usually result datasets rather than tables or plots). If this becomes problematic, saving of results can be disabled within the package. Local storage of results should only be used in exceptional cases and any locally stored files must be deleted immediately once they are no longer needed.
+
+## Using R Markdown
+
+R Markdown can be used for scaling workflows (though it is not mandatory). R Markdown documents allow text, code, and output to be combined in a single file.
+
+If you use R Markdown, make sure to enable the option **"Chunk Output in Console"** in the settings (click the gear icon at the top of the script). Do not use “Chunk Output Inline”, as this may prevent some scaling outputs from being displayed correctly in R.
+
+## Session Information
+
+To ensure reproducibility, the versions of R and all packages used in the scaling process should be documented. This can be done using:
+
+`{r} sessionInfo()`
+
+# Basics in R
+
+To use `NEPSroutines` and to understand this guide, you should possess basic knowledge of
+
+-   Loading packages
+-   Importing data
+-   Basic data manipulation (subsetting and merging datasets)
+
+Key concepts include:
+
+-   `NA` as missing value
+-   Data types: logical, numeric, integer, double, factor, character
+-   for-loops and if-statements
+-   Logical operators: `&`, `&&`, `|`, `||`, `!`, `==`, `!=`, `<=`, `>=`, `<`, `>`
+-   `%in%` operator
+-   Pipe operator `|>`
+-   Calling functions without loading packages: `package::function()`
+-   Indexing data frames:
+    -   `df[rows, columns]`
+    -   `df[[column]]`
+
+If you are not familiar with R basics, many resources are available online (Stack Overflow is often helpful). R cheat sheets are also recommended:
+
+<https://www.rstudio.com/resources/cheatsheets/>
