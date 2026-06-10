@@ -39,66 +39,64 @@ To open a specific vignette, replace `"my_vignette"` with the required vignette 
 utils::vignette("my_vignette", package = "NEPSroutines")
 ```
 
-The following vignettes are included in the package:
-
-```{r, echo = FALSE, results = 'asis'}
-vignettes <- utils::vignette(package = "NEPSroutines")
-cat(paste0("- ", vignettes$results[, "Item"], "\n"), sep = "")
-```
-
 ## Available Documentation
 
-The package documentation is organized according to the typical scaling process.
+The package documentation is organized according to the typical scaling process. The following sections list all available vignettes.
 
 ### Introduction to R and Scaling NEPS Data
 
 If you are new to scaling NEPS data and maybe also to using R, start by reading the first vignettes that give you a short introduction to the scaling of NEPS data using R, RStudio, and R Markdown.
 
--   *Scaling NEPS data*
+-   *scaling_NEPS_data*
 
--   *Scaling with R*
+-   *scaling_with_R*
 
 ### Introduction to NEPSroutines
 
 Get acquainted with the NEPSroutines package, its required data structure, and the package workflow.
 
--   *Package Introduction*
+-   *package_introduction*
 
 ### Data Import and Preparation
 
 Learn how to prepare competence items, score items, define missing values, and create the required data structures.
 
--   *Import Data*
--   *Prepare Data*
+-   *import_data*
+-   *prepare_data*
 
 ### Descriptive Analyses
 
 Obtain descriptive statistics for samples, items, and test booklets.
 
--   *Descriptive Analysis*
+-   *descriptive_analyses*
 
 ### Missing Value Analyses
 
 Analyze user-defined missing values at the person and item level.
 
--   *Missing Responses per Person*
--   *Missing Responses per Item*
+-   *missing_values_analyses*
 
 ### Psychometric Analyses
 
 Evaluate item and test quality.
 
--   *Item Response Theory Analysis*
--   *Differential Item Functioning Analysis*
--   *Distractor Analysis*
--   *Dimensionality Analysis*
+-   *irt_analyses*
+-   *dif_analyses*
+-   *distractor_analyses*
+-   *dimensionality_analyses*
 
 ### Score Creation and SUF Generation
 
 Estimate scores and create the Scientific Use File.
 
--   *Create Scores*
--   *Create SUF*
+-   *create_scores*
+-   *create_suf*
+
+### Technical Report
+
+The package supports the half-automated creation of the Technical Report.
+
+-   *technical_report*
 
 ## Further Information
 
