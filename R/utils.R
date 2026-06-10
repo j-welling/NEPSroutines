@@ -893,5 +893,5 @@ capitalize <- function(x) {
 #'
 #' @export
 open_guide <- function() {
-  utils::vignette("0_getting_started", package = "NEPSroutines")
+  utils::vignette("_getting_started", package = "NEPSroutines")
 }
