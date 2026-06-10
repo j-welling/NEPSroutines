@@ -102,3 +102,52 @@ attributes(dat$name_variable)$labels
 ```
 
 # Import Data
+
+## Information on Competence Items
+
+First, the required data must be imported. We initially need certain information about the competence items (e.g., correct response, item type, position, test booklet; see Section *Required Data and Files*). This information should be identified beforehand for each unscored item and compiled in an Excel table so that it can now be loaded into the R environment as the data.frame `vars`. Pay attention to the naming conventions of the NEPSroutines package for the variables in the data.frame `vars` (see Section *Required Data Structure* in vignette `package_introduction`). Which items are included in the competency test can be found either in the codebook or in a document corresponding to the respective test (see Section *Required Data and Files*).
+
+```{r}
+vars <- openxlsx::read.xlsx(file = "path/filename.xlsx") 
+```
+
+The NEPSroutines package additionally requires logical variables in the dataset that contain information about the item version (`raw`, `dich`, `poly`). Since only unscored items are available at this point, the assignment is straightforward and can be applied to all items simultaneously. Note that the variable `poly` is only required if the test also contains polytomous items.
+
+```{r}
+vars$raw <- TRUE
+vars$dich <- FALSE
+vars$poly <- FALSE 
+```
+
+## Competence Data
+
+The raw competency item data can be found in the SPSS dataset `xTargetCompetencies`. This dataset is loaded into the R environment as a data.frame named `resp` using the function `read_sav()`. The argument `use_na = FALSE` prevents missing values specified in SPSS from being imported as `NA`. Very large datasets may cause memory issues; in such cases, using `foreign::read.spss` may help.
+
+```{r}
+resp <- haven::read_sav(file = "path/filename.sav", use_na = FALSE) 
+```
+
+We only need those items that occurred in the competency test to be scaled and, for the DIF analyses, the variable indicating the test booklet design (`tx...`). These can be selected using the function `select()`.
+
+```{r}
+item_names <- vars$item 
+design <- "NameDesignVariable"
+resp <- dplyr::select(resp, ID_t, design, all_of(item_names)) 
+```
+
+## Sociodemographic Data
+
+In the DIF analyses, it is examined whether the items elicit comparable response behavior across different groups (e.g., test booklets A and B). Several sociodemographic and methodological variables are used as so-called DIF variables. The variables typically used in our scaling procedures are explained in Sections *Sociodemographic Data* and *Test Booklet Design Information* in vignette `import_data`. The raw data must be assembled from various SPSS files.
+
+As with the competency data, the SPSS files are loaded into R using `read_sav()`, and the required variables (`ID_t`, DIF variables) are selected using `select()` (see previous section). In general, data from the current wave are used; however, missing values may also be supplemented using information from earlier waves. If multiple values are available (e.g., school-leaving qualification or socioeconomic status of the parents), the higher value is used.
+
+The data.frame containing the new variables is merged with the data.frame `resp` using the `merge()` function.
+
+```{r}
+resp <- merge(
+  resp, 
+  dif_vars[, c("ID_t", "dif_var1", "dif_var2", etc.)],  
+  by = "ID_t",  
+  all.x = TRUE
+)
+```

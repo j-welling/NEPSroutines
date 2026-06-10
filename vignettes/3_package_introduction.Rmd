@@ -98,11 +98,7 @@ e.g. sociodemographic variables. Information about each participant is
 stored in a single row. An example of this dataset can be seen below for
 study B129. The following variables are particularly required:
 
-<table style="width:97%;">
-<colgroup>
-<col style="width: 25%" />
-<col style="width: 70%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th><p>Variable</p></th>
@@ -182,7 +178,7 @@ Example for `resp` (from study B129, only the first variables are
 shown):
 
 | Variable | Explanation |
-|--------------------|----------------------------------------------------|
+|----|----|
 | **`ID_t`** | Contains the IDs of the persons |
 | `sex`, `migration` and `books` | Dichotomous (or dichotomized) sociodemographic variables for descriptive and DIF analyses |
 | `difficulty` | Grouping variable assigning persons to the different test booklets |
@@ -206,11 +202,7 @@ An example of the `vars` dataset can be seen below for study B129. How
 the variables are constructed is described in Chapter 4 *Data
 Preparation*. The following variables are particularly required:
 
-<table style="width:97%;">
-<colgroup>
-<col style="width: 23%" />
-<col style="width: 73%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th><p>Variable</p></th>
@@ -315,7 +307,7 @@ An example of `vars` (from study B129, only the first variables are
 shown):
 
 | Argument | Explanation |
-|------------------------|-----------------------------------------------|
+|----|----|
 | `item` | Contains the item names |
 | `type` and `correct_response` | Variables defining item type and correct response |
 | `raw`, `dich` and `poly` | Logical variables identifying unscored, dichotomously scored, and polytomously scored items |
@@ -424,13 +416,7 @@ further detail in the remainder of the guide.
 
 **Input** arguments:
 
-<table style="width:95%;">
-<colgroup>
-<col style="width: 17%" />
-<col style="width: 17%" />
-<col style="width: 42%" />
-<col style="width: 17%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th><p>Argument</p></th>
@@ -502,7 +488,7 @@ version.</p></td>
 **Process** arguments:
 
 | Argument | Type | Description | Default |
-|------------------|------------------|------------------|------------------|
+|----|----|----|----|
 | `digits` | integer | Number of decimal places to which the results should be rounded. | usually `3` |
 | `warn` | logical | Whether warnings should be printed to the console. | usually `TRUE` |
 | `verbose` | logical | Whether the processing steps should be printed to the console. | usually `TRUE` |
@@ -510,7 +496,7 @@ version.</p></td>
 **Output** arguments:
 
 | Argument | Type | Description | Default |
-|---------------|---------------|-----------------------------|---------------|
+|----|----|----|----|
 | `plots` | logical | In main functions, users can choose whether plots of the analyses (e.g. ICC plots and Wright maps in IRT analyses) should be generated. | usually `FALSE` |
 | `print` | logical | In main functions, users can choose whether (additional) results should be printed to the console or included in the HTML document. | usually `TRUE` |
 | `save` | logical | In almost all functions, users can choose whether results should be saved (as `Excel` and/or `RDS`). | usually `TRUE` |
@@ -531,7 +517,7 @@ corresponding package functions, some of the following functions may be
 helpful.
 
 | Function | Usage |
-|------------------|------------------------------------------------------|
+|----|----|
 | `convert_mv` | Converts user-defined missing values into NAs. Input arguments are `resp`, `items`, and `mvs`. The output is `resp` with converted missing values. |
 | `prepare_resp` | Prepares `resp` for subsequent analyses. Input arguments are `resp`, `vars`, `items`, `valid`, `mvs`, the logical `use_only_valid` (whether only valid cases should be used), and the logical `convert` (whether user-defined missing values should be converted to NAs). The output is `resp` containing only the items defined in `items` as variables, optionally restricted to valid cases and with missing values optionally converted to NAs. |
 | `check_folder` | Checks whether the folder specified in the path exists and creates it if it does not. |

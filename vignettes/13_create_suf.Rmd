@@ -38,7 +38,7 @@ the test must be included in the SUF. These refer to the scored items.
 Polytomous variables with collapsed categories should not be included in
 the SUF. During data preparation, a logical variable should therefore
 already have been created that identifies the relevant items (see
-Section 4.3.3 Variables for Scores and the SUF). In the example, this
+Section *Create Variables for Scores and SUF* in vignette `prepare_data`). In the example, this
 variable is called `suf`.
 
 The function returns the SUF containing all scored variables. If the

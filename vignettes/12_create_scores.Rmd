@@ -75,14 +75,14 @@ suffix to each file name (e.g., `"cohort_6"`).
 The package also allows the computation of sum scores and metacognitive
 scores in addition to WLEs. Sum scores (variables with suffix `_sc3`)
 require all original items used in the test. During data preparation
-(see Section 4.3.3 Variables for Scores and the SUF), a variable should
-therefore already have been created in `vars` that identifies all
-dichotomous and polytomous items used in the test and included in the
-SUF. These are scored items without collapsed categories. In the
-example, this variable is called `suf`. To compute sum scores, the
-argument `sum_score` must be set to `TRUE`, and the arguments
-`sum_select` and `num_cat` must be specified. The computed sum scores
-are stored as variables with suffix `_sc3`.
+(see Section *Create Variables for Scores and SUF* in vignette
+`prepare_data`), a variable should therefore already have been created
+in `vars` that identifies all dichotomous and polytomous items used in
+the test and included in the SUF. These are scored items without
+collapsed categories. In the example, this variable is called `suf`. To
+compute sum scores, the argument `sum_score` must be set to `TRUE`, and
+the arguments `sum_select` and `num_cat` must be specified. The computed
+sum scores are stored as variables with suffix `_sc3`.
 
 To compute metacognitive scores, the argument `metap` must be set to
 `TRUE`, and the arguments `meta_variable`, `num_cat`, `meta_score_name`,
@@ -124,4 +124,3 @@ Information on the individual function arguments can be obtained via the
 help function (`?create_scores`).
 
 No minor functions exist for creating scores.
-

@@ -58,7 +58,8 @@ sample and each group). In this case, the function
 `grouped_irt_analysis()` can be used to perform IRT analyses for
 multiple groups with a single command. Note that the data.frames `resp`
 and `vars` must include the corresponding group variables and
-group-specific analysis variables (see Section 4.3.2 Group Variables).
+group-specific analysis variables (see Section *Create Group Variables*
+in vignette `prepare_data`).
 
 If not every person was administered every item, the argument
 `missing_by_design` should be specified in both main functions by

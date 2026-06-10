@@ -128,7 +128,7 @@ therefore be specified either as a string or as a vector (i.e., one
 `select` variable per DIF variable).
 
 | Function | Input | Output |
-|---------------------|---------------------------|------------------------|
+|----|----|----|
 | `dif_model` | Data.frames `resp` and `vars` containing information on responses, items, and person characteristics | Results of the DIF analysis for a single DIF variable (R object) |
 | `conduct_dif_analysis` | Data.frames `resp` and `vars` containing information on responses, items, and person characteristics | Results of the DIF analysis for multiple DIF variables (R object, optionally RDS) |
 | `dif_summary` | Output of the function `dif_model` (or the element `models$NameDIFVariable` from the output of `dif_analysis`) | Tables with results of the DIF analysis for a single DIF variable (R object, optionally Excel) |

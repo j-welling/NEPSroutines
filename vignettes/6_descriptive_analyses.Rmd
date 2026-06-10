@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 
 \newpage
 
-## Descriptive Analysis of the Sample
+## Analysis of the Whole Sample
 
 First, descriptive analyses of the sample should be conducted. Within
 the NEPSroutines package, several smaller functions are available for
@@ -40,7 +40,7 @@ display the results in the console.
 The following table provides an overview of the available functions:
 
 | Function | Output |
-|----|----|
+|------------------------------------|------------------------------------|
 | `n_valid` | Number of all valid and invalid cases in the dataset. |
 | `desc_con` | Table with descriptive statistics (e.g., mean, SD) for the continuous variables defined in `desc`. |
 | `desc_abs` | Table with the number of cases in each category for the categorical variables defined in `desc` (e.g., number of males and females in the dataset for the variable `sex`). |
@@ -86,7 +86,7 @@ rm(sociodemographics, booklet)
 Information on the individual function arguments can be obtained via the
 help function (e.g., `?desc_nom`).
 
-## Descriptive Analysis by Subgroups (if applicable)
+## Analysis by Subgroup (if applicable)
 
 In many scaling applications, one or more grouping variables are present
 (e.g., different test booklets). It is useful to report sample size as
