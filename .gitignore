@@ -1,6 +1,6 @@
-.Rproj
-.Rproj.user
-.Rhistory
+*.Rproj
+*.Rproj.user
+*.Rhistory
 inst/doc
 /doc/
 /Meta/
