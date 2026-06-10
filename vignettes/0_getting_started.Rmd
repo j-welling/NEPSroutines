@@ -104,9 +104,9 @@ Estimate scores and create the Scientific Use File.
 
 For details on individual functions, see the corresponding help pages, e.g.
 
-```{r}
+```{r, eval = FALSE}
 ?irt_analysis
 ?create_scores
 ```
 
-If the package and function documentation is missing vital information or if you are stuck, please write to *scaling\@lifbi.de*.
+If the package and function documentation is missing vital information or if you are stuck, please write to *skalierung\@lifbi.de*.
