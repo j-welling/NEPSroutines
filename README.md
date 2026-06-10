@@ -54,12 +54,6 @@ install.packages(
 Replace PATH/TO/DIRECTORY with your local path and X.Y.Z with the actual
 version number.
 
-Once installed, you can load the package like any other R package:
-
-``` r
-library(NEPSroutines)
-```
-
 #### From GitHub
 
 You can also install the newest version of NEPSroutines from
@@ -71,6 +65,14 @@ remotes::install_github("j-welling/NEPSroutines@vX.Y.Z")
 ```
 
 Replace X.Y.Z with the actual version number.
+
+#### Load Package
+
+Once installed, you can load the package like any other R package:
+
+``` r
+library(NEPSroutines)
+```
 
 ### Getting Started
 
