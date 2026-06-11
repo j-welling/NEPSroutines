@@ -55,6 +55,38 @@ test_that("TblItemProps() works", {
 })
 
 
+test_that("TblItemProps() keeps grouped rows with na.rm = TRUE", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  vars <- data.frame(
+    txttyp = c(NA, NA, "MC", "CMC"),
+    mixed_easy = c(TRUE, TRUE, FALSE, FALSE),
+    mixed_difficult = c(FALSE, FALSE, TRUE, TRUE)
+  )
+
+  tbl <- TblItemProps(
+    vars = vars,
+    select = c("Easy test" = "mixed_easy", "Difficult test" = "mixed_difficult"),
+    prop = "txttyp",
+    propname = "Text types",
+    na.rm = TRUE,
+    width = 0.5
+  )
+
+  expect_s3_class(tbl, "flextable")
+  expect_equal(tbl$body$dataset[["Text types"]], c(
+    "Simple multiple-choice items",
+    "Complex multiple-choice items",
+    "Total number of items"
+  ))
+  expect_equal(tbl$body$dataset[["Easy test"]], c("0", "0", "0"))
+  expect_equal(tbl$body$dataset[["Difficult test"]], c("1", "1", "2"))
+
+})
+
+
 test_that("TblItemFacets() works", {
 
   skip_if_not_installed("flextable")
@@ -271,5 +303,4 @@ test_that("TblCode() works", {
   expect_equal(tail(code, 1), "TAM::tam.wle(mod)")
 
 })
-
 

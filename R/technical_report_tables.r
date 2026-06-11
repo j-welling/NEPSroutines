@@ -200,7 +200,13 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
       }
     }
     freq_groups[is.na(freq_groups)] <- 0
-    if (na.rm) freq_groups <- freq_groups[freq_groups$f > 0, ]
+    if (na.rm) {
+      freq_groups <- freq_groups[
+        rowSums(freq_groups[, -1, drop = FALSE]) > 0,
+        ,
+        drop = FALSE
+      ]
+    }
 
     # Sort table according to ordering in formats
     formatsvec <- GetPropLabels()
@@ -221,8 +227,9 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
     freq_groups <- rbind(freq_groups, c("Total number of items", sums))
 
     # Create flextable
+    hline <- if (nrow(freq_groups) > 1) nrow(freq_groups) - 1 else NULL
     ft <- Tbl(freq_groups, align = c("left", rep("center", length(select))),
-              hline = nrow(freq_groups) - 1, footnote = footnote,
+              hline = hline, footnote = footnote,
               size = size, width = width)
     return (ft)
 
@@ -1212,4 +1219,3 @@ TblCode <- function(vars, select, collapsed = NULL, tbl = TRUE,
   }
 
 }
-
