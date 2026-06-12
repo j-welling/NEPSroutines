@@ -54,6 +54,63 @@ test_that("TblItemProps() works", {
 
 })
 
+test_that("TblItemProps() with na.rm works", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  vars <- data.frame(
+    txttyp = factor(c("SR", "HL", "CMC")),
+    easy = c(TRUE, FALSE, FALSE),
+    medium = c(FALSE, FALSE, FALSE),
+    difficult = c(FALSE, FALSE, TRUE)
+  )
+
+  # na.rm = TRUE
+  tbl1 <- TblItemProps(
+    vars = vars,
+    select = c("Easy test" = "easy",
+               "Medium test" = "medium",
+               "Difficult test" = "difficult"),
+    prop = "txttyp",
+    propname = "Text types",
+    na.rm = TRUE
+  )
+  expect_s3_class(tbl1, "flextable")
+  expect_equal(names(tbl1$body$dataset), c("Text types", "Easy test",
+                                           "Difficult test"))
+  expect_equal(tbl$body$dataset[["Text types"]], c(
+    "Complex multiple-choice items",
+    "Short constructed responses",
+    "Total number of items"
+  ))
+  expect_equal(tbl$body$dataset[["Easy test"]], c("0", "1", "1"))
+  expect_equal(tbl$body$dataset[["Difficult test"]], c("1", "0", "1"))
+
+  # na.rm = FALSE
+  tbl2 <- TblItemProps(
+    vars = vars,
+    select = c("Easy test" = "easy",
+               "Medium test" = "medium",
+               "Difficult test" = "difficult"),
+    prop = "txttyp",
+    propname = "Text types",
+    na.rm = FALSE
+  )
+  expect_s3_class(tbl2, "flextable")
+  expect_equal(names(tbl2$body$dataset), c("Text types", "Easy test",
+                                           "Medium test", "Difficult test"))
+  expect_equal(tbl2$body$dataset[["Text types"]], c(
+    "Complex multiple-choice items",
+    "Short constructed responses",
+    "Highlighting tasks",
+    "Total number of items"
+  ))
+  expect_equal(tbl2$body$dataset[["Easy test"]], c("0", "1", "0", "1"))
+  expect_equal(tbl2$body$dataset[["Difficult test"]], c("1", "0", "0", "1"))
+
+})
+
 
 test_that("TblItemFacets() works", {
 

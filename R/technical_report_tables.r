@@ -39,10 +39,10 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
                 size_foot = 10, width = NULL, digits = 2, align = "center",
                 align_head = "center") {
 
-  if(!requireNamespace("flextable", quietly = TRUE)) {
+  if (!requireNamespace("flextable", quietly = TRUE)) {
     stop("Please install flextable!")
   }
-  if(!requireNamespace("officer", quietly = TRUE)) {
+  if (!requireNamespace("officer", quietly = TRUE)) {
     stop("Please install officer!")
   }
 
@@ -59,7 +59,7 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
 
   # Set column widths
   if (!any(is.null(width))) {
-    if(length(width) == 1) width <- rep(width, ncol(obj))
+    if (length(width) == 1) width <- rep(width, ncol(obj))
     for (j in seq(1, ncol(obj)))
       ft <- flextable::width(ft, j = j, width = width[j])
   } else if (autofit) {
@@ -186,6 +186,9 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
                          na.rm = TRUE, size = 12, width = NULL,
                          formats = NULL) {
 
+    if (!(prop %in% names(vars))) stop("Unknown item property ", prop, "!")
+    if (!is.factor(vars[[prop]])) vars[[prop]] <- as.factor(vars[[prop]])
+
     # Create frequency table
     freq_groups <- NULL
     if (is.null(names(select)))
@@ -200,7 +203,13 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
       }
     }
     freq_groups[is.na(freq_groups)] <- 0
-    if (na.rm) freq_groups <- freq_groups[freq_groups$f > 0, ]
+    if (na.rm) {
+      ff <- rowSums(freq_groups[, -1, drop = FALSE]) > 0
+      freq_groups <- freq_groups[ff, , drop = FALSE]
+      ff <- colSums(freq_groups[, -1, drop = FALSE]) > 0
+      freq_groups <- freq_groups[, c(TRUE, ff), drop = FALSE]
+      select <- select[ff]
+    }
 
     # Sort table according to ordering in formats
     formatsvec <- GetPropLabels()
@@ -221,10 +230,11 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
     freq_groups <- rbind(freq_groups, c("Total number of items", sums))
 
     # Create flextable
+    hline <- if (nrow(freq_groups) > 1) nrow(freq_groups) - 1 else NULL
     ft <- Tbl(freq_groups, align = c("left", rep("center", length(select))),
-              hline = nrow(freq_groups) - 1, footnote = footnote,
+              hline = hline, footnote = footnote,
               size = size, width = width)
-    return (ft)
+    return(ft)
 
   }
 
@@ -296,7 +306,7 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
   if (length(width) == 1) width <- c(0.3, rep(width, ncol(tab) - 1))
   ft <- Tbl(tab, footnote = footnote, width = width, size = size)
   ft <- flextable::colformat_double(ft, j = 1, digits = 0)
-  return (ft)
+  return(ft)
 
 }
 
