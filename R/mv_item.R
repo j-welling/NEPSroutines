@@ -612,7 +612,7 @@ resp_per_position <- function(resp, resp_c, vars_c, grouping, position) {
 
   for (g in grouping) {
 
-    r <- data.frame(t(resp_c[resp[[g]], ]))
+    r <- data.frame(t(resp_c[resp[[g]], vars_c$item[vars_c[[g]]]]))
     r$item <- rownames(r)
     r <- merge(r, vars_c[, c('item', position[g])], by = "item")
     r <- dplyr::rename(r, position = as.character(position[g]))
