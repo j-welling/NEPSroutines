@@ -170,7 +170,7 @@ test_that("TblMvi() without booklets works", {
     path_table = outdir,
     overwrite = TRUE,
     warn = FALSE,
-    verbose = FALSE,
+    verbose = FALSE
   )
   tab <- Import(outdir, "mv_item.xlsx")
   tbl <- TblMvi(tab, excl = "", sort = "N_valid")
