@@ -109,6 +109,9 @@ test_that("TblItemProps() with na.rm works", {
   expect_equal(tbl2$body$dataset[["Easy test"]], c("0", "1", "0", "1"))
   expect_equal(tbl2$body$dataset[["Difficult test"]], c("1", "0", "0", "1"))
 
+  expect_error(TblItemProps(vars = vars, select = "easy", prop = "unknown"),
+               "Unknown item property unknown!")
+
 })
 
 

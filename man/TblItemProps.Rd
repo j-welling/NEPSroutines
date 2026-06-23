@@ -8,7 +8,7 @@ TblItemProps(
   vars,
   select,
   prop,
-  propname = "",
+  propname = " ",
   footnote = NULL,
   na.rm = TRUE,
   size = 12,
@@ -32,7 +32,7 @@ property such as response format, text function, or cognitive function.}
 
 \item{footnote}{A table note.}
 
-\item{na.rm}{A logical to remove empty properties.}
+\item{na.rm}{A logical to remove empty properties (rows) and empty groups (columns).}
 
 \item{size}{The general font size.}
 
