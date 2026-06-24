@@ -34,7 +34,8 @@ reference model and the name of the facet variable.}
 first column; otherwise the number of values must correspond to the number of
 columns in `obj`.}
 
-\item{...}{Further arguments passed to [Tbl()].}
+\item{...}{Further arguments passed to [Tbl()]. The first column (dimension
+labels) is always left-aligned, so any `align` passed here does not affect it.}
 }
 \value{
 A flextable.

@@ -152,7 +152,8 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
 #' @param footnote A table note.
 #' @param na.rm A logical to remove empty properties.
 #' @param formats Long names of item properties to be displayed in the table.
-#' @param ... Further arguments passed to [Tbl()].
+#' @param ... Further arguments passed to [Tbl()]; `align` and `hline` are set
+#' internally and will error if also passed here.
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @inheritParams collapse_response_categories
@@ -743,7 +744,8 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
 #' @param width The column widths; if a single value is given, it refers to the
 #' first column; otherwise the number of values must correspond to the number of
 #' columns in `obj`.
-#' @param ... Further arguments passed to [Tbl()].
+#' @param ... Further arguments passed to [Tbl()]. The first column (dimension
+#' labels) is always left-aligned, so any `align` passed here does not affect it.
 #' @return A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
@@ -847,7 +849,8 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 #' corresponds to the first column; otherwise the number of values must
 #' correspond to the number of columns in `obj`.
 #' @param digits A number for rounding.
-#' @param ... Further arguments passed to [Tbl()].
+#' @param ... Further arguments passed to [Tbl()]; `hline` and `lbl` are set
+#' internally and will error if also passed here.
 #' @return A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
@@ -979,7 +982,8 @@ TblDIF <- TblDif
 #'
 #' @param excl A vector of DIF variables that should be excluded.
 #' @param label A vector of names for the DIF variables.
-#' @param ... Further arguments passed to [Tbl()].
+#' @param ... Further arguments passed to [Tbl()]; `digits` is set internally and
+#' will error if also passed here.
 #' @return A flextable.
 #' @inheritParams TblDif
 #' @export

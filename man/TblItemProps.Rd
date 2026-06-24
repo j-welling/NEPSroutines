@@ -43,7 +43,8 @@ number of columns in `obj`.}
 
 \item{formats}{Long names of item properties to be displayed in the table.}
 
-\item{...}{Further arguments passed to [Tbl()].}
+\item{...}{Further arguments passed to [Tbl()]; `align` and `hline` are set
+internally and will error if also passed here.}
 }
 \value{
 A flextable.

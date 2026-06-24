@@ -59,7 +59,8 @@ correspond to the number of columns in `obj`.}
 \item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
 item names.}
 
-\item{...}{Further arguments passed to [Tbl()].}
+\item{...}{Further arguments passed to [Tbl()]; `hline` and `lbl` are set
+internally and will error if also passed here.}
 }
 \value{
 A flextable.

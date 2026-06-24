@@ -295,6 +295,21 @@ test_that("specialized table functions forward ... to Tbl()", {
   # being silently swallowed (Tbl() has a closed signature, no `...`).
   expect_error(TblMvi(tab, nonexistent_arg = 1), "unused argument")
 
+  # Wrappers that hard-code structural Tbl() arguments raise a duplicate-argument
+  # error if the same name is also passed via `...` (the intended guardrail).
+  data("ex2")
+  expect_error(
+    TblItemProps(ex2$vars, select = c("Number of items" = "mixed"),
+                 prop = "type", align = "left"),
+    "matched by multiple"
+  )
+
+  # A valid, unbound Tbl() argument still forwards through a wrapper that
+  # hard-codes a different argument (TblDifFit fixes `digits`).
+  dif <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_TR.xlsx")
+  expect_s3_class(TblDifFit(dif, merge = FALSE), "flextable")
+  expect_error(TblDifFit(dif, digits = 0), "matched by multiple")
+
 })
 
 

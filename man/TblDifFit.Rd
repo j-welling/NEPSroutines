@@ -42,7 +42,8 @@ or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
 corresponds to the first column; otherwise the number of values must
 correspond to the number of columns in `obj`.}
 
-\item{...}{Further arguments passed to [Tbl()].}
+\item{...}{Further arguments passed to [Tbl()]; `digits` is set internally and
+will error if also passed here.}
 }
 \value{
 A flextable.
