@@ -4,3 +4,7 @@
 inst/doc
 /doc/
 /Meta/
+
+# Claude Code local scratch — must never be committed
+.claude/worktrees/
+.claude/settings.local.json
