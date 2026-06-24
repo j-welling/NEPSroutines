@@ -152,6 +152,7 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
 #' @param footnote A table note.
 #' @param na.rm A logical to remove empty properties.
 #' @param formats Long names of item properties to be displayed in the table.
+#' @param ... Further arguments passed to [Tbl()].
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @inheritParams collapse_response_categories
@@ -184,7 +185,7 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
 #' }
 TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
                          na.rm = TRUE, size = 12, width = NULL,
-                         formats = NULL) {
+                         formats = NULL, ...) {
 
     # Create frequency table
     freq_groups <- NULL
@@ -223,7 +224,7 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
     # Create flextable
     ft <- Tbl(freq_groups, align = c("left", rep("center", length(select))),
               hline = nrow(freq_groups) - 1, footnote = footnote,
-              size = size, width = width)
+              size = size, width = width, ...)
     return (ft)
 
   }
@@ -239,6 +240,7 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
 #' @param position The variable name in `vars` giving the item position.
 #' @param footnote A table note.
 #' @param lbl Long names of item facets to be displayed in the table.
+#' @param ... Further arguments passed to [Tbl()].
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @inheritParams collapse_response_categories
@@ -266,7 +268,7 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
 #' }
 TblItemFacets <- function(vars, select, facets, position = NULL,
                           footnote = NULL, size = 12, width = 1.9,
-                          lbl = NULL, rename_collapsed = TRUE) {
+                          lbl = NULL, rename_collapsed = TRUE, ...) {
 
   # Select variables
   cols <- c("item", facets)
@@ -294,7 +296,7 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 
   # Create flextable
   if (length(width) == 1) width <- c(0.3, rep(width, ncol(tab) - 1))
-  ft <- Tbl(tab, footnote = footnote, width = width, size = size)
+  ft <- Tbl(tab, footnote = footnote, width = width, size = size, ...)
   ft <- flextable::colformat_double(ft, j = 1, digits = 0)
   return (ft)
 
@@ -311,6 +313,7 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' @param footnote An optional table note.
 #' @param sort A column name to indicate by which column to sort.
 #' @param excl A vector of column names to exclude.
+#' @param ... Further arguments passed to [Tbl()].
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @export
@@ -350,7 +353,7 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' }
 TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
                    size = 12, width = NULL,
-                   excl = c("N_administered", "ND", "ALL", "...1")) {
+                   excl = c("N_administered", "ND", "ALL", "...1"), ...) {
 
   # Result table
   if (is.list(obj) & "list" %in% names(obj))
@@ -441,7 +444,7 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
   note <- append(note, footnote)
 
   # Create flextable
-  ft <- Tbl(tab, footnote = note, size = size, width = width)
+  ft <- Tbl(tab, footnote = note, size = size, width = width, ...)
   if ("Pos." %in% colnames(tab))
     ft <- flextable::colformat_double(ft, j = "Pos.", digits = 0)
   if ("Total" %in% colnames(tab))
@@ -465,6 +468,7 @@ TblMVI <- TblMvi
 #' [irt_analysis()].
 #' @param rename_collapsed A boolean to remove the "_collapsed" suffix from
 #' item names.
+#' @param ... Further arguments passed to [Tbl()].
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
@@ -502,7 +506,7 @@ TblMVI <- TblMvi
 #' TblPars(pars, excl = NULL, footnote = "Nothing to report.")
 #' }
 TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
-                    size = 10, width = 0.5, rename_collapsed = TRUE) {
+                    size = 10, width = 0.5, rename_collapsed = TRUE, ...) {
 
   # Result table
   if (is.list(obj) & "summary" %in% names(obj))
@@ -595,7 +599,7 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
     note <- append(note, footnote)
 
   # Create flextable
-  ft <- Tbl(tab, size = size, width = width, footnote = note)
+  ft <- Tbl(tab, size = size, width = width, footnote = note, ...)
   if ("Nr." %in% colnames(tab)) {
     ft <- flextable::colformat_double(ft, j = 1, digits = 0)
     ft <- flextable::width(ft, j = "Nr.", width = .3)
@@ -640,6 +644,7 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
 #' @param obj A list with data frames with sheets from "irt_poly.xlsx"
 #' or sheet "steps" from "irt_poly.xlsx" created by [irt_analysis()].
 #' @param digits A number for rounding.
+#' @param ... Further arguments passed to [Tbl()].
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
@@ -677,7 +682,7 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
 #' TblSteps(pars, size = 12, footnote = "Nothing to note.")
 #' }
 TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
-                     rename_collapsed = TRUE) {
+                     rename_collapsed = TRUE, ...) {
 
   # Result table
   if (is.list(obj) & "steps" %in% names(obj))
@@ -721,7 +726,7 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
     width <- rep(width, ncol(tab))
     width[1] <- max(nchar(tab$Item)) * .085
   }
-  ft <- Tbl(tab, footnote = note, size = size, width = width)
+  ft <- Tbl(tab, footnote = note, size = size, width = width, ...)
   return(ft)
 
 }
@@ -738,6 +743,7 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
 #' @param width The column widths; if a single value is given, it refers to the
 #' first column; otherwise the number of values must correspond to the number of
 #' columns in `obj`.
+#' @param ... Further arguments passed to [Tbl()].
 #' @return A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
@@ -776,7 +782,7 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
 #'        rownames = c("Units", "Change", "Space", "Data"))
 #' }
 TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
-                   footnote = NULL, size = 12, width = 3) {
+                   footnote = NULL, size = 12, width = 3, ...) {
 
   # Get table
   obj <- obj[[paste0("Cor-Var ", model)]]
@@ -818,7 +824,7 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 
   # Create flextable
   if (length(width) == 1) width <- c(width, rep(0.6, ncol(tab) - 1))
-  ft <- Tbl(tab, footnote = note, size = size, width = width)
+  ft <- Tbl(tab, footnote = note, size = size, width = width, ...)
   ft <- flextable::bold(ft, j = 1, part = "body")
   ft <- flextable::align(ft, j = 1, align = "left", part = "body")
   return(ft)
@@ -841,6 +847,7 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 #' corresponds to the first column; otherwise the number of values must
 #' correspond to the number of columns in `obj`.
 #' @param digits A number for rounding.
+#' @param ... Further arguments passed to [Tbl()].
 #' @return A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
@@ -881,7 +888,7 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 TblDif <- function(obj, footnote = NULL, excl = NULL,
                    colnames1 = NULL, colnames2 = NULL,
                    width = 1.4, size = 10, digits = 2,
-                   rename_collapsed = TRUE) {
+                   rename_collapsed = TRUE, ...) {
 
   # Result table
   if (is.list(obj) & "estimates" %in% names(obj))
@@ -952,7 +959,7 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
   # Create flextable
   if (length(width) == 1) width <- c(width, rep(1, ncol(tab) - 1))
   ft <- Tbl(tab, footnote = note, size = size, width = width,
-            hline = nrow(tab) - 2, lbl = lbl)
+            hline = nrow(tab) - 2, lbl = lbl, ...)
   ft <- flextable::add_header_row(ft, top = FALSE, values = vals)
   ft <- flextable::style(ft, i = 2, part = "header",
                          pr_t = officer::fp_text(bold = FALSE))
@@ -972,6 +979,7 @@ TblDIF <- TblDif
 #'
 #' @param excl A vector of DIF variables that should be excluded.
 #' @param label A vector of names for the DIF variables.
+#' @param ... Further arguments passed to [Tbl()].
 #' @return A flextable.
 #' @inheritParams TblDif
 #' @export
@@ -1007,7 +1015,7 @@ TblDIF <- TblDif
 #' TblDifFit(dif$TR, excl= "sex", label = c("mig" = "Migrant background"))
 #' }
 TblDifFit <-function(obj, footnote = NULL, excl = NULL, label = NULL,
-                     size = 12, width = 0.9) {
+                     size = 12, width = 0.9, ...) {
 
   # Result table
   if (is.list(obj) & "gof" %in% names(obj))
@@ -1042,7 +1050,7 @@ TblDifFit <-function(obj, footnote = NULL, excl = NULL, label = NULL,
 
   # Create flextable
   ft <- Tbl(tab, footnote = note, size = size, width = width,
-            digits = 0)
+            digits = 0, ...)
   ft <- flextable::merge_v(ft, j = 1, part = "body")
   ft <- flextable::compose(
     ft, i = 1, j = "N", part = "header",

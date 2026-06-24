@@ -11,7 +11,8 @@ TblDim(
   colnames = NULL,
   footnote = NULL,
   size = 12,
-  width = 3
+  width = 3,
+  ...
 )
 }
 \arguments{
@@ -32,6 +33,8 @@ reference model and the name of the facet variable.}
 \item{width}{The column widths; if a single value is given, it refers to the
 first column; otherwise the number of values must correspond to the number of
 columns in `obj`.}
+
+\item{...}{Further arguments passed to [Tbl()].}
 }
 \value{
 A flextable.
