@@ -197,7 +197,11 @@ conduct_dis_analysis <- function(resp, vars, valid = NULL,
             warn = FALSE
           )
         })
-      resp$score <- irt_results$model.pcm$wle$theta
+      if (is_poly(resp, vars, select_score)) {
+        resp$score <- irt_results$model.pcm$wle$theta
+      } else {
+        resp$score <- irt_results$model.1pl$wle$theta
+      }
     }
 
     # Correlations with distractors (for unscored items)

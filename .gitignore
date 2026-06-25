@@ -1,9 +1,9 @@
-*.Rproj
 *.Rproj.user
 *.Rhistory
 inst/doc
 /doc/
 /Meta/
+.Rproj.user
 
 # Claude Code local scratch — must never be committed
 .claude/worktrees/

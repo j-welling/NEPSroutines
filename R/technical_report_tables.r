@@ -39,10 +39,10 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
                 size_foot = 10, width = NULL, digits = 2, align = "center",
                 align_head = "center") {
 
-  if(!requireNamespace("flextable", quietly = TRUE)) {
+  if (!requireNamespace("flextable", quietly = TRUE)) {
     stop("Please install flextable!")
   }
-  if(!requireNamespace("officer", quietly = TRUE)) {
+  if (!requireNamespace("officer", quietly = TRUE)) {
     stop("Please install officer!")
   }
 
@@ -59,7 +59,7 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
 
   # Set column widths
   if (!any(is.null(width))) {
-    if(length(width) == 1) width <- rep(width, ncol(obj))
+    if (length(width) == 1) width <- rep(width, ncol(obj))
     for (j in seq(1, ncol(obj)))
       ft <- flextable::width(ft, j = j, width = width[j])
   } else if (autofit) {
@@ -186,6 +186,9 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
                          na.rm = TRUE, size = 12, width = NULL,
                          formats = NULL) {
 
+    if (!(prop %in% names(vars))) stop("Unknown item property ", prop, "!")
+    if (!is.factor(vars[[prop]])) vars[[prop]] <- as.factor(vars[[prop]])
+
     # Create frequency table
     freq_groups <- NULL
     if (is.null(names(select)))
@@ -200,7 +203,13 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
       }
     }
     freq_groups[is.na(freq_groups)] <- 0
-    if (na.rm) freq_groups <- freq_groups[freq_groups$f > 0, ]
+    if (na.rm) {
+      ff <- rowSums(freq_groups[, -1, drop = FALSE]) > 0
+      freq_groups <- freq_groups[ff, , drop = FALSE]
+      ff <- colSums(freq_groups[, -1, drop = FALSE]) > 0
+      freq_groups <- freq_groups[, c(TRUE, ff), drop = FALSE]
+      select <- select[ff]
+    }
 
     # Sort table according to ordering in formats
     formatsvec <- GetPropLabels()
@@ -221,10 +230,11 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
     freq_groups <- rbind(freq_groups, c("Total number of items", sums))
 
     # Create flextable
+    hline <- if (nrow(freq_groups) > 1) nrow(freq_groups) - 1 else NULL
     ft <- Tbl(freq_groups, align = c("left", rep("center", length(select))),
-              hline = nrow(freq_groups) - 1, footnote = footnote,
+              hline = hline, footnote = footnote,
               size = size, width = width)
-    return (ft)
+    return(ft)
 
   }
 
@@ -296,7 +306,7 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
   if (length(width) == 1) width <- c(0.3, rep(width, ncol(tab) - 1))
   ft <- Tbl(tab, footnote = footnote, width = width, size = size)
   ft <- flextable::colformat_double(ft, j = 1, digits = 0)
-  return (ft)
+  return(ft)
 
 }
 
@@ -357,27 +367,30 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
     obj <- obj[["list"]]
   tab <- obj
 
+  # Correct empty column names
+  colnames(tab)[1] <- "Nr."
+
   # Select results for group
   if (!is.null(select)) {
-    tab <- tab[, grepl(paste0("item|_", select), colnames(tab))]
+    tab <- tab[, grepl(paste0("Nr.|item|_", select), colnames(tab))]
     colnames(tab) <- sub(paste0("_", select), "", colnames(tab))
   }
 
-  # Exclude columns
-  regexp <-"^$"
-  if (!is.null(excl)) regexp <- paste0(regexp, "|", paste(excl, collapse = "|"))
-  tab <- tab[, !grepl(regexp, colnames(tab))]
-
   # Remove empty rows
-  tab <- tab[!(rowSums(!is.na(tab)) == 1), ]
+  tab <- tab[!(rowSums(!is.na(tab)) == 2), ]
 
   # Sorting
   if (sort %in% names(tab)) {
     tab <- tab[order(as.numeric(tab[, sort])), ]
   }
 
-  # Add item number
-  tab <- cbind("Nr." = seq(1, nrow(tab)), tab)
+  # Create numbering
+  tab$"Nr." <- seq_len(nrow(tab))
+
+  # Exclude columns
+  regexp <- "^$"
+  if (!is.null(excl)) regexp <- paste0(regexp, "|", paste(excl, collapse = "|"))
+  tab <- tab[, !grepl(regexp, colnames(tab))]
 
   # Rename variables
   lbl <- colnames(tab)
@@ -509,6 +522,9 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
     obj <- obj[["summary"]]
   tab <- obj
 
+  # Correct empty column names
+  colnames(tab)[1] <- "Nr."
+
   # Exclude columns
   if (!is.null(excl)) {
     tab <- tab[, !grepl(paste(excl, collapse = "|"), colnames(tab))]
@@ -525,7 +541,6 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
 
   # Rename variables
   lbl <- colnames(tab)
-  lbl[1] <- "Nr."
   lbl[lbl == "correct"] <- "Percentage\n correct"
   lbl[lbl == "N_administered"] <- "Total"
   lbl[lbl == "N_valid"] <- "N"
@@ -894,8 +909,8 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
   }
 
   # Rename collapsed items
-  if ("Item" %in% colnames(tab) & rename_collapsed) {
-    tab$Item <- gsub("_collapsed", "", tab$Item)
+  if ("item" %in% colnames(tab) & rename_collapsed) {
+    tab$item <- gsub("_collapsed", "", tab$item)
   }
 
   # Rename variables
@@ -1006,8 +1021,8 @@ TblDIF <- TblDif
 #' # Excluding results for sex, but with a new label for mig
 #' TblDifFit(dif$TR, excl= "sex", label = c("mig" = "Migrant background"))
 #' }
-TblDifFit <-function(obj, footnote = NULL, excl = NULL, label = NULL,
-                     size = 12, width = 0.9) {
+TblDifFit <- function(obj, footnote = NULL, excl = NULL, label = NULL,
+                      size = 12, width = 0.9) {
 
   # Result table
   if (is.list(obj) & "gof" %in% names(obj))
