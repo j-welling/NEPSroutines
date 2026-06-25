@@ -54,6 +54,63 @@ test_that("TblItemProps() works", {
 
 })
 
+test_that("TblItemProps() with na.rm works", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  vars <- data.frame(
+    txttyp = factor(c("SR", "HL", "CMC")),
+    easy = c(TRUE, FALSE, FALSE),
+    medium = c(FALSE, FALSE, FALSE),
+    difficult = c(FALSE, FALSE, TRUE)
+  )
+
+  # na.rm = TRUE
+  tbl1 <- TblItemProps(
+    vars = vars,
+    select = c("Easy test" = "easy",
+               "Medium test" = "medium",
+               "Difficult test" = "difficult"),
+    prop = "txttyp",
+    propname = "Text types",
+    na.rm = TRUE
+  )
+  expect_s3_class(tbl1, "flextable")
+  expect_equal(names(tbl1$body$dataset), c("Text types", "Easy test",
+                                           "Difficult test"))
+  expect_equal(tbl1$body$dataset[["Text types"]], c(
+    "Complex multiple-choice items",
+    "Short constructed responses",
+    "Total number of items"
+  ))
+  expect_equal(tbl1$body$dataset[["Easy test"]], c("0", "1", "1"))
+  expect_equal(tbl1$body$dataset[["Difficult test"]], c("1", "0", "1"))
+
+  # na.rm = FALSE
+  tbl2 <- TblItemProps(
+    vars = vars,
+    select = c("Easy test" = "easy",
+               "Medium test" = "medium",
+               "Difficult test" = "difficult"),
+    prop = "txttyp",
+    propname = "Text types",
+    na.rm = FALSE
+  )
+  expect_s3_class(tbl2, "flextable")
+  expect_equal(names(tbl2$body$dataset), c("Text types", "Easy test",
+                                           "Medium test", "Difficult test"))
+  expect_equal(tbl2$body$dataset[["Text types"]], c(
+    "Complex multiple-choice items",
+    "Short constructed responses",
+    "Highlighting tasks",
+    "Total number of items"
+  ))
+  expect_equal(tbl2$body$dataset[["Easy test"]], c("0", "1", "0", "1"))
+  expect_equal(tbl2$body$dataset[["Difficult test"]], c("1", "0", "0", "1"))
+
+})
+
 
 test_that("TblItemFacets() works", {
 
@@ -90,12 +147,32 @@ test_that("TblItemFacets() works", {
 })
 
 
-test_that("TblMvi() works", {
+test_that("TblMvi() without booklets works", {
 
   skip_if_not_installed("flextable")
   skip_if_not_installed("officer")
 
-  tab <- Import(test_path("fixtures", "ex1", "tables"), "mv_item.xlsx")
+  # Create output for missing values analyses
+  data("ex1")
+  outdir <- withr::local_tempdir()
+  mv_item(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    select = "dich",
+    valid = "valid",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    position = "pos",
+    plots = FALSE,
+    print = FALSE,
+    save = TRUE,
+    return = FALSE,
+    path_results = outdir,
+    path_table = outdir,
+    overwrite = TRUE,
+    warn = FALSE,
+    verbose = FALSE,
+  )
+  tab <- Import(outdir, "mv_item.xlsx")
   tbl <- TblMvi(tab, excl = "", sort = "N_valid")
 
   expect_s3_class(tbl, "flextable")
@@ -108,10 +185,51 @@ test_that("TblMvi() works", {
   ))
   expect_equal(tbl$body$dataset[["N"]][1:3], c(345, 552, 679))
   expect_equal(tbl$body$dataset[["ALL"]][1:3], c(65.5, 44.8, 32.1))
-  expect_equal(TblMVI(tab)$body$dataset, TblMvi(tab)$body$dataset)
 
 })
 
+
+test_that("TblMvi() with booklets works", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  # Create output for missing values analyses
+  data("ex3")
+  outdir <- withr::local_tempdir()
+  mv_item(
+    resp = ex3$resp,
+    vars = ex3$vars,
+    select = "dich",
+    valid = "valid",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    position = c(booklet1 = "pos1", booklet2 = "pos2"),
+    grouping = c("Booklet 1" = "booklet1", "Booklet 2" = "booklet2"),
+    plots = FALSE,
+    print = FALSE,
+    save = TRUE,
+    return = FALSE,
+    path_results = outdir,
+    path_table = outdir,
+    overwrite = TRUE,
+    warn = FALSE,
+    verbose = FALSE
+  )
+  tab <- Import(outdir, "mv_item.xlsx")
+  tbl <- TblMvi(tab, select = "booklet2")
+
+  expect_s3_class(tbl, "flextable")
+  expect_equal(names(tbl$body$dataset), c(
+    "Nr.", "Item", "Pos.", "N", "OM", "NV", "NR"
+  ))
+  expect_equal(tbl$body$dataset[["Nr."]][1:3], c(1, 2, 3))
+  expect_equal(tbl$body$dataset[["Item"]][1:3], c(
+    "reg70001_c", "reg70003_c", "reg70005_c"
+  ))
+  expect_equal(tbl$body$dataset[["N"]][1:3], c(689, 689, 669))
+  expect_equal(tbl$body$dataset[["Pos."]][1:3], c(1, 3, 5))
+
+})
 
 test_that("TblPars() works", {
 
@@ -192,9 +310,29 @@ test_that("TblDif() works", {
   skip_if_not_installed("flextable")
   skip_if_not_installed("officer")
 
-  tab <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_TR.xlsx")
+  # DIF analyses
+  data(ex1)
+  outdir <- withr::local_tempdir()
+  dif_analysis(
+   resp = ex1$resp,
+   vars = ex1$vars,
+   select = "dich",
+   valid = "valid",
+   dif_vars = c("sex", "mig"),
+   include_mv = 100,
+   print = FALSE,
+   save = TRUE,
+   return = FALSE,
+   path_results = outdir,
+   path_table = outdir,
+   overwrite = TRUE,
+   verbose = FALSE,
+   warn = FALSE
+  )
+  dif <- Import(outdir, regexp = "^dif_dich_([^_]+\\.xlsx)")
+
   tbl <- TblDif(
-    tab,
+    dif$TR,
     footnote = "Nothing to note.",
     colnames2 = c(
       "mig.1-3" = "without vs. missing",
@@ -222,8 +360,8 @@ test_that("TblDif() works", {
     "Main effect\n (DIF model)",
     "Main effect\n (Main effect model)"
   ))
-  expect_equal(tbl$body$dataset[["sex.0-1"]][1], "-0.01 (-0.01)")
-  expect_equal(TblDIF(tab)$body$dataset, TblDif(tab)$body$dataset)
+  expect_equal(tbl$body$dataset[["sex.0-1"]][1], "0.02 (0.02)")
+  expect_equal(TblDIF(dif$TR)$body$dataset, TblDif(dif$TR)$body$dataset)
 
 })
 

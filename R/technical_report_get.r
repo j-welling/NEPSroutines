@@ -30,7 +30,7 @@ GetProp <- function(obj, select, prop = "type", val = c("CMC", "MA"),
   if (item) {
     return(out)
   } else {
-    return (length(out))
+    return(length(out))
   }
 
 }
@@ -206,7 +206,7 @@ GetMvp <- function(obj, type, value, digits = 0) {
   }
   if (operator == "=") operator <- paste0(operator, "=")
   names(obj[[type]]) <- gsub(" ", ".", names(obj[[type]]))
-  n <- as.numeric(obj[[type]]$`Number.of.missing.responses`)
+  n <- as.numeric(as.character(obj[[type]]$`Number.of.missing.responses`))
   out <- sum(obj[[type]]$Percentage[methods::getFunction(operator)(n, value)])
   return(rnd(out, digits = digits))
 
