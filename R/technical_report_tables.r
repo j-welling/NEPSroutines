@@ -367,27 +367,30 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
     obj <- obj[["list"]]
   tab <- obj
 
+  # Correct empty column names
+  colnames(tab)[1] <- "Nr."
+
   # Select results for group
   if (!is.null(select)) {
-    tab <- tab[, grepl(paste0("item|_", select), colnames(tab))]
+    tab <- tab[, grepl(paste0("Nr.|item|_", select), colnames(tab))]
     colnames(tab) <- sub(paste0("_", select), "", colnames(tab))
   }
 
-  # Exclude columns
-  regexp <-"^$"
-  if (!is.null(excl)) regexp <- paste0(regexp, "|", paste(excl, collapse = "|"))
-  tab <- tab[, !grepl(regexp, colnames(tab))]
-
   # Remove empty rows
-  tab <- tab[!(rowSums(!is.na(tab)) == 1), ]
+  tab <- tab[!(rowSums(!is.na(tab)) == 2), ]
 
   # Sorting
   if (sort %in% names(tab)) {
     tab <- tab[order(as.numeric(tab[, sort])), ]
   }
 
-  # Add item number
-  tab <- cbind("Nr." = seq(1, nrow(tab)), tab)
+  # Create numbering
+  tab$"Nr." <- seq_len(nrow(tab))
+
+  # Exclude columns
+  regexp <- "^$"
+  if (!is.null(excl)) regexp <- paste0(regexp, "|", paste(excl, collapse = "|"))
+  tab <- tab[, !grepl(regexp, colnames(tab))]
 
   # Rename variables
   lbl <- colnames(tab)
@@ -519,6 +522,9 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
     obj <- obj[["summary"]]
   tab <- obj
 
+  # Correct empty column names
+  colnames(tab)[1] <- "Nr."
+
   # Exclude columns
   if (!is.null(excl)) {
     tab <- tab[, !grepl(paste(excl, collapse = "|"), colnames(tab))]
@@ -535,7 +541,6 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
 
   # Rename variables
   lbl <- colnames(tab)
-  lbl[1] <- "Nr."
   lbl[lbl == "correct"] <- "Percentage\n correct"
   lbl[lbl == "N_administered"] <- "Total"
   lbl[lbl == "N_valid"] <- "N"
@@ -904,8 +909,8 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
   }
 
   # Rename collapsed items
-  if ("Item" %in% colnames(tab) & rename_collapsed) {
-    tab$Item <- gsub("_collapsed", "", tab$Item)
+  if ("item" %in% colnames(tab) & rename_collapsed) {
+    tab$item <- gsub("_collapsed", "", tab$item)
   }
 
   # Rename variables
@@ -1016,8 +1021,8 @@ TblDIF <- TblDif
 #' # Excluding results for sex, but with a new label for mig
 #' TblDifFit(dif$TR, excl= "sex", label = c("mig" = "Migrant background"))
 #' }
-TblDifFit <-function(obj, footnote = NULL, excl = NULL, label = NULL,
-                     size = 12, width = 0.9) {
+TblDifFit <- function(obj, footnote = NULL, excl = NULL, label = NULL,
+                      size = 12, width = 0.9) {
 
   # Result table
   if (is.list(obj) & "gof" %in% names(obj))
