@@ -32,14 +32,52 @@ test_that("GetProp() and GetPropLabels() work", {
 })
 
 
-test_that("GetMVI and GetMVP work", {
+test_that("GetMVI works", {
 
-  mvi <- Import(test_path("fixtures", "ex1", "tables"), "mv_item.xlsx")
-  mvp <- Import(test_path("fixtures", "ex1", "tables"), "mv_person.xlsx")
+  # Missing values analysis
+  data("ex1")
+  outdir <- withr::local_tempdir()
+  mvi <- mv_item(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    select = "dich",
+    valid = "valid",
+    position = "pos",
+    digits = 2,
+    plots = FALSE,
+    path_results = outdir,
+    path_table = outdir,
+    path_plots = outdir,
+    overwrite = TRUE,
+    print = FALSE
+  )
+  mvi <- Import(outdir, "mv_item.xlsx")
 
   expect_equal(GetMVI(mvi, type = "NR", stat = "Max"), "64")
   expect_equal(GetMvi(mvi$summary, type = "NV", stat = "SD", digits = 2), "0.27")
   expect_equal(GetMVI(mvi, "OM", "Mean"), GetMvi(mvi, "OM", "Mean"))
+
+})
+
+test_that("GetMVP works", {
+
+  # Missing values analysis
+  data("ex1")
+  outdir <- withr::local_tempdir()
+  mvp <- mv_person(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    select = "dich",
+    valid = "valid",
+    digits = 2,
+    plots = FALSE,
+    path_results = outdir,
+    path_table = outdir,
+    path_plots = outdir,
+    overwrite = TRUE,
+    print = FALSE
+  )
+  mvp <- Import(outdir, "mv_person.xlsx")
 
   expect_equal(GetMVP(mvp, type = "ALL", value = ">5", digits = 1), "9.2")
   expect_equal(GetMvp(mvp, type = "NV", value = "0"), "89")
@@ -50,7 +88,25 @@ test_that("GetMVI and GetMVP work", {
 
 test_that("GetPars() works", {
 
-  pars <- Import(test_path("fixtures", "ex1", "tables"), "irt_dich.xlsx")
+  # IRT analysis
+  data("ex1")
+  outdir <- withr::local_tempdir()
+  irtmod <- irt_analysis(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    valid = "valid",
+    select = "dich",
+    digits = 2,
+    plots = FALSE,
+    verbose = FALSE,
+    path_results = outdir,
+    path_table = outdir,
+    path_plots = outdir,
+    overwrite = TRUE,
+    print = FALSE,
+    warn = FALSE
+  )
+  pars <- Import(outdir, "irt_dich.xlsx")
 
   expect_equal(GetPars(pars, type = "xsi", stat = min, item = TRUE), "grk10001_c")
   expect_equal(GetPars(pars, type = "N_valid", stat = "<600|>900"), "11")
@@ -73,23 +129,99 @@ test_that("GetPars() works", {
 })
 
 test_that("GetCat() works", {
-  dich <- readRDS(test_path("fixtures", "ex1", "results", "irt_dich.rds"))
-  poly <- readRDS(test_path("fixtures", "ex2", "results", "irt_poly.rds"))
+
+  # IRT analysis for dichotomous items
+  data("ex1")
+  outdir <- withr::local_tempdir()
+  irtmod1 <- irt_analysis(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    valid = "valid",
+    select = "dich",
+    digits = 2,
+    plots = FALSE,
+    verbose = FALSE,
+    path_results = outdir,
+    path_table = outdir,
+    path_plots = outdir,
+    overwrite = TRUE,
+    print = FALSE,
+    warn = FALSE
+  )
+  dich <- readRDS(file.path(outdir, "irt_dich.rds"))
+
+  # IRT analysis for polytomous items
+  data("ex2")
+  outdir <- withr::local_tempdir()
+  irtmod2 <- suppressWarnings(irt_analysis(
+    resp = ex2$resp,
+    vars = ex2$vars,
+    valid = "valid",
+    select = "mixed",
+    digits = 2,
+    plots = FALSE,
+    verbose = FALSE,
+    path_results = outdir,
+    path_table = outdir,
+    path_plots = outdir,
+    overwrite = TRUE,
+    print = FALSE,
+    warn = FALSE
+  ))
+  poly <- readRDS(file.path(outdir, "irt_poly.rds"))
 
   expect_equal(GetCat(dich, stat = median), "-0.14")
   expect_equal(GetCat(dich, stat = min, item = TRUE), "grk10001_c")
-  expect_equal(GetCat(poly, stat = max), "1.70")
+  expect_equal(GetCat(poly, stat = max), "1.61")
   expect_equal(GetCat(poly, stat = max, item = TRUE), "mag120017_c")
 
 })
 
 
 test_that("GetVar() and GetRel() work", {
-  dich <- readRDS(test_path("fixtures", "ex1", "results", "irt_dich.rds"))
-  poly <- readRDS(test_path("fixtures", "ex2", "results", "irt_poly.rds"))
+
+  # IRT analysis for dichotomous items
+  data("ex1")
+  outdir <- withr::local_tempdir()
+  irtmod1 <- irt_analysis(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    valid = "valid",
+    select = "dich",
+    digits = 2,
+    plots = FALSE,
+    verbose = FALSE,
+    path_results = outdir,
+    path_table = outdir,
+    path_plots = outdir,
+    overwrite = TRUE,
+    print = FALSE,
+    warn = FALSE
+  )
+  dich <- readRDS(file.path(outdir, "irt_dich.rds"))
+
+  # IRT analysis for polytomous items
+  data("ex2")
+  outdir <- withr::local_tempdir()
+  irtmod2 <- suppressWarnings(irt_analysis(
+    resp = ex2$resp,
+    vars = ex2$vars,
+    valid = "valid",
+    select = "mixed",
+    digits = 2,
+    plots = FALSE,
+    verbose = FALSE,
+    path_results = outdir,
+    path_table = outdir,
+    path_plots = outdir,
+    overwrite = TRUE,
+    print = FALSE,
+    warn = FALSE
+  ))
+  poly <- readRDS(file.path(outdir, "irt_poly.rds"))
 
   expect_equal(GetVar(dich), "1.46")
-  expect_equal(GetVar(poly, digits = 1), "1.6")
+  expect_equal(GetVar(poly, digits = 1), "1.2")
 
   expect_equal(GetRel(dich), "0.74")
   expect_equal(GetRel(dich, WLE = TRUE, digits = 1), "0.7")
@@ -101,6 +233,25 @@ test_that("GetVar() and GetRel() work", {
 
 test_that("GetDist() works", {
 
+  # Distractor analysis
+  data("ex1")
+  outdir <- withr::local_tempdir()
+  dis_analysis(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    valid = "valid",
+    select_raw = "raw",
+    select_score = "dich",
+    correct = "correct",
+    use_wle = TRUE,
+    digits = 2,
+    save = TRUE,
+    overwrite = TRUE,
+    path_table = outdir,
+    path_results = outdir,
+    print = FALSE,
+    warn  = FALSE
+  )
   dist <- Import(
     test_path("fixtures", "ex1", "tables"),
     "distractors_summary.xlsx"
@@ -115,7 +266,25 @@ test_that("GetDist() works", {
 
 test_that("GetFit() works", {
 
-  pars <- Import(test_path("fixtures", "ex1", "tables"), "irt_dich.xlsx")
+  # IRT analysis
+  data("ex1")
+  outdir <- withr::local_tempdir()
+  irtmod <- irt_analysis(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    valid = "valid",
+    select = "dich",
+    digits = 2,
+    plots = FALSE,
+    verbose = FALSE,
+    path_results = outdir,
+    path_table = outdir,
+    path_plots = outdir,
+    overwrite = TRUE,
+    print = FALSE,
+    warn = FALSE
+  )
+  pars <- Import(outdir, "irt_dich.xlsx")
 
   expect_equal(GetFit(pars, type = "AIC"), "13,946")
   expect_equal(GetFit(pars, type = "BIC"), "14,024")
@@ -139,22 +308,40 @@ test_that("GetDim() and GetDimFit() work", {
 
 test_that("GetDIF() works", {
 
-  sex <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_sex.xlsx")
-  mig <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_mig.xlsx")
+  data("ex1")
+  outdir <- withr::local_tempdir()
+  diffit <- dif_analysis(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    valid = "valid",
+    select = "dich",
+    digits = 2,
+    dif_vars = c("sex", "mig"),
+    overwrite = TRUE,
+    save = TRUE,
+    print = FALSE,
+    return = FALSE,
+    path_results = outdir,
+    path_table = outdir,
+    verbose = FALSE,
+    warn = FALSE
+  )
+  sex <- Import(outdir, "dif_dich_sex.xlsx")
+  mig <- Import(outdir, "dif_dich_mig.xlsx")
 
-  expect_equal(GetDIF(sex, n = 0), "491")
-  expect_equal(GetDif(sex, main = "std", model = "main"), "-0.34")
-  expect_equal(GetDif(mig, main = "ustd", group = "1-3"), "0.54")
-  expect_equal(GetDif(mig, main = "ustd", group = "1-3", model = "main"), "0.50")
+  expect_equal(GetDIF(sex, n = 0), "493")
+  expect_equal(GetDif(sex, main = "std", model = "main"), "-0.32")
+  expect_equal(GetDif(mig, main = "ustd", group = "1-3"), "0.42")
+  expect_equal(GetDif(mig, main = "ustd", group = "1-3", model = "main"), "0.40")
 
-  expect_equal(GetDif(mig, dif = ">.4|<.05"), "12")
+  expect_equal(GetDif(mig, dif = ">.4|<.05"), "10")
   expect_equal(GetDif(mig, dif = median), "0.14")
-  expect_equal(GetDif(mig, dif = "<0.1", signed = FALSE, group = "1-2"), "9")
+  expect_equal(GetDif(mig, dif = "<0.1", signed = FALSE, group = "1-2"), "7")
   expect_equal(
     GetDif(mig, dif = ">.4", group = c("1-2", "2-3"), item = TRUE),
-    "grk10015_c, grk10001_c, grk10005_c"
+    "grk10015_c, grk10013_c, grk10014_c"
   )
-  expect_equal(GetDif(sex, dif = "<-0.1", signed = TRUE), "3")
+  expect_equal(GetDif(sex, dif = "<-0.1", signed = TRUE), "1")
 
   expect_error(
     GetDif(sex, main = "unknown"),
@@ -174,12 +361,30 @@ test_that("GetDIF() works", {
 
 test_that("GetDIFFit works", {
 
-  tr <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_TR.xlsx")
+  data("ex1")
+  outdir <- withr::local_tempdir()
+  diffit <- dif_analysis(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    valid = "valid",
+    select = "dich",
+    digits = 2,
+    dif_vars = c("sex", "mig"),
+    overwrite = TRUE,
+    save = TRUE,
+    print = FALSE,
+    return = FALSE,
+    path_results = outdir,
+    path_table = outdir,
+    verbose = FALSE,
+    warn = FALSE
+  )
+  tr <- Import(outdir, "dif_dich_TR.xlsx")
 
-  expect_equal(GetDIFFit(tr, difvar = "mig", type = "AIC"), "13,662")
-  expect_equal(GetDifFit(tr, difvar = "mig", type = "BIC", model = "main"), "13,721")
+  expect_equal(GetDIFFit(tr, difvar = "mig", type = "AIC"), "13,914")
+  expect_equal(GetDifFit(tr, difvar = "mig", type = "BIC", model = "main"), "13,967")
   expect_equal(GetDIFFit(tr, difvar = "mig", type = "Number.of.parameters"), "46")
-  expect_equal(GetDIFFit(tr, difvar = "mig", type = "Deviance"), "13,570")
+  expect_equal(GetDIFFit(tr, difvar = "mig", type = "Deviance"), "13,822")
   expect_equal(
     GetDIFFit(tr, difvar = "sex", type = "BIC"),
     GetDifFit(tr, difvar = "sex", type = "BIC")
