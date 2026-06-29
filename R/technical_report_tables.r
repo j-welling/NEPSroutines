@@ -372,11 +372,12 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
 
   # Select results for group
   if (!is.null(select)) {
-    tab <- tab[, grepl(paste0("Nr.|item|_", select), colnames(tab))]
+    tab <- tab[, grepl(paste0("Nr\\.|item|_", select), colnames(tab))]
     colnames(tab) <- sub(paste0("_", select), "", colnames(tab))
   }
 
   # Remove empty rows
+  # Note: columns 'Nr.' and 'item' are always present (i.e. at least 2 columns)
   tab <- tab[!(rowSums(!is.na(tab)) == 2), ]
 
   # Sorting
