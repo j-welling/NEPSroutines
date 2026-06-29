@@ -411,3 +411,43 @@ test_that("TblCode() works", {
 })
 
 
+test_that("specialized table functions forward ... to Tbl()", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex1", "tables"), "mv_item.xlsx")
+
+  # TblMvi() does not set `align`/`align_head` itself, so both flow through `...`
+  # to Tbl(); several Tbl() arguments can be forwarded in a single call.
+  tbl <- TblMvi(tab, align = "left", align_head = "left")
+  expect_s3_class(tbl, "flextable")
+  expect_true(all(tbl$body$styles$pars$text.align$data == "left"))
+  expect_true(all(tbl$header$styles$pars$text.align$data == "left"))
+
+  # Without `...`, Tbl()'s default centered alignment is retained.
+  tbl_default <- TblMvi(tab)
+  expect_true(all(tbl_default$body$styles$pars$text.align$data == "center"))
+
+  # An argument Tbl() does not accept errors at the Tbl() boundary rather than
+  # being silently swallowed (Tbl() has a closed signature, no `...`).
+  expect_error(TblMvi(tab, nonexistent_arg = 1), "unused argument")
+
+  # Wrappers that hard-code structural Tbl() arguments raise a duplicate-argument
+  # error if the same name is also passed via `...` (the intended guardrail).
+  data("ex2")
+  expect_error(
+    TblItemProps(ex2$vars, select = c("Number of items" = "mixed"),
+                 prop = "type", align = "left"),
+    "matched by multiple"
+  )
+
+  # A valid, unbound Tbl() argument still forwards through a wrapper that
+  # hard-codes a different argument (TblDifFit fixes `digits`).
+  dif <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_TR.xlsx")
+  expect_s3_class(TblDifFit(dif, merge = FALSE), "flextable")
+  expect_error(TblDifFit(dif, digits = 0), "matched by multiple")
+
+})
+
+

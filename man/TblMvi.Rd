@@ -12,7 +12,8 @@ TblMvi(
   sort = "position",
   size = 12,
   width = NULL,
-  excl = c("N_administered", "ND", "ALL", "...1")
+  excl = c("N_administered", "ND", "ALL", "...1"),
+  ...
 )
 
 TblMVI(
@@ -22,7 +23,8 @@ TblMVI(
   sort = "position",
   size = 12,
   width = NULL,
-  excl = c("N_administered", "ND", "ALL", "...1")
+  excl = c("N_administered", "ND", "ALL", "...1"),
+  ...
 )
 }
 \arguments{
@@ -43,6 +45,8 @@ will be applied to all columns; otherwise the length must correspond to the
 number of columns in `obj`.}
 
 \item{excl}{A vector of column names to exclude.}
+
+\item{...}{Further arguments passed to [Tbl()].}
 }
 \value{
 A flextable.

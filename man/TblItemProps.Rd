@@ -13,7 +13,8 @@ TblItemProps(
   na.rm = TRUE,
   size = 12,
   width = NULL,
-  formats = NULL
+  formats = NULL,
+  ...
 )
 }
 \arguments{
@@ -41,6 +42,9 @@ will be applied to all columns; otherwise the length must correspond to the
 number of columns in `obj`.}
 
 \item{formats}{Long names of item properties to be displayed in the table.}
+
+\item{...}{Further arguments passed to [Tbl()]; `align` and `hline` are set
+internally and will error if also passed here.}
 }
 \value{
 A flextable.

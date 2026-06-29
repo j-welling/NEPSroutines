@@ -11,7 +11,8 @@ TblDifFit(
   excl = NULL,
   label = NULL,
   size = 12,
-  width = 0.9
+  width = 0.9,
+  ...
 )
 
 TblDIFFit(
@@ -20,7 +21,8 @@ TblDIFFit(
   excl = NULL,
   label = NULL,
   size = 12,
-  width = 0.9
+  width = 0.9,
+  ...
 )
 }
 \arguments{
@@ -39,6 +41,9 @@ or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
 \item{width}{The widths of the columns; if a single values is given, it
 corresponds to the first column; otherwise the number of values must
 correspond to the number of columns in `obj`.}
+
+\item{...}{Further arguments passed to [Tbl()]; `digits` is set internally and
+will error if also passed here.}
 }
 \value{
 A flextable.

@@ -14,7 +14,8 @@ TblDif(
   width = 1.4,
   size = 10,
   digits = 2,
-  rename_collapsed = TRUE
+  rename_collapsed = TRUE,
+  ...
 )
 
 TblDIF(
@@ -26,7 +27,8 @@ TblDIF(
   width = 1.4,
   size = 10,
   digits = 2,
-  rename_collapsed = TRUE
+  rename_collapsed = TRUE,
+  ...
 )
 }
 \arguments{
@@ -56,6 +58,9 @@ correspond to the number of columns in `obj`.}
 
 \item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
 item names.}
+
+\item{...}{Further arguments passed to [Tbl()]; `hline` and `lbl` are set
+internally and will error if also passed here.}
 }
 \value{
 A flextable.

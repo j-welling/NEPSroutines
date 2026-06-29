@@ -13,7 +13,8 @@ TblItemFacets(
   size = 12,
   width = 1.9,
   lbl = NULL,
-  rename_collapsed = TRUE
+  rename_collapsed = TRUE,
+  ...
 )
 }
 \arguments{
@@ -41,6 +42,8 @@ number of columns in `obj`.}
 
 \item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
 item names.}
+
+\item{...}{Further arguments passed to [Tbl()].}
 }
 \value{
 A flextable.
