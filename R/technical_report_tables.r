@@ -150,7 +150,7 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
 #' property such as response format, text function, or cognitive function.
 #' @param propname A name for the item property to be used in the table heading.
 #' @param footnote A table note.
-#' @param na.rm A logical to remove empty properties.
+#' @param na.rm A logical to remove empty properties (rows) and empty groups (columns).
 #' @param formats Long names of item properties to be displayed in the table.
 #' @param ... Further arguments passed to [Tbl()]; `align` and `hline` are set
 #' internally and will error if also passed here.
@@ -184,7 +184,7 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
 #'   footnote = "The study administered three difficulty-tiered booklets."
 #' )
 #' }
-TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
+TblItemProps <- function(vars, select, prop, propname = "\x20", footnote = NULL,
                          na.rm = TRUE, size = 12, width = NULL,
                          formats = NULL, ...) {
 
