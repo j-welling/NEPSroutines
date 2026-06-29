@@ -383,7 +383,8 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
     keep <- colnames(tab) %in% c("Nr.", "item") |
       endsWith(colnames(tab), paste0("_", select))
     tab <- tab[, keep]
-    colnames(tab) <- sub(paste0("_", select), "", colnames(tab))
+    # Strip the trailing group suffix only (anchored, matching the filter above)
+    colnames(tab) <- sub(paste0("_", select, "$"), "", colnames(tab))
   }
 
   # Remove empty rows

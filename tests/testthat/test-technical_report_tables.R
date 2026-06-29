@@ -507,6 +507,31 @@ test_that("TblMvi() select matches the group suffix exactly (#115)", {
 })
 
 
+test_that("TblMvi() select strips only the trailing group suffix (#121)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  # A measure name that itself contains the suffix token ("_g") must keep its
+  # internal "_g"; the rename must strip only the *trailing* "_g" (anchored),
+  # not the first occurrence.
+  obj <- data.frame(
+    x = c("", ""),
+    item = c("i1", "i2"),
+    position_g = c(1, 2),
+    x_g_score_g = c(10, 20),
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
+  colnames(obj)[1] <- ""
+
+  nms <- names(TblMvi(obj, select = "g", excl = NULL)$body$dataset)
+  expect_true("x_g_score" %in% nms)   # anchored: only the trailing "_g" removed
+  expect_false("x_score_g" %in% nms)  # unanchored sub() would have produced this
+
+})
+
+
 test_that("TblPars() excl matches column names exactly (#115)", {
 
   skip_if_not_installed("flextable")
