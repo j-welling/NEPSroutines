@@ -32,7 +32,10 @@ TblMVI(
 or a data frame with sheet "summary" from "mv_item.xlsx" created by
 [mv_item()].}
 
-\item{select}{An optional name of a specific group to select.}
+\item{select}{An optional name of a specific group to select. Columns whose
+names end in the group suffix (e.g. `"_mixed"`) are kept, along with the
+`"Nr."` and `"item"` columns; the suffix is matched literally, not as a
+regular expression.}
 
 \item{footnote}{An optional table note.}
 
@@ -44,7 +47,8 @@ or a data frame with sheet "summary" from "mv_item.xlsx" created by
 will be applied to all columns; otherwise the length must correspond to the
 number of columns in `obj`.}
 
-\item{excl}{A vector of column names to exclude.}
+\item{excl}{A vector of column names to exclude. Names are matched exactly,
+not as regular expressions or substrings.}
 
 \item{...}{Further arguments passed to [Tbl()].}
 }

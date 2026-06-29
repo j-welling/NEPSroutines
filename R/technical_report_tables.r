@@ -320,10 +320,14 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' @param obj A list with data frames with sheets from "mv_item.xlsx"
 #' or a data frame with sheet "summary" from "mv_item.xlsx" created by
 #' [mv_item()].
-#' @param select An optional name of a specific group to select.
+#' @param select An optional name of a specific group to select. Columns whose
+#' names end in the group suffix (e.g. `"_mixed"`) are kept, along with the
+#' `"Nr."` and `"item"` columns; the suffix is matched literally, not as a
+#' regular expression.
 #' @param footnote An optional table note.
 #' @param sort A column name to indicate by which column to sort.
-#' @param excl A vector of column names to exclude.
+#' @param excl A vector of column names to exclude. Names are matched exactly,
+#' not as regular expressions or substrings.
 #' @param ... Further arguments passed to [Tbl()].
 #' @returns A flextable.
 #' @inheritParams Tbl
@@ -376,7 +380,9 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
 
   # Select results for group
   if (!is.null(select)) {
-    tab <- tab[, grepl(paste0("Nr\\.|item|_", select), colnames(tab))]
+    keep <- colnames(tab) %in% c("Nr.", "item") |
+      endsWith(colnames(tab), paste0("_", select))
+    tab <- tab[, keep]
     colnames(tab) <- sub(paste0("_", select), "", colnames(tab))
   }
 
@@ -392,10 +398,10 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
   # Create numbering
   tab$"Nr." <- seq_len(nrow(tab))
 
-  # Exclude columns
-  regexp <- "^$"
-  if (!is.null(excl)) regexp <- paste0(regexp, "|", paste(excl, collapse = "|"))
-  tab <- tab[, !grepl(regexp, colnames(tab))]
+  # Exclude columns by exact name (also drops unnamed columns)
+  keep <- nzchar(colnames(tab))
+  if (!is.null(excl)) keep <- keep & !(colnames(tab) %in% excl)
+  tab <- tab[, keep]
 
   # Rename variables
   lbl <- colnames(tab)
@@ -533,7 +539,7 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
 
   # Exclude columns
   if (!is.null(excl)) {
-    tab <- tab[, !grepl(paste(excl, collapse = "|"), colnames(tab))]
+    tab <- tab[, !(colnames(tab) %in% excl)]
   }
 
   # Rename collapsed items
@@ -916,7 +922,7 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
 
   # Exclude columns
   if (!is.null(excl)) {
-    tab <- tab[, !grepl(paste(excl, collapse = "|"), colnames(tab))]
+    tab <- tab[, !(colnames(tab) %in% excl)]
   }
 
   # Rename collapsed items
@@ -996,7 +1002,9 @@ TblDIF <- TblDif
 
 #' Create table with fit statistics for DIF analyses
 #'
-#' @param excl A vector of DIF variables that should be excluded.
+#' @param excl A vector of DIF variables that should be excluded. Values are
+#' matched exactly against `DIF.variable`, not as regular expressions or
+#' substrings.
 #' @param label A vector of names for the DIF variables.
 #' @param ... Further arguments passed to [Tbl()]; `digits` is set internally and
 #' will error if also passed here.
@@ -1044,7 +1052,7 @@ TblDifFit <- function(obj, footnote = NULL, excl = NULL, label = NULL,
 
   # Exclude rows
   if (!is.null(excl)) {
-    tab <- tab[!grepl(paste(excl, collapse = "|"), tab$'DIF.variable'), ]
+    tab <- tab[!(tab$'DIF.variable' %in% excl), ]
   }
 
   # Rename variables
