@@ -913,9 +913,12 @@ parse_conditions <- function(cond) {
   # split into individual comparisons and trim surrounding whitespace
   parts <- base::trimws(base::strsplit(base::trimws(cond), "[&|]")[[1]])
 
+  # split each comparison into its operator and the number to compare against
   operators <- character(length(parts))
   values <- numeric(length(parts))
   for (k in seq_along(parts)) {
+    # grab the leading operator; 2-char forms are listed first so e.g. ">="
+    # matches before ">" (=> and =< are matched here only to reject them below)
     op <- base::regmatches(parts[k], base::regexpr("^(<=|>=|=>|=<|==|!=|=|<|>)", parts[k]))
     if (length(op) == 0L)
       stop("Unknown stat function.")
@@ -923,7 +926,8 @@ parse_conditions <- function(cond) {
     if (op == "=>" || op == "=<")
       stop("Unknown operator '", op, "' in condition '", parts[k],
            "': did you mean '", if (op == "=>") ">=" else "<=", "'?")
-    operators[k] <- if (op == "=") "==" else op
+    operators[k] <- if (op == "=") "==" else op   # treat "=" as R's "=="
+    # whatever follows the operator has to be a number, otherwise error
     value <- suppressWarnings(
       as.numeric(base::trimws(base::sub("^(<=|>=|==|!=|=|<|>)", "", parts[k]))))
     if (is.na(value))
@@ -943,6 +947,9 @@ parse_conditions <- function(cond) {
 # @noRd
 eval_conditions <- function(parsed, x) {
 
+  # getFunction() looks up the function named by a string, so
+  # getFunction(">")(x, 1.2) is x > 1.2 and getFunction("&")(a, b) is a & b.
+  # start from the first comparison, then fold in the rest left-to-right.
   boolvec <- methods::getFunction(parsed$operators[1L])(x, parsed$values[1L])
   for (k in seq_along(parsed$operators)[-1L]) {
     cur <- methods::getFunction(parsed$operators[k])(x, parsed$values[k])

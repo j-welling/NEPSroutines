@@ -318,7 +318,8 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
     # no summary function available
   } else {
 
-    # turn the condition string into a counting summary function
+    # turn the condition string into a summary function: with item = FALSE it
+    # counts the matches, with item = TRUE it returns the logical mask of matches
     parsed <- parse_conditions(stat)
     stat <- \(x, na.rm, item = FALSE) {
       boolvec <- eval_conditions(parsed, x)
@@ -336,6 +337,8 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
     if (!item) {
       return(rnd(stat(tab[, type], na.rm = TRUE), digits = digits))
     } else {
+      # which() keeps only the matching rows, so items with an NA value are
+      # dropped rather than showing up as "NA" in the returned list
       i <- tab[which(stat(tab[, type], na.rm = TRUE, item = TRUE)), "Item"]
       if (rename_collapsed) i <- gsub("_collapsed", "", i)
       return(paste0(i, collapse = ", "))
@@ -915,7 +918,8 @@ GetDif <- function(obj, n = NULL, main = NULL, dif = NULL,
     # DIF effects without summary function
   } else if (!is.null(dif)) {
 
-    # turn the condition string into a counting summary function
+    # turn the condition string into a summary function: with item = FALSE it
+    # counts the matches, with item = TRUE it returns the logical mask of matches
     parsed <- parse_conditions(dif)
     stat <- \(x, na.rm, item = FALSE) {
       boolvec <- eval_conditions(parsed, x)
@@ -945,6 +949,8 @@ GetDif <- function(obj, n = NULL, main = NULL, dif = NULL,
     if (!item) {
       return(rnd(stat(tab$xsi, na.rm = TRUE), digits))
     } else {
+      # which() keeps only the matching rows, so items with an NA value are
+      # dropped rather than showing up as "NA" in the returned list
       i <- tab[which(stat(tab$xsi, na.rm = TRUE, item = TRUE)), "item"]
       return(paste0(unique(i), collapse = ", "))
     }
