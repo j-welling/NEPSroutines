@@ -890,3 +890,64 @@ recodeVar <- function(x, src, tgt, default = NULL, keep.na = TRUE) {
 capitalize <- function(x) {
   paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))
 }
+
+
+# Internal helper: parse a string condition used by GetPars()/GetDif().
+# A condition is a single string such as ">1.15", ">1.15 & <1.20", or
+# "<1 | >1.2": comparison operators (=, ==, !=, <, <=, >, >=) are combined
+# with the logical connectors & (and) and | (or). Surrounding whitespace is
+# ignored. An unrecognised operator, the reversed forms => / =<, or a
+# non-numeric value each raise an error. Returns the operators, their numeric
+# values, and the connectors in their original order.
+# @noRd
+parse_conditions <- function(cond) {
+
+  cond <- as.character(cond)
+  if (length(cond) != 1L)
+    stop("Provide a single condition string; combine filters with '&' or '|', ",
+         "e.g. \">1.15 & <1.20\".")
+
+  # logical connectors (& or |) in their original order
+  logicals <- base::strsplit(base::gsub("[^&|]", "", cond), "")[[1]]
+
+  # split into individual comparisons and trim surrounding whitespace
+  parts <- base::trimws(base::strsplit(base::trimws(cond), "[&|]")[[1]])
+
+  operators <- character(length(parts))
+  values <- numeric(length(parts))
+  for (k in seq_along(parts)) {
+    op <- base::regmatches(parts[k], base::regexpr("^(<=|>=|=>|=<|==|!=|=|<|>)", parts[k]))
+    if (length(op) == 0L)
+      stop("Unknown stat function.")
+    # reject the reversed forms of >= and <= with a helpful hint
+    if (op == "=>" || op == "=<")
+      stop("Unknown operator '", op, "' in condition '", parts[k],
+           "': did you mean '", if (op == "=>") ">=" else "<=", "'?")
+    operators[k] <- if (op == "=") "==" else op
+    value <- suppressWarnings(
+      as.numeric(base::trimws(base::sub("^(<=|>=|==|!=|=|<|>)", "", parts[k]))))
+    if (is.na(value))
+      stop("Invalid number in condition '", parts[k], "'.")
+    values[k] <- value
+  }
+
+  list(operators = operators, values = values, logicals = logicals)
+
+}
+
+
+# Internal helper: evaluate parsed conditions against a numeric vector. The
+# individual comparisons are folded left-to-right with their logical connectors
+# (e.g. "<1 | >1.2" becomes (x < 1) | (x > 1.2)). Returns a logical vector the
+# same length as x.
+# @noRd
+eval_conditions <- function(parsed, x) {
+
+  boolvec <- methods::getFunction(parsed$operators[1L])(x, parsed$values[1L])
+  for (k in seq_along(parsed$operators)[-1L]) {
+    cur <- methods::getFunction(parsed$operators[k])(x, parsed$values[k])
+    boolvec <- methods::getFunction(parsed$logicals[k - 1L])(boolvec, cur)
+  }
+  boolvec
+
+}

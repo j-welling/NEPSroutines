@@ -498,3 +498,66 @@ test_that("rnd() works", {
   expect_equal(rnd(c(0.042, -0.1459), d0 = TRUE), c(".04", "-.15"))
 
 })
+
+
+test_that("parse_conditions() parses operators, values and connectors", {
+
+  # single comparison; no logical connectors
+  expect_equal(
+    parse_conditions(">1.15"),
+    list(operators = ">", values = 1.15, logicals = character(0))
+  )
+
+  # "=" is normalised to "=="; two-character operators are supported
+  expect_equal(parse_conditions("=3")$operators, "==")
+  expect_equal(parse_conditions(">=1.15")$operators, ">=")
+  expect_equal(parse_conditions("<=1.2")$operators, "<=")
+  expect_equal(parse_conditions("!=0")$operators, "!=")
+
+  # multiple conditions: operators, values and connectors captured in order
+  p <- parse_conditions("<1 | >1.2 & =1.1")
+  expect_equal(p$operators, c("<", ">", "=="))
+  expect_equal(p$values, c(1, 1.2, 1.1))
+  expect_equal(p$logicals, c("|", "&"))
+
+  # whitespace around operators and connectors is tolerated
+  expect_equal(parse_conditions(" > 1.15 & <= 1.20 "),
+               parse_conditions(">1.15&<=1.20"))
+
+  # a vector of conditions is rejected with a helpful message
+  expect_error(parse_conditions(c(">1.15", "<1.20")), "single condition")
+
+  # an unknown operator keeps the historical error message
+  expect_error(parse_conditions("+1"), "Unknown stat function.", fixed = TRUE)
+
+  # the reversed forms => and =< are rejected with a hint (R uses >= / <=)
+  expect_error(parse_conditions("=>1.15"), "did you mean '>='", fixed = TRUE)
+  expect_error(parse_conditions("=<1.15"), "did you mean '<='", fixed = TRUE)
+
+  # a malformed operator or missing number errors instead of coercing to NA
+  expect_error(parse_conditions("><1"), "Invalid number", fixed = TRUE)
+  expect_error(parse_conditions(">"), "Invalid number", fixed = TRUE)
+
+})
+
+
+test_that("eval_conditions() folds comparisons left-to-right", {
+
+  x <- c(0.90, 1.00, 1.10, 1.16, 1.18, 1.25)
+
+  expect_equal(eval_conditions(parse_conditions(">1.15"), x),
+               c(FALSE, FALSE, FALSE, TRUE, TRUE, TRUE))
+
+  # AND keeps only the in-band values
+  expect_equal(eval_conditions(parse_conditions(">1.15 & <1.20"), x),
+               c(FALSE, FALSE, FALSE, TRUE, TRUE, FALSE))
+
+  # >= includes the boundary value (1.16)
+  expect_equal(eval_conditions(parse_conditions(">=1.16"), x),
+               c(FALSE, FALSE, FALSE, TRUE, TRUE, TRUE))
+
+  # spaces give the same result as no spaces
+  expect_equal(eval_conditions(parse_conditions("<1 | >1.2"), x),
+               eval_conditions(parse_conditions("<1|>1.2"), x))
+
+})
