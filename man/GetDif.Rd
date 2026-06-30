@@ -41,7 +41,7 @@ main effects (`ustd`). If the DIF variable has more than two groups
 and `group` is missing, results for the first group comparison are returned.}
 
 \item{dif}{A function used to summarize the DIF effects or a single string
-specifying a comparison operator (=, ==, !=, <, <=, >, >=) with a number;
+specifying a comparison operator (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number;
 e.g.,
 * =1 returns number of DIF effects equal to 1
 * <1 returns number of DIF effects less than 1

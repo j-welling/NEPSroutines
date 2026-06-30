@@ -222,7 +222,7 @@ GetMVP <- GetMvp
 #' created by [irt_analysis()].
 #' @param type A column name in `obj` identifying an item statistic.
 #' @param stat A function used to summarize `type` or a single string
-#' specifying a comparison operator (=, ==, !=, <, <=, >, >=) with a number;
+#' specifying a comparison operator (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number;
 #' e.g.,
 #' * =3 returns number of type equal to 3
 #' * <3 returns number of type less than 3
@@ -232,7 +232,7 @@ GetMVP <- GetMvp
 #' @param item A logical indicating whether to return the results from stat
 #' (`FALSE`) or the item name corresponding to the value of `stat` (`TRUE`).
 #' @param excl A single string specifying a comparison operator
-#' (=, ==, !=, <, <=, >, >=) with a number indicating values to exclude; e.g.,
+#' (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number indicating values to exclude; e.g.,
 #' * =3 excludes type equal to 3
 #' * <3 excludes type less than 3
 #' * >=3 excludes type greater than or equal to 3
@@ -787,7 +787,7 @@ GetDim <- function(obj, model = "dim", stat = median, var = FALSE,
 #' @param group If the DIF variable has more than two groups, the name of
 #' the group comparison.
 #' @param dif A function used to summarize the DIF effects or a single string
-#' specifying a comparison operator (=, ==, !=, <, <=, >, >=) with a number;
+#' specifying a comparison operator (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number;
 #' e.g.,
 #' * =1 returns number of DIF effects equal to 1
 #' * <1 returns number of DIF effects less than 1

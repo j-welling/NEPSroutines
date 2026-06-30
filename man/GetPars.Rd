@@ -21,7 +21,7 @@ created by [irt_analysis()].}
 \item{type}{A column name in `obj` identifying an item statistic.}
 
 \item{stat}{A function used to summarize `type` or a single string
-specifying a comparison operator (=, ==, !=, <, <=, >, >=) with a number;
+specifying a comparison operator (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number;
 e.g.,
 * =3 returns number of type equal to 3
 * <3 returns number of type less than 3
@@ -33,7 +33,7 @@ Multiple conditions can be combined within the string using & and |
 (`FALSE`) or the item name corresponding to the value of `stat` (`TRUE`).}
 
 \item{excl}{A single string specifying a comparison operator
-(=, ==, !=, <, <=, >, >=) with a number indicating values to exclude; e.g.,
+(=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number indicating values to exclude; e.g.,
 * =3 excludes type equal to 3
 * <3 excludes type less than 3
 * >=3 excludes type greater than or equal to 3
