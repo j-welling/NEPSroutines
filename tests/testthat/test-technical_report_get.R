@@ -116,6 +116,33 @@ test_that("GetPars() works", {
     "0.5"
   )
 
+  # robustness: whitespace around &/| is tolerated (same result as no spaces)
+  expect_equal(GetPars(pars, type = "WMNSQ", stat = max, excl = "<1 | >1.1"), "1.03")
+  expect_equal(GetPars(pars, type = "N_valid", stat = "<600 | >900"), "11")
+
+  # robustness: two-character operators >= and <= are supported
+  expect_equal(
+    GetPars(pars, type = "N_valid", stat = ">=600"),
+    GetPars(pars, type = "N_valid", stat = ">599")
+  )
+  expect_equal(
+    GetPars(pars, type = "N_valid", stat = "<=900"),
+    GetPars(pars, type = "N_valid", stat = "<901")
+  )
+
+  # robustness: a vector of filters is rejected (combine with & or | instead)
+  expect_error(
+    GetPars(pars, type = "WMNSQ", stat = max, excl = c(">1.15", "<1.20")),
+    "single condition"
+  )
+
+  # robustness: the reversed operator => is rejected with a hint (R uses >=)
+  expect_error(
+    GetPars(pars, type = "WMNSQ", stat = "=>1.15"),
+    "did you mean '>='",
+    fixed = TRUE
+  )
+
   expect_error(
     GetPars(pars, type = "WMNSQ", stat = "+1"),
     "Unknown stat function.",
@@ -335,6 +362,9 @@ test_that("GetDIF() works", {
   expect_equal(GetDif(mig, main = "ustd", group = "1-3", model = "main"), "0.40")
 
   expect_equal(GetDif(mig, dif = ">.4|<.05"), "10")
+  # robustness: whitespace around &/| tolerated; >= supported (no xsi is exactly .4)
+  expect_equal(GetDif(mig, dif = ">.4 | <.05"), "10")
+  expect_equal(GetDif(mig, dif = ">=.4"), GetDif(mig, dif = ">.4"))
   expect_equal(GetDif(mig, dif = median), "0.14")
   expect_equal(GetDif(mig, dif = "<0.1", signed = FALSE, group = "1-2"), "7")
   expect_equal(

@@ -40,12 +40,14 @@ GetDIF(
 main effects (`ustd`). If the DIF variable has more than two groups
 and `group` is missing, results for the first group comparison are returned.}
 
-\item{dif}{A function used to summarize the DIF effects or a string
-specifying an operator (=, <, >) with a number; e.g.,
+\item{dif}{A function used to summarize the DIF effects or a single string
+specifying a comparison operator (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number;
+e.g.,
 * =1 returns number of DIF effects equal to 1
 * <1 returns number of DIF effects less than 1
-* >1 returns number of DIF effects greater than 1
-Multiple conditions can be combined using & and |.
+* >=1 returns number of DIF effects greater than or equal to 1
+Multiple conditions can be combined within the string using & and |
+(e.g. `">.4 | <.05"`); surrounding whitespace is ignored.
 If the DIF variable has more than two group and `group` is missing, results
 across all groups are returned.}
 

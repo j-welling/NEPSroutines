@@ -890,3 +890,71 @@ recodeVar <- function(x, src, tgt, default = NULL, keep.na = TRUE) {
 capitalize <- function(x) {
   paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))
 }
+
+
+# Internal helper: parse a string condition used by GetPars()/GetDif().
+# A condition is a single string such as ">1.15", ">1.15 & <1.20", or
+# "<1 | >1.2": comparison operators (=, ==, !=, <, <=, >, >=) are combined
+# with the logical connectors & (and) and | (or). Surrounding whitespace is
+# ignored. An unrecognised operator, the reversed forms => / =<, or a
+# non-numeric value each raise an error. Returns the operators, their numeric
+# values, and the connectors in their original order.
+# @noRd
+parse_conditions <- function(cond) {
+
+  cond <- as.character(cond)
+  if (length(cond) != 1L)
+    stop("Provide a single condition string; combine filters with '&' or '|', ",
+         "e.g. \">1.15 & <1.20\".")
+
+  # logical connectors (& or |) in their original order
+  logicals <- base::strsplit(base::gsub("[^&|]", "", cond), "")[[1]]
+
+  # split into individual comparisons and trim surrounding whitespace
+  parts <- base::trimws(base::strsplit(base::trimws(cond), "[&|]")[[1]])
+
+  # split each comparison into its operator and the number to compare against
+  operators <- character(length(parts))
+  values <- numeric(length(parts))
+  for (k in seq_along(parts)) {
+    # grab the leading operator; 2-char forms are listed first so e.g. ">="
+    # matches before ">" (=> and =< are matched here only to reject them below)
+    op <- base::regmatches(parts[k], base::regexpr("^(<=|>=|=>|=<|==|!=|=|<|>)", parts[k]))
+    if (length(op) == 0L)
+      stop("Unknown stat function.")
+    # reject the reversed forms of >= and <= with a helpful hint
+    if (op == "=>" || op == "=<")
+      stop("Unknown operator '", op, "' in condition '", parts[k],
+           "': did you mean '", if (op == "=>") ">=" else "<=", "'?")
+    operators[k] <- if (op == "=") "==" else op   # treat "=" as R's "=="
+    # whatever follows the operator has to be a number, otherwise error
+    value <- suppressWarnings(
+      as.numeric(base::trimws(base::sub("^(<=|>=|==|!=|=|<|>)", "", parts[k]))))
+    if (is.na(value))
+      stop("Invalid number in condition '", parts[k], "'.")
+    values[k] <- value
+  }
+
+  list(operators = operators, values = values, logicals = logicals)
+
+}
+
+
+# Internal helper: evaluate parsed conditions against a numeric vector. The
+# individual comparisons are folded left-to-right with their logical connectors
+# (e.g. "<1 | >1.2" becomes (x < 1) | (x > 1.2)). Returns a logical vector the
+# same length as x.
+# @noRd
+eval_conditions <- function(parsed, x) {
+
+  # getFunction() looks up the function named by a string, so
+  # getFunction(">")(x, 1.2) is x > 1.2 and getFunction("&")(a, b) is a & b.
+  # start from the first comparison, then fold in the rest left-to-right.
+  boolvec <- methods::getFunction(parsed$operators[1L])(x, parsed$values[1L])
+  for (k in seq_along(parsed$operators)[-1L]) {
+    cur <- methods::getFunction(parsed$operators[k])(x, parsed$values[k])
+    boolvec <- methods::getFunction(parsed$logicals[k - 1L])(boolvec, cur)
+  }
+  boolvec
+
+}
