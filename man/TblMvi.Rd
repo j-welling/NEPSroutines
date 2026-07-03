@@ -47,8 +47,10 @@ regular expression.}
 will be applied to all columns; otherwise the length must correspond to the
 number of columns in `obj`.}
 
-\item{excl}{A vector of column names to exclude. Names are matched exactly,
-not as regular expressions or substrings.}
+\item{excl}{A vector of column names to exclude. Each value is matched
+exactly (not as a regular expression or substring) against either the
+internal column name or the label shown in the rendered table (e.g. both
+`"N_administered"` and `"Total"` exclude the total-respondents column).}
 
 \item{...}{Further arguments passed to [Tbl()].}
 }

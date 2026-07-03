@@ -21,8 +21,10 @@ or a data frame with sheet "summary" from "irt_poly.xlsx" created by
 
 \item{footnote}{A table note.}
 
-\item{excl}{A vector of column names to exclude. Names are matched exactly,
-not as regular expressions or substrings.}
+\item{excl}{A vector of column names to exclude. Each value is matched
+exactly (not as a regular expression or substring) against either the
+internal column name or the label shown in the rendered table (e.g. both
+`"N_administered"` and `"Total"` exclude the total-respondents column).}
 
 \item{size}{The general font size.}
 
