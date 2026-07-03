@@ -32,7 +32,9 @@ or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
 
 \item{footnote}{A table note.}
 
-\item{excl}{A vector of DIF variables that should be excluded.}
+\item{excl}{A vector of DIF variables that should be excluded. Values are
+matched exactly against `DIF.variable`, not as regular expressions or
+substrings.}
 
 \item{label}{A vector of names for the DIF variables.}
 

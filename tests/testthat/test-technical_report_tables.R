@@ -454,3 +454,141 @@ test_that("specialized table functions forward ... to Tbl()", {
 })
 
 
+# Regression tests for #115: excl/select must match whole names exactly, not as
+# unanchored regular expressions / substrings.
+
+test_that("TblMvi() excl matches column names exactly (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex1", "tables"), "mv_item.xlsx")
+
+  # "N" is not the exact name of any column, so nothing is excluded. The old
+  # grepl() implementation dropped N_administered, N_valid, NV and NR.
+  keep_all <- names(TblMvi(tab, excl = NULL)$body$dataset)
+  collide <- names(TblMvi(tab, excl = "N")$body$dataset)
+  expect_equal(collide, keep_all)
+  expect_true(all(c("OM", "NV", "NR") %in% collide))
+
+  # The documented defaults still drop their exact columns.
+  def <- names(TblMvi(tab)$body$dataset)
+  expect_false(any(c("Total", "ALL") %in% def))  # N_administered, ALL excluded
+  expect_true(all(c("OM", "NV", "NR") %in% def))
+
+})
+
+
+test_that("TblMvi() select matches the group suffix exactly (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  # Two groups whose suffixes collide as substrings ("_g" is contained in
+  # "_g2"). select = "g" must keep only the "_g" columns.
+  obj <- data.frame(
+    x = c("", ""),
+    item = c("i1", "i2"),
+    position_g = c(1, 2),
+    N_valid_g = c(10, 20),
+    position_g2 = c(3, 4),
+    N_valid_g2 = c(30, 40),
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
+  colnames(obj)[1] <- ""  # mimic the unnamed first column from openxlsx
+
+  tbl <- TblMvi(obj, select = "g")
+  nms <- names(tbl$body$dataset)
+  # Old grepl("_g") also matched "_g2", leaking "position2"/"N_valid2" columns.
+  expect_equal(nms, c("Nr.", "Item", "Pos.", "N"))
+  expect_false(any(grepl("2$", nms)))
+
+})
+
+
+test_that("TblMvi() select strips only the trailing group suffix (#121)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  # A measure name that itself contains the suffix token ("_g") must keep its
+  # internal "_g"; the rename must strip only the *trailing* "_g" (anchored),
+  # not the first occurrence.
+  obj <- data.frame(
+    x = c("", ""),
+    item = c("i1", "i2"),
+    position_g = c(1, 2),
+    x_g_score_g = c(10, 20),
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
+  colnames(obj)[1] <- ""
+
+  nms <- names(TblMvi(obj, select = "g", excl = NULL)$body$dataset)
+  expect_true("x_g_score" %in% nms)   # anchored: only the trailing "_g" removed
+  expect_false("x_score_g" %in% nms)  # unanchored sub() would have produced this
+
+})
+
+
+test_that("TblPars() excl matches column names exactly (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex2", "tables"), "irt_poly.xlsx")
+
+  # "N" excludes nothing (no column is named exactly "N"); the old grepl()
+  # dropped N_administered, N_valid and even WMNSQ.
+  keep_all <- names(TblPars(tab, excl = NULL)$body$dataset)
+  collide <- names(TblPars(tab, excl = "N")$body$dataset)
+  expect_equal(collide, keep_all)
+  expect_true(all(c("WMNSQ", "N") %in% collide))
+
+  # Exact name is still excluded.
+  expect_false("N_administered" %in% names(TblPars(tab, excl = "N_administered")$body$dataset))
+
+})
+
+
+test_that("TblDif() excl matches column names exactly (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  dif <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_TR.xlsx")
+  hdr1 <- function(ft) as.character(unlist(ft$header$dataset[1, ]))
+
+  all_cols <- hdr1(TblDif(dif))
+  # "mig" is not an exact column name; the old grepl() dropped mig.1-2/1-3/2-3.
+  expect_equal(hdr1(TblDif(dif, excl = "mig")), all_cols)
+  expect_true(all(c("mig.1-2", "mig.1-3", "mig.2-3") %in% all_cols))
+
+  # Exact names (with "." and "-" treated literally) are excluded.
+  dropped <- hdr1(TblDif(dif, excl = c("mig.1-2", "mig.1-3")))
+  expect_false(any(c("mig.1-2", "mig.1-3") %in% dropped))
+  expect_true(all(c("item", "sex.0-1", "mig.2-3") %in% dropped))
+
+})
+
+
+test_that("TblDifFit() excl matches DIF variables exactly (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_TR.xlsx")
+
+  # "se" is a substring of "sex" but not an exact DIF variable, so the sex rows
+  # are retained (the old grepl() removed them).
+  collide <- TblDifFit(tab, excl = "se")$body$dataset[["DIF variable"]]
+  expect_true(any(grepl("Sex", collide)))
+
+  # The exact name still drops the rows.
+  dropped <- TblDifFit(tab, excl = "sex")$body$dataset[["DIF variable"]]
+  expect_false(any(grepl("Sex", dropped)))
+
+})
+
+

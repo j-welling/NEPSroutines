@@ -21,7 +21,8 @@ or a data frame with sheet "summary" from "irt_poly.xlsx" created by
 
 \item{footnote}{A table note.}
 
-\item{excl}{A vector of column names to exclude.}
+\item{excl}{A vector of column names to exclude. Names are matched exactly,
+not as regular expressions or substrings.}
 
 \item{size}{The general font size.}
 
