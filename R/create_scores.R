@@ -431,7 +431,9 @@ estimate_rotated_wles <- function(resp,
   irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
 
   # Prepare data
-  rotation <- resp[resp[[valid]], rotation, drop = FALSE]
+  # Note: rotation needs to be a data.frame instead of a tibble for
+  #       TAM::designMatrices.mfr2()
+  rotation <- as.data.frame(resp[resp[[valid]], rotation, drop = FALSE])
   pid <- resp$ID_t[resp[[valid]]]
   check_pid(pid)
   resp_ <- prepare_resp(
