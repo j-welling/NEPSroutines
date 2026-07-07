@@ -22,7 +22,10 @@ or a data frame with sheet "summary" from "irt_poly.xlsx" created by
 \item{footnote}{A table note.}
 
 \item{excl}{A vector of column names to exclude. Names are matched exactly,
-not as regular expressions or substrings.}
+not as regular expressions or substrings. Columns are dropped before the
+widths are applied, so a vector `width` must be sized and ordered to match
+the columns that remain after exclusion (a single `width` value is recycled
+and is unaffected).}
 
 \item{size}{The general font size.}
 

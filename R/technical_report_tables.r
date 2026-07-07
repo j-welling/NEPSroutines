@@ -327,7 +327,10 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' @param footnote An optional table note.
 #' @param sort A column name to indicate by which column to sort.
 #' @param excl A vector of column names to exclude. Names are matched exactly,
-#' not as regular expressions or substrings.
+#' not as regular expressions or substrings. Columns are dropped before the
+#' widths are applied, so a vector `width` must be sized and ordered to match
+#' the columns that remain after exclusion (a single `width` value is recycled
+#' and is unaffected).
 #' @param ... Further arguments passed to [Tbl()].
 #' @returns A flextable.
 #' @inheritParams Tbl
@@ -870,7 +873,8 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 #' `obj`, while the values give the new headings.
 #' @param width The widths of the columns; if a single values is given, it
 #' corresponds to the first column; otherwise the number of values must
-#' correspond to the number of columns in `obj`.
+#' correspond to the number of columns in the rendered table (i.e. `obj` after
+#' any columns removed by `excl`).
 #' @param digits A number for rounding.
 #' @param ... Further arguments passed to [Tbl()]; `hline` and `lbl` are set
 #' internally and will error if also passed here.
@@ -1007,6 +1011,10 @@ TblDIF <- TblDif
 #' matched exactly against `DIF.variable`, not as regular expressions or
 #' substrings.
 #' @param label A vector of names for the DIF variables.
+#' @param width The widths of the columns; if a single value is given, it is
+#' applied to all columns; otherwise the number of values must correspond to the
+#' number of columns in the rendered table. `excl` removes rows here, so it does
+#' not affect the column count.
 #' @param ... Further arguments passed to [Tbl()]; `digits` is set internally and
 #' will error if also passed here.
 #' @return A flextable.
