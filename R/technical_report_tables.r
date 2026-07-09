@@ -622,7 +622,7 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
     note <- append(note, list(flextable::as_i("Q")))
     note <- append(note, list(flextable::as_sub("3")))
     note <- append(note,
-                   " = Average absolute residual correlation for item (Yen, 1983). "
+                   " = Average absolute residual correlation for item (Yen, 1984). "
     )
   }
   if ("Percentage correct" %in% colnames(tab))
