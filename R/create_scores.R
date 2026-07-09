@@ -431,7 +431,9 @@ estimate_rotated_wles <- function(resp,
   irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
 
   # Prepare data
-  rotation <- resp[resp[[valid]], rotation, drop = FALSE]
+  # Note: rotation needs to be a data.frame instead of a tibble for
+  #       TAM::designMatrices.mfr2()
+  rotation <- as.data.frame(resp[resp[[valid]], rotation, drop = FALSE])
   pid <- resp$ID_t[resp[[valid]]]
   check_pid(pid)
   resp_ <- prepare_resp(
@@ -460,16 +462,20 @@ estimate_rotated_wles <- function(resp,
   B <- des$B$B.3d
 
   # 0.5 scoring for PCMs
-  if (irt_type == "poly" & !is.null(scoring)) {
-    v <- sub(paste0('-', names(rotation)[1], '.+$'), "", rownames(B))
-    v <- merge(data.frame(item = v), vars[vars[[select]], c("item", scoring)], by.x = "item")
-    v[[2]][is.na(v[[2]])] <- 1
-    B[, , 1] <- B[, , 1] * v[[2]]
+  if (!is.null(scoring)) {
+    scoring_mat <- vars[vars[[select]], c("item", scoring)]
+    for (i in seq(1, nrow(scoring_mat))) {
+      if (is.na( scoring_mat$scoring[i])) next
+      B[grepl(paste0("^", scoring_mat$item[i]), rownames(B)), , 1] <-
+        B[grepl(paste0("^", scoring_mat$item[i]), rownames(B)), , 1] *
+          scoring_mat$scoring[i]
+    }
   }
 
   # Match item parameters by item name
-  xsi_fixed <- order_xsi_fixed(
-    xsi_fixed, resp2, irtmodel = '1PL', A = A, B = B, rename_steps = TRUE
+  xsi_fixed_mat <- order_xsi_fixed(
+    xsi_fixed, resp2, A = A, B = B, rename_steps = TRUE,
+    irtmodel = ifelse(irt_type == "poly", "PCM2", "1PL")
   )
 
   # Fit model
@@ -477,7 +483,7 @@ estimate_rotated_wles <- function(resp,
     resp = resp2,
     A = A,
     B = B,
-    xsi.fixed = xsi_fixed,
+    xsi.fixed = xsi_fixed_mat,
     verbose = FALSE,
     pid = pid,
     control = control_tam,
