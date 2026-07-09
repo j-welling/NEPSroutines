@@ -326,8 +326,10 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' regular expression.
 #' @param footnote An optional table note.
 #' @param sort A column name to indicate by which column to sort.
-#' @param excl A vector of column names to exclude. Names are matched exactly,
-#' not as regular expressions or substrings.
+#' @param excl A vector of column names to exclude. Each value is matched
+#' exactly (not as a regular expression or substring) against either the
+#' internal column name or the label shown in the rendered table (e.g. both
+#' `"N_administered"` and `"Total"` exclude the total-respondents column).
 #' @param ... Further arguments passed to [Tbl()].
 #' @returns A flextable.
 #' @inheritParams Tbl
@@ -399,17 +401,20 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
   # Create numbering
   tab$"Nr." <- seq_len(nrow(tab))
 
-  # Exclude columns by exact name (also drops unnamed columns)
-  keep <- nzchar(colnames(tab))
-  if (!is.null(excl)) keep <- keep & !(colnames(tab) %in% excl)
-  tab <- tab[, keep]
-
-  # Rename variables
+  # Display labels (internal name -> label shown in the rendered table) so
+  # `excl` can match either the internal name or the displayed header.
   lbl <- colnames(tab)
   lbl[lbl == "item"] <- "Item"
   lbl[lbl == "position"] <- "Pos."
   lbl[lbl == "N_administered"] <- "Total"
   lbl[lbl == "N_valid"] <- "N"
+
+  # Exclude columns by exact name -- internal name OR display label
+  # (also drops unnamed columns)
+  keep <- nzchar(colnames(tab))
+  if (!is.null(excl)) keep <- keep & !(colnames(tab) %in% excl | lbl %in% excl)
+  tab <- tab[, keep]
+  lbl <- lbl[keep]
   colnames(tab) <- lbl
 
   # Create footnote
@@ -538,9 +543,15 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
   # Correct empty column names
   colnames(tab)[1] <- "Nr."
 
-  # Exclude columns
+  # Exclude columns by exact name -- internal name OR display label (the labels
+  # mirror the rename block below; excl may use either form).
   if (!is.null(excl)) {
-    tab <- tab[, !(colnames(tab) %in% excl)]
+    lbl <- colnames(tab)
+    lbl[lbl == "correct"] <- "Percentage\n correct"
+    lbl[lbl == "N_administered"] <- "Total"
+    lbl[lbl == "N_valid"] <- "N"
+    lbl[lbl == "xsi"] <- "Difficulty"
+    tab <- tab[, !(colnames(tab) %in% excl | lbl %in% excl)]
   }
 
   # Rename collapsed items
@@ -868,6 +879,10 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 #' @param colnames2 A named vector of groups for the DIF variables included in
 #' the second line for the table heading; the names indicate the group name in
 #' `obj`, while the values give the new headings.
+#' @param excl A vector of column names to exclude, matched exactly against the
+#' column names (e.g. `"mig.1-2"`); `.` and `-` are treated literally. Unlike
+#' [TblMvi()], the displayed group labels (e.g. `"Migration"`) are not accepted
+#' here, because one label maps to several columns.
 #' @param width The widths of the columns; if a single values is given, it
 #' corresponds to the first column; otherwise the number of values must
 #' correspond to the number of columns in `obj`.
@@ -1003,9 +1018,10 @@ TblDIF <- TblDif
 
 #' Create table with fit statistics for DIF analyses
 #'
-#' @param excl A vector of DIF variables that should be excluded. Values are
-#' matched exactly against `DIF.variable`, not as regular expressions or
-#' substrings.
+#' @param excl A vector of DIF variables that should be excluded. Each value is
+#' matched exactly (not as a regular expression or substring) against either the
+#' raw `DIF.variable` value (e.g. `"mig"`) or its display label (e.g.
+#' `"Migration"`, including any custom `label`).
 #' @param label A vector of names for the DIF variables.
 #' @param ... Further arguments passed to [Tbl()]; `digits` is set internally and
 #' will error if also passed here.
@@ -1051,9 +1067,19 @@ TblDifFit <- function(obj, footnote = NULL, excl = NULL, label = NULL,
     obj <- obj[["gof"]]
   tab <- obj
 
-  # Exclude rows
+  # Exclude rows by exact name -- raw DIF.variable value OR display label (the
+  # labels mirror the rename block below; excl may use either form).
   if (!is.null(excl)) {
-    tab <- tab[!(tab$'DIF.variable' %in% excl), ]
+    lbl <- trimws(tab$'DIF.variable')
+    lbl[lbl == "sex"] <- "Sex"
+    lbl[lbl == "mig"] <- "Migration"
+    lbl[lbl == "books"] <- "Books"
+    lbl[lbl %in% c("rotation", "position")] <- "Test position"
+    lbl[lbl %in% c("sc", "cohort")] <- "Starting cohort"
+    for (i in seq_along(label)) {
+      lbl[trimws(tab$'DIF.variable') == names(label)[i]] <- label[i]
+    }
+    tab <- tab[!(tab$'DIF.variable' %in% excl | lbl %in% excl), ]
   }
 
   # Rename variables
