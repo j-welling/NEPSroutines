@@ -47,11 +47,13 @@ regular expression.}
 will be applied to all columns; otherwise the length must correspond to the
 number of columns in `obj`.}
 
-\item{excl}{A vector of column names to exclude. Names are matched exactly,
-not as regular expressions or substrings. Columns are dropped before the
-widths are applied, so a vector `width` must be sized and ordered to match
-the columns that remain after exclusion (a single `width` value is recycled
-and is unaffected).}
+\item{excl}{A vector of column names to exclude. Each value is matched
+exactly (not as a regular expression or substring) against either the
+internal column name or the label shown in the rendered table (e.g. both
+`"N_administered"` and `"Total"` exclude the total-respondents column).
+Columns are dropped before the widths are applied, so a vector `width` must
+be sized and ordered to match the columns that remain after exclusion (a
+single `width` value is recycled and is unaffected).}
 
 \item{...}{Further arguments passed to [Tbl()].}
 }

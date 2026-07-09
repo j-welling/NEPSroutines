@@ -38,11 +38,10 @@ or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
 
 \item{footnote}{A table note.}
 
-\item{excl}{A vector of column names to exclude. Names are matched exactly,
-not as regular expressions or substrings. Columns are dropped before the
-widths are applied, so a vector `width` must be sized and ordered to match
-the columns that remain after exclusion (a single `width` value is recycled
-and is unaffected).}
+\item{excl}{A vector of column names to exclude, matched exactly against the
+column names (e.g. `"mig.1-2"`); `.` and `-` are treated literally. Unlike
+[TblMvi()], the displayed group labels (e.g. `"Migration"`) are not accepted
+here, because one label maps to several columns.}
 
 \item{colnames1}{A named vector of names for the DIF variables included in
 the first line of the table heading; the names indicate the group name in

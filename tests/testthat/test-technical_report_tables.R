@@ -464,12 +464,15 @@ test_that("TblMvi() excl matches column names exactly (#115)", {
 
   tab <- Import(test_path("fixtures", "ex1", "tables"), "mv_item.xlsx")
 
-  # "N" is not the exact name of any column, so nothing is excluded. The old
-  # grepl() implementation dropped N_administered, N_valid, NV and NR.
+  # Substring / regex collisions are ignored: "dministered" is inside the
+  # internal "N_administered" and "ota" is inside the "Total" label, but neither
+  # is an exact name or label, so nothing is excluded. The old grepl() dropped
+  # N_administered, N_valid, NV and NR for a bare "N". (A bare "N" now excludes
+  # the column shown as "N" -- see the display-label test below.)
   keep_all <- names(TblMvi(tab, excl = NULL)$body$dataset)
-  collide <- names(TblMvi(tab, excl = "N")$body$dataset)
-  expect_equal(collide, keep_all)
-  expect_true(all(c("OM", "NV", "NR") %in% collide))
+  expect_equal(names(TblMvi(tab, excl = "dministered")$body$dataset), keep_all)
+  expect_equal(names(TblMvi(tab, excl = "ota")$body$dataset), keep_all)
+  expect_true(all(c("OM", "NV", "NR") %in% keep_all))
 
   # The documented defaults still drop their exact columns.
   def <- names(TblMvi(tab)$body$dataset)
@@ -539,12 +542,15 @@ test_that("TblPars() excl matches column names exactly (#115)", {
 
   tab <- Import(test_path("fixtures", "ex2", "tables"), "irt_poly.xlsx")
 
-  # "N" excludes nothing (no column is named exactly "N"); the old grepl()
-  # dropped N_administered, N_valid and even WMNSQ.
+  # Substring / regex collisions are ignored: "WMNS" is inside "WMNSQ" and
+  # "otal" is inside the "Total" label, but neither is an exact name or label,
+  # so nothing is excluded. The old grepl() dropped N_administered, N_valid and
+  # even WMNSQ for "N". (A bare "N" now excludes the column shown as "N" -- see
+  # the display-label test below.)
   keep_all <- names(TblPars(tab, excl = NULL)$body$dataset)
-  collide <- names(TblPars(tab, excl = "N")$body$dataset)
-  expect_equal(collide, keep_all)
-  expect_true(all(c("WMNSQ", "N") %in% collide))
+  expect_equal(names(TblPars(tab, excl = "WMNS")$body$dataset), keep_all)
+  expect_equal(names(TblPars(tab, excl = "otal")$body$dataset), keep_all)
+  expect_true(all(c("WMNSQ", "N") %in% keep_all))
 
   # Exact name is still excluded.
   expect_false("N_administered" %in% names(TblPars(tab, excl = "N_administered")$body$dataset))
@@ -588,6 +594,73 @@ test_that("TblDifFit() excl matches DIF variables exactly (#115)", {
   # The exact name still drops the rows.
   dropped <- TblDifFit(tab, excl = "sex")$body$dataset[["DIF variable"]]
   expect_false(any(grepl("Sex", dropped)))
+
+})
+
+
+# Regression tests for #115 (follow-up to #121): excl also accepts the display
+# labels shown in the rendered table, in addition to the internal column /
+# DIF-variable names it matches already. Renamed columns (e.g. N_administered ->
+# "Total", N_valid -> "N") were previously impossible to exclude by what the
+# user sees.
+
+test_that("TblMvi() excl also accepts display labels (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex1", "tables"), "mv_item.xlsx")
+
+  # Excluding by display label is equivalent to excluding by the internal name.
+  by_label <- names(TblMvi(tab, excl = c("Total", "N"))$body$dataset)
+  by_internal <- names(TblMvi(tab, excl = c("N_administered", "N_valid"))$body$dataset)
+  expect_equal(by_label, by_internal)
+  expect_false(any(c("Total", "N") %in% by_label))
+
+  # The user's original mix of labels now drops each named column exactly.
+  nms <- names(TblMvi(tab, excl = c("Nr.", "Pos.", "Total", "N"))$body$dataset)
+  expect_false(any(c("Nr.", "Pos.", "Total", "N") %in% nms))
+  expect_true(all(c("Item", "OM", "NV", "NR") %in% nms))
+
+})
+
+
+test_that("TblPars() excl also accepts display labels (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex2", "tables"), "irt_poly.xlsx")
+
+  by_label <- names(TblPars(tab, excl = c("Total", "N"))$body$dataset)
+  by_internal <- names(TblPars(tab, excl = c("N_administered", "N_valid"))$body$dataset)
+  expect_equal(by_label, by_internal)
+  expect_false(any(c("Total", "N") %in% by_label))
+
+  # "Difficulty" is the label for the internal "xsi" column.
+  expect_true("Difficulty" %in% names(TblPars(tab, excl = NULL)$body$dataset))
+  expect_false("Difficulty" %in% names(TblPars(tab, excl = "Difficulty")$body$dataset))
+
+})
+
+
+test_that("TblDifFit() excl also accepts display labels (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_TR.xlsx")
+
+  # "Migration" is the display label for the raw DIF variable "mig".
+  by_label <- TblDifFit(tab, excl = "Migration")$body$dataset[["DIF variable"]]
+  by_raw <- TblDifFit(tab, excl = "mig")$body$dataset[["DIF variable"]]
+  expect_equal(by_label, by_raw)
+  expect_false(any(grepl("Migration", by_label)))
+
+  # A custom `label` value can also be used to exclude its rows.
+  custom <- TblDifFit(tab, excl = "Custom",
+                      label = c(mig = "Custom"))$body$dataset[["DIF variable"]]
+  expect_false(any(grepl("Custom|Migration", custom)))
 
 })
 
