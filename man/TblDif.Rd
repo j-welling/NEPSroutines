@@ -53,7 +53,8 @@ the second line for the table heading; the names indicate the group name in
 
 \item{width}{The widths of the columns; if a single values is given, it
 corresponds to the first column; otherwise the number of values must
-correspond to the number of columns in `obj`.}
+correspond to the number of columns in the rendered table (i.e. `obj` after
+any columns removed by `excl`).}
 
 \item{size}{The general font size.}
 
