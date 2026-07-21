@@ -80,11 +80,11 @@ test_that("prepare_resp() works", {
 
   # vars is missing
   expect_error(prepare_resp(resp = resp, select = "use"),
-               regexp = "^To create a data frame \\(resp\\) with only the.+")
+               regexp = "^To create a data frame \\(resp\\) containing only the.+")
 
   # select not set or incorrect
   expect_message(prepare_resp(resp = resp, select = NULL, warn = TRUE),
-                 regexp = "^No variable provided indicating the items.+")
+                 regexp = "^No variable was provided that indicates which of the items.+")
   expect_no_message(prepare_resp(resp = resp, select = NULL, warn = FALSE))
   expect_error(prepare_resp(resp = resp, vars = vars, select = "dontuse"),
                regexp = "^Variable 'dontuse' not found in 'vars'.+")
@@ -283,7 +283,7 @@ test_that("check_invalid_values() works", {
   df2 <- data.frame(var1 = c(-5, -2, 1:8))
   expect_error(check_invalid_values(df = df2, name_df = "myname",
                                     items = "var1"),
-               regexp = "-5, -2")
+               regexp = "-5 and -2")
 
 })
 

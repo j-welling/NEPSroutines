@@ -123,7 +123,7 @@ prepare_resp <- function(
             resp <- resp[ , items]
         }
     } else {
-        message("No variable was provided that indicates which the items to keep",
+        message("No variable was provided that indicates which of the items to keep",
         "(see function argument 'select'). All items are kept.")
     }
 
