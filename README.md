@@ -61,7 +61,7 @@ You can also install the newest version of NEPSroutines from
 
 ``` r
 install.packages("remotes")
-remotes::install_github("j-welling/NEPSroutines@vX.Y.Z")
+remotes::install_github("LIfBi-Educational-Measurement/NEPSroutines@vX.Y.Z")
 ```
 
 Replace X.Y.Z with the actual version number.
@@ -90,5 +90,5 @@ You can install the development version of NEPSroutines from
 
 ``` r
 install.packages("remotes")
-remotes::install_github("j-welling/NEPSroutines")
+remotes::install_github("LIfBi-Educational-Measurement/NEPSroutines")
 ```
