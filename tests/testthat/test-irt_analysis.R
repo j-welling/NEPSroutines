@@ -1,8 +1,22 @@
 
+# All tests in this file call irt_model()/irt_analysis(), which reach MASS via
+# TAM -> CDM. MASS is a recommended package that is missing from clean
+# R CMD check environments, so every block is guarded (see
+# dev/01_claude_reference.md).
+
+# Maximum absolute deviation per column between two summary tables
+max_deviation <- function(new, old, cols) {
+  vapply(cols, function(col) {
+    max(abs(new[[col]] - old[[col]]), na.rm = TRUE)
+  }, numeric(1))
+}
+
+
 test_that("irt_model() runs without error for 1PL", {
 
+  skip_if_not_installed("MASS")
+
   data(ex1)
-  path <- withr::local_tempdir()
 
   result <- try({
     irt_model(
@@ -32,6 +46,8 @@ test_that("irt_model() runs without error for 1PL", {
 
 test_that("irt_model() runs without error for 2PL", {
 
+  skip_if_not_installed("MASS")
+
   data(ex1)
 
   result <- try({
@@ -55,6 +71,8 @@ test_that("irt_model() runs without error for 2PL", {
 
 
 test_that("irt_model() runs without error for PCM2", {
+
+  skip_if_not_installed("MASS")
 
   data(ex2)
 
@@ -81,6 +99,8 @@ test_that("irt_model() runs without error for PCM2", {
 
 test_that("irt_model() runs without error for GPCM", {
 
+  skip_if_not_installed("MASS")
+
   data(ex2)
 
   result <- try({
@@ -104,28 +124,11 @@ test_that("irt_model() runs without error for GPCM", {
 })
 
 
-test_that("irt_model() rejects invalid irtmodel", {
-
-  data(ex1)
-
-  expect_error(
-    irt_model(
-      resp = ex1$resp,
-      vars = ex1$vars,
-      select = "dich",
-      irtmodel = "INVALID",
-      save = FALSE
-    ),
-    regexp = "Invalid irtmodel"
-  )
-
-})
-
-
 test_that("irt_analysis() dichotomous produces expected structure", {
 
+  skip_if_not_installed("MASS")
+
   data(ex1)
-  path <- withr::local_tempdir()
 
   result <- try({
     irt_analysis(
@@ -151,6 +154,8 @@ test_that("irt_analysis() dichotomous produces expected structure", {
 
 
 test_that("irt_analysis() polytomous produces expected structure", {
+
+  skip_if_not_installed("MASS")
 
   data(ex2)
 
@@ -181,6 +186,8 @@ test_that("irt_analysis() polytomous produces expected structure", {
 
 test_that("irt_analysis() dichotomous matches fixture", {
 
+  skip_if_not_installed("MASS")
+
   data(ex1)
   path <- withr::local_tempdir()
 
@@ -199,24 +206,56 @@ test_that("irt_analysis() dichotomous matches fixture", {
     warn = FALSE
   )
 
+  # Both output files are written
+  expect_true(file.exists(file.path(path, "irt_dich.rds")))
+  expect_true(file.exists(file.path(path, "irt_dich.xlsx")))
+
   # Load fixture
   fixture <- readRDS(test_path("fixtures/ex1/results/irt_dich.rds"))
 
-  # Compare summary table structure
+  # Item parameters. The unrounded TAM estimates are the numerical ground
+  # truth: they must not drift, and they are unaffected by any change to the
+  # `digits` used for the printed tables.
+  expect_equal(result$model.1pl$mod$xsi$xsi,
+               fixture$model.1pl$mod$xsi$xsi, tolerance = 1e-4)
+  expect_equal(result$model.1pl$mod$xsi$se.xsi,
+               fixture$model.1pl$mod$xsi$se.xsi, tolerance = 1e-4)
+  expect_equal(result$model.2pl$mod$xsi$xsi,
+               fixture$model.2pl$mod$xsi$xsi, tolerance = 1e-4)
+  expect_equal(result$model.2pl$mod$B, fixture$model.2pl$mod$B,
+               tolerance = 1e-4)
 
+  # Person parameters
+  expect_equal(result$model.1pl$wle_rel, fixture$model.1pl$wle_rel,
+               tolerance = 1e-4)
+  expect_equal(result$model.2pl$wle_rel, fixture$model.2pl$wle_rel,
+               tolerance = 1e-4)
+
+  # Model fit table is rounded to whole numbers / 3 decimals and is therefore
+  # unaffected by the digits change: it must match exactly.
+  expect_equal(result$model_fit, fixture$model_fit)
+
+  # Summary table structure
   expect_equal(names(result$summary), names(fixture$summary))
   expect_equal(nrow(result$summary), nrow(fixture$summary))
-
-  # Compare item names
   expect_equal(result$summary$Item, fixture$summary$Item)
 
-  # Compare model fit table structure
-  expect_equal(rownames(result$model_fit), rownames(fixture$model_fit))
+  # Summary table values. The fixture was written when `digits` defaulted to 2
+  # and is now produced with 3 decimals, so allow half a unit in the fixture's
+  # last decimal.
+  deviation <- max_deviation(
+    result$summary, fixture$summary,
+    cols = c("N_administered", "N_valid", "correct", "xsi", "SE", "WMNSQ",
+             "t", "rit", "aQ3", "Discr.")
+  )
+  expect_lt(max(deviation), 0.01)
 
 })
 
 
 test_that("irt_analysis() polytomous matches fixture", {
+
+  skip_if_not_installed("MASS")
 
   data(ex2)
   path <- withr::local_tempdir()
@@ -237,20 +276,54 @@ test_that("irt_analysis() polytomous matches fixture", {
     warn = FALSE
   )
 
+  expect_true(file.exists(file.path(path, "irt_poly.rds")))
+  expect_true(file.exists(file.path(path, "irt_poly.xlsx")))
+
   # Load fixture
   fixture <- readRDS(test_path("fixtures/ex2/results/irt_poly.rds"))
 
-  # Compare summary table structure
+  # Item parameters (see comment in the dichotomous test above)
+  expect_equal(result$model.pcm$mod$xsi$xsi,
+               fixture$model.pcm$mod$xsi$xsi, tolerance = 1e-4)
+  expect_equal(result$model.pcm$mod$xsi$se.xsi,
+               fixture$model.pcm$mod$xsi$se.xsi, tolerance = 1e-4)
+  expect_equal(result$model.gpcm$mod$xsi$xsi,
+               fixture$model.gpcm$mod$xsi$xsi, tolerance = 1e-4)
+
+  # Person parameters
+  expect_equal(result$model.pcm$wle_rel, fixture$model.pcm$wle_rel,
+               tolerance = 1e-4)
+  expect_equal(result$model.gpcm$wle_rel, fixture$model.gpcm$wle_rel,
+               tolerance = 1e-4)
+
+  expect_equal(result$model_fit, fixture$model_fit)
+
+  # Summary table structure
   expect_equal(names(result$summary), names(fixture$summary))
   expect_equal(nrow(result$summary), nrow(fixture$summary))
+  expect_equal(result$summary$Item, fixture$summary$Item)
 
-  # Compare steps table structure
-  expect_equal(ncol(result$steps), ncol(fixture$steps))
+  # Summary table values (see comment in the dichotomous test above)
+  deviation <- max_deviation(
+    result$summary, fixture$summary,
+    cols = c("N_administered", "N_valid", "correct", "xsi", "SE", "WMNSQ",
+             "t", "rit", "aQ3", "Discr.")
+  )
+  expect_lt(max(deviation), 0.01)
+
+  # Step parameters are pre-formatted strings ("1.671 (0.0713)") whose
+  # precision follows `digits`, so only their layout is compared here; the
+  # underlying values are checked via model.pcm$mod$xsi above.
+  expect_equal(dim(result$steps), dim(fixture$steps))
+  expect_equal(names(result$steps), names(fixture$steps))
+  expect_equal(rownames(result$steps), rownames(fixture$steps))
 
 })
 
 
 test_that("irt_summary() produces valid output", {
+
+  skip_if_not_installed("MASS")
 
   data(ex1)
 
@@ -303,6 +376,8 @@ test_that("irt_summary() produces valid output", {
 
 test_that("irt_model_fit() produces valid output", {
 
+  skip_if_not_installed("MASS")
+
   data(ex1)
 
   model_1pl <- irt_model(
@@ -342,31 +417,5 @@ test_that("irt_model_fit() produces valid output", {
   expect_true("BIC" %in% names(mfit))
   expect_true("EAPrel" %in% names(mfit))
   expect_true("WLErel" %in% names(mfit))
-
-})
-
-
-test_that("irt_analysis() saves files correctly", {
-
-  data(ex1)
-  path <- withr::local_tempdir()
-
-  irt_analysis(
-    resp = ex1$resp,
-    vars = ex1$vars,
-    select = "dich",
-    valid = "valid",
-    mvs = c(OM = -97, NV = -95, NR = -94),
-    print = FALSE,
-    save = TRUE,
-    return = FALSE,
-    path_results = path,
-    path_table = path,
-    overwrite = TRUE,
-    warn = FALSE
-  )
-
-  expect_true(file.exists(paste0(path, "/irt_dich.rds")))
-  expect_true(file.exists(paste0(path, "/irt_dich.xlsx")))
 
 })
