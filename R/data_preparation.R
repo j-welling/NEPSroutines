@@ -83,8 +83,8 @@ duplicate_items <- function(vars, old_names, new_names, change = NULL) {
 
   # Check whether all items are indeed included in vars
   if (any(!(old_names %in% vars$item))) {
-    stop("Item/s '", paste(old_names[!(old_names %in% vars$item)], collapse = "', '"),
-         "' is/are not included in vars! Please check again.")
+    stop("Item/s ", list_elements(old_names[!(old_names %in% vars$item)]),
+         " is/are not included in vars! Please check again.")
   }
 
   # Create new dataframe
@@ -719,7 +719,7 @@ hl_scoring <- function(resp, hl_solutions, hl_distractors,
     stop(paste0("The arguments 'hl_solutions' and 'hl_distractors' ",
                 "must include the same names for their elements. ",
                 "Please check your input. Problems found for ",
-                paste(names_diff, collapse = ", "), "."))
+                list_elements(names_diff), "."))
   }
   NEPSroutines:::check_numerics(resp, "resp", unlist(hl_solutions), dich = TRUE)
   NEPSroutines:::check_numerics(resp, "resp", unlist(hl_distractors), dich = TRUE)
@@ -995,13 +995,13 @@ collapse_response_categories_without_rules <-
       message("\nThe following items resulted in less than two response categories ",
               "with more than ", per_cat, " cases and were thus not collapsed. ",
               "Please check these items manually:\n",
-              paste(problematic_items, collapse = ", "))
+              list_elements(problematic_items))
     }
 
     if (!is.null(dichotomous_items)) {
       message("\nDichotomous items were not considered for collapsing. ",
               "The following items have less than three response categories::\n",
-              paste(dichotomous_items, collapse = ", "))
+              list_elements(dichotomous_items))
     }
 
     if (nrow(collapsed_items) > 0L) {
@@ -1069,8 +1069,8 @@ collapse_response_categories_with_rules <-
     duplicates <- names(n_rules)[n_rules > 1]
     if (length(duplicates) > 0)
       stop(paste(
-        "Multiple rules found for items:",
-        paste(duplicates, collapse = ", ")
+        "Multiple rules found for items ",
+        list_elements(duplicates)
       ))
 
     # Remove rules for non-existent items
@@ -1110,7 +1110,7 @@ collapse_response_categories_with_rules <-
       message("\nThe following items resulted in response categories ",
               "with less than ", per_cat, " cases. ",
               "Please check these items carefully:\n",
-              paste(problematic_items, collapse = ", "))
+              list_elements(problematic_items))
     }
 
     out <- list(

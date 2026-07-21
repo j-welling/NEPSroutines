@@ -111,8 +111,11 @@ prepare_resp <- function(
     # Select only certain variables
     if (!is.null(select)) {
         if (is.null(vars)) {
-            stop("To create a data frame (resp) with only the indicated items, ",
-                 "please also provide vars.")
+            stop(
+              "To create a data frame (resp) containing only the items ",
+              "indicated by variable '", select,
+              "', please also provide the data frame vars."
+              )
         } else {
             check_logicals(vars, "vars", select, warn = warn)
             items <- vars$item[vars[[select]]]
@@ -120,8 +123,8 @@ prepare_resp <- function(
             resp <- resp[ , items]
         }
     } else if (warn) {
-        message("No variable provided indicating the items to keep. ",
-                "All items are kept.")
+        message("No variable was provided that indicates which of the items to keep",
+        " (see function argument 'select'). All items are kept.")
     }
 
     # Convert missing values to NA
@@ -151,8 +154,8 @@ is_null_mvs_valid <- function(mvs = NA, valid = NA) {
   }
 
   if (is.null(valid)) {
-    message("No variable with valid cases provided. ",
-            "All cases are used for analysis.")
+    message("No variable was provided that indicates valid cases ",
+            "(see function argument 'valid'). All cases are used for analysis.")
   }
   return(invisible())
 }
@@ -225,11 +228,16 @@ save_results <- function(results, filename, path) {
 #' @export
 
 check_folder <- function(path) {
+
     if (!file.exists(path)) {
+
         dir.create(path, recursive = TRUE)
         message("The location ", path, " did not exist. New folder created.")
+
     }
+
   return(invisible())
+
 }
 
 
@@ -240,14 +248,25 @@ check_folder <- function(path) {
 #' @export
 
 check_pid <- function(pid) {
+
     if (length(pid) != length(unique(pid))) {
-        stop("There are duplicates in the person identifiers.")
+
+      dupes <- unique(pid[duplicated(pid)])
+
+      stop("There are duplicates of the following person identifiers: ",
+           "\n", fmt_names(dupes))
+
     }
 
     if (any(is.na(pid))) {
-        warning("There are missing values in the person identifiers.")
+
+        warning("There are missing values (NA) in the person identifiers. ",
+                "Check that all persons have an identifier in resp.")
+
     }
+
   return(invisible())
+
 }
 
 
@@ -301,7 +320,9 @@ validation_msg <- function(label, bad, name_df, verb_singular, verb_plural,
 #' @export
 
 check_items <- function(items) {
+
     if (length(items) != length(unique(items))) {
+
         dupes <- unique(items[duplicated(items)])
         stop("Duplicate item names found in 'vars$item': ",
              fmt_names(dupes), ".")
@@ -453,7 +474,7 @@ check_invalid_values <- function(df, name_df = "<unknown>", items = NULL) {
     stop(sprintf(
       "Data frame '%s' contains invalid values (< 0): %s. ",
       name_df,
-      paste(invalid_values, collapse = ", ")
+      list_elements(invalid_values)
     ), "Include all user-defined missing values via the `mvs` argument.")
   }
   return(invisible())
@@ -730,6 +751,7 @@ order_xsi_fixed <- function(
   ) {
 
   if (irtmodel %in% c("1PL", "PCM2")) {
+
     xsi_arg <- TAM::tam.mml(
       resp = resp,
       Q = Q,
@@ -739,7 +761,9 @@ order_xsi_fixed <- function(
       verbose = FALSE,
       control = list(maxiter = 1)
     )$xsi.fixed.estimated
+
   } else if (irtmodel %in% c("2PL", "GPCM")) {
+
     xsi_arg <- TAM::tam.mml.2pl(
       resp = resp,
       Q = Q,
@@ -749,18 +773,48 @@ order_xsi_fixed <- function(
       verbose = FALSE,
       control = list(maxiter = 1)
     )$xsi.fixed.estimated
+
   }
 
- if (rename_steps) names(xsi_fixed) <- gsub("_step", ":step", names(xsi_fixed))
+  if (rename_steps) names(xsi_fixed) <- gsub("_step", ":step", names(xsi_fixed))
 
-  if (any(!names(xsi_fixed) %in% rownames(xsi_arg)))
-    stop(paste0("Items in xsi_fixed do not match items in ", irtmodel, " model!"))
+  if (any(!names(xsi_fixed) %in% rownames(xsi_arg))) {
 
+    missing_items <- names(xsi_fixed)[!names(xsi_fixed) %in% rownames(xsi_arg)]
+    stop(paste0(
+      ifelse(
+        length(missing_items) == 1,
+        paste0("Item ", missing_items, " is "),
+        paste0("Items ", fmt_names(missing_items), " are ")
+        ),
+      "included in xsi_fixed but not in the ", irtmodel, " model."
+    ))
+
+  }
+
+ if (any(!rownames(xsi_arg) %in% names(xsi_fixed))) {
+
+   missing_items <- rownames(xsi_arg)[!rownames(xsi_arg) %in% names(xsi_fixed)]
+   message(paste0(
+     ifelse(
+       length(missing_items) == 1,
+       paste0("Item ", missing_items, " is "),
+       paste0("Items ", fmt_names(missing_items), " are ")
+     ),
+     "included in the ", irtmodel, " model but not in xsi_fixed. ",
+     "The corresponding item difficulties are estimated freely."
+     ))
+
+ }
+
+  # reorder xsi
   xsi_new <- cbind(
-    xsi_arg[names(xsi_fixed), 1], xsi_fixed[names(xsi_fixed)] # reorder xsi
+    xsi_arg[names(xsi_fixed), 1],
+    xsi_fixed[names(xsi_fixed)]
   )
 
   return(xsi_new)
+
 }
 
 
@@ -885,12 +939,24 @@ recodeVar <- function(x, src, tgt, default = NULL, keep.na = TRUE) {
 
 
 
-# Internal helper: capitalize the first letter of each string element
-# @noRd
+#' Internal helper: capitalize the first letter of each string element
+#' @param x string; the word or sentence to be capitalized
+#' @noRd
 capitalize <- function(x) {
   paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))
 }
 
+#' Internal helper: use the right separation when listing elements in a string
+#' @param x character vector; includes elements that shall be listed using oxford comma
+#' @noRd
+list_elements <- function(x) {
+  n <- length(x)
+  if (n == 0) return("")
+  if (n == 1) return(x)
+  if (n == 2) return(paste(x, collapse = " and "))
+  paste0(paste(x[-n], collapse = ", "), ", and ", x[n])
+
+}
 
 # Internal helper: parse a string condition used by GetPars()/GetDif().
 # A condition is a single string such as ">1.15", ">1.15 & <1.20", or
