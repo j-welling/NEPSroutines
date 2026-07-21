@@ -951,6 +951,8 @@ list_elements <- function(x) {
   if (n == 2) return(paste(x, collapse = " and "))
   paste0(paste(x[-n], collapse = ", "), ", and ", x[n])
 
+}
+
 # Internal helper: parse a string condition used by GetPars()/GetDif().
 # A condition is a single string such as ">1.15", ">1.15 & <1.20", or
 # "<1 | >1.2": comparison operators (=, ==, !=, <, <=, >, >=) are combined
