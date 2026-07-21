@@ -702,6 +702,7 @@ pc_imputation <- function( resp, vars, select,
 #' name of the vector should match the vector names in @hl_solutions
 #' @param mvs  integer vector; contains user-defined missing values
 #' @param warn  logical; print warnings
+#' @param verbose logical; print messages
 #'
 #' @return resp including unscored (raw) and scored items
 #' @export
@@ -746,12 +747,13 @@ hl_scoring <- function(resp, hl_solutions, hl_distractors,
     rn <- length(hl_distractors[[item]]) - fp
     rpr <- rp / (rp + fn)
     fpr <- fp / (fp + rn)
+    denom <- (4 * pmax(rpr, fpr) - 4 * rpr * fpr)
     hl_item <-
-      0.5 + sign(rpr - fpr) * ((rpr - fpr)^2 + abs(rpr - fpr)) /
-      (4 * pmax(rpr, fpr) - 4 * rpr * fpr)
+      0.5 + sign(rpr - fpr) * ((rpr - fpr)^2 + abs(rpr - fpr)) / denom
     hl_item <-
       cut(hl_item, c(-1, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 2),
           labels = FALSE, right = FALSE) - 1
+    hl_item[denom %in% 0] <- 0
 
     # Set missing values
     subitems <- c(hl_solutions[[item]], hl_distractors[[item]])
@@ -1004,7 +1006,7 @@ collapse_response_categories_without_rules <-
 
     if (nrow(collapsed_items) > 0L) {
       message("\nThe following items have been collapsed:\n")
-      print(format(item_names, justify = "left"), n = nrow(item_names), right = F)
+      print(format(item_names, justify = "left"))
     } else {
       message("\nNo items have been collapsed.")
     }
@@ -1071,9 +1073,17 @@ collapse_response_categories_with_rules <-
         list_elements(duplicates)
       ))
 
+    # Remove rules for non-existent items
+    rm_rules <- c()
+    for (i in seq_len(nrow(rules))) {
+      if (is.null(resp[[rules$original_item[i]]]))
+        rm_rules <- c(rm_rules, i)
+    }
+    if (length(rm_rules) > 0L)
+      rules <- rules[(!seq_len(nrow(rules)) %in% rm_rules), ]
+
     # Apply rules to data
     for (i in seq_len(nrow(rules))) {
-      if (is.null(resp[[rules$original_item[i]]])) next
       rec_string <- trimws(strsplit(rules$scoring[i], ",")[[1]])
       resp[[paste0(rules$original_item[i], "_collapsed")]] <-
         recodeVar(

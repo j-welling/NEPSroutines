@@ -30,7 +30,7 @@ GetProp <- function(obj, select, prop = "type", val = c("CMC", "MA"),
   if (item) {
     return(out)
   } else {
-    return (length(out))
+    return(length(out))
   }
 
 }
@@ -206,7 +206,7 @@ GetMvp <- function(obj, type, value, digits = 0) {
   }
   if (operator == "=") operator <- paste0(operator, "=")
   names(obj[[type]]) <- gsub(" ", ".", names(obj[[type]]))
-  n <- as.numeric(obj[[type]]$`Number.of.missing.responses`)
+  n <- as.numeric(as.character(obj[[type]]$`Number.of.missing.responses`))
   out <- sum(obj[[type]]$Percentage[methods::getFunction(operator)(n, value)])
   return(rnd(out, digits = digits))
 
@@ -221,23 +221,27 @@ GetMVP <- GetMvp
 #' @param obj A data frame with sheets from "irt_dich.xlsx" or "irt_poly.xlsx"
 #' created by [irt_analysis()].
 #' @param type A column name in `obj` identifying an item statistic.
-#' @param stat A function used to summarize `type` or a string specifying
-#' an operator (=, <, >) with a number; e.g.,
+#' @param stat A function used to summarize `type` or a single string
+#' specifying a comparison operator (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number;
+#' e.g.,
 #' * =3 returns number of type equal to 3
 #' * <3 returns number of type less than 3
-#' * >3 returns number of type greater than 3
-#'  Multiple conditions can be combined using & and |.
+#' * >=3 returns number of type greater than or equal to 3
+#' Multiple conditions can be combined within the string using & and |
+#' (e.g. `">1.15 & <1.20"`); surrounding whitespace is ignored.
 #' @param item A logical indicating whether to return the results from stat
 #' (`FALSE`) or the item name corresponding to the value of `stat` (`TRUE`).
-#' @param excl A string specifying an operator (=, <, >) with a number
-#' indicating values to exclude; e.g.,
-#' * =3 excludes number of type equal to 3
-#' * <3 excludes number of type less than 3
-#' * >3 excludes number of type greater than 3
-#' Multiple conditions can be combined using & and |.
+#' @param excl A single string specifying a comparison operator
+#' (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number indicating values to exclude; e.g.,
+#' * =3 excludes type equal to 3
+#' * <3 excludes type less than 3
+#' * >=3 excludes type greater than or equal to 3
+#' Multiple conditions can be combined within the string using & and |
+#' (e.g. `">1.15 & <1.20"`); surrounding whitespace is ignored.
 #' @param digits A number for rounding.
 #' @returns A number with the calculated statistic or character vector with
 #' item names.
+#' @inheritParams TblPars
 #' @export
 #' @examples
 #' \dontrun{
@@ -276,12 +280,15 @@ GetMVP <- GetMvp
 #' # Largest WMNSQ between 1 and 1.2
 #' GetPars(pars, "WMNSQ", max, excl = "<1|>1.2")
 #'
+#' # Number of items with a WMNSQ from 1.15 up to 1.20 (spaces are allowed)
+#' GetPars(pars, "WMNSQ", ">=1.15 & <1.20")
+#'
 #' # Clean up generated files
 #' file.remove(paste0(tmpdir, "/irt_dich.xlsx"))
 #' file.remove(paste0(tmpdir, "/irt_dich.rds"))
 #' }
 GetPars <- function(obj, type, stat = median, item = FALSE,
-                    excl = NULL, digits = 2) {
+                    excl = NULL, digits = 2, rename_collapsed = TRUE) {
 
   # normalize arguments
   type <- as.character(type[1])
@@ -292,36 +299,9 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
   tab <- as.data.frame(obj[["summary"]])
   if (!is.null(excl)) {
 
-    # identify multiple conditions
-    logicals <- base::strsplit(gsub("[^&|]", "", excl), "")[[1]]
-    excl <- base::strsplit(base::trimws(excl), "[&|]")[[1]]
-
-    # identify operator and value for each condition
-    operators <- values <- c()
-    for (i in excl) {
-      if (!(substr(base::trimws(i), 1, 1) %in% c("=", "<", ">")))
-        stop("Unknown stat function.")
-      operators[i] = substr(i, 1, 1)
-      if (operators[i] == "=") operators[i] <- paste0(operators[i], "=")
-      values[i] <- as.numeric(base::trimws(substring(i, 2)))
-    }
-
-    # combine conditions to select data
-    for (i in seq_along(operators)) {
-      if (i == 1) {
-        boolvec <- methods::getFunction(operators[i])(tab[, type], values[i])
-      } else {
-        expr <-
-          call(
-            logicals[i - 1],
-            boolvec,
-            methods::getFunction(operators[i])(tab[, type], values[i])
-          )
-        boolvec <- eval(expr)
-      }
-    }
-    tab <- tab[!boolvec, ]
-    rm(logicals, operators, values, boolvec)
+    # drop rows matching the exclusion condition(s); which() ignores NA cells
+    boolvec <- eval_conditions(parse_conditions(excl), tab[, type])
+    tab <- tab[which(!boolvec), ]
 
   }
 
@@ -338,35 +318,11 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
     # no summary function available
   } else {
 
-    # identify multiple conditions
-    logicals <- base::strsplit(gsub("[^&|]", "", stat), "")[[1]]
-    stat <- base::strsplit(base::trimws(stat), "[&|]")[[1]]
-
-    # identify operator and value for each condition
-    operators <- values <- c()
-    for (i in stat) {
-      if (!(substr(base::trimws(i), 1, 1) %in% c("=", "<", ">")))
-        stop("Unknown stat function.")
-      operators[i] = substr(i, 1, 1)
-      if (operators[i] == "=") operators[i] <- paste0(operators[i], "=")
-      values[i] <- as.numeric(base::trimws(substring(i, 2)))
-    }
-
-    # combine conditions in new summary function
+    # turn the condition string into a summary function: with item = FALSE it
+    # counts the matches, with item = TRUE it returns the logical mask of matches
+    parsed <- parse_conditions(stat)
     stat <- \(x, na.rm, item = FALSE) {
-      for (i in seq_along(operators)) {
-        if (i == 1) {
-          boolvec <- methods::getFunction(operators[i])(x, values[i])
-        } else {
-          expr <-
-            call(
-              logicals[i - 1],
-              boolvec,
-              methods::getFunction(operators[i])(x, values[i])
-            )
-          boolvec<- eval(expr)
-        }
-      }
+      boolvec <- eval_conditions(parsed, x)
       if (item) {
         return(boolvec)
       } else {
@@ -381,7 +337,10 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
     if (!item) {
       return(rnd(stat(tab[, type], na.rm = TRUE), digits = digits))
     } else {
-      i <- tab[stat(tab[, type], na.rm = TRUE, item = TRUE), "Item"]
+      # which() keeps only the matching rows, so items with an NA value are
+      # dropped rather than showing up as "NA" in the returned list
+      i <- tab[which(stat(tab[, type], na.rm = TRUE, item = TRUE)), "Item"]
+      if (rename_collapsed) i <- gsub("_collapsed", "", i)
       return(paste0(i, collapse = ", "))
     }
 
@@ -399,6 +358,7 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
 #' (`FALSE`) or the item name corresponding to the value of `stat` (`TRUE`).
 #' @param digits A number for rounding.
 #' @returns The calculated statistic or a vector of item names.
+#' @inheritParams TblPars
 #' @export
 #' @examples
 #' \dontrun{
@@ -435,7 +395,8 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
 #' file.remove(paste0(tmpdir, "/irt_poly.xlsx"))
 #' file.remove(paste0(tmpdir, "/irt_poly.rds"))
 #' }
-GetCat <- function(obj, stat = median, item = FALSE, digits = 2) {
+GetCat <- function(obj, stat = median, item = FALSE, digits = 2,
+                   rename_collapsed = TRUE) {
 
   # Normalize arguments
   item <- as.logical(item[1])
@@ -450,6 +411,7 @@ GetCat <- function(obj, stat = median, item = FALSE, digits = 2) {
     return(rnd(stat(na.omit(c(cat))), digits = digits))
   } else {
     i <- rownames(cat)[rowSums(cat == stat(na.omit(c(cat))), na.rm = TRUE) >= 1]
+    if (rename_collapsed) i <- gsub("_collapsed", "", i)
     return(paste0(i, collapse = ", "))
   }
 
@@ -827,12 +789,14 @@ GetDim <- function(obj, model = "dim", stat = median, var = FALSE,
 #' and `group` is missing, results for the first group comparison are returned.
 #' @param group If the DIF variable has more than two groups, the name of
 #' the group comparison.
-#' @param dif A function used to summarize the DIF effects or a string
-#' specifying an operator (=, <, >) with a number; e.g.,
+#' @param dif A function used to summarize the DIF effects or a single string
+#' specifying a comparison operator (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number;
+#' e.g.,
 #' * =1 returns number of DIF effects equal to 1
 #' * <1 returns number of DIF effects less than 1
-#' * >1 returns number of DIF effects greater than 1
-#' Multiple conditions can be combined using & and |.
+#' * >=1 returns number of DIF effects greater than or equal to 1
+#' Multiple conditions can be combined within the string using & and |
+#' (e.g. `">.4 | <.05"`); surrounding whitespace is ignored.
 #' If the DIF variable has more than two group and `group` is missing, results
 #' across all groups are returned.
 #' @param item A logical to return the item names (`TRUE`) instead of the
@@ -954,35 +918,11 @@ GetDif <- function(obj, n = NULL, main = NULL, dif = NULL,
     # DIF effects without summary function
   } else if (!is.null(dif)) {
 
-    # identify multiple conditions
-    logicals <- strsplit(gsub("[^&|]", "", dif), "")[[1]]
-    stat <- strsplit(trimws(dif), "[&|]")[[1]]
-
-    # identify operator and value for each condition
-    operators <- values <- c()
-    for (i in stat) {
-      if (!(substr(trimws(i), 1, 1) %in% c("=", "<", ">")))
-        stop("Unknown stat function.")
-      operators[i] = substr(i, 1, 1)
-      if (operators[i] == "=") operators[i] <- paste0(operators[i], "=")
-      values[i] <- as.numeric(trimws(substring(i, 2)))
-    }
-
-    # combine conditions in new summary function
+    # turn the condition string into a summary function: with item = FALSE it
+    # counts the matches, with item = TRUE it returns the logical mask of matches
+    parsed <- parse_conditions(dif)
     stat <- \(x, na.rm, item = FALSE) {
-      for (i in seq_along(operators)) {
-        if (i == 1) {
-          boolvec <- methods::getFunction(operators[i])(x, values[i])
-        } else {
-          expr <-
-            call(
-              logicals[i - 1],
-              boolvec,
-              methods::getFunction(operators[i])(x, values[i])
-            )
-          boolvec<- eval(expr)
-        }
-      }
+      boolvec <- eval_conditions(parsed, x)
       if (item) {
         return(boolvec)
       } else {
@@ -1009,7 +949,9 @@ GetDif <- function(obj, n = NULL, main = NULL, dif = NULL,
     if (!item) {
       return(rnd(stat(tab$xsi, na.rm = TRUE), digits))
     } else {
-      i <- tab[stat(tab$xsi, na.rm = TRUE, item = TRUE), "item"]
+      # which() keeps only the matching rows, so items with an NA value are
+      # dropped rather than showing up as "NA" in the returned list
+      i <- tab[which(stat(tab$xsi, na.rm = TRUE, item = TRUE)), "item"]
       return(paste0(unique(i), collapse = ", "))
     }
 

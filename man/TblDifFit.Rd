@@ -11,7 +11,8 @@ TblDifFit(
   excl = NULL,
   label = NULL,
   size = 12,
-  width = 0.9
+  width = 0.9,
+  ...
 )
 
 TblDIFFit(
@@ -20,7 +21,8 @@ TblDIFFit(
   excl = NULL,
   label = NULL,
   size = 12,
-  width = 0.9
+  width = 0.9,
+  ...
 )
 }
 \arguments{
@@ -30,15 +32,22 @@ or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
 
 \item{footnote}{A table note.}
 
-\item{excl}{A vector of DIF variables that should be excluded.}
+\item{excl}{A vector of DIF variables that should be excluded. Each value is
+matched exactly (not as a regular expression or substring) against either the
+raw `DIF.variable` value (e.g. `"mig"`) or its display label (e.g.
+`"Migration"`, including any custom `label`).}
 
 \item{label}{A vector of names for the DIF variables.}
 
 \item{size}{The general font size.}
 
-\item{width}{The widths of the columns; if a single values is given, it
-corresponds to the first column; otherwise the number of values must
-correspond to the number of columns in `obj`.}
+\item{width}{The widths of the columns; if a single value is given, it is
+applied to all columns; otherwise the number of values must correspond to the
+number of columns in the rendered table. `excl` removes rows here, so it does
+not affect the column count.}
+
+\item{...}{Further arguments passed to [Tbl()]; `digits` is set internally and
+will error if also passed here.}
 }
 \value{
 A flextable.

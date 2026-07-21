@@ -4,7 +4,15 @@
 \alias{GetPars}
 \title{Summarize item parameters}
 \usage{
-GetPars(obj, type, stat = median, item = FALSE, excl = NULL, digits = 2)
+GetPars(
+  obj,
+  type,
+  stat = median,
+  item = FALSE,
+  excl = NULL,
+  digits = 2,
+  rename_collapsed = TRUE
+)
 }
 \arguments{
 \item{obj}{A data frame with sheets from "irt_dich.xlsx" or "irt_poly.xlsx"
@@ -12,24 +20,30 @@ created by [irt_analysis()].}
 
 \item{type}{A column name in `obj` identifying an item statistic.}
 
-\item{stat}{A function used to summarize `type` or a string specifying
-an operator (=, <, >) with a number; e.g.,
+\item{stat}{A function used to summarize `type` or a single string
+specifying a comparison operator (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number;
+e.g.,
 * =3 returns number of type equal to 3
 * <3 returns number of type less than 3
-* >3 returns number of type greater than 3
- Multiple conditions can be combined using & and |.}
+* >=3 returns number of type greater than or equal to 3
+Multiple conditions can be combined within the string using & and |
+(e.g. `">1.15 & <1.20"`); surrounding whitespace is ignored.}
 
 \item{item}{A logical indicating whether to return the results from stat
 (`FALSE`) or the item name corresponding to the value of `stat` (`TRUE`).}
 
-\item{excl}{A string specifying an operator (=, <, >) with a number
-indicating values to exclude; e.g.,
-* =3 excludes number of type equal to 3
-* <3 excludes number of type less than 3
-* >3 excludes number of type greater than 3
-Multiple conditions can be combined using & and |.}
+\item{excl}{A single string specifying a comparison operator
+(=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number indicating values to exclude; e.g.,
+* =3 excludes type equal to 3
+* <3 excludes type less than 3
+* >=3 excludes type greater than or equal to 3
+Multiple conditions can be combined within the string using & and |
+(e.g. `">1.15 & <1.20"`); surrounding whitespace is ignored.}
 
 \item{digits}{A number for rounding.}
+
+\item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
+item names.}
 }
 \value{
 A number with the calculated statistic or character vector with
@@ -74,6 +88,9 @@ GetPars(pars, "xsi", "<-2", item = TRUE)
 
 # Largest WMNSQ between 1 and 1.2
 GetPars(pars, "WMNSQ", max, excl = "<1|>1.2")
+
+# Number of items with a WMNSQ from 1.15 up to 1.20 (spaces are allowed)
+GetPars(pars, "WMNSQ", ">=1.15 & <1.20")
 
 # Clean up generated files
 file.remove(paste0(tmpdir, "/irt_dich.xlsx"))

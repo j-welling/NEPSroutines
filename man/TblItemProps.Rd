@@ -8,12 +8,13 @@ TblItemProps(
   vars,
   select,
   prop,
-  propname = "",
+  propname = " ",
   footnote = NULL,
   na.rm = TRUE,
   size = 12,
   width = NULL,
-  formats = NULL
+  formats = NULL,
+  ...
 )
 }
 \arguments{
@@ -32,7 +33,7 @@ property such as response format, text function, or cognitive function.}
 
 \item{footnote}{A table note.}
 
-\item{na.rm}{A logical to remove empty properties.}
+\item{na.rm}{A logical to remove empty properties (rows) and empty groups (columns).}
 
 \item{size}{The general font size.}
 
@@ -41,6 +42,9 @@ will be applied to all columns; otherwise the length must correspond to the
 number of columns in `obj`.}
 
 \item{formats}{Long names of item properties to be displayed in the table.}
+
+\item{...}{Further arguments passed to [Tbl()]; `align` and `hline` are set
+internally and will error if also passed here.}
 }
 \value{
 A flextable.

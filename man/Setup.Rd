@@ -10,7 +10,8 @@ Setup(
   sc = 0,
   domain = "re",
   study = "A000",
-  wave = 0
+  wave = 0,
+  overwrite = FALSE
 )
 }
 \arguments{
@@ -26,10 +27,15 @@ or provide the information as arguments without confirmation (`FALSE`).}
 \item{study}{The number of the study.}
 
 \item{wave}{The number of the study wave.}
+
+\item{overwrite}{A logical to overwrite existing files}
 }
 \value{
 Returns `NULL`, invisibly.
 }
 \description{
 Setup the folder with the Quarto extension for the technical report
+}
+\seealso{
+`vignette("technical_report", package = "NEPSroutines")`
 }

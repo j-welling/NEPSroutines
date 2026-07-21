@@ -1,0 +1,241 @@
+Guideline for Contributing to NEPSroutines
+================
+
+## Introduction
+
+This file is a guideline for everyone developing and maintaining the
+NEPSroutines package. It explains the required workflow to implement
+changes using branches and to create a new package release on GitHub.
+
+## Roles and Contributors
+
+All contributors in the GitHub project belong currently to one of these
+roles:
+
+- **Admin**: They have full access, may add new contributors, set branch
+  protection rules, and change the settings. Currently, this corresponds
+  to `j-welling` and `tgnambs`. They are the only persons who may bypass
+  branch protection rules (see section *Branches*).
+
+- **Writer**: They can read, write, and clone the project, as well as
+  create and manage issues and pull requests. Currently, this
+  corresponds to every other person contributing to the NEPSroutines
+  package.
+
+Technically, these roles are also possible:
+
+- **Maintainer**: Same as writer but with permission to change some of
+  the settings.
+
+- **Read**: Can only read and clone the repository. No pushes, issues,
+  or pull requests are allowed.
+
+## Branching Workflow
+
+This section describes the workflow of implementing changes to the
+package.
+
+### Branches
+
+The `main` branch represents the current state of the package. It is
+protected by the following **protection rules**:
+
+1.  Changes can only be incorporated by opening a pull request.
+
+2.  The pull request needs to be reviewed and approved by at least one
+    other person.
+
+3.  Only the **admins** can bypass these rules.
+
+Changes are implemented using **extra branches**. Please use the
+following workflow:
+
+- Before starting to work on a new branch, **pull** the newest version
+  of the main branch on your local repository.
+
+- Then **create a new branch** with a meaningful name (e.g.,
+  `add-new-feature`). Branches can be further divided into the three
+  categories feature (new feature for users), bugfix, and chore (package
+  maintenance). The category can be added to the branch name,
+  e.g. `feature/add-this-feature`, `bugfix/fix-this-bug`,
+  `chore/add-this-file`.
+
+- To improve clarity and traceability, it is recommended to create a new
+  branch for every working package or feature.
+
+You can pull the newest `main` version and create new branches by using
+the git GUI in R Studio or by writing these commands in the terminal:
+
+``` bash
+# switch to main branch and pull newest version
+git switch main
+git pull
+# create new branch
+git switch -c my-new-branch-name
+```
+
+### Commits
+
+Make small, logical commits. Each commit should represent one coherent
+change. The description should explain the changes in a short and
+precise way using present tense. No version numbers are required.
+
+You can commit changes by using the git GUI in R Studio or by writing
+these commands in the terminal:
+
+``` bash
+git commit # opens text editor to enter commit message manually
+git commit -m "Add my new feature" # incorporates the commit message in the command
+```
+
+### Checks and Push
+
+When all changes are implemented and committed, please verify if
+
+- the code is correct and does what it is supposed to do,
+
+- the documentation (including vignettes) is up to date, and
+
+- all checks and tests pass.
+
+You can use the following commands:
+
+``` r
+devtools::document()
+devtools::test()
+devtools::check()
+```
+
+If all checks and tests pass and the documentation is up to date, then
+push the commits to the GitHub repository.
+
+``` bash
+git push
+```
+
+### Pull Requests
+
+To merge the changes of your new branch into the `main` branch, please
+create a pull request with an overview of your changes in the
+description. Assign a reviewer and keep an eye on potential comments and
+reviews to the pull request. The **admins** will merge the pull request
+to the `main` branch using `squash commits`.
+
+Please note that the **admins** will not test your code but rather just
+shortly check if the code contradicts any previous changes. The
+responsibility of your code and its functionality within the package
+lies with you.
+
+## Release Workflow
+
+Creating new releases is pretty easy. The most important and time
+consuming part is to test whether everything works well.
+
+Generally, new releases should be only created by the **admins**. If the
+**admins** are unavailable and a new release is indispensable, other
+contributors may create a release as well.
+
+### Checks and Tests
+
+At the moment, testing is done manually by comparing the results of the
+current version to results of the previous version using example NEPS
+data. In the future, automatic tests based on simulated data shall
+replace the manual tests. If bugs are found, they are fixed using the
+usual procedure using branches and pull requests.
+
+Once all results are reproduced, please update the documentation and run
+all automatic tests and checks using the following commands:
+
+``` r
+devtools::document()
+devtools::test()
+devtools::check()
+```
+
+### Create Release
+
+Once all checks and tests pass, you can create a new release in five
+steps:
+
+1.  **Update the DESCRIPTION and** **CITATION file** by changing the
+    package version number and potentially adding new contributors as
+    package authors or new features in the package description. The
+    **version number** is given in the format vX.Y.Z. Change…
+    1.  **X** for **breaking changes** (i.e., code is no longer backward
+        compatible)
+    2.  **Y** for **minor changes** (i.e., implemented new features, but
+        still backward compatible)
+    3.  **Z** for **minimal changes** (i.e., bug fixes, small
+        improvements)
+
+<!-- -->
+
+2.  **Commit the changes** using a commit message that includes the new
+    version name, e.g. “prepare release vX.Y.Z”:
+
+``` bash
+git commit -m "prepare release vX.Y.Z"
+```
+
+3.  **Create a** **tag** with the version name:
+
+``` bash
+git tag vX.Y.Z
+```
+
+4.  **Push** both the commit and the new tag to the remote repository:
+
+``` bash
+git push
+git push --tags
+```
+
+5.  **Create a release** on GitHub: In the GitHub repository, go to
+    “Releases”. There, select your newly created tag “v.X.Y.Z”. Select
+    “create new release” and add changes since last release as release
+    notes.
+
+Congratulations, you’ve just created a new release! :)
+
+### Create TAR-Ball
+
+If required, create a TAR-ball from the release page on GitHub and send
+it to the FDZ or upload it on the Netzlaufwerk.
+
+## Development Conventions
+
+### Package Hygiene Rules
+
+Not every document on GitHub needs to be included in releases. For
+example, development files (like this Rmd) can be specifically excluded
+by adding them in `.Rbuildignore`.
+
+### Git Hygiene Rules
+
+Only commit source code, documentation, and intentional data artifacts.
+Do NOT commit `.Rhistory` / `.RData` / `.Rproj.user` / generated files
+unless explicitly intended
+
+### Documentation Workflow
+
+Internal documentation is generated via `roxygen2`. NEVER manually edit
+`.Rd` files in `man/`.
+
+External documentation is implemented via vignettes using simulated
+data. Major functions and features should be explained in the
+corresponding vignette.
+
+### Dependency Workflow
+
+When adding a new package dependency:
+
+- update `DESCRIPTION`
+
+- run `devtools::document()`
+
+- check `Imports` vs `Suggests`.
+
+## Using AI for Package Development
+
+*Here we could add rules / guidelines for incorporating AI in package
+development.*

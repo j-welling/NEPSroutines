@@ -4,7 +4,15 @@
 \alias{TblSteps}
 \title{Create table with step parameters}
 \usage{
-TblSteps(obj, footnote = NULL, size = 10, width = 1, digits = 2)
+TblSteps(
+  obj,
+  footnote = NULL,
+  size = 10,
+  width = 1,
+  digits = 2,
+  rename_collapsed = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{A list with data frames with sheets from "irt_poly.xlsx"
@@ -19,6 +27,11 @@ will be applied to all columns; otherwise the length must correspond to the
 number of columns in `obj`.}
 
 \item{digits}{A number for rounding.}
+
+\item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
+item names.}
+
+\item{...}{Further arguments passed to [Tbl()].}
 }
 \value{
 A flextable.

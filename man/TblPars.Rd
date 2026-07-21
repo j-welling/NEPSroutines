@@ -9,7 +9,9 @@ TblPars(
   footnote = NULL,
   excl = c("N_administered"),
   size = 10,
-  width = 0.5
+  width = 0.5,
+  rename_collapsed = TRUE,
+  ...
 )
 }
 \arguments{
@@ -19,13 +21,24 @@ or a data frame with sheet "summary" from "irt_poly.xlsx" created by
 
 \item{footnote}{A table note.}
 
-\item{excl}{A vector of column names to exclude.}
+\item{excl}{A vector of column names to exclude. Each value is matched
+exactly (not as a regular expression or substring) against either the
+internal column name or the label shown in the rendered table (e.g. both
+`"N_administered"` and `"Total"` exclude the total-respondents column).
+Columns are dropped before the widths are applied, so a vector `width` must
+be sized and ordered to match the columns that remain after exclusion (a
+single `width` value is recycled and is unaffected).}
 
 \item{size}{The general font size.}
 
 \item{width}{The widths of the columns; if a single value is provided, it
 will be applied to all columns; otherwise the length must correspond to the
 number of columns in `obj`.}
+
+\item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
+item names.}
+
+\item{...}{Further arguments passed to [Tbl()].}
 }
 \value{
 A flextable.
@@ -61,7 +74,7 @@ pars <- Import(tmpdir, "/irt_dich.xlsx")
 # Default parameter table
 TblPars(pars)
 
-# Parameter table including number of respondents the item was adminstered
+# Parameter table including number of respondents the item was administered
 # and a footnote
 TblPars(pars, excl = NULL, footnote = "Nothing to report.")
 }
