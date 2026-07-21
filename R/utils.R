@@ -122,9 +122,9 @@ prepare_resp <- function(
             check_variables(resp, "resp", variables = items)
             resp <- resp[ , items]
         }
-    } else {
+    } else if (warn) {
         message("No variable was provided that indicates which of the items to keep",
-        "(see function argument 'select'). All items are kept.")
+        " (see function argument 'select'). All items are kept.")
     }
 
     # Convert missing values to NA
