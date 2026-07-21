@@ -1,91 +1,133 @@
 
-test_that("dif_model() runs without error for dichotomous data", {
+# dif_analysis() estimates a main effects model and a DIF model for every DIF
+# variable. Each analysis is therefore run only once per example dataset and all
+# assertions share that result, following test-distractor_analysis.R.
+
+
+test_that("dif_analysis() works for dichotomous data", {
+
+  # Temporary output directory
+  path <- withr::local_tempdir()
 
   data(ex1)
-
   result <- try({
-    dif_model(
-      resp = ex1$resp,
-      vars = ex1$vars,
-      select = "dich",
-      dif_var = "sex",
-      valid = "valid",
-      mvs = c(OM = -97, NV = -95, NR = -94),
-      verbose = FALSE,
-      save = FALSE,
-      warn = FALSE
-    )
-  })
-
-  expect_false(inherits(result, "try-error"))
-  expect_true(is.list(result))
-  expect_true("mmod" %in% names(result))
-  expect_true("dmod" %in% names(result))
-  expect_true("facets" %in% names(result))
-  expect_true("dif_var" %in% names(result))
-  expect_true("irt_type" %in% names(result))
-  expect_equal(result$dif_var, "sex")
-  expect_equal(result$irt_type, "dich")
-
-})
-
-
-test_that("dif_model() runs without error for polytomous data", {
-
-  data(ex2)
-
-  result <- try({
-    dif_model(
-      resp = ex2$resp,
-      vars = ex2$vars,
-      select = "mixed",
-      dif_var = "sex",
-      valid = "valid",
-      scoring = "scoring",
-      mvs = c(OM = -97, NV = -95, NR = -94),
-      verbose = FALSE,
-      save = FALSE,
-      warn = FALSE
-    )
-  })
-
-  expect_false(inherits(result, "try-error"))
-  expect_equal(result$irt_type, "poly")
-
-})
-
-
-test_that("conduct_dif_analysis() handles multiple DIF variables", {
-
-  data(ex1)
-
-  result <- try({
-    conduct_dif_analysis(
+    dif_analysis(
       resp = ex1$resp,
       vars = ex1$vars,
       select = "dich",
       dif_vars = c("sex", "mig"),
       valid = "valid",
       mvs = c(OM = -97, NV = -95, NR = -94),
+      print = FALSE,
+      save = TRUE,
+      return = TRUE,
+      path_results = path,
+      path_table = path,
+      overwrite = TRUE,
       verbose = FALSE,
-      save = FALSE,
       warn = FALSE
     )
   })
 
+  # Estimated without error
   expect_false(inherits(result, "try-error"))
-  expect_true(is.list(result))
-  expect_equal(length(result), 2)
-  expect_true("sex" %in% names(result))
-  expect_true("mig" %in% names(result))
+
+  # Contains the output of conduct_dif_analysis(), summarize_dif_analysis()
+  # and build_dif_tr_tables()
+  expect_true(all(c("models", "summaries", "tr_tables") %in% names(result)))
+
+  # One model and one summary per DIF variable
+  expect_equal(names(result$models), c("sex", "mig"))
+  expect_equal(names(result$summaries), c("sex", "mig"))
+  expect_equal(result$models$sex$dif_var, "sex")
+  expect_equal(result$models$mig$dif_var, "mig")
+  expect_equal(result$models$sex$irt_type, "dich")
+  expect_true(all(c("mmod", "dmod", "facets") %in% names(result$models$sex)))
+  expect_true(
+    all(c("est", "mne", "gof", "facets", "irt_type") %in%
+          names(result$summaries$sex))
+  )
+
+  # Technical report tables (tibbles inherit from data.frame)
+  expect_s3_class(result$tr_tables$gof, "data.frame")
+  expect_s3_class(result$tr_tables$estimates, "data.frame")
+
+  # All files created
+  expect_true(file.exists(paste0(path, "/dif_dich_models.rds")))
+  expect_true(file.exists(paste0(path, "/dif_dich_summaries.rds")))
+  expect_true(file.exists(paste0(path, "/dif_dich_TR.xlsx")))
+  expect_true(file.exists(paste0(path, "/dif_dich_sex.xlsx")))
+  expect_true(file.exists(paste0(path, "/dif_dich_mig.xlsx")))
+
+  # The saved results are the same objects that are returned
+  expect_identical(
+    readRDS(paste0(path, "/dif_dich_summaries.rds")), result$summaries
+  )
+
+  # Same structure as the precomputed results. Only the structure is compared:
+  # the ex1 DIF fixtures were saved with different group sizes than the current
+  # ex1 data produces, so their values cannot currently be reproduced.
+  models_fix <- readRDS(test_path("fixtures/ex1/results/dif_dich_models.rds"))
+  summaries_fix <- readRDS(
+    test_path("fixtures/ex1/results/dif_dich_summaries.rds")
+  )
+  expect_equal(names(result$models), names(models_fix))
+  expect_equal(names(result$summaries), names(summaries_fix))
+  expect_equal(names(result$summaries$sex), names(summaries_fix$sex))
+
+  # Written tables can be read back in and contain the expected sheets
+  expect_equal(names(Import(path, "dif_dich_TR.xlsx")), c("gof", "estimates"))
+  expect_true(
+    all(c("gof", "facets") %in% names(Import(path, "dif_dich_sex.xlsx")))
+  )
 
 })
 
 
-test_that("dif_summary() produces valid output", {
+test_that("dif_analysis() works for polytomous data", {
+
+  # Temporary output directory
+  path <- withr::local_tempdir()
+
+  data(ex2)
+  result <- try({
+    dif_analysis(
+      resp = ex2$resp,
+      vars = ex2$vars,
+      select = "mixed",
+      dif_vars = "sex",
+      valid = "valid",
+      scoring = "scoring",
+      mvs = c(OM = -97, NV = -95, NR = -94),
+      print = FALSE,
+      save = TRUE,
+      return = TRUE,
+      path_results = path,
+      path_table = path,
+      overwrite = TRUE,
+      verbose = FALSE,
+      warn = FALSE
+    )
+  })
+
+  # Estimated without error
+  expect_false(inherits(result, "try-error"))
+
+  # Polytomous items are modelled with a PCM
+  models_fix <- readRDS(test_path("fixtures/ex2/results/dif_poly_models.rds"))
+  expect_equal(result$models$sex$irt_type, "poly")
+  expect_equal(result$models$sex$irt_type, models_fix$sex$irt_type)
+
+  # All files created
+  expect_true(file.exists(paste0(path, "/dif_poly_models.rds")))
+  expect_true(file.exists(paste0(path, "/dif_poly_summaries.rds")))
+
+})
+
+
+test_that("dif_model() and dif_summary() work for a single DIF variable", {
 
   data(ex1)
-
   dif_mod <- dif_model(
     resp = ex1$resp,
     vars = ex1$vars,
@@ -98,220 +140,68 @@ test_that("dif_summary() produces valid output", {
     warn = FALSE
   )
 
-  summary <- dif_summary(
+  expect_true(
+    all(c("mmod", "dmod", "facets", "dif_var", "irt_type") %in% names(dif_mod))
+  )
+  expect_equal(dif_mod$dif_var, "sex")
+  expect_equal(dif_mod$irt_type, "dich")
+
+  smry <- dif_summary(
     diflist = dif_mod,
     vars = ex1$vars,
     print = FALSE,
     save = FALSE
   )
 
-  expect_true(is.list(summary))
-  expect_true("est" %in% names(summary))
-  expect_true("mne" %in% names(summary))
-  expect_true("gof" %in% names(summary))
-  expect_true("facets" %in% names(summary))
-  expect_true("irt_type" %in% names(summary))
+  expect_true(
+    all(c("est", "mne", "gof", "facets", "irt_type") %in% names(smry))
+  )
+  expect_equal(smry$irt_type, "dich")
 
 })
 
 
-test_that("dif_analysis() dichotomous produces expected structure", {
+test_that("dif_model() excludes items below the min_val threshold", {
 
   data(ex1)
-  path <- withr::local_tempdir()
 
-  result <- try({
-    dif_analysis(
+  # warn = TRUE, otherwise the exclusion of items is not observable.
+  # capture_warnings() keeps the test robust against additional warnings.
+  warns <- testthat::capture_warnings(
+    result <- dif_model(
       resp = ex1$resp,
       vars = ex1$vars,
       select = "dich",
-      dif_vars = c("sex", "mig"),
+      dif_var = "sex",
       valid = "valid",
+      # The lowest number of valid responses per group and item in ex1 is 168
+      min_val = 200,
       mvs = c(OM = -97, NV = -95, NR = -94),
-      print = FALSE,
-      save = FALSE,
-      return = TRUE,
       verbose = FALSE,
-      warn = FALSE
+      save = FALSE,
+      warn = TRUE
     )
-  })
-
-  expect_false(inherits(result, "try-error"))
-  expect_true("models" %in% names(result))
-  expect_true("summaries" %in% names(result))
-  expect_true("tr_tables" %in% names(result))
-
-})
-
-
-test_that("dif_analysis() dichotomous matches fixture structure", {
-
-  data(ex1)
-  path <- withr::local_tempdir()
-
-  result <- dif_analysis(
-    resp = ex1$resp,
-    vars = ex1$vars,
-    select = "dich",
-    dif_vars = c("sex", "mig"),
-    valid = "valid",
-    mvs = c(OM = -97, NV = -95, NR = -94),
-    print = FALSE,
-    save = TRUE,
-    return = TRUE,
-    path_results = path,
-    path_table = path,
-    overwrite = TRUE,
-    verbose = FALSE,
-    warn = FALSE
   )
 
-  # Load fixtures
-  fixture_models <- readRDS(test_path("fixtures/ex1/results/dif_dich_models.rds"))
-  fixture_summaries <- readRDS(test_path("fixtures/ex1/results/dif_dich_summaries.rds"))
+  # Items without the minimum number of valid responses were dropped
+  expect_true(any(grepl("minimum number of valid responses", warns)))
 
-  # Compare structure
-  expect_equal(names(result$models), names(fixture_models))
-  expect_equal(names(result$summaries), names(fixture_summaries))
-
-  # Compare DIF variable names
-  expect_equal(result$models$sex$dif_var, fixture_models$sex$dif_var)
-  expect_equal(result$models$mig$dif_var, fixture_models$mig$dif_var)
+  # Still produces a valid model
+  expect_true(all(c("mmod", "dmod") %in% names(result)))
 
 })
 
 
-test_that("dif_analysis() polytomous matches fixture structure", {
-
-  data(ex2)
-  path <- withr::local_tempdir()
-
-  result <- dif_analysis(
-    resp = ex2$resp,
-    vars = ex2$vars,
-    select = "mixed",
-    dif_vars = c("sex"),
-    valid = "valid",
-    scoring = "scoring",
-    mvs = c(OM = -97, NV = -95, NR = -94),
-    print = FALSE,
-    save = TRUE,
-    return = TRUE,
-    path_results = path,
-    path_table = path,
-    overwrite = TRUE,
-    verbose = FALSE,
-    warn = FALSE
-  )
-
-  # Load fixture
-  fixture_models <- readRDS(test_path("fixtures/ex2/results/dif_poly_models.rds"))
-
-  # Compare structure
-  expect_equal(result$models$sex$irt_type, "poly")
-  expect_equal(result$models$sex$irt_type, fixture_models$sex$irt_type)
-
-})
-
-
-test_that("build_dif_tr_tables() produces valid output", {
+test_that("dif_model() excludes missing values in the DIF variable", {
 
   data(ex1)
 
-  dif_result <- dif_analysis(
-    resp = ex1$resp,
-    vars = ex1$vars,
-    select = "dich",
-    dif_vars = c("sex", "mig"),
-    valid = "valid",
-    mvs = c(OM = -97, NV = -95, NR = -94),
-    print = FALSE,
-    save = FALSE,
-    return = TRUE,
-    verbose = FALSE,
-    warn = FALSE
-  )
-
-  tr_tables <- build_dif_tr_tables(
-    dif_summaries = dif_result$summaries,
-    vars = ex1$vars,
-    save = FALSE
-  )
-
-  expect_true(is.list(tr_tables))
-  expect_true("gof" %in% names(tr_tables))
-  expect_true("estimates" %in% names(tr_tables))
-  expect_true(is.data.frame(tr_tables$gof))
-  expect_true(is.data.frame(tr_tables$estimates) || tibble::is_tibble(tr_tables$estimates))
-
-})
-
-
-test_that("dif_analysis() saves files correctly", {
-
-  data(ex1)
-  path <- withr::local_tempdir()
-
-  dif_analysis(
-    resp = ex1$resp,
-    vars = ex1$vars,
-    select = "dich",
-    dif_vars = c("sex", "mig"),
-    valid = "valid",
-    mvs = c(OM = -97, NV = -95, NR = -94),
-    print = FALSE,
-    save = TRUE,
-    return = FALSE,
-    path_results = path,
-    path_table = path,
-    overwrite = TRUE,
-    verbose = FALSE,
-    warn = FALSE
-  )
-
-  expect_true(file.exists(paste0(path, "/dif_dich_models.rds")))
-  expect_true(file.exists(paste0(path, "/dif_dich_summaries.rds")))
-  expect_true(file.exists(paste0(path, "/dif_dich_TR.xlsx")))
-
-})
-
-
-test_that("dif_model() respects min_val threshold", {
-
-  data(ex1)
-
-  # With moderately high min_val, some items should be excluded
-  result <- dif_model(
-    resp = ex1$resp,
-    vars = ex1$vars,
-    select = "dich",
-    dif_var = "sex",
-    valid = "valid",
-    min_val = 100,  # Moderate threshold (should exclude items with < 100 valid responses per group)
-    mvs = c(OM = -97, NV = -95, NR = -94),
-    verbose = FALSE,
-    save = FALSE,
-    warn = FALSE
-  )
-
-  # Should still produce a valid model
-  expect_true(is.list(result))
-  expect_true("mmod" %in% names(result))
-
-})
-
-
-test_that("dif_model() handles missing values in DIF variable", {
-
-  data(ex1)
-
-  # Add some NAs to DIF variable
+  # Add some NAs to the DIF variable
   ex1_mod <- ex1
   ex1_mod$resp$sex[1:10] <- NA
 
-  # Should produce warning about excluded cases
-  expect_warning(
-    dif_model(
+  warns <- testthat::capture_warnings(
+    result <- dif_model(
       resp = ex1_mod$resp,
       vars = ex1_mod$vars,
       select = "dich",
@@ -321,8 +211,36 @@ test_that("dif_model() handles missing values in DIF variable", {
       verbose = FALSE,
       save = FALSE,
       warn = TRUE
+    )
+  )
+
+  expect_true(any(grepl(
+    "missing values were found in the DIF variable", warns
+  )))
+  expect_true(all(c("mmod", "dmod") %in% names(result)))
+
+})
+
+
+test_that("dif_analysis() rejects mismatched 'select' and 'dif_vars'", {
+
+  data(ex1)
+
+  expect_error(
+    dif_analysis(
+      resp = ex1$resp,
+      vars = ex1$vars,
+      select = c("dich", "dich"),
+      dif_vars = c("sex", "mig", "school"),
+      valid = "valid",
+      mvs = c(OM = -97, NV = -95, NR = -94),
+      print = FALSE,
+      save = FALSE,
+      return = TRUE,
+      verbose = FALSE,
+      warn = FALSE
     ),
-    regexp = "missing values"
+    regexp = "Please check 'select' and 'dif_vars'"
   )
 
 })
