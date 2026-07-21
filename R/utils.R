@@ -751,6 +751,7 @@ order_xsi_fixed <- function(
   ) {
 
   if (irtmodel %in% c("1PL", "PCM2")) {
+
     xsi_arg <- TAM::tam.mml(
       resp = resp,
       Q = Q,
@@ -760,7 +761,9 @@ order_xsi_fixed <- function(
       verbose = FALSE,
       control = list(maxiter = 1)
     )$xsi.fixed.estimated
+
   } else if (irtmodel %in% c("2PL", "GPCM")) {
+
     xsi_arg <- TAM::tam.mml.2pl(
       resp = resp,
       Q = Q,
@@ -770,6 +773,7 @@ order_xsi_fixed <- function(
       verbose = FALSE,
       control = list(maxiter = 1)
     )$xsi.fixed.estimated
+
   }
 
   if (rename_steps) names(xsi_fixed) <- gsub("_step", ":step", names(xsi_fixed))
@@ -791,13 +795,14 @@ order_xsi_fixed <- function(
  if (any(!rownames(xsi_arg) %in% names(xsi_fixed))) {
 
    missing_items <- rownames(xsi_arg)[!rownames(xsi_arg) %in% names(xsi_fixed)]
-   stop(paste0(
+   message(paste0(
      ifelse(
        length(missing_items) == 1,
        paste0("Item ", missing_items, " is "),
        paste0("Items ", fmt_names(missing_items), " are ")
      ),
-     "included in the ", irtmodel, " model but not in xsi_fixed."
+     "included in the ", irtmodel, " model but not in xsi_fixed. ",
+     "The corresponding item difficulties are estimated freely."
      ))
 
  }
