@@ -1,4 +1,4 @@
-Guideline for Package Development
+Guideline for Contributing to NEPSroutines
 ================
 
 ## Introduction
@@ -9,17 +9,26 @@ changes using branches and to create a new package release on GitHub.
 
 ## Roles and Contributors
 
-At the moment, all contributors in the GitHub project belong to one of
-two roles. However, this may change when the project is moved to the
-GitHub page of the scaling team.
+All contributors in the GitHub project belong currently to one of these
+roles:
 
-- **Maintainer**: The person who “owns” the project. Currently, this is
-  `j-welling`. This is the only person who can bypass branch protection
-  rules (see section *Branches*).
+- **Admin**: They have full access, may add new contributors, set branch
+  protection rules, and change the settings. Currently, this corresponds
+  to `j-welling` and `tgnambs`. They are the only persons who may bypass
+  branch protection rules (see section *Branches*).
 
-- **Contributor**: Every other person who is part of the GitHub project.
+- **Writer**: They can read, write, and clone the project, as well as
+  create and manage issues and pull requests. Currently, this
+  corresponds to every other person contributing to the NEPSroutines
+  package.
 
-*Here we could also add rules on who may be added as contributor.*
+Technically, these roles are also possible:
+
+- **Maintainer**: Same as writer but with permission to change some of
+  the settings.
+
+- **Read**: Can only read and clone the repository. No pushes, issues,
+  or pull requests are allowed.
 
 ## Branching Workflow
 
@@ -36,7 +45,7 @@ protected by the following **protection rules**:
 2.  The pull request needs to be reviewed and approved by at least one
     other person.
 
-3.  Only the maintainer can bypass these rules.
+3.  Only the **admins** can bypass these rules.
 
 Changes are implemented using **extra branches**. Please use the
 following workflow:
@@ -108,11 +117,11 @@ git push
 
 To merge the changes of your new branch into the `main` branch, please
 create a pull request with an overview of your changes in the
-description. Assign a reviewer (e.g., the maintainer) and keep an eye on
-potential comments and reviews to the pull request. The maintainer will
-merge the pull request to the `main` branch using `squash commits`.
+description. Assign a reviewer and keep an eye on potential comments and
+reviews to the pull request. The **admins** will merge the pull request
+to the `main` branch using `squash commits`.
 
-Please note that the maintainer will not test your code but rather just
+Please note that the **admins** will not test your code but rather just
 shortly check if the code contradicts any previous changes. The
 responsibility of your code and its functionality within the package
 lies with you.
@@ -122,8 +131,8 @@ lies with you.
 Creating new releases is pretty easy. The most important and time
 consuming part is to test whether everything works well.
 
-Generally, new releases should be only created by the maintainer. If the
-maintainer is unavailable and a new release is indispensable, other
+Generally, new releases should be only created by the **admins**. If the
+**admins** are unavailable and a new release is indispensable, other
 contributors may create a release as well.
 
 ### Checks and Tests
