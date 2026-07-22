@@ -240,7 +240,7 @@ test_that("dif_analysis() rejects mismatched 'select' and 'dif_vars'", {
       verbose = FALSE,
       warn = FALSE
     ),
-    regexp = "Please check 'select' and 'dif_vars'"
+    regexp = "'select' and 'dif_vars'"
   )
 
 })
