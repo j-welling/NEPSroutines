@@ -15,16 +15,16 @@ Import(
 }
 \arguments{
 \item{path}{A path to the folder with the result tables created by the
-`NEPSroutines` package.}
+\code{NEPSroutines} package.}
 
 \item{filename}{An optional name of an excel file to import or a vector of
-multiple file names; if not set `regexp` should be used.}
+multiple file names; if not set \code{regexp} should be used.}
 
 \item{sheet}{An optional name of an excel sheet; if set, only the specified
 excel sheet will be imported.}
 
 \item{regexp}{An optional regular expression to identify file names in the
-folder given by `path`; if not set, `filename` should be used.}
+folder given by \code{path}; if not set, \code{filename} should be used.}
 
 \item{rename}{An optional named vector with new names for the imported files;
 the names of the vector need to identify the original file names.}

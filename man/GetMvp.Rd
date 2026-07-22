@@ -11,15 +11,17 @@ GetMVP(obj, type, value, digits = 0)
 }
 \arguments{
 \item{obj}{A list with data frames with sheets from "mv_person.xlsx"
-created by [mv_person()].}
+created by \code{\link[=mv_person]{mv_person()}}.}
 
 \item{type}{The type of missing value which is typically one of
 OM, NR, NV, ND, or ALL.}
 
 \item{value}{An operator (=, <, >) with a number of missing values; e.g.,
-* =3 returns percentage for 3 missing values
-* <3 returns percentage for less than 3 missing values
-* >3 returns percentage for more than 3 missing values}
+\itemize{
+\item =3 returns percentage for 3 missing values
+\item <3 returns percentage for less than 3 missing values
+\item 3 returns percentage for more than 3 missing values
+}}
 
 \item{digits}{A number for rounding.}
 }

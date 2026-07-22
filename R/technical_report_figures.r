@@ -9,7 +9,7 @@
 #' @param width The width of the resized image.
 #' @param height The height of the resized image
 #' @param crop A string indicating how to crop the image in the format
-#' "<width>x<height>\{+-\}<xoffset>\{+-\}<yoffset>"
+#' `"<width>x<height>{+-}<xoffset>{+-}<yoffset>"`
 #' (see http://www.imagemagick.org/Magick++/Geometry.html)
 #' @param dpi The dots per inch.
 #' @param footnote An optional note to be displayed below the figure.
@@ -168,7 +168,7 @@ FigMV <- FigMv
 #' @param file A file path for the image.
 #' @param tbl The table number for the footnote.
 #' @param crop A string indicating how to crop the image in the format
-#' "<width>x<height>\{+-\}<xoffset>\{+-\}<yoffset>"
+#' `"<width>x<height>{+-}<xoffset>{+-}<yoffset>"`
 #' (see http://www.imagemagick.org/Magick++/Geometry.html)
 #' @returns An image.
 #' @export

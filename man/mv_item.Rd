@@ -112,9 +112,9 @@ for title and legend of plots (only needed when grouping exists)}
 }
 \value{
 (if return = TRUE) list with results:
-           list: percentages for each item
-           summary: summary statistics across items
-           summary_table: table with summary statistics for TR.
+list: percentages for each item
+summary: summary statistics across items
+summary_table: table with summary statistics for TR.
 }
 \description{
 Missing values analysis by item - all in one function

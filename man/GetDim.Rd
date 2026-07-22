@@ -8,14 +8,14 @@ GetDim(obj, model = "dim", stat = median, var = FALSE, digits = 2)
 }
 \arguments{
 \item{obj}{A data frame with sheets from "dimensionality.xlsx"
-created by [dim_analysis()].}
+created by \code{\link[=dim_analysis]{dim_analysis()}}.}
 
 \item{model}{A model name which is typically one of uni or dim.}
 
 \item{stat}{A function used to summarize the correlations.}
 
-\item{var}{A logical to summarize the variances (`TRUE`) instead of the
-correlations (`FALSE`).}
+\item{var}{A logical to summarize the variances (\code{TRUE}) instead of the
+correlations (\code{FALSE}).}
 
 \item{digits}{A number for rounding.}
 }

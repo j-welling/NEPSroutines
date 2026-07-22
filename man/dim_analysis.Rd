@@ -80,8 +80,8 @@ to the number of dimensions!)}
 }
 \value{
 (if return = TRUE) list of results:
- analysis: list with results for each dimensionality model
- summary: list with summary of results (variance-covariance matrices & model fit).
+analysis: list with results for each dimensionality model
+summary: list with summary of results (variance-covariance matrices & model fit).
 }
 \description{
 Dimensionality analysis

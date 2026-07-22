@@ -105,12 +105,12 @@ as elements of the list}
 }
 \value{
 (if return = TRUE) list with all results:
-            model.1pl/model.pcm: results of irt analysis with one parameter
-            model.2pl/model.gpcm: results of irt analysis with two parameters
-          (depending on function arguments / type of analysis) +
-            summary: table with results for TR
-            model_fit: table with goodness of fit indicators for all mdoels
-            steps: table with results of steps analysis (only for polytomous analysis)
+model.1pl/model.pcm: results of irt analysis with one parameter
+model.2pl/model.gpcm: results of irt analysis with two parameters
+(depending on function arguments / type of analysis) +
+summary: table with results for TR
+model_fit: table with goodness of fit indicators for all mdoels
+steps: table with results of steps analysis (only for polytomous analysis)
 }
 \description{
 Perform 1PL and 2PL analyses for binary or PCM and GPCM analyses for

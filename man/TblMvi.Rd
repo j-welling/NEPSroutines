@@ -30,11 +30,11 @@ TblMVI(
 \arguments{
 \item{obj}{A list with data frames with sheets from "mv_item.xlsx"
 or a data frame with sheet "summary" from "mv_item.xlsx" created by
-[mv_item()].}
+\code{\link[=mv_item]{mv_item()}}.}
 
 \item{select}{An optional name of a specific group to select. Columns whose
-names end in the group suffix (e.g. `"_mixed"`) are kept, along with the
-`"Nr."` and `"item"` columns; the suffix is matched literally, not as a
+names end in the group suffix (e.g. \code{"_mixed"}) are kept, along with the
+\code{"Nr."} and \code{"item"} columns; the suffix is matched literally, not as a
 regular expression.}
 
 \item{footnote}{An optional table note.}
@@ -45,17 +45,17 @@ regular expression.}
 
 \item{width}{The widths of the columns; if a single value is provided, it
 will be applied to all columns; otherwise the length must correspond to the
-number of columns in `obj`.}
+number of columns in \code{obj}.}
 
 \item{excl}{A vector of column names to exclude. Each value is matched
 exactly (not as a regular expression or substring) against either the
 internal column name or the label shown in the rendered table (e.g. both
-`"N_administered"` and `"Total"` exclude the total-respondents column).
-Columns are dropped before the widths are applied, so a vector `width` must
+\code{"N_administered"} and \code{"Total"} exclude the total-respondents column).
+Columns are dropped before the widths are applied, so a vector \code{width} must
 be sized and ordered to match the columns that remain after exclusion (a
-single `width` value is recycled and is unaffected).}
+single \code{width} value is recycled and is unaffected).}
 
-\item{...}{Further arguments passed to [Tbl()].}
+\item{...}{Further arguments passed to \code{\link[=Tbl]{Tbl()}}.}
 }
 \value{
 A flextable.

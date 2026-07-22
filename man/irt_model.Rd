@@ -75,13 +75,13 @@ as elements of the list}
 }
 \value{
 list with results:
-  mod: tam.mml; estimated item response model
-  fit: data.frame; item fit (WMNSQ) of the model
-  pars: data.frame; item difficulties and scoring parameters with respective standard errors
-  mfit: data.frame; (adjusted) Yen's Q3 statistics of the model
-  wle: data.frame; WLEs for the model
-  wle_rel: numeric; WLE reliability of the model
-  info_crit: data.frame with information criteria of the model.
+mod: tam.mml; estimated item response model
+fit: data.frame; item fit (WMNSQ) of the model
+pars: data.frame; item difficulties and scoring parameters with respective standard errors
+mfit: data.frame; (adjusted) Yen's Q3 statistics of the model
+wle: data.frame; WLEs for the model
+wle_rel: numeric; WLE reliability of the model
+info_crit: data.frame with information criteria of the model.
 }
 \description{
 Perform Rasch or 2PL analyses for binary or PCM or GPCM analyses for

@@ -31,6 +31,12 @@ NEPSroutines is an R package for scaling NEPS (National Educational Panel Study)
 ### Documentation
 - Uses roxygen2 - edit comments in R files, then run `devtools::document()`
 - Never edit `man/*.Rd` files directly
+- Markdown is enabled (`Roxygen: list(markdown = TRUE)` in DESCRIPTION):
+  - `[fn()]` becomes a link to that function's help; `[pkg::fn()]` links across
+    packages (the package must be in Imports/Suggests)
+  - Backticks render as `\code{}`; `*`/`-` bullets become `\itemize{}`
+  - Legacy Rd macros (`\code{}`, `\itemize{}`, `\describe{}`) still work and are
+    passed through unchanged, so both styles can coexist
 
 ### Testing
 - Framework: testthat (edition 3)
@@ -51,7 +57,9 @@ NEPSroutines is an R package for scaling NEPS (National Educational Panel Study)
 
 **`.Rbuildignore` for directories with content**: The pattern `^dirname$` excludes the directory entry but NOT files inside it. Use BOTH `^dirname` AND `^dirname$` patterns (or use `usethis::use_build_ignore("dirname")` which adds `^dirname$` and test that files inside are excluded). Verified by inspecting the tarball with `tar -tzf`.
 
-**Roxygen brace escaping**: In roxygen2 comments, curly braces `{` and `}` must be escaped as `\{` and `\}` to avoid "Lost braces" NOTEs in Rd files. Common cases: `y in {0, 1}` → `y in \{0, 1\}`, `{+-}` → `\{+-\}`.
+**Roxygen brace escaping**: In roxygen2 comments, curly braces `{` and `}` must be escaped as `\{` and `\}` to avoid "Lost braces" NOTEs in Rd files. Common cases: `y in {0, 1}` → `y in \{0, 1\}`. Inside a markdown code span the braces need no escaping: `` `{+-}` `` is fine.
+
+**Markdown pitfalls in roxygen** (since markdown was enabled): a markdown list must be closed by a blank `#'` line, otherwise the following paragraphs are absorbed into the last bullet and concatenated without spaces. A `<` or `>` starting a line is read as a blockquote marker and silently dropped, and `<word>` is read as raw HTML and wrapped in `\if{html}{\out{}}` (invisible in PDF/text help). Put such text in backticks. After changing roxygen comments, skim `git diff man/` — mangling shows up there, not in `check()`.
 
 **RoxygenNote version mismatch**: If installed roxygen2 version doesn't match `RoxygenNote` in DESCRIPTION, `devtools::check()` won't re-document. Update `RoxygenNote` in DESCRIPTION to match installed version before running `devtools::document()`.
 

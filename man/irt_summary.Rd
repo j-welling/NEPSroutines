@@ -65,7 +65,7 @@ for items with collapsed categories}
 }
 \value{
 a data.frame (for TR) containing the item name, N, percentage correct,
-  item difficulty, SE, WMNSQ, t, rit, item discrimination, Q3.
+item difficulty, SE, WMNSQ, t, rit, item discrimination, Q3.
 }
 \description{
 Create table with results of IRT analysis.

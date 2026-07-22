@@ -17,8 +17,8 @@ Setup(
 \arguments{
 \item{path}{The path to the folder for the technical report.}
 
-\item{ask}{A logical to ask for confirmation and some information (`TRUE`)
-or provide the information as arguments without confirmation (`FALSE`).}
+\item{ask}{A logical to ask for confirmation and some information (\code{TRUE})
+or provide the information as arguments without confirmation (\code{FALSE}).}
 
 \item{sc}{The number of the starting cohort.}
 
@@ -31,11 +31,11 @@ or provide the information as arguments without confirmation (`FALSE`).}
 \item{overwrite}{A logical to overwrite existing files}
 }
 \value{
-Returns `NULL`, invisibly.
+Returns \code{NULL}, invisibly.
 }
 \description{
 Setup the folder with the Quarto extension for the technical report
 }
 \seealso{
-`vignette("technical_report", package = "NEPSroutines")`
+\code{vignette("technical_report", package = "NEPSroutines")}
 }

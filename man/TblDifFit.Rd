@@ -28,14 +28,14 @@ TblDIFFit(
 \arguments{
 \item{obj}{A list with data frames with sheets from "dif_poly_TR.xlsx"
 or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
-[dif_analysis()].}
+\code{\link[=dif_analysis]{dif_analysis()}}.}
 
 \item{footnote}{A table note.}
 
 \item{excl}{A vector of DIF variables that should be excluded. Each value is
 matched exactly (not as a regular expression or substring) against either the
-raw `DIF.variable` value (e.g. `"mig"`) or its display label (e.g.
-`"Migration"`, including any custom `label`).}
+raw \code{DIF.variable} value (e.g. \code{"mig"}) or its display label (e.g.
+\code{"Migration"}, including any custom \code{label}).}
 
 \item{label}{A vector of names for the DIF variables.}
 
@@ -43,10 +43,10 @@ raw `DIF.variable` value (e.g. `"mig"`) or its display label (e.g.
 
 \item{width}{The widths of the columns; if a single value is given, it is
 applied to all columns; otherwise the number of values must correspond to the
-number of columns in the rendered table. `excl` removes rows here, so it does
+number of columns in the rendered table. \code{excl} removes rows here, so it does
 not affect the column count.}
 
-\item{...}{Further arguments passed to [Tbl()]; `digits` is set internally and
+\item{...}{Further arguments passed to \code{\link[=Tbl]{Tbl()}}; \code{digits} is set internally and
 will error if also passed here.}
 }
 \value{
