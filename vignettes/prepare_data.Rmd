@@ -478,7 +478,9 @@ For distractor analysis, a logical variable is required that identifies
 all unscored multiple-choice items. In our example, it is called
 `distan`.
 
-`{r} vars$distan <- vars$raw & vars$type == "MC"}`
+```{r}
+vars$distan <- vars$raw & vars$type == "MC"
+```
 
 ### Create Variables for Scores and SUF
 
@@ -543,7 +545,13 @@ In such cases, the variables must be converted without losing the UDMVs.
 In most cases, the following code works, but be sure to verify afterward
 that the missing values have not been converted to `NA`s.
 
-`{r} # Convert “haven_labelled” variables to “double” resp <- haven::zap_labels(resp)  # Check whether the user-defined missing values still exist table(unlist(resp[ , vars$item]), useNA = "ifany")}`
+```{r}
+# Convert "haven_labelled" variables to "double"
+resp <- haven::zap_labels(resp)
+
+# Check whether the user-defined missing values still exist
+table(unlist(resp[ , vars$item]), useNA = "ifany")
+```
 
 ## Check Data Structure
 

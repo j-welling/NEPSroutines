@@ -59,7 +59,9 @@ If you use R Markdown, make sure to enable the option **"Chunk Output in Console
 
 To ensure reproducibility, the versions of R and all packages used in the scaling process should be documented. This can be done using:
 
-`{r} sessionInfo()`
+```{r}
+sessionInfo()
+```
 
 # Basics in R
 

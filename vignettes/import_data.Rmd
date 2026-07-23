@@ -79,7 +79,7 @@ Common variable names (may vary by study):
 
 -   **Gender**: `tx80501` in `CohortProfile`
 
--   **Age**: must be computed (see vignette `data_preparation`) using `tx8050y` (year of birth), `tx8050m` (month of birth), and the survey year/month in `CohortProfile`
+-   **Age**: must be computed (see vignette `prepare_data`) using `tx8050y` (year of birth), `tx8050m` (month of birth), and the survey year/month in `CohortProfile`
 
 -   **Migration background**: e.g., `p400500_g1` in `pParent` (children)
 

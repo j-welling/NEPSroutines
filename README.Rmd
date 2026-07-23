@@ -44,7 +44,7 @@ To make your work reproducible, install the latest official release of the packa
 On the GitHub page of NEPSroutines, go to the panel "Releases" on the right.
 There, you find the number of the latest release (e.g., "Release v1.3.0").
 
-You can install NEPSroutines in two different ways:
+You can install NEPSroutines in different ways:
 
 #### TAR-Ball
 
@@ -73,6 +73,23 @@ pak::pak("LIfBi-Educational-Measurement/NEPSroutines@vX.Y.Z")
 ```
 
 Replace X.Y.Z with the actual version number.
+
+#### From a Local Clone
+
+If you cloned the repository to your local computer, first switch to the
+repository folder and to the branch you want to use. Then install the package
+from the local source with vignettes:
+
+```r
+install.packages("devtools")
+devtools::install("My_working_dir/NEPSroutines", build_vignettes = TRUE)
+```
+
+Replace `My_working_dir` with the path to the folder that contains the cloned
+`NEPSroutines` repository.
+
+The argument `build_vignettes = TRUE` is required if you want to call the
+vignettes after installing the package from a local clone.
 
 #### Load Package
 

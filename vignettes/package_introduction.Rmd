@@ -39,7 +39,7 @@ The NEPS data is scaled using the `NEPSroutines` package.
 For this purpose, the latest stable version of `NEPSroutines` should be
 installed (see README file for an how-to-guide).
 
-Once installed, `NEPSroutines`must be loaded at the beginning of each R
+Once installed, `NEPSroutines` must be loaded at the beginning of each R
 session:
 
 ```{r}
@@ -128,7 +128,7 @@ descriptive analyses, e.g. age in schoolchildren, may also be
 continuous.</p></li>
 <li><p>Missing values are defined as NA</p></li>
 <li><p>For an overview of all variables required for scaling, see
-vignette <code>preparations</code>.</p></li>
+vignette <code>prepare_data</code>.</p></li>
 </ul></td>
 </tr>
 <tr>
@@ -232,7 +232,7 @@ least three valid responses</p></td>
 values</p></td>
 </tr>
 <tr>
-<td><p><code>reg 70110_sc2g7_c</code></p></td>
+<td><p><code>reg70110_sc2g7_c</code></p></td>
 <td><p>The dichotomously scored item belonging to
 <code>reg70110_sc2g7</code> recognizable by the suffix <code>_c</code>
 with user-defined missing values</p></td>
@@ -481,7 +481,7 @@ further detail in the remainder of the guide.
 </colgroup>
 <thead>
 <tr>
-<th><p>A rgument</p></th>
+<th><p>Argument</p></th>
 <th><p>Type</p></th>
 <th><p>Description</p></th>
 <th><p>Default</p></th>
@@ -520,7 +520,7 @@ valid cases see section <em>Valid Cases</em> in vignette
 <tr>
 <td><p><code>mvs</code></p></td>
 <td><p>named<br />
-ch aracter vector</p></td>
+character vector</p></td>
 <td><p>Optional in most functions exception: missing value analysis.
 Requires a named character vector containing all user-defined missing
 values see section <em>User-Defined Missing Values</em> in vignette
@@ -529,8 +529,8 @@ problems and errors in scaling may occur!</p></td>
 <td><p>-999 to -1</p></td>
 </tr>
 <tr>
-<td><p><code>gr ouping</code></p></td>
-<td><p>ch aracter vector</p></td>
+<td><p><code>grouping</code></p></td>
+<td><p>character vector</p></td>
 <td><p>Optional in some functions. Sometimes parts of the scaling must
 be conducted separately for different groups e.g. different test booklet
 versions. In this case, this function argument requires a character
