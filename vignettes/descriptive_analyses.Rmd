@@ -71,7 +71,7 @@ NEPSroutines::desc_con(resp = resp, desc = "age", valid = "valid")
 
 # Creating vectors with all categorical sociodemographic or booklet variables, respectively
 sociodemographics = c("sex", "attendsGymnasium", "migration", "books")
-booklet = "difficulty" # In other NEPSroutiness some more characteristics might apply here, e.g. position of booklet
+booklet = "difficulty" # In other NEPSroutines some more characteristics might apply here, e.g. position of booklet
 
 # Descriptives (attributes, frequency) of nominal sociodemographic variables
 NEPSroutines::desc_nom(resp = resp, desc = sociodemographics, valid = "valid")
