@@ -340,7 +340,7 @@ GetPars <- function(obj, type, stat = median, item = FALSE,
       # which() keeps only the matching rows, so items with an NA value are
       # dropped rather than showing up as "NA" in the returned list
       i <- tab[which(stat(tab[, type], na.rm = TRUE, item = TRUE)), "Item"]
-      if (rename_collapsed) i <- gsub("_collapsed", "", i)
+      if (rename_collapsed) i <- sub("_collapsed$", "", i)
       return(paste0(i, collapse = ", "))
     }
 
@@ -411,7 +411,7 @@ GetCat <- function(obj, stat = median, item = FALSE, digits = 2,
     return(rnd(stat(na.omit(c(cat))), digits = digits))
   } else {
     i <- rownames(cat)[rowSums(cat == stat(na.omit(c(cat))), na.rm = TRUE) >= 1]
-    if (rename_collapsed) i <- gsub("_collapsed", "", i)
+    if (rename_collapsed) i <- sub("_collapsed$", "", i)
     return(paste0(i, collapse = ", "))
   }
 

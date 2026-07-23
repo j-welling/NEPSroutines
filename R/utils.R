@@ -828,13 +828,13 @@ create_suf_names <- function(vars_name = NULL) {
 
   if (is.data.frame(vars_name)) {
     for (item in seq_along(vars_name$item)) {
-      vars_name$item[[item]] <- gsub("_collapsed", "",vars_name$item[[item]])
+      vars_name$item[[item]] <- sub("_collapsed$", "", vars_name$item[[item]])
     }
     return(vars_name$item)
 
   } else {
     for (item in seq_along(vars_name)) {
-      vars_name[[item]] <- gsub("_collapsed", "",vars_name[[item]])
+      vars_name[[item]] <- sub("_collapsed$", "", vars_name[[item]])
     }
     return(vars_name)
   }
