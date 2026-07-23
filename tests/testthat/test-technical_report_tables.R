@@ -510,6 +510,32 @@ test_that("TblMvi() select matches the group suffix exactly (#115)", {
 })
 
 
+test_that("TblMvi() strips the '_collapsed' suffix from item names", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  obj <- data.frame(
+    x = c("", ""),
+    item = c("i1_collapsed", "i2"),
+    position = c(1, 2),
+    N_valid = c(10, 20),
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
+  colnames(obj)[1] <- ""  # mimic the unnamed first column from openxlsx
+
+  # Stripped by default
+  tbl <- TblMvi(obj)
+  expect_equal(tbl$body$dataset[["Item"]], c("i1", "i2"))
+
+  # Preserved when disabled
+  tbl_keep <- TblMvi(obj, rename_collapsed = FALSE)
+  expect_equal(tbl_keep$body$dataset[["Item"]], c("i1_collapsed", "i2"))
+
+})
+
+
 test_that("TblMvi() select strips only the trailing group suffix (#121)", {
 
   skip_if_not_installed("flextable")

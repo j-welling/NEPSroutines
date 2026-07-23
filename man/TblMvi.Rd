@@ -13,6 +13,7 @@ TblMvi(
   size = 12,
   width = NULL,
   excl = c("N_administered", "ND", "ALL", "...1"),
+  rename_collapsed = TRUE,
   ...
 )
 
@@ -24,6 +25,7 @@ TblMVI(
   size = 12,
   width = NULL,
   excl = c("N_administered", "ND", "ALL", "...1"),
+  rename_collapsed = TRUE,
   ...
 )
 }
@@ -54,6 +56,9 @@ internal column name or the label shown in the rendered table (e.g. both
 Columns are dropped before the widths are applied, so a vector `width` must
 be sized and ordered to match the columns that remain after exclusion (a
 single `width` value is recycled and is unaffected).}
+
+\item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
+item names.}
 
 \item{...}{Further arguments passed to [Tbl()].}
 }

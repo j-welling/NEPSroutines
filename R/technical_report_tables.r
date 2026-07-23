@@ -333,6 +333,8 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' Columns are dropped before the widths are applied, so a vector `width` must
 #' be sized and ordered to match the columns that remain after exclusion (a
 #' single `width` value is recycled and is unaffected).
+#' @param rename_collapsed A boolean to remove the "_collapsed" suffix from
+#' item names.
 #' @param ... Further arguments passed to [Tbl()].
 #' @returns A flextable.
 #' @inheritParams Tbl
@@ -373,7 +375,8 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' }
 TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
                    size = 12, width = NULL,
-                   excl = c("N_administered", "ND", "ALL", "...1"), ...) {
+                   excl = c("N_administered", "ND", "ALL", "...1"),
+                   rename_collapsed = TRUE, ...) {
 
   # Result table
   if (is.list(obj) & "list" %in% names(obj))
@@ -390,6 +393,11 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
     tab <- tab[, keep]
     # Strip the trailing group suffix only (anchored, matching the filter above)
     colnames(tab) <- sub(paste0("_", select, "$"), "", colnames(tab))
+  }
+
+  # Rename collapsed items
+  if ("item" %in% colnames(tab) & rename_collapsed) {
+    tab$item <- gsub("_collapsed", "", tab$item)
   }
 
   # Remove empty rows
