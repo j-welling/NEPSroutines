@@ -495,14 +495,7 @@ mvp_plots <- function(
     # Check color argument
     grps <- create_ifelse(is.null(grouping), 1, length(groups))
 
-    if (!is.null(color)) {
-      if (length(color) != grps) {
-        stop(paste0('The number of provided colors does not match the number ',
-                    'of groups (', grps, ').'))
-      }
-    } else {
-      color <- colorspace::sequential_hcl(grps)
-    }
+    color <- check_color(color = color, grps = grps)
 
     # Test labels
     names_mvs <- names(mv_all)[-length(mv_all)]

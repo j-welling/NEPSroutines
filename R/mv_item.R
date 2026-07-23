@@ -972,29 +972,6 @@ mvi_plots <- function(
   }
 }
 
-#' Check color argument and create new if null
-#'
-#' @param color  vector; includes colors for plot
-#' @param grps  character vector; includes groups for graph
-#'
-#' @return color argument
-#' @noRd
-
-check_color <- function(color, grps) {
-
-  if (!is.null(color)) {
-    if (length(color) != grps) {
-      stop(paste0('The number of provided colors does not match the number ',
-                  'of groups (', grps, ').'))
-    }
-  } else {
-    color <- colorspace::sequential_hcl(grps, palette = "Viridis")
-  }
-
-  return(color)
-
-}
-
 #' Create dataframe in wide format for all groups
 #'
 #' @param mv_i  list with missing values as variables

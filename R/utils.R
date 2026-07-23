@@ -22,6 +22,46 @@ only_valid <- function(resp, valid = NULL, warn = TRUE) {
 }
 
 
+#' Default color palette for NEPSroutines plots
+#'
+#' Single source of truth for the package-wide color scheme. Missing-value
+#' plotting functions use these colors unless the user provides their own via a
+#' \code{color} argument, ensuring a consistent look across figures.
+#'
+#' @param n  integer; number of colors to generate
+#'
+#' @return character vector of \code{n} hex colors
+#' @noRd
+
+neps_palette <- function(n) {
+  colorspace::sequential_hcl(n, palette = "Blues 2")
+}
+
+
+#' Check color argument and create new if null
+#'
+#' @param color  vector; includes colors for plot
+#' @param grps  character vector; includes groups for graph
+#'
+#' @return color argument
+#' @noRd
+
+check_color <- function(color, grps) {
+
+  if (!is.null(color)) {
+    if (length(color) != grps) {
+      stop(paste0('The number of provided colors does not match the number ',
+                  'of groups (', grps, ').'))
+    }
+  } else {
+    color <- neps_palette(grps)
+  }
+
+  return(color)
+
+}
+
+
 #' Convert user-defined missing values to NAs
 #'
 #' User defined missing values (usually coded as negative numbers) must be
