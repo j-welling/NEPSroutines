@@ -83,6 +83,29 @@ test_that("GetMVP works", {
   expect_equal(GetMvp(mvp, type = "NV", value = "0"), "89")
   expect_equal(GetMVP(mvp, "NR", "<2"), GetMvp(mvp, "NR", "<2"))
 
+  # two-character operators are parsed instead of silently returning NA
+  expect_false(GetMvp(mvp, "OM", ">=3") == "NA")
+  expect_equal(GetMvp(mvp, "OM", ">=3", digits = 2),
+               GetMvp(mvp, "OM", ">2", digits = 2))
+  expect_equal(GetMvp(mvp, "OM", "<=2", digits = 2),
+               GetMvp(mvp, "OM", "<3", digits = 2))
+  expect_equal(GetMvp(mvp, "OM", "==0", digits = 2),
+               GetMvp(mvp, "OM", "0", digits = 2))
+  expect_equal(GetMvp(mvp, "OM", "!=0", digits = 2),
+               GetMvp(mvp, "OM", ">0", digits = 2))
+
+  # conditions can be combined
+  expect_equal(
+    as.numeric(GetMvp(mvp, "OM", ">=1 & <=2", digits = 2)),
+    as.numeric(GetMvp(mvp, "OM", "1", digits = 2)) +
+      as.numeric(GetMvp(mvp, "OM", "2", digits = 2)),
+    tolerance = 1e-6
+  )
+
+  # invalid conditions raise an error rather than returning NA
+  expect_error(GetMvp(mvp, "OM", "=>3"), "did you mean")
+  expect_error(GetMvp(mvp, "OM", ">abc"), "Invalid number")
+
 })
 
 
