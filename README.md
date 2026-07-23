@@ -66,23 +66,6 @@ pak::pak("LIfBi-Educational-Measurement/NEPSroutines@vX.Y.Z")
 
 Replace X.Y.Z with the actual version number.
 
-#### From a Local Clone
-
-If you cloned the repository to your local computer, first switch to the
-repository folder and to the branch you want to use. Then install the
-package from the local source with vignettes:
-
-``` r
-install.packages("devtools")
-devtools::install("My_working_dir/NEPSroutines", build_vignettes = TRUE)
-```
-
-Replace `My_working_dir` with the path to the folder that contains the
-cloned `NEPSroutines` repository.
-
-The argument `build_vignettes = TRUE` is required if you want to call the
-vignettes after installing the package from a local clone.
-
 #### Load Package
 
 Once installed, you can load the package like any other R package:
@@ -100,7 +83,9 @@ documented using **vignettes** within this package. Start with the
 ## Information for Developers
 
 If you want to contribute to the package, please read first the
-DEVELOPMENT file in the inst/ folder.
+CONTRIBUTING file in the inst/ folder.
+
+### Installation of Development Version
 
 You can install the development version of NEPSroutines from
 [GitHub](https://github.com/) with:
@@ -109,3 +94,20 @@ You can install the development version of NEPSroutines from
 install.packages("pak")
 pak::pak("LIfBi-Educational-Measurement/NEPSroutines")
 ```
+
+### Installation from Local Clone
+
+If you cloned the repository to your local computer, first switch to the
+repository folder and to the branch you want to use. Then install the
+package from the local source with vignettes:
+
+``` r
+install.packages("devtools")
+devtools::install("PATH/TO/DIRECTORY/NEPSroutines", build_vignettes = TRUE)
+```
+
+Replace `PATH/TO/DIRECTORY` with the path to the folder that contains
+the cloned `NEPSroutines` repository.
+
+The argument `build_vignettes = TRUE` is required if you want to call
+the vignettes after installing the package from a local clone.
