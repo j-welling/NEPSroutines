@@ -457,7 +457,7 @@ returned. This output, or parts of it, is usually required for
 subsequent functions (e.g. for generating plots or result tables). It is
 therefore recommended to store the output in an R object (see above).
 When using downstream functions, pay close attention to the instructions
-in this guide and in the help files (see vignette `general_information`)
+in this guide and in the help files (see vignette `getting_started`)
 regarding which output or which part of the output is actually required!
 For minor functions that generate plots or tables from results, users
 can choose whether these files should be saved (function argument
@@ -570,7 +570,7 @@ version.</p></td>
 In some functions, additional specific arguments are included. These are
 described in this guide and can also be accessed at any time via the R
 documentation (using the helper functions, see vignette
-`general_information`).
+`getting_started`).
 
 ### Helper Functions
 
