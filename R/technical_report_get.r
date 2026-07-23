@@ -155,10 +155,13 @@ GetMVI <- GetMvi
 #' created by [mv_person()].
 #' @param type The type of missing value which is typically one of
 #' OM, NR, NV, ND, or ALL.
-#' @param value An operator (=, <, >) with a number of missing values; e.g.,
-#' * =3 returns percentage for 3 missing values
-#' * <3 returns percentage for less than 3 missing values
-#' * >3 returns percentage for more than 3 missing values
+#' @param value An operator (`=`, `<`, `>`) with a number of missing values.
+#' For example:
+#'
+#' * `"=3"` returns the percentage for 3 missing values
+#' * `"<3"` returns the percentage for less than 3 missing values
+#' * `">3"` returns the percentage for more than 3 missing values
+#'
 #' @param digits A number for rounding.
 #' @returns The calculated percentage.
 #' @export
@@ -221,22 +224,27 @@ GetMVP <- GetMvp
 #' @param obj A data frame with sheets from "irt_dich.xlsx" or "irt_poly.xlsx"
 #' created by [irt_analysis()].
 #' @param type A column name in `obj` identifying an item statistic.
-#' @param stat A function used to summarize `type` or a single string
-#' specifying a comparison operator (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number;
-#' e.g.,
-#' * =3 returns number of type equal to 3
-#' * <3 returns number of type less than 3
-#' * >=3 returns number of type greater than or equal to 3
-#' Multiple conditions can be combined within the string using & and |
+#' @param stat A function used to summarize `type`, or a single string giving
+#' a comparison operator (`=`, `==`, `!=`, `<`, `<=`, `>`, `>=`) followed by a
+#' number. Use `>=` / `<=`, not the reversed `=>` / `=<`. For example:
+#'
+#' * `"=3"` returns the number of `type` equal to 3
+#' * `"<3"` returns the number of `type` less than 3
+#' * `">=3"` returns the number of `type` greater than or equal to 3
+#'
+#' Multiple conditions can be combined within the string using `&` and `|`
 #' (e.g. `">1.15 & <1.20"`); surrounding whitespace is ignored.
 #' @param item A logical indicating whether to return the results from stat
 #' (`FALSE`) or the item name corresponding to the value of `stat` (`TRUE`).
-#' @param excl A single string specifying a comparison operator
-#' (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number indicating values to exclude; e.g.,
-#' * =3 excludes type equal to 3
-#' * <3 excludes type less than 3
-#' * >=3 excludes type greater than or equal to 3
-#' Multiple conditions can be combined within the string using & and |
+#' @param excl A single string giving a comparison operator (`=`, `==`, `!=`,
+#' `<`, `<=`, `>`, `>=`) followed by a number, indicating values to exclude.
+#' Use `>=` / `<=`, not the reversed `=>` / `=<`. For example:
+#'
+#' * `"=3"` excludes `type` equal to 3
+#' * `"<3"` excludes `type` less than 3
+#' * `">=3"` excludes `type` greater than or equal to 3
+#'
+#' Multiple conditions can be combined within the string using `&` and `|`
 #' (e.g. `">1.15 & <1.20"`); surrounding whitespace is ignored.
 #' @param digits A number for rounding.
 #' @returns A number with the calculated statistic or character vector with

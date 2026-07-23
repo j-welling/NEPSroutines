@@ -20,25 +20,32 @@ created by \code{\link[=irt_analysis]{irt_analysis()}}.}
 
 \item{type}{A column name in \code{obj} identifying an item statistic.}
 
-\item{stat}{A function used to summarize \code{type} or a single string
-specifying a comparison operator (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number;
-e.g.,
+\item{stat}{A function used to summarize \code{type}, or a single string giving
+a comparison operator (\code{=}, \code{==}, \code{!=}, \code{<}, \code{<=}, \code{>}, \code{>=}) followed by a
+number. Use \code{>=} / \code{<=}, not the reversed \verb{=>} / \verb{=<}. For example:
 \itemize{
-\item =3 returns number of type equal to 3
-\item <3 returns number of type less than 3
-\item =3 returns number of type greater than or equal to 3Multiple conditions can be combined within the string using & and |(e.g. ">1.15 & <1.20"); surrounding whitespace is ignored.
-}}
+\item \code{"=3"} returns the number of \code{type} equal to 3
+\item \code{"<3"} returns the number of \code{type} less than 3
+\item \code{">=3"} returns the number of \code{type} greater than or equal to 3
+}
+
+Multiple conditions can be combined within the string using \code{&} and \code{|}
+(e.g. \code{">1.15 & <1.20"}); surrounding whitespace is ignored.}
 
 \item{item}{A logical indicating whether to return the results from stat
 (\code{FALSE}) or the item name corresponding to the value of \code{stat} (\code{TRUE}).}
 
-\item{excl}{A single string specifying a comparison operator
-(=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number indicating values to exclude; e.g.,
+\item{excl}{A single string giving a comparison operator (\code{=}, \code{==}, \code{!=},
+\code{<}, \code{<=}, \code{>}, \code{>=}) followed by a number, indicating values to exclude.
+Use \code{>=} / \code{<=}, not the reversed \verb{=>} / \verb{=<}. For example:
 \itemize{
-\item =3 excludes type equal to 3
-\item <3 excludes type less than 3
-\item =3 excludes type greater than or equal to 3Multiple conditions can be combined within the string using & and |(e.g. ">1.15 & <1.20"); surrounding whitespace is ignored.
-}}
+\item \code{"=3"} excludes \code{type} equal to 3
+\item \code{"<3"} excludes \code{type} less than 3
+\item \code{">=3"} excludes \code{type} greater than or equal to 3
+}
+
+Multiple conditions can be combined within the string using \code{&} and \code{|}
+(e.g. \code{">1.15 & <1.20"}); surrounding whitespace is ignored.}
 
 \item{digits}{A number for rounding.}
 

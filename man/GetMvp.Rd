@@ -16,11 +16,12 @@ created by \code{\link[=mv_person]{mv_person()}}.}
 \item{type}{The type of missing value which is typically one of
 OM, NR, NV, ND, or ALL.}
 
-\item{value}{An operator (=, <, >) with a number of missing values; e.g.,
+\item{value}{An operator (\code{=}, \code{<}, \code{>}) with a number of missing values.
+For example:
 \itemize{
-\item =3 returns percentage for 3 missing values
-\item <3 returns percentage for less than 3 missing values
-\item 3 returns percentage for more than 3 missing values
+\item \code{"=3"} returns the percentage for 3 missing values
+\item \code{"<3"} returns the percentage for less than 3 missing values
+\item \code{">3"} returns the percentage for more than 3 missing values
 }}
 
 \item{digits}{A number for rounding.}
