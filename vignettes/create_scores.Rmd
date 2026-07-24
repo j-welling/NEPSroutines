@@ -1,0 +1,128 @@
+---
+title: "Create Scores"
+author: "Jana Welling, Christian Diegel, Tanja Kutscher"
+date: "`r Sys.Date()`"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    toc: true
+    number_sections: no
+  bookdown::pdf_document2:
+    toc: true
+    number_sections: no
+bibliography: ../inst/NEPSroutines.bib
+vignette: >
+  %\VignetteIndexEntry{Create Scores}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, include = FALSE}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+
+```
+
+\newpage
+
+## General Information
+
+At the end of the scaling process, cross-sectional and longitudinal WLEs
+are estimated and prepared for the SUF. In principle, WLEs are estimated
+in the same way as in the Rasch or PCM analysis. Even if different test
+booklets exist, all WLEs are calculated based on a jointly scaled model
+(i.e., not separately by test booklet). If a rotation design is present,
+a correction is applied in the cross-sectional estimation to obtain
+unbiased ability estimates. For this purpose, the argument `facet` must
+be specified accordingly.
+
+For the estimation of cross-sectional WLEs, fixed item parameters can be
+used. These item parameters correspond to the estimated item parameters
+of the respective model and are available in the object created after
+running the function `irt_analysis` (for example under
+`irt_poly_all$model.pcm$mod$xsi$xsi`). This object element should be
+provided in the argument `xsi_fixed`. Note that the fixed parameters
+should be defined as a named numeric vector. This can be done, for
+example, as follows:
+`xsi_fixed = row.names(irt_poly_all$model.pcm$mod$xsi)`. If the argument
+`xsi_fixed` is not specified, the function `create_scores()` will
+automatically estimate the item parameters first and then use them for
+the estimation of cross-sectional WLEs.
+
+If more than one measurement occasion is available, linked item
+parameters must additionally be used. However, linking is not yet
+implemented in this version of the NEPSroutines package. In this case,
+scores must be computed without the package.
+
+## Main Function
+
+The function `create_scores()` returns a table with the newly computed
+WLEs (variables with suffix `_sc1`) and the corresponding standard
+errors (`_sc2`). If these WLEs are to be included in the SUF later
+(which is usually the case), this table should be stored as an R object.
+By default, the computed scores are saved in RDS format. In addition,
+the item parameters used for WLE estimation are saved in XLSX format,
+and the corresponding TAM model is saved in RDS format. If the file
+names need to be modified (e.g., because a test is scaled simultaneously
+for several cohorts), use the function argument `name_group` that adds a
+suffix to each file name (e.g., `"cohort_6"`).
+
+The package also allows the computation of sum scores and metacognitive
+scores in addition to WLEs. Sum scores (variables with suffix `_sc3`)
+require all original items used in the test. During data preparation
+(see Section *Create Variables for Scores and SUF* in vignette
+`prepare_data`), a variable should therefore already have been created
+in `vars` that identifies all dichotomous and polytomous items used in
+the test and included in the SUF. These are scored items without
+collapsed categories. In the example, this variable is called `suf`. To
+compute sum scores, the argument `sum_score` must be set to `TRUE`, and
+the arguments `sum_select` and `num_cat` must be specified. The computed
+sum scores are stored as variables with suffix `_sc3`.
+
+To compute metacognitive scores, the argument `metap` must be set to
+`TRUE`, and the arguments `meta_variable`, `num_cat`, `meta_score_name`,
+and `meta_select` must be specified. If either of the first two
+arguments is missing, the function returns an error. If
+`meta_score_name` or `meta_select` are missing, the function uses the
+strings from `score_name` and `select` instead. The computed
+metacognitive scores are stored as variables with suffix `_sc5` and
+`_sc6`. Note that, unlike WLEs and sum scores, metacognitive scores are
+computed separately for each test booklet. Therefore, it is recommended
+to compute metacognitive scores separately from the other scores so that
+`create_scores` can be specified separately for each booklet (e.g., by
+selecting `suf_easy` or `suf_difficult` in `select`).
+
+If the variable specified in `meta_variable` contains non-standard
+values for metacognitive assessment (e.g., 5–10, 5/10), these values are
+converted to `NA` during execution of `create_scores`. A warning message
+is displayed in the console.
+
+```{r}
+scores <- NEPSroutines::create_scores(
+  resp = resp,
+  vars = vars,
+  scoring = "scoring",
+  score_name = "reg7",
+  facet = NULL,
+  select = "mixed",
+  valid = "valid",
+  wle = TRUE,
+  sum_score = FALSE,
+  sum_select = "suf",
+  num_cat = "num_cat",
+  metap = FALSE,
+  return = TRUE
+)
+```
+
+Information on the individual function arguments can be obtained via the
+help function (`?create_scores`).
+
+No minor functions exist for creating scores.

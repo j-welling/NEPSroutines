@@ -1,0 +1,624 @@
+---
+title: "Data Preparation"
+author: "Jana Welling, Christian Diegel"
+date: "`r Sys.Date()`"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    toc: true
+    number_sections: no
+  bookdown::pdf_document2:
+    toc: true
+    number_sections: no
+bibliography: ../inst/NEPSroutines.bib
+vignette: >
+  %\VignetteIndexEntry{Data Preparation}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, include = FALSE}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+
+```
+
+\newpage
+
+## Prepare Competence Data
+
+### Dichotomous Item Scoring
+
+In the next step, the unscored items must be scored. For each item, a
+new variable is created indicating whether the item was answered
+correctly (`1`) or incorrectly (`0`). The function
+`dichotomous_scoring()` can be used for this purpose. The function takes
+the data.frames `resp` and `vars` as input, along with the character
+vector `old_names` containing the names of the unscored items. In
+principle, the character vector `new_names` with the desired names for
+the scored items can also be passed to the function. However, if the
+scaling is performed for a NEPS study, this is not necessary because the
+NEPS naming convention (name of the unscored item + suffix `"_c"`) is
+implemented as the default in the function. For the function to work,
+the variable `correct_response` must be defined in `vars`. If more than
+one response option can be correct for an item, pass the punctuation
+mark used to separate the correct responses in this variable to the
+function argument `sep` as a character string (see Section *Dataset
+`vars`* in vignette `package_introduction`, default is `";"`). The
+function extends the data.frame `resp` with the new items.
+
+```{r}
+resp <- NEPSroutines::dichotomous_scoring(resp, vars, old_names = item_names) 
+```
+
+In the NEPSroutines package, it is necessary to create a separate row in
+the data.frame `vars` for each version of an item (e.g., unscored,
+scored). Since most information is identical between unscored and scored
+items, the function `duplicate_items()` can be used for this purpose.
+This function duplicates the item information for any number of items
+and only applies explicitly requested modifications (e.g., item name).
+The function takes the data.frame `vars`, the character vector
+`old_names` with the names of the original items, the character vector
+`new_names` with the names of the new items, and optionally the list
+`change` if information other than the item names should also be
+modified. The name of each list element corresponds to the name of the
+variable that differs between the old and new items. The content of each
+list element is either a single value used for all new items or a vector
+containing one value per new item. The function returns the data.frame
+`vars` including the new items. Since only the variables `raw` and
+`dich` should differ between the unscored and scored items, the function
+call looks as follows.
+
+```{r}
+vars <- NEPSroutines::duplicate_items(
+  vars,
+  old_names = item_names,
+  new_names = paste0(item_names, "_c"),
+  change = list(raw = FALSE, dich = TRUE)
+)
+```
+
+### Polytomous Item Scoring
+
+If the competency test contains polytomous items, these must also be
+scored. The function `pc_scoring()` can be used for this purpose. The
+function takes the data.frame `resp` and the list `poly_items` as input,
+with one element per polytomous item. The names of the elements
+correspond to the names of the polytomous items, and each element
+contains a character vector with the names of all subitems. In NEPS, the
+name of a polytomous item generally consists of the names of the
+subitems. Only the digit that differs between the items is replaced with
+an `"s"`. The function extends the data.frame `resp` with the new items.
+
+Before scoring, the function `pc_scoring()` performs an imputation of
+missing values on the subitems of polytomous items by default—provided
+that at least 50% of the subitems of a polytomous item contain valid
+responses. This functionality is enabled by default through the
+arguments `impute = TRUE` and `threshold = .50`. The imputation is based
+on a Rasch model: using the estimated item and person parameters (EAP
+values), the probability of solving each subitem is calculated for each
+person, and an individual response is predicted from this. The arguments
+`vars` and `select` are required for the imputation. `vars` refers to a
+dataset containing information about the competency items. With the
+argument `select`, a logical variable within `vars` is specified that
+identifies all scored dichotomous items (e.g., `select = "dich"`). This
+includes both multiple-choice items and subitems of polytomous items.
+The imputed values are used exclusively for scoring the polytomous
+items. In the returned dataset, the original (non-imputed) subitem
+responses remain unchanged. Information on the imputation is
+automatically saved in Excel and RDS format.
+
+```{r}
+poly_items <- list(
+  Item1s_c = paste0("Item1", c(1:3), "_c"),
+  Item2s_c = paste0("Item2", c(1:4), "_c"),
+  etc. 
+) 
+resp <- NEPSroutines::pc_scoring(
+  resp,
+  poly_items = poly_items,
+  vars = vars,
+  select = "dich"
+)
+```
+
+As with dichotomous item scoring, the polytomous items must also be
+stored in the data.frame `vars`. This can again be accomplished using
+the function `duplicate_items()`. One subitem is used as the reference
+item in each case.
+
+```{r}
+first_subitem <- sapply(poly_items, function(x) x[1])
+vars <- NEPSroutines::duplicate_items(
+  vars,
+  old_names = first_subitem,
+  new_names = names(poly_items),
+  change = list(raw = FALSE, dich = FALSE, poly = TRUE) 
+)
+```
+
+If individual PCM categories are sparsely populated, i.e., if the cell
+frequency in a frequency table falls below a certain value (200 in
+NEPS), they must be merged with the next lower category. If, for
+example, category 0 is too sparsely populated, it is merged with the
+next higher category accordingly. The function
+`collapse_response_categories()` checks this condition and automatically
+performs the merging if necessary. The function takes the data.frame
+`resp` and, via `select`, the name of the variable in `vars` that
+identifies all polytomous items. The default threshold for sparse cell
+frequencies is 200 but can be changed using the function argument
+`per_cat`. The function returns the data.frame `resp`, which contains
+all original variables and, additionally, all collapsed items. This
+means that for each item with sparse response categories, there are now
+two variables in the dataset—the original item and a new item with
+collapsed response categories. The names of the new items end with the
+suffix `_collapsed`. The function returns a list of all modified items
+in the console. If `save = TRUE`, this list is also saved as an Excel
+table. In the rare case that collapsing would leave an item with fewer
+than two categories, the function refrains from collapsing and issues a
+warning containing the name of the item in the console. Such an item
+should then be collapsed manually. Remember that the names of manually
+collapsed items should also be added to the list of collapsed items.
+
+```{r}
+resp <- NEPSroutines::collapse_response_categories(resp, vars, select = "poly")
+```
+
+If items were collapsed, the new items must be stored in the data.frame
+`vars`. The names of the old items (with the suffix `_c`) and the new,
+collapsed items (with the suffix `_collapsed`) can be obtained from the
+console output or the Excel table. The function `duplicate_items()` can
+again be used for this purpose. Note that the new items are also stored
+as polytomous items (`poly = TRUE`) even if they only contain two
+response categories.
+
+```{r}
+original_items <- c("original.item_1", "original.item_2")
+collapsed_items <- c("collapsed.item_1", "collapsed.item_2")
+vars <- NEPSroutines::duplicate_items(
+  vars,
+  old_names = original_items,
+  new_names = collapsed_items
+)
+```
+
+If a competency test contains both simple and polytomous items, most of
+the scaling is performed using the item set consisting of the polytomous
+items and the simple scored items. However, the subitems of the
+polytomous items are not used. To enable the use of this item set in the
+subsequent analyses, a logical variable is now created that identifies
+the corresponding items. In our example, this variable is called
+`mixed`. Note that items for which a collapsed item was created should
+be excluded from the analyses.
+
+```{r}
+vars$mixed <- ifelse(
+  vars$poly,
+  TRUE,
+  ifelse(vars$dich & !vars$item %in% unlist(poly_items), TRUE, FALSE)
+) 
+vars$mixed[vars$item %in% original_items] <- FALSE
+```
+
+After combining the polytomous items, the item positions now contain
+gaps (e.g., if subitems 1 to 4 previously occupied positions 1 to 4,
+only a single polytomous item remains at position 1 afterward).
+Therefore, a new position variable without gaps should be created for
+each group. This can be accomplished using the function `pos_new()`. The
+function takes `vars`, `items`, and the (named) character vector
+`position` as input. If there are multiple groups, `position` contains
+the names of the group-specific position variables (the names of the
+vector elements correspond to the names of the grouping variables); if
+there is only one group, it contains the name of the single position
+variable. The function returns the data.frame `vars` with the new
+position variables.
+
+```{r}
+vars <- NEPSroutines::pos_new(
+  vars,
+  select = "mixed",
+  position = c(easy = "position_easy", difficult = "position_difficult")
+)
+```
+
+Finally, the scoring variable `scoring` must be created, which is
+required for polytomous IRT and DIF analyses. By default, dichotomous
+items in NEPS are scored with `1` and polytomous items with `0.5`. Items
+that are actually polytomous but became dichotomous through collapsing
+response categories are also scored with `1`. However, this can be
+adjusted in individual cases.
+
+```{r}
+vars$scoring[vars$mixed] <- ifelse(
+  apply(resp[ , vars$item[vars$mixed]], 2, max, na.rm = TRUE) > 1,
+  0.5,
+  1
+)
+```
+
+### User-Defined Missing Values
+
+The competency items in NEPS contain so-called user-defined missing
+values (UDMV). Missing values are therefore coded using negative
+integers to distinguish between different types of missing values. In
+NEPS, the following UDMVs exist:
+
+-   `-99`: filtered
+
+-   `-97`: omitted (OM)
+
+-   `-95`: not valid (NV)
+
+-   `-94`: not reached (NR)
+
+-   `-93`: not applicable
+
+-   `-91`: test aborted (TA)
+
+-   `-90`: missing without specified reason (UM)
+
+-   `-56`: not participated
+
+-   `-55`: not determinable (ND)
+
+-   `-54`: missing by design (MD)
+
+-   `-22`: skipped
+
+-   `-21`: response reset (AZ)
+
+Not every type of missing value occurs in every competency test. For
+scaling, one should therefore first check which types are actually
+present. This can be done using the `table` function.
+
+```{r}
+table(unlist(resp[ , vars$item]))
+```
+
+The existing UDMVs are now defined in a named integer vector. The
+missing values can be named arbitrarily, but abbreviations are usually
+the most practical. For example:
+
+```{r}
+mvs = c(OM = -97, NV = -95, NR = -94, ND = -55, MD = -54)
+```
+
+The labels of the UDMVs are now stored in a named character vector.
+These labels are later used as captions and headings in plots and
+tables. The names must correspond to the names of the previously defined
+named integer vector. Note that the additional element `"ALL"` with the
+label for all missing values is required here.
+
+```{r}
+labels_mvs = c(
+  ALL = "total missing items",
+  OM = "omitted items",
+  NV = "not valid items",
+  NR = "not reached items",
+  ND = "not determinable items",
+  MD = "items missing by design"
+)
+```
+
+## Prepare DIF Variables
+
+### Calculate Age
+
+In NEPS, age is usually not available directly and must first be
+calculated from the date of birth and the assessment date. This is done
+using the function `calculate_age()`. The function takes the data.frame
+`resp` and the names of the variables containing the date of birth
+(year, month, and day) as input. For the test date variables, one can
+either provide the names of the corresponding variables in `resp` (if
+persons were tested on different dates) or alternatively specify a
+single number for each component (if all persons were tested in the same
+year/month/day). Specifying the birth year and month as well as the test
+year and month is mandatory, whereas the birth day and test day may be
+omitted. In this case, the function uses the 15th day of the month as
+the default. The function returns a vector containing age in years.
+
+```{r}
+resp$age <- NEPSroutines::calculate_age(
+  resp,
+  birth_year = "birthy",
+  birth_month = "birthm",
+  birth_day = "birthd",
+  test_year = 2022,
+  test_month = 10,
+  test_day = 17
+)
+```
+
+### Dichotomize Sociodemographic Variables
+
+Some DIF variables (e.g., age) still have more than two categories and
+therefore need to be dichotomized. The split criteria for
+dichotomization are:
+
+-   **School type**: non-academic secondary school (`0`) / academic
+    secondary school (`1`)
+
+-   **School-leaving qualification**: no university entrance
+    qualification (`0`) / university entrance qualification (`1`)
+
+-   **Migration background**: \> 2.25 generation (`0`) / 1st to 2nd
+    generation (`1`)
+
+-   **Number of books**: \< 100 books (`0`) / ≥ 100 books (`1`)
+
+-   **Age**: e.g., median split (only necessary for age-heterogeneous
+    groups)
+
+Dichotomization can conveniently be performed using the `ifelse()`
+function. For example:
+
+```{r}
+resp$migration <- ifelse(
+  resp$migration %in% c(0, 4:10),
+  0,
+  ifelse(is.na(resp$migration), NA, 1)
+)
+```
+
+### Create Variable for Test Booklet Design
+
+The test booklet design variable from the raw data cannot yet be used
+directly. First, the necessary information must be extracted from it
+(see Section *Test Booklet Design Information* in vignette
+`import_data`): Were there different rotations of the test booklets?
+Were there different versions of the test booklets? Was there any other
+information relevant for scaling? For each piece of information relevant
+to the DIF analyses, a dichotomous variable is created in the dataset
+`resp`. If the IRT models are additionally to be estimated separately
+for different groups (especially for different test booklets), a logical
+variable is also created for each group indicating whether a person
+belongs to that group. For example, the B129 study contains an easy and
+a difficult test booklet.
+
+```{r}
+# Create design variable for testlet version
+resp$testlet <- ifelse(resp[[design]] %in% c(241, 242, 243, 244, ...), "A", "B")  
+
+# Create logical variables for testlet version
+resp$easy <- ifelse(resp$testlet == "A", TRUE, FALSE)
+resp$difficult <- ifelse(resp$testlet == "B", TRUE, FALSE)
+```
+
+### Assign Labels for Variables
+
+To avoid confusion regarding the values of the dichotomous DIF
+variables, labels should be assigned to the variables. This can be done
+very easily using the function `labelled()`. For example, the code for
+the migration background variable is as follows:
+
+```{r}
+resp$migration <- haven::labelled(
+  resp$migration,
+  c("no migration background" = 0, "migration background" = 1)
+)
+```
+
+## Other Preparations
+
+### Identify Valid Cases
+
+If respondents have provided only very few valid responses, they are
+considered invalid cases and are excluded from the analyses. In NEPS,
+the minimum number of valid responses is set to three by default. To
+identify (in)valid cases, a new logical variable is created in `resp`
+using the function `min_val()`. The function takes `resp`, `vars`, and
+`select` as input. Under `select`, one should specify the variable that
+identifies all items to be used for scaling (i.e., `dich` for a purely
+dichotomous item set and `mixed` for a mixed item set). In addition, the
+minimum number of valid responses can be defined using the argument
+`min.val` (default is 3), and a vector containing all values to be
+treated as invalid can be specified using the argument `invalid`
+(default is all negative values and `NA`s). The function returns a
+logical vector (`TRUE` for all valid cases). Note that if the item set
+is modified (e.g., because some items were excluded), it may be
+necessary to create a new valid variable (e.g., `valid_new`).
+
+```{r}
+resp$valid <- NEPSroutines::min_val(resp, vars, select = "mixed")
+```
+
+### Create Group Variables
+
+If a grouping exists (e.g., test booklets), additional variables must be
+created. This section assumes that both `vars` and `resp` already
+contain a logical variable for each group that identifies the items or
+persons belonging to the respective group (e.g., `easy` and
+`difficult`).
+
+If the groups were administered not only different items, IRT analyses
+are performed, among others, for all common items. For this purpose, a
+logical variable must be created in `vars` indicating which items were
+administered to all groups. Analogously, a logical variable must be
+created in `resp` indicating which persons were administered the common
+items. Since the common items were administered to all groups, they were
+naturally administered to all persons as well (the variable is therefore
+`TRUE` for all persons). In our example, the variables are both called
+`common`.
+
+```{r}
+vars$common <- vars$easy & vars$difficult
+resp$common <- TRUE
+```
+
+In the case of grouping, group-specific analysis variables (e.g.,
+`dich`, `mixed`) must also be defined in the dataset `vars` for each
+group. For example, if there is an easy and a difficult test booklet
+with partially overlapping items, a new version of each required
+analysis variable should be created that identifies only the items
+relevant to that group. The `mixed` variables only need to be created if
+the test contains polytomous items.
+
+```{r}
+# New dich variables
+vars$dich_easy <- vars$dich & vars$easy
+vars$dich_difficult <- vars$dich & vars$difficult
+vars$dich_common <- vars$dich & vars$common 
+
+# New mixed variables
+vars$mixed_easy <- vars$mixed & vars$easy
+vars$mixed_difficult <- vars$mixed & vars$difficult
+vars$mixed_common <- vars$mixed & vars$common
+```
+
+### Create Variable for Distractor Analysis
+
+For distractor analysis, a logical variable is required that identifies
+all unscored multiple-choice items. In our example, it is called
+`distan`.
+
+```{r}
+vars$distan <- vars$raw & vars$type == "MC"
+```
+
+### Create Variables for Scores and SUF
+
+For the calculation of sum scores and metacognition scores, as well as
+for the creation of the SUF, the logical variable `suf` is required in
+the dataset `vars`. This variable indicates which items were used in the
+test and should be included in the SUF. These are scored dichotomous and
+polytomous items without collapsed response categories.
+
+```{r}
+vars$suf <- vars$mixed
+vars$suf[vars$item %in% original_items] <- TRUE
+vars$suf[vars$item %in% collapsed_items] <- FALSE
+vars$item[vars$suf]
+```
+
+If the scores are to be calculated separately for different groups
+(e.g., test booklets), an additional logical variable analogous to `suf`
+must be created for each group, identifying all items of that group
+required for the scores and the SUF. For an easy and a difficult test
+booklet, the variables could, for example, be called `suf_easy` and
+`suf_difficult`.
+
+```{r}
+vars$suf_easy <- ifelse(vars$suf & vars$easy, TRUE, FALSE)
+vars$suf_difficult <- ifelse(vars$suf & vars$difficult, TRUE, FALSE)
+```
+
+For the calculation of sum scores and metacognition scores, a variable
+(e.g., `num_cat`) is required in `vars` that contains the maximum number
+of correct responses per item. For polytomous items, this corresponds to
+the number of subitems, whereas for dichotomous items it is 1. The
+function `calculate_num_cat()` computes the maximum number of correct
+responses per item. It requires the following arguments: on the one
+hand, the list `poly_items` created earlier, and on the other hand, the
+name of the logical variable in `vars` that identifies all items used
+for creating the scores and included in the SUF (e.g., `suf`). If the
+test contains only dichotomous variables, the argument `poly_items` is
+omitted.
+
+```{r}
+vars$num_cat <- NEPSroutines::calculate_num_cat(
+  vars, 
+  poly_items = poly_items,  
+  select_suf = "suf"
+)
+```
+
+### Additional Required Variables
+
+Depending on the study design, additional variables may be required, for
+example for linking. Functions for these variables are not yet
+available, so they must be created manually.
+
+### Problem with Variables of Type `haven_labelled`
+
+Unfortunately, R Markdown currently (as of October 2024) does not always
+handle variables of type `haven_labelled` correctly. This can lead to
+errors during rendering that do not occur when executing the code
+outside of R Markdown (e.g., the error message "invalid argument type").
+In such cases, the variables must be converted without losing the UDMVs.
+In most cases, the following code works, but be sure to verify afterward
+that the missing values have not been converted to `NA`s.
+
+```{r}
+# Convert "haven_labelled" variables to "double"
+resp <- haven::zap_labels(resp)
+
+# Check whether the user-defined missing values still exist
+table(unlist(resp[ , vars$item]), useNA = "ifany")
+```
+
+## Check Data Structure
+
+Once data preparation has been completed, the data structure can be
+checked using several functions. Although these checks are also
+performed automatically within the functions of the individual scaling
+steps, conducting them in advance can save a considerable amount of
+post-processing. The following functions are available for checking the
+data structure:
+
+| Function | Usage |
+|----------------|--------------------------------------------------------|
+| `check_logicals` | Checks the specified variables in the defined dataset for existence, logical data type, and absence of missing values. The function takes the arguments `df` (the data.frame), `name_df` (name of the data.frame as a string), and `logicals` (character vector containing the names of the variables to be checked). |
+| `check_numerics` | Checks the specified variables in the defined dataset for existence, numeric data type, and, if required, for the absence of negative values and/or values greater than 1 (for dichotomous variables). The function takes the arguments `df`, `name_df`, `numerics` (character vector containing the names of the variables to be checked), `check_invalid` (logical, whether to check for negative values; default is `FALSE`), and `dich` (logical, whether to check for values greater than 1; default is `FALSE`). |
+| `check_variables` | Basic function for variables of any data type. It checks the specified variables in the defined dataset only for existence. The function takes the arguments `df`, `name_df`, and `variables` (character vector containing the names of the variables to be checked). |
+| `check_pid` | Checks whether duplicates exist in the ID variable (`ID_t`). |
+| `check_items` | Checks whether item names are duplicated in the data.frame `vars`. |
+
+Note that if the data structure is correct, none of the functions will
+produce any output. Therefore, if no error messages appear after running
+the functions, everything is set up correctly.
+
+A data structure check could, for example, look as follows:
+
+```{r}
+# Check vars
+NEPSroutines::check_items(vars$item)
+NEPSroutines::check_variables(
+  vars, "vars", c("item", "type", "correct_response")
+)
+NEPSroutines::check_logicals(
+  vars, "vars", c("raw", "dich", "poly", "mixed", "easy", "difficult")
+)
+NEPSroutines::check_numerics(
+  vars, "vars", c("scoring", "position_easy", "position_difficult")
+)
+
+# Check resp
+NEPSroutines::check_variables(resp, "resp", c("ID_t", vars$item[vars$raw])) NEPSroutines::check_logicals(resp, "resp", c("valid", "easy", "difficult")) NEPSroutines::check_numerics(
+  resp, "resp", c("sex", "migration", "books"), dich = TRUE, check_invalid = TRUE
+)
+NEPSroutines::check_numerics(resp, "resp", vars$item[vars$dich], dich = TRUE)
+NEPSroutines::check_numerics(resp, "resp", vars$item[vars$poly])
+NEPSroutines::check_pid(resp$ID_t)
+```
+
+## Save Data
+
+Once the preparations have been completed, the data can be saved.
+
+```{r}
+save(resp, vars, mvs, labels_mvs, file = "data/dat.Rdata")
+```
+
+From this point onward, the data preparation step can be skipped, and
+the prepared data can be loaded directly.
+
+```{r}
+load("data/dat.Rdata")
+```
+
+## Changes to Items During Scaling
+
+It is common for the item set used in the analyses to change during the
+scaling process, for example because individual items are excluded due
+to poor item statistics or because multiple items are combined into a
+new item. In such cases, certain parts of the data preparation must be
+repeated, such as creating new variables to identify the final item set
+and the final item positions, or modifying existing variables such as
+the scoring variable or the validity variable accordingly.

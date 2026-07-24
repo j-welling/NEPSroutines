@@ -1,5 +1,7 @@
 ---
 title: "Semi-automated technical reports with NEPSroutines"
+author: "Timo Gnambs"
+date: "`r Sys.Date()`"
 output:
   bookdown::html_document2:
     base_format: rmarkdown::html_vignette
@@ -140,7 +142,7 @@ dim <- Import(paste0(path, "tables/"), "dimensionality.xlsx")
 dif <- Import(paste0(path, "tables/"), regexp = "^dif_poly_([^_]+)")
 ```
 
-This block requires some modifications to identify the NEPSroutines results for the technical report. First, the `path` object needs to define the (absolute or relative) path to the folder containing the NEPSroutines results obtained with `NEPSroutines`. It should point to the top folder containing the `.rpoj` file.
+This block requires some modifications to identify the NEPSroutines results for the technical report. First, the `path` object needs to define the (absolute or relative) path to the folder containing the NEPSroutines results obtained with `NEPSroutines`. It should point to the top folder containing the `.Rproj` file.
 
 Then, the raw data including the variables to describe the sample (i.e., `sex`, `rotation`, `valid`) and the variable definition file need to be imported. Because these are non-standard files that are used but not created by `NEPSroutines`, there is no standard way to import them. After running `load(paste0(path, "data/data.Rdata"))` or an appropriately adapted code, the environment should include an object `data` with a data frame including the data with sample information and an object `vars` with a data frame of the item characteristics.
 

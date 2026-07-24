@@ -10,6 +10,7 @@
 ^Meta$
 ^README\.Rmd$
 ^CONTRIBUTING\.Rmd$
+^CONTRIBUTING\.md$
 ^AGENTS\.md$
 ^CLAUDE\.md$
 \.gitignore
