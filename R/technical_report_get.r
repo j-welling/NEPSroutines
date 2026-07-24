@@ -155,10 +155,15 @@ GetMVI <- GetMvi
 #' created by [mv_person()].
 #' @param type The type of missing value which is typically one of
 #' OM, NR, NV, ND, or ALL.
-#' @param value An operator (=, <, >) with a number of missing values; e.g.,
+#' @param value A single string specifying a comparison operator
+#' (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number
+#' of missing values; e.g.,
 #' * =3 returns percentage for 3 missing values
 #' * <3 returns percentage for less than 3 missing values
-#' * >3 returns percentage for more than 3 missing values
+#' * >=3 returns percentage for 3 or more missing values
+#' A number without an operator (e.g. 3) is treated as =3. Multiple conditions
+#' can be combined within the string using & and | (e.g. `">2 & <5"`);
+#' surrounding whitespace is ignored.
 #' @param digits A number for rounding.
 #' @returns The calculated percentage.
 #' @export
@@ -192,6 +197,9 @@ GetMVI <- GetMvi
 #' # Percentage of respondents with more than 5 missing responses with one decimal
 #' GetMvp(mvp, "ALL", ">5", digits = 1)
 #'
+#' # Percentage of respondents with 3 or more omitted responses
+#' GetMvp(mvp, "OM", ">=3")
+#'
 #' # Clean up generated files
 #' file.remove(paste0(tmpdir, "/mv_person.xlsx"))
 #' file.remove(paste0(tmpdir, "/mv_person.rds"))
@@ -199,15 +207,19 @@ GetMvp <- function(obj, type, value, digits = 0) {
 
   type <- as.character(type[1])
   value <- as.character(value[1])
-  operator <- "="
-  if (substr(value, 1, 1) %in% c("=", "<", ">")) {
-    operator = substr(value, 1, 1)
-    value <- as.numeric(substring(value, 2))
-  }
-  if (operator == "=") operator <- paste0(operator, "=")
+
+  # a bare number such as "3" is shorthand for "=3"
+  if (!grepl("^\\s*(<=|>=|=>|=<|==|!=|=|<|>)", value))
+    value <- paste0("=", trimws(value))
+
+  # the shared parser also understands the two-character operators (>=, <=,
+  # ==, !=) and conditions combined with & or |, e.g. ">2 & <5"
+  parsed <- parse_conditions(value)
+
   names(obj[[type]]) <- gsub(" ", ".", names(obj[[type]]))
   n <- as.numeric(as.character(obj[[type]]$`Number.of.missing.responses`))
-  out <- sum(obj[[type]]$Percentage[methods::getFunction(operator)(n, value)])
+  # which() drops non-matching and NA rows rather than summing them to NA
+  out <- sum(obj[[type]]$Percentage[which(eval_conditions(parsed, n))])
   return(rnd(out, digits = digits))
 
 }

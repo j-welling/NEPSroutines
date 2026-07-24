@@ -16,10 +16,15 @@ created by [mv_person()].}
 \item{type}{The type of missing value which is typically one of
 OM, NR, NV, ND, or ALL.}
 
-\item{value}{An operator (=, <, >) with a number of missing values; e.g.,
+\item{value}{A single string specifying a comparison operator
+(=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number
+of missing values; e.g.,
 * =3 returns percentage for 3 missing values
 * <3 returns percentage for less than 3 missing values
-* >3 returns percentage for more than 3 missing values}
+* >=3 returns percentage for 3 or more missing values
+A number without an operator (e.g. 3) is treated as =3. Multiple conditions
+can be combined within the string using & and | (e.g. `">2 & <5"`);
+surrounding whitespace is ignored.}
 
 \item{digits}{A number for rounding.}
 }
@@ -58,6 +63,9 @@ GetMvp(mvp, "NV", "=0")
 
 # Percentage of respondents with more than 5 missing responses with one decimal
 GetMvp(mvp, "ALL", ">5", digits = 1)
+
+# Percentage of respondents with 3 or more omitted responses
+GetMvp(mvp, "OM", ">=3")
 
 # Clean up generated files
 file.remove(paste0(tmpdir, "/mv_person.xlsx"))
