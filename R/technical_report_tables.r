@@ -303,7 +303,7 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
   col_names <- c(ifelse(is.null(position), "No.", "Pos."), "Item", names(facets))
   colnames(tab) <- col_names
   if (rename_collapsed)
-    tab$Item <- gsub("_collapsed", "", tab$Item)
+    tab$Item <- sub("_collapsed$", "", tab$Item)
 
   # Create flextable
   if (length(width) == 1) width <- c(0.3, rep(width, ncol(tab) - 1))
@@ -333,6 +333,8 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' Columns are dropped before the widths are applied, so a vector `width` must
 #' be sized and ordered to match the columns that remain after exclusion (a
 #' single `width` value is recycled and is unaffected).
+#' @param rename_collapsed A boolean to remove the "_collapsed" suffix from
+#' item names.
 #' @param ... Further arguments passed to [Tbl()].
 #' @returns A flextable.
 #' @inheritParams Tbl
@@ -373,7 +375,8 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' }
 TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
                    size = 12, width = NULL,
-                   excl = c("N_administered", "ND", "ALL", "...1"), ...) {
+                   excl = c("N_administered", "ND", "ALL", "...1"),
+                   rename_collapsed = TRUE, ...) {
 
   # Result table
   if (is.list(obj) & "list" %in% names(obj))
@@ -390,6 +393,11 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
     tab <- tab[, keep]
     # Strip the trailing group suffix only (anchored, matching the filter above)
     colnames(tab) <- sub(paste0("_", select, "$"), "", colnames(tab))
+  }
+
+  # Rename collapsed items
+  if ("item" %in% colnames(tab) & rename_collapsed) {
+    tab$item <- sub("_collapsed$", "", tab$item)
   }
 
   # Remove empty rows
@@ -559,7 +567,7 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
 
   # Rename collapsed items
   if ("Item" %in% colnames(tab) & rename_collapsed) {
-    tab$Item <- gsub("_collapsed", "", tab$Item)
+    tab$Item <- sub("_collapsed$", "", tab$Item)
   }
 
   # Model type
@@ -732,7 +740,7 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
 
   # Rename collapsed items
   if ("Item" %in% colnames(tab) & rename_collapsed) {
-    tab$Item <- gsub("_collapsed", "", tab$Item)
+    tab$Item <- sub("_collapsed$", "", tab$Item)
   }
 
   # Rounding
@@ -947,7 +955,7 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
 
   # Rename collapsed items
   if ("item" %in% colnames(tab) & rename_collapsed) {
-    tab$item <- gsub("_collapsed", "", tab$item)
+    tab$item <- sub("_collapsed$", "", tab$item)
   }
 
   # Rename variables
@@ -1178,7 +1186,7 @@ TblCode <- function(vars, select, collapsed = NULL, tbl = TRUE,
   )
   items <- vars$item[vars[[select]]]
   if (rename_collapsed)
-    items <- gsub("_collapsed", "", items)
+    items <- sub("_collapsed$", "", items)
   for (i in seq(1, length(items), 3)) {
     j <- i + 2
     while (j > length(items)) j <- j - 1
@@ -1199,7 +1207,7 @@ TblCode <- function(vars, select, collapsed = NULL, tbl = TRUE,
   )
   poly <- vars$item[vars$poly & vars[[select]]]
   if (rename_collapsed)
-    poly <- gsub("_collapsed", "", poly)
+    poly <- sub("_collapsed$", "", poly)
   if (length(poly) >= 1) {
     txt <- c(
       txt,

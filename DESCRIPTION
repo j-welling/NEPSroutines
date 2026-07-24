@@ -20,7 +20,7 @@ Description: This package contains a collection of functions for the
     functions support general data preparation and consistency checks of the
     data. Finally, the package includes a Quarto extension and functionalities
     for the creation of semi-automated technical reports.
-License: GPL-2
+License: MIT
 Imports:
     colorspace,
     dplyr,
