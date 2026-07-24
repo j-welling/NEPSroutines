@@ -1,0 +1,72 @@
+---
+title: "Create SUF"
+author: "Jana Welling, Christian Diegel, Tanja Kutscher"
+date: "`r Sys.Date()`"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    toc: true
+    number_sections: no
+  bookdown::pdf_document2:
+    toc: true
+    number_sections: no
+bibliography: ../inst/NEPSroutines.bib
+vignette: >
+  %\VignetteIndexEntry{Create SUF}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, include = FALSE}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+
+```
+
+\newpage
+
+## Main Function
+
+The function `create_suf()` is used to create the SUF with the newly
+computed WLEs. Note that all dichotomous and polytomous items used in
+the test must be included in the SUF. These refer to the scored items.
+Polytomous variables with collapsed categories should not be included in
+the SUF. During data preparation, a logical variable should therefore
+already have been created that identifies the relevant items (see
+Section *Create Variables for Scores and SUF* in vignette `prepare_data`). In the example, this
+variable is called `suf`.
+
+The function returns the SUF containing all scored variables. If the
+file name needs to be modified (e.g., because a test is scaled
+simultaneously for several cohorts), use the function argument
+`name_group` that adds a suffix to the SUF name (e.g., `"cohort_6"`).
+
+```{r}
+NEPSroutines::create_suf(
+  resp = resp,
+  vars = vars,
+  select = "suf",
+  competence = "Reading",
+  scores = scores,
+  score_name = "reg7",
+  path = "suf"
+)
+```
+
+Information on the individual function arguments can be obtained via the
+help function (`?create_suf`).
+
+## Minor Function
+
+In addition to the main function `create_suf()`, the minor function
+`set_labels()` can also be used. It allows changing the labels of items
+in the SUF and returns a dataset that contains the SUF with the modified
+labels. Information on the individual function arguments can be obtained
+via the help function (`?set_labels`).

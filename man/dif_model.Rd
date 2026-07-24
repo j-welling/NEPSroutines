@@ -77,8 +77,8 @@ contains person weights as passed to TAM-function}
 }
 \value{
 a list of:
-  mmod: main effects model
-  dmod: DIF effects model.
+mmod: main effects model
+dmod: DIF effects model.
 }
 \description{
 Testing for differential item functioning for binary and polytomous data.

@@ -977,13 +977,18 @@ recodeVar <- function(x, src, tgt, default = NULL, keep.na = TRUE) {
   return(val)
 }
 
-
-
 #' Internal helper: capitalize the first letter of each string element
 #' @param x string; the word or sentence to be capitalized
+
 #' @noRd
 capitalize <- function(x) {
   paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))
+}
+
+#' Open first vignette
+#' @export
+open_guide <- function() {
+  utils::vignette("getting_started", package = "NEPSroutines")
 }
 
 #' Internal helper: use the right separation when listing elements in a string

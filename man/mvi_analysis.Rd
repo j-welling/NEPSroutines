@@ -71,8 +71,8 @@ design}
 }
 \value{
 list with percentages:
-             list: percentages for each item
-             summary: summary statistics across items.
+list: percentages for each item
+summary: summary statistics across items.
 }
 \description{
 Percentage of missing responses by item

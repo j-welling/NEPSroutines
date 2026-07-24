@@ -30,9 +30,9 @@ Duplicate item information in vars
 \section{Notifications}{
 
 \describe{
-  \item{\code{stop}}{One or more names in \code{old_names} are not found in
-    \code{vars$item}. Effect: the function halts; no new rows are added to
-    \code{vars}.}
+\item{\code{stop}}{One or more names in \code{old_names} are not found in
+\code{vars$item}. Effect: the function halts; no new rows are added to
+\code{vars}.}
 }
 }
 

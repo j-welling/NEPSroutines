@@ -45,26 +45,26 @@ Calculate age from birth and test date
 \section{Notifications}{
 
 \describe{
-  \item{\code{warning}: missing birth year replaced}{Triggered when
-    \code{birth_year} contains \code{NA}s. Effect: the missing values are
-    silently replaced by the sample median of \code{birth_year}; the
-    number of replacements is reported. Age values for affected persons are
-    approximate.}
-  \item{\code{warning}: missing birth month replaced}{Triggered when
-    \code{birth_month} contains \code{NA}s. Effect: the missing values are
-    silently replaced by the sample median of \code{birth_month}; the
-    number of replacements is reported. Age values for affected persons are
-    approximate.}
-  \item{\code{warning}: missing test year replaced}{Triggered when
-    \code{test_year} contains \code{NA}s. Effect: the missing values are
-    silently replaced by the sample median of \code{test_year}; the number
-    of replacements is reported. Age values for affected persons are
-    approximate.}
-  \item{\code{warning}: missing test month replaced}{Triggered when
-    \code{test_month} contains \code{NA}s. Effect: the missing values are
-    silently replaced by the sample median of \code{test_month}; the
-    number of replacements is reported. Age values for affected persons are
-    approximate.}
+\item{\code{warning}: missing birth year replaced}{Triggered when
+\code{birth_year} contains \code{NA}s. Effect: the missing values are
+silently replaced by the sample median of \code{birth_year}; the
+number of replacements is reported. Age values for affected persons are
+approximate.}
+\item{\code{warning}: missing birth month replaced}{Triggered when
+\code{birth_month} contains \code{NA}s. Effect: the missing values are
+silently replaced by the sample median of \code{birth_month}; the
+number of replacements is reported. Age values for affected persons are
+approximate.}
+\item{\code{warning}: missing test year replaced}{Triggered when
+\code{test_year} contains \code{NA}s. Effect: the missing values are
+silently replaced by the sample median of \code{test_year}; the number
+of replacements is reported. Age values for affected persons are
+approximate.}
+\item{\code{warning}: missing test month replaced}{Triggered when
+\code{test_month} contains \code{NA}s. Effect: the missing values are
+silently replaced by the sample median of \code{test_month}; the
+number of replacements is reported. Age values for affected persons are
+approximate.}
 }
 }
 

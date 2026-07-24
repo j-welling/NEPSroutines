@@ -26,13 +26,13 @@ Tbl(
 
 \item{footnote}{A table note.}
 
-\item{autofit}{A logical to automatically determine columns widths (`TRUE`);
-will be set to `FALSE`, if `width` is given.}
+\item{autofit}{A logical to automatically determine columns widths (\code{TRUE});
+will be set to \code{FALSE}, if \code{width} is given.}
 
 \item{merge}{A logical to merge header cells with the same content.}
 
 \item{lbl}{A vector of labels for the header; the length of the vector
-must correspond to the number of columns in `obj`.}
+must correspond to the number of columns in \code{obj}.}
 
 \item{hline}{A (named) vector of line numbers in the body for which a bottom
 border is added; names of each element can be used to set the border color.}
@@ -49,19 +49,19 @@ color.}
 
 \item{width}{The widths of the columns; if a single value is provided, it
 will be applied to all columns; otherwise the length must correspond to the
-number of columns in `obj`.}
+number of columns in \code{obj}.}
 
 \item{digits}{A number for rounding; if a single number is provided, it will
 be applied to all columns; otherwise the length must correspond to the
-number of columns in `obj`.}
+number of columns in \code{obj}.}
 
 \item{align}{The alignment for each column in the body; if a single value is
 provide, it will be applied to all columns; otherwise the length must
-correspond to the number of columns in `obj`.}
+correspond to the number of columns in \code{obj}.}
 
 \item{align_head}{the alignment for each column in the header; if a single
 value is provided, it will be applied to all columns; otherwise the length
-must correspond to the number of columns in `obj`.}
+must correspond to the number of columns in \code{obj}.}
 }
 \value{
 A flextable.

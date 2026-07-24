@@ -10,11 +10,11 @@ Update(path = getwd())
 \item{path}{The path to the folder for the technical report.}
 }
 \value{
-Returns `NULL`, invisibly.
+Returns \code{NULL}, invisibly.
 }
 \description{
 Update the Quarto extension in a folder
 }
 \seealso{
-`vignette("technical_report", package = "NEPSroutines")`
+\code{vignette("technical_report", package = "NEPSroutines")}
 }

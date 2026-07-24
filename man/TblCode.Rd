@@ -22,18 +22,18 @@ variables that are further defined in the function arguments}
 contains the item names of the polytomous items}
 
 \item{collapsed}{A data frame with the collapsed item categories generated
-by [collapse_response_categories()].}
+by \code{\link[=collapse_response_categories]{collapse_response_categories()}}.}
 
-\item{tbl}{A logical to return the table (`TRUE`) instead of the code (`FALSE`).}
+\item{tbl}{A logical to return the table (\code{TRUE}) instead of the code (\code{FALSE}).}
 
-\item{special}{A logical for special schools (`TRUE`) or regular schools
-(`FALSE`).}
+\item{special}{A logical for special schools (\code{TRUE}) or regular schools
+(\code{FALSE}).}
 
 \item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
 item names.}
 }
 \value{
-A `knitr::knit_child()` object or a vector.
+A \code{knitr::knit_child()} object or a vector.
 }
 \description{
 Create a table with the analysis code

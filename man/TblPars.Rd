@@ -17,28 +17,28 @@ TblPars(
 \arguments{
 \item{obj}{A list with data frames with sheets from "irt_poly.xlsx"
 or a data frame with sheet "summary" from "irt_poly.xlsx" created by
-[irt_analysis()].}
+\code{\link[=irt_analysis]{irt_analysis()}}.}
 
 \item{footnote}{A table note.}
 
 \item{excl}{A vector of column names to exclude. Each value is matched
 exactly (not as a regular expression or substring) against either the
 internal column name or the label shown in the rendered table (e.g. both
-`"N_administered"` and `"Total"` exclude the total-respondents column).
-Columns are dropped before the widths are applied, so a vector `width` must
+\code{"N_administered"} and \code{"Total"} exclude the total-respondents column).
+Columns are dropped before the widths are applied, so a vector \code{width} must
 be sized and ordered to match the columns that remain after exclusion (a
-single `width` value is recycled and is unaffected).}
+single \code{width} value is recycled and is unaffected).}
 
 \item{size}{The general font size.}
 
 \item{width}{The widths of the columns; if a single value is provided, it
 will be applied to all columns; otherwise the length must correspond to the
-number of columns in `obj`.}
+number of columns in \code{obj}.}
 
 \item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
 item names.}
 
-\item{...}{Further arguments passed to [Tbl()].}
+\item{...}{Further arguments passed to \code{\link[=Tbl]{Tbl()}}.}
 }
 \value{
 A flextable.

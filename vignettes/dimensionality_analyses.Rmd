@@ -1,0 +1,112 @@
+---
+title: "Dimensionality Analyses"
+author: "Jana Welling, Christian Diegel"
+date: "`r Sys.Date()`"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    toc: true
+    number_sections: no
+  bookdown::pdf_document2:
+    toc: true
+    number_sections: no
+bibliography: ../inst/NEPSroutines.bib
+vignette: >
+  %\VignetteIndexEntry{Dimensionality Analyses}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, include = FALSE}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+
+```
+
+\newpage
+
+## General Information
+
+The dimensionality of a test indicates how many latent dimensions are
+required to answer the test. It affects the IRT models used. For
+example, a key assumption of the Rasch model is that unidimensionality
+holds.
+
+To test this assumption, both a unidimensional model and
+multidimensional models are estimated and compared. Dimensionality
+variables are item characteristics that allow items to be divided into
+subgroups. These may include, for example, overarching tasks with
+multiple items, item type, or— in reading tests—text type. The
+evaluation is based on analyses of variances and correlations of the
+dimensions of the assumed multidimensional model. For model comparison,
+information criteria such as AIC and BIC are again used.
+
+These analyses can take a very long time in R (several hours), so it is
+recommended to run them on a particularly powerful computer.
+Multidimensional analyses are especially computationally demanding;
+therefore, instead of quadrature methods, Monte Carlo methods are used.
+For trial runs of the syntax, `snodes = 10` can be used initially, but
+for final estimation a higher number should be selected (default
+`snodes = 5000`).
+
+The dimensionality analysis should only be conducted for all valid cases
+(function argument `valid`). It is typically performed using the full
+sample rather than separated by groups.
+
+## Main Function
+
+In the **NEPSroutines** package, the function `dim_analysis()` is used
+to assess the dimensionality of a test. The function can estimate and
+compare models for multiple dimensionality variables simultaneously
+(argument `dim`). It performs the analyses and returns the required
+results in the form of a table as well as additional information in the
+console. In addition, the results are saved as an Excel file and in RDS
+format. If the file names need to be modified (e.g., because a test is
+scaled simultaneously for several cohorts), use the function argument
+`name_group` that adds a suffix to each file name (e.g., `"cohort_6"`).
+
+In the example, a multidimensional model is estimated for the item type
+and a multidimensional model is estimated for the text type.
+
+```{r}
+NEPSroutines::dim_analysis(
+  resp = resp,
+  vars = vars,
+  select = "mixed",
+  valid = "valid",
+  dim = c("kog_type", "text_type"),
+  scoring = "scoring",
+  irtmodel = "PCM2",
+  verbose = TRUE,
+  return = FALSE,
+  save = TRUE,
+  print = TRUE,
+  path_table = "tables",
+  path_results = "results",
+  overwrite = TRUE
+)
+```
+
+Information on the individual function arguments can be obtained via the
+help function (`?dim_analysis`).
+
+## Minor Functions
+
+In addition to the main function, the following minor functions can be
+used:
+
+| Function | Input | Output |
+|-------------------|----------------------------------|-------------------|
+| `conduct_dim_analysis` | Data.frames containing information on items and person characteristics, as well as the specification of the items under investigation. Additionally, the IRT model and the scoring information created during data preparation in `vars` must be provided. | Results of the dimensionality analysis (R object, optionally RDS) |
+| `dim_summary` | Output of the function `conduct_dim_analysis` (or the element `analysis` from the output of `dim_analysis`) | Tables with results of the dimensionality analysis (R object, optionally Excel) |
+| `print_dim_summary` | Output of the function `dim_summary` (or the element `summary` from the output of `dim_analysis`) | Summary of the dimensionality analysis (printed in the console) |
+
+Information on the individual function arguments can be obtained via the
+help function (e.g., `?dim_summary`).

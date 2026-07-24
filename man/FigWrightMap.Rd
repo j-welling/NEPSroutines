@@ -15,7 +15,7 @@ FigWright_Map(file, tbl = 5, crop = "800x1010+5+50")
 \item{tbl}{The table number for the footnote.}
 
 \item{crop}{A string indicating how to crop the image in the format
-"<width>x<height>\{+-\}<xoffset>\{+-\}<yoffset>"
+"\if{html}{\out{<width>}}x\if{html}{\out{<height>}}\{+-\}\if{html}{\out{<xoffset>}}\{+-\}\if{html}{\out{<yoffset>}}"
 (see http://www.imagemagick.org/Magick++/Geometry.html)}
 }
 \value{

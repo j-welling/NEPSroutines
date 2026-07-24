@@ -29,8 +29,8 @@ dim_summary(
 }
 \value{
 list with summary of results:
- Cor-Var X: variance-covariance matrix for each dimensionality model (= X)
- Goodness of fit: table with number of parameters, Loglikelihood, AIC & BIC for each model.
+Cor-Var X: variance-covariance matrix for each dimensionality model (= X)
+Goodness of fit: table with number of parameters, Loglikelihood, AIC & BIC for each model.
 }
 \description{
 Summary of dimensionality analysis (saves summary in excel sheet)

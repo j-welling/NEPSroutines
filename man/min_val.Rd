@@ -30,10 +30,10 @@ Select sample with a minimum number of valid values
 \section{Notifications}{
 
 \describe{
-  \item{\code{warning}: invalid \code{min.val}}{Triggered when
-    \code{min.val} is \code{NULL} or negative. Effect: the default of
-    3 valid responses per person is used; cases with fewer than 3 valid
-    responses are marked as invalid.}
+\item{\code{warning}: invalid \code{min.val}}{Triggered when
+\code{min.val} is \code{NULL} or negative. Effect: the default of
+3 valid responses per person is used; cases with fewer than 3 valid
+responses are marked as invalid.}
 }
 }
 

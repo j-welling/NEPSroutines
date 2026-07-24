@@ -1,0 +1,112 @@
+---
+title: "Scaling NEPS data"
+author: "Jana Welling, Christian Diegel"
+date: "`r Sys.Date()`"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    toc: true
+    number_sections: no
+  bookdown::pdf_document2:
+    toc: true
+    number_sections: no
+bibliography: ../inst/NEPSroutines.bib
+vignette: >
+  %\VignetteIndexEntry{Scaling NEPS data}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r, include = FALSE}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+
+```
+
+\newpage
+
+## Introduction
+
+This scaling guide is primarily intended to introduce the general procedure of scaling of competence tests in the National Educational Panel Study (NEPS). It is not intended as a comprehensive introduction to the methodological foundations of scaling or item response theory. The following sections provide only a brief overview of scaling in NEPS and mainly serve as pointers for further reading.
+
+## Scaling of Competence Tests in NEPS
+
+The scaling of competence tests in NEPS typically includes the following steps:
+
+-   Data search and preparation
+
+-   Descriptive analysis
+
+-   Analysis of missing values (per person & per item)
+
+-   Item Response Theory (IRT) analysis
+
+-   Differential Item Functioning (DIF) analysis
+
+-   Distractor analysis
+
+-   Dimensionality analysis
+
+-   Linking
+
+-   Estimation of Weighted Maximum Likelihood Estimates (WLE)
+
+-   Creation of the Scientific Use File (SUF)
+
+-   Documentation of results in the Technical Report (TR)
+
+Individual steps may be omitted if the necessary prerequisites are not met (e.g., if no structure in the test justifies a dimensionality analysis). The vignettes included in `NEPSroutines` lead you step by step through these procedures and summarize key information on data preparation in R, required datasets, and the use of the `NEPSroutines` package. This vignette also provides background information on competence assessments and measurement models used in NEPS.
+
+### Competence Assessments in NEPS
+
+General information on competence assessments in NEPS is available at:
+
+<https://www.neps-data.de/Portals/0/NEPS/Datenzentrum/Forschungsdaten/Kompetenzen/NEPS_OverviewCompetenceData_2025_en.pdf>
+
+This document explains naming conventions and provides an overview of all competence assessments.
+
+Further information on specific assessments can be found here:
+
+<https://www.neps-data.de/Data-Center/Data-and-Documentation>
+
+### Competence Items
+
+Tasks in competence tests are called **items**. In the raw data, these are initially unscored and contain the response selected by the participant (e.g., “3” or "C" if the third option was chosen).
+
+At the beginning of the scaling process, items are scored by converting them into dichotomous variables indicating whether the response is correct (1) or incorrect (0).
+
+Some tasks consist of multiple sub-items (e.g., complex multiple-choice or matching tasks). These are called **polytomous items**. The score of a polytomous item is obtained by summing all sub-item scores. For example, an item with three sub-items can take the values 0, 1, 2, or 3.
+
+During scaling, a distinction is made between dichotomous and polytomous items:
+
+-   **Dichotomous items**: all simple scored items and all scored sub-items of polytomous items, as well as originally polytomous items reduced to two categories.
+-   **Polytomous items**: all items with more than two categories.
+
+### Item Response Theory Models
+
+The scaling framework for NEPS is described in @pohl2012:
+
+<https://www.neps-data.de/Portals/0/Working%20Papers/WP_XIV.pdf>
+
+NEPS competence tests are designed to fit the Rasch model (@rasch1960) or the Partial Credit Model (PCM; @masters1982). Additionally, a 2PL model (@birnbaum1968) or a Generalized Partial Credit Model (GPCM; @muraki1992) is estimated to assess model fit.
+
+The choice of model depends on the item format:
+
+-   If only dichotomous items are present: Rasch model and 2PL model are used\
+-   If at least one polytomous item is included: PCM and GPCM are used
+
+### Linking
+
+Competence assessments are often linked across waves or cohorts to ensure comparability between different measurements.
+
+A detailed description of the linking procedure is provided in @fischer2016:
+
+<https://www.neps-data.de/Portals/0/Survey%20Papers/SP_I.pdf>
+
+*Note*: Linking is not yet implemented in this version of the `NEPSroutines` package.
+
+## References

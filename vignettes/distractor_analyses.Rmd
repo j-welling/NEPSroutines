@@ -1,0 +1,98 @@
+---
+title: "Distractor Analyses"
+author: "Jana Welling, Christian Diegel"
+date: "`r Sys.Date()`"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    toc: true
+    number_sections: no
+  bookdown::pdf_document2:
+    toc: true
+    number_sections: no
+bibliography: ../inst/NEPSroutines.bib
+vignette: >
+  %\VignetteIndexEntry{Distractor Analyses}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, include = FALSE}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+
+```
+
+\newpage
+
+## General Information
+
+In tasks where the respondent must choose between several answer options
+(multiple choice), so-called distractors are used. These are incorrect
+answers that are nevertheless constructed to resemble correct response
+alternatives. A distractor analysis should be used in the context of
+test evaluation to identify poor distractors. This is important because
+poor distractors violate model assumptions and can lead to problems in
+test interpretation. In the distractor analysis, point-biserial
+correlations between the distractors and the total score of the
+respondent are calculated.
+
+The distractor analysis should only be conducted for all valid cases
+(function argument `valid`). It is typically performed using the full
+sample rather than separated by groups.
+
+## Main Function
+
+The function `dis_analysis()` computes correlations between correct or
+incorrect item responses (distractors) and the total score. Distractors
+are analysed for all raw multiple-choice items (function argument
+`select_raw`). During data preparation, a corresponding variable was
+already created in `vars`; in our example, it is called `distan`.
+
+The output of the function consists of aggregated results reporting the
+minimum and maximum correlations of correct responses and distractors
+with the total score. In addition, a table is produced that details the
+number of responses and the correlations between item responses and the
+total score for each task. Both outputs are saved in Excel and RDS
+format. If the file names need to be modified (e.g., because a test is
+scaled simultaneously for several cohorts), use the function argument
+`name_group` that adds a suffix to each file name (e.g., `"cohort_6"`).
+A summary is printed in the console.
+
+```{r}
+NEPSroutines::dis_analysis(
+  resp = resp,
+  vars = vars,
+  valid = "valid",
+  select_raw = "distan",
+  print = TRUE,
+  save = FALSE,
+  overwrite = TRUE,
+  path_table = "tables",
+  path_results = "results",
+)
+```
+
+Information on the individual function arguments can be obtained via the
+help function (`?dis_analysis`).
+
+## Minor Functions
+
+In addition to the main function, the following minor functions can be
+used:
+
+| Function | Input | Output |
+|-------------------|----------------------------------|-------------------|
+| `conduct_dis_analysis` | Data.frames `resp` and `vars` containing information on responses, items, and person characteristics | Results of the distractor analysis (R object, optionally RDS) |
+| `dis_summary` | Output of the function `conduct_dis_analysis` (or the element `analysis` from the output of `dis_analysis`) | Tables with results of the distractor analysis (R object, optionally Excel) |
+| `print_dis_summary` | Output of the function `dis_summary` (or the element `summary` from the output of `dis_analysis`) | Summary of the distractor analysis (printed in the console) |
+
+Information on the individual function arguments can be obtained via the
+help function (e.g., `?dis_summary`).

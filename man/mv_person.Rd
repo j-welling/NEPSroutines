@@ -104,8 +104,8 @@ avoid problems with the data structure)}
 }
 \value{
 (if return = TRUE) list with results:
-            mv_p: list with missing values per person and each missing value type (in percentage)
-            summary: table with summary statistics for TR.
+mv_p: list with missing values per person and each missing value type (in percentage)
+summary: table with summary statistics for TR.
 }
 \description{
 Missing values by person analysis

@@ -22,13 +22,13 @@ TblItemFacets(
 includes variable 'item' containing item names; additionally includes all
 variables that are further defined in the function arguments}
 
-\item{select}{A named vector of variable names in `vars` identifying
+\item{select}{A named vector of variable names in \code{vars} identifying
 different groups of items for which the item property should be counted. The
 name of the vector gives the column headings of the table.}
 
-\item{facets}{Variable names in `vars` identifying the item facets.}
+\item{facets}{Variable names in \code{vars} identifying the item facets.}
 
-\item{position}{The variable name in `vars` giving the item position.}
+\item{position}{The variable name in \code{vars} giving the item position.}
 
 \item{footnote}{A table note.}
 
@@ -36,14 +36,14 @@ name of the vector gives the column headings of the table.}
 
 \item{width}{The widths of the columns; if a single value is provided, it
 will be applied to all columns; otherwise the length must correspond to the
-number of columns in `obj`.}
+number of columns in \code{obj}.}
 
 \item{lbl}{Long names of item facets to be displayed in the table.}
 
 \item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
 item names.}
 
-\item{...}{Further arguments passed to [Tbl()].}
+\item{...}{Further arguments passed to \code{\link[=Tbl]{Tbl()}}.}
 }
 \value{
 A flextable.

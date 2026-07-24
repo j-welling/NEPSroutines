@@ -11,7 +11,7 @@ GetMVP(obj, type, value, digits = 0)
 }
 \arguments{
 \item{obj}{A list with data frames with sheets from "mv_person.xlsx"
-created by [mv_person()].}
+created by \code{\link[=mv_person]{mv_person()}}.}
 
 \item{type}{The type of missing value which is typically one of
 OM, NR, NV, ND, or ALL.}
@@ -19,12 +19,11 @@ OM, NR, NV, ND, or ALL.}
 \item{value}{A single string specifying a comparison operator
 (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number
 of missing values; e.g.,
-* =3 returns percentage for 3 missing values
-* <3 returns percentage for less than 3 missing values
-* >=3 returns percentage for 3 or more missing values
-A number without an operator (e.g. 3) is treated as =3. Multiple conditions
-can be combined within the string using & and | (e.g. `">2 & <5"`);
-surrounding whitespace is ignored.}
+\itemize{
+\item =3 returns percentage for 3 missing values
+\item <3 returns percentage for less than 3 missing values
+\item =3 returns percentage for 3 or more missing valuesA number without an operator (e.g. 3) is treated as =3. Multiple conditionscan be combined within the string using & and | (e.g. ">2 & <5");surrounding whitespace is ignored.
+}}
 
 \item{digits}{A number for rounding.}
 }

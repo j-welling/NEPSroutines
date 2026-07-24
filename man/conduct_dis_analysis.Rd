@@ -64,7 +64,7 @@ are stored on the hard drive}
 }
 \value{
 list with one data frame per item containing item-total correlations
-  for each possible response; correct response is marked with an *.
+for each possible response; correct response is marked with an *.
 }
 \description{
 Calculates the item-rest correlations of distractor and correct responses

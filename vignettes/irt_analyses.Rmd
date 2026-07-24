@@ -1,0 +1,235 @@
+---
+title: "IRT Analyses"
+author: "Jana Welling, Christian Diegel"
+date: "`r Sys.Date()`"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    toc: true
+    number_sections: no
+  bookdown::pdf_document2:
+    toc: true
+    number_sections: no
+bibliography: ../inst/NEPSroutines.bib
+vignette: >
+  %\VignetteIndexEntry{IRT Analyses}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, include = FALSE}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>"
+)
+
+```
+
+\newpage
+
+## General Information
+
+In IRT analyses, person ability parameters as well as item difficulty
+and, if applicable, discrimination parameters are estimated. Depending
+on the available data format, a 1PL and 2PL analysis (only dichotomous
+items) and, if applicable, additionally a PCM and GPCM analysis (also
+polytomous items) are conducted, and the results are compared using
+model fit.
+
+The analyses should again only be conducted for all valid cases
+(function argument `valid`). The 1PL and 2PL analyses must always be
+conducted and use all dichotomously scored items (`select = "dich"`). If
+the test also includes polytomous items, additional PCM and GPCM
+analyses are performed using all items defined in the variable `mixed`.
+If the item set is modified during the scaling process (e.g., because
+items are excluded), the IRT analyses must be repeated with the updated
+item set (in this case, the new analysis variables must be specified in
+`select`, e.g. `dich_new` & `mixed_new`).
+
+If a grouping exists (e.g., test booklets), the analyses are in most
+cases conducted both for the full sample and for each group separately.
+If the groups also share common items, additional IRT analyses are
+conducted using only these common items. This can result in a large
+number of IRT analyses (dichotomous and polytomous analyses for the full
+sample and each group). In this case, the function
+`grouped_irt_analysis()` can be used to perform IRT analyses for
+multiple groups with a single command. Note that the data.frames `resp`
+and `vars` must include the corresponding group variables and
+group-specific analysis variables (see Section *Create Group Variables*
+in vignette `prepare_data`).
+
+If not every person was administered every item, the argument
+`missing_by_design` should be specified in both main functions by
+providing the user-defined missing value for design-related missing
+responses. This is necessary to correctly compute the number of persons
+to whom an item was administered.
+
+## Main function `irt_analysis`
+
+The main function `irt_analysis()` automatically performs the required
+IRT analyses, returns results in several tables and as text in the
+console, and saves the (most important) results as Excel files and in
+RDS format. ICC plots and Wright maps can also be generated and saved
+(`plots = TRUE`). If the file names need to be modified (e.g., because a
+test is scaled simultaneously for several cohorts), use the function
+argument `name_group` that adds a suffix to each file name (e.g.,
+`"cohort_6"`). The function automatically detects whether the item set
+contains polytomous items and accordingly performs either a 1PL and 2PL
+analysis (dichotomous items only) or a PCM and GPCM analysis (including
+polytomous items). PCM and GPCM are estimated using the ConQuest
+parameterisation `"item + item*step"`.
+
+The function performs analyses for a single item set (e.g., all items
+selected via the argument `select`). If IRT analyses are required for
+multiple item sets (e.g., easy and difficult test booklets and common
+items), but repeated calls to `irt_analysis()` should be avoided, the
+function `grouped_irt_analysis()` can be used instead (see following
+section).
+
+Sometimes, the item parameters for the IRT analyses are already known
+and need to be fixed to predetermined values. The function
+`irt_analysis()` provides the possibility to use fixed item
+difficulties. Because this function conducts two IRT analyses (1PL and
+2PL models for dichotomous items, PCM and GPCM for polytomous or mixed
+items), it contains two different function arguments: `xsi_fixed_1p` and
+`xsi_fixed_2p`. The first argument may contain the fixed item
+difficulties for the 1PL model or PCM, while the second argument may
+contain the fixed item difficulties for the 2PL model or GPCM. Please
+note that the item discrimination parameters from the 2PL model and GPCM
+cannot be fixed within this package.
+
+```{r}
+# Rasch and 2PL
+NEPSroutines::irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = "dich",
+  valid = "valid",
+  missing_by_design = -54,
+  scoring = NULL,
+  plots = TRUE,
+  save = TRUE,
+  print = TRUE,
+  return = FALSE,
+  path_results = "results",
+  path_table = "tables",
+  path_plots = "plots",
+  overwrite = TRUE,
+  digits = 3, 
+  name_group = "all"
+)
+
+# PCM and GPCM
+NEPSroutines::irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = "mixed",
+  valid = "valid",
+  scoring = "scoring",
+  missing_by_design = -54,
+  plots = TRUE,
+  save = TRUE,
+  print = TRUE,
+  return = FALSE,
+  path_results = "results",
+  path_table = "tables",
+  path_plots = "plots",
+  suf_item_names = TRUE,
+  overwrite = TRUE,
+  digits = 3,
+  name_group = "all"
+)
+```
+
+Information on the individual function arguments can be obtained via the
+help function (`?irt_analysis`).
+
+## Main function `grouped_irt_analysis`
+
+With the function `grouped_irt_analysis()` IRT analyses can be performed
+for multiple item sets (e.g., easy and difficult test booklets and
+common items) with a single command.
+
+Although the function arguments are in principle the same as in
+`irt_analysis()`, some arguments must now be specified per group. For
+this purpose, a list is created in which each group corresponds to one
+element. The names of the list elements correspond to the names of the
+grouping variables (exactly as defined in `resp` and `vars`, e.g.,
+`easy`). The list elements themselves contain the group-specific
+argument values (e.g., `mixed_easy`).
+
+In the case of the argument `select`, all groups must be included. For
+other group-specific arguments (`control_tam`, `control_wle`,
+`xsi_fixed_1p`, `xsi_fixed_2p`), list elements can be specified for only
+some groups, or the entire argument can be left empty (`NULL`).
+
+In the B129 study, there was a difficult and an easy test booklet that
+also included common items. For the IRT analyses, it is therefore
+important that the data.frames `resp` and `vars` include the logical
+variables `easy`, `difficult`, and `common`, and that `vars`
+additionally contains the group-specific analysis variables (see Section
+4.3.2 Group Variables).
+
+The function `grouped_irt_analysis` is defined as follows:
+
+```{r}
+# Rasch and 2PL
+NEPSroutines::grouped_irt_analysis(
+  resp = resp,
+  vars = vars,
+  valid = "valid",
+  scoring = "scoring",
+  missing_by_design = -54,
+  select = c(easy = "dich_easy",
+             difficult = "dich_diff",
+             common = "dich_common"),
+  overwrite = TRUE,
+  plots = TRUE,
+  return = FALSE,
+  path_results = "results",
+  path_table = "tables",
+  path_plots = "plots"
+)
+
+# PCM and GPCM
+NEPSroutines::grouped_irt_analysis(
+  resp = resp,
+  vars = vars,
+  valid = "valid",
+  scoring = "scoring",
+  missing_by_design = -54,
+  select = c(easy = "mixed_easy",
+             difficult = "mixed_difficult",
+             common = "mixed_common"),
+  overwrite = TRUE,
+  plots = TRUE,
+  return = FALSE,
+  path_results = "results",
+  path_table = "tables",
+  path_plots = "plots",
+  suf_item_names = TRUE
+)
+```
+
+## Minor Functions
+
+In addition to the main function, the following minor functions can be
+used:
+
+| Function | Input | Output |
+|-------------------|---------------------------|--------------------------|
+| `irt_model` | Data.frames `resp` and `vars` containing information on responses, items, person characteristics, and optionally grouping | Results of the IRT analysis (R object, optionally RDS) |
+| `icc_plots` | Output of the function `irt_model` | ICC plots for IRT models (PNG) |
+| `wright_map` | Output of the function `irt_model` | Wright maps for IRT models (PNG) |
+| `irt_summary` | Output of the function `irt_model` | Table with results of the IRT analysis (R object, optionally Excel) |
+| `irt_model_fit` | Output of the function `irt_model` | Table with model fit for the 1PL and 2PL models or PCM and GPCM (R object, optionally Excel) |
+| `step_analysis` | Output of the function `irt_model` (only for PCM analyses) | Table with results of the step analysis (R object, optionally Excel) |
+| `print_irt_summary` | Output of the functions `irt_summary`, `irt_model`, and optionally `step_analysis` | Summary of the IRT and step analysis and additional results relevant for the Technical Report (printed in the console) |
+
+Information on the individual function arguments can be obtained via the
+help function (e.g. `?irt_summary`).

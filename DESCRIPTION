@@ -1,15 +1,7 @@
 Type: Package
 Package: NEPSroutines
-Title: Implementing the NEPS Scaling Guidelines
 Version: 1.2.1
-Date: 2025-05-26
-Authors@R: c(
-    person("Jana", "Welling", email = "jana.welling@lifbi.de", role = c("cre", "aut")),
-    person("Anna", "Scharl", role = "aut"),
-    person("Tanja", "Kutscher", email = "tanja.kutscher@lifbi.de", role = "aut"),
-    person("Timo", "Gnambs", email = "timo.gnambs@lifbi.de", role = "aut"),
-    person("Christian", "Diegel", role = "ctb")
-  )
+Title: Implementing the NEPS Scaling Guidelines
 Description: This package contains a collection of functions for the
     scaling of NEPS competence data. It provides standardized scaling
     routines for one- and two-parametric logistic models with binary and 
@@ -20,7 +12,14 @@ Description: This package contains a collection of functions for the
     functions support general data preparation and consistency checks of the
     data. Finally, the package includes a Quarto extension and functionalities
     for the creation of semi-automated technical reports.
-License: MIT
+Authors@R: c(
+    person("Jana", "Welling", email = "jana.welling@lifbi.de", role = c("cre", "aut")),
+    person("Anna", "Scharl", role = "aut"),
+    person("Tanja", "Kutscher", email = "tanja.kutscher@lifbi.de", role = "aut"),
+    person("Timo", "Gnambs", email = "timo.gnambs@lifbi.de", role = "aut"),
+    person("Christian", "Diegel", role = "ctb")
+  )
+License: MIT + file LICENSE
 Imports:
     colorspace,
     dplyr,
@@ -53,3 +52,5 @@ Depends:
     R (>= 4.3.0)
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.0.0
+Roxygen: list(markdown = TRUE)
+
