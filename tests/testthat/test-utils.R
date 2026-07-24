@@ -561,3 +561,32 @@ test_that("eval_conditions() folds comparisons left-to-right", {
                eval_conditions(parse_conditions("<1|>1.2"), x))
 
 })
+
+
+test_that("neps_palette() returns the package-wide blue scheme", {
+
+  # returns n hex colors from the shared 'Blues 2' palette
+  expect_length(neps_palette(1), 1)
+  expect_length(neps_palette(4), 4)
+  expect_match(neps_palette(1), "^#[0-9A-Fa-f]{6}$")
+
+  # single source of truth: identical to colorspace default (Blues 2)
+  expect_equal(neps_palette(3), colorspace::sequential_hcl(3, palette = "Blues 2"))
+
+})
+
+
+test_that("check_color() validates or generates colors", {
+
+  # NULL color falls back to the package palette
+  expect_equal(check_color(NULL, 3), neps_palette(3))
+
+  # user-supplied colors of matching length pass through untouched
+  cols <- c("red", "green", "blue")
+  expect_equal(check_color(cols, 3), cols)
+
+  # mismatched length errors
+  expect_error(check_color(c("red", "blue"), 3),
+               regexp = "number of provided colors does not match")
+
+})
