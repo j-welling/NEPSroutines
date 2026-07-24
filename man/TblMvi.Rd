@@ -12,7 +12,9 @@ TblMvi(
   sort = "position",
   size = 12,
   width = NULL,
-  excl = c("N_administered", "ND", "ALL", "...1")
+  excl = c("N_administered", "ND", "ALL", "...1"),
+  rename_collapsed = TRUE,
+  ...
 )
 
 TblMVI(
@@ -22,7 +24,9 @@ TblMVI(
   sort = "position",
   size = 12,
   width = NULL,
-  excl = c("N_administered", "ND", "ALL", "...1")
+  excl = c("N_administered", "ND", "ALL", "...1"),
+  rename_collapsed = TRUE,
+  ...
 )
 }
 \arguments{
@@ -30,7 +34,10 @@ TblMVI(
 or a data frame with sheet "summary" from "mv_item.xlsx" created by
 \code{\link[=mv_item]{mv_item()}}.}
 
-\item{select}{An optional name of a specific group to select.}
+\item{select}{An optional name of a specific group to select. Columns whose
+names end in the group suffix (e.g. \code{"_mixed"}) are kept, along with the
+\code{"Nr."} and \code{"item"} columns; the suffix is matched literally, not as a
+regular expression.}
 
 \item{footnote}{An optional table note.}
 
@@ -42,7 +49,18 @@ or a data frame with sheet "summary" from "mv_item.xlsx" created by
 will be applied to all columns; otherwise the length must correspond to the
 number of columns in \code{obj}.}
 
-\item{excl}{A vector of column names to exclude.}
+\item{excl}{A vector of column names to exclude. Each value is matched
+exactly (not as a regular expression or substring) against either the
+internal column name or the label shown in the rendered table (e.g. both
+\code{"N_administered"} and \code{"Total"} exclude the total-respondents column).
+Columns are dropped before the widths are applied, so a vector \code{width} must
+be sized and ordered to match the columns that remain after exclusion (a
+single \code{width} value is recycled and is unaffected).}
+
+\item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
+item names.}
+
+\item{...}{Further arguments passed to \code{\link[=Tbl]{Tbl()}}.}
 }
 \value{
 A flextable.

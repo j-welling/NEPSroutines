@@ -54,6 +54,66 @@ test_that("TblItemProps() works", {
 
 })
 
+test_that("TblItemProps() with na.rm works", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  vars <- data.frame(
+    txttyp = factor(c("SR", "HL", "CMC")),
+    easy = c(TRUE, FALSE, FALSE),
+    medium = c(FALSE, FALSE, FALSE),
+    difficult = c(FALSE, FALSE, TRUE)
+  )
+
+  # na.rm = TRUE
+  tbl1 <- TblItemProps(
+    vars = vars,
+    select = c("Easy test" = "easy",
+               "Medium test" = "medium",
+               "Difficult test" = "difficult"),
+    prop = "txttyp",
+    propname = "Text types",
+    na.rm = TRUE
+  )
+  expect_s3_class(tbl1, "flextable")
+  expect_equal(names(tbl1$body$dataset), c("Text types", "Easy test",
+                                           "Difficult test"))
+  expect_equal(tbl1$body$dataset[["Text types"]], c(
+    "Complex multiple-choice items",
+    "Short constructed responses",
+    "Total number of items"
+  ))
+  expect_equal(tbl1$body$dataset[["Easy test"]], c("0", "1", "1"))
+  expect_equal(tbl1$body$dataset[["Difficult test"]], c("1", "0", "1"))
+
+  # na.rm = FALSE
+  tbl2 <- TblItemProps(
+    vars = vars,
+    select = c("Easy test" = "easy",
+               "Medium test" = "medium",
+               "Difficult test" = "difficult"),
+    prop = "txttyp",
+    propname = "Text types",
+    na.rm = FALSE
+  )
+  expect_s3_class(tbl2, "flextable")
+  expect_equal(names(tbl2$body$dataset), c("Text types", "Easy test",
+                                           "Medium test", "Difficult test"))
+  expect_equal(tbl2$body$dataset[["Text types"]], c(
+    "Complex multiple-choice items",
+    "Short constructed responses",
+    "Highlighting tasks",
+    "Total number of items"
+  ))
+  expect_equal(tbl2$body$dataset[["Easy test"]], c("0", "1", "0", "1"))
+  expect_equal(tbl2$body$dataset[["Difficult test"]], c("1", "0", "0", "1"))
+
+  expect_error(TblItemProps(vars = vars, select = "easy", prop = "unknown"),
+               "Unknown item property unknown!")
+
+})
+
 
 test_that("TblItemFacets() works", {
 
@@ -90,12 +150,32 @@ test_that("TblItemFacets() works", {
 })
 
 
-test_that("TblMvi() works", {
+test_that("TblMvi() without booklets works", {
 
   skip_if_not_installed("flextable")
   skip_if_not_installed("officer")
 
-  tab <- Import(test_path("fixtures", "ex1", "tables"), "mv_item.xlsx")
+  # Create output for missing values analyses
+  data("ex1")
+  outdir <- withr::local_tempdir()
+  mv_item(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    select = "dich",
+    valid = "valid",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    position = "pos",
+    plots = FALSE,
+    print = FALSE,
+    save = TRUE,
+    return = FALSE,
+    path_results = outdir,
+    path_table = outdir,
+    overwrite = TRUE,
+    warn = FALSE,
+    verbose = FALSE
+  )
+  tab <- Import(outdir, "mv_item.xlsx")
   tbl <- TblMvi(tab, excl = "", sort = "N_valid")
 
   expect_s3_class(tbl, "flextable")
@@ -108,10 +188,51 @@ test_that("TblMvi() works", {
   ))
   expect_equal(tbl$body$dataset[["N"]][1:3], c(345, 552, 679))
   expect_equal(tbl$body$dataset[["ALL"]][1:3], c(65.5, 44.8, 32.1))
-  expect_equal(TblMVI(tab)$body$dataset, TblMvi(tab)$body$dataset)
 
 })
 
+
+test_that("TblMvi() with booklets works", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  # Create output for missing values analyses
+  data("ex3")
+  outdir <- withr::local_tempdir()
+  mv_item(
+    resp = ex3$resp,
+    vars = ex3$vars,
+    select = "dich",
+    valid = "valid",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    position = c(booklet1 = "pos1", booklet2 = "pos2"),
+    grouping = c("Booklet 1" = "booklet1", "Booklet 2" = "booklet2"),
+    plots = FALSE,
+    print = FALSE,
+    save = TRUE,
+    return = FALSE,
+    path_results = outdir,
+    path_table = outdir,
+    overwrite = TRUE,
+    warn = FALSE,
+    verbose = FALSE
+  )
+  tab <- Import(outdir, "mv_item.xlsx")
+  tbl <- TblMvi(tab, select = "booklet2")
+
+  expect_s3_class(tbl, "flextable")
+  expect_equal(names(tbl$body$dataset), c(
+    "Nr.", "Item", "Pos.", "N", "OM", "NV", "NR"
+  ))
+  expect_equal(tbl$body$dataset[["Nr."]][1:3], c(1, 2, 3))
+  expect_equal(tbl$body$dataset[["Item"]][1:3], c(
+    "reg70001_c", "reg70003_c", "reg70005_c"
+  ))
+  expect_equal(tbl$body$dataset[["N"]][1:3], c(689, 689, 669))
+  expect_equal(tbl$body$dataset[["Pos."]][1:3], c(1, 3, 5))
+
+})
 
 test_that("TblPars() works", {
 
@@ -192,9 +313,29 @@ test_that("TblDif() works", {
   skip_if_not_installed("flextable")
   skip_if_not_installed("officer")
 
-  tab <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_TR.xlsx")
+  # DIF analyses
+  data(ex1)
+  outdir <- withr::local_tempdir()
+  dif_analysis(
+   resp = ex1$resp,
+   vars = ex1$vars,
+   select = "dich",
+   valid = "valid",
+   dif_vars = c("sex", "mig"),
+   include_mv = 100,
+   print = FALSE,
+   save = TRUE,
+   return = FALSE,
+   path_results = outdir,
+   path_table = outdir,
+   overwrite = TRUE,
+   verbose = FALSE,
+   warn = FALSE
+  )
+  dif <- Import(outdir, regexp = "^dif_dich_([^_]+\\.xlsx)")
+
   tbl <- TblDif(
-    tab,
+    dif$TR,
     footnote = "Nothing to note.",
     colnames2 = c(
       "mig.1-3" = "without vs. missing",
@@ -222,8 +363,8 @@ test_that("TblDif() works", {
     "Main effect\n (DIF model)",
     "Main effect\n (Main effect model)"
   ))
-  expect_equal(tbl$body$dataset[["sex.0-1"]][1], "-0.01 (-0.01)")
-  expect_equal(TblDIF(tab)$body$dataset, TblDif(tab)$body$dataset)
+  expect_equal(tbl$body$dataset[["sex.0-1"]][1], "0.02 (0.02)")
+  expect_equal(TblDIF(dif$TR)$body$dataset, TblDif(dif$TR)$body$dataset)
 
 })
 
@@ -269,6 +410,288 @@ test_that("TblCode() works", {
   expect_true(any(grepl("^# polytomous items$", code)))
   expect_true(any(grepl("TAM::tam.mml\\(resp = dat\\[, items\\], Q = Q", code)))
   expect_equal(tail(code, 1), "TAM::tam.wle(mod)")
+
+})
+
+
+test_that("specialized table functions forward ... to Tbl()", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex1", "tables"), "mv_item.xlsx")
+
+  # TblMvi() does not set `align`/`align_head` itself, so both flow through `...`
+  # to Tbl(); several Tbl() arguments can be forwarded in a single call.
+  tbl <- TblMvi(tab, align = "left", align_head = "left")
+  expect_s3_class(tbl, "flextable")
+  expect_true(all(tbl$body$styles$pars$text.align$data == "left"))
+  expect_true(all(tbl$header$styles$pars$text.align$data == "left"))
+
+  # Without `...`, Tbl()'s default centered alignment is retained.
+  tbl_default <- TblMvi(tab)
+  expect_true(all(tbl_default$body$styles$pars$text.align$data == "center"))
+
+  # An argument Tbl() does not accept errors at the Tbl() boundary rather than
+  # being silently swallowed (Tbl() has a closed signature, no `...`).
+  expect_error(TblMvi(tab, nonexistent_arg = 1), "unused argument")
+
+  # Wrappers that hard-code structural Tbl() arguments raise a duplicate-argument
+  # error if the same name is also passed via `...` (the intended guardrail).
+  data("ex2")
+  expect_error(
+    TblItemProps(ex2$vars, select = c("Number of items" = "mixed"),
+                 prop = "type", align = "left"),
+    "matched by multiple"
+  )
+
+  # A valid, unbound Tbl() argument still forwards through a wrapper that
+  # hard-codes a different argument (TblDifFit fixes `digits`).
+  dif <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_TR.xlsx")
+  expect_s3_class(TblDifFit(dif, merge = FALSE), "flextable")
+  expect_error(TblDifFit(dif, digits = 0), "matched by multiple")
+
+})
+
+
+# Regression tests for #115: excl/select must match whole names exactly, not as
+# unanchored regular expressions / substrings.
+
+test_that("TblMvi() excl matches column names exactly (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex1", "tables"), "mv_item.xlsx")
+
+  # Substring / regex collisions are ignored: "dministered" is inside the
+  # internal "N_administered" and "ota" is inside the "Total" label, but neither
+  # is an exact name or label, so nothing is excluded. The old grepl() dropped
+  # N_administered, N_valid, NV and NR for a bare "N". (A bare "N" now excludes
+  # the column shown as "N" -- see the display-label test below.)
+  keep_all <- names(TblMvi(tab, excl = NULL)$body$dataset)
+  expect_equal(names(TblMvi(tab, excl = "dministered")$body$dataset), keep_all)
+  expect_equal(names(TblMvi(tab, excl = "ota")$body$dataset), keep_all)
+  expect_true(all(c("OM", "NV", "NR") %in% keep_all))
+
+  # The documented defaults still drop their exact columns.
+  def <- names(TblMvi(tab)$body$dataset)
+  expect_false(any(c("Total", "ALL") %in% def))  # N_administered, ALL excluded
+  expect_true(all(c("OM", "NV", "NR") %in% def))
+
+})
+
+
+test_that("TblMvi() select matches the group suffix exactly (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  # Two groups whose suffixes collide as substrings ("_g" is contained in
+  # "_g2"). select = "g" must keep only the "_g" columns.
+  obj <- data.frame(
+    x = c("", ""),
+    item = c("i1", "i2"),
+    position_g = c(1, 2),
+    N_valid_g = c(10, 20),
+    position_g2 = c(3, 4),
+    N_valid_g2 = c(30, 40),
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
+  colnames(obj)[1] <- ""  # mimic the unnamed first column from openxlsx
+
+  tbl <- TblMvi(obj, select = "g")
+  nms <- names(tbl$body$dataset)
+  # Old grepl("_g") also matched "_g2", leaking "position2"/"N_valid2" columns.
+  expect_equal(nms, c("Nr.", "Item", "Pos.", "N"))
+  expect_false(any(grepl("2$", nms)))
+
+})
+
+
+test_that("TblMvi() strips only a trailing '_collapsed' suffix from item names", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  obj <- data.frame(
+    x = c("", "", ""),
+    # Third item carries "_collapsed" mid-name: only the trailing suffix is
+    # stripped, so the internal occurrence must be preserved.
+    item = c("i1_collapsed", "i2", "i3_collapsed_c"),
+    position = c(1, 2, 3),
+    N_valid = c(10, 20, 30),
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
+  colnames(obj)[1] <- ""  # mimic the unnamed first column from openxlsx
+
+  # Only the trailing suffix is stripped by default
+  tbl <- TblMvi(obj)
+  expect_equal(tbl$body$dataset[["Item"]], c("i1", "i2", "i3_collapsed_c"))
+
+  # Preserved when disabled
+  tbl_keep <- TblMvi(obj, rename_collapsed = FALSE)
+  expect_equal(
+    tbl_keep$body$dataset[["Item"]],
+    c("i1_collapsed", "i2", "i3_collapsed_c")
+  )
+
+})
+
+
+test_that("TblMvi() select strips only the trailing group suffix (#121)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  # A measure name that itself contains the suffix token ("_g") must keep its
+  # internal "_g"; the rename must strip only the *trailing* "_g" (anchored),
+  # not the first occurrence.
+  obj <- data.frame(
+    x = c("", ""),
+    item = c("i1", "i2"),
+    position_g = c(1, 2),
+    x_g_score_g = c(10, 20),
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
+  colnames(obj)[1] <- ""
+
+  nms <- names(TblMvi(obj, select = "g", excl = NULL)$body$dataset)
+  expect_true("x_g_score" %in% nms)   # anchored: only the trailing "_g" removed
+  expect_false("x_score_g" %in% nms)  # unanchored sub() would have produced this
+
+})
+
+
+test_that("TblPars() excl matches column names exactly (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex2", "tables"), "irt_poly.xlsx")
+
+  # Substring / regex collisions are ignored: "WMNS" is inside "WMNSQ" and
+  # "otal" is inside the "Total" label, but neither is an exact name or label,
+  # so nothing is excluded. The old grepl() dropped N_administered, N_valid and
+  # even WMNSQ for "N". (A bare "N" now excludes the column shown as "N" -- see
+  # the display-label test below.)
+  keep_all <- names(TblPars(tab, excl = NULL)$body$dataset)
+  expect_equal(names(TblPars(tab, excl = "WMNS")$body$dataset), keep_all)
+  expect_equal(names(TblPars(tab, excl = "otal")$body$dataset), keep_all)
+  expect_true(all(c("WMNSQ", "N") %in% keep_all))
+
+  # Exact name is still excluded.
+  expect_false("N_administered" %in% names(TblPars(tab, excl = "N_administered")$body$dataset))
+
+})
+
+
+test_that("TblDif() excl matches column names exactly (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  dif <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_TR.xlsx")
+  hdr1 <- function(ft) as.character(unlist(ft$header$dataset[1, ]))
+
+  all_cols <- hdr1(TblDif(dif))
+  # "mig" is not an exact column name; the old grepl() dropped mig.1-2/1-3/2-3.
+  expect_equal(hdr1(TblDif(dif, excl = "mig")), all_cols)
+  expect_true(all(c("mig.1-2", "mig.1-3", "mig.2-3") %in% all_cols))
+
+  # Exact names (with "." and "-" treated literally) are excluded.
+  dropped <- hdr1(TblDif(dif, excl = c("mig.1-2", "mig.1-3")))
+  expect_false(any(c("mig.1-2", "mig.1-3") %in% dropped))
+  expect_true(all(c("item", "sex.0-1", "mig.2-3") %in% dropped))
+
+})
+
+
+test_that("TblDifFit() excl matches DIF variables exactly (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_TR.xlsx")
+
+  # "se" is a substring of "sex" but not an exact DIF variable, so the sex rows
+  # are retained (the old grepl() removed them).
+  collide <- TblDifFit(tab, excl = "se")$body$dataset[["DIF variable"]]
+  expect_true(any(grepl("Sex", collide)))
+
+  # The exact name still drops the rows.
+  dropped <- TblDifFit(tab, excl = "sex")$body$dataset[["DIF variable"]]
+  expect_false(any(grepl("Sex", dropped)))
+
+})
+
+
+# Regression tests for #115 (follow-up to #121): excl also accepts the display
+# labels shown in the rendered table, in addition to the internal column /
+# DIF-variable names it matches already. Renamed columns (e.g. N_administered ->
+# "Total", N_valid -> "N") were previously impossible to exclude by what the
+# user sees.
+
+test_that("TblMvi() excl also accepts display labels (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex1", "tables"), "mv_item.xlsx")
+
+  # Excluding by display label is equivalent to excluding by the internal name.
+  by_label <- names(TblMvi(tab, excl = c("Total", "N"))$body$dataset)
+  by_internal <- names(TblMvi(tab, excl = c("N_administered", "N_valid"))$body$dataset)
+  expect_equal(by_label, by_internal)
+  expect_false(any(c("Total", "N") %in% by_label))
+
+  # The user's original mix of labels now drops each named column exactly.
+  nms <- names(TblMvi(tab, excl = c("Nr.", "Pos.", "Total", "N"))$body$dataset)
+  expect_false(any(c("Nr.", "Pos.", "Total", "N") %in% nms))
+  expect_true(all(c("Item", "OM", "NV", "NR") %in% nms))
+
+})
+
+
+test_that("TblPars() excl also accepts display labels (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex2", "tables"), "irt_poly.xlsx")
+
+  by_label <- names(TblPars(tab, excl = c("Total", "N"))$body$dataset)
+  by_internal <- names(TblPars(tab, excl = c("N_administered", "N_valid"))$body$dataset)
+  expect_equal(by_label, by_internal)
+  expect_false(any(c("Total", "N") %in% by_label))
+
+  # "Difficulty" is the label for the internal "xsi" column.
+  expect_true("Difficulty" %in% names(TblPars(tab, excl = NULL)$body$dataset))
+  expect_false("Difficulty" %in% names(TblPars(tab, excl = "Difficulty")$body$dataset))
+
+})
+
+
+test_that("TblDifFit() excl also accepts display labels (#115)", {
+
+  skip_if_not_installed("flextable")
+  skip_if_not_installed("officer")
+
+  tab <- Import(test_path("fixtures", "ex1", "tables"), "dif_dich_TR.xlsx")
+
+  # "Migration" is the display label for the raw DIF variable "mig".
+  by_label <- TblDifFit(tab, excl = "Migration")$body$dataset[["DIF variable"]]
+  by_raw <- TblDifFit(tab, excl = "mig")$body$dataset[["DIF variable"]]
+  expect_equal(by_label, by_raw)
+  expect_false(any(grepl("Migration", by_label)))
+
+  # A custom `label` value can also be used to exclude its rows.
+  custom <- TblDifFit(tab, excl = "Custom",
+                      label = c(mig = "Custom"))$body$dataset[["DIF variable"]]
+  expect_false(any(grepl("Custom|Migration", custom)))
 
 })
 

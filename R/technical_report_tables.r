@@ -39,10 +39,10 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
                 size_foot = 10, width = NULL, digits = 2, align = "center",
                 align_head = "center") {
 
-  if(!requireNamespace("flextable", quietly = TRUE)) {
+  if (!requireNamespace("flextable", quietly = TRUE)) {
     stop("Please install flextable!")
   }
-  if(!requireNamespace("officer", quietly = TRUE)) {
+  if (!requireNamespace("officer", quietly = TRUE)) {
     stop("Please install officer!")
   }
 
@@ -59,7 +59,7 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
 
   # Set column widths
   if (!any(is.null(width))) {
-    if(length(width) == 1) width <- rep(width, ncol(obj))
+    if (length(width) == 1) width <- rep(width, ncol(obj))
     for (j in seq(1, ncol(obj)))
       ft <- flextable::width(ft, j = j, width = width[j])
   } else if (autofit) {
@@ -150,8 +150,10 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
 #' property such as response format, text function, or cognitive function.
 #' @param propname A name for the item property to be used in the table heading.
 #' @param footnote A table note.
-#' @param na.rm A logical to remove empty properties.
+#' @param na.rm A logical to remove empty properties (rows) and empty groups (columns).
 #' @param formats Long names of item properties to be displayed in the table.
+#' @param ... Further arguments passed to [Tbl()]; `align` and `hline` are set
+#' internally and will error if also passed here.
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @inheritParams collapse_response_categories
@@ -182,9 +184,12 @@ Tbl <- function(obj, footnote = NULL, autofit = TRUE, merge = TRUE, lbl = NULL,
 #'   footnote = "The study administered three difficulty-tiered booklets."
 #' )
 #' }
-TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
+TblItemProps <- function(vars, select, prop, propname = "\x20", footnote = NULL,
                          na.rm = TRUE, size = 12, width = NULL,
-                         formats = NULL) {
+                         formats = NULL, ...) {
+
+    if (!(prop %in% names(vars))) stop("Unknown item property ", prop, "!")
+    if (!is.factor(vars[[prop]])) vars[[prop]] <- as.factor(vars[[prop]])
 
     # Create frequency table
     freq_groups <- NULL
@@ -200,7 +205,13 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
       }
     }
     freq_groups[is.na(freq_groups)] <- 0
-    if (na.rm) freq_groups <- freq_groups[freq_groups$f > 0, ]
+    if (na.rm) {
+      ff <- rowSums(freq_groups[, -1, drop = FALSE]) > 0
+      freq_groups <- freq_groups[ff, , drop = FALSE]
+      ff <- colSums(freq_groups[, -1, drop = FALSE]) > 0
+      freq_groups <- freq_groups[, c(TRUE, ff), drop = FALSE]
+      select <- select[ff]
+    }
 
     # Sort table according to ordering in formats
     formatsvec <- GetPropLabels()
@@ -221,10 +232,11 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
     freq_groups <- rbind(freq_groups, c("Total number of items", sums))
 
     # Create flextable
+    hline <- if (nrow(freq_groups) > 1) nrow(freq_groups) - 1 else NULL
     ft <- Tbl(freq_groups, align = c("left", rep("center", length(select))),
-              hline = nrow(freq_groups) - 1, footnote = footnote,
-              size = size, width = width)
-    return (ft)
+              hline = hline, footnote = footnote,
+              size = size, width = width, ...)
+    return(ft)
 
   }
 
@@ -239,6 +251,7 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
 #' @param position The variable name in `vars` giving the item position.
 #' @param footnote A table note.
 #' @param lbl Long names of item facets to be displayed in the table.
+#' @param ... Further arguments passed to [Tbl()].
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @inheritParams collapse_response_categories
@@ -266,7 +279,7 @@ TblItemProps <- function(vars, select, prop, propname = "", footnote = NULL,
 #' }
 TblItemFacets <- function(vars, select, facets, position = NULL,
                           footnote = NULL, size = 12, width = 1.9,
-                          lbl = NULL, rename_collapsed = TRUE) {
+                          lbl = NULL, rename_collapsed = TRUE, ...) {
 
   # Select variables
   cols <- c("item", facets)
@@ -290,13 +303,13 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
   col_names <- c(ifelse(is.null(position), "No.", "Pos."), "Item", names(facets))
   colnames(tab) <- col_names
   if (rename_collapsed)
-    tab$Item <- gsub("_collapsed", "", tab$Item)
+    tab$Item <- sub("_collapsed$", "", tab$Item)
 
   # Create flextable
   if (length(width) == 1) width <- c(0.3, rep(width, ncol(tab) - 1))
-  ft <- Tbl(tab, footnote = footnote, width = width, size = size)
+  ft <- Tbl(tab, footnote = footnote, width = width, size = size, ...)
   ft <- flextable::colformat_double(ft, j = 1, digits = 0)
-  return (ft)
+  return(ft)
 
 }
 
@@ -307,10 +320,22 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' @param obj A list with data frames with sheets from "mv_item.xlsx"
 #' or a data frame with sheet "summary" from "mv_item.xlsx" created by
 #' [mv_item()].
-#' @param select An optional name of a specific group to select.
+#' @param select An optional name of a specific group to select. Columns whose
+#' names end in the group suffix (e.g. `"_mixed"`) are kept, along with the
+#' `"Nr."` and `"item"` columns; the suffix is matched literally, not as a
+#' regular expression.
 #' @param footnote An optional table note.
 #' @param sort A column name to indicate by which column to sort.
-#' @param excl A vector of column names to exclude.
+#' @param excl A vector of column names to exclude. Each value is matched
+#' exactly (not as a regular expression or substring) against either the
+#' internal column name or the label shown in the rendered table (e.g. both
+#' `"N_administered"` and `"Total"` exclude the total-respondents column).
+#' Columns are dropped before the widths are applied, so a vector `width` must
+#' be sized and ordered to match the columns that remain after exclusion (a
+#' single `width` value is recycled and is unaffected).
+#' @param rename_collapsed A boolean to remove the "_collapsed" suffix from
+#' item names.
+#' @param ... Further arguments passed to [Tbl()].
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @export
@@ -350,41 +375,57 @@ TblItemFacets <- function(vars, select, facets, position = NULL,
 #' }
 TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
                    size = 12, width = NULL,
-                   excl = c("N_administered", "ND", "ALL", "...1")) {
+                   excl = c("N_administered", "ND", "ALL", "...1"),
+                   rename_collapsed = TRUE, ...) {
 
   # Result table
   if (is.list(obj) & "list" %in% names(obj))
     obj <- obj[["list"]]
   tab <- obj
 
+  # Correct empty column names
+  colnames(tab)[1] <- "Nr."
+
   # Select results for group
   if (!is.null(select)) {
-    tab <- tab[, grepl(paste0("item|_", select), colnames(tab))]
-    colnames(tab) <- sub(paste0("_", select), "", colnames(tab))
+    keep <- colnames(tab) %in% c("Nr.", "item") |
+      endsWith(colnames(tab), paste0("_", select))
+    tab <- tab[, keep]
+    # Strip the trailing group suffix only (anchored, matching the filter above)
+    colnames(tab) <- sub(paste0("_", select, "$"), "", colnames(tab))
   }
 
-  # Exclude columns
-  regexp <-"^$"
-  if (!is.null(excl)) regexp <- paste0(regexp, "|", paste(excl, collapse = "|"))
-  tab <- tab[, !grepl(regexp, colnames(tab))]
+  # Rename collapsed items
+  if ("item" %in% colnames(tab) & rename_collapsed) {
+    tab$item <- sub("_collapsed$", "", tab$item)
+  }
 
   # Remove empty rows
-  tab <- tab[!(rowSums(!is.na(tab)) == 1), ]
+  # Note: columns 'Nr.' and 'item' are always present (i.e. at least 2 columns)
+  tab <- tab[!(rowSums(!is.na(tab)) == 2), ]
 
   # Sorting
   if (sort %in% names(tab)) {
     tab <- tab[order(as.numeric(tab[, sort])), ]
   }
 
-  # Add item number
-  tab <- cbind("Nr." = seq(1, nrow(tab)), tab)
+  # Create numbering
+  tab$"Nr." <- seq_len(nrow(tab))
 
-  # Rename variables
+  # Display labels (internal name -> label shown in the rendered table) so
+  # `excl` can match either the internal name or the displayed header.
   lbl <- colnames(tab)
   lbl[lbl == "item"] <- "Item"
   lbl[lbl == "position"] <- "Pos."
   lbl[lbl == "N_administered"] <- "Total"
   lbl[lbl == "N_valid"] <- "N"
+
+  # Exclude columns by exact name -- internal name OR display label
+  # (also drops unnamed columns)
+  keep <- nzchar(colnames(tab))
+  if (!is.null(excl)) keep <- keep & !(colnames(tab) %in% excl | lbl %in% excl)
+  tab <- tab[, keep]
+  lbl <- lbl[keep]
   colnames(tab) <- lbl
 
   # Create footnote
@@ -441,7 +482,7 @@ TblMvi <- function(obj, select = NULL, footnote = NULL, sort = "position",
   note <- append(note, footnote)
 
   # Create flextable
-  ft <- Tbl(tab, footnote = note, size = size, width = width)
+  ft <- Tbl(tab, footnote = note, size = size, width = width, ...)
   if ("Pos." %in% colnames(tab))
     ft <- flextable::colformat_double(ft, j = "Pos.", digits = 0)
   if ("Total" %in% colnames(tab))
@@ -465,6 +506,7 @@ TblMVI <- TblMvi
 #' [irt_analysis()].
 #' @param rename_collapsed A boolean to remove the "_collapsed" suffix from
 #' item names.
+#' @param ... Further arguments passed to [Tbl()].
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
@@ -502,21 +544,30 @@ TblMVI <- TblMvi
 #' TblPars(pars, excl = NULL, footnote = "Nothing to report.")
 #' }
 TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
-                    size = 10, width = 0.5, rename_collapsed = TRUE) {
+                    size = 10, width = 0.5, rename_collapsed = TRUE, ...) {
 
   # Result table
   if (is.list(obj) & "summary" %in% names(obj))
     obj <- obj[["summary"]]
   tab <- obj
 
-  # Exclude columns
+  # Correct empty column names
+  colnames(tab)[1] <- "Nr."
+
+  # Exclude columns by exact name -- internal name OR display label (the labels
+  # mirror the rename block below; excl may use either form).
   if (!is.null(excl)) {
-    tab <- tab[, !grepl(paste(excl, collapse = "|"), colnames(tab))]
+    lbl <- colnames(tab)
+    lbl[lbl == "correct"] <- "Percentage\n correct"
+    lbl[lbl == "N_administered"] <- "Total"
+    lbl[lbl == "N_valid"] <- "N"
+    lbl[lbl == "xsi"] <- "Difficulty"
+    tab <- tab[, !(colnames(tab) %in% excl | lbl %in% excl)]
   }
 
   # Rename collapsed items
   if ("Item" %in% colnames(tab) & rename_collapsed) {
-    tab$Item <- gsub("_collapsed", "", tab$Item)
+    tab$Item <- sub("_collapsed$", "", tab$Item)
   }
 
   # Model type
@@ -525,7 +576,6 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
 
   # Rename variables
   lbl <- colnames(tab)
-  lbl[1] <- "Nr."
   lbl[lbl == "correct"] <- "Percentage\n correct"
   lbl[lbl == "N_administered"] <- "Total"
   lbl[lbl == "N_valid"] <- "N"
@@ -583,7 +633,7 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
     note <- append(note, list(flextable::as_i("Q")))
     note <- append(note, list(flextable::as_sub("3")))
     note <- append(note,
-                   " = Average absolute residual correlation for item (Yen, 1983). "
+                   " = Average absolute residual correlation for item (Yen, 1984). "
     )
   }
   if ("Percentage correct" %in% colnames(tab))
@@ -595,7 +645,7 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
     note <- append(note, footnote)
 
   # Create flextable
-  ft <- Tbl(tab, size = size, width = width, footnote = note)
+  ft <- Tbl(tab, size = size, width = width, footnote = note, ...)
   if ("Nr." %in% colnames(tab)) {
     ft <- flextable::colformat_double(ft, j = 1, digits = 0)
     ft <- flextable::width(ft, j = "Nr.", width = .3)
@@ -640,6 +690,7 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
 #' @param obj A list with data frames with sheets from "irt_poly.xlsx"
 #' or sheet "steps" from "irt_poly.xlsx" created by [irt_analysis()].
 #' @param digits A number for rounding.
+#' @param ... Further arguments passed to [Tbl()].
 #' @returns A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
@@ -677,7 +728,7 @@ TblPars <- function(obj, footnote = NULL, excl = c("N_administered"),
 #' TblSteps(pars, size = 12, footnote = "Nothing to note.")
 #' }
 TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
-                     rename_collapsed = TRUE) {
+                     rename_collapsed = TRUE, ...) {
 
   # Result table
   if (is.list(obj) & "steps" %in% names(obj))
@@ -689,7 +740,7 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
 
   # Rename collapsed items
   if ("Item" %in% colnames(tab) & rename_collapsed) {
-    tab$Item <- gsub("_collapsed", "", tab$Item)
+    tab$Item <- sub("_collapsed$", "", tab$Item)
   }
 
   # Rounding
@@ -721,7 +772,7 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
     width <- rep(width, ncol(tab))
     width[1] <- max(nchar(tab$Item)) * .085
   }
-  ft <- Tbl(tab, footnote = note, size = size, width = width)
+  ft <- Tbl(tab, footnote = note, size = size, width = width, ...)
   return(ft)
 
 }
@@ -738,6 +789,8 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
 #' @param width The column widths; if a single value is given, it refers to the
 #' first column; otherwise the number of values must correspond to the number of
 #' columns in `obj`.
+#' @param ... Further arguments passed to [Tbl()]. The first column (dimension
+#' labels) is always left-aligned, so any `align` passed here does not affect it.
 #' @return A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
@@ -776,7 +829,7 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
 #'        rownames = c("Units", "Change", "Space", "Data"))
 #' }
 TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
-                   footnote = NULL, size = 12, width = 3) {
+                   footnote = NULL, size = 12, width = 3, ...) {
 
   # Get table
   obj <- obj[[paste0("Cor-Var ", model)]]
@@ -818,7 +871,7 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 
   # Create flextable
   if (length(width) == 1) width <- c(width, rep(0.6, ncol(tab) - 1))
-  ft <- Tbl(tab, footnote = note, size = size, width = width)
+  ft <- Tbl(tab, footnote = note, size = size, width = width, ...)
   ft <- flextable::bold(ft, j = 1, part = "body")
   ft <- flextable::align(ft, j = 1, align = "left", part = "body")
   return(ft)
@@ -837,10 +890,17 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 #' @param colnames2 A named vector of groups for the DIF variables included in
 #' the second line for the table heading; the names indicate the group name in
 #' `obj`, while the values give the new headings.
+#' @param excl A vector of column names to exclude, matched exactly against the
+#' column names (e.g. `"mig.1-2"`); `.` and `-` are treated literally. Unlike
+#' [TblMvi()], the displayed group labels (e.g. `"Migration"`) are not accepted
+#' here, because one label maps to several columns.
 #' @param width The widths of the columns; if a single values is given, it
 #' corresponds to the first column; otherwise the number of values must
-#' correspond to the number of columns in `obj`.
+#' correspond to the number of columns in the rendered table (i.e. `obj` after
+#' any columns removed by `excl`).
 #' @param digits A number for rounding.
+#' @param ... Further arguments passed to [Tbl()]; `hline` and `lbl` are set
+#' internally and will error if also passed here.
 #' @return A flextable.
 #' @inheritParams Tbl
 #' @inheritParams TblMvi
@@ -881,7 +941,7 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 TblDif <- function(obj, footnote = NULL, excl = NULL,
                    colnames1 = NULL, colnames2 = NULL,
                    width = 1.4, size = 10, digits = 2,
-                   rename_collapsed = TRUE) {
+                   rename_collapsed = TRUE, ...) {
 
   # Result table
   if (is.list(obj) & "estimates" %in% names(obj))
@@ -890,12 +950,12 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
 
   # Exclude columns
   if (!is.null(excl)) {
-    tab <- tab[, !grepl(paste(excl, collapse = "|"), colnames(tab))]
+    tab <- tab[, !(colnames(tab) %in% excl)]
   }
 
   # Rename collapsed items
-  if ("Item" %in% colnames(tab) & rename_collapsed) {
-    tab$Item <- gsub("_collapsed", "", tab$Item)
+  if ("item" %in% colnames(tab) & rename_collapsed) {
+    tab$item <- sub("_collapsed$", "", tab$item)
   }
 
   # Rename variables
@@ -952,7 +1012,7 @@ TblDif <- function(obj, footnote = NULL, excl = NULL,
   # Create flextable
   if (length(width) == 1) width <- c(width, rep(1, ncol(tab) - 1))
   ft <- Tbl(tab, footnote = note, size = size, width = width,
-            hline = nrow(tab) - 2, lbl = lbl)
+            hline = nrow(tab) - 2, lbl = lbl, ...)
   ft <- flextable::add_header_row(ft, top = FALSE, values = vals)
   ft <- flextable::style(ft, i = 2, part = "header",
                          pr_t = officer::fp_text(bold = FALSE))
@@ -970,8 +1030,17 @@ TblDIF <- TblDif
 
 #' Create table with fit statistics for DIF analyses
 #'
-#' @param excl A vector of DIF variables that should be excluded.
+#' @param excl A vector of DIF variables that should be excluded. Each value is
+#' matched exactly (not as a regular expression or substring) against either the
+#' raw `DIF.variable` value (e.g. `"mig"`) or its display label (e.g.
+#' `"Migration"`, including any custom `label`).
 #' @param label A vector of names for the DIF variables.
+#' @param width The widths of the columns; if a single value is given, it is
+#' applied to all columns; otherwise the number of values must correspond to the
+#' number of columns in the rendered table. `excl` removes rows here, so it does
+#' not affect the column count.
+#' @param ... Further arguments passed to [Tbl()]; `digits` is set internally and
+#' will error if also passed here.
 #' @return A flextable.
 #' @inheritParams TblDif
 #' @export
@@ -1006,17 +1075,27 @@ TblDIF <- TblDif
 #' # Excluding results for sex, but with a new label for mig
 #' TblDifFit(dif$TR, excl= "sex", label = c("mig" = "Migrant background"))
 #' }
-TblDifFit <-function(obj, footnote = NULL, excl = NULL, label = NULL,
-                     size = 12, width = 0.9) {
+TblDifFit <- function(obj, footnote = NULL, excl = NULL, label = NULL,
+                      size = 12, width = 0.9, ...) {
 
   # Result table
   if (is.list(obj) & "gof" %in% names(obj))
     obj <- obj[["gof"]]
   tab <- obj
 
-  # Exclude rows
+  # Exclude rows by exact name -- raw DIF.variable value OR display label (the
+  # labels mirror the rename block below; excl may use either form).
   if (!is.null(excl)) {
-    tab <- tab[!grepl(paste(excl, collapse = "|"), tab$'DIF.variable'), ]
+    lbl <- trimws(tab$'DIF.variable')
+    lbl[lbl == "sex"] <- "Sex"
+    lbl[lbl == "mig"] <- "Migration"
+    lbl[lbl == "books"] <- "Books"
+    lbl[lbl %in% c("rotation", "position")] <- "Test position"
+    lbl[lbl %in% c("sc", "cohort")] <- "Starting cohort"
+    for (i in seq_along(label)) {
+      lbl[trimws(tab$'DIF.variable') == names(label)[i]] <- label[i]
+    }
+    tab <- tab[!(tab$'DIF.variable' %in% excl | lbl %in% excl), ]
   }
 
   # Rename variables
@@ -1042,7 +1121,7 @@ TblDifFit <-function(obj, footnote = NULL, excl = NULL, label = NULL,
 
   # Create flextable
   ft <- Tbl(tab, footnote = note, size = size, width = width,
-            digits = 0)
+            digits = 0, ...)
   ft <- flextable::merge_v(ft, j = 1, part = "body")
   ft <- flextable::compose(
     ft, i = 1, j = "N", part = "header",
@@ -1107,7 +1186,7 @@ TblCode <- function(vars, select, collapsed = NULL, tbl = TRUE,
   )
   items <- vars$item[vars[[select]]]
   if (rename_collapsed)
-    items <- gsub("_collapsed", "", items)
+    items <- sub("_collapsed$", "", items)
   for (i in seq(1, length(items), 3)) {
     j <- i + 2
     while (j > length(items)) j <- j - 1
@@ -1128,7 +1207,7 @@ TblCode <- function(vars, select, collapsed = NULL, tbl = TRUE,
   )
   poly <- vars$item[vars$poly & vars[[select]]]
   if (rename_collapsed)
-    poly <- gsub("_collapsed", "", poly)
+    poly <- sub("_collapsed$", "", poly)
   if (length(poly) >= 1) {
     txt <- c(
       txt,

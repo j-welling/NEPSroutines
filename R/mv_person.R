@@ -243,7 +243,7 @@ mvp_analysis <- function(
 
     # NAs are not acknowledged in mvs-argument
     if (warn & any(resp %in% NA))
-        warning("NAs found in resp! These values are ignored.")
+        warning("NAs found in data.frame 'resp'! These values are ignored.")
 
     # Missing by design
     if(!is.null(missing_by_design)) mvs <- mvs[!(mvs %in% missing_by_design)]
@@ -495,18 +495,18 @@ mvp_plots <- function(
     # Check color argument
     grps <- create_ifelse(is.null(grouping), 1, length(groups))
 
-    if (!is.null(color)) {
-      if (length(color) != grps) {
-        stop(paste0('The number of provided colors does not match the number ',
-                    'of groups (', grps, ').'))
-      }
-    } else {
-      color <- colorspace::sequential_hcl(grps)
-    }
+    color <- check_color(color = color, grps = grps)
 
     # Test labels
-    if (any(!names(mv_all)[-length(mv_all)] %in% names(labels_mvs))) {
-        stop("Please provide labels for each missing value type specified in mv_p.")
+    names_mvs <- names(mv_all)[-length(mv_all)]
+    if (any(!names_mvs %in% names(labels_mvs))) {
+
+      missing_labels <- names_mvs[!names_mvs %in% names(labels_mvs)]
+      stop(paste0(
+        "No label/s provided for the missing value type(s) ",
+        list_elements(missing_labels),
+        ". Please check that each missing value type is included in 'labels_mvs'."
+      ))
     }
 
     # Create directory for plots
@@ -750,7 +750,14 @@ test_mvp_data <- function(mv_p, grouping, mvs) {
     }
 
     if (any(!(names(mvs) %in% nms))) {
-        stop("Please provide mv_p with all specified missing values.")
+
+      missing <- names(mvs)[!names(mvs) %in% nms]
+      stop(
+        "Missing value type(s) ",
+        list_elements(missing),
+        " are not included in 'mv_p'. Please check your input."
+      )
+
     }
 }
 

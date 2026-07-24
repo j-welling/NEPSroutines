@@ -735,7 +735,7 @@ check_minimum_valid <- function(
   if (length(remove) > 0 & warn) warning(
     "At least one group from the DIF variable '", dif_var, "' does not have ",
     "the minimum number of valid responses (", min_val, ") on ",
-    ifelse(length(remove) > 1, "items ", "item "), paste(remove, collapse = ", "),
+    ifelse(length(remove) > 1, "items ", "item "), list_elements(remove),
     ". The corresponding items were excluded from the analysis.\n"
   )
 
@@ -1257,8 +1257,8 @@ test_dif_data <- function(
     if (length(select) > 1) {
 
       if (length(select) != length(dif_vars)) {
-        stop("Please check 'select' and 'dif_vars'. At least one of them does ",
-             "not match the intended analysis.")
+        stop("Please check function arguments 'select' and 'dif_vars'. ",
+        "They must match in length. Please check your input.")
       }
 
       for (sel in select) {

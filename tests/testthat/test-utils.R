@@ -80,11 +80,11 @@ test_that("prepare_resp() works", {
 
   # vars is missing
   expect_error(prepare_resp(resp = resp, select = "use"),
-               regexp = "^To create a data frame \\(resp\\) with only the.+")
+               regexp = "^To create a data frame \\(resp\\) containing only the.+")
 
   # select not set or incorrect
   expect_message(prepare_resp(resp = resp, select = NULL, warn = TRUE),
-                 regexp = "^No variable provided indicating the items.+")
+                 regexp = "^No variable was provided that indicates which of the items.+")
   expect_no_message(prepare_resp(resp = resp, select = NULL, warn = FALSE))
   expect_error(prepare_resp(resp = resp, vars = vars, select = "dontuse"),
                regexp = "^Variable 'dontuse' not found in 'vars'.+")
@@ -283,7 +283,7 @@ test_that("check_invalid_values() works", {
   df2 <- data.frame(var1 = c(-5, -2, 1:8))
   expect_error(check_invalid_values(df = df2, name_df = "myname",
                                     items = "var1"),
-               regexp = "-5, -2")
+               regexp = "-5 and -2")
 
 })
 
@@ -496,5 +496,97 @@ test_that("rnd() works", {
   expect_equal(rnd(99), "99.00")
   expect_equal(rnd(c(0.042, 0.1459)), c("0.04", "0.15"))
   expect_equal(rnd(c(0.042, -0.1459), d0 = TRUE), c(".04", "-.15"))
+
+})
+
+
+test_that("parse_conditions() parses operators, values and connectors", {
+
+  # single comparison; no logical connectors
+  expect_equal(
+    parse_conditions(">1.15"),
+    list(operators = ">", values = 1.15, logicals = character(0))
+  )
+
+  # "=" is normalised to "=="; two-character operators are supported
+  expect_equal(parse_conditions("=3")$operators, "==")
+  expect_equal(parse_conditions(">=1.15")$operators, ">=")
+  expect_equal(parse_conditions("<=1.2")$operators, "<=")
+  expect_equal(parse_conditions("!=0")$operators, "!=")
+
+  # multiple conditions: operators, values and connectors captured in order
+  p <- parse_conditions("<1 | >1.2 & =1.1")
+  expect_equal(p$operators, c("<", ">", "=="))
+  expect_equal(p$values, c(1, 1.2, 1.1))
+  expect_equal(p$logicals, c("|", "&"))
+
+  # whitespace around operators and connectors is tolerated
+  expect_equal(parse_conditions(" > 1.15 & <= 1.20 "),
+               parse_conditions(">1.15&<=1.20"))
+
+  # a vector of conditions is rejected with a helpful message
+  expect_error(parse_conditions(c(">1.15", "<1.20")), "single condition")
+
+  # an unknown operator keeps the historical error message
+  expect_error(parse_conditions("+1"), "Unknown stat function.", fixed = TRUE)
+
+  # the reversed forms => and =< are rejected with a hint (R uses >= / <=)
+  expect_error(parse_conditions("=>1.15"), "did you mean '>='", fixed = TRUE)
+  expect_error(parse_conditions("=<1.15"), "did you mean '<='", fixed = TRUE)
+
+  # a malformed operator or missing number errors instead of coercing to NA
+  expect_error(parse_conditions("><1"), "Invalid number", fixed = TRUE)
+  expect_error(parse_conditions(">"), "Invalid number", fixed = TRUE)
+
+})
+
+
+test_that("eval_conditions() folds comparisons left-to-right", {
+
+  x <- c(0.90, 1.00, 1.10, 1.16, 1.18, 1.25)
+
+  expect_equal(eval_conditions(parse_conditions(">1.15"), x),
+               c(FALSE, FALSE, FALSE, TRUE, TRUE, TRUE))
+
+  # AND keeps only the in-band values
+  expect_equal(eval_conditions(parse_conditions(">1.15 & <1.20"), x),
+               c(FALSE, FALSE, FALSE, TRUE, TRUE, FALSE))
+
+  # >= includes the boundary value (1.16)
+  expect_equal(eval_conditions(parse_conditions(">=1.16"), x),
+               c(FALSE, FALSE, FALSE, TRUE, TRUE, TRUE))
+
+  # spaces give the same result as no spaces
+  expect_equal(eval_conditions(parse_conditions("<1 | >1.2"), x),
+               eval_conditions(parse_conditions("<1|>1.2"), x))
+
+})
+
+
+test_that("neps_palette() returns the package-wide blue scheme", {
+
+  # returns n hex colors from the shared 'Blues 2' palette
+  expect_length(neps_palette(1), 1)
+  expect_length(neps_palette(4), 4)
+  expect_match(neps_palette(1), "^#[0-9A-Fa-f]{6}$")
+
+  # single source of truth: identical to colorspace default (Blues 2)
+  expect_equal(neps_palette(3), colorspace::sequential_hcl(3, palette = "Blues 2"))
+
+})
+
+
+test_that("check_color() validates or generates colors", {
+
+  # NULL color falls back to the package palette
+  expect_equal(check_color(NULL, 3), neps_palette(3))
+
+  # user-supplied colors of matching length pass through untouched
+  cols <- c("red", "green", "blue")
+  expect_equal(check_color(cols, 3), cols)
+
+  # mismatched length errors
+  expect_error(check_color(c("red", "blue"), 3),
+               regexp = "number of provided colors does not match")
 
 })

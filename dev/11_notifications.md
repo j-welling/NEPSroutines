@@ -570,10 +570,13 @@ Messages 57–67 are all `message()` calls emitted when `verbose = TRUE` (the de
 
 | # | Type | Message text (abbreviated) | Trigger | Effect |
 |---|------|---------------------------|---------|--------|
-| 137 | **error** | *"Unknown stat function."* (in `GetPars()` `excl` branch) | An exclusion condition string does not start with `=`, `<`, or `>`. | Execution stops. Only simple comparison operators are supported in the `excl` argument. |
-| 138 | **error** | *"Unknown stat function."* (in `GetPars()` `stat` branch) | A statistic condition string does not start with `=`, `<`, or `>`. | Execution stops. Analogous to #137. |
+| 137 | **error** | *"Unknown stat function."* (in `GetPars()` `excl` branch) | An exclusion condition does not begin with a recognised comparison operator (`=`, `==`, `!=`, `<`, `<=`, `>`, `>=`). | Execution stops. Combine multiple conditions inside one string with `&`/`|`. |
+| 138 | **error** | *"Unknown stat function."* (in `GetPars()` `stat` branch) | A statistic condition does not begin with a recognised comparison operator. | Execution stops. Analogous to #137. |
 | 139 | **error** | *"Allowed values for argument main are 'std' and 'ustd'."* (in `GetDif()` `main` argument validation) | `main` is not `"std"` or `"ustd"`. | Execution stops. Only standardised and unstandardised effect-size variants are implemented. |
-| 140 | **error** | *"Unknown stat function."* (in `GetDif()` `dif` branch) | A DIF condition string uses an unsupported operator. | Execution stops. Analogous to #137. |
+| 140 | **error** | *"Unknown stat function."* (in `GetDif()` `dif` branch) | A DIF condition does not begin with a recognised comparison operator. | Execution stops. Analogous to #137. |
+| 141 | **error** | *"Provide a single condition string; combine filters with '&' or '|', …"* (in the shared `parse_conditions()` helper) | A condition argument (`excl`/`stat`/`dif`) is a character vector of length > 1 instead of a single string. | Execution stops. Pass one string and join filters with `&`/`|`, e.g. `">1.15 & <1.20"`. |
+| 142 | **error** | *"Unknown operator '=>' in condition '…': did you mean '>='?"* (in `parse_conditions()`) | A condition uses the reversed form `=>` or `=<` instead of `>=`/`<=`. | Execution stops with a hint to use the correct operator. |
+| 143 | **error** | *"Invalid number in condition '…'."* (in `parse_conditions()`) | The text after a comparison operator is not a number (e.g. a malformed operator such as `><1`, or a missing number such as `>`). | Execution stops instead of silently producing an `NA` comparison. |
 
 ---
 
@@ -581,9 +584,9 @@ Messages 57–67 are all `message()` calls emitted when `verbose = TRUE` (the de
 
 | Notification type | Count |
 |-------------------|------:|
-| **error** (`stop()`) | 46 |
+| **error** (`stop()`) | 49 |
 | **warning** | 24 |
 | **message** | 70 |
-| **Total** | **140** |
+| **Total** | **143** |
 
 > **Note:** Counts reflect all distinct notification call-sites in the package source at the time of writing.  The same underlying condition may be triggered multiple times during a single analysis run (e.g., once per group or per item).

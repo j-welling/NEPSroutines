@@ -14,7 +14,8 @@ TblDif(
   width = 1.4,
   size = 10,
   digits = 2,
-  rename_collapsed = TRUE
+  rename_collapsed = TRUE,
+  ...
 )
 
 TblDIF(
@@ -26,7 +27,8 @@ TblDIF(
   width = 1.4,
   size = 10,
   digits = 2,
-  rename_collapsed = TRUE
+  rename_collapsed = TRUE,
+  ...
 )
 }
 \arguments{
@@ -36,7 +38,10 @@ or a data frame with sheet "estimates" from "dif_poly_TR.xlsx" created by
 
 \item{footnote}{A table note.}
 
-\item{excl}{A vector of column names to exclude.}
+\item{excl}{A vector of column names to exclude, matched exactly against the
+column names (e.g. \code{"mig.1-2"}); \code{.} and \code{-} are treated literally. Unlike
+\code{\link[=TblMvi]{TblMvi()}}, the displayed group labels (e.g. \code{"Migration"}) are not accepted
+here, because one label maps to several columns.}
 
 \item{colnames1}{A named vector of names for the DIF variables included in
 the first line of the table heading; the names indicate the group name in
@@ -48,7 +53,8 @@ the second line for the table heading; the names indicate the group name in
 
 \item{width}{The widths of the columns; if a single values is given, it
 corresponds to the first column; otherwise the number of values must
-correspond to the number of columns in \code{obj}.}
+correspond to the number of columns in the rendered table (i.e. \code{obj} after
+any columns removed by \code{excl}).}
 
 \item{size}{The general font size.}
 
@@ -56,6 +62,9 @@ correspond to the number of columns in \code{obj}.}
 
 \item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
 item names.}
+
+\item{...}{Further arguments passed to \code{\link[=Tbl]{Tbl()}}; \code{hline} and \code{lbl} are set
+internally and will error if also passed here.}
 }
 \value{
 A flextable.

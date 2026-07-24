@@ -22,6 +22,46 @@ only_valid <- function(resp, valid = NULL, warn = TRUE) {
 }
 
 
+#' Default color palette for NEPSroutines plots
+#'
+#' Single source of truth for the package-wide color scheme. Missing-value
+#' plotting functions use these colors unless the user provides their own via a
+#' \code{color} argument, ensuring a consistent look across figures.
+#'
+#' @param n  integer; number of colors to generate
+#'
+#' @return character vector of \code{n} hex colors
+#' @noRd
+
+neps_palette <- function(n) {
+  colorspace::sequential_hcl(n, palette = "Blues 2")
+}
+
+
+#' Check color argument and create new if null
+#'
+#' @param color  vector; includes colors for plot
+#' @param grps  character vector; includes groups for graph
+#'
+#' @return color argument
+#' @noRd
+
+check_color <- function(color, grps) {
+
+  if (!is.null(color)) {
+    if (length(color) != grps) {
+      stop(paste0('The number of provided colors does not match the number ',
+                  'of groups (', grps, ').'))
+    }
+  } else {
+    color <- neps_palette(grps)
+  }
+
+  return(color)
+
+}
+
+
 #' Convert user-defined missing values to NAs
 #'
 #' User defined missing values (usually coded as negative numbers) must be
@@ -111,8 +151,11 @@ prepare_resp <- function(
     # Select only certain variables
     if (!is.null(select)) {
         if (is.null(vars)) {
-            stop("To create a data frame (resp) with only the indicated items, ",
-                 "please also provide vars.")
+            stop(
+              "To create a data frame (resp) containing only the items ",
+              "indicated by variable '", select,
+              "', please also provide the data frame vars."
+              )
         } else {
             check_logicals(vars, "vars", select, warn = warn)
             items <- vars$item[vars[[select]]]
@@ -120,8 +163,8 @@ prepare_resp <- function(
             resp <- resp[ , items]
         }
     } else if (warn) {
-        message("No variable provided indicating the items to keep. ",
-                "All items are kept.")
+        message("No variable was provided that indicates which of the items to keep",
+        " (see function argument 'select'). All items are kept.")
     }
 
     # Convert missing values to NA
@@ -151,8 +194,8 @@ is_null_mvs_valid <- function(mvs = NA, valid = NA) {
   }
 
   if (is.null(valid)) {
-    message("No variable with valid cases provided. ",
-            "All cases are used for analysis.")
+    message("No variable was provided that indicates valid cases ",
+            "(see function argument 'valid'). All cases are used for analysis.")
   }
   return(invisible())
 }
@@ -225,11 +268,16 @@ save_results <- function(results, filename, path) {
 #' @export
 
 check_folder <- function(path) {
+
     if (!file.exists(path)) {
+
         dir.create(path, recursive = TRUE)
         message("The location ", path, " did not exist. New folder created.")
+
     }
+
   return(invisible())
+
 }
 
 
@@ -240,14 +288,25 @@ check_folder <- function(path) {
 #' @export
 
 check_pid <- function(pid) {
+
     if (length(pid) != length(unique(pid))) {
-        stop("There are duplicates in the person identifiers.")
+
+      dupes <- unique(pid[duplicated(pid)])
+
+      stop("There are duplicates of the following person identifiers: ",
+           "\n", fmt_names(dupes))
+
     }
 
     if (any(is.na(pid))) {
-        warning("There are missing values in the person identifiers.")
+
+        warning("There are missing values (NA) in the person identifiers. ",
+                "Check that all persons have an identifier in resp.")
+
     }
+
   return(invisible())
+
 }
 
 
@@ -301,7 +360,9 @@ validation_msg <- function(label, bad, name_df, verb_singular, verb_plural,
 #' @export
 
 check_items <- function(items) {
+
     if (length(items) != length(unique(items))) {
+
         dupes <- unique(items[duplicated(items)])
         stop("Duplicate item names found in 'vars$item': ",
              fmt_names(dupes), ".")
@@ -453,7 +514,7 @@ check_invalid_values <- function(df, name_df = "<unknown>", items = NULL) {
     stop(sprintf(
       "Data frame '%s' contains invalid values (< 0): %s. ",
       name_df,
-      paste(invalid_values, collapse = ", ")
+      list_elements(invalid_values)
     ), "Include all user-defined missing values via the `mvs` argument.")
   }
   return(invisible())
@@ -730,6 +791,7 @@ order_xsi_fixed <- function(
   ) {
 
   if (irtmodel %in% c("1PL", "PCM2")) {
+
     xsi_arg <- TAM::tam.mml(
       resp = resp,
       Q = Q,
@@ -739,7 +801,9 @@ order_xsi_fixed <- function(
       verbose = FALSE,
       control = list(maxiter = 1)
     )$xsi.fixed.estimated
+
   } else if (irtmodel %in% c("2PL", "GPCM")) {
+
     xsi_arg <- TAM::tam.mml.2pl(
       resp = resp,
       Q = Q,
@@ -749,18 +813,48 @@ order_xsi_fixed <- function(
       verbose = FALSE,
       control = list(maxiter = 1)
     )$xsi.fixed.estimated
+
   }
 
- if (rename_steps) names(xsi_fixed) <- gsub("_step", ":step", names(xsi_fixed))
+  if (rename_steps) names(xsi_fixed) <- gsub("_step", ":step", names(xsi_fixed))
 
-  if (any(!names(xsi_fixed) %in% rownames(xsi_arg)))
-    stop(paste0("Items in xsi_fixed do not match items in ", irtmodel, " model!"))
+  if (any(!names(xsi_fixed) %in% rownames(xsi_arg))) {
 
+    missing_items <- names(xsi_fixed)[!names(xsi_fixed) %in% rownames(xsi_arg)]
+    stop(paste0(
+      ifelse(
+        length(missing_items) == 1,
+        paste0("Item ", missing_items, " is "),
+        paste0("Items ", fmt_names(missing_items), " are ")
+        ),
+      "included in xsi_fixed but not in the ", irtmodel, " model."
+    ))
+
+  }
+
+ if (any(!rownames(xsi_arg) %in% names(xsi_fixed))) {
+
+   missing_items <- rownames(xsi_arg)[!rownames(xsi_arg) %in% names(xsi_fixed)]
+   message(paste0(
+     ifelse(
+       length(missing_items) == 1,
+       paste0("Item ", missing_items, " is "),
+       paste0("Items ", fmt_names(missing_items), " are ")
+     ),
+     "included in the ", irtmodel, " model but not in xsi_fixed. ",
+     "The corresponding item difficulties are estimated freely."
+     ))
+
+ }
+
+  # reorder xsi
   xsi_new <- cbind(
-    xsi_arg[names(xsi_fixed), 1], xsi_fixed[names(xsi_fixed)] # reorder xsi
+    xsi_arg[names(xsi_fixed), 1],
+    xsi_fixed[names(xsi_fixed)]
   )
 
   return(xsi_new)
+
 }
 
 
@@ -774,13 +868,13 @@ create_suf_names <- function(vars_name = NULL) {
 
   if (is.data.frame(vars_name)) {
     for (item in seq_along(vars_name$item)) {
-      vars_name$item[[item]] <- gsub("_collapsed", "",vars_name$item[[item]])
+      vars_name$item[[item]] <- sub("_collapsed$", "", vars_name$item[[item]])
     }
     return(vars_name$item)
 
   } else {
     for (item in seq_along(vars_name)) {
-      vars_name[[item]] <- gsub("_collapsed", "",vars_name[[item]])
+      vars_name[[item]] <- sub("_collapsed$", "", vars_name[[item]])
     }
     return(vars_name)
   }
@@ -884,14 +978,94 @@ recodeVar <- function(x, src, tgt, default = NULL, keep.na = TRUE) {
 }
 
 #' Internal helper: capitalize the first letter of each string element
+#' @param x string; the word or sentence to be capitalized
+
 #' @noRd
 capitalize <- function(x) {
   paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))
 }
 
 #' Open first vignette
-#'
 #' @export
 open_guide <- function() {
   utils::vignette("getting_started", package = "NEPSroutines")
+}
+
+#' Internal helper: use the right separation when listing elements in a string
+#' @param x character vector; includes elements that shall be listed using oxford comma
+#' @noRd
+list_elements <- function(x) {
+  n <- length(x)
+  if (n == 0) return("")
+  if (n == 1) return(x)
+  if (n == 2) return(paste(x, collapse = " and "))
+  paste0(paste(x[-n], collapse = ", "), ", and ", x[n])
+
+}
+
+# Internal helper: parse a string condition used by GetPars()/GetDif().
+# A condition is a single string such as ">1.15", ">1.15 & <1.20", or
+# "<1 | >1.2": comparison operators (=, ==, !=, <, <=, >, >=) are combined
+# with the logical connectors & (and) and | (or). Surrounding whitespace is
+# ignored. An unrecognised operator, the reversed forms => / =<, or a
+# non-numeric value each raise an error. Returns the operators, their numeric
+# values, and the connectors in their original order.
+# @noRd
+parse_conditions <- function(cond) {
+
+  cond <- as.character(cond)
+  if (length(cond) != 1L)
+    stop("Provide a single condition string; combine filters with '&' or '|', ",
+         "e.g. \">1.15 & <1.20\".")
+
+  # logical connectors (& or |) in their original order
+  logicals <- base::strsplit(base::gsub("[^&|]", "", cond), "")[[1]]
+
+  # split into individual comparisons and trim surrounding whitespace
+  parts <- base::trimws(base::strsplit(base::trimws(cond), "[&|]")[[1]])
+
+  # split each comparison into its operator and the number to compare against
+  operators <- character(length(parts))
+  values <- numeric(length(parts))
+  for (k in seq_along(parts)) {
+    # grab the leading operator; 2-char forms are listed first so e.g. ">="
+    # matches before ">" (=> and =< are matched here only to reject them below)
+    op <- base::regmatches(parts[k], base::regexpr("^(<=|>=|=>|=<|==|!=|=|<|>)", parts[k]))
+    if (length(op) == 0L)
+      stop("Unknown stat function.")
+    # reject the reversed forms of >= and <= with a helpful hint
+    if (op == "=>" || op == "=<")
+      stop("Unknown operator '", op, "' in condition '", parts[k],
+           "': did you mean '", if (op == "=>") ">=" else "<=", "'?")
+    operators[k] <- if (op == "=") "==" else op   # treat "=" as R's "=="
+    # whatever follows the operator has to be a number, otherwise error
+    value <- suppressWarnings(
+      as.numeric(base::trimws(base::sub("^(<=|>=|==|!=|=|<|>)", "", parts[k]))))
+    if (is.na(value))
+      stop("Invalid number in condition '", parts[k], "'.")
+    values[k] <- value
+  }
+
+  list(operators = operators, values = values, logicals = logicals)
+
+}
+
+
+# Internal helper: evaluate parsed conditions against a numeric vector. The
+# individual comparisons are folded left-to-right with their logical connectors
+# (e.g. "<1 | >1.2" becomes (x < 1) | (x > 1.2)). Returns a logical vector the
+# same length as x.
+# @noRd
+eval_conditions <- function(parsed, x) {
+
+  # getFunction() looks up the function named by a string, so
+  # getFunction(">")(x, 1.2) is x > 1.2 and getFunction("&")(a, b) is a & b.
+  # start from the first comparison, then fold in the rest left-to-right.
+  boolvec <- methods::getFunction(parsed$operators[1L])(x, parsed$values[1L])
+  for (k in seq_along(parsed$operators)[-1L]) {
+    cur <- methods::getFunction(parsed$operators[k])(x, parsed$values[k])
+    boolvec <- methods::getFunction(parsed$logicals[k - 1L])(boolvec, cur)
+  }
+  boolvec
+
 }

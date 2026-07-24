@@ -10,7 +10,8 @@ TblSteps(
   size = 10,
   width = 1,
   digits = 2,
-  rename_collapsed = TRUE
+  rename_collapsed = TRUE,
+  ...
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ number of columns in \code{obj}.}
 
 \item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
 item names.}
+
+\item{...}{Further arguments passed to \code{\link[=Tbl]{Tbl()}}.}
 }
 \value{
 A flextable.

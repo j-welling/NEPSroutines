@@ -283,7 +283,7 @@ mvi_analysis <- function(
 
     # NAs are not acknowledged in mvs-argument
     if (warn & any(resp_c %in% NA)) {
-      warning("NAs found in resp! These values are ignored.")
+      warning("NAs found in data.frame 'resp'! These values are ignored.")
     }
 
     # Convert all values missing by design
@@ -443,12 +443,12 @@ test_mvi_analysis <- function(
 
   if (is.null(grouping)) {
     if (length(position) > 1) {
-      stop("No grouping. Please provide only one position variable.\n")
+      stop("No grouping variable provided. Please provide only one position variable.\n")
     }
   } else {
     if (length(position) == 1) {
       warning("Only one position variable provided. ",
-              "The items of each group are therefore set to the same positions.\n")
+              "The item positions are therefore identical between groups.\n")
     } else {
       if (length(position) != length(grouping)) {
         stop("Position and grouping variables do not match. ",
@@ -494,8 +494,8 @@ create_mvlist <- function(
   if (length(item) != length(position) |
       ncol(responses) != length(item) |
       ncol(responses) != length(position)) {
-    stop("Number of items in dataframe responses, in vector item and in vector position do not match. ",
-         "Please provide matching arguments to function create_mvlist().")
+    stop("Number of items in dataframe, position variable and selected item vector do not match. ",
+         "Please check your input.")
   }
 
   # Create dataframe
@@ -565,7 +565,7 @@ mvi_calc <- function(responses, mvs, digits = 3, use_for_plot) {
 #' only the items administered to and the cases of the designated group
 #' @param mvs  named integer vector; contains user-defined missing values
 #' @param digits  integer; number of decimals for rounding
-#' @param use_for_plot logical; indicates whether frequencies are used for a plot
+#' @param use_for_plot logical; whether return object is used as data in plot
 #'
 #' @return table with frequency of missing values for one missing value type
 #' (by item).
@@ -612,7 +612,7 @@ resp_per_position <- function(resp, resp_c, vars_c, grouping, position) {
 
   for (g in grouping) {
 
-    r <- data.frame(t(resp_c[resp[[g]], ]))
+    r <- data.frame(t(resp_c[resp[[g]], vars_c$item[vars_c[[g]]]]))
     r$item <- rownames(r)
     r <- merge(r, vars_c[, c('item', position[g])], by = "item")
     r <- dplyr::rename(r, position = as.character(position[g]))
@@ -972,29 +972,6 @@ mvi_plots <- function(
   }
 }
 
-#' Check color argument and create new if null
-#'
-#' @param color  vector; includes colors for plot
-#' @param grps  character vector; includes groups for graph
-#'
-#' @return color argument
-#' @noRd
-
-check_color <- function(color, grps) {
-
-  if (!is.null(color)) {
-    if (length(color) != grps) {
-      stop(paste0('The number of provided colors does not match the number ',
-                  'of groups (', grps, ').'))
-    }
-  } else {
-    color <- colorspace::sequential_hcl(grps, palette = "Viridis")
-  }
-
-  return(color)
-
-}
-
 #' Create dataframe in wide format for all groups
 #'
 #' @param mv_i  list with missing values as variables
@@ -1187,11 +1164,11 @@ print_mvi_results <- function(
             message("The proportion of ", labels_mvs[lbl], " varied between ",
                     mv_min, "%", if(length(item_min) <= 3) {
                         paste0(" (", ifelse(length(item_min) > 1, "items ", "item "),
-                               paste(item_min, collapse = ", "), ")")
+                               list_elements(item_min), ")")
                     }, " and ",
                     mv_max, "%", if(length(item_max) <= 3) {
                         paste0(" (", ifelse(length(item_max) > 1, "items ", "item "),
-                               paste(item_max, collapse = ", "), ")")
+                               list_elements(item_max), ")")
                     }, ".")
 
         }
@@ -1213,11 +1190,11 @@ print_mvi_results <- function(
                         " ", name_grouping, " varied between ",
                         mv_min, "%", if(length(item_min) <= 3) {
                             paste0(" (", ifelse(length(item_min) > 1, "items ", "item "),
-                                   paste(item_min, collapse = ", "), ")")
+                                   list_elements(item_min), ")")
                         }, " and ",
                         mv_max, "%", if(length(item_max) <= 3) {
                             paste0(" (", ifelse(length(item_max) > 1, "items ", "item "),
-                                   paste(item_max, collapse = ", "), ")")
+                                   list_elements(item_max), ")")
                         }, ".")
             }
         }
@@ -1245,6 +1222,13 @@ test_mvi_data <- function(mv_i, grouping, mvs) {
     }
 
     if (any(!(names(mvs) %in% nms))) {
-        stop("Please provide mv_i with all specified missing values.")
+
+      missing <- names(mvs)[!names(mvs) %in% nms]
+        stop(
+          "Missing value type(s) ",
+          list_elements(missing),
+          " are not included in 'mv_i'. Please check your input."
+        )
+
     }
 }

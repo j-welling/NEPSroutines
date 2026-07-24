@@ -1089,9 +1089,9 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
   message("Percentage correct:\n",
           "The percentage of correct responses within dichotomous items varied between ",
           pc_min, "% (", ifelse(length(pc_min_item) > 1, "items ", "item "),
-          paste(pc_min_item, collapse = ", "), ") and ",
+          list_elements(pc_min_item), ") and ",
           pc_max, "% (", ifelse(length(pc_max_item) > 1, "items ", "item "),
-          paste(pc_max_item, collapse = ", "),
+          list_elements(pc_max_item),
           ") with an average of ", pc_mean, "% (SD = ",
           pc_sd, "%), and a median of ", pc_median, "% correct responses.\n")
 
@@ -1106,9 +1106,9 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
   message("Item difficulties:\n",
           "The estimated item difficulties (or location parameters for polytomous variables) varied between ",
           xsi_min, " (", ifelse(length(xsi_min_item) > 1, "items ", "item "),
-          paste(xsi_min_item, collapse = ", "), ") and ",
+          list_elements(xsi_min_item), ") and ",
           xsi_max, " (", ifelse(length(xsi_max_item) > 1, "items ", "item "),
-          paste(xsi_max_item, collapse = ", "),
+          list_elements(xsi_max_item),
           ") with an average of ", xsi_mean, " (SD = ", xsi_sd,
           "), and a median of ", xsi_median, ".\n")
 
@@ -1118,7 +1118,7 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
   message("SE of item difficulties:\n",
           "The maximum of SEs is ", se_max,
           " (", ifelse(length(se_max_item) > 1, "items ", "item "),
-          paste(se_max_item, collapse = ", "), ").\n")
+          list_elements(se_max_item), ").\n")
 
   # WMNSQ
   wmnsq_min <- min(irt_sum$WMNSQ, na.rm = TRUE)
@@ -1131,17 +1131,23 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
   message("WMNSQ:\n",
           "The WMNSQ value varied between ", wmnsq_min, " (",
           ifelse(length(wmnsq_min_item) > 1, "items ", "item "),
-          paste(wmnsq_min_item, collapse = ", "), ") and ", wmnsq_max, " (",
+          list_elements(wmnsq_min_item), ") and ", wmnsq_max, " (",
           ifelse(length(wmnsq_max_item) > 1, "items ", "item "),
-          paste(wmnsq_max_item, collapse = ", "), ") with an average of ",
+          list_elements(wmnsq_max_item), ") with an average of ",
           wmnsq_mean, " (SD = ", wmnsq_sd, "), and a median of ",
           wmnsq_median, ".")
 
   wmnsq_misfit <- irt_sum$Item[irt_sum$WMNSQ >= 1.15]
-  message(ifelse(length(wmnsq_misfit) == 0, "No item",
-                 paste0(ifelse(length(wmnsq_misfit) > 1, "Items ", "Item "),
-                        paste(wmnsq_misfit, collapse = ", "))),
-            " exhibited a WMNSQ of at least 1.15.")
+  message(ifelse(
+    length(wmnsq_misfit) == 0,
+    "No item",
+    paste0(
+      ifelse(length(wmnsq_misfit) > 1, "Items ", "Item "),
+      list_elements(wmnsq_misfit)
+      )
+    ),
+    " exhibited a WMNSQ of at least 1.15."
+    )
 
   # WMNSQ t-value
   t_min <- min(irt_sum$t, na.rm = TRUE)
@@ -1154,17 +1160,23 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
   message("\nWMNSQ t-value:\n",
           "The WMNSQ t-values varied between ",
           t_min, " (", ifelse(length(t_min_item) > 1, "items ", "item "),
-          paste(t_min_item, collapse = ", "), ") and ",
+          list_elements(t_min_item), ") and ",
           t_max, " (", ifelse(length(t_max_item) > 1, "items ", "item "),
-          paste(t_max_item, collapse = ", "), ") with an average of ",
+          list_elements(t_max_item), ") with an average of ",
           t_mean, " (SD = ", t_sd, "), and a median of ", t_median, ".")
 
   t_misfit <- irt_sum$Item[irt_sum$t >= 8]
 
-  message(ifelse(length(t_misfit) == 0, "No item",
-          paste0(ifelse(length(t_misfit) > 1, "Items ", "Item "),
-          paste(t_misfit, collapse = ", "))),
-          " exhibited a t-value of at least 8.")
+  message(ifelse(
+    length(t_misfit) == 0,
+    "No item",
+    paste0(
+      ifelse(length(t_misfit) > 1, "Items ", "Item "),
+      list_elements(t_misfit)
+      )
+    ),
+    " exhibited a t-value of at least 8."
+  )
 
   # Correlation of item scores with total correct score
   rit_min <- min(irt_sum$rit, na.rm = TRUE)
@@ -1177,9 +1189,9 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
   message("\nCorrelation of item scores with total correct score:\n",
           "The correlations between the item scores and the total correct scores varied between ",
           rit_min, " (", ifelse(length(rit_min_item) > 1, "items ", "item "),
-          paste(rit_min_item, collapse = ", "), ") and ",
+          list_elements(rit_min_item), ") and ",
           rit_max, " (", ifelse(length(rit_max_item) > 1, "items ", "item "),
-          paste(rit_max_item, collapse = ", "), ") with an average correlation of ",
+          list_elements(rit_max_item), ") with an average correlation of ",
           rit_mean, " (SD = ", rit_sd, "), and a median correlation of ",
           rit_median, ".\n")
 
@@ -1206,9 +1218,9 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
   message("Item discrimination:\n",
           "The estimated discrimination parameters varied between ",
           disc_min, " (", ifelse(length(disc_min_item) > 1, "items ", "item "),
-          paste(disc_min_item, collapse = ", "), ") and ",
+          list_elements(disc_min_item), ") and ",
           disc_max, " (", ifelse(length(disc_max_item) > 1, "items ", "item "),
-          paste(disc_max_item, collapse = ", "), ") with an average discrimination of ",
+          list_elements(disc_max_item), ") with an average discrimination of ",
           disc_mean, " (SD = ", disc_sd, "), and a median discrimination of ",
           disc_median, ".\n")
 
@@ -1224,9 +1236,9 @@ print_irt_summary <- function(model, irt_sum, steps_sum = NULL, digits = 3) {
   message("Thresholds:\n",
           "The estimated thresholds varied between ", round(thresh_min, digits),
           " (", ifelse(length(thresh_min_item) > 1, "items ", "item "),
-          paste(thresh_min_item, collapse = ", "), ") and ", round(thresh_max, digits),
+          list_elements(thresh_min_item), ") and ", round(thresh_max, digits),
           " (", ifelse(length(thresh_max_item) > 1, "items ", "item "),
-          paste(thresh_max_item, collapse = ", "),
+          list_elements(thresh_max_item),
           ") with an average of ", thresh_mean, " (SD = ", thresh_sd,
           "), and a median of ", thresh_median, ".\n\n")
 }

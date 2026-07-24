@@ -10,7 +10,8 @@ TblPars(
   excl = c("N_administered"),
   size = 10,
   width = 0.5,
-  rename_collapsed = TRUE
+  rename_collapsed = TRUE,
+  ...
 )
 }
 \arguments{
@@ -20,7 +21,13 @@ or a data frame with sheet "summary" from "irt_poly.xlsx" created by
 
 \item{footnote}{A table note.}
 
-\item{excl}{A vector of column names to exclude.}
+\item{excl}{A vector of column names to exclude. Each value is matched
+exactly (not as a regular expression or substring) against either the
+internal column name or the label shown in the rendered table (e.g. both
+\code{"N_administered"} and \code{"Total"} exclude the total-respondents column).
+Columns are dropped before the widths are applied, so a vector \code{width} must
+be sized and ordered to match the columns that remain after exclusion (a
+single \code{width} value is recycled and is unaffected).}
 
 \item{size}{The general font size.}
 
@@ -30,6 +37,8 @@ number of columns in \code{obj}.}
 
 \item{rename_collapsed}{A boolean to remove the "_collapsed" suffix from
 item names.}
+
+\item{...}{Further arguments passed to \code{\link[=Tbl]{Tbl()}}.}
 }
 \value{
 A flextable.

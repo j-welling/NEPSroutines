@@ -20,23 +20,24 @@ created by \code{\link[=irt_analysis]{irt_analysis()}}.}
 
 \item{type}{A column name in \code{obj} identifying an item statistic.}
 
-\item{stat}{A function used to summarize \code{type} or a string specifying
-an operator (=, <, >) with a number; e.g.,
+\item{stat}{A function used to summarize \code{type} or a single string
+specifying a comparison operator (=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number;
+e.g.,
 \itemize{
 \item =3 returns number of type equal to 3
 \item <3 returns number of type less than 3
-\item 3 returns number of type greater than 3Multiple conditions can be combined using & and |.
+\item =3 returns number of type greater than or equal to 3Multiple conditions can be combined within the string using & and |(e.g. ">1.15 & <1.20"); surrounding whitespace is ignored.
 }}
 
 \item{item}{A logical indicating whether to return the results from stat
 (\code{FALSE}) or the item name corresponding to the value of \code{stat} (\code{TRUE}).}
 
-\item{excl}{A string specifying an operator (=, <, >) with a number
-indicating values to exclude; e.g.,
+\item{excl}{A single string specifying a comparison operator
+(=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number indicating values to exclude; e.g.,
 \itemize{
-\item =3 excludes number of type equal to 3
-\item <3 excludes number of type less than 3
-\item 3 excludes number of type greater than 3Multiple conditions can be combined using & and |.
+\item =3 excludes type equal to 3
+\item <3 excludes type less than 3
+\item =3 excludes type greater than or equal to 3Multiple conditions can be combined within the string using & and |(e.g. ">1.15 & <1.20"); surrounding whitespace is ignored.
 }}
 
 \item{digits}{A number for rounding.}
@@ -87,6 +88,9 @@ GetPars(pars, "xsi", "<-2", item = TRUE)
 
 # Largest WMNSQ between 1 and 1.2
 GetPars(pars, "WMNSQ", max, excl = "<1|>1.2")
+
+# Number of items with a WMNSQ from 1.15 up to 1.20 (spaces are allowed)
+GetPars(pars, "WMNSQ", ">=1.15 & <1.20")
 
 # Clean up generated files
 file.remove(paste0(tmpdir, "/irt_dich.xlsx"))

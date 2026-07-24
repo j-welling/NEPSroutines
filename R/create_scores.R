@@ -53,56 +53,6 @@
 #'   saved
 #' @param path_table  string; defines path to folder where tables shall be saved
 #' @param warn  logical; whether to print warnings
-# #' @param resp_prev data.frame with responses of first measurement wave,
-# #'    a person identifier; may also include a WLE as given in wid
-# #' @param resp_link data.frame with responses of link sample,
-# #'    a person identifier;
-# #' @param vars_prev data.frame; contains information about items of previous
-# #' measurement wave with items as rows; includes variable 'item' containing item
-# #' names and may include variable with item scoring
-# #' @param vars_link data.frame; contains information about items of link study
-# #' with items as rows; includes variable 'item' containing item names and may
-# #' include variable with item scoring; required if anchor group design is used
-# #' @param select_prev character; contains name of logical variable in vars_prev
-# #' identifying the item set for the previous measurement wave
-# #' @param select_link character; contains name of logical variable in vars_link
-# #' identifying the item set for the link study; required if anchor group design
-# #' is used
-# #' @param valid_prev string; defines name of logical variable in resp_prev that
-# #' indicates (in)valid cases for the previous measurement wave
-# #' @param valid_link string; defines name of logical variable in resp_link that
-# #' indicates (in)valid cases for the link study; optional variable for anchor
-# #' group design
-# #' @param pweights_prev numeric vector; person weights for previous
-# #'   measurement point passed to TAM-functions
-# #' @param pweights_link numeric vector; person weights for link study
-# #'   passed to TAM-functions
-# #' @param scoring_prev  numeric; named vector with the scoring factors to
-# #'   be applied to the loading matrix of the previous measurement point; can be
-# #'   NULL for the Rasch model
-# #' @param scoring_link  numeric; named vector with the scoring factors to
-# #'   be applied to the loading matrix of the link study; can be NULL for the
-# #'   Rasch model
-# #' @param anchors  character; data.frame with two columns including the link
-# #'   items; for anchor item designs the first column refers to the previous
-# #'   measurement time point and the second column to the current measurement
-# #'   time point; for anchor group designs the first column refers to the main
-# #'   sample (for both time points) and the second column refers to the link
-# #'   sample; if NULL, all common items are used
-# #' @param longitudinal  logical; do within cohort linking (TRUE) or between
-# #'   cohort linking (FALSE)
-# #' @param print  logical; whether results shall be printed to console
-# #' @param do_dim logical; whether to do dimensionality analysis for linking
-# #' @param do_dif logical; whether to do dif analysis for linking
-# #' @param dif_threshold numeric; threshold under which DIF in common link items
-# #'   is accepted; defaults to .5
-# #' @param wid variable name used as WLE identifier in first measurement wave
-# #' @param snodes snodes as passed to the TAM function for the dimensionality
-# #'   analyses
-# #' @param maxiter maximum number of iterations as passed to the TAM function
-# #'   for the dimensionality analyses
-# #' @param digits  numeric; number of decimal places for rounding
-# #' @param verbose  logical; verbose as passed to the TAM function
 #'
 #' @export
 create_scores <- function(
@@ -135,31 +85,6 @@ create_scores <- function(
     path_results = "Results",
     path_table = "Tables",
     warn = TRUE
-    ### The following function arguments were commented out
-    ### because linking is not yet implemented
-    # print = TRUE,
-    # resp_prev = NULL,
-    # resp_link = NULL,
-    # vars_prev = NULL,
-    # vars_link = NULL,
-    # select_prev = NULL,
-    # select_link = NULL,
-    # valid_prev = NULL,
-    # valid_link = NULL,
-    # scoring_prev = NULL,
-    # scoring_link = NULL,
-    # pweights_prev = NULL,
-    # pweights_link = NULL,
-    # anchors = NULL,
-    # longitudinal = TRUE,
-    # do_dim = TRUE,
-    # do_dif = TRUE,
-    # dif_threshold = .5,
-    # wid = NULL,
-    # snodes = 5000,
-    # maxiter = 10000,
-    # digits = 3,
-    # verbose = TRUE,
 ) {
 
 
@@ -170,54 +95,6 @@ create_scores <- function(
     check_variables(vars, "vars", num_cat)
 
   if (warn) is_null_mvs_valid(mvs = mvs, valid = valid)
-
-  ################################## Linking ##################################
-
-  # # Estimate linked WLEs and SEs
-  # if (wle & !is.null(resp_prev)) {
-  #   linked_scores <-
-  #     linking(
-  #       resp_curr = resp,
-  #       resp_prev = resp_prev,
-  #       resp_link = resp_link,
-  #       vars_curr = vars,
-  #       vars_prev = vars_prev,
-  #       vars_link = vars_link,
-  #       select_curr = select,
-  #       select_prev = select_prev,
-  #       select_link = select_link,
-  #       valid_curr = valid,
-  #       valid_prev = valid_prev,
-  #       valid_link = valid_link,
-  #       scoring_curr = scoring,
-  #       scoring_prev = scoring_prev,
-  #       scoring_link = scoring_link,
-  #       anchors = anchors,
-  #       mvs = mvs,
-  #       longitudinal = longitudinal,
-  #       overwrite = overwrite,
-  #       verbose = verbose,
-  #       path_table = path_table,
-  #       path_results = path_results,
-  #       return = return, print = print, save = save,
-  #       dif_threshold = dif_threshold,
-  #       wid = wid, snodes = snodes, maxiter = maxiter,
-  #       digits = digits,
-  #       pweights_curr = pweights,
-  #       pweights_prev = pweights_prev,
-  #       pweights_link = pweights_link,
-  #       control_tam = control_tam,
-  #       do_dim = do_dim, do_dif = do_dif,
-  #       warn = warn
-  #     )
-  #   wles_linked <- linked_scores$link_results$wle_linked
-  #   names(wles_linked) <- c("ID_t", paste0(score_name, c("_sc1u", "_sc2u")))
-  # } else {
-  #   wles_linked <- NULL
-  #   linked_scores <- NULL
-  # }
-
-  #############################################################################
 
   # Estimate (unrotated) WLEs and SEs
   if (wle) {
@@ -283,9 +160,6 @@ create_scores <- function(
       names(wles) <- c("ID_t", paste0(score_name, c("_sc1", "_sc2")))
     }
 
-    # if (!is.null(wles_linked))                                                # commented out because linking is not yet implemented
-    # wles <- merge(wles, wles_linked, by = "ID_t", all = TRUE)               # commented out because linking is not yet implemented
-
   }
 
   # Estimate sum scores
@@ -327,7 +201,9 @@ create_scores <- function(
   if (metap) {
 
     # Test and prepare data
-    if (is.null(meta_variable)) stop("No argument 'meta_variable' provided.")
+    if (is.null(meta_variable)) {
+      stop("No argument 'meta_variable' provided. Please check yout input.")
+    }
     meta_score_name <- ifelse(is.null(meta_score_name), score_name, meta_score_name)
 
     if (is.null(meta_select)) {
@@ -360,8 +236,7 @@ create_scores <- function(
   }
 
   # Create results object
-  scores <- data.frame(wles) # !!delete this line when linking is implemeted!!
-  # scores <- list(wle = wles, linking = linked_scores) # commented out because linking is not yet implemented
+  scores <- data.frame(wles)
 
   # Create objects that obtain item parameters and TAM model used to estimate wles
   if (wle) {
@@ -558,7 +433,9 @@ estimate_rotated_wles <- function(resp,
   irt_type <- ifelse(is_poly(resp, vars, select), 'poly', 'dich')
 
   # Prepare data
-  rotation <- resp[resp[[valid]], rotation, drop = FALSE]
+  # Note: rotation needs to be a data.frame instead of a tibble for
+  #       TAM::designMatrices.mfr2()
+  rotation <- as.data.frame(resp[resp[[valid]], rotation, drop = FALSE])
   pid <- resp$ID_t[resp[[valid]]]
   check_pid(pid)
   resp_ <- prepare_resp(
@@ -587,16 +464,20 @@ estimate_rotated_wles <- function(resp,
   B <- des$B$B.3d
 
   # 0.5 scoring for PCMs
-  if (irt_type == "poly" & !is.null(scoring)) {
-    v <- sub(paste0('-', names(rotation)[1], '.+$'), "", rownames(B))
-    v <- merge(data.frame(item = v), vars[vars[[select]], c("item", scoring)], by.x = "item")
-    v[[2]][is.na(v[[2]])] <- 1
-    B[, , 1] <- B[, , 1] * v[[2]]
+  if (!is.null(scoring)) {
+    scoring_mat <- vars[vars[[select]], c("item", scoring)]
+    for (i in seq(1, nrow(scoring_mat))) {
+      if (is.na( scoring_mat$scoring[i])) next
+      B[grepl(paste0("^", scoring_mat$item[i]), rownames(B)), , 1] <-
+        B[grepl(paste0("^", scoring_mat$item[i]), rownames(B)), , 1] *
+          scoring_mat$scoring[i]
+    }
   }
 
   # Match item parameters by item name
-  xsi_fixed <- order_xsi_fixed(
-    xsi_fixed, resp2, irtmodel = '1PL', A = A, B = B, rename_steps = TRUE
+  xsi_fixed_mat <- order_xsi_fixed(
+    xsi_fixed, resp2, A = A, B = B, rename_steps = TRUE,
+    irtmodel = ifelse(irt_type == "poly", "PCM2", "1PL")
   )
 
   # Fit model
@@ -604,7 +485,7 @@ estimate_rotated_wles <- function(resp,
     resp = resp2,
     A = A,
     B = B,
-    xsi.fixed = xsi_fixed,
+    xsi.fixed = xsi_fixed_mat,
     verbose = FALSE,
     pid = pid,
     control = control_tam,
