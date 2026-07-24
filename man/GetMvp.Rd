@@ -17,13 +17,17 @@ created by \code{\link[=mv_person]{mv_person()}}.}
 OM, NR, NV, ND, or ALL.}
 
 \item{value}{A single string specifying a comparison operator
-(=, ==, !=, <, <=, >, >=; use >= / <=, not the reversed =>/=<) with a number
-of missing values; e.g.,
+(\code{=}, \code{==}, \code{!=}, \code{<}, \code{<=}, \code{>}, \code{>=}; use \code{>=} / \code{<=}, not the reversed
+\verb{=>} / \verb{=<}) with a number of missing values; e.g.,
 \itemize{
-\item =3 returns percentage for 3 missing values
-\item <3 returns percentage for less than 3 missing values
-\item =3 returns percentage for 3 or more missing valuesA number without an operator (e.g. 3) is treated as =3. Multiple conditionscan be combined within the string using & and | (e.g. ">2 & <5");surrounding whitespace is ignored.
-}}
+\item \code{"=3"} returns the percentage for 3 missing values
+\item \code{"<3"} returns the percentage for less than 3 missing values
+\item \code{">=3"} returns the percentage for 3 or more missing values
+}
+
+A number without an operator (e.g. \code{3}) is treated as \verb{=3}. Multiple
+conditions can be combined within the string using \code{&} and \code{|}
+(e.g. \code{">2 & <5"}); surrounding whitespace is ignored.}
 
 \item{digits}{A number for rounding.}
 }
