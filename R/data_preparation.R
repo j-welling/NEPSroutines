@@ -721,8 +721,8 @@ hl_scoring <- function(resp, hl_solutions, hl_distractors,
                 "Please check your input. Problems found for ",
                 list_elements(names_diff), "."))
   }
-  NEPSroutines:::check_numerics(resp, "resp", unlist(hl_solutions), dich = TRUE)
-  NEPSroutines:::check_numerics(resp, "resp", unlist(hl_distractors), dich = TRUE)
+  check_numerics(resp, "resp", unlist(hl_solutions), dich = TRUE)
+  check_numerics(resp, "resp", unlist(hl_distractors), dich = TRUE)
   if (warn) {
     for (hl_name in names(hl_solutions)) {
       is_hl_named_correctly <- grepl("s(_[a-zA-Z0-9]+)*_c$", hl_name)
