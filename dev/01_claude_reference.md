@@ -63,7 +63,7 @@ NEPSroutines is an R package for scaling NEPS (National Educational Panel Study)
 
 **RoxygenNote version mismatch**: If installed roxygen2 version doesn't match `RoxygenNote` in DESCRIPTION, `devtools::check()` won't re-document. Update `RoxygenNote` in DESCRIPTION to match installed version before running `devtools::document()`.
 
-**WrightMap/sfsmisc in Imports**: These packages were declared in Imports but only used transitively through TAM. Move to Suggests to avoid "All declared Imports should be used" NOTE.
+**WrightMap/sfsmisc in Imports**: These packages were declared in Imports but never called with `::` from this package, which triggers the "All declared Imports should be used" NOTE. They belong in Suggests — but Suggests does *not* guarantee installation, and both are still required at runtime on default code paths: `TAM::IRT.WrightMap()` (used by `wright_map()`) calls `WrightMap::wrightMap()`, and `TAM::tam.mml()` with `snodes > 0` and TAM's default `QMC = TRUE` calls `sfsmisc::QUnif()` (`conduct_dim_analysis()` defaults to `snodes = 5000`). Any move from Imports to Suggests must therefore be paired with a `requireNamespace()` guard at the calling function; otherwise users hit an opaque error raised from inside TAM. General rule: a dependency reached only transitively is still yours to guard if the intermediate package merely Suggests it.
 
 ### CI test failures (2026-02-20)
 

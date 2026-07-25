@@ -701,6 +701,11 @@ icc_plots <- function(model, path = "Plots", name_group = NULL) {
 wright_map <- function(model, path = "Plots", name_group = NULL,
                        width = 800, height = 1300) {
 
+  # TAM::IRT.WrightMap() draws via WrightMap::wrightMap()
+  if (!requireNamespace("WrightMap", quietly = TRUE)) {
+    stop("Please install WrightMap!")
+  }
+
   # Identify kind of irt model
   irtmodel <- model$irtmodel
 
