@@ -330,19 +330,36 @@ test_that("TblDim() works", {
                  "units" = "Units"),
     footnote = "Nothing of note happened."
   )
+  # once the columns carry labels, neither axis is numbered
   expect_equal(tbl$body$dataset[["Dimension"]], c(
-    "Dim 1: Space", "Dim 2: Change", "Dim 3: Data", "Dim 4: Units"
+    "Space", "Change", "Data", "Units"
   ))
   expect_equal(names(tbl$body$dataset), c(
-    "Dimension", "Dim 1: Space", "Dim 2: Change", "Dim 3: Data", "Dim 4: Units"
+    "Dimension", "Space", "Change", "Data", "Units"
   ))
+  # the values must follow the labels, not stay behind in the old order
+  expect_equal(tbl$body$dataset[["Space"]], c("2.89", ".72", ".70", ".75"))
+  expect_equal(tbl$body$dataset[["Units"]], c("", "", "", "2.00"))
+
+  # colnames alone: the table is reordered, but the rows stay numbered
+  tbl <- TblDim(
+    tab,
+    model = "content",
+    colnames = c("data" = "Data", "space" = "Space", "change" = "Change",
+                 "units" = "Units")
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], paste("Dim", 1:4))
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Data", "Space", "Change", "Units"
+  ))
+  expect_equal(tbl$body$dataset[["Data"]], c("2.40", ".70", ".75", ".78"))
 
   # without labels
   tbl <- TblDim(tab, model = "content")
   expect_equal(tbl$body$dataset[["Dimension"]], paste("Dim", 1:4))
 
-  # unidimensional model: a single value column, and the two axes are named
-  # differently ("1" and "V1")
+  # unidimensional model: a single value column, and the sheet names its one
+  # dimension "1"
   tbl <- TblDim(tab, model = "uni")
   expect_s3_class(tbl, "flextable")
   expect_equal(tbl$body$dataset[["Dimension"]], "Dim 1")
@@ -364,7 +381,7 @@ test_that("TblDim() works", {
     "deprecated"
   )
   expect_equal(names(tbl$body$dataset), c(
-    "Dimension", "Dim 1: Units", "Dim 2: Change", "Dim 3: Space", "Dim 4: Data"
+    "Dimension", "Units", "Change", "Space", "Data"
   ))
 
   # an unnamed vector of the wrong length cannot be used at all
@@ -384,8 +401,13 @@ test_that("TblDim() works", {
     "deprecated"
   )
   expect_equal(names(tbl$body$dataset), c(
-    "Dimension", "Dim 1: Space", "Dim 2: Change", "Dim 3: Data", "Dim 4: Units"
+    "Dimension", "Space", "Change", "Data", "Units"
   ))
+  # the unnamed `colnames` were bound to the original order (units, change,
+  # space, data), so the reordered columns must carry their labels
+  expect_equal(tbl$body$dataset[["Dimension"]], c("Space", "Change", "Data",
+                                                  "Units"))
+  expect_equal(tbl$body$dataset[["Space"]], c("2.89", ".72", ".70", ".75"))
   # here the deprecated vector is bound to the original order and then, being
   # complete, applies that order -- `rownames` takes precedence over `colnames`
   expect_warning(
@@ -395,12 +417,12 @@ test_that("TblDim() works", {
                                "data" = "Data", "units" = "Units")),
     "deprecated"
   )
-  expect_equal(tbl$body$dataset[["Dimension"]], c(
-    "Dim 1: Units", "Dim 2: Change", "Dim 3: Space", "Dim 4: Data"
-  ))
+  expect_equal(tbl$body$dataset[["Dimension"]], c("Units", "Change", "Space",
+                                                  "Data"))
   expect_equal(names(tbl$body$dataset), c(
-    "Dimension", "Dim 1: Units", "Dim 2: Change", "Dim 3: Space", "Dim 4: Data"
+    "Dimension", "Units", "Change", "Space", "Data"
   ))
+  expect_equal(tbl$body$dataset[["Units"]], c("2.00", ".74", ".75", ".78"))
 
   # labels on a single-dimension model
   tbl <- TblDim(tab, model = "uni", rownames = c("1" = "Reading"))

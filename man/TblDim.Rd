@@ -54,6 +54,13 @@ A flextable.
 \description{
 Create correlation table for multi-dimensional models
 }
+\details{
+An axis without labels is numbered "Dim 1", "Dim 2" and so on. While
+the columns are numbered this way, the row labels are prefixed by the same
+numbers, so that a column can be traced back to its row; once \code{colnames} are
+given, the columns carry labels of their own and both axes show the labels
+alone.
+}
 \examples{
 \dontrun{
 data(ex2)

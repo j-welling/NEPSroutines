@@ -796,29 +796,32 @@ check_dimnames <- function(labels, dimensions, what) {
   if (is.null(labels)) return(NULL)
   if (is.null(names(labels))) {
     if (length(labels) != length(dimensions)) {
-      warning("Number of ", what, " elements does not match table dimensions.")
+      warning("Number of ", what, " elements does not match table dimensions.",
+              call. = FALSE)
       return(NULL)
     }
     warning("Passing `", what, "s` without names is deprecated: the labels are ",
             "assigned by position, so a wrong order silently mislabels the ",
             "results. Name each element after its dimension, for example ",
-            "c(\"", dimensions[1], "\" = \"", labels[1], "\").")
-    # The table has not been reordered at this point -- reordering requires
-    # names -- so position still corresponds to dimension.
+            "c(\"", dimensions[1], "\" = \"", labels[1], "\").", call. = FALSE)
+    # `dimensions` must be the dimensions in their original order: the caller
+    # resolves the labels before any reordering, so position still corresponds
+    # to dimension here.
     names(labels) <- dimensions
     return(labels)
   }
   if (anyDuplicated(names(labels))) {
     warning("Some ", what, " elements share the same name; only the first ",
-            "of each is used.")
+            "of each is used.", call. = FALSE)
   }
   if (!all(names(labels) %in% dimensions)) {
-    warning("Some ", what, " elements do not match a dimension in the table.")
+    warning("Some ", what, " elements do not match a dimension in the table.",
+            call. = FALSE)
   }
   if (!all(dimensions %in% names(labels))) {
     warning("Some dimensions are not covered by the supplied ", what,
             " elements; these keep their raw name, and the sequence given ",
-            "here is not applied.")
+            "here is not applied.", call. = FALSE)
   }
   labels
 }
@@ -856,6 +859,11 @@ replace_dimnames <- function(dimensions, labels) {
 #' specified sequence. Named as in `rownames`. Note that supplying `colnames`
 #' alone reorders the table but leaves the rows labelled "Dim 1", "Dim 2" and so
 #' on, so set `rownames` as well to keep the rows identifiable.
+#' @details An axis without labels is numbered "Dim 1", "Dim 2" and so on. While
+#' the columns are numbered this way, the row labels are prefixed by the same
+#' numbers, so that a column can be traced back to its row; once `colnames` are
+#' given, the columns carry labels of their own and both axes show the labels
+#' alone.
 #' @param width The column widths; if a single value is given, it refers to the
 #' first column; otherwise the number of values must correspond to the number of
 #' columns in `obj`.
@@ -923,11 +931,12 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
   }
   # Carry the dimension names onto the matrix itself. These names -- not the
   # row positions -- are what `rownames`/`colnames` are matched against below,
-  # which is what makes the labelling order-independent. Both axes take their
-  # names from the first column: the sheet is a square, symmetric correlation
-  # matrix, and the header cannot be used, as the unidimensional model has no
-  # dimension name to write there ("V1"), while `openxlsx` replaces blanks in
-  # any other name by dots when the sheet is read back in.
+  # which is what makes the labelling order-independent. The sheet is a square,
+  # symmetric correlation matrix, so both axes take their names from the first
+  # column. Its header is unusable as a second source: the unidimensional model
+  # has no dimension name to write there, and `openxlsx` replaces blanks in any
+  # other name by dots when the sheet is read back in, so a dimension called
+  # "Change and relationships" would return as "Change.and.relationships".
   rownames(tab) <- colnames(tab) <- as.character(obj[, 1])
   tab <- as.data.frame(tab)
 
@@ -965,29 +974,26 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
   rowlabels <- replace_dimnames(rownames(tab), rownames)
   collabels <- replace_dimnames(colnames(tab), colnames)
 
-  # A correlation table is square and carries the same dimensions on both axes,
-  # so the "Dim i: " prefix is added only then. Compare extents rather than
-  # names: for the unidimensional model both axes hold the single dimension but
-  # under different names ("1" and "V1"), as `dim_summary()` has no Q matrix to
-  # take column names from. Numbering follows the final (post-reorder) position,
-  # so prefix and label always refer to the same dimension.
-  if (nrow(tab) == ncol(tab)) {
-    if (is.null(rownames)) {
-      rowlabels <- paste0("Dim ", seq(1, nrow(tab)))
-    } else {
-      rowlabels <- paste0("Dim ", seq_along(rowlabels), ": ", rowlabels)
-    }
-    if (is.null(colnames)) {
-      collabels <- paste0("Dim ", seq(1, ncol(tab)))
-    } else {
-      collabels <- paste0("Dim ", seq_along(collabels), ": ", collabels)
-    }
+  # The "Dim i" numbering is what lets a reader map an unlabelled column back to
+  # its row, so it is dropped as soon as the columns carry labels of their own:
+  # unlabelled axes are numbered, and the rows are prefixed only while the
+  # columns are still bare. Numbering follows the final (post-reorder) position,
+  # so a prefix and its label always refer to the same dimension.
+  if (is.null(rownames)) {
+    rowlabels <- paste0("Dim ", seq(1, nrow(tab)))
+  } else if (is.null(colnames)) {
+    rowlabels <- paste0("Dim ", seq_along(rowlabels), ": ", rowlabels)
   }
-  rownames(tab) <- rowlabels
+  if (is.null(colnames)) {
+    collabels <- paste0("Dim ", seq(1, ncol(tab)))
+  }
   colnames(tab) <- collabels
 
   # Add dimension column
-  tab <- cbind("Dimension" = rownames(tab), tab)
+  # Taken from `rowlabels` rather than from the row names of `tab`, which have
+  # to be unique: without the "Dim i" prefix two dimensions may well share a
+  # label, and that is the user's business, not an error.
+  tab <- cbind("Dimension" = rowlabels, tab)
 
   # Footnote
   note <- paste0("Variances of the dimensions are given in the ",
