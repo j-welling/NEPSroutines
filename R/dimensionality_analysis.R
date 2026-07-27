@@ -14,8 +14,12 @@
 #' contains the scoring factor to be applied to loading matrix; defaults to
 #' "scoring"
 #' @param dim  character vector. contains names of all dimension variables
-#' that shall be analyzed (NOTE: the dimensions must be coded as integers from 1
-#' to the number of dimensions!)
+#' that shall be analyzed. Each of these variables may be a factor, a character
+#' or an integer variable. Its values name the dimensions in the results and are
+#' what [TblDim()] matches its labels against: factor levels are used as given,
+#' unused ones dropped; character values are sorted; integer codes become
+#' "dim1", "dim2" and so on. Only a factor preserves a chosen reporting order,
+#' as levels are kept in their declared sequence.
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param mvs named integer vector; contains user-defined missing values
@@ -125,8 +129,12 @@ dim_analysis <- function(
 #' contains the scoring factor to be applied to loading matrix; defaults to
 #' "scoring"
 #' @param dim  character vector. contains names of all dimension variables
-#' in vars that shall be analyzed (NOTE: the dimensions must be coded as integers
-#' from 1 to the number of dimensions!)
+#' in vars that shall be analyzed. Each of these variables may be a factor, a
+#' character or an integer variable. Its values name the dimensions in the
+#' results and are what [TblDim()] matches its labels against: factor levels are
+#' used as given, unused ones dropped; character values are sorted; integer
+#' codes become "dim1", "dim2" and so on. Only a factor preserves a chosen
+#' reporting order, as levels are kept in their declared sequence.
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param irtmodel  string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and

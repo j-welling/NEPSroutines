@@ -778,62 +778,6 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
 }
 
 
-#' Create correlation table for multi-dimensional models
-#'
-#' @param obj A data frame with sheets from "dimensionality.xlsx"
-#' created by [dim_analysis()].
-#' @param model The model name, typically `uni` for the unidimensional
-#' reference model and the name of the facet variable.
-#' @param rownames An optional named vector of labels for the rows; if all
-#' row elements are set, the rows and columns are reordered according to the
-#' specified sequence (overrides any sequence specified in `colnames`).
-#' @param colnames An optional named vector of labels for the columns; if all
-#' column elements are set, the rows and columns are reordered according to the
-#' specified sequence.
-#' @param width The column widths; if a single value is given, it refers to the
-#' first column; otherwise the number of values must correspond to the number of
-#' columns in `obj`.
-#' @param ... Further arguments passed to [Tbl()]. The first column (dimension
-#' labels) is always left-aligned, so any `align` passed here does not affect it.
-#' @return A flextable.
-#' @inheritParams Tbl
-#' @inheritParams TblMvi
-#' @export
-#' @examples
-#' \dontrun{
-#' data(ex2)
-#'
-#' # Dimensionality analyses
-#' tmpdir <- tempdir()
-#' ex2$vars$content <- as.numeric(ex2$vars$content)
-#' dim_analysis(
-#'  resp = ex2$resp,
-#'  vars = ex2$vars,
-#'  select = "mixed",
-#'  valid = "valid",
-#'  dim = "content",
-#'  snodes = 5,# only for speed; model will not converge!
-#'  print = FALSE,
-#'  save = TRUE,
-#'  return = FALSE,
-#'  path_results = tmpdir,
-#'  path_table = tmpdir,
-#'  overwrite = TRUE,
-#'  verbose = FALSE,
-#' )
-#'
-#' # Import results of dimensionality analyses
-#' dim <- Import(tmpdir, "/dimensionality.xlsx")
-#'
-#' # Default correlation table
-#' TblDim(dim, "content")
-#'
-#' # Correlation table with labels; names refer to the dimensions, so the
-#' # sequence given here also determines the row and column order
-#' TblDim(dim, "content",
-#'        rownames = c("dim1" = "Units", "dim2" = "Change",
-#'                     "dim3" = "Space", "dim4" = "Data"))
-#' }
 #' Validate a vector of dimension labels
 #'
 #' Labels are matched by name, so an unnamed vector cannot be applied at all and
@@ -879,6 +823,68 @@ replace_dimnames <- function(dimensions, labels) {
   ifelse(is.na(hit), dimensions, labels[hit])
 }
 
+
+#' Create correlation table for multi-dimensional models
+#'
+#' @param obj A data frame with sheets from "dimensionality.xlsx"
+#' created by [dim_analysis()].
+#' @param model The model name, typically `uni` for the unidimensional
+#' reference model and the name of the facet variable.
+#' @param rownames An optional named vector of labels for the rows; if all
+#' row elements are set, the rows and columns are reordered according to the
+#' specified sequence (overrides any sequence specified in `colnames`). The
+#' names must be the dimension names given by the dimension variable passed to
+#' [dim_analysis()], not row positions; a name matching no dimension, or a
+#' dimension left without a label, is reported by a warning.
+#' @param colnames An optional named vector of labels for the columns; if all
+#' column elements are set, the rows and columns are reordered according to the
+#' specified sequence. Named as in `rownames`. Note that supplying `colnames`
+#' alone reorders the table but leaves the rows labelled "Dim 1", "Dim 2" and so
+#' on, so set `rownames` as well to keep the rows identifiable.
+#' @param width The column widths; if a single value is given, it refers to the
+#' first column; otherwise the number of values must correspond to the number of
+#' columns in `obj`.
+#' @param ... Further arguments passed to [Tbl()]. The first column (dimension
+#' labels) is always left-aligned, so any `align` passed here does not affect it.
+#' @return A flextable.
+#' @inheritParams Tbl
+#' @inheritParams TblMvi
+#' @export
+#' @examples
+#' \dontrun{
+#' data(ex2)
+#'
+#' # Dimensionality analyses
+#' tmpdir <- tempdir()
+#' ex2$vars$content <- as.numeric(ex2$vars$content)
+#' dim_analysis(
+#'  resp = ex2$resp,
+#'  vars = ex2$vars,
+#'  select = "mixed",
+#'  valid = "valid",
+#'  dim = "content",
+#'  snodes = 5,# only for speed; model will not converge!
+#'  print = FALSE,
+#'  save = TRUE,
+#'  return = FALSE,
+#'  path_results = tmpdir,
+#'  path_table = tmpdir,
+#'  overwrite = TRUE,
+#'  verbose = FALSE,
+#' )
+#'
+#' # Import results of dimensionality analyses
+#' dim <- Import(tmpdir, "/dimensionality.xlsx")
+#'
+#' # Default correlation table
+#' TblDim(dim, "content")
+#'
+#' # Correlation table with labels; names refer to the dimensions, so the
+#' # sequence given here also determines the row and column order
+#' TblDim(dim, "content",
+#'        rownames = c("dim1" = "Units", "dim2" = "Change",
+#'                     "dim3" = "Space", "dim4" = "Data"))
+#' }
 
 TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
                    footnote = NULL, size = 12, width = 3, ...) {
