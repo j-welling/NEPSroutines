@@ -354,6 +354,51 @@ test_that("TblDim() works", {
   ))
   expect_equal(tbl$body$dataset[["Data"]], c("2.40", ".70", ".75", ".78"))
 
+  # a `colnames` vector that leaves a dimension unlabelled must not switch the
+  # numbering off: those columns are headed by their raw name from the results
+  # file, and nothing else would tie them to the rows
+  expect_warning(
+    tbl <- TblDim(
+      tab,
+      model = "content",
+      rownames = c("units" = "Units", "change" = "Change", "space" = "Space",
+                   "data" = "Data"),
+      colnames = c("data" = "Data")
+    ),
+    "not covered"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: Units", "Dim 2: Change", "Dim 3: Space", "Dim 4: Data"
+  ))
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1: units", "Dim 2: change", "Dim 3: space", "Dim 4: Data"
+  ))
+
+  # the same when the labels match no dimension at all
+  expect_warning(
+    expect_warning(
+      tbl <- TblDim(tab, model = "content", colnames = c("nope" = "X")),
+      "do not match"
+    ),
+    "not covered"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], paste("Dim", 1:4))
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1: units", "Dim 2: change", "Dim 3: space", "Dim 4: data"
+  ))
+
+  # two rows may share a label once the columns are labelled and distinct
+  tbl <- TblDim(
+    tab,
+    model = "content",
+    rownames = c("units" = "Maths", "change" = "Maths", "space" = "Space",
+                 "data" = "Data"),
+    colnames = c("units" = "U", "change" = "C", "space" = "S", "data" = "D")
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c("Maths", "Maths", "Space",
+                                                  "Data"))
+  expect_equal(tbl$body$dataset[["U"]], c("2.00", ".74", ".75", ".78"))
+
   # without labels
   tbl <- TblDim(tab, model = "content")
   expect_equal(tbl$body$dataset[["Dimension"]], paste("Dim", 1:4))

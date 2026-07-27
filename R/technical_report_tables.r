@@ -859,11 +859,12 @@ replace_dimnames <- function(dimensions, labels) {
 #' specified sequence. Named as in `rownames`. Note that supplying `colnames`
 #' alone reorders the table but leaves the rows labelled "Dim 1", "Dim 2" and so
 #' on, so set `rownames` as well to keep the rows identifiable.
-#' @details An axis without labels is numbered "Dim 1", "Dim 2" and so on. While
-#' the columns are numbered this way, the row labels are prefixed by the same
-#' numbers, so that a column can be traced back to its row; once `colnames` are
-#' given, the columns carry labels of their own and both axes show the labels
-#' alone.
+#' @details An axis without labels is numbered "Dim 1", "Dim 2" and so on, and
+#' while the columns are not fully labelled, both axes carry those numbers, so
+#' that a column can be traced back to its row. The numbers are dropped only
+#' once `colnames` labels every dimension: the columns then head themselves, and
+#' the rows show their labels alone. Supplying `colnames` without `rownames`
+#' therefore leaves the rows numbered rather than named.
 #' @param width The column widths; if a single value is given, it refers to the
 #' first column; otherwise the number of values must correspond to the number of
 #' columns in `obj`.
@@ -974,25 +975,32 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
   rowlabels <- replace_dimnames(rownames(tab), rownames)
   collabels <- replace_dimnames(colnames(tab), colnames)
 
-  # The "Dim i" numbering is what lets a reader map an unlabelled column back to
-  # its row, so it is dropped as soon as the columns carry labels of their own:
-  # unlabelled axes are numbered, and the rows are prefixed only while the
-  # columns are still bare. Numbering follows the final (post-reorder) position,
-  # so a prefix and its label always refer to the same dimension.
+  # The "Dim i" numbering is what lets a reader map a column back to its row, so
+  # it is dropped only once every column carries a label of its own. A vector
+  # that leaves any dimension unlabelled does not qualify: those columns would
+  # be headed by their raw name from the results file, with nothing tying them
+  # to the rows. Numbering follows the final (post-reorder) position, so a
+  # number and its label always refer to the same dimension.
+  labelled <- function(labels, dimensions) {
+    !is.null(labels) && all(dimensions %in% names(labels))
+  }
   if (is.null(rownames)) {
     rowlabels <- paste0("Dim ", seq(1, nrow(tab)))
-  } else if (is.null(colnames)) {
+  } else if (!labelled(colnames, colnames(tab))) {
     rowlabels <- paste0("Dim ", seq_along(rowlabels), ": ", rowlabels)
   }
   if (is.null(colnames)) {
     collabels <- paste0("Dim ", seq(1, ncol(tab)))
+  } else if (!labelled(colnames, colnames(tab))) {
+    collabels <- paste0("Dim ", seq_along(collabels), ": ", collabels)
   }
   colnames(tab) <- collabels
 
   # Add dimension column
   # Taken from `rowlabels` rather than from the row names of `tab`, which have
-  # to be unique: without the "Dim i" prefix two dimensions may well share a
-  # label, and that is the user's business, not an error.
+  # to be unique: without the "Dim i" prefix two rows may share a label, which
+  # is the user's business as long as the column labels stay distinct -- those
+  # become the table's column keys and must still be unique.
   tab <- cbind("Dimension" = rowlabels, tab)
 
   # Footnote

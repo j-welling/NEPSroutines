@@ -55,11 +55,12 @@ A flextable.
 Create correlation table for multi-dimensional models
 }
 \details{
-An axis without labels is numbered "Dim 1", "Dim 2" and so on. While
-the columns are numbered this way, the row labels are prefixed by the same
-numbers, so that a column can be traced back to its row; once \code{colnames} are
-given, the columns carry labels of their own and both axes show the labels
-alone.
+An axis without labels is numbered "Dim 1", "Dim 2" and so on, and
+while the columns are not fully labelled, both axes carry those numbers, so
+that a column can be traced back to its row. The numbers are dropped only
+once \code{colnames} labels every dimension: the columns then head themselves, and
+the rows show their labels alone. Supplying \code{colnames} without \code{rownames}
+therefore leaves the rows numbered rather than named.
 }
 \examples{
 \dontrun{
