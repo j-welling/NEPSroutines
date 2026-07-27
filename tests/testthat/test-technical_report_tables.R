@@ -406,12 +406,42 @@ test_that("TblDim() works", {
     "Dimension", "Dim 1: Units", "Dim 2: Change", "Dim 3: Space", "Dim 4: Data"
   ))
 
+  # a partial `rownames` numbers both axes even when no `colnames` are given
+  expect_warning(
+    tbl <- TblDim(tab, model = "content", rownames = c("units" = "A")),
+    "not covered"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: A", "Dim 2: change", "Dim 3: space", "Dim 4: data"
+  ))
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1", "Dim 2", "Dim 3", "Dim 4"
+  ))
+
   # duplicated column labels cannot be rendered, as they become the column keys
   expect_error(
     TblDim(tab, model = "content",
            colnames = c("units" = "X", "change" = "X", "space" = "S",
                         "data" = "D")),
     "must be unique"
+  )
+  # including when the numbering would have made them distinct, so that the
+  # rule holds for the labels the user supplied rather than for the rendering
+  expect_error(
+    expect_warning(
+      TblDim(tab, model = "content", rownames = c("units" = "A"),
+             colnames = c("units" = "X", "change" = "X", "space" = "S",
+                          "data" = "D")),
+      "not covered"
+    ),
+    "must be unique"
+  )
+  # a label colliding with the key of the dimension column is rejected too
+  expect_error(
+    TblDim(tab, model = "content",
+           colnames = c("units" = "Dimension", "change" = "C", "space" = "S",
+                        "data" = "D")),
+    "Dimension"
   )
 
   # two rows may share a label once the columns are labelled and distinct

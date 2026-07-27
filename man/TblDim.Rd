@@ -36,8 +36,8 @@ column elements are set, the rows and columns are reordered according to the
 specified sequence. Named as in \code{rownames}. Note that supplying \code{colnames}
 alone reorders the table but leaves the rows labelled "Dim 1", "Dim 2" and so
 on, so set \code{rownames} as well to keep the rows identifiable. Column labels
-become the column keys of the table and must therefore be unique, whereas two
-rows may well share a label.}
+become the column keys of the table, so they must be unique, must differ from
+"Dimension", and are rejected otherwise; two rows may well share a label.}
 
 \item{footnote}{A table note.}
 
@@ -57,12 +57,13 @@ A flextable.
 Create correlation table for multi-dimensional models
 }
 \details{
-An axis without labels is numbered "Dim 1", "Dim 2" and so on. As
-long as either vector leaves a dimension unlabelled, both axes carry those
-numbers as a prefix, so that a column can be traced back to its row; they are
-dropped once every dimension is labelled. Supplying \code{colnames} alone is the
-exception: the columns then head themselves and the rows are numbered, as
-there is no partly labelled axis to tie them to.
+An axis given no labels at all is numbered "Dim 1", "Dim 2" and so
+on. As long as either vector leaves a dimension unlabelled, the labels of
+both axes are prefixed by those numbers, so that a column can be traced back
+to its row; the numbers are dropped once every dimension is labelled. A
+complete \code{colnames} on its own is the exception: the columns then head
+themselves and the rows stay numbered, as there is no partly labelled axis to
+tie them to.
 }
 \examples{
 \dontrun{
