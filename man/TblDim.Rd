@@ -27,7 +27,9 @@ row elements are set, the rows and columns are reordered according to the
 specified sequence (overrides any sequence specified in \code{colnames}). The
 names must be the dimension names given by the dimension variable passed to
 \code{\link[=dim_analysis]{dim_analysis()}}, not row positions; a name matching no dimension, or a
-dimension left without a label, is reported by a warning.}
+dimension left without a label, is reported by a warning. An unnamed vector
+is deprecated: its labels are assigned by position, which mislabels the
+results if the order does not match the dimensions in the data.}
 
 \item{colnames}{An optional named vector of labels for the columns; if all
 column elements are set, the rows and columns are reordered according to the

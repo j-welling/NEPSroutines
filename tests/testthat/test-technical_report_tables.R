@@ -348,17 +348,31 @@ test_that("TblDim() works", {
   expect_equal(tbl$body$dataset[["Dimension"]], "Dim 1")
   expect_equal(tbl$body$dataset[["Dim 1"]], "1.60")
 
-  # unnamed vectors cannot be matched and are dropped with a warning
+  # unnamed vectors are the deprecated earlier form: still applied by
+  # position, so existing report scripts keep working, but warned about
   expect_warning(
-    TblDim(tab, model = "content",
-           rownames = c("Change", "Data", "Units", "Space")),
-    "named"
+    tbl <- TblDim(tab, model = "content",
+                  rownames = c("Units", "Change", "Space", "Data")),
+    "deprecated"
   )
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: Units", "Dim 2: Change", "Dim 3: Space", "Dim 4: Data"
+  ))
   expect_warning(
-    TblDim(tab, model = "content",
-           colnames = c("Change", "Data", "Units", "Space")),
-    "named"
+    tbl <- TblDim(tab, model = "content",
+                  colnames = c("Units", "Change", "Space", "Data")),
+    "deprecated"
   )
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1: Units", "Dim 2: Change", "Dim 3: Space", "Dim 4: Data"
+  ))
+
+  # an unnamed vector of the wrong length cannot be used at all
+  expect_warning(
+    tbl <- TblDim(tab, model = "content", rownames = c("Units", "Change")),
+    "does not match"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], paste("Dim", 1:4))
 
   # names that match no dimension would otherwise fail silently; a mistyped
   # name necessarily leaves a dimension unlabelled, so both warnings fire

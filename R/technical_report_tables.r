@@ -780,20 +780,33 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
 
 #' Validate a vector of dimension labels
 #'
-#' Labels are matched by name, so an unnamed vector cannot be applied at all and
-#' is dropped. Anything else that would leave a raw dimension name in the output
-#' is warned about but kept, as a partly labelled table is still usable.
+#' Labels are matched by name. An unnamed vector is the earlier form, where
+#' labels were assigned by position; it is still honoured if it covers every
+#' dimension, so that existing report scripts keep working, but is deprecated
+#' because a wrong order mislabels results without any sign in the output.
+#' Anything else that would leave a raw dimension name in the table is warned
+#' about but kept, as a partly labelled table is still usable.
 #'
 #' @param labels The user-supplied vector of labels, or `NULL`.
 #' @param dimensions The dimension names present in the table.
 #' @param what Either "rowname" or "colname", used in the warning messages.
-#' @return `labels`, or `NULL` if it cannot be used.
+#' @return `labels`, named, or `NULL` if it cannot be used.
 #' @noRd
 check_dimnames <- function(labels, dimensions, what) {
   if (is.null(labels)) return(NULL)
   if (is.null(names(labels))) {
-    warning("`", what, "s` must be a *named* vector.")
-    return(NULL)
+    if (length(labels) != length(dimensions)) {
+      warning("Number of ", what, " elements does not match table dimensions.")
+      return(NULL)
+    }
+    warning("Passing `", what, "s` without names is deprecated: the labels are ",
+            "assigned by position, so a wrong order silently mislabels the ",
+            "results. Name each element after its dimension, for example ",
+            "c(\"", dimensions[1], "\" = \"", labels[1], "\").")
+    # The table has not been reordered at this point -- reordering requires
+    # names -- so position still corresponds to dimension.
+    names(labels) <- dimensions
+    return(labels)
   }
   if (anyDuplicated(names(labels))) {
     warning("Some ", what, " elements share the same name; only the first ",
@@ -835,7 +848,9 @@ replace_dimnames <- function(dimensions, labels) {
 #' specified sequence (overrides any sequence specified in `colnames`). The
 #' names must be the dimension names given by the dimension variable passed to
 #' [dim_analysis()], not row positions; a name matching no dimension, or a
-#' dimension left without a label, is reported by a warning.
+#' dimension left without a label, is reported by a warning. An unnamed vector
+#' is deprecated: its labels are assigned by position, which mislabels the
+#' results if the order does not match the dimensions in the data.
 #' @param colnames An optional named vector of labels for the columns; if all
 #' column elements are set, the rows and columns are reordered according to the
 #' specified sequence. Named as in `rownames`. Note that supplying `colnames`
