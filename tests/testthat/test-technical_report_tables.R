@@ -436,6 +436,30 @@ test_that("TblDim() works", {
     ),
     "must be unique"
   )
+  # a label left over from a typo never reaches the table, so it cannot make
+  # the table unrenderable by colliding with a real one
+  expect_warning(
+    tbl <- TblDim(tab, model = "content",
+                  colnames = c("units" = "A", "change" = "B", "space" = "C",
+                               "data" = "D", "typo" = "A")),
+    "do not match"
+  )
+  expect_equal(names(tbl$body$dataset), c("Dimension", "A", "B", "C", "D"))
+
+  # empty and missing labels would reach the table as "Var.2" and "NA"
+  expect_warning(
+    expect_warning(
+      tbl <- TblDim(tab, model = "content",
+                    colnames = c("units" = "", "change" = NA, "space" = "C",
+                                 "data" = "D")),
+      "empty or missing"
+    ),
+    "not covered"
+  )
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1: units", "Dim 2: change", "Dim 3: C", "Dim 4: D"
+  ))
+
   # a label colliding with the key of the dimension column is rejected too,
   # whether or not the numbering would have kept the two apart
   expect_error(

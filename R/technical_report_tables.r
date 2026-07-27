@@ -810,9 +810,18 @@ check_dimnames <- function(labels, dimensions, what) {
     names(labels) <- dimensions
     return(labels)
   }
+  # An empty or missing label would reach the table unnoticed: `data.frame()`
+  # repairs an empty column key to "Var.2" and NA renders as the text "NA".
+  if (any(is.na(labels) | !nzchar(labels))) {
+    warning("Some ", what, " elements are empty or missing and are ignored.",
+            call. = FALSE)
+    labels <- labels[!is.na(labels) & nzchar(labels)]
+    if (!length(labels)) return(NULL)
+  }
   if (anyDuplicated(names(labels))) {
     warning("Some ", what, " elements share the same name; only the first ",
-            "of each is used.", call. = FALSE)
+            "of each is used. The sequence given here is not applied.",
+            call. = FALSE)
   }
   if (!all(names(labels) %in% dimensions)) {
     warning("Some ", what, " elements do not match a dimension in the table.",
@@ -857,9 +866,10 @@ replace_dimnames <- function(dimensions, labels) {
 #' created by [dim_analysis()].
 #' @param model The model name, typically `uni` for the unidimensional
 #' reference model and the name of the facet variable.
-#' @param rownames An optional named vector of labels for the rows; if all
-#' row elements are set, the rows and columns are reordered according to the
-#' specified sequence (overrides any sequence specified in `colnames`). The
+#' @param rownames An optional named vector of labels for the rows; if it holds
+#' exactly one element per dimension, the rows and columns are reordered
+#' according to the specified sequence (overrides any sequence specified in
+#' `colnames`). The
 #' names must be the dimension names given by the dimension variable passed to
 #' [dim_analysis()], not row positions; a name matching no dimension, or a
 #' dimension left without a label, is reported by a warning. An unnamed vector
@@ -1025,7 +1035,10 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
   # judged on the labels as supplied: a "Dim i" prefix would make them distinct
   # keys, and whether the table renders would then depend on the numbering
   # rather than on the labels alone.
-  keys <- if (is.null(colnames)) collabels else unname(colnames)
+  # Only the labels that name a dimension reach the table, so an element left
+  # over from a typo must not make the table unrenderable.
+  keys <- if (is.null(colnames)) collabels else
+    unname(colnames[names(colnames) %in% colnames(tab)])
   duplicate <- c("Dimension", keys)[anyDuplicated(c("Dimension", keys))]
   if (length(duplicate)) {
     stop("`colnames` labels must be unique and cannot be \"Dimension\"; \"",
