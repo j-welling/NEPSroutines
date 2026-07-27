@@ -436,11 +436,21 @@ test_that("TblDim() works", {
     ),
     "must be unique"
   )
-  # a label colliding with the key of the dimension column is rejected too
+  # a label colliding with the key of the dimension column is rejected too,
+  # whether or not the numbering would have kept the two apart
   expect_error(
     TblDim(tab, model = "content",
            colnames = c("units" = "Dimension", "change" = "C", "space" = "S",
                         "data" = "D")),
+    "Dimension"
+  )
+  expect_error(
+    expect_warning(
+      TblDim(tab, model = "content", rownames = c("units" = "A"),
+             colnames = c("units" = "Dimension", "change" = "C", "space" = "S",
+                          "data" = "D")),
+      "not covered"
+    ),
     "Dimension"
   )
 

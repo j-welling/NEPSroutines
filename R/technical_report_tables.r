@@ -877,10 +877,10 @@ replace_dimnames <- function(dimensions, labels) {
 #' @details An axis given no labels at all is numbered "Dim 1", "Dim 2" and so
 #' on. As long as either vector leaves a dimension unlabelled, the labels of
 #' both axes are prefixed by those numbers, so that a column can be traced back
-#' to its row; the numbers are dropped once every dimension is labelled. A
-#' complete `colnames` on its own is the exception: the columns then head
-#' themselves and the rows stay numbered, as there is no partly labelled axis to
-#' tie them to.
+#' to its row; the numbers are dropped only once every dimension is labelled on
+#' both axes. A complete `colnames` on its own is the exception: the columns
+#' then head themselves and the rows stay numbered, as there is no partly
+#' labelled axis to tie them to.
 #' @param width The column widths; if a single value is given, it refers to the
 #' first column; otherwise the number of values must correspond to the number of
 #' columns in `obj`.
@@ -1019,15 +1019,14 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
     collabels <- paste0("Dim ", seq_along(collabels), ": ", collabels)
   }
   # The column labels become the table's column keys, alongside "Dimension" for
-  # the row labels, so unlike the row labels they cannot repeat. Report that
-  # here rather than letting `flextable()` fail with a message that names
-  # neither the argument nor the label. The supplied labels are checked as they
-  # were given: a "Dim i" prefix would make repeated labels distinct keys, and
-  # then whether the table renders would depend on the numbering rather than on
-  # the labels alone.
-  duplicate <- c(colnames[anyDuplicated(colnames)],
-                 c("Dimension", collabels)[anyDuplicated(c("Dimension",
-                                                           collabels))])
+  # the row labels, so unlike the row labels they can neither repeat nor be
+  # "Dimension" themselves. Report that here rather than letting `flextable()`
+  # fail with a message naming neither the argument nor the label. Both are
+  # judged on the labels as supplied: a "Dim i" prefix would make them distinct
+  # keys, and whether the table renders would then depend on the numbering
+  # rather than on the labels alone.
+  keys <- if (is.null(colnames)) collabels else unname(colnames)
+  duplicate <- c("Dimension", keys)[anyDuplicated(c("Dimension", keys))]
   if (length(duplicate)) {
     stop("`colnames` labels must be unique and cannot be \"Dimension\"; \"",
          duplicate[1], "\" is used more than once.", call. = FALSE)

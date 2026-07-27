@@ -62,10 +62,10 @@ Create correlation table for multi-dimensional models
 An axis given no labels at all is numbered "Dim 1", "Dim 2" and so
 on. As long as either vector leaves a dimension unlabelled, the labels of
 both axes are prefixed by those numbers, so that a column can be traced back
-to its row; the numbers are dropped once every dimension is labelled. A
-complete \code{colnames} on its own is the exception: the columns then head
-themselves and the rows stay numbered, as there is no partly labelled axis to
-tie them to.
+to its row; the numbers are dropped only once every dimension is labelled on
+both axes. A complete \code{colnames} on its own is the exception: the columns
+then head themselves and the rows stay numbered, as there is no partly
+labelled axis to tie them to.
 }
 \examples{
 \dontrun{

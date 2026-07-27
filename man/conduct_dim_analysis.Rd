@@ -41,9 +41,10 @@ which items to use for the analysis}
 in vars that shall be analyzed. Each of these variables may be a factor, a
 character or an integer variable. Its values name the dimensions in the
 results and are what \code{\link[=TblDim]{TblDim()}} matches its labels against: factor levels are
-used as given, unused ones dropped; character values are sorted; integer
-codes become "dim1", "dim2" and so on. Only a factor preserves a chosen
-reporting order, as levels are kept in their declared sequence.}
+used as given, unused ones dropped; character values are sorted; an integer
+code becomes "dim" followed by the code itself, so codes 1 to n give "dim1"
+to "dimn". Only a factor preserves a chosen reporting order, as levels are
+kept in their declared sequence.}
 
 \item{scoring}{string; defines name of numerical variable in vars that
 contains the scoring factor to be applied to loading matrix; defaults to
