@@ -22,9 +22,13 @@ created by \code{\link[=dim_analysis]{dim_analysis()}}.}
 \item{model}{The model name, typically \code{uni} for the unidimensional
 reference model and the name of the facet variable.}
 
-\item{rownames}{A vector of labels for the rows.}
+\item{rownames}{An optional named vector of labels for the rows; if all
+row elements are set, the rows and columns are reordered according to the
+specified sequence (overrides any sequence specified in \code{colnames}).}
 
-\item{colnames}{A vector of labels for the columns.}
+\item{colnames}{An optional named vector of labels for the columns; if all
+column elements are set, the rows and columns are reordered according to the
+specified sequence.}
 
 \item{footnote}{A table note.}
 

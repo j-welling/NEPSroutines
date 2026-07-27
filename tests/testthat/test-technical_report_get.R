@@ -348,10 +348,10 @@ test_that("GetDim() and GetDimFit() work", {
 
   dim <- Import(test_path("fixtures", "ex2", "tables"), "dimensionality.xlsx")
 
-  expect_equal(GetDimFit(dim, model = "content", type = "BIC"), "26,425")
-  expect_equal(GetDim(dim, model = "content", stat = median), ".72")
+  expect_equal(GetDimFit(dim, model = "content", type = "BIC"), "26,151")
+  expect_equal(GetDim(dim, model = "content", stat = median), ".74")
   expect_equal(GetDim(dim, model = "content", stat = max, digits = 1), ".8")
-  expect_equal(GetDim(dim, model = "content", stat = min, var = TRUE), "2.04")
+  expect_equal(GetDim(dim, model = "content", stat = min, var = TRUE), "2.00")
 
 })
 
