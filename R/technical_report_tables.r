@@ -827,6 +827,17 @@ check_dimnames <- function(labels, dimensions, what) {
 }
 
 
+#' Does a vector of labels name every dimension?
+#'
+#' @param labels A named vector of labels, or `NULL`.
+#' @param dimensions The dimension names present in the table.
+#' @return `TRUE` if every dimension is labelled.
+#' @noRd
+complete_dimnames <- function(labels, dimensions) {
+  !is.null(labels) && all(dimensions %in% names(labels))
+}
+
+
 #' Replace dimension names by their labels
 #'
 #' @param dimensions The dimension names present in the table.
@@ -858,13 +869,15 @@ replace_dimnames <- function(dimensions, labels) {
 #' column elements are set, the rows and columns are reordered according to the
 #' specified sequence. Named as in `rownames`. Note that supplying `colnames`
 #' alone reorders the table but leaves the rows labelled "Dim 1", "Dim 2" and so
-#' on, so set `rownames` as well to keep the rows identifiable.
-#' @details An axis without labels is numbered "Dim 1", "Dim 2" and so on, and
-#' while the columns are not fully labelled, both axes carry those numbers, so
-#' that a column can be traced back to its row. The numbers are dropped only
-#' once `colnames` labels every dimension: the columns then head themselves, and
-#' the rows show their labels alone. Supplying `colnames` without `rownames`
-#' therefore leaves the rows numbered rather than named.
+#' on, so set `rownames` as well to keep the rows identifiable. Column labels
+#' become the column keys of the table and must therefore be unique, whereas two
+#' rows may well share a label.
+#' @details An axis without labels is numbered "Dim 1", "Dim 2" and so on. As
+#' long as either vector leaves a dimension unlabelled, both axes carry those
+#' numbers as a prefix, so that a column can be traced back to its row; they are
+#' dropped once every dimension is labelled. Supplying `colnames` alone is the
+#' exception: the columns then head themselves and the rows are numbered, as
+#' there is no partly labelled axis to tie them to.
 #' @param width The column widths; if a single value is given, it refers to the
 #' first column; otherwise the number of values must correspond to the number of
 #' columns in `obj`.
@@ -977,22 +990,32 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 
   # The "Dim i" numbering is what lets a reader map a column back to its row, so
   # it is dropped only once every column carries a label of its own. A vector
-  # that leaves any dimension unlabelled does not qualify: those columns would
-  # be headed by their raw name from the results file, with nothing tying them
-  # to the rows. Numbering follows the final (post-reorder) position, so a
-  # number and its label always refer to the same dimension.
-  labelled <- function(labels, dimensions) {
-    !is.null(labels) && all(dimensions %in% names(labels))
-  }
+  # that leaves any dimension unlabelled does not qualify: those rows or columns
+  # would show their raw name from the results file, with nothing tying the two
+  # axes together. An axis given no vector at all is simply numbered, which is
+  # why the columns stay bare when only they are labelled -- there is no partly
+  # named axis to tie them to. Numbering follows the final (post-reorder)
+  # position, so a number and its label always refer to the same dimension.
+  complete_rows <- complete_dimnames(rownames, rownames(tab))
+  complete_cols <- complete_dimnames(colnames, colnames(tab))
+  partial_rows <- !is.null(rownames) && !complete_rows
   if (is.null(rownames)) {
     rowlabels <- paste0("Dim ", seq(1, nrow(tab)))
-  } else if (!labelled(colnames, colnames(tab))) {
+  } else if (!complete_cols || !complete_rows) {
     rowlabels <- paste0("Dim ", seq_along(rowlabels), ": ", rowlabels)
   }
   if (is.null(colnames)) {
     collabels <- paste0("Dim ", seq(1, ncol(tab)))
-  } else if (!labelled(colnames, colnames(tab))) {
+  } else if (!complete_cols || partial_rows) {
     collabels <- paste0("Dim ", seq_along(collabels), ": ", collabels)
+  }
+  # The column labels become the table's column keys, so unlike the row labels
+  # they cannot repeat. Say so here rather than letting `flextable()` fail with
+  # a message that names neither the argument nor the dimension.
+  if (anyDuplicated(collabels)) {
+    stop("`colnames` labels must be unique; \"",
+         collabels[anyDuplicated(collabels)], "\" is used more than once.",
+         call. = FALSE)
   }
   colnames(tab) <- collabels
 

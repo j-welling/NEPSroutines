@@ -387,6 +387,33 @@ test_that("TblDim() works", {
     "Dimension", "Dim 1: units", "Dim 2: change", "Dim 3: space", "Dim 4: data"
   ))
 
+  # a partial `rownames` must number both axes for the same reason: an
+  # unlabelled row shows its raw name, and nothing else would tie it to a column
+  expect_warning(
+    tbl <- TblDim(
+      tab,
+      model = "content",
+      rownames = c("units" = "A"),
+      colnames = c("units" = "Units", "change" = "Change", "space" = "Space",
+                   "data" = "Data")
+    ),
+    "not covered"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: A", "Dim 2: change", "Dim 3: space", "Dim 4: data"
+  ))
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1: Units", "Dim 2: Change", "Dim 3: Space", "Dim 4: Data"
+  ))
+
+  # duplicated column labels cannot be rendered, as they become the column keys
+  expect_error(
+    TblDim(tab, model = "content",
+           colnames = c("units" = "X", "change" = "X", "space" = "S",
+                        "data" = "D")),
+    "must be unique"
+  )
+
   # two rows may share a label once the columns are labelled and distinct
   tbl <- TblDim(
     tab,
