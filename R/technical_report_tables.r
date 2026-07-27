@@ -817,8 +817,8 @@ check_dimnames <- function(labels, dimensions, what) {
   }
   if (!all(dimensions %in% names(labels))) {
     warning("Some dimensions are not covered by the supplied ", what,
-            " elements; these keep their raw name and the table is not ",
-            "reordered.")
+            " elements; these keep their raw name, and the sequence given ",
+            "here is not applied.")
   }
   labels
 }
@@ -923,20 +923,30 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
   }
   # Carry the dimension names onto the matrix itself. These names -- not the
   # row positions -- are what `rownames`/`colnames` are matched against below,
-  # which is what makes the labelling order-independent.
-  rownames(tab) <- obj[, 1]
-  colnames(tab) <- colnames(values)
+  # which is what makes the labelling order-independent. Both axes take their
+  # names from the first column: the sheet is a square, symmetric correlation
+  # matrix, and the header cannot be used, as the unidimensional model has no
+  # dimension name to write there ("V1"), while `openxlsx` replaces blanks in
+  # any other name by dots when the sheet is read back in.
+  rownames(tab) <- colnames(tab) <- as.character(obj[, 1])
   tab <- as.data.frame(tab)
+
+  # Resolve the labels before anything is reordered. An unnamed vector is bound
+  # to the dimensions by position, so it must be resolved against the original
+  # order -- doing this after a reorder would bind the labels to the new
+  # sequence and mislabel every dimension.
+  rownames <- check_dimnames(rownames, rownames(tab), "rowname")
+  colnames <- check_dimnames(colnames, colnames(tab), "colname")
 
   # Reorder rows and columns
   # Reordering is opt-in: it happens only if the supplied vector covers every
   # dimension (`length(...) == ncol/nrow`) and every dimension name is one of
   # its names. Otherwise the vector is used for labelling alone and the table
   # keeps its original order. `rownames` is applied second so it wins.
-  if (length(colnames) == ncol(tab) & all(colnames(tab) %in% names(colnames)))
-    tab <- tab[names(colnames), names(colnames)]
-  if (length(rownames) == nrow(tab) & all(rownames(tab) %in% names(rownames)))
-    tab <- tab[names(rownames), names(rownames)]
+  if (length(colnames) == ncol(tab) && all(colnames(tab) %in% names(colnames)))
+    tab <- tab[names(colnames), names(colnames), drop = FALSE]
+  if (length(rownames) == nrow(tab) && all(rownames(tab) %in% names(rownames)))
+    tab <- tab[names(rownames), names(rownames), drop = FALSE]
   # Reordering permutes the filled lower triangle, so some values now sit above
   # the diagonal. Mirror them back down to restore a lower-triangular table.
   for (i in seq(1, nrow(tab))) {
@@ -949,13 +959,6 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
   }
 
   # Rename variables
-  # Both failure modes below leave the raw dimension name in the output, where
-  # it is easy to overlook, so each is reported: a name matching no dimension
-  # (typo), and a dimension left without a label (incomplete vector, which also
-  # means no reordering was applied).
-  rownames <- check_dimnames(rownames, rownames(tab), "rowname")
-  colnames <- check_dimnames(colnames, colnames(tab), "colname")
-
   # Substitute in one vectorised step. An in-place loop would re-scan values it
   # had already replaced, so a label equal to another dimension's name would be
   # overwritten in turn.

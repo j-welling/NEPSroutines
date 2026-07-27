@@ -374,6 +374,56 @@ test_that("TblDim() works", {
   )
   expect_equal(tbl$body$dataset[["Dimension"]], paste("Dim", 1:4))
 
+  # an unnamed vector must be bound to the dimensions before the other,
+  # named vector reorders the table, or it labels the wrong dimensions
+  expect_warning(
+    tbl <- TblDim(tab, model = "content",
+                  rownames = c("space" = "Space", "change" = "Change",
+                               "data" = "Data", "units" = "Units"),
+                  colnames = c("Units", "Change", "Space", "Data")),
+    "deprecated"
+  )
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1: Space", "Dim 2: Change", "Dim 3: Data", "Dim 4: Units"
+  ))
+  # here the deprecated vector is bound to the original order and then, being
+  # complete, applies that order -- `rownames` takes precedence over `colnames`
+  expect_warning(
+    tbl <- TblDim(tab, model = "content",
+                  rownames = c("Units", "Change", "Space", "Data"),
+                  colnames = c("space" = "Space", "change" = "Change",
+                               "data" = "Data", "units" = "Units")),
+    "deprecated"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: Units", "Dim 2: Change", "Dim 3: Space", "Dim 4: Data"
+  ))
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1: Units", "Dim 2: Change", "Dim 3: Space", "Dim 4: Data"
+  ))
+
+  # labels on a single-dimension model
+  tbl <- TblDim(tab, model = "uni", rownames = c("1" = "Reading"))
+  expect_equal(tbl$body$dataset[["Dimension"]], "Dim 1: Reading")
+  expect_equal(tbl$body$dataset[["Dim 1"]], "1.60")
+
+  # dimension names containing blanks: `openxlsx` replaces these by dots in the
+  # header when a results file is read back in, so both axes must take their
+  # names from the first column instead
+  spaced <- list("Cor-Var content" = data.frame(
+    c("Change and relationships", "Data and chance"),
+    c(2.1, 0.7), c(0.7, 2.2)
+  ))
+  names(spaced[["Cor-Var content"]]) <- c(
+    "X1", "Change.and.relationships", "Data.and.chance"
+  )
+  tbl <- TblDim(spaced, model = "content",
+                rownames = c("Data and chance" = "Data",
+                             "Change and relationships" = "Change"))
+  expect_equal(tbl$body$dataset[["Dimension"]], c("Dim 1: Data",
+                                                  "Dim 2: Change"))
+  expect_equal(tbl$body$dataset[["Dim 1"]], c("2.20", ".70"))
+
   # names that match no dimension would otherwise fail silently; a mistyped
   # name necessarily leaves a dimension unlabelled, so both warnings fire
   expect_warning(

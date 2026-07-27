@@ -233,7 +233,10 @@ conduct_dim_analysis <- function(
       # character and numeric variables have no such order and are sorted.
       # `droplevels()` matters: an unused level would otherwise add an all-zero
       # column to Q, that is, a dimension carrying no items.
-      v <- c(t(vars[vars[[select]], d]))
+      # Extract by column rather than via `t()`, which would coerce a factor to
+      # character through a matrix and lose the level order -- silently, and
+      # only for a tibble, as a data frame drops to the bare column.
+      v <- vars[[d]][vars[[select]]]
       if (is.factor(v)) {
         v <- droplevels(v)
       } else if (is.character(v)) {
@@ -241,6 +244,10 @@ conduct_dim_analysis <- function(
       } else if (is.numeric(v)) {
         v <- factor(v, levels = sort(unique(v)),
                     labels = paste0("dim", sort(unique(v))))
+      } else {
+        # Anything else (logical, date, ...) would leave `levels(v)` NULL and
+        # produce a Q matrix without columns, which only fails later inside TAM.
+        v <- factor(as.character(v), levels = sort(unique(as.character(v))))
       }
       dimensions <- levels(v)
       Q <- matrix(0, nrow = length(v), ncol = length(dimensions))
