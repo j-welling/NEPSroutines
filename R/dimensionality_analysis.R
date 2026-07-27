@@ -220,7 +220,13 @@ conduct_dim_analysis <- function(
 
       # Create Q matrix
       v <- c(t(vars[vars[[select]], d]))
-      dimensions <- as.character(sort(unique(v)))
+      if (is.character(v)) {
+        v <- factor(v, levels = sort(unique(v)))
+      } else if (is.numeric(v)) {
+        v <- factor(v, levels = sort(unique(v)),
+                    labels = paste0("dim", sort(unique(v))))
+      }
+      dimensions <- levels(v)
       Q <- matrix(0, nrow = length(v), ncol = length(dimensions))
       colnames(Q) <- dimensions
       for (i in dimensions) {

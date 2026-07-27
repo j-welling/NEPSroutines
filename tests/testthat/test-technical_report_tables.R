@@ -288,13 +288,15 @@ test_that("TblDim() works", {
   skip_if_not_installed("officer")
 
   tab <- Import(test_path("fixtures", "ex2", "tables"), "dimensionality.xlsx")
+
+  # with rownames
   tbl <- TblDim(
     tab,
     model = "content",
-    rownames = c("Change", "Data", "Units", "Space"),
+    rownames = c("change" = "Change", "data" = "Data", "units" = "Units",
+                 "space" = "Space"),
     footnote = "Nothing of note happened."
   )
-
   expect_s3_class(tbl, "flextable")
   expect_equal(names(tbl$body$dataset), c(
     "Dimension", "Dim 1", "Dim 2", "Dim 3", "Dim 4"
@@ -302,8 +304,38 @@ test_that("TblDim() works", {
   expect_equal(tbl$body$dataset[["Dimension"]], c(
     "Dim 1: Change", "Dim 2: Data", "Dim 3: Units", "Dim 4: Space"
   ))
-  expect_equal(tbl$body$dataset[["Dim 1"]], c("2.04", ".67", ".74", ".75"))
-  expect_equal(tbl$body$dataset[["Dim 4"]], c("", "", "", "2.39"))
+  expect_equal(tbl$body$dataset[["Dim 1"]], c("2.36", ".75", ".74", ".72"))
+  expect_equal(tbl$body$dataset[["Dim 4"]], c("", "", "", "2.89"))
+
+  # with reordered rownames
+  tbl <- TblDim(
+    tab,
+    model = "content",
+    rownames = c("space" = "Space", "change" = "Change", "data" = "Data",
+                 "units" = "Units"),
+    footnote = "Nothing of note happened."
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: Space", "Dim 2: Change", "Dim 3: Data", "Dim 4: Units"
+  ))
+  expect_equal(tbl$body$dataset[["Dim 1"]], c("2.89", ".72", ".70", ".75"))
+
+  # with reorder rownames and colnames
+  tbl <- TblDim(
+    tab,
+    model = "content",
+    rownames = c("space" = "Space", "change" = "Change", "data" = "Data",
+                 "units" = "Units"),
+    colnames = c("data" = "Data", "space" = "Space", "change" = "Change",
+                 "units" = "Units"),
+    footnote = "Nothing of note happened."
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: Space", "Dim 2: Change", "Dim 3: Data", "Dim 4: Units"
+  ))
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1: Space", "Dim 2: Change", "Dim 3: Data", "Dim 4: Units"
+  ))
 
 })
 

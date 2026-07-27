@@ -784,8 +784,12 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
 #' created by [dim_analysis()].
 #' @param model The model name, typically `uni` for the unidimensional
 #' reference model and the name of the facet variable.
-#' @param rownames A vector of labels for the rows.
-#' @param colnames A vector of labels for the columns.
+#' @param rownames An optional named vector of labels for the rows; if all
+#' row elements are set, the rows and columns are reordered according to the
+#' specified sequence (overrides any sequence specified in `colnames`).
+#' @param colnames An optional named vector of labels for the columns; if all
+#' column elements are set, the rows and columns are reordered according to the
+#' specified sequence.
 #' @param width The column widths; if a single value is given, it refers to the
 #' first column; otherwise the number of values must correspond to the number of
 #' columns in `obj`.
@@ -833,34 +837,72 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 
   # Get table
   obj <- obj[[paste0("Cor-Var ", model)]]
-  obj <- as.data.frame(obj[, -1])
 
   # Format table
-  tab <- matrix("", nrow = nrow(obj), ncol = ncol(obj))
+  tab <- matrix("", nrow = nrow(obj), ncol = ncol(obj[, -1]))
   for (i in seq(1, nrow(obj))) {
     for (j in seq(1, i)) {
-      tab[i, j] <- rnd(obj[i, j], digits = 2, d0 = i != j)
+      tab[i, j] <- rnd(obj[i, j + 1], digits = 2, d0 = i != j)
     }
   }
+  rownames(tab) <- obj[, 1]
+  colnames(tab) <- colnames(obj[, -1])
   tab <- as.data.frame(tab)
 
+  # Reorder rows and columns
+  if (length(colnames) == ncol(tab) & all(colnames(tab) %in% names(colnames)))
+    tab <- tab[names(colnames), names(colnames)]
+  if (length(rownames) == nrow(tab) & all(rownames(tab) %in% names(rownames)))
+    tab <- tab[names(rownames), names(rownames)]
+  for (i in seq(1, nrow(tab))) {
+    for (j in seq(1, i)) {
+      if (tab[i, j] == "") {
+        tab[i, j] <- tab[j, i]
+        tab[j, i] <- ""
+      }
+    }
+  }
+
   # Rename variables
-  if (!is.null(rownames) & length(rownames) != nrow(tab)) {
-    warning("Number of rowname elements does not match table dimensions.")
+  if (!is.null(rownames) & is.null(names(rownames))) {
+    warning("Rowname must be a *named* vector.")
     rownames <- NULL
   }
-  if (is.null(rownames)) {
-    rownames <- paste0("Dim ", seq(1, nrow(tab)))
-  } else if (is.null(colnames)) {
-    rownames <- paste0(paste0("Dim ", seq(1, nrow(tab))), ": ", rownames)
+  if (!is.null(colnames) & is.null(names(colnames))) {
+    warning("Colname must be a *named* vector.")
+    rownames <- NULL
   }
-  if (!is.null(colnames) & length(colnames) != ncol(tab)) {
-    warning("Number of colname elements does not match table dimensions.")
-    colnames <- NULL
+  rowlabels <- rownames(tab)
+  if (!is.null(rownames)) {
+    for (i in seq_along(rownames)) {
+      rowlabels[rowlabels == names(rownames)[i]] <- rownames[i]
+    }
   }
-  if (is.null(colnames)) colnames <- paste0("Dim ", seq(1, ncol(tab)))
-  tab <- cbind(rownames, tab)
-  colnames(tab) <- c("Dimension", colnames)
+  if (all(rownames(tab) == colnames(tab))) {
+    if (is.null(rownames)) {
+      rowlabels <- paste0("Dim ", seq(1, nrow(tab)))
+    } else {
+      rowlabels <- paste0("Dim ", seq_along(rowlabels), ": ", rowlabels)
+    }
+  }
+  collabels <- colnames(tab)
+  if (!is.null(colnames)) {
+    for (i in seq_along(colnames)) {
+      collabels[collabels == names(colnames)[i]] <- colnames[i]
+    }
+  }
+  if (all(rownames(tab) == colnames(tab))) {
+    if (is.null(colnames)) {
+      collabels <- paste0("Dim ", seq(1, nrow(tab)))
+    } else {
+      collabels <- paste0("Dim ", seq_along(collabels), ": ", collabels)
+    }
+  }
+  rownames(tab) <- rowlabels
+  colnames(tab) <- collabels
+
+  # Add dimension column
+  tab <- cbind("Dimension" = rownames(tab), tab)
 
   # Footnote
   note <- paste0("Variances of the dimensions are given in the ",
