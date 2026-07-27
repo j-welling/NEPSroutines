@@ -76,8 +76,10 @@ dim <- Import(tmpdir, "/dimensionality.xlsx")
 # Default correlation table
 TblDim(dim, "content")
 
-# Correlation table with labels
+# Correlation table with labels; names refer to the dimensions, so the
+# sequence given here also determines the row and column order
 TblDim(dim, "content",
-       rownames = c("Units", "Change", "Space", "Data"))
+       rownames = c("dim1" = "Units", "dim2" = "Change",
+                    "dim3" = "Space", "dim4" = "Data"))
 }
 }

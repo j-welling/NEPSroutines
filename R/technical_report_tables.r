@@ -828,9 +828,11 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
 #' # Default correlation table
 #' TblDim(dim, "content")
 #'
-#' # Correlation table with labels
+#' # Correlation table with labels; names refer to the dimensions, so the
+#' # sequence given here also determines the row and column order
 #' TblDim(dim, "content",
-#'        rownames = c("Units", "Change", "Space", "Data"))
+#'        rownames = c("dim1" = "Units", "dim2" = "Change",
+#'                     "dim3" = "Space", "dim4" = "Data"))
 #' }
 TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
                    footnote = NULL, size = 12, width = 3, ...) {
@@ -839,21 +841,34 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
   obj <- obj[[paste0("Cor-Var ", model)]]
 
   # Format table
+  # Column 1 of `obj` holds the dimension names, hence the `j + 1` offset when
+  # reading values and the `[, -1]` when sizing `tab`. Only the lower triangle
+  # is filled; `d0 = i != j` keeps the leading zero on the diagonal (variances)
+  # and drops it off-diagonal (correlations).
   tab <- matrix("", nrow = nrow(obj), ncol = ncol(obj[, -1]))
   for (i in seq(1, nrow(obj))) {
     for (j in seq(1, i)) {
       tab[i, j] <- rnd(obj[i, j + 1], digits = 2, d0 = i != j)
     }
   }
+  # Carry the dimension names onto the matrix itself. These names -- not the
+  # row positions -- are what `rownames`/`colnames` are matched against below,
+  # which is what makes the labelling order-independent.
   rownames(tab) <- obj[, 1]
   colnames(tab) <- colnames(obj[, -1])
   tab <- as.data.frame(tab)
 
   # Reorder rows and columns
+  # Reordering is opt-in: it happens only if the supplied vector covers every
+  # dimension (`length(...) == ncol/nrow`) and every dimension name is one of
+  # its names. Otherwise the vector is used for labelling alone and the table
+  # keeps its original order. `rownames` is applied second so it wins.
   if (length(colnames) == ncol(tab) & all(colnames(tab) %in% names(colnames)))
     tab <- tab[names(colnames), names(colnames)]
   if (length(rownames) == nrow(tab) & all(rownames(tab) %in% names(rownames)))
     tab <- tab[names(rownames), names(rownames)]
+  # Reordering permutes the filled lower triangle, so some values now sit above
+  # the diagonal. Mirror them back down to restore a lower-triangular table.
   for (i in seq(1, nrow(tab))) {
     for (j in seq(1, i)) {
       if (tab[i, j] == "") {
@@ -864,13 +879,24 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
   }
 
   # Rename variables
+  # Labels are matched by name, so an unnamed vector cannot be applied at all
+  # and is dropped with a warning rather than silently used positionally.
   if (!is.null(rownames) & is.null(names(rownames))) {
     warning("Rowname must be a *named* vector.")
     rownames <- NULL
   }
   if (!is.null(colnames) & is.null(names(colnames))) {
     warning("Colname must be a *named* vector.")
-    rownames <- NULL
+    colnames <- NULL
+  }
+  # Replace each dimension name by its label. Names that match nothing in the
+  # table would fail silently, so warn: a typo in a name is otherwise invisible
+  # in the output, which simply keeps the raw dimension name.
+  if (!is.null(rownames) & !all(names(rownames) %in% rownames(tab))) {
+    warning("Some rowname elements do not match a dimension in the table.")
+  }
+  if (!is.null(colnames) & !all(names(colnames) %in% colnames(tab))) {
+    warning("Some colname elements do not match a dimension in the table.")
   }
   rowlabels <- rownames(tab)
   if (!is.null(rownames)) {
@@ -878,6 +904,9 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
       rowlabels[rowlabels == names(rownames)[i]] <- rownames[i]
     }
   }
+  # Rows and columns carry the same dimensions in a correlation table, so the
+  # "Dim i: " prefix is added only then, numbering by final (post-reorder)
+  # position so that prefix and label always refer to the same dimension.
   if (all(rownames(tab) == colnames(tab))) {
     if (is.null(rownames)) {
       rowlabels <- paste0("Dim ", seq(1, nrow(tab)))

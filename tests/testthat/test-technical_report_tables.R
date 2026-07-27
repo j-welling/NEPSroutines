@@ -337,6 +337,26 @@ test_that("TblDim() works", {
     "Dimension", "Dim 1: Space", "Dim 2: Change", "Dim 3: Data", "Dim 4: Units"
   ))
 
+  # unnamed vectors cannot be matched and are dropped with a warning
+  expect_warning(
+    TblDim(tab, model = "content",
+           rownames = c("Change", "Data", "Units", "Space")),
+    "named"
+  )
+  expect_warning(
+    TblDim(tab, model = "content",
+           colnames = c("Change", "Data", "Units", "Space")),
+    "named"
+  )
+
+  # names that match no dimension would otherwise fail silently
+  expect_warning(
+    TblDim(tab, model = "content",
+           rownames = c("change" = "Change", "data" = "Data",
+                        "units" = "Units", "typo" = "Space")),
+    "do not match"
+  )
+
 })
 
 
