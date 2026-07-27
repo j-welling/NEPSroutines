@@ -31,9 +31,11 @@ dimension left without a label, is reported by a warning. An unnamed vector
 is deprecated: its labels are assigned by position, which mislabels the
 results if the order does not match the dimensions in the data.}
 
-\item{colnames}{An optional named vector of labels for the columns; if all
-column elements are set, the rows and columns are reordered according to the
-specified sequence. Named as in \code{rownames}. Note that supplying \code{colnames}
+\item{colnames}{An optional named vector of labels for the columns; if it
+holds exactly one element per dimension, the rows and columns are reordered
+according to the specified sequence. A vector carrying further elements
+beyond those still labels the table, but leaves its order alone. Named as in
+\code{rownames}. Note that supplying \code{colnames}
 alone reorders the table but leaves the rows labelled "Dim 1", "Dim 2" and so
 on, so set \code{rownames} as well to keep the rows identifiable. Column labels
 become the column keys of the table, so they must be unique, must differ from

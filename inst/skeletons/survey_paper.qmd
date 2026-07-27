@@ -415,9 +415,12 @@ The dimensionality of the test was also examined by specifying {{ifre}}two multi
 #| tbl-cap: "Results of three-dimensional scaling for cognitive functions"
 #| label: tbl-dim-cogfun
 
-# The names of `rownames` must match the dimensions in your own data: "dim1",
-# "dim2", ... for a numerically coded variable, otherwise its factor levels.
-# They determine both the labels and the row and column order of the table.
+# The names of `rownames` must match the dimensions as they are named in your
+# own results file, and determine both the labels and the row and column order
+# of the table. A dimension variable coded numerically gives "dim1", "dim2" and
+# so on, a factor gives its levels, and any other variable its sorted values.
+# Results files written before dimension names were stored name them "1", "2"
+# and so on; re-run the dimensionality analysis to obtain the real names.
 TblDim(obj = dim, model = "cogfun",
        rownames = c("dim1" = "Finding information in the text",
                     "dim2" = "Drawing text-related conclusions",
