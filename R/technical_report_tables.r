@@ -834,6 +834,52 @@ TblSteps <- function(obj, footnote = NULL, size = 10, width = 1, digits = 2,
 #'        rownames = c("dim1" = "Units", "dim2" = "Change",
 #'                     "dim3" = "Space", "dim4" = "Data"))
 #' }
+#' Validate a vector of dimension labels
+#'
+#' Labels are matched by name, so an unnamed vector cannot be applied at all and
+#' is dropped. Anything else that would leave a raw dimension name in the output
+#' is warned about but kept, as a partly labelled table is still usable.
+#'
+#' @param labels The user-supplied vector of labels, or `NULL`.
+#' @param dimensions The dimension names present in the table.
+#' @param what Either "rowname" or "colname", used in the warning messages.
+#' @return `labels`, or `NULL` if it cannot be used.
+#' @noRd
+check_dimnames <- function(labels, dimensions, what) {
+  if (is.null(labels)) return(NULL)
+  if (is.null(names(labels))) {
+    warning("`", what, "s` must be a *named* vector.")
+    return(NULL)
+  }
+  if (anyDuplicated(names(labels))) {
+    warning("Some ", what, " elements share the same name; only the first ",
+            "of each is used.")
+  }
+  if (!all(names(labels) %in% dimensions)) {
+    warning("Some ", what, " elements do not match a dimension in the table.")
+  }
+  if (!all(dimensions %in% names(labels))) {
+    warning("Some dimensions are not covered by the supplied ", what,
+            " elements; these keep their raw name and the table is not ",
+            "reordered.")
+  }
+  labels
+}
+
+
+#' Replace dimension names by their labels
+#'
+#' @param dimensions The dimension names present in the table.
+#' @param labels A named vector of labels, or `NULL`.
+#' @return A character vector of labels, in the order of `dimensions`.
+#' @noRd
+replace_dimnames <- function(dimensions, labels) {
+  if (is.null(labels)) return(dimensions)
+  hit <- match(dimensions, names(labels))
+  ifelse(is.na(hit), dimensions, labels[hit])
+}
+
+
 TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
                    footnote = NULL, size = 12, width = 3, ...) {
 
@@ -842,10 +888,13 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
 
   # Format table
   # Column 1 of `obj` holds the dimension names, hence the `j + 1` offset when
-  # reading values and the `[, -1]` when sizing `tab`. Only the lower triangle
-  # is filled; `d0 = i != j` keeps the leading zero on the diagonal (variances)
-  # and drops it off-diagonal (correlations).
-  tab <- matrix("", nrow = nrow(obj), ncol = ncol(obj[, -1]))
+  # reading values and the `[, -1]` when sizing `tab`. `drop = FALSE` is
+  # essential: the unidimensional model has a single value column, which would
+  # otherwise collapse to a vector and make `ncol()` return NULL. Only the
+  # lower triangle is filled; `d0 = i != j` keeps the leading zero on the
+  # diagonal (variances) and drops it off-diagonal (correlations).
+  values <- obj[, -1, drop = FALSE]
+  tab <- matrix("", nrow = nrow(obj), ncol = ncol(values))
   for (i in seq(1, nrow(obj))) {
     for (j in seq(1, i)) {
       tab[i, j] <- rnd(obj[i, j + 1], digits = 2, d0 = i != j)
@@ -855,7 +904,7 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
   # row positions -- are what `rownames`/`colnames` are matched against below,
   # which is what makes the labelling order-independent.
   rownames(tab) <- obj[, 1]
-  colnames(tab) <- colnames(obj[, -1])
+  colnames(tab) <- colnames(values)
   tab <- as.data.frame(tab)
 
   # Reorder rows and columns
@@ -879,50 +928,33 @@ TblDim <- function(obj, model, rownames = NULL, colnames = NULL,
   }
 
   # Rename variables
-  # Labels are matched by name, so an unnamed vector cannot be applied at all
-  # and is dropped with a warning rather than silently used positionally.
-  if (!is.null(rownames) & is.null(names(rownames))) {
-    warning("Rowname must be a *named* vector.")
-    rownames <- NULL
-  }
-  if (!is.null(colnames) & is.null(names(colnames))) {
-    warning("Colname must be a *named* vector.")
-    colnames <- NULL
-  }
-  # Replace each dimension name by its label. Names that match nothing in the
-  # table would fail silently, so warn: a typo in a name is otherwise invisible
-  # in the output, which simply keeps the raw dimension name.
-  if (!is.null(rownames) & !all(names(rownames) %in% rownames(tab))) {
-    warning("Some rowname elements do not match a dimension in the table.")
-  }
-  if (!is.null(colnames) & !all(names(colnames) %in% colnames(tab))) {
-    warning("Some colname elements do not match a dimension in the table.")
-  }
-  rowlabels <- rownames(tab)
-  if (!is.null(rownames)) {
-    for (i in seq_along(rownames)) {
-      rowlabels[rowlabels == names(rownames)[i]] <- rownames[i]
-    }
-  }
-  # Rows and columns carry the same dimensions in a correlation table, so the
-  # "Dim i: " prefix is added only then, numbering by final (post-reorder)
-  # position so that prefix and label always refer to the same dimension.
-  if (all(rownames(tab) == colnames(tab))) {
+  # Both failure modes below leave the raw dimension name in the output, where
+  # it is easy to overlook, so each is reported: a name matching no dimension
+  # (typo), and a dimension left without a label (incomplete vector, which also
+  # means no reordering was applied).
+  rownames <- check_dimnames(rownames, rownames(tab), "rowname")
+  colnames <- check_dimnames(colnames, colnames(tab), "colname")
+
+  # Substitute in one vectorised step. An in-place loop would re-scan values it
+  # had already replaced, so a label equal to another dimension's name would be
+  # overwritten in turn.
+  rowlabels <- replace_dimnames(rownames(tab), rownames)
+  collabels <- replace_dimnames(colnames(tab), colnames)
+
+  # A correlation table is square and carries the same dimensions on both axes,
+  # so the "Dim i: " prefix is added only then. Compare extents rather than
+  # names: for the unidimensional model both axes hold the single dimension but
+  # under different names ("1" and "V1"), as `dim_summary()` has no Q matrix to
+  # take column names from. Numbering follows the final (post-reorder) position,
+  # so prefix and label always refer to the same dimension.
+  if (nrow(tab) == ncol(tab)) {
     if (is.null(rownames)) {
       rowlabels <- paste0("Dim ", seq(1, nrow(tab)))
     } else {
       rowlabels <- paste0("Dim ", seq_along(rowlabels), ": ", rowlabels)
     }
-  }
-  collabels <- colnames(tab)
-  if (!is.null(colnames)) {
-    for (i in seq_along(colnames)) {
-      collabels[collabels == names(colnames)[i]] <- colnames[i]
-    }
-  }
-  if (all(rownames(tab) == colnames(tab))) {
     if (is.null(colnames)) {
-      collabels <- paste0("Dim ", seq(1, nrow(tab)))
+      collabels <- paste0("Dim ", seq(1, ncol(tab)))
     } else {
       collabels <- paste0("Dim ", seq_along(collabels), ": ", collabels)
     }

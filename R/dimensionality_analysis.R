@@ -219,8 +219,16 @@ conduct_dim_analysis <- function(
     for (d in dim) {
 
       # Create Q matrix
+      # The dimension names travel with the model into the results table, where
+      # `TblDim()` matches user-supplied labels against them. A factor keeps its
+      # declared level order, which is the author's intended reporting order;
+      # character and numeric variables have no such order and are sorted.
+      # `droplevels()` matters: an unused level would otherwise add an all-zero
+      # column to Q, that is, a dimension carrying no items.
       v <- c(t(vars[vars[[select]], d]))
-      if (is.character(v)) {
+      if (is.factor(v)) {
+        v <- droplevels(v)
+      } else if (is.character(v)) {
         v <- factor(v, levels = sort(unique(v)))
       } else if (is.numeric(v)) {
         v <- factor(v, levels = sort(unique(v)),

@@ -337,6 +337,17 @@ test_that("TblDim() works", {
     "Dimension", "Dim 1: Space", "Dim 2: Change", "Dim 3: Data", "Dim 4: Units"
   ))
 
+  # without labels
+  tbl <- TblDim(tab, model = "content")
+  expect_equal(tbl$body$dataset[["Dimension"]], paste("Dim", 1:4))
+
+  # unidimensional model: a single value column, and the two axes are named
+  # differently ("1" and "V1")
+  tbl <- TblDim(tab, model = "uni")
+  expect_s3_class(tbl, "flextable")
+  expect_equal(tbl$body$dataset[["Dimension"]], "Dim 1")
+  expect_equal(tbl$body$dataset[["Dim 1"]], "1.60")
+
   # unnamed vectors cannot be matched and are dropped with a warning
   expect_warning(
     TblDim(tab, model = "content",
@@ -349,13 +360,43 @@ test_that("TblDim() works", {
     "named"
   )
 
-  # names that match no dimension would otherwise fail silently
+  # names that match no dimension would otherwise fail silently; a mistyped
+  # name necessarily leaves a dimension unlabelled, so both warnings fire
+  expect_warning(
+    expect_warning(
+      TblDim(tab, model = "content",
+             rownames = c("change" = "Change", "data" = "Data",
+                          "units" = "Units", "typo" = "Space")),
+      "do not match"
+    ),
+    "not covered"
+  )
+
+  # so would dimensions left unlabelled by an incomplete vector
+  expect_warning(
+    tbl <- TblDim(tab, model = "content",
+                  rownames = c("change" = "Change", "data" = "Data")),
+    "not covered"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: units", "Dim 2: Change", "Dim 3: space", "Dim 4: Data"
+  ))
+
+  # duplicated names
   expect_warning(
     TblDim(tab, model = "content",
-           rownames = c("change" = "Change", "data" = "Data",
-                        "units" = "Units", "typo" = "Space")),
-    "do not match"
+           rownames = c("units" = "A", "units" = "B", "change" = "C",
+                        "space" = "D", "data" = "E")),
+    "same name"
   )
+
+  # a label equal to another dimension's name must not cascade
+  tbl <- TblDim(tab, model = "content",
+                rownames = c("units" = "change", "change" = "data",
+                             "space" = "Space", "data" = "Data"))
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: change", "Dim 2: data", "Dim 3: Space", "Dim 4: Data"
+  ))
 
 })
 
