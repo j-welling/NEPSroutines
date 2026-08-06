@@ -28,7 +28,7 @@
 - PRs: #56 (IRT), #57 (DIF), #58 (DIM), #59 (Linking), #60 (MV)
 
 **Files Created**:
-- `tests/testthat/test-irt_analysis.R` - 50 tests
+- `tests/testthat/test-irt_analyses.R` - 50 tests
 - `tests/testthat/test-dif_analysis.R` - 43 tests
 - `tests/testthat/test-dim_analysis.R` - 28 tests
 - `tests/testthat/test-linking.R` - 46 tests
