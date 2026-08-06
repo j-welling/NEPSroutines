@@ -11,6 +11,35 @@ max_deviation <- function(new, old, cols) {
   }, numeric(1))
 }
 
+# Compare WLEs against a fixture, matched on person ID rather than row position.
+#
+# wle_rel alone is not enough: it is 1 - mean(error^2) / var(theta), a variance
+# ratio, so it is unchanged if theta is permuted across persons, shifted by a
+# constant, or sign-flipped. A permutation is exactly the regression that
+# matters here, because irt_model() filters persons via only_valid() before
+# handing ID_t to TAM as pid, and a misalignment would attach abilities to the
+# wrong persons while leaving every reported number intact.
+#
+# Matching on pid rather than row order also means a change in the order
+# only_valid() returns rows is not by itself a failure, as long as each person
+# keeps their own estimate.
+expect_wle_equal <- function(new, old, tolerance = 1e-4) {
+
+  cols <- c("pid", "theta", "error")
+  new <- as.data.frame(new)[, cols]
+  old <- as.data.frame(old)[, cols]
+
+  expect_setequal(new$pid, old$pid)
+
+  merged <- merge(new, old, by = "pid", suffixes = c("", "_fix"))
+
+  # Guards against a duplicated pid silently expanding the join
+  expect_equal(nrow(merged), nrow(old))
+
+  expect_equal(merged$theta, merged$theta_fix, tolerance = tolerance)
+  expect_equal(merged$error, merged$error_fix, tolerance = tolerance)
+}
+
 
 test_that("irt_model() runs without error for 1PL", {
 
@@ -231,6 +260,17 @@ test_that("irt_analysis() dichotomous matches fixture", {
   expect_equal(result$model.2pl$wle_rel, fixture$model.2pl$wle_rel,
                tolerance = 1e-4)
 
+  # The estimates behind that reliability, per person (see expect_wle_equal)
+  expect_wle_equal(result$model.1pl$wle, fixture$model.1pl$wle)
+  expect_wle_equal(result$model.2pl$wle, fixture$model.2pl$wle)
+
+  # pid must carry the ID_t of the valid cases, which is what makes the WLEs
+  # attributable to persons at all. Checked against the input data rather than
+  # the fixture, so it still holds if the fixture is ever regenerated.
+  valid_ids <- ex1$resp$ID_t[ex1$resp$valid]
+  expect_equal(result$model.1pl$wle$pid, valid_ids)
+  expect_equal(result$model.2pl$wle$pid, valid_ids)
+
   # Model fit table is rounded to whole numbers / 3 decimals and is therefore
   # unaffected by the digits change: it must match exactly.
   expect_equal(result$model_fit, fixture$model_fit)
@@ -290,11 +330,30 @@ test_that("irt_analysis() polytomous matches fixture", {
   expect_equal(result$model.gpcm$mod$xsi$xsi,
                fixture$model.gpcm$mod$xsi$xsi, tolerance = 1e-4)
 
+  # Slopes. For GPCM these are freely estimated and are the whole reason to fit
+  # it alongside PCM, so they need the same guard the 2PL slopes get above;
+  # mod$xsi holds the step parameters and says nothing about discrimination.
+  expect_equal(result$model.gpcm$mod$B, fixture$model.gpcm$mod$B,
+               tolerance = 1e-4)
+
+  # PCM slopes are fixed at the scoring weights rather than estimated, so this
+  # pins the scoring matrix that was handed to TAM.
+  expect_equal(result$model.pcm$mod$B, fixture$model.pcm$mod$B,
+               tolerance = 1e-4)
+
   # Person parameters
   expect_equal(result$model.pcm$wle_rel, fixture$model.pcm$wle_rel,
                tolerance = 1e-4)
   expect_equal(result$model.gpcm$wle_rel, fixture$model.gpcm$wle_rel,
                tolerance = 1e-4)
+
+  # The estimates behind that reliability, per person (see expect_wle_equal)
+  expect_wle_equal(result$model.pcm$wle, fixture$model.pcm$wle)
+  expect_wle_equal(result$model.gpcm$wle, fixture$model.gpcm$wle)
+
+  valid_ids <- ex2$resp$ID_t[ex2$resp$valid]
+  expect_equal(result$model.pcm$wle$pid, valid_ids)
+  expect_equal(result$model.gpcm$wle$pid, valid_ids)
 
   expect_equal(result$model_fit, fixture$model_fit)
 
@@ -311,12 +370,29 @@ test_that("irt_analysis() polytomous matches fixture", {
   )
   expect_lt(max(deviation), 0.01)
 
-  # Step parameters are pre-formatted strings ("1.671 (0.0713)") whose
-  # precision follows `digits`, so only their layout is compared here; the
-  # underlying values are checked via model.pcm$mod$xsi above.
+  # Step parameters are pre-formatted strings whose precision follows `digits`,
+  # so their layout rather than their text is compared here.
   expect_equal(dim(result$steps), dim(fixture$steps))
   expect_equal(names(result$steps), names(fixture$steps))
   expect_equal(rownames(result$steps), rownames(fixture$steps))
+
+  # Not every step value comes from model.pcm$mod$xsi: the last step of each
+  # item is derived in steps_analysis() from the sum-zero constraint, so it is
+  # package logic with no TAM counterpart to compare against. Assert the
+  # constraint itself, which holds at any `digits` and does not depend on the
+  # standard errors also printed in these cells.
+  step_values <- vapply(result$steps, function(col) {
+    as.numeric(sub(" .*$", "", col))
+  }, numeric(nrow(result$steps)))
+
+  expect_equal(rowSums(step_values, na.rm = TRUE),
+               rep(0, nrow(step_values)),
+               tolerance = 1e-8,
+               ignore_attr = TRUE)
+
+  # Every item must actually have a derived cell, otherwise the row sums above
+  # are trivially satisfied by an all-NA row.
+  expect_true(all(rowSums(!is.na(step_values)) >= 2))
 
 })
 
@@ -417,5 +493,117 @@ test_that("irt_model_fit() produces valid output", {
   expect_true("BIC" %in% names(mfit))
   expect_true("EAPrel" %in% names(mfit))
   expect_true("WLErel" %in% names(mfit))
+
+  # Row labels come from the irt_type branch in irt_model_fit() and are what
+  # identifies the models in the technical report
+  expect_equal(rownames(mfit), c("1PL model", "2PL model"))
+
+})
+
+
+test_that("irt_summary() produces valid output for polytomous models", {
+
+  skip_if_not_installed("MASS")
+
+  data(ex2)
+
+  model_pcm <- irt_model(
+    resp = ex2$resp,
+    vars = ex2$vars,
+    select = "mixed",
+    valid = "valid",
+    scoring = "scoring",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    irtmodel = "PCM2",
+    verbose = FALSE,
+    save = FALSE,
+    warn = FALSE
+  )
+
+  model_gpcm <- irt_model(
+    resp = ex2$resp,
+    vars = ex2$vars,
+    select = "mixed",
+    valid = "valid",
+    scoring = "scoring",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    irtmodel = "GPCM",
+    verbose = FALSE,
+    save = FALSE,
+    warn = FALSE
+  )
+
+  summary <- irt_summary(
+    resp = ex2$resp,
+    vars = ex2$vars,
+    valid = "valid",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    results = model_pcm,
+    disc = model_gpcm,
+    save = FALSE,
+    warn = FALSE
+  )
+
+  expect_true(is.data.frame(summary))
+  expect_true("Item" %in% names(summary))
+  expect_true("N_administered" %in% names(summary))
+  expect_true("N_valid" %in% names(summary))
+  expect_true("xsi" %in% names(summary))
+  expect_true("WMNSQ" %in% names(summary))
+  expect_true("rit" %in% names(summary))
+  expect_true("Discr." %in% names(summary))
+
+  # One row per scaled item, polytomous ones included
+  expect_equal(nrow(summary), sum(ex2$vars$mixed))
+
+})
+
+
+test_that("irt_model_fit() produces valid output for polytomous models", {
+
+  skip_if_not_installed("MASS")
+
+  data(ex2)
+
+  model_pcm <- irt_model(
+    resp = ex2$resp,
+    vars = ex2$vars,
+    select = "mixed",
+    valid = "valid",
+    scoring = "scoring",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    irtmodel = "PCM2",
+    verbose = FALSE,
+    save = FALSE,
+    warn = FALSE
+  )
+
+  model_gpcm <- irt_model(
+    resp = ex2$resp,
+    vars = ex2$vars,
+    select = "mixed",
+    valid = "valid",
+    scoring = "scoring",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    irtmodel = "GPCM",
+    verbose = FALSE,
+    save = FALSE,
+    warn = FALSE
+  )
+
+  mfit <- irt_model_fit(
+    model_1p = model_pcm,
+    model_2p = model_gpcm,
+    save = FALSE
+  )
+
+  expect_true(is.data.frame(mfit))
+  expect_equal(nrow(mfit), 2)
+  expect_true("EAPrel" %in% names(mfit))
+  expect_true("WLErel" %in% names(mfit))
+
+  # The 'poly' branch of irt_model_fit() is reachable only from a PCM2 model
+  # and was previously never executed by any test
+  expect_equal(rownames(mfit), c("PCM model", "GPCM model"))
 
 })
