@@ -20,24 +20,62 @@ max_deviation <- function(new, old, cols) {
 # handing ID_t to TAM as pid, and a misalignment would attach abilities to the
 # wrong persons while leaving every reported number intact.
 #
-# Matching on pid rather than row order also means a change in the order
-# only_valid() returns rows is not by itself a failure, as long as each person
-# keeps their own estimate.
+# This comparison is deliberately order-insensitive so that its failure message
+# means "a person's estimate changed" and nothing else. Row order is not thereby
+# permitted to drift: the calling blocks pin it separately against the input
+# data with expect_equal(wle$pid, valid_ids). Splitting the two keeps a
+# reordering from also producing a wall of value mismatches.
 expect_wle_equal <- function(new, old, tolerance = 1e-4) {
 
+  # irt_model() returns all seven tam.wle columns; the fixtures store three
   cols <- c("pid", "theta", "error")
-  new <- as.data.frame(new)[, cols]
-  old <- as.data.frame(old)[, cols]
+  merged <- merge(
+    as.data.frame(new)[, cols],
+    as.data.frame(old)[, cols],
+    by = "pid", suffixes = c("", "_fix")
+  )
 
-  expect_setequal(new$pid, old$pid)
-
-  merged <- merge(new, old, by = "pid", suffixes = c("", "_fix"))
-
-  # Guards against a duplicated pid silently expanding the join
+  # merge() drops unmatched pids, so this covers both set equality and a
+  # duplicated pid silently expanding the join
   expect_equal(nrow(merged), nrow(old))
 
   expect_equal(merged$theta, merged$theta_fix, tolerance = tolerance)
   expect_equal(merged$error, merged$error_fix, tolerance = tolerance)
+}
+
+
+# Fit a model on the packaged example data. Blocks that need a fitted model only
+# as setup call these; blocks that test irt_model() itself spell the call out, so
+# that the arguments under test stay visible at the point of use.
+fit_dich <- function(irtmodel) {
+  data(ex1, envir = environment())
+  irt_model(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    select = "dich",
+    valid = "valid",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    irtmodel = irtmodel,
+    verbose = FALSE,
+    save = FALSE,
+    warn = FALSE
+  )
+}
+
+fit_poly <- function(irtmodel) {
+  data(ex2, envir = environment())
+  irt_model(
+    resp = ex2$resp,
+    vars = ex2$vars,
+    select = "mixed",
+    valid = "valid",
+    scoring = "scoring",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    irtmodel = irtmodel,
+    verbose = FALSE,
+    save = FALSE,
+    warn = FALSE
+  )
 }
 
 
@@ -47,22 +85,19 @@ test_that("irt_model() runs without error for 1PL", {
 
   data(ex1)
 
-  result <- try({
-    irt_model(
-      resp = ex1$resp,
-      vars = ex1$vars,
-      select = "dich",
-      valid = "valid",
-      mvs = c(OM = -97, NV = -95, NR = -94),
-      irtmodel = "1PL",
-      verbose = FALSE,
-      save = FALSE,
-      warn = FALSE
-    )
-  })
+  result <- irt_model(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    select = "dich",
+    valid = "valid",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    irtmodel = "1PL",
+    verbose = FALSE,
+    save = FALSE,
+    warn = FALSE
+  )
 
-  expect_false(inherits(result, "try-error"))
-  expect_true(is.list(result))
+  # The documented return contract (see roxygen for irt_model())
   expect_true("mod" %in% names(result))
   expect_true("fit" %in% names(result))
   expect_true("pars" %in% names(result))
@@ -79,21 +114,18 @@ test_that("irt_model() runs without error for 2PL", {
 
   data(ex1)
 
-  result <- try({
-    irt_model(
-      resp = ex1$resp,
-      vars = ex1$vars,
-      select = "dich",
-      valid = "valid",
-      mvs = c(OM = -97, NV = -95, NR = -94),
-      irtmodel = "2PL",
-      verbose = FALSE,
-      save = FALSE,
-      warn = FALSE
-    )
-  })
+  result <- irt_model(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    select = "dich",
+    valid = "valid",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    irtmodel = "2PL",
+    verbose = FALSE,
+    save = FALSE,
+    warn = FALSE
+  )
 
-  expect_false(inherits(result, "try-error"))
   expect_equal(result$irtmodel, "2PL")
 
 })
@@ -105,22 +137,19 @@ test_that("irt_model() runs without error for PCM2", {
 
   data(ex2)
 
-  result <- try({
-    irt_model(
-      resp = ex2$resp,
-      vars = ex2$vars,
-      select = "mixed",
-      valid = "valid",
-      scoring = "scoring",
-      mvs = c(OM = -97, NV = -95, NR = -94),
-      irtmodel = "PCM2",
-      verbose = FALSE,
-      save = FALSE,
-      warn = FALSE
-    )
-  })
+  result <- irt_model(
+    resp = ex2$resp,
+    vars = ex2$vars,
+    select = "mixed",
+    valid = "valid",
+    scoring = "scoring",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    irtmodel = "PCM2",
+    verbose = FALSE,
+    save = FALSE,
+    warn = FALSE
+  )
 
-  expect_false(inherits(result, "try-error"))
   expect_equal(result$irtmodel, "PCM2")
 
 })
@@ -132,22 +161,19 @@ test_that("irt_model() runs without error for GPCM", {
 
   data(ex2)
 
-  result <- try({
-    irt_model(
-      resp = ex2$resp,
-      vars = ex2$vars,
-      select = "mixed",
-      valid = "valid",
-      scoring = "scoring",
-      mvs = c(OM = -97, NV = -95, NR = -94),
-      irtmodel = "GPCM",
-      verbose = FALSE,
-      save = FALSE,
-      warn = FALSE
-    )
-  })
+  result <- irt_model(
+    resp = ex2$resp,
+    vars = ex2$vars,
+    select = "mixed",
+    valid = "valid",
+    scoring = "scoring",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    irtmodel = "GPCM",
+    verbose = FALSE,
+    save = FALSE,
+    warn = FALSE
+  )
 
-  expect_false(inherits(result, "try-error"))
   expect_equal(result$irtmodel, "GPCM")
 
 })
@@ -159,21 +185,18 @@ test_that("irt_analysis() dichotomous produces expected structure", {
 
   data(ex1)
 
-  result <- try({
-    irt_analysis(
-      resp = ex1$resp,
-      vars = ex1$vars,
-      select = "dich",
-      valid = "valid",
-      mvs = c(OM = -97, NV = -95, NR = -94),
-      print = FALSE,
-      save = FALSE,
-      return = TRUE,
-      warn = FALSE
-    )
-  })
+  result <- irt_analysis(
+    resp = ex1$resp,
+    vars = ex1$vars,
+    select = "dich",
+    valid = "valid",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    print = FALSE,
+    save = FALSE,
+    return = TRUE,
+    warn = FALSE
+  )
 
-  expect_false(inherits(result, "try-error"))
   expect_true("model.1pl" %in% names(result))
   expect_true("model.2pl" %in% names(result))
   expect_true("summary" %in% names(result))
@@ -188,22 +211,19 @@ test_that("irt_analysis() polytomous produces expected structure", {
 
   data(ex2)
 
-  result <- try({
-    irt_analysis(
-      resp = ex2$resp,
-      vars = ex2$vars,
-      select = "mixed",
-      valid = "valid",
-      scoring = "scoring",
-      mvs = c(OM = -97, NV = -95, NR = -94),
-      print = FALSE,
-      save = FALSE,
-      return = TRUE,
-      warn = FALSE
-    )
-  })
+  result <- irt_analysis(
+    resp = ex2$resp,
+    vars = ex2$vars,
+    select = "mixed",
+    valid = "valid",
+    scoring = "scoring",
+    mvs = c(OM = -97, NV = -95, NR = -94),
+    print = FALSE,
+    save = FALSE,
+    return = TRUE,
+    warn = FALSE
+  )
 
-  expect_false(inherits(result, "try-error"))
   expect_true("model.pcm" %in% names(result))
   expect_true("model.gpcm" %in% names(result))
   expect_true("summary" %in% names(result))
@@ -403,29 +423,8 @@ test_that("irt_summary() produces valid output", {
 
   data(ex1)
 
-  model_1pl <- irt_model(
-    resp = ex1$resp,
-    vars = ex1$vars,
-    select = "dich",
-    valid = "valid",
-    mvs = c(OM = -97, NV = -95, NR = -94),
-    irtmodel = "1PL",
-    verbose = FALSE,
-    save = FALSE,
-    warn = FALSE
-  )
-
-  model_2pl <- irt_model(
-    resp = ex1$resp,
-    vars = ex1$vars,
-    select = "dich",
-    valid = "valid",
-    mvs = c(OM = -97, NV = -95, NR = -94),
-    irtmodel = "2PL",
-    verbose = FALSE,
-    save = FALSE,
-    warn = FALSE
-  )
+  model_1pl <- fit_dich("1PL")
+  model_2pl <- fit_dich("2PL")
 
   summary <- irt_summary(
     resp = ex1$resp,
@@ -454,31 +453,8 @@ test_that("irt_model_fit() produces valid output", {
 
   skip_if_not_installed("MASS")
 
-  data(ex1)
-
-  model_1pl <- irt_model(
-    resp = ex1$resp,
-    vars = ex1$vars,
-    select = "dich",
-    valid = "valid",
-    mvs = c(OM = -97, NV = -95, NR = -94),
-    irtmodel = "1PL",
-    verbose = FALSE,
-    save = FALSE,
-    warn = FALSE
-  )
-
-  model_2pl <- irt_model(
-    resp = ex1$resp,
-    vars = ex1$vars,
-    select = "dich",
-    valid = "valid",
-    mvs = c(OM = -97, NV = -95, NR = -94),
-    irtmodel = "2PL",
-    verbose = FALSE,
-    save = FALSE,
-    warn = FALSE
-  )
+  model_1pl <- fit_dich("1PL")
+  model_2pl <- fit_dich("2PL")
 
   mfit <- irt_model_fit(
     model_1p = model_1pl,
@@ -507,31 +483,8 @@ test_that("irt_summary() produces valid output for polytomous models", {
 
   data(ex2)
 
-  model_pcm <- irt_model(
-    resp = ex2$resp,
-    vars = ex2$vars,
-    select = "mixed",
-    valid = "valid",
-    scoring = "scoring",
-    mvs = c(OM = -97, NV = -95, NR = -94),
-    irtmodel = "PCM2",
-    verbose = FALSE,
-    save = FALSE,
-    warn = FALSE
-  )
-
-  model_gpcm <- irt_model(
-    resp = ex2$resp,
-    vars = ex2$vars,
-    select = "mixed",
-    valid = "valid",
-    scoring = "scoring",
-    mvs = c(OM = -97, NV = -95, NR = -94),
-    irtmodel = "GPCM",
-    verbose = FALSE,
-    save = FALSE,
-    warn = FALSE
-  )
+  model_pcm <- fit_poly("PCM2")
+  model_gpcm <- fit_poly("GPCM")
 
   summary <- irt_summary(
     resp = ex2$resp,
@@ -563,33 +516,8 @@ test_that("irt_model_fit() produces valid output for polytomous models", {
 
   skip_if_not_installed("MASS")
 
-  data(ex2)
-
-  model_pcm <- irt_model(
-    resp = ex2$resp,
-    vars = ex2$vars,
-    select = "mixed",
-    valid = "valid",
-    scoring = "scoring",
-    mvs = c(OM = -97, NV = -95, NR = -94),
-    irtmodel = "PCM2",
-    verbose = FALSE,
-    save = FALSE,
-    warn = FALSE
-  )
-
-  model_gpcm <- irt_model(
-    resp = ex2$resp,
-    vars = ex2$vars,
-    select = "mixed",
-    valid = "valid",
-    scoring = "scoring",
-    mvs = c(OM = -97, NV = -95, NR = -94),
-    irtmodel = "GPCM",
-    verbose = FALSE,
-    save = FALSE,
-    warn = FALSE
-  )
+  model_pcm <- fit_poly("PCM2")
+  model_gpcm <- fit_poly("GPCM")
 
   mfit <- irt_model_fit(
     model_1p = model_pcm,
