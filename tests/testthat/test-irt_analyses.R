@@ -4,11 +4,29 @@
 # R CMD check environments, so every block is guarded (see
 # dev/01_claude_reference.md).
 
-# Maximum absolute deviation per column between two summary tables
+# Maximum absolute deviation per column between two summary tables.
+#
+# NA cells cannot be differenced, so they are excluded and the callers assert the
+# NA pattern separately. A column that is NA on both sides has nothing to compare
+# and returns NA rather than the -Inf that max(na.rm = TRUE) yields for an empty
+# set, because -Inf would silently satisfy any upper bound the caller checks.
 max_deviation <- function(new, old, cols) {
   vapply(cols, function(col) {
-    max(abs(new[[col]] - old[[col]]), na.rm = TRUE)
+    deviation <- abs(new[[col]] - old[[col]])
+    if (all(is.na(deviation))) NA_real_ else max(deviation, na.rm = TRUE)
   }, numeric(1))
+}
+
+
+# Numeric estimates behind the pre-formatted "<estimate> (<SE>)" cells of the
+# step table. Dropping everything from the first space also drops the SE, which
+# keeps this independent of how the SE is rendered.
+step_estimates <- function(steps) {
+  matrix(
+    as.numeric(sub(" .*$", "", as.matrix(steps))),
+    nrow = nrow(steps),
+    dimnames = dimnames(steps)
+  )
 }
 
 # Compare WLEs against a fixture, matched on person ID rather than row position.
@@ -303,11 +321,15 @@ test_that("irt_analysis() dichotomous matches fixture", {
   # Summary table values. The fixture was written when `digits` defaulted to 2
   # and is now produced with 3 decimals, so allow half a unit in the fixture's
   # last decimal.
-  deviation <- max_deviation(
-    result$summary, fixture$summary,
-    cols = c("N_administered", "N_valid", "correct", "xsi", "SE", "WMNSQ",
-             "t", "rit", "aQ3", "Discr.")
-  )
+  value_cols <- c("N_administered", "N_valid", "correct", "xsi", "SE", "WMNSQ",
+                  "t", "rit", "aQ3", "Discr.")
+
+  # Which cells are NA is part of the result: max_deviation() can only compare
+  # the cells that carry a number, so a column turning NA would otherwise pass
+  expect_equal(is.na(result$summary[value_cols]),
+               is.na(fixture$summary[value_cols]))
+
+  deviation <- max_deviation(result$summary, fixture$summary, cols = value_cols)
   expect_lt(max(deviation), 0.01)
 
 })
@@ -382,12 +404,22 @@ test_that("irt_analysis() polytomous matches fixture", {
   expect_equal(nrow(result$summary), nrow(fixture$summary))
   expect_equal(result$summary$Item, fixture$summary$Item)
 
-  # Summary table values (see comment in the dichotomous test above)
-  deviation <- max_deviation(
-    result$summary, fixture$summary,
-    cols = c("N_administered", "N_valid", "correct", "xsi", "SE", "WMNSQ",
-             "t", "rit", "aQ3", "Discr.")
-  )
+  # Summary table values (see comment in the dichotomous test above).
+  value_cols <- c("N_administered", "N_valid", "correct", "xsi", "SE", "WMNSQ",
+                  "t", "rit", "aQ3", "Discr.")
+
+  # `correct` is excluded from the NA comparison because the fixture predates
+  # 8f69505 (#97), which extended the percentage to polytomous items as a share
+  # of each item's maximum score. The fixture still holds NA for ex2's four
+  # polytomous items, so that column is pinned against the current contract
+  # instead: every scaled item now gets a percentage.
+  expect_false(any(is.na(result$summary$correct)))
+
+  na_cols <- setdiff(value_cols, "correct")
+  expect_equal(is.na(result$summary[na_cols]),
+               is.na(fixture$summary[na_cols]))
+
+  deviation <- max_deviation(result$summary, fixture$summary, cols = value_cols)
   expect_lt(max(deviation), 0.01)
 
   # Step parameters are pre-formatted strings whose precision follows `digits`,
@@ -396,23 +428,27 @@ test_that("irt_analysis() polytomous matches fixture", {
   expect_equal(names(result$steps), names(fixture$steps))
   expect_equal(rownames(result$steps), rownames(fixture$steps))
 
-  # Not every step value comes from model.pcm$mod$xsi: the last step of each
-  # item is derived in steps_analysis() from the sum-zero constraint, so it is
-  # package logic with no TAM counterpart to compare against. Assert the
-  # constraint itself, which holds at any `digits` and does not depend on the
-  # standard errors also printed in these cells.
-  step_values <- vapply(result$steps, function(col) {
-    as.numeric(sub(" .*$", "", col))
-  }, numeric(nrow(result$steps)))
+  # Step estimates against the fixture. The last step of each item is derived in
+  # steps_analysis() from the sum-zero constraint rather than read from
+  # model.pcm$mod$xsi, so the xsi comparison above does not reach it, and neither
+  # does anything else in this file. Comparing the parsed estimates is what
+  # actually pins these values, including which cell each one lands in.
+  step_values <- step_estimates(result$steps)
+  fixture_values <- step_estimates(fixture$steps)
 
+  expect_equal(is.na(step_values), is.na(fixture_values))
+  expect_lt(max(abs(step_values - fixture_values), na.rm = TRUE), 0.01)
+
+  # The constraint itself. This is weaker than it looks -- the derived cell is
+  # defined as -sum(others), so the row sums stay at zero if every estimate is
+  # rescaled or if two cells in a row are swapped, which is why the fixture
+  # comparison above carries the real weight. It does still catch a sign error
+  # or a sum taken over the wrong margin, and unlike the comparison it holds at
+  # any `digits`.
   expect_equal(rowSums(step_values, na.rm = TRUE),
                rep(0, nrow(step_values)),
                tolerance = 1e-8,
                ignore_attr = TRUE)
-
-  # Every item must actually have a derived cell, otherwise the row sums above
-  # are trivially satisfied by an all-NA row.
-  expect_true(all(rowSums(!is.na(step_values)) >= 2))
 
 })
 
