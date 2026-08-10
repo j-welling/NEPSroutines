@@ -74,6 +74,13 @@ test_that("dif_analysis() works for dichotomous data", {
   expect_equal(names(result$models), names(models_fix))
   expect_equal(names(result$summaries), names(summaries_fix))
   expect_equal(names(result$summaries$sex), names(summaries_fix$sex))
+  # The goodness-of-fit column schema and the group-contrast keys do not depend
+  # on group sizes, so they can be checked against the fixtures despite the
+  # group-size drift. This catches a renamed or reordered column that the
+  # top-level name comparison above would miss.
+  expect_equal(names(result$summaries$sex$gof), names(summaries_fix$sex$gof))
+  expect_equal(names(result$summaries$sex$est), names(summaries_fix$sex$est))
+  expect_equal(names(result$summaries$sex$mne), names(summaries_fix$sex$mne))
 
   # Written tables can be read back in and contain the expected sheets
   expect_equal(names(Import(path, "dif_dich_TR.xlsx")), c("gof", "estimates"))
@@ -216,6 +223,35 @@ test_that("dif_model() excludes missing values in the DIF variable", {
 
   expect_true(any(grepl(
     "missing values were found in the DIF variable", warns
+  )))
+  expect_true(all(c("mmod", "dmod") %in% names(result)))
+
+})
+
+
+test_that("dif_model() includes DIF-variable missings as an extra group", {
+
+  data(ex1)
+
+  # ex1$resp$mig carries 208 NAs, above the default include_mv threshold (200),
+  # so the missing cases are kept as an additional group rather than dropped.
+  # This is the complement of the exclusion branch tested above.
+  warns <- testthat::capture_warnings(
+    result <- dif_model(
+      resp = ex1$resp,
+      vars = ex1$vars,
+      select = "dich",
+      dif_var = "mig",
+      valid = "valid",
+      mvs = c(OM = -97, NV = -95, NR = -94),
+      verbose = FALSE,
+      save = FALSE,
+      warn = TRUE
+    )
+  )
+
+  expect_true(any(grepl(
+    "included in the analysis as an extra group", warns
   )))
   expect_true(all(c("mmod", "dmod") %in% names(result)))
 
