@@ -1011,11 +1011,13 @@ steps_analysis <- function(
     name_group = NULL
   ) {
 
-  # step parameters
-  step <- round(pcm_model$mod$xsi[, c("xsi", "se.xsi")], digits)
-  step$item <- sub("_step[0-9]$", "", rownames(pcm_model$mod$xsi))
-  step$step <- as.numeric(gsub(".+_step", "", rownames(pcm_model$mod$xsi)))
-  step <- step[!is.na(step$step), ]
+  # step parameters; xsi holds both item and step rows, keep only 'item_step<n>'
+  xsi_names <- rownames(pcm_model$mod$xsi)
+  is_step <- grepl("_step[0-9]+$", xsi_names)
+
+  step <- round(pcm_model$mod$xsi[is_step, c("xsi", "se.xsi"), drop = FALSE], digits)
+  step$item <- sub("_step[0-9]+$", "", xsi_names[is_step])
+  step$step <- as.numeric(sub(".+_step", "", xsi_names[is_step]))
 
   # create matrix for pcm_model
   steps <- matrix(NA, ncol = max(step$step) + 1, nrow = length(unique(step$item)))
@@ -1027,7 +1029,7 @@ steps_analysis <- function(
   for (i in seq_len(nrow(step))) {
     steps[step$item[i], step$step[i]] <- paste0(
       format(step$xsi[i], nsmall = digits), " (",
-      format(step$se.xsi[i]), nsmall = digits, ")"
+      format(step$se.xsi[i], nsmall = digits), ")"
     )
     pars[step$item[i], step$step[i]] <- step$xsi[i]
   }
