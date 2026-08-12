@@ -10,8 +10,9 @@ test_that("dif_analysis() works for dichotomous data", {
   path <- withr::local_tempdir()
 
   data(ex1)
-  result <- try({
-    dif_analysis(
+  # Estimated without error; expect_no_error() surfaces the message on failure.
+  expect_no_error(
+    result <- dif_analysis(
       resp = ex1$resp,
       vars = ex1$vars,
       select = "dich",
@@ -27,10 +28,7 @@ test_that("dif_analysis() works for dichotomous data", {
       verbose = FALSE,
       warn = FALSE
     )
-  })
-
-  # Estimated without error
-  expect_false(inherits(result, "try-error"))
+  )
 
   # Contains the output of conduct_dif_analysis(), summarize_dif_analysis()
   # and build_dif_tr_tables()
@@ -97,8 +95,9 @@ test_that("dif_analysis() works for polytomous data", {
   path <- withr::local_tempdir()
 
   data(ex2)
-  result <- try({
-    dif_analysis(
+  # Estimated without error; expect_no_error() surfaces the message on failure.
+  expect_no_error(
+    result <- dif_analysis(
       resp = ex2$resp,
       vars = ex2$vars,
       select = "mixed",
@@ -115,10 +114,7 @@ test_that("dif_analysis() works for polytomous data", {
       verbose = FALSE,
       warn = FALSE
     )
-  })
-
-  # Estimated without error
-  expect_false(inherits(result, "try-error"))
+  )
 
   # Polytomous items are modelled with a PCM
   models_fix <- readRDS(test_path("fixtures/ex2/results/dif_poly_models.rds"))
