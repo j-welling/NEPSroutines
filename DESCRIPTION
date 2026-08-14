@@ -27,10 +27,12 @@ Imports:
     grDevices,
     haven,
     openxlsx,
+    sfsmisc,
     stats,
     methods,
     TAM (>= 4.2),
-    tidyselect
+    tidyselect,
+    WrightMap
 Suggests:
     flextable,
     MASS,
