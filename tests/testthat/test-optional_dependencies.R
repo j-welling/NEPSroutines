@@ -5,12 +5,12 @@
 
 test_that("wright_map() errors informatively when WrightMap is missing", {
   local_mocked_bindings(requireNamespace = function(...) FALSE, .package = "base")
-  expect_error(wright_map(model = NULL), "Please install WrightMap!")
+  expect_error(wright_map(model = NULL), "Please install the package 'WrightMap'!")
 })
 
 test_that("conduct_dim_analysis() errors informatively when sfsmisc is missing", {
   local_mocked_bindings(requireNamespace = function(...) FALSE, .package = "base")
-  expect_error(conduct_dim_analysis(snodes = 5000), "Please install sfsmisc!")
+  expect_error(conduct_dim_analysis(snodes = 5000), "Please install the package 'sfsmisc'!")
 })
 
 test_that("conduct_dim_analysis() does not require sfsmisc for snodes = 0", {

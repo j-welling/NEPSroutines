@@ -703,7 +703,7 @@ wright_map <- function(model, path = "Plots", name_group = NULL,
 
   # TAM::IRT.WrightMap() draws via WrightMap::wrightMap()
   if (!requireNamespace("WrightMap", quietly = TRUE)) {
-    stop("Please install WrightMap!")
+    stop("Please install the package 'WrightMap'!")
   }
 
   # Identify kind of irt model

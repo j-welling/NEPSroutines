@@ -166,7 +166,7 @@ conduct_dim_analysis <- function(
   # snodes > 0 (TAM's control default is QMC = TRUE); snodes = 0 uses the
   # Gauss-Hermite grid instead and needs no extra package.
   if (snodes > 0 && !requireNamespace("sfsmisc", quietly = TRUE)) {
-    stop("Please install sfsmisc!")
+    stop("Please install the package 'sfsmisc'!")
   }
 
   # Test data
