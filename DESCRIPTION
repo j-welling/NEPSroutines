@@ -21,7 +21,6 @@ Authors@R: c(
   )
 License: MIT + file LICENSE
 Imports:
-    colorspace,
     dplyr,
     ggplot2,
     graphics,

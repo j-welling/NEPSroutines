@@ -34,7 +34,7 @@ only_valid <- function(resp, valid = NULL, warn = TRUE) {
 #' @noRd
 
 neps_palette <- function(n) {
-  colorspace::sequential_hcl(n, palette = "Blues 2")
+  grDevices::hcl.colors(n, palette = "Blues 2")
 }
 
 
