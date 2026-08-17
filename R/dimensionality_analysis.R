@@ -14,8 +14,13 @@
 #' contains the scoring factor to be applied to loading matrix; defaults to
 #' "scoring"
 #' @param dim  character vector. contains names of all dimension variables
-#' that shall be analyzed (NOTE: the dimensions must be coded as integers from 1
-#' to the number of dimensions!)
+#' that shall be analyzed. Each of these variables may be a factor, a character
+#' or an integer variable. Its values name the dimensions in the results and are
+#' what [TblDim()] matches its labels against: factor levels are used as given,
+#' unused ones dropped; character values are sorted; an integer code becomes
+#' "dim" followed by the code itself, so codes 1 to n give "dim1" to "dimn".
+#' Only a factor preserves a chosen reporting order, as levels are kept in their
+#' declared sequence.
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param mvs named integer vector; contains user-defined missing values
@@ -125,8 +130,13 @@ dim_analysis <- function(
 #' contains the scoring factor to be applied to loading matrix; defaults to
 #' "scoring"
 #' @param dim  character vector. contains names of all dimension variables
-#' in vars that shall be analyzed (NOTE: the dimensions must be coded as integers
-#' from 1 to the number of dimensions!)
+#' in vars that shall be analyzed. Each of these variables may be a factor, a
+#' character or an integer variable. Its values name the dimensions in the
+#' results and are what [TblDim()] matches its labels against: factor levels are
+#' used as given, unused ones dropped; character values are sorted; an integer
+#' code becomes "dim" followed by the code itself, so codes 1 to n give "dim1"
+#' to "dimn". Only a factor preserves a chosen reporting order, as levels are
+#' kept in their declared sequence.
 #' @param valid  string; defines name of logical variable in resp that indicates
 #' (in)valid cases
 #' @param irtmodel  string; "1PL" for Rasch, "2PL" for 2PL, "PCM2" for PCM and
@@ -219,8 +229,29 @@ conduct_dim_analysis <- function(
     for (d in dim) {
 
       # Create Q matrix
-      v <- c(t(vars[vars[[select]], d]))
-      dimensions <- as.character(sort(unique(v)))
+      # The dimension names travel with the model into the results table, where
+      # `TblDim()` matches user-supplied labels against them. A factor keeps its
+      # declared level order, which is the author's intended reporting order;
+      # character and numeric variables have no such order and are sorted.
+      # `droplevels()` matters: an unused level would otherwise add an all-zero
+      # column to Q, that is, a dimension carrying no items.
+      # Extract by column rather than via `t()`, which would coerce a factor to
+      # character through a matrix and lose the level order -- silently, and
+      # only for a tibble, as a data frame drops to the bare column.
+      v <- vars[[d]][vars[[select]]]
+      if (is.factor(v)) {
+        v <- droplevels(v)
+      } else if (is.character(v)) {
+        v <- factor(v, levels = sort(unique(v)))
+      } else if (is.numeric(v)) {
+        v <- factor(v, levels = sort(unique(v)),
+                    labels = paste0("dim", sort(unique(v))))
+      } else {
+        # Anything else (logical, date, ...) would leave `levels(v)` NULL and
+        # produce a Q matrix without columns, which only fails later inside TAM.
+        v <- factor(as.character(v), levels = sort(unique(as.character(v))))
+      }
+      dimensions <- levels(v)
       Q <- matrix(0, nrow = length(v), ncol = length(dimensions))
       colnames(Q) <- dimensions
       for (i in dimensions) {

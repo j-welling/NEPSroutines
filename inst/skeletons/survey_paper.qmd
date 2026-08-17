@@ -415,10 +415,16 @@ The dimensionality of the test was also examined by specifying {{ifre}}two multi
 #| tbl-cap: "Results of three-dimensional scaling for cognitive functions"
 #| label: tbl-dim-cogfun
 
+# The names of `rownames` must match the dimensions as they are named in your
+# own results file, and determine both the labels and the row and column order
+# of the table. A dimension variable coded numerically gives "dim1", "dim2" and
+# so on, a factor gives its levels, and any other variable its sorted values.
+# Results files written before dimension names were stored name them "1", "2"
+# and so on; re-run the dimensionality analysis to obtain the real names.
 TblDim(obj = dim, model = "cogfun",
-       rownames = c("Finding information in the text",
-                    "Drawing text-related conclusions",
-                    "Reflecting and assessing"))
+       rownames = c("dim1" = "Finding information in the text",
+                    "dim2" = "Drawing text-related conclusions",
+                    "dim3" = "Reflecting and assessing"))
 
 ```
 
@@ -429,10 +435,10 @@ TblDim(obj = dim, model = "cogfun",
 #| label: tbl-dim-content
 
 TblDim(obj = dim, model = "content",
-       rownames = c("Change and relationship",
-                    "Data and chance",
-                    "Units and measuring",
-                    "Space and shape"))
+       rownames = c("dim1" = "Change and relationships",
+                    "dim2" = "Data and chance",
+                    "dim3" = "Quantity",
+                    "dim4" = "Space and shape"))
 
 ```
 
@@ -444,10 +450,10 @@ TblDim(obj = dim, model = "content",
 
 TblDim(obj = dim, 
        model = "dimension",
-       rownames = c("Evaluating information",
-                    "Detecting intentions and strategies", 
-                    "Communicating and interacting",
-                    "Handling data"))
+       rownames = c("dim1" = "Evaluating information",
+                    "dim2" = "Detecting intentions and strategies",
+                    "dim3" = "Communicating and interacting",
+                    "dim4" = "Handling data"))
 
 ```
 
@@ -463,11 +469,11 @@ The variances and correlations of the {{ifre}}three dimensions reflecting the co
 
 TblDim(obj = dim, 
        model = "txttyp",
-       rownames = c("Information text",
-                    "Instruction text",
-                    "Advertising text",
-                    "Commenting or argumenting text",
-                    "Literary text"))
+       rownames = c("dim1" = "Information text",
+                    "dim2" = "Instruction text",
+                    "dim3" = "Advertising text",
+                    "dim4" = "Commenting or argumenting text",
+                    "dim5" = "Literary text"))
 
 ```
 
