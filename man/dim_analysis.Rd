@@ -45,8 +45,13 @@ contains the scoring factor to be applied to loading matrix; defaults to
 "scoring"}
 
 \item{dim}{character vector. contains names of all dimension variables
-that shall be analyzed (NOTE: the dimensions must be coded as integers from 1
-to the number of dimensions!)}
+that shall be analyzed. Each of these variables may be a factor, a character
+or an integer variable. Its values name the dimensions in the results and are
+what \code{\link[=TblDim]{TblDim()}} matches its labels against: factor levels are used as given,
+unused ones dropped; character values are sorted; an integer code becomes
+"dim" followed by the code itself, so codes 1 to n give "dim1" to "dimn".
+Only a factor preserves a chosen reporting order, as levels are kept in their
+declared sequence.}
 
 \item{valid}{string; defines name of logical variable in resp that indicates
 (in)valid cases}

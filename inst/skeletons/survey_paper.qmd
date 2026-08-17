@@ -180,7 +180,7 @@ Missing responses provide information about how well the test worked (e.g., time
 
 ## Scaling Model
 
-Item and person parameters were estimated using a partial credit model [PCM, @Masters1982] with Gauss-Hermite quadrature (21 nodes). A detailed description of the scaling model can be found in Pohl and Carstensen [-@Pohl2012a]. CMC items consisted of a set of subtasks, which were aggregated into a polytomous variable for each item, indicating the number of correctly solved subtasks within that item. If at least one of the subtasks contained a missing response, the partial credit item was scored as missing.{{ifdc}} When scoring polytomous items, missing values of subitems were imputed if at least 50% of the subitems of a polytomous item contained valid answers. The imputation was based on a Rasch model that included both multiple-choice items and subitems of polytomous items.{{/ifdc}} Response categories of polytomous items with few responses were collapsed in order to avoid possible estimation problems. This was usually done for the lower categories of polytomous items. Appendix B shows how response categories were collapsed for the different items.
+Item and person parameters were estimated using a partial credit model [PCM, @Masters1982] with fixed-grid quadrature (21 equidistant nodes over the interval [-6, 6]). A detailed description of the scaling model can be found in Pohl and Carstensen [-@Pohl2012a]. CMC items consisted of a set of subtasks, which were aggregated into a polytomous variable for each item, indicating the number of correctly solved subtasks within that item. If at least one of the subtasks contained a missing response, the partial credit item was scored as missing.{{ifdc}} When scoring polytomous items, missing values of subitems were imputed if at least 50% of the subitems of a polytomous item contained valid answers. The imputation was based on a Rasch model that included both multiple-choice items and subitems of polytomous items.{{/ifdc}} Response categories of polytomous items with few responses were collapsed in order to avoid possible estimation problems. This was usually done for the lower categories of polytomous items. Appendix B shows how response categories were collapsed for the different items.
 
 {{Domain}} scores were estimated as weighted likelihood estimates [WLE, @Warm1989]. To estimate item and person parameters, a score of 0.5 points was applied to each category of the polytomous items, while simple multiple-choice items were scored dichotomously as 0 for an incorrect and 1 for a correct response. Studies on the scoring of different response formats are reported in Pohl and Carstensen [-@Pohl2012a] and @Haberkorn2016.
 
@@ -196,13 +196,13 @@ The MC items consisted of one correct response option and several distractors (i
 
 Before aggregating the subtasks of a CMC{{ifre}} and MA{{/ifre}} item into a polytomous variable, this approach was justified by preliminary psychometric analyses. For this purpose, the subtasks were analyzed together with the multiple-choice items in a @Rasch1960 model. The fit of the subtasks was evaluated based on the weighted mean square error (WMNSQ), the respective *t*-value, and the item characteristic curves. Only when the subtasks showed a satisfactory item fit, were they used to construct polytomous variables that were included in the final scaling model.
 
-After aggregating the subtasks into polytomous variables, the fit of the dichotomous and polytomous items to the PCM [@Masters1982] was evaluated using the WMNSQ statistic, the respective *t*-value, and the item characteristic curves [see @Pohl2012a]. Items with a WMNSQ \> 1.15 (*t*-value \> \|6\|) were considered to have a noticeable item misfit, and items with a WMNSQ \> 1.20 (*t*-value \> \|8\|) were considered to have a considerable item misfit and their performance was investigated further. Correlations of the item score with the corrected total score greater than .30 were considered as good, those greater than .20 as acceptable, and those less than .20 as problematic. The overall judgment of item fit was based on all fit indicators.
+After aggregating the subtasks into polytomous variables, the fit of the dichotomous and polytomous items to the PCM [@Masters1982] was evaluated using the WMNSQ statistic, the respective *t*-value, and the item characteristic curves [see @Pohl2012a]. Items with a WMNSQ \> 1.15 (\|*t*\| \> 6) were considered to have a noticeable item misfit, and items with a WMNSQ \> 1.20 (\|*t*\| \> 8) were considered to have a considerable item misfit and their performance was investigated further. Correlations of the item score with the corrected total score greater than .30 were considered as good, those greater than .20 as acceptable, and those less than .20 as problematic. The overall judgment of item fit was based on all fit indicators.
 
 The {{domain}} test should measure the same construct for all respondents. If some items favored certain subgroups (e.g., they were easier for boys than for girls), measurement invariance would be violated and a comparison of competence scores between these subgroups (e.g., boys and girls) would be biased. In the present study, differential item functioning (DIF) was investigated for the variables sex, the number of books at home (as a proxy for cultural status), migrant background, and test position (first versus second). DIF was examined using a multigroup item response model, in which the main effects of the subgroups as well as the differential effects of the subgroups on item difficulty were modeled. Based on experience with preliminary data, we considered absolute differences in estimated difficulties between the subgroups that were greater than 1 logit as very strong DIF, absolute differences between 0.6 and 1 as considerable and worthy of further investigation, differences between 0.4 and 0.6 as small but not severe, and differences less than 0.4 as negligible DIF. In addition, measurement invariance was examined by comparing the fit of a model that acknowledged DIF to a model that included only main effects and no DIF.
 
 The {{domain}} test was scaled using the PCM [@Masters1982] because it preserves the weighting of the different aspects of the framework as intended by the test developers [@Pohl2012a]. Nevertheless, Rasch-homogeneity is an assumption that may not hold for empirical data. To test the assumption of equal item discrimination parameters, a generalized partial credit model [GPCM, @Muraki1992] was also fitted to the data and compared to the PCM.
 
-The dimensionality of the test was evaluated by examining the residuals of the PCM. Residual correlations close to zero, as indicated by Yen's [-@Yen1984] *Q*~3~, suggest unidimensionality. Because the *Q*~3~ tends to be slightly negative in case of locally independent items, we report the corrected *Q*~3~, which has an expected value of 0. According to @Yen1993, values of *Q*~3~ falling below .20 indicate essential unidimensionality. In addition, we estimated two multidimensional models using quasi-Monte Carlo integration (with 2,000 nodes) that specified different subdimensions based on the different construction rationales for the test (see @sec-framework), that is, a model with {{ifre}}three subdimensions representing the three cognitive requirements and a model with five subdimensions based on the different text types{{/ifre}}{{ifma}}three subdimensions representing the three content areas{{/ifma}}{{ifdc}}four subdimensions representing the four facets{{/ifdc}} (see Appendix A). The correlations between the subdimensions and the differences in model fit between the unidimensional and multidimensional models were used to evaluate the unidimensionality of the test.
+The dimensionality of the test was evaluated by examining the residuals of the PCM. Residual correlations close to zero, as indicated by Yen's [-@Yen1984] *Q*~3~, suggest unidimensionality. Because the *Q*~3~ tends to be slightly negative in case of locally independent items, we report the corrected *Q*~3~, which has an expected value of 0. According to @Yen1993, values of *Q*~3~ falling below .20 indicate essential unidimensionality. In addition, we estimated two multidimensional models using quasi-Monte Carlo integration (with 5,000 nodes) that specified different subdimensions based on the different construction rationales for the test (see @sec-framework), that is, a model with {{ifre}}three subdimensions representing the three cognitive requirements and a model with five subdimensions based on the different text types{{/ifre}}{{ifma}}four subdimensions representing the four content areas{{/ifma}}{{ifdc}}four subdimensions representing the four facets{{/ifdc}} (see Appendix A). The correlations between the subdimensions and the differences in model fit between the unidimensional and multidimensional models were used to evaluate the unidimensionality of the test.
 
 ## Software
 
@@ -361,7 +361,7 @@ To investigate how well the distractors of the multiple-choice items performed, 
 
 ### Item Fit
 
-The evaluation of item fit was based on the final scaling model presented above. Overall, the item fit was satisfactory (see @tbl-parameters). There were `r GetPars(pars, "WMNSQ", ">1.20")` items (`r GetPars(pars, "WMNSQ", ">1.20", TRUE)`) with a WMSNQ greater than 1.20, while `r GetPars(pars, "WMNSQ", ">1.15&<1.20")` items (`r GetPars(pars, "WMNSQ", ">1.15&<1.20", TRUE)`) had a WMSNQ between 1.15 and 1.20. However, visual inspections of the empirical ICCs for these items did not reveal any pronounced deviation from the expected ICCs. For the remaining items, the WMNSQ values ranged from `r GetPars(pars, "WMNSQ", min, excl = ">1.15")` (`r GetPars(pars, "WMNSQ", min, TRUE, excl = ">1.15")`) to `r GetPars(pars, "WMNSQ", max, excl = ">1.15")` (`r GetPars(pars, "WMNSQ", max, TRUE, excl = ">1.15")`), with a median of `r GetPars(pars, "WMNSQ", median, excl = ">1.15")`. In addition, the correlations of the correct responses with the total rest scores varied between `r GetPars(pars, "rit", min)` (`r GetPars(pars, "rit", min, TRUE)`) and `r GetPars(pars, "rit", max)` (`r GetPars(pars, "rit", max, TRUE)`), with a median of `r GetPars(pars, "rit", median)`.
+The evaluation of item fit was based on the final scaling model presented above. Overall, the item fit was satisfactory (see @tbl-parameters). There were `r GetPars(pars, "WMNSQ", ">1.20")` items (`r GetPars(pars, "WMNSQ", ">1.20", TRUE)`) with a WMNSQ greater than 1.20, while `r GetPars(pars, "WMNSQ", ">1.15&<1.20")` items (`r GetPars(pars, "WMNSQ", ">1.15&<1.20", TRUE)`) had a WMNSQ between 1.15 and 1.20. However, visual inspections of the empirical ICCs for these items did not reveal any pronounced deviation from the expected ICCs. For the remaining items, the WMNSQ values ranged from `r GetPars(pars, "WMNSQ", min, excl = ">1.15")` (`r GetPars(pars, "WMNSQ", min, TRUE, excl = ">1.15")`) to `r GetPars(pars, "WMNSQ", max, excl = ">1.15")` (`r GetPars(pars, "WMNSQ", max, TRUE, excl = ">1.15")`), with a median of `r GetPars(pars, "WMNSQ", median, excl = ">1.15")`. In addition, the correlations of the correct responses with the total rest scores varied between `r GetPars(pars, "rit", min)` (`r GetPars(pars, "rit", min, TRUE)`) and `r GetPars(pars, "rit", max)` (`r GetPars(pars, "rit", max, TRUE)`), with a median of `r GetPars(pars, "rit", median)`.
 
 ### Differential Item Functioning {#sec-dif}
 
@@ -401,13 +401,13 @@ TblDifFit(obj = dif$TR)
 
 ### Rasch-homogeneity
 
-An essential assumption of the @Rasch1960 model is that all item discrimination parameters are equal. To test this assumption, a generalized partial credit model [GPCM, @Muraki1992] was fitted to the data to estimate the discrimination parameters. The estimated discrimination parameters differed moderately between items (see @tbl-parameters). The median discrimination parameter fell at `r GetPars(pars, "Discr.", median)` (*Min* = `r GetPars(pars, "Discr.", min)`, *Max* = `r GetPars(pars, "Discr.", max)`). Model fit indices suggested a better model fit of the GPCM (AIC = `r GetFit(pars, "AIC", TRUE)`, BIC = `r GetFit(pars, "BIC", TRUE)`, number of parameters = `r GetFit(pars, "Npars", TRUE)`) compared to the PCM model (AIC = `r GetFit(pars, "AIC")`, BIC = `r GetFit(pars, "BIC")`, number of parameters = `r GetFt(pars, "Npars")`). However, an inspection of the respective item characteristic curves indicated an adequate fit of the PCM. Despite the empirical preference for the GPCM, the PCM is more in line with the theoretical concepts underlying the test construction [see @Pohl2012a]. For this reason, the PCM was chosen as our scaling model in order to preserve the item weightings as intended in the theoretical framework.
+An essential assumption of the @Rasch1960 model is that all item discrimination parameters are equal. To test this assumption, a generalized partial credit model [GPCM, @Muraki1992] was fitted to the data to estimate the discrimination parameters. The estimated discrimination parameters differed moderately between items (see @tbl-parameters). The median discrimination parameter fell at `r GetPars(pars, "Discr.", median)` (*Min* = `r GetPars(pars, "Discr.", min)`, *Max* = `r GetPars(pars, "Discr.", max)`). Model fit indices suggested a better model fit of the GPCM (AIC = `r GetFit(pars, "AIC", TRUE)`, BIC = `r GetFit(pars, "BIC", TRUE)`, number of parameters = `r GetFit(pars, "Npars", TRUE)`) compared to the PCM model (AIC = `r GetFit(pars, "AIC")`, BIC = `r GetFit(pars, "BIC")`, number of parameters = `r GetFit(pars, "Npars")`). However, an inspection of the respective item characteristic curves indicated an adequate fit of the PCM. Despite the empirical preference for the GPCM, the PCM is more in line with the theoretical concepts underlying the test construction [see @Pohl2012a]. For this reason, the PCM was chosen as our scaling model in order to preserve the item weightings as intended in the theoretical framework.
 
 ### Dimensionality
 
 The dimensionality of the test was investigated by evaluating the correlations between the residuals of the PCM. The adjusted *Q*~3~ statistics (see @tbl-parameters) were quite low (*Mdn* = `r GetPars(pars, "aQ3", median)`) - the largest absolute residual correlation was `r GetPars(pars, "aQ3", max)` (`r GetPars(pars, "aQ3", max, item = TRUE)`). Overall, these results indicate an essentially unidimensional test.
 
-The dimensionality of the test was also examined by specifying {{ifre}}two multi-dimensional models based on the three cognitive requirements or the five text types{{/ifre}}{{ifma}}a multi-dimensional model based on the three content areas{{/ifma}} (see @sec-framework). Each item was assigned to one of {{ifre}}three or five{{/ifre}}{{ifma}}three{{/ifma}}{{ifdc}}four{{/ifdc}} latent factors (between-item multidimensionality). The multidimensional models were estimated using Quasi Monte Carlo method with 5,000 nodes.
+The dimensionality of the test was also examined by specifying {{ifre}}two multi-dimensional models based on the three cognitive requirements or the five text types{{/ifre}}{{ifma}}a multi-dimensional model based on the four content areas{{/ifma}} (see @sec-framework). Each item was assigned to one of {{ifre}}three or five{{/ifre}}{{ifma}}four{{/ifma}}{{ifdc}}four{{/ifdc}} latent factors (between-item multidimensionality). The multidimensional models were estimated using Quasi Monte Carlo method with 5,000 nodes.
 
 {{ifre}}
 
@@ -415,10 +415,16 @@ The dimensionality of the test was also examined by specifying {{ifre}}two multi
 #| tbl-cap: "Results of three-dimensional scaling for cognitive functions"
 #| label: tbl-dim-cogfun
 
+# The names of `rownames` must match the dimensions as they are named in your
+# own results file, and determine both the labels and the row and column order
+# of the table. A dimension variable coded numerically gives "dim1", "dim2" and
+# so on, a factor gives its levels, and any other variable its sorted values.
+# Results files written before dimension names were stored name them "1", "2"
+# and so on; re-run the dimensionality analysis to obtain the real names.
 TblDim(obj = dim, model = "cogfun",
-       rownames = c("Finding information in the text",
-                    "Drawing text-related conclusions",
-                    "Reflecting and assessing"))
+       rownames = c("dim1" = "Finding information in the text",
+                    "dim2" = "Drawing text-related conclusions",
+                    "dim3" = "Reflecting and assessing"))
 
 ```
 
@@ -429,10 +435,10 @@ TblDim(obj = dim, model = "cogfun",
 #| label: tbl-dim-content
 
 TblDim(obj = dim, model = "content",
-       rownames = c("Change and relationship",
-                    "Data and chance",
-                    "Units and measuring",
-                    "Space and shape"))
+       rownames = c("dim1" = "Change and relationships",
+                    "dim2" = "Data and chance",
+                    "dim3" = "Quantity",
+                    "dim4" = "Space and shape"))
 
 ```
 
@@ -444,16 +450,16 @@ TblDim(obj = dim, model = "content",
 
 TblDim(obj = dim, 
        model = "dimension",
-       rownames = c("Evaluating information",
-                    "Detecting intentions and strategies", 
-                    "Communicating and interacting",
-                    "Handling data"))
+       rownames = c("dim1" = "Evaluating information",
+                    "dim2" = "Detecting intentions and strategies",
+                    "dim3" = "Communicating and interacting",
+                    "dim4" = "Handling data"))
 
 ```
 
 {{/ifdc}}
 
-The variances and correlations of the {{ifre}}three dimensions reflecting the cognitive requirements are summarized in @tbl-dim-cogfun{{/ifre}}{{ifma}}three dimensions reflecting the content areas are summarized in @tbl-dim-content{{/ifma}}{{ifdc}}four dimensions reflecting the facets are summarized in @tbl-dim-facet{{/ifdc}}. All dimensions exhibited substantial variances. As expected, the correlations between the {{ifre}}three cognitive requirements were rather high, ranging between `r GetDim(dim, "cogfun", min)` and `r GetDim(dim, "cogfun", max)`{{/ifre}}{{ifma}}four content areas were rather high, ranging between `r GetDim(dim, "content", min)` and `r GetDim(dim, "content", max)`{{/ifma}}{{ifdc}}four facets were rather high, ranging between `r GetDim(dim, "dimension", min)` and `r GetDim(dim, "dimension", max)`{{/ifdc}}. Because they were close to or above *r* = .95, these correlations suggest an essential unidimensionality of the test [see @Carstensen2013]. Although the correlations were large, the {{ifre}}three-dimensional model did fit the data better (AIC = `r GetDimFit(dim, "cogfun", "AIC")`, BIC = `r GetDimFit(dim, "cogfun", "BIC")`, number of parameters = `r GetDimFit(dim, "cogfun", "Npars")`){{/ifre}}{{ifma}}four-dimensional model did fit the data better (AIC = `r GetDimFit(dim, "content", "AIC")`, BIC = `r GetDimFit(dim, "content", "BIC")`, number of parameters = `r GetDimFit(dim, "content", "Npars")`){{/ifma}}{{ifdc}}four-dimensional model did fit the data better (AIC = `r GetDimFit(dim, "dimension", "AIC")`, BIC = `r GetDimFit(dim, "dimension", "BIC")`, number of parameters = `r GetDimFit(dim, "dimension", "Npars")`){{/ifdc}} than the unidimensional model (AIC = `r GetDimFit(dim, "uni", "AIC")`, BIC = `r GetDimFit(dim, "uni", "BIC")`, number of parameters = `r GetDimFit(dim, "uni", "Npars")`). The results suggest that the {{ifre}}three cognitive requirements{{/ifre}}{{ifma}}four content areas{{/ifma}}{{ifdc}}four facets{{/ifdc}} do not measure different constructs but rather represent an essentially unidimensional construct.
+The variances and correlations of the {{ifre}}three dimensions reflecting the cognitive requirements are summarized in @tbl-dim-cogfun{{/ifre}}{{ifma}}four dimensions reflecting the content areas are summarized in @tbl-dim-content{{/ifma}}{{ifdc}}four dimensions reflecting the facets are summarized in @tbl-dim-facet{{/ifdc}}. All dimensions exhibited substantial variances. As expected, the correlations between the {{ifre}}three cognitive requirements were rather high, ranging between `r GetDim(dim, "cogfun", min)` and `r GetDim(dim, "cogfun", max)`{{/ifre}}{{ifma}}four content areas were rather high, ranging between `r GetDim(dim, "content", min)` and `r GetDim(dim, "content", max)`{{/ifma}}{{ifdc}}four facets were rather high, ranging between `r GetDim(dim, "dimension", min)` and `r GetDim(dim, "dimension", max)`{{/ifdc}}. Because they were close to or above *r* = .95, these correlations suggest an essential unidimensionality of the test [see @Carstensen2013]. Although the correlations were large, the {{ifre}}three-dimensional model did fit the data better (AIC = `r GetDimFit(dim, "cogfun", "AIC")`, BIC = `r GetDimFit(dim, "cogfun", "BIC")`, number of parameters = `r GetDimFit(dim, "cogfun", "Npars")`){{/ifre}}{{ifma}}four-dimensional model did fit the data better (AIC = `r GetDimFit(dim, "content", "AIC")`, BIC = `r GetDimFit(dim, "content", "BIC")`, number of parameters = `r GetDimFit(dim, "content", "Npars")`){{/ifma}}{{ifdc}}four-dimensional model did fit the data better (AIC = `r GetDimFit(dim, "dimension", "AIC")`, BIC = `r GetDimFit(dim, "dimension", "BIC")`, number of parameters = `r GetDimFit(dim, "dimension", "Npars")`){{/ifdc}} than the unidimensional model (AIC = `r GetDimFit(dim, "uni", "AIC")`, BIC = `r GetDimFit(dim, "uni", "BIC")`, number of parameters = `r GetDimFit(dim, "uni", "Npars")`). The results suggest that the {{ifre}}three cognitive requirements{{/ifre}}{{ifma}}four content areas{{/ifma}}{{ifdc}}four facets{{/ifdc}} do not measure different constructs but rather represent an essentially unidimensional construct.
 
 {{ifre}} The variances and correlations of the five dimensions reflecting the text types are summarized in @tbl-dim-txttyp. All dimensions exhibited substantial variances. The correlations between the five dimensions were between `r GetDim(dim, "txttyp", min)` and `r GetDim(dim, "txttyp", max)`. The lowest correlations were found between Dimension 2 (instruction text) and Dimensions 1 (information text) and 4 (commenting text). However, all correlations were notably smaller than .95 [see @Carstensen2013], indicating that the texts formed subdimensions. The five-dimensional model also exhibited a better fit to the data (AIC = `r GetDimFit(dim, "txttyp", "AIC")`, BIC = `r GetDimFit(dim, "txttyp", "BIC")`, number of parameters = `r GetDimFit(dim, "txttyp", "Npars")`) than the unidimensional model. Because the text types are perfectly confounded with the texts, that is, there is a single text for each text type, local item dependence (LID) occurs. The correlations reported in @tbl-dim-txttyp are therefore due to multidimensionality based on text types as well as local item dependence. In the present study, it is not possible to disentangle these two sources. However, in pilot studies [@Gehrer2013a], a larger number of texts were presented to the respondents, thus, allowing the impact of text types to be investigated independently of LID. The correlations estimated in the pilot study ranged from .78 to .91. Although a different scaling model was used in this paper, the results can give an idea of the impact of the text types (unconfounded with LID) on the dimensionality of the test. As the correlations found in @Gehrer2013a also differed from .95, it can be concluded that text types form subdimensions of reading competence. In addition, comparing these correlations with those found in the present study (see @tbl-dim-txttyp), which confounded the impact of text types and LID, allows for evaluating the impact of LID. The correlations found in the present study were similar (between `r GetDim(dim, "txttyp", min)` and `r GetDim(dim, "txttyp", max)`) to those found in Gehrer et al. (between .78 and .91), indicating that there is little local item dependence. Based on theoretical considerations, @Gehrer2013a argued for a unidimensional construct.
 
@@ -463,11 +469,11 @@ The variances and correlations of the {{ifre}}three dimensions reflecting the co
 
 TblDim(obj = dim, 
        model = "txttyp",
-       rownames = c("Information text",
-                    "Instruction text",
-                    "Advertising text",
-                    "Commenting or argumenting text",
-                    "Literary text"))
+       rownames = c("dim1" = "Information text",
+                    "dim2" = "Instruction text",
+                    "dim3" = "Advertising text",
+                    "dim4" = "Commenting or argumenting text",
+                    "dim5" = "Literary text"))
 
 ```
 

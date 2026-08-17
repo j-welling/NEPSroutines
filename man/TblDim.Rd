@@ -22,9 +22,25 @@ created by \code{\link[=dim_analysis]{dim_analysis()}}.}
 \item{model}{The model name, typically \code{uni} for the unidimensional
 reference model and the name of the facet variable.}
 
-\item{rownames}{A vector of labels for the rows.}
+\item{rownames}{An optional named vector of labels for the rows; if it holds
+exactly one element per dimension, the rows and columns are reordered
+according to the specified sequence (overrides any sequence specified in
+\code{colnames}). The
+names must be the dimension names given by the dimension variable passed to
+\code{\link[=dim_analysis]{dim_analysis()}}, not row positions; a name matching no dimension, or a
+dimension left without a label, is reported by a warning. An unnamed vector
+is deprecated: its labels are assigned by position, which mislabels the
+results if the order does not match the dimensions in the data.}
 
-\item{colnames}{A vector of labels for the columns.}
+\item{colnames}{An optional named vector of labels for the columns; if it
+holds exactly one element per dimension, the rows and columns are reordered
+according to the specified sequence. A vector carrying further elements
+beyond those still labels the table, but leaves its order alone. Named as in
+\code{rownames}. Note that supplying \code{colnames}
+alone reorders the table but leaves the rows labelled "Dim 1", "Dim 2" and so
+on, so set \code{rownames} as well to keep the rows identifiable. Column labels
+become the column keys of the table, so they must be unique, must differ from
+"Dimension", and are rejected otherwise; two rows may well share a label.}
 
 \item{footnote}{A table note.}
 
@@ -42,6 +58,15 @@ A flextable.
 }
 \description{
 Create correlation table for multi-dimensional models
+}
+\details{
+An axis given no labels at all is numbered "Dim 1", "Dim 2" and so
+on. As long as either vector leaves a dimension unlabelled, the labels of
+both axes are prefixed by those numbers, so that a column can be traced back
+to its row; the numbers are dropped only once every dimension is labelled on
+both axes. A complete \code{colnames} on its own is the exception: the columns
+then head themselves and the rows stay numbered, as there is no partly
+labelled axis to tie them to.
 }
 \examples{
 \dontrun{
@@ -72,8 +97,10 @@ dim <- Import(tmpdir, "/dimensionality.xlsx")
 # Default correlation table
 TblDim(dim, "content")
 
-# Correlation table with labels
+# Correlation table with labels; names refer to the dimensions, so the
+# sequence given here also determines the row and column order
 TblDim(dim, "content",
-       rownames = c("Units", "Change", "Space", "Data"))
+       rownames = c("dim1" = "Units", "dim2" = "Change",
+                    "dim3" = "Space", "dim4" = "Data"))
 }
 }

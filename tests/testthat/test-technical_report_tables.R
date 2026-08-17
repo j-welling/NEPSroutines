@@ -288,13 +288,15 @@ test_that("TblDim() works", {
   skip_if_not_installed("officer")
 
   tab <- Import(test_path("fixtures", "ex2", "tables"), "dimensionality.xlsx")
+
+  # with rownames
   tbl <- TblDim(
     tab,
     model = "content",
-    rownames = c("Change", "Data", "Units", "Space"),
+    rownames = c("change" = "Change", "data" = "Data", "units" = "Units",
+                 "space" = "Space"),
     footnote = "Nothing of note happened."
   )
-
   expect_s3_class(tbl, "flextable")
   expect_equal(names(tbl$body$dataset), c(
     "Dimension", "Dim 1", "Dim 2", "Dim 3", "Dim 4"
@@ -302,8 +304,321 @@ test_that("TblDim() works", {
   expect_equal(tbl$body$dataset[["Dimension"]], c(
     "Dim 1: Change", "Dim 2: Data", "Dim 3: Units", "Dim 4: Space"
   ))
-  expect_equal(tbl$body$dataset[["Dim 1"]], c("2.04", ".67", ".74", ".75"))
-  expect_equal(tbl$body$dataset[["Dim 4"]], c("", "", "", "2.39"))
+  expect_equal(tbl$body$dataset[["Dim 1"]], c("2.36", ".75", ".74", ".72"))
+  expect_equal(tbl$body$dataset[["Dim 4"]], c("", "", "", "2.89"))
+
+  # with reordered rownames
+  tbl <- TblDim(
+    tab,
+    model = "content",
+    rownames = c("space" = "Space", "change" = "Change", "data" = "Data",
+                 "units" = "Units"),
+    footnote = "Nothing of note happened."
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: Space", "Dim 2: Change", "Dim 3: Data", "Dim 4: Units"
+  ))
+  expect_equal(tbl$body$dataset[["Dim 1"]], c("2.89", ".72", ".70", ".75"))
+
+  # with reorder rownames and colnames
+  tbl <- TblDim(
+    tab,
+    model = "content",
+    rownames = c("space" = "Space", "change" = "Change", "data" = "Data",
+                 "units" = "Units"),
+    colnames = c("data" = "Data", "space" = "Space", "change" = "Change",
+                 "units" = "Units"),
+    footnote = "Nothing of note happened."
+  )
+  # once the columns carry labels, neither axis is numbered
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Space", "Change", "Data", "Units"
+  ))
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Space", "Change", "Data", "Units"
+  ))
+  # the values must follow the labels, not stay behind in the old order
+  expect_equal(tbl$body$dataset[["Space"]], c("2.89", ".72", ".70", ".75"))
+  expect_equal(tbl$body$dataset[["Units"]], c("", "", "", "2.00"))
+
+  # colnames alone: the table is reordered, but the rows stay numbered
+  tbl <- TblDim(
+    tab,
+    model = "content",
+    colnames = c("data" = "Data", "space" = "Space", "change" = "Change",
+                 "units" = "Units")
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], paste("Dim", 1:4))
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Data", "Space", "Change", "Units"
+  ))
+  expect_equal(tbl$body$dataset[["Data"]], c("2.40", ".70", ".75", ".78"))
+
+  # a `colnames` vector that leaves a dimension unlabelled must not switch the
+  # numbering off: those columns are headed by their raw name from the results
+  # file, and nothing else would tie them to the rows
+  expect_warning(
+    tbl <- TblDim(
+      tab,
+      model = "content",
+      rownames = c("units" = "Units", "change" = "Change", "space" = "Space",
+                   "data" = "Data"),
+      colnames = c("data" = "Data")
+    ),
+    "not covered"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: Units", "Dim 2: Change", "Dim 3: Space", "Dim 4: Data"
+  ))
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1: units", "Dim 2: change", "Dim 3: space", "Dim 4: Data"
+  ))
+
+  # the same when the labels match no dimension at all
+  expect_warning(
+    expect_warning(
+      tbl <- TblDim(tab, model = "content", colnames = c("nope" = "X")),
+      "do not match"
+    ),
+    "not covered"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], paste("Dim", 1:4))
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1: units", "Dim 2: change", "Dim 3: space", "Dim 4: data"
+  ))
+
+  # a partial `rownames` must number both axes for the same reason: an
+  # unlabelled row shows its raw name, and nothing else would tie it to a column
+  expect_warning(
+    tbl <- TblDim(
+      tab,
+      model = "content",
+      rownames = c("units" = "A"),
+      colnames = c("units" = "Units", "change" = "Change", "space" = "Space",
+                   "data" = "Data")
+    ),
+    "not covered"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: A", "Dim 2: change", "Dim 3: space", "Dim 4: data"
+  ))
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1: Units", "Dim 2: Change", "Dim 3: Space", "Dim 4: Data"
+  ))
+
+  # a partial `rownames` numbers both axes even when no `colnames` are given
+  expect_warning(
+    tbl <- TblDim(tab, model = "content", rownames = c("units" = "A")),
+    "not covered"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: A", "Dim 2: change", "Dim 3: space", "Dim 4: data"
+  ))
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1", "Dim 2", "Dim 3", "Dim 4"
+  ))
+
+  # duplicated column labels cannot be rendered, as they become the column keys
+  expect_error(
+    TblDim(tab, model = "content",
+           colnames = c("units" = "X", "change" = "X", "space" = "S",
+                        "data" = "D")),
+    "must be unique"
+  )
+  # including when the numbering would have made them distinct, so that the
+  # rule holds for the labels the user supplied rather than for the rendering
+  expect_error(
+    expect_warning(
+      TblDim(tab, model = "content", rownames = c("units" = "A"),
+             colnames = c("units" = "X", "change" = "X", "space" = "S",
+                          "data" = "D")),
+      "not covered"
+    ),
+    "must be unique"
+  )
+  # a label left over from a typo never reaches the table, so it cannot make
+  # the table unrenderable by colliding with a real one
+  expect_warning(
+    tbl <- TblDim(tab, model = "content",
+                  colnames = c("units" = "A", "change" = "B", "space" = "C",
+                               "data" = "D", "typo" = "A")),
+    "do not match"
+  )
+  expect_equal(names(tbl$body$dataset), c("Dimension", "A", "B", "C", "D"))
+
+  # empty and missing labels would reach the table as "Var.2" and "NA"
+  expect_warning(
+    expect_warning(
+      tbl <- TblDim(tab, model = "content",
+                    colnames = c("units" = "", "change" = NA, "space" = "C",
+                                 "data" = "D")),
+      "empty or missing"
+    ),
+    "not covered"
+  )
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Dim 1: units", "Dim 2: change", "Dim 3: C", "Dim 4: D"
+  ))
+
+  # a label colliding with the key of the dimension column is rejected too,
+  # whether or not the numbering would have kept the two apart
+  expect_error(
+    TblDim(tab, model = "content",
+           colnames = c("units" = "Dimension", "change" = "C", "space" = "S",
+                        "data" = "D")),
+    "Dimension"
+  )
+  expect_error(
+    expect_warning(
+      TblDim(tab, model = "content", rownames = c("units" = "A"),
+             colnames = c("units" = "Dimension", "change" = "C", "space" = "S",
+                          "data" = "D")),
+      "not covered"
+    ),
+    "Dimension"
+  )
+
+  # two rows may share a label once the columns are labelled and distinct
+  tbl <- TblDim(
+    tab,
+    model = "content",
+    rownames = c("units" = "Maths", "change" = "Maths", "space" = "Space",
+                 "data" = "Data"),
+    colnames = c("units" = "U", "change" = "C", "space" = "S", "data" = "D")
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c("Maths", "Maths", "Space",
+                                                  "Data"))
+  expect_equal(tbl$body$dataset[["U"]], c("2.00", ".74", ".75", ".78"))
+
+  # without labels
+  tbl <- TblDim(tab, model = "content")
+  expect_equal(tbl$body$dataset[["Dimension"]], paste("Dim", 1:4))
+
+  # unidimensional model: a single value column, and the sheet names its one
+  # dimension "1"
+  tbl <- TblDim(tab, model = "uni")
+  expect_s3_class(tbl, "flextable")
+  expect_equal(tbl$body$dataset[["Dimension"]], "Dim 1")
+  expect_equal(tbl$body$dataset[["Dim 1"]], "1.60")
+
+  # unnamed vectors are the deprecated earlier form: still applied by
+  # position, so existing report scripts keep working, but warned about
+  expect_warning(
+    tbl <- TblDim(tab, model = "content",
+                  rownames = c("Units", "Change", "Space", "Data")),
+    "deprecated"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: Units", "Dim 2: Change", "Dim 3: Space", "Dim 4: Data"
+  ))
+  expect_warning(
+    tbl <- TblDim(tab, model = "content",
+                  colnames = c("Units", "Change", "Space", "Data")),
+    "deprecated"
+  )
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Units", "Change", "Space", "Data"
+  ))
+
+  # an unnamed vector of the wrong length cannot be used at all
+  expect_warning(
+    tbl <- TblDim(tab, model = "content", rownames = c("Units", "Change")),
+    "does not match"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], paste("Dim", 1:4))
+
+  # an unnamed vector must be bound to the dimensions before the other,
+  # named vector reorders the table, or it labels the wrong dimensions
+  expect_warning(
+    tbl <- TblDim(tab, model = "content",
+                  rownames = c("space" = "Space", "change" = "Change",
+                               "data" = "Data", "units" = "Units"),
+                  colnames = c("Units", "Change", "Space", "Data")),
+    "deprecated"
+  )
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Space", "Change", "Data", "Units"
+  ))
+  # the unnamed `colnames` were bound to the original order (units, change,
+  # space, data), so the reordered columns must carry their labels
+  expect_equal(tbl$body$dataset[["Dimension"]], c("Space", "Change", "Data",
+                                                  "Units"))
+  expect_equal(tbl$body$dataset[["Space"]], c("2.89", ".72", ".70", ".75"))
+  # here the deprecated vector is bound to the original order and then, being
+  # complete, applies that order -- `rownames` takes precedence over `colnames`
+  expect_warning(
+    tbl <- TblDim(tab, model = "content",
+                  rownames = c("Units", "Change", "Space", "Data"),
+                  colnames = c("space" = "Space", "change" = "Change",
+                               "data" = "Data", "units" = "Units")),
+    "deprecated"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c("Units", "Change", "Space",
+                                                  "Data"))
+  expect_equal(names(tbl$body$dataset), c(
+    "Dimension", "Units", "Change", "Space", "Data"
+  ))
+  expect_equal(tbl$body$dataset[["Units"]], c("2.00", ".74", ".75", ".78"))
+
+  # labels on a single-dimension model
+  tbl <- TblDim(tab, model = "uni", rownames = c("1" = "Reading"))
+  expect_equal(tbl$body$dataset[["Dimension"]], "Dim 1: Reading")
+  expect_equal(tbl$body$dataset[["Dim 1"]], "1.60")
+
+  # dimension names containing blanks: `openxlsx` replaces these by dots in the
+  # header when a results file is read back in, so both axes must take their
+  # names from the first column instead
+  spaced <- list("Cor-Var content" = data.frame(
+    c("Change and relationships", "Data and chance"),
+    c(2.1, 0.7), c(0.7, 2.2)
+  ))
+  names(spaced[["Cor-Var content"]]) <- c(
+    "X1", "Change.and.relationships", "Data.and.chance"
+  )
+  tbl <- TblDim(spaced, model = "content",
+                rownames = c("Data and chance" = "Data",
+                             "Change and relationships" = "Change"))
+  expect_equal(tbl$body$dataset[["Dimension"]], c("Dim 1: Data",
+                                                  "Dim 2: Change"))
+  expect_equal(tbl$body$dataset[["Dim 1"]], c("2.20", ".70"))
+
+  # names that match no dimension would otherwise fail silently; a mistyped
+  # name necessarily leaves a dimension unlabelled, so both warnings fire
+  expect_warning(
+    expect_warning(
+      TblDim(tab, model = "content",
+             rownames = c("change" = "Change", "data" = "Data",
+                          "units" = "Units", "typo" = "Space")),
+      "do not match"
+    ),
+    "not covered"
+  )
+
+  # so would dimensions left unlabelled by an incomplete vector
+  expect_warning(
+    tbl <- TblDim(tab, model = "content",
+                  rownames = c("change" = "Change", "data" = "Data")),
+    "not covered"
+  )
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: units", "Dim 2: Change", "Dim 3: space", "Dim 4: Data"
+  ))
+
+  # duplicated names
+  expect_warning(
+    TblDim(tab, model = "content",
+           rownames = c("units" = "A", "units" = "B", "change" = "C",
+                        "space" = "D", "data" = "E")),
+    "same name"
+  )
+
+  # a label equal to another dimension's name must not cascade
+  tbl <- TblDim(tab, model = "content",
+                rownames = c("units" = "change", "change" = "data",
+                             "space" = "Space", "data" = "Data"))
+  expect_equal(tbl$body$dataset[["Dimension"]], c(
+    "Dim 1: change", "Dim 2: data", "Dim 3: Space", "Dim 4: Data"
+  ))
 
 })
 

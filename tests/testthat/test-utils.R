@@ -570,8 +570,8 @@ test_that("neps_palette() returns the package-wide blue scheme", {
   expect_length(neps_palette(4), 4)
   expect_match(neps_palette(1), "^#[0-9A-Fa-f]{6}$")
 
-  # single source of truth: identical to colorspace default (Blues 2)
-  expect_equal(neps_palette(3), colorspace::sequential_hcl(3, palette = "Blues 2"))
+  # single source of truth: identical to the base R 'Blues 2' palette
+  expect_equal(neps_palette(3), grDevices::hcl.colors(3, palette = "Blues 2"))
 
 })
 

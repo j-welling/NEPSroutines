@@ -26,15 +26,6 @@ Rscript -e "devtools::document()"                   # Regenerate docs
 Rscript -e "devtools::load_all()"                   # Load for testing
 ```
 
-## Project Structure
-
-```
-R/                  # Source code
-man/                # Documentation (auto-generated, don't edit)
-tests/testthat/     # Tests (testthat edition 3)
-dev/                # Development docs
-```
-
 ## Reference
 
 See `dev/01_claude_reference.md` for:

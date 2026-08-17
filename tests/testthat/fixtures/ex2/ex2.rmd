@@ -197,7 +197,6 @@ NEPSroutines::dif_analysis(
 
 ```{r dimensionality analysis}
 
-vars$content <- as.numeric(factor(vars$content))
 NEPSroutines::dim_analysis(
   resp = resp,
   vars = vars,
