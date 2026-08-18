@@ -13,5 +13,6 @@
 ^CONTRIBUTING\.md$
 ^AGENTS\.md$
 ^CLAUDE\.md$
+^LICENSE\.md$
 \.gitignore
 \.Rhistory

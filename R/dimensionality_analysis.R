@@ -172,6 +172,13 @@ conduct_dim_analysis <- function(
     test = TRUE
   ) {
 
+  # TAM draws quasi-random integration nodes via sfsmisc::QUnif() whenever
+  # snodes > 0 (TAM's control default is QMC = TRUE); snodes = 0 uses the
+  # Gauss-Hermite grid instead and needs no extra package.
+  if (snodes > 0 && !requireNamespace("sfsmisc", quietly = TRUE)) {
+    stop("Please install the package 'sfsmisc'!")
+  }
+
   # Test data
   if (test) {
       NEPSroutines::check_logicals(vars, "vars", select, warn = warn)

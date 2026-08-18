@@ -28,20 +28,20 @@ Imports:
     grDevices,
     haven,
     openxlsx,
-    sfsmisc,
     stats,
     methods,
     TAM (>= 4.2),
-    tidyselect,
-    WrightMap
+    tidyselect
 Suggests:
     flextable,
     MASS,
     officer (>= 0.6.5),
     magick (>= 2.8.3),
     rlang,
+    sfsmisc,
     testthat (>= 3.2.0),
     withr,
+    WrightMap,
     knitr,
     rmarkdown,
     bookdown
