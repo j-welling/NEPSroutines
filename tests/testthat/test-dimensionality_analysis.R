@@ -14,33 +14,30 @@ test_that("dim_analysis() works for a multidimensional model", {
   # The texttype model does not converge on ex3 (the precomputed fixture hit the
   # iteration limit at maxiter = 10000 as well), so the convergence warning is
   # expected. capture_warnings() keeps the test robust against additional
-  # warnings.
+  # warnings. An estimation error would abort the block on its own, so no
+  # try() wrapper is needed to report one.
   warns <- testthat::capture_warnings(
-    result <- try({
-      dim_analysis(
-        resp = ex3$resp,
-        vars = ex3$vars,
-        select = "mixed",
-        scoring = "scoring",
-        dim = "texttype",
-        valid = "valid",
-        irtmodel = "PCM2",
-        mvs = c(OM = -97, NV = -95, NR = -94, MBD = -56, LT = -54),
-        maxiter = 500,
-        snodes = 1000,
-        print = FALSE,
-        save = TRUE,
-        return = TRUE,
-        path_results = path,
-        path_table = path,
-        overwrite = TRUE,
-        verbose = FALSE
-      )
-    })
+    result <- dim_analysis(
+      resp = ex3$resp,
+      vars = ex3$vars,
+      select = "mixed",
+      scoring = "scoring",
+      dim = "texttype",
+      valid = "valid",
+      irtmodel = "PCM2",
+      mvs = c(OM = -97, NV = -95, NR = -94, MBD = -56, LT = -54),
+      maxiter = 500,
+      snodes = 1000,
+      print = FALSE,
+      save = TRUE,
+      return = TRUE,
+      path_results = path,
+      path_table = path,
+      overwrite = TRUE,
+      verbose = FALSE
+    )
   )
 
-  # Estimated without error
-  expect_false(inherits(result, "try-error"))
   expect_true(any(grepl("did not converge", warns)))
 
   # Contains the output of conduct_dim_analysis() and dim_summary()
@@ -86,11 +83,11 @@ test_that("dim_analysis() works for a multidimensional model", {
   expect_true(all(corvar[lower.tri(corvar)] <= 1))
 
   # All files created
-  expect_true(file.exists(paste0(path, "/dimensionality.rds")))
-  expect_true(file.exists(paste0(path, "/dimensionality.xlsx")))
+  expect_true(file.exists(file.path(path, "dimensionality.rds")))
+  expect_true(file.exists(file.path(path, "dimensionality.xlsx")))
 
   # The saved results are the same object that is returned
-  expect_identical(readRDS(paste0(path, "/dimensionality.rds")), result)
+  expect_identical(readRDS(file.path(path, "dimensionality.rds")), result)
 
   # Written table can be read back in and contains the expected sheets
   expect_equal(names(Import(path, "dimensionality.xlsx")),
@@ -148,5 +145,39 @@ test_that("conduct_dim_analysis() produces a unidimensional reference model", {
   # A single dimension leaves a 1 x 1 matrix holding that dimension's variance
   expect_equal(dim(smry$`Cor-Var uni`), c(1L, 1L))
   expect_gt(smry$`Cor-Var uni`[1, 1], 0)
+
+})
+
+
+test_that("dim_summary() names the group and print_dim_summary() shows it", {
+
+  # Temporary output directory
+  path <- withr::local_tempdir()
+
+  # Neither function estimates anything, so both can be driven from the
+  # precomputed models and this block costs no TAM run.
+  fixture <- readRDS(test_path("fixtures/ex3/results/dimensionality.rds"))
+
+  smry <- dim_summary(
+    fixture$analysis,
+    save = TRUE,
+    name_group = "easy",
+    path = path,
+    overwrite = TRUE
+  )
+
+  # create_name() appends the group to the file name
+  expect_true(file.exists(file.path(path, "dimensionality_easy.xlsx")))
+  expect_false(file.exists(file.path(path, "dimensionality.xlsx")))
+  expect_equal(names(Import(path, "dimensionality_easy.xlsx")), names(smry))
+
+  # print_dim_summary() announces the results and prints every sheet, so both
+  # the message and the printed output have to be captured. It emits a trailing
+  # blank message as well, which capture_messages() absorbs along with the
+  # header instead of letting it surface as suite noise.
+  msgs <- testthat::capture_messages(
+    expect_output(print_dim_summary(smry), "Goodness of fit")
+  )
+  expect_true(any(grepl("RESULTS", msgs)))
 
 })
