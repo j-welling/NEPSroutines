@@ -40,32 +40,41 @@ package provides example data and scripts.
 `NEPSroutines` contains example data sets that correspond to different test designs.
 In the current package version, this includes:
 
-- `dat1`: The simulated data includes a linear test with 1000
-  persons, 15 items (all MC), no rotation or booklet design, and no
+- `dat1`: Simulated data for a linear test with 1000 persons,
+  15 items (all MC), no rotation or booklet design, and no
   dimensionality variable.
 
-- `dat2`: The simulated data includes a linear test with 1500
-  persons, 17 items (9 MC, 4 SCR, 4 CMC), a rotation design, the
+- `dat2`: Simulated data for a linear test with 1500 persons,
+  17 items (9 MC, 4 SCR, 4 CMC), a rotation design, the
   dimensionality variable "content", and no booklet design.
 
-- `dat3`: The simulated data includes a linear test with 2100
-  persons, 21 items (16 MC, 5 CMC), a rotation design, the
+- `dat3`: Simulated data for a linear test with 2100 persons, 
+  21 items (16 MC, 5 CMC), a rotation design, the
   dimensionality variable "texttype", and three booklets "easy",
   "medium", and "difficult".
 
-- `dat4`: The simulated data includes a multi-stage test with three
-  stages, 3400 persons, 34 items (26 MC, 8 CMC), a rotation design, and
+- `dat4`: Simulated data for a multi-stage test with three stages, 
+  3400 persons, 34 items (26 MC, 8 CMC), a rotation design, and
   the dimensionality variable "component".
   
-You can access the data while `NEPSroutines` is loaded in your R environment.
+You can access the data once you have loaded `NEPSroutines`.
 
-To load the data into your current environment, type: 
+To load the data into your current R environment, type: 
 
 ```{r}
 data("dat1") # for loading dat1
 data("dat2") # for loading dat2
 data("dat3") # for loading dat3
 data("dat4") # for loading dat4
+```
+
+Each file is a list containing the two data sets `resp` and `vars`. For each file, documentation including a description of all variables exists. You can access it with:
+
+```{r}
+?dat1 # for documentation of dat1
+?dat2 # for documentation of dat2
+?dat3 # for documentation of dat3
+?dat4 # for documentation of dat4
 ```
 
 ## Example scripts 
@@ -82,15 +91,14 @@ directory <- system.file("examples", package = "NEPSroutines")
 list.files(directory)
 ```
 
-You can access RMD files using:
+You can access RMD files by changing "my_file.Rmd" to the corresponding file name:
 
 ```{r}
 file.edit(system.file("examples", "my_file.Rmd", package = "NEPSroutines"))
 ```
 
-And access HTML files using:
+And access HTML files by changing "my_file.html" to the corresponding file name:
 
 ```{r}
 browseURL(system.file("examples", "my_file.html", package = "NEPSroutines"))
-
 ```
