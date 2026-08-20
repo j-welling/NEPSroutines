@@ -74,7 +74,7 @@ pak::pak("LIfBi-Educational-Measurement/NEPSroutines@vX.Y.Z")
 
 Replace X.Y.Z with the actual version number.
 
-#### Load Package
+#### Load the Package
 
 Once installed, you can load the package like any other R package:
 
@@ -84,7 +84,11 @@ library(NEPSroutines)
 
 ### Getting Started
 
-Scaling NEPS data using R in general and NEPSroutines in particular is documented using **vignettes** within this package. Start with the **introductory vignette** by using the function `open_guide()`.
+Scaling NEPS data using R in general and NEPSroutines in particular is documented using **vignettes** within this package. Start with the **introductory vignette** by using the function `open_guide()`. There you will get acquainted with the documentation structure of the package and learn how to access other vignettes.
+
+### Example data and scripts
+
+NEPSroutines provides example (simulated) data and scripts for users. The vignette `example_data_and_scripts` gives an overview and explains how to access them.
 
 ## Information for Developers
 
