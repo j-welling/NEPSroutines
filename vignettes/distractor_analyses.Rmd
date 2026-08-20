@@ -66,6 +66,8 @@ scaled simultaneously for several cohorts), use the function argument
 `name_group` that adds a suffix to each file name (e.g., `"cohort_6"`).
 A summary is printed in the console.
 
+Example code:
+
 ```{r}
 NEPSroutines::dis_analysis(
   resp = resp,

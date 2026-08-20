@@ -48,6 +48,8 @@ file name needs to be modified (e.g., because a test is scaled
 simultaneously for several cohorts), use the function argument
 `name_group` that adds a suffix to the SUF name (e.g., `"cohort_6"`).
 
+Example code:
+
 ```{r}
 NEPSroutines::create_suf(
   resp = resp,

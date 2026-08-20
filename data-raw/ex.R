@@ -755,7 +755,7 @@ sim.testlet <- function(N = 2000, I = 25, CMC = 5, SCR = 5, MC = NULL,
 #' simulated test includes 15 MC items without a booklet design.
 #'
 
-ex1 <- sim.testlet(
+dat1 <- sim.testlet(
   N = 1000,
   I = 15,
   SCR = 0,
@@ -771,10 +771,10 @@ ex1 <- sim.testlet(
     testyear = 2011
   )
 )
-ex1$vars
-head(ex1$resp)
+dat1$vars
+head(dat1$resp)
 
-save(ex1, file = "data/ex1.rda")
+save(dat1, file = "data/dat1.rda")
 
 
 #'
@@ -786,7 +786,7 @@ save(ex1, file = "data/ex1.rda")
 #'
 
 # Simulate data
-ex2 <- sim.testlet(
+dat2 <- sim.testlet(
   N = 1500,
   MC = 9,
   SCR = 4,
@@ -803,20 +803,20 @@ ex2 <- sim.testlet(
     testyear = 2013
   )
 )
-ex2$vars
-head(ex2$resp)
+dat2$vars
+head(dat2$resp)
 
-save(ex2, file = "data/ex2.rda")
+save(dat2, file = "data/dat2.rda")
 
 
 #'
 #' Example 3
 #'
 #' The example is loosely based on the scaling of reading in B129 The
-#' simulated test includes 13 MC and 4 CMC items with 3 booklets.
+#' simulated test includes 16 MC and 5 CMC items with 3 booklets.
 #'
 
-ex3 <- sim.testlet(
+dat3 <- sim.testlet(
   N = 2100,
   I = 21,
   SCR = 0,
@@ -831,16 +831,16 @@ ex3 <- sim.testlet(
     varname.testlets = "texttype",
     lbl.testlets =  c("information", "instruction", "advertising", "commenting",
                       "literary"),
-    lbl.booklets = c("easy", "medium", "difficult")
-  ),
-  age = 12,
-  testyear = 2018
+    lbl.booklets = c("easy", "medium", "difficult"),
+    age = 12,
+    testyear = 2018
+  )
 )
-ex3$resp$school <- NULL
-ex3$vars
-head(ex3$resp)
+dat3$resp$school <- NULL
+dat3$vars
+head(dat3$resp)
 
-save(ex3, file = "data/ex3.rda")
+save(dat3, file = "data/dat3.rda")
 
 
 #'
@@ -850,7 +850,7 @@ save(ex3, file = "data/ex3.rda")
 #' simulated test includes a multi-stage test with 34 items.
 #'
 
-ex4 <- sim.testlet(
+dat4 <- sim.testlet(
   N = 3700,
   I = 34,
   SCR = 0,
@@ -870,11 +870,11 @@ ex4 <- sim.testlet(
     testyear = 2021
   )
 )
-ex4$resp$school <- ex4$resp$mig <- NULL
-ex4$vars
-head(ex4$resp)
+dat4$resp$school <- dat4$resp$mig <- NULL
+dat4$vars
+head(dat4$resp)
 
-save(ex4, file = "data/ex4.rda")
+save(dat4, file = "data/dat4.rda")
 
 
 #'
@@ -884,9 +884,9 @@ save(ex4, file = "data/ex4.rda")
 #'
 
 library(TAM)
-load("data/ex1.rda")
-items <- ex1$vars$item[ex1$vars$dich]
-resp <- ex1$resp[ex1$resp$valid, ]
+load("data/dat1.rda")
+items <- dat1$vars$item[dat1$vars$dich]
+resp <- dat1$resp[dat1$resp$valid, ]
 resp[resp < 0] <- NA
 
 # Rasch model
@@ -909,9 +909,9 @@ mod1.3$beta
 #'
 
 library(TAM)
-load("data/ex2.rda")
-items <- ex2$vars$item[ex2$vars$mixed]
-resp <- ex2$resp[ex2$resp$valid, ]
+load("data/dat2.rda")
+items <- dat2$vars$item[dat2$vars$mixed]
+resp <- dat2$resp[dat2$resp$valid, ]
 resp[resp < 0] <- NA
 
 # Rasch model
@@ -936,10 +936,10 @@ mod2.4$beta
 # Multidimensional (testlet) model
 Q <- matrix(0, length(items), 5)
 Q[, 1] <- 1
-Q[ex2$vars$content[ex2$vars$item %in% items] == "units", 2] <- 1
-Q[ex2$vars$content[ex2$vars$item %in% items] == "change", 3] <- 1
-Q[ex2$vars$content[ex2$vars$item %in% items] == "space", 4] <- 1
-Q[ex2$vars$content[ex2$vars$item %in% items] == "data", 5] <- 1
+Q[dat2$vars$content[dat2$vars$item %in% items] == "units", 2] <- 1
+Q[dat2$vars$content[dat2$vars$item %in% items] == "change", 3] <- 1
+Q[dat2$vars$content[dat2$vars$item %in% items] == "space", 4] <- 1
+Q[dat2$vars$content[dat2$vars$item %in% items] == "data", 5] <- 1
 var.fixed <- c()
 for (i in 1:4) {
   for (j in seq(i + 1, 5))
@@ -955,9 +955,9 @@ summary(mod2.5)
 #'
 
 library(TAM)
-load("data/ex3.rda")
-items <- ex3$vars$item[ex3$vars$mixed]
-resp <- ex3$resp[ex3$resp$valid, ]
+load("data/dat3.rda")
+items <- dat3$vars$item[dat3$vars$mixed]
+resp <- dat3$resp[dat3$resp$valid, ]
 resp[resp < 0] <- NA
 
 # Rasch model
@@ -980,7 +980,7 @@ mod3.4$beta
 
 # Rasch model for easy booklet
 mod3.5 <- TAM::tam.mml(
-  resp = resp[resp$easy, ex3$vars$item[ex3$vars$mixed & ex3$vars$easy]],
+  resp = resp[resp$easy, dat3$vars$item[dat3$vars$mixed & dat3$vars$easy]],
   verbose = FALSE
 )
 summary(mod3.5)

@@ -3,7 +3,7 @@
 \docType{data}
 \name{ex2}
 \alias{ex2}
-\title{Polytomous NEPS data without booklets}
+\title{Test data: Polytomous NEPS data without booklets}
 \format{
 A list with two data frames including the simulated responses
 (\code{resp}) and the characteristics of the variables (\code{vars}).

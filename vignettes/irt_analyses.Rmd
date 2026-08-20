@@ -103,6 +103,8 @@ contain the fixed item difficulties for the 2PL model or GPCM. Please
 note that the item discrimination parameters from the 2PL model and GPCM
 cannot be fixed within this package.
 
+Example code:
+
 ```{r}
 # Rasch and 2PL
 NEPSroutines::irt_analysis(
@@ -168,14 +170,14 @@ other group-specific arguments (`control_tam`, `control_wle`,
 `xsi_fixed_1p`, `xsi_fixed_2p`), list elements can be specified for only
 some groups, or the entire argument can be left empty (`NULL`).
 
-In the B129 study, there was a difficult and an easy test booklet that
+In the reading test in NEPS study B129, there was a difficult and an easy test booklet that
 also included common items. For the IRT analyses, it is therefore
 important that the data.frames `resp` and `vars` include the logical
 variables `easy`, `difficult`, and `common`, and that `vars`
 additionally contains the group-specific analysis variables (see Section
 4.3.2 Group Variables).
 
-The function `grouped_irt_analysis` is defined as follows:
+Example code:
 
 ```{r}
 # Rasch and 2PL
@@ -185,9 +187,11 @@ NEPSroutines::grouped_irt_analysis(
   valid = "valid",
   scoring = "scoring",
   missing_by_design = -54,
-  select = c(easy = "dich_easy",
-             difficult = "dich_diff",
-             common = "dich_common"),
+  select = c(
+    easy = "dich_easy",
+    difficult = "dich_diff",
+    common = "dich_common"
+  ),
   overwrite = TRUE,
   plots = TRUE,
   return = FALSE,
@@ -203,9 +207,11 @@ NEPSroutines::grouped_irt_analysis(
   valid = "valid",
   scoring = "scoring",
   missing_by_design = -54,
-  select = c(easy = "mixed_easy",
-             difficult = "mixed_difficult",
-             common = "mixed_common"),
+  select = c(
+    easy = "mixed_easy",
+    difficult = "mixed_difficult",
+    common = "mixed_common"
+  ),
   overwrite = TRUE,
   plots = TRUE,
   return = FALSE,
