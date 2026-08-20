@@ -66,7 +66,7 @@ pak::pak("LIfBi-Educational-Measurement/NEPSroutines@vX.Y.Z")
 
 Replace X.Y.Z with the actual version number.
 
-#### Load the Package
+#### Load Package
 
 Once installed, you can load the package like any other R package:
 
@@ -84,14 +84,14 @@ and learn how to access other vignettes.
 
 ### Example data and scripts
 
-NEPSroutines provides example (simulated) data and scripts for users.
-The vignette `example_data_and_scripts` gives an overview and explains
-how to access them.
+NEPSroutines provides simulated data and example scripts for users. The
+vignette `example_data_and_scripts` gives an overview and explains how
+to access them.
 
 ## Information for Developers
 
 If you want to contribute to the package, please read first the
-CONTRIBUTING file in the inst/ folder.
+CONTRIBUTING file.
 
 ### Installation of Development Version
 
