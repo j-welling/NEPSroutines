@@ -38,6 +38,32 @@ NEPSroutines is an R package for scaling NEPS (National Educational Panel Study)
   - Legacy Rd macros (`\code{}`, `\itemize{}`, `\describe{}`) still work and are
     passed through unchanged, so both styles can coexist
 
+### User documentation (vignettes)
+
+- All user-facing documentation lives in `vignettes/`; `getting_started.Rmd` is
+  the entry point and links to the others (users reach it via `open_guide()`)
+- When a change affects users (new/renamed/removed arguments, changed defaults
+  or output), update the corresponding vignette in the same PR
+- Vignettes are maintained by Jana - keep edits minimal and limited to what the
+  code change requires; larger restructuring should be left to her
+
+### Data sets
+
+`data/` holds two separate families. They serve different purposes and are not
+interchangeable:
+
+| Files | Purpose | Used by |
+|-------|---------|---------|
+| `ex1`-`ex3` | Test data | `tests/`, roxygen `@examples` |
+| `dat1`-`dat4` | Example data for package users | `vignettes/`, `inst/examples/` |
+
+- Do not rename or change `dat1`-`dat4`, `inst/examples/`, or the vignettes that
+  document them without asking Jana first - she maintains them
+- `ex1`-`ex3` are coupled to the stored fixtures in `tests/testthat/fixtures/`;
+  changing them invalidates saved model objects, not just test expectations
+- `data-raw/ex.R` generates `dat1`-`dat4` only (despite its name); there is no
+  generation script in the repository for `ex1`-`ex3`
+
 ### Testing
 - Framework: testthat (edition 3)
 - Test fixtures in `tests/testthat/fixtures/`
