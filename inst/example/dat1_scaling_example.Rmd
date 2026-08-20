@@ -1,0 +1,273 @@
+---
+title: "Example Scaling Script for dat1"
+author: "Jana Welling"
+date: "`r Sys.time()`"
+output:
+    html_document:
+        toc: true
+        number_sections: true
+        toc_float: true
+        theme: readable
+        highlight: tango
+        df_print: paged
+        code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+
+# Preparation of R and data
+
+## Load data and NEPSroutines
+
+```{r load, message = FALSE}
+
+load("dat1.rda")
+resp <- dat1$resp
+vars <- dat1$vars
+
+library("NEPSroutines")
+
+```
+
+## User-defined missing values
+
+```{r user-defined missing values}
+
+table(unlist(resp[resp < 0]))
+
+mvs = c(
+  OM = -97,
+  NV = -95,
+  NR = -94,
+  NP = -56
+)
+
+labels_mvs = c(
+  ALL = "total missing items",
+  OM = "omitted items",
+  NV = "not valid items",
+  NR = "not reached items",
+  NP = "not participated"
+)
+
+```
+
+## Attributes for socio-demographic variables
+
+```{r attributes}
+
+# Sex
+attributes(resp$sex)$labels <- c(
+  female = 0,
+  male = 1
+)
+
+# Migration
+attributes(resp$mig)$labels <- c(
+  no_migration_background = 0,
+  migration_background = 1
+)
+
+# Books
+attributes(resp$books)$labels <- c(
+  less_than_100 = 0,
+  more_than_100 = 1
+)
+
+```
+
+
+# Sample and Booklet Descriptives
+
+```{r descriptives}
+
+# Sample size with only valid cases
+NEPSroutines::n_valid(resp, valid = "valid")
+
+# Descriptives (mean, sd, etc.) of continuous variables
+NEPSroutines::desc_con(resp, desc = "age", valid = "valid")
+
+# Descriptives (attributes, frequency) of nominal socio-demographic variables
+NEPSroutines::show_attributes(resp, desc = c("sex", "mig", "books"))
+NEPSroutines::desc_nom(resp, desc = c("sex", "mig", "books"), valid = "valid")
+
+
+```
+
+
+# Missing Responses Analyses
+
+## Missing Responses by Person
+
+```{r missing responses by person}
+
+NEPSroutines::mv_person(
+  resp = resp,
+  vars = vars,
+  select = "dich",
+  valid = "valid",
+  mvs = mvs,
+  labels_mvs = labels_mvs,
+  missing_by_design = -56,
+  overwrite = TRUE,
+  plots = TRUE,
+  save = TRUE,
+  print = TRUE,
+  return = FALSE,
+  path_results = "results",
+  path_table = "tables",
+  path_plots = "plots/missings_by_person",
+  digits = 2,
+  warn = TRUE,
+  verbose = FALSE
+)
+
+```
+
+## Missing Responses by Item
+
+```{r missing responses by item}
+
+NEPSroutines::mv_item(
+  resp = resp,
+  vars = vars,
+  select = "dich",
+  valid = "valid",
+  position = "pos",
+  mvs = mvs,
+  labels_mvs = labels_mvs,
+  missing_by_design = -56,
+  overwrite = TRUE,
+  plots = TRUE,
+  save = TRUE,
+  print = TRUE,
+  return = FALSE,
+  path_results = "results",
+  path_table = "tables",
+  path_plots = "plots/missings_by_item",
+  digits = 2,
+  warn = TRUE,
+  verbose = FALSE
+)
+
+```
+
+
+# IRT Analyses
+
+```{r IRT analysis with dichotomous items}
+
+NEPSroutines::irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = "dich",
+  valid = "valid",
+  scoring = "scoring",
+  mvs = mvs,
+  plots = TRUE,
+  save = TRUE,
+  print = TRUE,
+  return = FALSE,
+  path_results = "results",
+  path_table = "tables",
+  path_plots = "plots",
+  overwrite = TRUE,
+  digits = 2,
+  verbose = FALSE
+)
+
+```
+
+
+# DIF Analysis
+
+```{r dif analysis for Rasch}
+
+NEPSroutines::dif_analysis(
+  resp = resp,
+  vars = vars,
+  select = "dich",
+  valid = "valid",
+  mvs = mvs,
+  dif_vars = c("sex", "mig"),
+  scoring = "scoring",
+  overwrite = TRUE,
+  verbose = FALSE,
+  save = TRUE,
+  print = TRUE,
+  return = FALSE,
+  path_results = "results",
+  path_table = "tables"
+)
+
+```
+
+
+# Distractor Analysis
+
+```{r distractor analysis}
+
+NEPSroutines::dis_analysis(
+  resp = resp,
+  vars = vars,
+  valid = "valid",
+  mvs = mvs,
+  select_raw = "raw",
+  correct = "correct",
+  print = TRUE,
+  save = TRUE,
+  overwrite = TRUE,
+  path_results = "results",
+  path_table = "tables"
+)
+
+```
+
+
+# Dimensionality Analysis
+
+No dimensionality analysis not necessary since no testlet variable exists.
+
+
+# Create Scores and SUF
+
+```{r suf}
+
+scores <- NEPSroutines::create_scores(
+  resp,
+  vars,
+  score_name = "grk1",
+  select = "dich",
+  valid = "valid",
+  mvs = mvs,
+  wle = TRUE,
+  sum_score = TRUE,
+  sum_select = "dich",
+  metap = FALSE,
+  return = TRUE,
+  save = TRUE,
+  overwrite = TRUE,
+  path_results = "results"
+)
+
+NEPSroutines::create_suf(
+  resp,
+  vars,
+  select = "dich",
+  competence = "Grammar",
+  scores = scores,
+  score_name = "grk1",
+  return = FALSE,
+  path = "suf"
+)
+
+rm(scores)
+
+```
+
+
+# Session
+
+```{r session-info}
+sessionInfo()
+```
