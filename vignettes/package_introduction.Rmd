@@ -3,36 +3,36 @@ title: "Introduction to NEPSroutines"
 author: "Jana Welling, Christian Diegel, Tanja Kutscher"
 date: "`r Sys.Date()`"
 output:
-  bookdown::html_document2:
-    base_format: rmarkdown::html_vignette
-    toc: true
-    number_sections: no
-  bookdown::pdf_document2:
-    toc: true
-    number_sections: no
+ bookdown::html_document2:
+  base_format: rmarkdown::html_vignette
+  toc: true
+  number_sections: no
+ bookdown::pdf_document2:
+  toc: true
+  number_sections: no
 bibliography: ../inst/NEPSroutines.bib
 vignette: >
-  %\VignetteIndexEntry{Package Introduction}
-  %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{knitr::rmarkdown}
+ %\VignetteIndexEntry{Package Introduction}
+ %\VignetteEncoding{UTF-8}
+ %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
-  markdown: 
-    wrap: 72
+ markdown: 
+  wrap: 72
 ---
 
 ```{r, include = FALSE}
 
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  eval = FALSE,
-  comment = "#>"
+ collapse = TRUE,
+ eval = FALSE,
+ comment = "#>"
 )
 
 ```
 
 \newpage
 
-## Installing and Loading `NEPSroutines`
+## Install and Load `NEPSroutines`
 
 The NEPS data is scaled using the `NEPSroutines` package.
 
@@ -94,377 +94,209 @@ approaches:
 
 ### Dataset `resp`
 
-This dataset (`data.frame`) contains all competence items — both scored
-and unscored — as well as all information about the test participants,
-e.g. sociodemographic variables. Information about each participant is
-stored in a single row. An example of this dataset can be seen below for
-the reading test in NEPS study B129. The following variables are
-particularly required:
+This `data.frame` contains all competence items — both scored and
+unscored — as well as all information about the test participants, e.g.
+sociodemographic variables. Information about each participant is stored
+in a single row. How the test items are scored and the sociodemographic
+variables prepared is described in vignette `prepare_data`. The
+following variables are particularly required:
 
-+-------------------+----------------------------------------+
-| Variable          | Explanation                            |
-+===================+========================================+
-| **`ID_t`**        | A variable that contains the IDs of    |
-|                   | the persons.                           |
-+-------------------+----------------------------------------+
-| All               | - The variables must be numeric. All   |
-| sociodemographic  |   variables used in the DIF analyses   |
-| and               |   must be dichotomous in {0, 1}.       |
-| methodological    |   Non-inherently dichotomous variables |
-| variables         |   can be dichotomized, e.g.            |
-| available per     |   categorizing number of books at home |
-| test person       |   into \> 100 books and \< 100 books.  |
-|                   |   Variables used only for descriptive  |
-|                   |   analyses, e.g. age in                |
-|                   |   schoolchildren, may also be          |
-|                   |   continuous.                          |
-|                   |                                        |
-|                   | - Missing values are defined as NA     |
-|                   |                                        |
-|                   | - For an overview of all variables     |
-|                   |   required for scaling, see vignette   |
-|                   |   `prepare_data`.                      |
-+-------------------+----------------------------------------+
-| All unscored,     | - All unscored items may be numeric,   |
-| scored, and       |   character, or factor variables.      |
-| aggregated        |                                        |
-| competence items  | - All scored items must be integers.   |
-|                   |   Either dichotomous in {0, 1} or, for |
-|                   |   polytomous items with k categories,  |
-|                   |   in {0, 1, ..., k-1}.                 |
-|                   |                                        |
-|                   | - Missing values are coded using       |
-|                   |   negative integers that distinguish   |
-|                   |   between cases, e.g. -91 = test       |
-|                   |   aborted, -55 = not administered.     |
-|                   |   These values are referred to as      |
-|                   |   *user-defined missing values* and    |
-|                   |   should already be present in the raw |
-|                   |   data.                                |
-+-------------------+----------------------------------------+
-| Additional        | - **Validity variable** e.g. `valid`:  |
-| variables that    |   Identifies those persons who have    |
-| identify specific |   reached a minimum number of valid    |
-| persons in the    |   responses to be included in the      |
-| dataset           |   analyses. In our scaling procedures, |
-|                   |   this is typically *three* valid      |
-|                   |   responses.                           |
-|                   |                                        |
-|                   |   - The variable must be logical.      |
-|                   |                                        |
-|                   |   - TRUE for all persons with the      |
-|                   |     minimum number of valid responses  |
-|                   |                                        |
-|                   | - **Group and grouping variables**, if |
-|                   |   one or more groupings are present    |
-|                   |                                        |
-|                   |   - For each grouping, a numeric or    |
-|                   |     factor variable must be created    |
-|                   |     that assigns each person to a      |
-|                   |     group e.g. `difficulty`, with      |
-|                   |     `0=easy` & `1=difficult`           |
-|                   |                                        |
-|                   |   - In addition, a logical variable    |
-|                   |     must be created per group e.g.     |
-|                   |     `easy` *and* `difficult` that      |
-|                   |     identifies all persons belonging   |
-|                   |     to that group                      |
-|                   |                                        |
-|                   |   - If items were administered to both |
-|                   |     groups, an IRT analysis is usually |
-|                   |     also performed for all common      |
-|                   |     items. For this purpose, a         |
-|                   |     variable must be defined in `resp` |
-|                   |     e.g. `common` that is TRUE for all |
-|                   |     persons who received the common    |
-|                   |     items — i.e. for all persons!      |
-|                   |                                        |
-|                   | - In individual cases, additional      |
-|                   |   variables may be required            |
-+-------------------+----------------------------------------+
++------------------+-----------------------------------------------+
+| Variable         | Explanation                                   |
++==================+===============================================+
+| **`ID_t`**       | A variable that contains the IDs of the       |
+|                  | persons.                                      |
++------------------+-----------------------------------------------+
+| All              | - The variables must be numeric. All          |
+| sociodemographic |   variables used in the DIF analyses must be  |
+| and              |   dichotomous in {0, 1}. Non-inherently       |
+| methodological   |   dichotomous variables can be dichotomized,  |
+| variables        |   e.g. categorizing number of books at home   |
+| available per    |   into \> 100 books and \< 100 books.         |
+| test person      |   Variables used only for descriptive         |
+|                  |   analyses, e.g. age in schoolchildren, may   |
+|                  |   also be continuous.                         |
+|                  |                                               |
+|                  | - Missing values are defined as NA            |
+|                  |                                               |
+|                  | - For an overview of all variables required   |
+|                  |   for scaling, see vignette `prepare_data`.   |
++------------------+-----------------------------------------------+
+| All unscored,    | - All unscored items may be numeric,          |
+| scored, and      |   character, or factor variables.             |
+| aggregated       |                                               |
+| competence items | - All scored items must be integers. Either   |
+|                  |   dichotomous in {0, 1} or, for polytomous    |
+|                  |   items with k categories, in {0, 1, ...,     |
+|                  |   k-1}.                                       |
+|                  |                                               |
+|                  | - Missing values are coded using negative     |
+|                  |   integers that distinguish between cases,    |
+|                  |   e.g. -91 = test aborted, -55 = not          |
+|                  |   administered. These values are referred to  |
+|                  |   as *user-defined missing values* and should |
+|                  |   already be present in the raw data.         |
++------------------+-----------------------------------------------+
+| Additional       | - **Validity variable** e.g. `valid`:         |
+| variables that   |   Identifies those persons who have reached a |
+| identify         |   minimum number of valid responses to be     |
+| specific persons |   included in the analyses. In our scaling    |
+| in the dataset   |   procedures, this is typically *three* valid |
+|                  |   responses.                                  |
+|                  |                                               |
+|                  |   - The variable must be logical.             |
+|                  |                                               |
+|                  |   - TRUE for all persons with the minimum     |
+|                  |     number of valid responses                 |
+|                  |                                               |
+|                  | - **Group and grouping variables**, if one or |
+|                  |   more groupings are present                  |
+|                  |                                               |
+|                  |   - For each grouping, a numeric or factor    |
+|                  |     variable must be created that assigns     |
+|                  |     each person to a group e.g. `difficulty`, |
+|                  |     with `0=easy` & `1=difficult`             |
+|                  |                                               |
+|                  |   - In addition, a logical variable must be   |
+|                  |     created per group e.g. `easy` *and*       |
+|                  |     `difficult` that identifies all persons   |
+|                  |     belonging to that group                   |
+|                  |                                               |
+|                  |   - If items were administered to both        |
+|                  |     groups, an IRT analysis is usually also   |
+|                  |     performed for all common items. For this  |
+|                  |     purpose, a variable must be defined in    |
+|                  |     `resp` e.g. `common` that is TRUE for all |
+|                  |     persons who received the common items —   |
+|                  |     i.e. for all persons!                     |
+|                  |                                               |
+|                  | - **Stage variables**, if test is a           |
+|                  |   multi-stage test                            |
+|                  |                                               |
+|                  |   - For each stage, create a logical variable |
+|                  |     named `stage1`, `stage2`, ... to identify |
+|                  |     all persons that were administered at     |
+|                  |     least one item in the corrsponding stage  |
+|                  |     (if FALSE, the person did not reach this  |
+|                  |     stage)                                    |
+|                  |                                               |
+|                  | - In individual cases, additional variables   |
+|                  |   may be required                             |
++------------------+-----------------------------------------------+
 
-Example for `resp` (from the reading test in NEPS study B129, only the
-first variables are shown):
-
-+----------------------+-----------------------------------------------+
-| Variable             | Explanation                                   |
-+======================+===============================================+
-| **`ID_t`**           | Contains the IDs of the persons               |
-+----------------------+-----------------------------------------------+
-| `sex`, `migration`   | Dichotomous or dichotomized sociodemographic  |
-| and `books`          | variables for descriptive and DIF analyses    |
-+----------------------+-----------------------------------------------+
-| `difficulty`         | Grouping variable assigning persons to the    |
-|                      | different test booklets                       |
-+----------------------+-----------------------------------------------+
-| `easy` and           | Group variables identifying persons who       |
-| `difficult`          | received the easy or difficult test form      |
-+----------------------+-----------------------------------------------+
-| `valid`              | Validity variable identifying all persons who |
-|                      | have provided at least three valid responses  |
-+----------------------+-----------------------------------------------+
-| `reg70110_sc2g7`     | Unscored simple item with user-defined        |
-|                      | missing values                                |
-+----------------------+-----------------------------------------------+
-| `re g70131_sc2g7`,\  | Unscored sub-items of a polytomous item with  |
-| `re g70132_sc2g7`,\  | user-defined missing values                   |
-| `reg70133_sc2g7`     |                                               |
-+----------------------+-----------------------------------------------+
-| `re g70110_sc2g7_c`  | The dichotomously scored item belonging to    |
-|                      | `reg70110_sc2g7` recognizable by the suffix   |
-|                      | `_c` with user-defined missing values         |
-+----------------------+-----------------------------------------------+
-| `reg  7013s_sc2g7_c` | The polytomously scored item belonging to the |
-|                      | sub-items recognizable by the `s` at the end  |
-|                      | of the item stem and the `_c` suffix with     |
-|                      | user-defined missing values                   |
-+----------------------+-----------------------------------------------+
+For an example of `resp` see the example data `dat1` to `dat4`.
+Information on how to access the example data and its documentation is
+available in the vignette `example_data_and_scripts`.
 
 ### Dataset `vars`
 
-This dataset (`data.frame`) contains all information about the
-competence items, e.g. item positions, assignment to a test booklet, and
-item type. Each version of a competence item (e.g. scored and unscored)
-is stored in a separate row (for an overview of the different item
-types, see Section *Competence items* in vignette `scaling_NEPS_data`).
-An example of the `vars` dataset can be seen below for the reading test
-in NEPS study B129. How the variables are constructed is described in
-vignette `prepare_data`. The following variables are particularly
-required:
+This `data.frame` contains all information about the competence items,
+e.g. item positions, assignment to a test booklet, and item type. Each
+version of a competence item (e.g. scored and unscored) is stored in a
+separate row (for an overview of the different item types, see Section
+*Competence items* in vignette `scaling_NEPS_data`). How the variables
+are constructed is described in vignette `prepare_data`. The following
+variables are particularly required:
 
-+-----------------------------+-----------------------------+
-| Variable                    | Explanation                 |
-+=============================+=============================+
-| **`item`**                  | A variable containing the   |
-|                             | item name                   |
-+-----------------------------+-----------------------------+
-| `correct_response`          | A variable containing the   |
-|                             | correct answer of the       |
-|                             | respective item e.g. 3 if   |
-|                             | the third response option   |
-|                             | is correct. Can be a        |
-|                             | character or numeric        |
-|                             | vector.                     |
-+-----------------------------+-----------------------------+
-| `type`                      | Variable defining the item  |
-|                             | type MC, CMC, etc.          |
-+-----------------------------+-----------------------------+
-| Position variables          | Indicate the position of    |
-|                             | the item in the test        |
-|                             | booklet                     |
-|                             |                             |
-|                             | - If there are multiple     |
-|                             |   groups, one position      |
-|                             |   variable per group, even  |
-|                             |   if the position is        |
-|                             |   identical across groups   |
-|                             |                             |
-|                             | - Otherwise only one        |
-|                             |   position variable         |
-+-----------------------------+-----------------------------+
-| Logical variables           | - `raw`: TRUE for all       |
-| identifying specific items  |   *unscored* items raw data |
-|                             |                             |
-|                             | - `distan`: TRUE for all    |
-|                             |   *unscored*                |
-|                             |   *multiple-choice* items   |
-|                             |   required for distractor   |
-|                             |   analysis                  |
-|                             |                             |
-|                             | - `dich`: TRUE for all      |
-|                             |   *dichotomously scored*    |
-|                             |   items used e.g. for IRT   |
-|                             |   and DIF analyses. This    |
-|                             |   also includes sub-items   |
-|                             |   of polytomous items!      |
-|                             |                             |
-|                             | - If the item set also      |
-|                             |   includes polytomous       |
-|                             |   items:                    |
-|                             |                             |
-|                             |   - `poly`: TRUE for all    |
-|                             |     *polytom scored* items  |
-|                             |     used for data           |
-|                             |     preparation             |
-|                             |                             |
-|                             |   - `final`: TRUE for all   |
-|                             |     items to be used in     |
-|                             |     scaling used e.g. for   |
-|                             |     IRT and DIF analyses.   |
-|                             |     This initially includes |
-|                             |     all *dichotomously      |
-|                             |     scored* items           |
-|                             |     *excluding* sub-items   |
-|                             |     of polytomous items and |
-|                             |     all *polytomously       |
-|                             |     scored* items if an     |
-|                             |     item was collapsed,     |
-|                             |     then the version with   |
-|                             |     collapsed response      |
-|                             |     categories.             |
-|                             |                             |
-|                             | - If the item set changes   |
-|                             |   during scaling e.g.       |
-|                             |   because items are         |
-|                             |   excluded, new variables   |
-|                             |   must be created e.g.      |
-|                             |   `dich_new` or `final_new` |
-|                             |   that replace the          |
-|                             |   variables above for the   |
-|                             |   new item set required for |
-|                             |   all analyses.             |
-|                             |                             |
-|                             | - `suf`: TRUE for all       |
-|                             |   *scored* items without    |
-|                             |   collapsed response        |
-|                             |   categories that are       |
-|                             |   actually used in the test |
-|                             |   used for computation of   |
-|                             |   sum scores, metacognition |
-|                             |   scores, and creation of   |
-|                             |   the SUF.                  |
-+-----------------------------+-----------------------------+
-| Depending on scaling        | - **Grouping variables**,   |
-| additional variables        |   if not all items are      |
-|                             |   administered in every     |
-|                             |   group e.g. different test |
-|                             |   booklet versions usually  |
-|                             |   contain different item    |
-|                             |   sets                      |
-|                             |                             |
-|                             |   - Group variables are     |
-|                             |     always logical          |
-|                             |     variables               |
-|                             |                             |
-|                             |   - One variable per group  |
-|                             |     e.g. `easy` and         |
-|                             |     `difficult` for easy    |
-|                             |     and difficult test      |
-|                             |     forms                   |
-|                             |                             |
-|                             |   - If items are            |
-|                             |     administered to all     |
-|                             |     groups, an additional   |
-|                             |     variable e.g. `common`  |
-|                             |     must be created         |
-|                             |     identifying these items |
-|                             |                             |
-|                             |   - For each grouping       |
-|                             |     variable e.g. `easy`,   |
-|                             |     `difficult` & `common`  |
-|                             |     and analysis variable   |
-|                             |     e.g. `dich`, `final` &  |
-|                             |     `suf`, a new            |
-|                             |     group-specific analysis |
-|                             |     variable must be        |
-|                             |     created e.g.            |
-|                             |     `dich_easy` identifying |
-|                             |     all dichotomous items   |
-|                             |     of the easy test form.  |
-|                             |                             |
-|                             | - **Scoring variables**, if |
-|                             |   polytomous items are      |
-|                             |   included e.g. `scoring`.  |
-|                             |   These are needed for PCM  |
-|                             |   and GPCM estimation. The  |
-|                             |   scoring defines how       |
-|                             |   strongly an item          |
-|                             |   contributes to the        |
-|                             |   analysis. By default,     |
-|                             |   this is 0.5 for           |
-|                             |   polytomous items and 1    |
-|                             |   for dichotomous items,    |
-|                             |   but deviations are        |
-|                             |   possible in individual    |
-|                             |   cases.                    |
-|                             |                             |
-|                             | - **Dimensionality          |
-|                             |   variables**, if the test  |
-|                             |   structure may violate     |
-|                             |   unidimensionality e.g.    |
-|                             |   reading tests with        |
-|                             |   multiple task groups.     |
-|                             |                             |
-|                             | - **Linking variables**, if |
-|                             |   linking is performed      |
-|                             |   after scaling. The        |
-|                             |   required variables depend |
-|                             |   on the type of linking    |
-|                             |   and data. See Survey      |
-|                             |   Paper No. 1 Fischer et    |
-|                             |   al., 2016; link above.    |
-|                             |                             |
-|                             | - In individual cases,      |
-|                             |   additional variables may  |
-|                             |   be required               |
-+-----------------------------+-----------------------------+
++--------------------+-----------------------------------------------+
+| Variable           | Explanation                                   |
++====================+===============================================+
+| **`item`**         | A variable containing the item name           |
++--------------------+-----------------------------------------------+
+| `correct_response` | A variable containing the correct answer of   |
+|                    | the respective item e.g. 3 if the third       |
+|                    | response option is correct. Can be a          |
+|                    | character or numeric vector.                  |
++--------------------+-----------------------------------------------+
+| `type`             | Variable defining the item type MC, CMC, etc. |
++--------------------+-----------------------------------------------+
+| Position variables | Indicate the position of the item in the test |
+|                    | booklet                                       |
+|                    |                                               |
+|                    | - If there are multiple groups, one position  |
+|                    |   variable per group, even if the position is |
+|                    |   identical across groups                     |
+|                    |                                               |
+|                    | - Otherwise only one position variable        |
++--------------------+-----------------------------------------------+
+| Logical variables  | - `raw`: TRUE for all *unscored* items raw    |
+| identifying        |   data                                        |
+| specific items     |                                               |
+|                    | - `distan`: TRUE for all *unscored*           |
+|                    |   *multiple-choice* items required for        |
+|                    |   distractor analysis                         |
+|                    |                                               |
+|                    | - `dich`: TRUE for all *dichotomously scored* |
+|                    |   items used e.g. for IRT and DIF analyses.   |
+|                    |   This also includes sub-items of polytomous  |
+|                    |   items!                                      |
+|                    |                                               |
+|                    | - If the item set also includes polytomous    |
+|                    |   items:                                      |
+|                    |                                               |
+|                    |   - `poly`: TRUE for all *polytom scored*     |
+|                    |     items used for data preparation           |
+|                    |                                               |
+|                    |   - `final`: TRUE for all items to be used in |
+|                    |     scaling used e.g. for IRT and DIF         |
+|                    |     analyses. This initially includes all     |
+|                    |     *dichotomously scored* items *excluding*  |
+|                    |     sub-items of polytomous items and all     |
+|                    |     *polytomously scored* items if an item    |
+|                    |     was collapsed, then the version with      |
+|                    |     collapsed response categories.            |
+|                    |                                               |
+|                    | - If the item set changes during scaling e.g. |
+|                    |   because items are excluded, new variables   |
+|                    |   must be created e.g. `dich_new` or          |
+|                    |   `final_new` that replace the variables      |
+|                    |   above for the new item set required for all |
+|                    |   analyses.                                   |
+|                    |                                               |
+|                    | - `suf`: TRUE for all *scored* items without  |
+|                    |   collapsed response categories that are      |
+|                    |   actually used in the test used for          |
+|                    |   computation of sum scores, metacognition    |
+|                    |   scores, and creation of the SUF.            |
++--------------------+-----------------------------------------------+
+| Depending on       | - **Grouping variables**, if not all items    |
+| scaling additional |   are administered in every group e.g.        |
+| variables          |   different test booklet versions usually     |
+|                    |   contain different item sets                 |
+|                    |   - Group variables are always logical        |
+|                    |     variables                                 |
+|                    |   - One variable per group e.g. `easy` and    |
+|                    |     `difficult` for easy and difficult test   |
+|                    |     forms                                     |
+|                    |   - If items are administered to all groups,  |
+|                    |     an additional variable e.g. `common` must |
+|                    |     be created identifying these items        |
+|                    |   - For each grouping variable e.g. `easy`,   |
+|                    |     `difficult` & `common` and analysis       |
+|                    |     variable e.g. `dich`, `final` & `suf`, a  |
+|                    |     new group-specific analysis variable must |
+|                    |     be created e.g. `dich_easy` identifying   |
+|                    |     all dichotomous items of the easy test    |
+|                    |     form.                                     |
+|                    | - **Scoring variables**, if polytomous items  |
+|                    |   are included e.g. `scoring`. These are      |
+|                    |   needed for PCM and GPCM estimation. The     |
+|                    |   scoring defines how strongly an item        |
+|                    |   contributes to the analysis. By default,    |
+|                    |   this is 0.5 for polytomous items and 1 for  |
+|                    |   dichotomous items, but deviations are       |
+|                    |   possible in individual cases.               |
+|                    | - **Dimensionality variables**, if the test   |
+|                    |   structure may violate unidimensionality,    |
+|                    |   e.g. reading tests with multiple task       |
+|                    |   groups.                                     |
+|                    | - In individual cases, additional variables   |
+|                    |   may be required                             |
++--------------------+-----------------------------------------------+
 
-An example of `vars` (from the reading test in NEPS study B129, only the
-first variables are shown):
-
-+-----------------------+------------------------------------------------+
-| Argument              | Explanation                                    |
-+=======================+================================================+
-| `item`                | Contains the item names                        |
-+-----------------------+------------------------------------------------+
-| `type` and            | Variables defining item type and correct       |
-| `co r  rect_response` | response                                       |
-+-----------------------+------------------------------------------------+
-| `raw`, `dich` and     | Logical variables identifying unscored,        |
-| `poly`                | dichotomously scored, and polytomously scored  |
-|                       | items                                          |
-+-----------------------+------------------------------------------------+
-| `distan`              | Logical variable identifying all items         |
-|                       | required for distractor analysis (unscored     |
-|                       | multiple-choice items)                         |
-+-----------------------+------------------------------------------------+
-| `final`               | Logical variable identifying all items         |
-|                       | included in IRT analyses. Includes all         |
-|                       | inherently dichotomous items and all           |
-|                       | polytomous items. If items are excluded or     |
-|                       | collapsed during scaling, this variable may be |
-|                       | updated or replaced (e.g. `final_new`)         |
-+-----------------------+------------------------------------------------+
-| `easy`, `difficult`   | Logical group variables identifying items      |
-| and `common`          | belonging to the easy, difficult, or both test |
-|                       | versions                                       |
-+-----------------------+------------------------------------------------+
-| `suf`                 | Logical variable identifying items used for    |
-|                       | score computation and included in the SUF      |
-+-----------------------+------------------------------------------------+
-| `text_type` and       | Variables for dimensionality analyses          |
-| `kog_type`            |                                                |
-+-----------------------+------------------------------------------------+
-| `scoring`             | Scoring variable required for PCM and GPCM     |
-+-----------------------+------------------------------------------------+
-| `position_easy` and   | Position variables specifying item position    |
-| `position_diff`       | separately for both test booklets              |
-+-----------------------+------------------------------------------------+
-| `dich_easy`,          | Logical variables identifying dichotomously    |
-| `d i  ch_difficult`,  | scored items from the easy, difficult, or both |
-| `dich_common`         | test versions                                  |
-+-----------------------+------------------------------------------------+
-| `final_easy`,         | Logical variables identifying polytomously     |
-| `fi n  al_difficult`, | scored and inherently dichotomous items from   |
-| `final_common`        | the different test versions                    |
-+-----------------------+------------------------------------------------+
-| `suf_easy` and        | Logical variables identifying items used for   |
-| `suf_difficult`       | score computation and SUF creation for each    |
-|                       | test version                                   |
-+-----------------------+------------------------------------------------+
-
-### Example Data
-
-You can find the example data in the folder `data/` within the
-`NEPSroutines` package. The package includes the following example data:
-
-- `ex1.Rda`: SHORT DESCRIPTION
-
-- `ex2.Rda`: SHORT DESCRIPTION
-
-- `ex3.Rda`: SHORT DESCRIPTION
-
-- `ex4.Rda`: SHORT DESCRIPTION
+For an example of `vars` see the example data `dat1` to `dat4`.
+Information on how to access the example data and its documentation is
+available in the vignette `example_data_and_scripts`.
 
 ## Package Structure
 
@@ -545,147 +377,150 @@ further detail in the remainder of the guide.
 
 **Input** arguments:
 
-+------------+-----------+-------------------+-----------+
-| Argument   | Type      | D escription      | Default   |
-+============+===========+===================+===========+
-| `resp` and | data      | These function    |           |
-| `vars`     | frame     | arguments require |           |
-|            |           | the data frames   |           |
-|            |           | `resp` and `vars` |           |
-|            |           | introduced in the |           |
-|            |           | previous section. |           |
-|            |           | They can be       |           |
-|            |           | passed as they    |           |
-|            |           | are and do not    |           |
-|            |           | need to be        |           |
-|            |           | modified further. |           |
-+------------+-----------+-------------------+-----------+
-| `select`   | string    | The analyses are  |           |
-|            |           | almost always     |           |
-|            |           | based on only a   |           |
-|            |           | subset of the     |           |
-|            |           | available items   |           |
-|            |           | or only a         |           |
-|            |           | specific version  |           |
-|            |           | of the items.     |           |
-|            |           | This function     |           |
-|            |           | argument requires |           |
-|            |           | the name of the   |           |
-|            |           | logical variable  |           |
-|            |           | in `vars` that    |           |
-|            |           | identifies the    |           |
-|            |           | variables         |           |
-|            |           | required for this |           |
-|            |           | analysis e.g.     |           |
-|            |           | `dich` for only d |           |
-|            |           | ichotomous items  |           |
-|            |           | or `scaling` for  |           |
-|            |           | d ichotomous      |           |
-|            |           | *and* polytomous  |           |
-|            |           | items.            |           |
-+------------+-----------+-------------------+-----------+
-| `valid`    | string    | Optional in most  | all cases |
-|            |           | functions. This   | are used  |
-|            |           | function argument |           |
-|            |           | requires the name |           |
-|            |           | of the logical    |           |
-|            |           | variable in       |           |
-|            |           | `resp` that       |           |
-|            |           | identifies all    |           |
-|            |           | valid cases see   |           |
-|            |           | section *Valid    |           |
-|            |           | Cases* in         |           |
-|            |           | vignette          |           |
-|            |           | `pre p are_data`. |           |
-+------------+-----------+-------------------+-----------+
-| `mvs`      | named\    | Optional in most  | -999 to   |
-|            | character | functions         | -1        |
-|            | vector    | exception:        |           |
-|            |           | missing value     |           |
-|            |           | analysis.         |           |
-|            |           | Requires a named  |           |
-|            |           | character vector  |           |
-|            |           | containing all u  |           |
-|            |           | s er-defined      |           |
-|            |           | missing values    |           |
-|            |           | see section *U s  |           |
-|            |           | er-Defined        |           |
-|            |           | Missing Values*   |           |
-|            |           | in vignette       |           |
-|            |           | `pre p are_data`. |           |
-|            |           | Warning: If this  |           |
-|            |           | vector is i       |           |
-|            |           | ncomplete, severe |           |
-|            |           | problems and      |           |
-|            |           | errors in scaling |           |
-|            |           | may occur!        |           |
-+------------+-----------+-------------------+-----------+
-| `grouping` | character | Optional in some  | NULL      |
-|            | vector    | functions.        |           |
-|            |           | Sometimes parts   |           |
-|            |           | of the scaling    |           |
-|            |           | must be conducted |           |
-|            |           | separately for    |           |
-|            |           | different groups  |           |
-|            |           | e.g. different    |           |
-|            |           | test booklet      |           |
-|            |           | versions. In this |           |
-|            |           | case, this        |           |
-|            |           | function argument |           |
-|            |           | requires a        |           |
-|            |           | character vector  |           |
-|            |           | with the names of |           |
-|            |           | the logical       |           |
-|            |           | variables in      |           |
-|            |           | `resp` and `vars` |           |
-|            |           | that identify all |           |
-|            |           | persons or items  |           |
-|            |           | belonging to a    |           |
-|            |           | group. One name   |           |
-|            |           | is specified per  |           |
-|            |           | group. Variable   |           |
-|            |           | names must match  |           |
-|            |           | between `resp`    |           |
-|            |           | and `vars` e.g.   |           |
-|            |           | the variable      |           |
-|            |           | `easy` in `vars`  |           |
-|            |           | identifies all    |           |
-|            |           | items a d         |           |
-|            |           | ministered in the |           |
-|            |           | easy test         |           |
-|            |           | version, and the  |           |
-|            |           | variable `easy`   |           |
-|            |           | in `resp`         |           |
-|            |           | identifies all    |           |
-|            |           | persons who       |           |
-|            |           | completed the     |           |
-|            |           | easy test         |           |
-|            |           | version.          |           |
-+------------+-----------+-------------------+-----------+
++-------------+-------------+-------------------+-------------+
+| Argument    | Type        | D escription      | Default     |
++=============+=============+===================+=============+
+| `resp` and  | data frame  | These function    |             |
+| `vars`      |             | arguments require |             |
+|             |             | the data frames   |             |
+|             |             | `resp` and `vars` |             |
+|             |             | introduced in the |             |
+|             |             | previous section. |             |
+|             |             | They can be       |             |
+|             |             | passed as they    |             |
+|             |             | are and do not    |             |
+|             |             | need to be        |             |
+|             |             | modified further. |             |
++-------------+-------------+-------------------+-------------+
+| `select`    | string      | The analyses are  |             |
+|             |             | almost always     |             |
+|             |             | based on only a   |             |
+|             |             | subset of the     |             |
+|             |             | available items   |             |
+|             |             | or only a         |             |
+|             |             | specific version  |             |
+|             |             | of the items.     |             |
+|             |             | This function     |             |
+|             |             | argument requires |             |
+|             |             | the name of the   |             |
+|             |             | logical variable  |             |
+|             |             | in `vars` that    |             |
+|             |             | identifies the    |             |
+|             |             | variables         |             |
+|             |             | required for this |             |
+|             |             | analysis e.g.     |             |
+|             |             | `dich` for only d |             |
+|             |             | ichotomous items  |             |
+|             |             | or `scaling` for  |             |
+|             |             | d ichotomous      |             |
+|             |             | *and* polytomous  |             |
+|             |             | items.            |             |
++-------------+-------------+-------------------+-------------+
+| `valid`     | string      | Optional in most  | all cases   |
+|             |             | functions. This   | are used    |
+|             |             | function argument |             |
+|             |             | requires the name |             |
+|             |             | of the logical    |             |
+|             |             | variable in       |             |
+|             |             | `resp` that       |             |
+|             |             | identifies all    |             |
+|             |             | valid cases see   |             |
+|             |             | section *Valid    |             |
+|             |             | Cases* in         |             |
+|             |             | vignette          |             |
+|             |             | `pre p are_data`. |             |
++-------------+-------------+-------------------+-------------+
+| `mvs`       | named\      | Optional in most  | -999 to -1  |
+|             | character   | functions         |             |
+|             | vector      | exception:        |             |
+|             |             | missing value     |             |
+|             |             | analysis.         |             |
+|             |             | Requires a named  |             |
+|             |             | character vector  |             |
+|             |             | containing all u  |             |
+|             |             | s er-defined      |             |
+|             |             | missing values    |             |
+|             |             | see section *U s  |             |
+|             |             | er-Defined        |             |
+|             |             | Missing Values*   |             |
+|             |             | in vignette       |             |
+|             |             | `pre p are_data`. |             |
+|             |             | Warning: If this  |             |
+|             |             | vector is i       |             |
+|             |             | ncomplete, severe |             |
+|             |             | problems and      |             |
+|             |             | errors in scaling |             |
+|             |             | may occur!        |             |
++-------------+-------------+-------------------+-------------+
+| `grouping`  | character   | Optional in some  | NULL        |
+|             | vector      | functions.        |             |
+|             |             | Sometimes parts   |             |
+|             |             | of the scaling    |             |
+|             |             | must be conducted |             |
+|             |             | separately for    |             |
+|             |             | different groups  |             |
+|             |             | e.g. different    |             |
+|             |             | test booklet      |             |
+|             |             | versions. In this |             |
+|             |             | case, this        |             |
+|             |             | function argument |             |
+|             |             | requires a        |             |
+|             |             | character vector  |             |
+|             |             | with the names of |             |
+|             |             | the logical       |             |
+|             |             | variables in      |             |
+|             |             | `resp` and `vars` |             |
+|             |             | that identify all |             |
+|             |             | persons or items  |             |
+|             |             | belonging to a    |             |
+|             |             | group. One name   |             |
+|             |             | is specified per  |             |
+|             |             | group. Variable   |             |
+|             |             | names must match  |             |
+|             |             | between `resp`    |             |
+|             |             | and `vars` e.g.   |             |
+|             |             | the variable      |             |
+|             |             | `easy` in `vars`  |             |
+|             |             | identifies all    |             |
+|             |             | items a d         |             |
+|             |             | ministered in the |             |
+|             |             | easy test         |             |
+|             |             | version, and the  |             |
+|             |             | variable `easy`   |             |
+|             |             | in `resp`         |             |
+|             |             | identifies all    |             |
+|             |             | persons who       |             |
+|             |             | completed the     |             |
+|             |             | easy test         |             |
+|             |             | version.          |             |
++-------------+-------------+-------------------+-------------+
 
 **Process** arguments:
 
-+---------------+---------------+----------------+---------------+
-| Argument      | Type          | Description    | Default       |
-+===============+===============+================+===============+
-| `digits`      | integer       | Number of      | usually `3`   |
-|               |               | decimal places |               |
-|               |               | to which the   |               |
-|               |               | results should |               |
-|               |               | be rounded.    |               |
-+---------------+---------------+----------------+---------------+
-| `warn`        | logical       | Whether        | usually       |
-|               |               | warnings       | `TRUE`        |
-|               |               | should be      |               |
-|               |               | printed to the |               |
-|               |               | console.       |               |
-+---------------+---------------+----------------+---------------+
-| `verbose`     | logical       | Whether the    | usually       |
-|               |               | processing     | `TRUE`        |
-|               |               | steps should   |               |
-|               |               | be printed to  |               |
-|               |               | the console.   |               |
-+---------------+---------------+----------------+---------------+
++--------------+--------------+--------------+--------------+
+| Argument     | Type         | Description  | Default      |
++==============+==============+==============+==============+
+| `digits`     | integer      | Number of    | usually `3`  |
+|              |              | decimal      |              |
+|              |              | places to    |              |
+|              |              | which the    |              |
+|              |              | results      |              |
+|              |              | should be    |              |
+|              |              | rounded.     |              |
++--------------+--------------+--------------+--------------+
+| `warn`       | logical      | Whether      | usually      |
+|              |              | warnings     | `TRUE`       |
+|              |              | should be    |              |
+|              |              | printed to   |              |
+|              |              | the console. |              |
++--------------+--------------+--------------+--------------+
+| `verbose`    | logical      | Whether the  | usually      |
+|              |              | processing   | `TRUE`       |
+|              |              | steps should |              |
+|              |              | be printed   |              |
+|              |              | to the       |              |
+|              |              | console.     |              |
++--------------+--------------+--------------+--------------+
 
 **Output** arguments:
 
@@ -791,32 +626,33 @@ If parts of the scaling process are carried out without the
 corresponding package functions, some of the following functions may be
 helpful.
 
-+-----------------+------------------------------------------------+
-| Function        | Usage                                          |
-+=================+================================================+
-| `convert_mv`    | Converts user-defined missing values into NAs. |
-|                 | Input arguments are `resp`, `items`, and       |
-|                 | `mvs`. The output is `resp` with converted     |
-|                 | missing values.                                |
-+-----------------+------------------------------------------------+
-| `prepare_resp`  | Prepares `resp` for subsequent analyses. Input |
-|                 | arguments are `resp`, `vars`, `items`,         |
-|                 | `valid`, `mvs`, the logical `use_only_valid`   |
-|                 | (whether only valid cases should be used), and |
-|                 | the logical `convert` (whether user-defined    |
-|                 | missing values should be converted to NAs).    |
-|                 | The output is `resp` containing only the items |
-|                 | defined in `items` as variables, optionally    |
-|                 | restricted to valid cases and with missing     |
-|                 | values optionally converted to NAs.            |
-+-----------------+------------------------------------------------+
-| `check_folder`  | Checks whether the folder specified in the     |
-|                 | path exists and creates it if it does not.     |
-+-----------------+------------------------------------------------+
-| `meht`          | Performs the Minimum Effect Hypothesis Test.   |
-|                 | Input arguments are various statistical        |
-|                 | quantities.                                    |
-+-----------------+------------------------------------------------+
++-----------------+----------------------------------------------+
+| Function        | Usage                                        |
++=================+==============================================+
+| `convert_mv`    | Converts user-defined missing values into    |
+|                 | NAs. Input arguments are `resp`, `items`,    |
+|                 | and `mvs`. The output is `resp` with         |
+|                 | converted missing values.                    |
++-----------------+----------------------------------------------+
+| `prepare_resp`  | Prepares `resp` for subsequent analyses.     |
+|                 | Input arguments are `resp`, `vars`, `items`, |
+|                 | `valid`, `mvs`, the logical `use_only_valid` |
+|                 | (whether only valid cases should be used),   |
+|                 | and the logical `convert` (whether           |
+|                 | user-defined missing values should be        |
+|                 | converted to NAs). The output is `resp`      |
+|                 | containing only the items defined in `items` |
+|                 | as variables, optionally restricted to valid |
+|                 | cases and with missing values optionally     |
+|                 | converted to NAs.                            |
++-----------------+----------------------------------------------+
+| `check_folder`  | Checks whether the folder specified in the   |
+|                 | path exists and creates it if it does not.   |
++-----------------+----------------------------------------------+
+| `meht`          | Performs the Minimum Effect Hypothesis Test. |
+|                 | Input arguments are various statistical      |
+|                 | quantities.                                  |
++-----------------+----------------------------------------------+
 
 ## Debugging
 
@@ -840,4 +676,6 @@ data.
 
 ## Example code and data
 
-NEPSroutines provides example (simulated) data and scaling scripts for users. The vignette `example_data_and_scripts` gives an overview and explains how to access them.
+NEPSroutines provides example (simulated) data and scaling scripts for
+users. The vignette `example_data_and_scripts` gives an overview and
+explains how to access them.
