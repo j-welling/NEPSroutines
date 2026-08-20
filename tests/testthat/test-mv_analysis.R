@@ -460,48 +460,89 @@ test_that("mvi_analysis() treats NAs as not administered", {
   data(ex1)
   mvs <- c(OM = -97, NV = -95, NR = -94)
 
-  baseline <- mvi_analysis(
-    resp = ex1$resp,
-    vars = ex1$vars,
-    select = "dich",
-    position = "pos",
-    valid = "valid",
-    mvs = mvs,
-    save = FALSE,
-    warn = FALSE
-  )
-
-  # Set a single response of the first item to NA. The person is part of the
-  # valid sample, so the NA has to show up in the results.
-  item <- ex1$vars$item[1]
-  expect_true(ex1$resp$valid[1])
-
-  ex1_mod <- ex1
-  ex1_mod$resp[1, item] <- NA
-
-  result <- try({
+  # Only the responses change between the runs below, so vars and all other
+  # arguments are held fixed. digits is pinned because the comparisons below
+  # are exact to three decimals; a change of the default has to fail here
+  # rather than silently shift the expected values.
+  run <- function(resp) {
     suppressWarnings(mvi_analysis(
-      resp = ex1_mod$resp,
-      vars = ex1_mod$vars,
+      resp = resp,
+      vars = ex1$vars,
       select = "dich",
       position = "pos",
       valid = "valid",
       mvs = mvs,
+      digits = 3,
       save = FALSE,
       warn = FALSE
     ))
-  })
+  }
 
+  baseline <- run(ex1$resp)
+
+  # Preconditions of the comparisons below: the first item is selected and is
+  # the first row of the results, and the person whose response is modified
+  # belongs to the valid sample. Checked rather than assumed, so that a change
+  # to ex1 fails loudly instead of making this test vacuous.
+  item <- ex1$vars$item[1]
+  expect_true(ex1$vars$dich[1])
+  expect_identical(baseline$list$item[1], item)
+  expect_true(ex1$resp$valid[1])
+
+  # Number of omitted responses (OM) for the first item, back-calculated from
+  # the reported percentage. Exact at digits = 3 for this sample size; at
+  # coarser rounding the recovered count would be off by several units.
+  om_count <- function(res) {
+    round(res$list$OM[1] * res$list$N_administered[1] / 100)
+  }
+
+  # Set a single response of the first item to NA
+  resp_na <- ex1$resp
+  resp_na[1, item] <- NA
+
+  result <- try(run(resp_na))
   expect_false(inherits(result, "try-error"))
 
-  # NAs count as not administered rather than as a user defined missing value
+  # The NA is dropped from the administered responses instead of being counted
+  # as a user defined missing value
   expect_equal(
     result$list$N_administered[1], baseline$list$N_administered[1] - 1
   )
   expect_equal(result$list$N_valid[1], baseline$list$N_valid[1] - 1)
+  expect_equal(om_count(result), om_count(baseline))
+
+  # The NA is also removed from the base of the reported percentages: the same
+  # number of missing values out of fewer administered responses is a higher
+  # percentage. The expected value is built from the baseline alone, so that a
+  # bug in N_administered cannot move expectation and observation together.
+  expect_gt(result$list$OM[1], baseline$list$OM[1])
+  expect_equal(
+    result$list$OM[1],
+    round(om_count(baseline) / (baseline$list$N_administered[1] - 1) * 100, 3)
+  )
 
   # Only the affected item changes
   expect_equal(result$list[-1, ], baseline$list[-1, ])
+
+  # Same cell, but set to an actual missing value instead of NA. This shows
+  # that the comparisons above can fail, and how the two cases differ: a user
+  # defined missing value stays administered and raises the missing count,
+  # while an NA lowers the number of administered responses and leaves the
+  # count alone. Only N_valid drops in both cases.
+  resp_om <- ex1$resp
+  resp_om[1, item] <- mvs[["OM"]]
+
+  control <- run(resp_om)
+
+  expect_equal(
+    control$list$N_administered[1], baseline$list$N_administered[1]
+  )
+  expect_equal(control$list$N_valid[1], baseline$list$N_valid[1] - 1)
+  expect_equal(om_count(control), om_count(baseline) + 1)
+  expect_gt(control$list$OM[1], baseline$list$OM[1])
+
+  # As for the NA, no other item is affected
+  expect_equal(control$list[-1, ], baseline$list[-1, ])
 
 })
 
@@ -511,32 +552,36 @@ test_that("mvp_analysis() does not count NAs as missing values", {
   data(ex1)
   mvs <- c(OM = -97, NV = -95, NR = -94)
 
-  baseline <- mvp_analysis(
-    resp = ex1$resp,
-    vars = ex1$vars,
-    select = "dich",
-    valid = "valid",
-    mvs = mvs,
-    save = FALSE,
-    warn = FALSE
-  )
-
-  # Replace a valid response by NA
-  ex1_mod <- ex1
-  ex1_mod$resp[1, ex1$vars$item[1]] <- NA
-
-  result <- try({
+  # As above, digits is pinned: a single additional omitted response among
+  # 1000 persons moves the mean by 0.001, which is exactly the resolution at
+  # three decimals. At a coarser setting the comparisons below would no longer
+  # be able to see the difference.
+  run <- function(resp) {
     suppressWarnings(mvp_analysis(
-      resp = ex1_mod$resp,
-      vars = ex1_mod$vars,
+      resp = resp,
+      vars = ex1$vars,
       select = "dich",
       valid = "valid",
       mvs = mvs,
+      digits = 3,
       save = FALSE,
       warn = FALSE
     ))
-  })
+  }
 
+  baseline <- run(ex1$resp)
+
+  # Only responses of the valid sample are analysed, so a modification of an
+  # invalid person would leave the results unchanged for the wrong reason
+  item <- ex1$vars$item[1]
+  expect_true(ex1$vars$dich[1])
+  expect_true(ex1$resp$valid[1])
+
+  # Replace a valid response by NA
+  resp_na <- ex1$resp
+  resp_na[1, item] <- NA
+
+  result <- try(run(resp_na))
   expect_false(inherits(result, "try-error"))
 
   # NAs are no user defined missing values, so the number of missing values
@@ -545,6 +590,22 @@ test_that("mvp_analysis() does not count NAs as missing values", {
     expect_equal(result[[type]], baseline[[type]])
     expect_equal(sum(result[[type]]), 100, tolerance = 0.01)
   }
+  expect_equal(result$summary, baseline$summary)
+
+  # Same cell, but set to an actual missing value instead of NA. The person
+  # then has one omitted response more, which has to move the distributions
+  # the comparisons above expect to be unchanged.
+  resp_om <- ex1$resp
+  resp_om[1, item] <- mvs[["OM"]]
+
+  control <- run(resp_om)
+
+  # The mean number of omitted responses per person rises, and the total rises
+  # with it. The other missing value types are untouched.
+  expect_gt(control$summary["mean", "OM"], baseline$summary["mean", "OM"])
+  expect_gt(control$summary["mean", "ALL"], baseline$summary["mean", "ALL"])
+  expect_equal(control$NV, baseline$NV)
+  expect_equal(control$NR, baseline$NR)
 
 })
 
