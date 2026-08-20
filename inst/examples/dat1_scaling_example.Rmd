@@ -1,5 +1,5 @@
 ---
-title: "Example Scaling Script for dat2"
+title: "Example Scaling Script for dat1"
 author: "Jana Welling"
 date: "`r Sys.time()`"
 output:
@@ -17,15 +17,15 @@ editor_options:
 
 # Preparation of R and data
 
-## Load data and NEPSroutines
+## Load package and example data
 
 ```{r load, message = FALSE}
 
-load("dat2.rda")
-resp <- dat2$resp
-vars <- dat2$vars
-
 library("NEPSroutines")
+
+data("dat1")
+resp <- dat1$resp
+vars <- dat1$vars
 
 ```
 
@@ -39,8 +39,7 @@ mvs = c(
   OM = -97,
   NV = -95,
   NR = -94,
-  NP = -56,
-  ND = -55
+  NP = -56
 )
 
 labels_mvs = c(
@@ -48,8 +47,7 @@ labels_mvs = c(
   OM = "omitted items",
   NV = "not valid items",
   NR = "not reached items",
-  NP = "not participated",
-  ND = "not determinable items"
+  NP = "not participated"
 )
 
 ```
@@ -106,7 +104,7 @@ NEPSroutines::desc_nom(resp, desc = c("sex", "mig", "books"), valid = "valid")
 NEPSroutines::mv_person(
   resp = resp,
   vars = vars,
-  select = "mixed",
+  select = "dich",
   valid = "valid",
   mvs = mvs,
   labels_mvs = labels_mvs,
@@ -133,7 +131,7 @@ NEPSroutines::mv_person(
 NEPSroutines::mv_item(
   resp = resp,
   vars = vars,
-  select = "mixed",
+  select = "dich",
   valid = "valid",
   position = "pos",
   mvs = mvs,
@@ -157,38 +155,12 @@ NEPSroutines::mv_item(
 
 # IRT Analyses
 
-## Dichotomous items
-
 ```{r IRT analysis with dichotomous items}
 
 NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = "dich",
-  valid = "valid",
-  mvs = mvs,
-  plots = TRUE,
-  save = TRUE,
-  print = TRUE,
-  return = FALSE,
-  path_results = "results",
-  path_table = "tables",
-  path_plots = "plots",
-  overwrite = TRUE,
-  digits = 2,
-  verbose = FALSE
-)
-
-```
-
-## All items
-
-```{r IRT analysis with all items}
-
-NEPSroutines::irt_analysis(
-  resp = resp,
-  vars = vars,
-  select = "mixed",
   valid = "valid",
   scoring = "scoring",
   mvs = mvs,
@@ -209,41 +181,16 @@ NEPSroutines::irt_analysis(
 
 # DIF Analysis
 
-## Dichotomous items
-
-```{r dif analysis for dichotomous items}
+```{r dif analysis for Rasch}
 
 NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
   select = "dich",
   valid = "valid",
-  dif_vars = c("sex", "mig", "books"),
-  scoring = "scoring",
   mvs = mvs,
-  overwrite = TRUE,
-  verbose = FALSE,
-  save = TRUE,
-  print = TRUE,
-  return = FALSE,
-  path_results = "results",
-  path_table = "tables"
-)
-
-```
-
-## All items
-
-```{r dif analysis for all items}
-
-NEPSroutines::dif_analysis(
-  resp = resp,
-  vars = vars,
-  select = "mixed",
-  valid = "valid",
-  dif_vars = c("sex", "mig", "books"),
+  dif_vars = c("sex", "mig"),
   scoring = "scoring",
-  mvs = mvs,
   overwrite = TRUE,
   verbose = FALSE,
   save = TRUE,
@@ -264,9 +211,9 @@ NEPSroutines::dis_analysis(
   resp = resp,
   vars = vars,
   valid = "valid",
+  mvs = mvs,
   select_raw = "raw",
   correct = "correct",
-  mvs = mvs,
   print = TRUE,
   save = TRUE,
   overwrite = TRUE,
@@ -279,30 +226,7 @@ NEPSroutines::dis_analysis(
 
 # Dimensionality Analysis
 
-```{r dimensionality analysis}
-
-vars$content_num <- as.numeric(as.factor(vars$content))
-table(vars$content, vars$content_num)
-
-NEPSroutines::dim_analysis(
-  resp = resp,
-  vars = vars,
-  select = "mixed",
-  valid = "valid",
-  scoring = "scoring",
-  irtmodel = "PCM2",
-  dim = "content_num",
-  mvs = mvs,
-  return = FALSE,
-  save = TRUE,
-  print = TRUE,
-  path_table = "tables", 
-  path_results = "results",
-  overwrite = TRUE,
-  verbose = FALSE
-)
-
-```
+No dimensionality analysis not necessary since no dimensionality variable (e.g., testlet) exists in these data.
 
 
 # Create Scores and SUF
@@ -312,10 +236,9 @@ NEPSroutines::dim_analysis(
 scores <- NEPSroutines::create_scores(
   resp,
   vars,
-  score_name = "mag12",
-  select = "mixed",
+  score_name = "grk1",
+  select = "dich",
   valid = "valid",
-  scoring = "scoring",
   mvs = mvs,
   wle = TRUE,
   sum_score = TRUE,
@@ -330,10 +253,10 @@ scores <- NEPSroutines::create_scores(
 NEPSroutines::create_suf(
   resp,
   vars,
-  select = "mixed",
-  competence = "Math",
+  select = "dich",
+  competence = "Grammar",
   scores = scores,
-  score_name = "mag12",
+  score_name = "grk1",
   return = FALSE,
   path = "suf"
 )

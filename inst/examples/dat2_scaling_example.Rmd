@@ -1,5 +1,5 @@
 ---
-title: "Example Scaling Script for dat3"
+title: "Example Scaling Script for dat2"
 author: "Jana Welling"
 date: "`r Sys.time()`"
 output:
@@ -17,15 +17,15 @@ editor_options:
 
 # Preparation of R and data
 
-## Load data and NEPSroutines
+## Load package and example data
 
 ```{r load, message = FALSE}
 
-load("ex3.rda")
-resp <- dat3$resp
-vars <- dat3$vars
-
 library("NEPSroutines")
+
+data("dat2")
+resp <- dat2$resp
+vars <- dat2$vars
 
 ```
 
@@ -33,15 +33,14 @@ library("NEPSroutines")
 
 ```{r user-defined missing values}
 
-table(unlist(resp[vars$item]))
+table(unlist(resp[resp < 0]))
 
 mvs = c(
   OM = -97,
   NV = -95,
   NR = -94,
   NP = -56,
-  ND = -55,
-  MD = -54
+  ND = -55
 )
 
 labels_mvs = c(
@@ -50,8 +49,7 @@ labels_mvs = c(
   NV = "not valid items",
   NR = "not reached items",
   NP = "not participated",
-  ND = "not determinable items",
-  MD = "items missing by design"
+  ND = "not determinable items"
 )
 
 ```
@@ -80,17 +78,6 @@ attributes(resp$books)$labels <- c(
 
 ```
 
-## Create variables indicating common items 
-
-```{r common items}
-
-vars$common <- vars$easy & vars$medium & vars$difficult
-resp$common <- TRUE
-
-vars$dich_common <- vars$dich & vars$common
-vars$mixed_common <- vars$mixed & vars$common
-
-```
 
 # Sample and Booklet Descriptives
 
@@ -106,28 +93,6 @@ NEPSroutines::desc_con(resp, desc = "age", valid = "valid")
 NEPSroutines::show_attributes(resp, desc = c("sex", "mig", "books"))
 NEPSroutines::desc_nom(resp, desc = c("sex", "mig", "books"), valid = "valid")
 
-# Descriptives (attributes, frequency) of nominal booklet variables
-NEPSroutines::desc_nom(resp, desc = "booklet", valid = "valid")
-
-# Sample size by test version
-NEPSroutines::sample_by_group(
-  resp = resp,
-  grouping_variable = "booklet",
-  save = TRUE,
-  overwrite = TRUE,
-  path = "tables"
-)
-
-# Item type by test version
-NEPSroutines::props_by_group(
-  vars = vars,
-  select = "mixed",
-  grouping = c("easy",  "medium", "difficult"),
-  properties = c("texttype"),
-  save = TRUE,
-  overwrite = TRUE,
-  path = "tables"
-)
 
 ```
 
@@ -145,7 +110,7 @@ NEPSroutines::mv_person(
   valid = "valid",
   mvs = mvs,
   labels_mvs = labels_mvs,
-  missing_by_design = c(-54,-56),
+  missing_by_design = -56,
   overwrite = TRUE,
   plots = TRUE,
   save = TRUE,
@@ -170,16 +135,10 @@ NEPSroutines::mv_item(
   vars = vars,
   select = "mixed",
   valid = "valid",
+  position = "pos",
   mvs = mvs,
   labels_mvs = labels_mvs,
-  missing_by_design = c(-54,-56),
-  grouping = c("easy", "medium", "difficult"),
-  position = c(
-    easy = "pos_easy",
-    medium = "pos_medium",
-    difficult = "pos_difficult"
-  ),
-  show_all = FALSE,
+  missing_by_design = -56,
   overwrite = TRUE,
   plots = TRUE,
   save = TRUE,
@@ -257,9 +216,9 @@ NEPSroutines::irt_analysis(
 NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
+  select = "dich",
   valid = "valid",
-  dif_vars = c("booklet", "sex", "mig", "books"),
-  select = c("dich_common", "dich", "dich", "dich"),
+  dif_vars = c("sex", "mig", "books"),
   scoring = "scoring",
   mvs = mvs,
   overwrite = TRUE,
@@ -280,9 +239,9 @@ NEPSroutines::dif_analysis(
 NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
+  select = "mixed",
   valid = "valid",
-  dif_vars = c("booklet", "sex", "mig", "books"),
-  select = c("mixed_common", "mixed", "mixed", "mixed"),
+  dif_vars = c("sex", "mig", "books"),
   scoring = "scoring",
   mvs = mvs,
   overwrite = TRUE,
@@ -322,9 +281,11 @@ NEPSroutines::dis_analysis(
 
 ```{r dimensionality analysis}
 
-vars$texttype_num <- as.numeric(as.factor(vars$texttype))
-table(vars$texttype, vars$texttype_num)
+# Create numerical dimensionality variable
+vars$content_num <- as.numeric(as.factor(vars$content))
+table(vars$content, vars$content_num)
 
+# Conduct dimensionality analysis
 NEPSroutines::dim_analysis(
   resp = resp,
   vars = vars,
@@ -332,7 +293,7 @@ NEPSroutines::dim_analysis(
   valid = "valid",
   scoring = "scoring",
   irtmodel = "PCM2",
-  dim = "texttype_num",
+  dim = "content_num",
   mvs = mvs,
   return = FALSE,
   save = TRUE,
@@ -353,7 +314,7 @@ NEPSroutines::dim_analysis(
 scores <- NEPSroutines::create_scores(
   resp,
   vars,
-  score_name = "reg7",
+  score_name = "mag12",
   select = "mixed",
   valid = "valid",
   scoring = "scoring",
@@ -372,9 +333,9 @@ NEPSroutines::create_suf(
   resp,
   vars,
   select = "mixed",
-  competence = "Reading",
+  competence = "Math",
   scores = scores,
-  score_name = "reg7",
+  score_name = "mag12",
   return = FALSE,
   path = "suf"
 )

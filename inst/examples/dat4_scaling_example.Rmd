@@ -17,15 +17,15 @@ editor_options:
 
 # Preparation of R and data
 
-## Load data and NEPSroutines
+## Load package and example data
 
 ```{r load, message = FALSE}
 
-load("ex4.rda")
+library("NEPSroutines")
+
+data("dat4")
 resp <- dat4$resp
 vars <- dat4$vars
-
-library("NEPSroutines")
 
 ```
 
@@ -291,9 +291,11 @@ NEPSroutines::dis_analysis(
 
 ```{r dimensionality analysis}
 
+# Create numerical dimensionality variable
 vars$component_num <- as.numeric(as.factor(vars$component))
 table(vars$component, vars$component_num)
 
+# Conduct dimensionality analysis
 NEPSroutines::dim_analysis(
   resp = resp,
   vars = vars,

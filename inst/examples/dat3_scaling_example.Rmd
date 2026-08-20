@@ -1,5 +1,5 @@
 ---
-title: "Example Scaling Script for dat1"
+title: "Example Scaling Script for dat3"
 author: "Jana Welling"
 date: "`r Sys.time()`"
 output:
@@ -17,15 +17,15 @@ editor_options:
 
 # Preparation of R and data
 
-## Load data and NEPSroutines
+## Load package and example data
 
 ```{r load, message = FALSE}
 
-load("dat1.rda")
-resp <- dat1$resp
-vars <- dat1$vars
-
 library("NEPSroutines")
+
+data("dat3")
+resp <- dat3$resp
+vars <- dat3$vars
 
 ```
 
@@ -33,13 +33,15 @@ library("NEPSroutines")
 
 ```{r user-defined missing values}
 
-table(unlist(resp[resp < 0]))
+table(unlist(resp[vars$item]))
 
 mvs = c(
   OM = -97,
   NV = -95,
   NR = -94,
-  NP = -56
+  NP = -56,
+  ND = -55,
+  MD = -54
 )
 
 labels_mvs = c(
@@ -47,7 +49,9 @@ labels_mvs = c(
   OM = "omitted items",
   NV = "not valid items",
   NR = "not reached items",
-  NP = "not participated"
+  NP = "not participated",
+  ND = "not determinable items",
+  MD = "items missing by design"
 )
 
 ```
@@ -76,6 +80,17 @@ attributes(resp$books)$labels <- c(
 
 ```
 
+## Create variables indicating common items 
+
+```{r common items}
+
+vars$common <- vars$easy & vars$medium & vars$difficult
+resp$common <- TRUE
+
+vars$dich_common <- vars$dich & vars$common
+vars$mixed_common <- vars$mixed & vars$common
+
+```
 
 # Sample and Booklet Descriptives
 
@@ -91,6 +106,28 @@ NEPSroutines::desc_con(resp, desc = "age", valid = "valid")
 NEPSroutines::show_attributes(resp, desc = c("sex", "mig", "books"))
 NEPSroutines::desc_nom(resp, desc = c("sex", "mig", "books"), valid = "valid")
 
+# Descriptives (attributes, frequency) of nominal booklet variables
+NEPSroutines::desc_nom(resp, desc = "booklet", valid = "valid")
+
+# Sample size by test version
+NEPSroutines::sample_by_group(
+  resp = resp,
+  grouping_variable = "booklet",
+  save = TRUE,
+  overwrite = TRUE,
+  path = "tables"
+)
+
+# Item type by test version
+NEPSroutines::props_by_group(
+  vars = vars,
+  select = "mixed",
+  grouping = c("easy",  "medium", "difficult"),
+  properties = c("texttype"),
+  save = TRUE,
+  overwrite = TRUE,
+  path = "tables"
+)
 
 ```
 
@@ -104,11 +141,11 @@ NEPSroutines::desc_nom(resp, desc = c("sex", "mig", "books"), valid = "valid")
 NEPSroutines::mv_person(
   resp = resp,
   vars = vars,
-  select = "dich",
+  select = "mixed",
   valid = "valid",
   mvs = mvs,
   labels_mvs = labels_mvs,
-  missing_by_design = -56,
+  missing_by_design = c(-54,-56),
   overwrite = TRUE,
   plots = TRUE,
   save = TRUE,
@@ -131,12 +168,18 @@ NEPSroutines::mv_person(
 NEPSroutines::mv_item(
   resp = resp,
   vars = vars,
-  select = "dich",
+  select = "mixed",
   valid = "valid",
-  position = "pos",
   mvs = mvs,
   labels_mvs = labels_mvs,
-  missing_by_design = -56,
+  missing_by_design = c(-54,-56),
+  grouping = c("easy", "medium", "difficult"),
+  position = c(
+    easy = "pos_easy",
+    medium = "pos_medium",
+    difficult = "pos_difficult"
+  ),
+  show_all = FALSE,
   overwrite = TRUE,
   plots = TRUE,
   save = TRUE,
@@ -155,12 +198,38 @@ NEPSroutines::mv_item(
 
 # IRT Analyses
 
+## Dichotomous items
+
 ```{r IRT analysis with dichotomous items}
 
 NEPSroutines::irt_analysis(
   resp = resp,
   vars = vars,
   select = "dich",
+  valid = "valid",
+  mvs = mvs,
+  plots = TRUE,
+  save = TRUE,
+  print = TRUE,
+  return = FALSE,
+  path_results = "results",
+  path_table = "tables",
+  path_plots = "plots",
+  overwrite = TRUE,
+  digits = 2,
+  verbose = FALSE
+)
+
+```
+
+## All items
+
+```{r IRT analysis with all items}
+
+NEPSroutines::irt_analysis(
+  resp = resp,
+  vars = vars,
+  select = "mixed",
   valid = "valid",
   scoring = "scoring",
   mvs = mvs,
@@ -181,16 +250,41 @@ NEPSroutines::irt_analysis(
 
 # DIF Analysis
 
-```{r dif analysis for Rasch}
+## Dichotomous items
+
+```{r dif analysis for dichotomous items}
 
 NEPSroutines::dif_analysis(
   resp = resp,
   vars = vars,
-  select = "dich",
   valid = "valid",
-  mvs = mvs,
-  dif_vars = c("sex", "mig"),
+  dif_vars = c("booklet", "sex", "mig", "books"),
+  select = c("dich_common", "dich", "dich", "dich"),
   scoring = "scoring",
+  mvs = mvs,
+  overwrite = TRUE,
+  verbose = FALSE,
+  save = TRUE,
+  print = TRUE,
+  return = FALSE,
+  path_results = "results",
+  path_table = "tables"
+)
+
+```
+
+## All items
+
+```{r dif analysis for all items}
+
+NEPSroutines::dif_analysis(
+  resp = resp,
+  vars = vars,
+  valid = "valid",
+  dif_vars = c("booklet", "sex", "mig", "books"),
+  select = c("mixed_common", "mixed", "mixed", "mixed"),
+  scoring = "scoring",
+  mvs = mvs,
   overwrite = TRUE,
   verbose = FALSE,
   save = TRUE,
@@ -211,9 +305,9 @@ NEPSroutines::dis_analysis(
   resp = resp,
   vars = vars,
   valid = "valid",
-  mvs = mvs,
   select_raw = "raw",
   correct = "correct",
+  mvs = mvs,
   print = TRUE,
   save = TRUE,
   overwrite = TRUE,
@@ -226,7 +320,32 @@ NEPSroutines::dis_analysis(
 
 # Dimensionality Analysis
 
-No dimensionality analysis not necessary since no testlet variable exists.
+```{r dimensionality analysis}
+
+# Create numerical dimensionality variable
+vars$texttype_num <- as.numeric(as.factor(vars$texttype))
+table(vars$texttype, vars$texttype_num)
+
+# Conduct dimensionality analysis
+NEPSroutines::dim_analysis(
+  resp = resp,
+  vars = vars,
+  select = "mixed",
+  valid = "valid",
+  scoring = "scoring",
+  irtmodel = "PCM2",
+  dim = "texttype_num",
+  mvs = mvs,
+  return = FALSE,
+  save = TRUE,
+  print = TRUE,
+  path_table = "tables", 
+  path_results = "results",
+  overwrite = TRUE,
+  verbose = FALSE
+)
+
+```
 
 
 # Create Scores and SUF
@@ -236,9 +355,10 @@ No dimensionality analysis not necessary since no testlet variable exists.
 scores <- NEPSroutines::create_scores(
   resp,
   vars,
-  score_name = "grk1",
-  select = "dich",
+  score_name = "reg7",
+  select = "mixed",
   valid = "valid",
+  scoring = "scoring",
   mvs = mvs,
   wle = TRUE,
   sum_score = TRUE,
@@ -253,10 +373,10 @@ scores <- NEPSroutines::create_scores(
 NEPSroutines::create_suf(
   resp,
   vars,
-  select = "dich",
-  competence = "Grammar",
+  select = "mixed",
+  competence = "Reading",
   scores = scores,
-  score_name = "grk1",
+  score_name = "reg7",
   return = FALSE,
   path = "suf"
 )
