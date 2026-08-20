@@ -50,14 +50,14 @@ The package documentation is organized according to the typical scaling process.
 If you are new to scaling NEPS data and maybe also to using R, start by reading the first vignettes that give you a short introduction to the scaling of NEPS data using R, RStudio, and R Markdown.
 
 -   *scaling_NEPS_data*
-
 -   *scaling_with_R*
 
 ### Introduction to NEPSroutines
 
-Get acquainted with the NEPSroutines package, its required data structure, and the package workflow.
+Get acquainted with the NEPSroutines package, its required data structure, and the package workflow. Check out the example data and scaling scripts.
 
 -   *package_introduction*
+-   *example_data_and_scripts*
 
 ### Data Import and Preparation
 

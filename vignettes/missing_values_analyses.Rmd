@@ -93,6 +93,8 @@ variable as name. For example, if the test consisted of two stages with
 10 items in the first and 8 items in the second stage, the argument
 should be `stages = c(stage1 = 10, stage2 = 8)`.
 
+Example code:
+
 ```{r}
 NEPSroutines::mv_person(
   resp = resp,
@@ -183,6 +185,8 @@ displayed without the suffix `"_collapsed"`. By default
 (`suf_item_names = FALSE`), item names remain unchanged. Note that in
 `.rds` files, item names always remain unchanged.
 
+Example code:
+
 ```{r}
 NEPSroutines::mv_item(
   resp = resp,
@@ -193,8 +197,10 @@ NEPSroutines::mv_item(
   mvs = mvs,
   labels_mvs = labels_mvs,
   missing_by_design = -54,
-  position = c(easy = "position_easy_mixed",
-               difficult = "position_difficult_mixed"),
+  position = c(
+    easy = "position_easy_mixed",
+    difficult = "position_difficult_mixed"
+  ),
   plots = TRUE,
   print = TRUE,
   save = TRUE,

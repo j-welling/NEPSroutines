@@ -104,6 +104,8 @@ values for metacognitive assessment (e.g., 5–10, 5/10), these values are
 converted to `NA` during execution of `create_scores`. A warning message
 is displayed in the console.
 
+Example code:
+
 ```{r}
 scores <- NEPSroutines::create_scores(
   resp = resp,

@@ -55,7 +55,11 @@ function argument `sep` as a character string (see Section *Dataset
 function extends the data.frame `resp` with the new items.
 
 ```{r}
-resp <- NEPSroutines::dichotomous_scoring(resp, vars, old_names = item_names) 
+resp <- NEPSroutines::dichotomous_scoring(
+  resp,
+  vars,
+  old_names = item_names
+) 
 ```
 
 In the NEPSroutines package, it is necessary to create a separate row in
@@ -121,6 +125,7 @@ poly_items <- list(
   Item2s_c = paste0("Item2", c(1:4), "_c"),
   etc. 
 ) 
+
 resp <- NEPSroutines::pc_scoring(
   resp,
   poly_items = poly_items,
@@ -135,7 +140,8 @@ the function `duplicate_items()`. One subitem is used as the reference
 item in each case.
 
 ```{r}
-first_subitem <- sapply(poly_items, function(x) x[1])
+first_subitem <- sapply(poly_items, function(subitems) subitems[1])
+
 vars <- NEPSroutines::duplicate_items(
   vars,
   old_names = first_subitem,
@@ -168,7 +174,11 @@ should then be collapsed manually. Remember that the names of manually
 collapsed items should also be added to the list of collapsed items.
 
 ```{r}
-resp <- NEPSroutines::collapse_response_categories(resp, vars, select = "poly")
+resp <- NEPSroutines::collapse_response_categories(
+  resp, 
+  vars, 
+  select = "poly"
+)
 ```
 
 If items were collapsed, the new items must be stored in the data.frame
@@ -182,6 +192,7 @@ response categories.
 ```{r}
 original_items <- c("original.item_1", "original.item_2")
 collapsed_items <- c("collapsed.item_1", "collapsed.item_2")
+
 vars <- NEPSroutines::duplicate_items(
   vars,
   old_names = original_items,
@@ -199,11 +210,14 @@ the corresponding items. In our example, this variable is called
 be excluded from the analyses.
 
 ```{r}
+all_subitems <- unlist(poly_items)
+
 vars$mixed <- ifelse(
   vars$poly,
   TRUE,
-  ifelse(vars$dich & !vars$item %in% unlist(poly_items), TRUE, FALSE)
+  ifelse(vars$dich & !vars$item %in% all_subitems, TRUE, FALSE)
 ) 
+
 vars$mixed[vars$item %in% original_items] <- FALSE
 ```
 
@@ -379,7 +393,7 @@ to the DIF analyses, a dichotomous variable is created in the dataset
 `resp`. If the IRT models are additionally to be estimated separately
 for different groups (especially for different test booklets), a logical
 variable is also created for each group indicating whether a person
-belongs to that group. For example, the B129 study contains an easy and
+belongs to that group. For example, the reading test in the NEPS study B129 contains an easy and
 a difficult test booklet.
 
 ```{r}
@@ -426,7 +440,11 @@ is modified (e.g., because some items were excluded), it may be
 necessary to create a new valid variable (e.g., `valid_new`).
 
 ```{r}
-resp$valid <- NEPSroutines::min_val(resp, vars, select = "mixed")
+resp$valid <- NEPSroutines::min_val(
+  resp,
+  vars,
+  select = "mixed"
+)
 ```
 
 ### Create Group Variables
@@ -461,12 +479,12 @@ relevant to that group. The `mixed` variables only need to be created if
 the test contains polytomous items.
 
 ```{r}
-# New dich variables
+# New variables for dichotomous items
 vars$dich_easy <- vars$dich & vars$easy
 vars$dich_difficult <- vars$dich & vars$difficult
 vars$dich_common <- vars$dich & vars$common 
 
-# New mixed variables
+# New variables for analysis (= "mixed") items
 vars$mixed_easy <- vars$mixed & vars$easy
 vars$mixed_difficult <- vars$mixed & vars$difficult
 vars$mixed_common <- vars$mixed & vars$common
@@ -505,8 +523,16 @@ booklet, the variables could, for example, be called `suf_easy` and
 `suf_difficult`.
 
 ```{r}
-vars$suf_easy <- ifelse(vars$suf & vars$easy, TRUE, FALSE)
-vars$suf_difficult <- ifelse(vars$suf & vars$difficult, TRUE, FALSE)
+vars$suf_easy <- ifelse(
+  vars$suf & vars$easy,
+  TRUE,
+  FALSE
+)
+vars$suf_difficult <- ifelse(
+  vars$suf & vars$difficult,
+  TRUE,
+  FALSE
+)
 ```
 
 For the calculation of sum scores and metacognition scores, a variable
@@ -579,22 +605,58 @@ A data structure check could, for example, look as follows:
 ```{r}
 # Check vars
 NEPSroutines::check_items(vars$item)
+
 NEPSroutines::check_variables(
-  vars, "vars", c("item", "type", "correct_response")
+  vars,
+  "vars",
+  c("item", "type", "correct_response")
 )
+
 NEPSroutines::check_logicals(
-  vars, "vars", c("raw", "dich", "poly", "mixed", "easy", "difficult")
+  vars,
+  "vars",
+  c("raw", "dich", "poly", "mixed", "easy", "difficult")
 )
+
 NEPSroutines::check_numerics(
-  vars, "vars", c("scoring", "position_easy", "position_difficult")
+  vars,
+  "vars",
+  c("scoring", "position_easy", "position_difficult")
 )
 
 # Check resp
-NEPSroutines::check_variables(resp, "resp", c("ID_t", vars$item[vars$raw])) NEPSroutines::check_logicals(resp, "resp", c("valid", "easy", "difficult")) NEPSroutines::check_numerics(
-  resp, "resp", c("sex", "migration", "books"), dich = TRUE, check_invalid = TRUE
+NEPSroutines::check_variables(
+  resp,
+  "resp",
+  c("ID_t", vars$item[vars$raw]))
+
+NEPSroutines::check_logicals(
+  resp,
+  "resp",
+  c("valid", "easy", "difficult")
 )
-NEPSroutines::check_numerics(resp, "resp", vars$item[vars$dich], dich = TRUE)
-NEPSroutines::check_numerics(resp, "resp", vars$item[vars$poly])
+
+NEPSroutines::check_numerics(
+  resp,
+  "resp",
+  c("sex", "migration", "books"),
+  dich = TRUE,
+  check_invalid = TRUE
+)
+
+NEPSroutines::check_numerics(
+  resp,
+  "resp",
+  vars$item[vars$dich],
+  dich = TRUE
+)
+
+NEPSroutines::check_numerics(
+  resp,
+  "resp",
+  vars$item[vars$poly]
+)
+
 NEPSroutines::check_pid(resp$ID_t)
 ```
 
