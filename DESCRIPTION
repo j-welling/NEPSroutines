@@ -1,6 +1,6 @@
 Type: Package
 Package: NEPSroutines
-Version: 1.2.1
+Version: 1.2.2
 Title: Implementing the NEPS Scaling Guidelines
 Description: This package contains a collection of functions for the
     scaling of NEPS competence data. It provides standardized scaling
