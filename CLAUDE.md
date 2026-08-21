@@ -10,6 +10,9 @@ Always work on a git worktree, not the main repository.
 4. **Simplify** - Review and simplify the solution
 5. **Update Tests** - Add or update tests for changed functionality
 6. **Update Docs** - Update roxygen comments and `dev/` documentation
+   - User-facing changes (new/renamed/removed function arguments, changed
+     defaults or output) must also be carried over into the affected
+     vignette(s) in `vignettes/`
 7. **Test** - Run `devtools::test()`
 8. **Verify** - Run `devtools::check(args = "--no-tests")` (skip tests since already run)
    - Ignorable pre-existing warnings: vignette warnings (Pandoc not installed locally); timestamp NOTE
