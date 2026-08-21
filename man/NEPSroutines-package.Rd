@@ -36,6 +36,7 @@ Authors:
 Other contributors:
 \itemize{
   \item Christian Diegel [contributor]
+  \item Rachael Kyalo [contributor]
 }
 
 }
